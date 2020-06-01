@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="prop/prop_scripts.js"></script>
+    <script src="builddate.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <title>Eendraadschema online tekenen</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="keywords" content="Eendraadschema, online, tekenen, svg, gratis">
+    <meta name="description" content="Een tool om ééndraadschema’s te tekenen">
+    <meta name="author" content="Ivan Goethals">
+  </head>
+  <body>
+    <div id="topmenu">
+      <ul id="minitabs">
+        <!--<li><a href="#">Thuis</a></li>-->
+        <li><a href="javascript:restart_all()">Nieuw</a></li>
+        <li><a href="javascript:importclicked()">Import</a></li>
+        <li><a href="javascript:exportjson()">Export</a></li>
+        <li><a href="Documentation/edsdoc.pdf" target="_blank">Documentatie</a></li>
+        <li><a href="javascript:openContactForm()">Info/Contact</a></li>
+      </ul>
+    </div>
+    <div id="configsection">
+    </div>
+    <div id="canvas_2col">
+      <div id="left_col">
+        <div id="left_col_inner"></div>
+      </div>
+      <div id="right_col">
+        <div id="right_col_inner"></div>
+      </div>
+    </div>
+    <input id="importfile" type="file" accept=".eds" onchange="importjson(event)" style="display:none;" >
+    <script src="eendraadschema.js"></script>
+  </body>
+</html>
+
+<!-- <div id="left_col_inner" style="overflow-x: scroll; white-space: nowrap;"></div> -->

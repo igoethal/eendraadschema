@@ -1,0 +1,22 @@
+#!/bin/bash
+
+cd src
+
+cat general.js > eendraadschema.ts
+cat SVGelement.ts >> eendraadschema.ts
+cat List_Item.ts >> eendraadschema.ts
+cat Electro_Item.ts >> eendraadschema.ts
+cat Simple_Item.ts >> eendraadschema.ts
+cat Hierarchical_List.ts >> eendraadschema.ts
+cat config.ts >> eendraadschema.ts
+cat ../prop/prop_scripts.ts >> eendraadschema.ts
+cat main.ts >> eendraadschema.ts
+
+tsc --outfile swap.js eendraadschema.ts
+cat GPL3.js swap.js > eendraadschema.js
+cp eendraadschema.js ..
+rm swap.js
+
+cd ..
+
+echo "var CONF_builddate=\""`date +%Y%m%d-%H%M%S`"\"" > builddate.js
