@@ -1,0 +1,118 @@
+html {height:100%; background-color: #FFFFFF;}
+
+#topmenu {width:100%; background-color: #F0F0F0;}
+
+ul#minitabs {
+list-style: none;
+margin: 0;
+padding: 7px 0;
+border-left: 1px solid #CCC;
+border-right: 1px solid #CCC;
+border-top: 1px solid #CCC;
+border-bottom: 1px solid #CCC;
+font-weight: bold;
+text-align: left;
+white-space: nowrap;
+}
+ul#minitabs li {
+display: inline;
+margin: 0 6px;
+}
+ul#minitabs a {
+text-decoration: none;
+padding: 0 0 3px;
+border-bottom: 4px solid #F0F0F0;
+color: #999
+  }
+ul#minitabs a#current {
+border-color: #F60;
+color:#06F
+}
+ul#minitabs a:hover {
+border-color: #F60;
+color: #666
+}
+
+table.html_edit_table {
+  width: "100%";
+}
+
+table.html_edit_table td:nth-child(1) {
+  //border-left: 5px solid #1C6EA4;
+  border-radius: 10px 10px 10px 10px;
+  //background-color: #8AB2E4;
+  border-collapse: collapse;
+  padding-left: 2px;
+  padding-right: 2px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  font-size: 150%;
+  text-align: center;
+  cursor: pointer;
+}
+
+table.html_edit_table td:nth-child(2) {
+  //background-color: #E0E0E0;
+  width: "100%";
+  border-collapse: collapse;
+  padding-left: 5px;
+  padding-right: 2px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+#config {
+  padding-left: 7px;
+  padding-right: 7px;
+  min-width:100%;
+  min-height:0px;
+}
+
+#canvas_2col {
+  padding:7px;
+  margin:7 0 0 40%;
+  background: url(right.jpg);
+  color:#fff; width:60%;
+  min-height:100%; float:right;
+}
+
+#left_col {
+  float:left;
+  width:76%;
+  height: 92vh;
+  margin-left:-66%;
+  text-align:left;
+  color:#000;
+  overflow: auto;
+}
+
+#left_col_inner {padding:10px; color:#000000}
+
+#right_col {
+  height: 92vh;
+  //min-height: calc(100vh - 50px);
+  overflow: auto;
+}
+
+#right_col_inner {padding:10px; color:#000000;}
+#AJAX_sent {padding:0px; color:#000000;}
+#AJAX_received {padding:0px; color:#000000;}
+#AJAX_draw {padding:0px; color:#000000;}
+
+.onlypointer {
+  cursor: pointer;
+}
+
+p {font-size:16px; line-height:24px;}
+
+div.kring {
+  background-color: #FFCC99;
+}
+
+div.verbruiker {
+  background-color: #FFFFCC;
+}
+
+table {
+    border-collapse: collapse;
+}
