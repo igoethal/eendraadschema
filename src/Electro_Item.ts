@@ -631,7 +631,8 @@ class Electro_Item extends List_Item {
           endx = startx + 20;
           outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />';
           //outputstr += '<path d="M' + startx + ' 25 L' + endx + ' 25" stroke="black" />';
-          outputstr += '<use xlink:href="#bewegingsschakelaar" x="' + endx + '" y="25" />';
+          outputstr += '<use xlink:href="#relais" x="' + endx + '" y="25" />';
+          outputstr += '<use xlink:href="#moving_man" x="' + (endx + 1.5) + '" y="20" />';
           startx = endx + 40;
           lowerbound = Math.max(lowerbound,30);
           break;
