@@ -461,7 +461,7 @@ var Electro_Item = /** @class */ (function (_super) {
         switch (this.keys[0][2]) {
             case "Kring":
                 output += "&nbsp;Naam: " + this.stringToHTML(10, 5) + "<br>";
-                output += "Zekering: " + this.selectToHTML(7, ["automatisch", "differentieel", "smelt", "geen", "---", "schemer"]);
+                output += "Zekering: " + this.selectToHTML(7, ["automatisch", "differentieel", "smelt", "geen", "---", "schakelaar", "schemer"]);
                 if (this.keys[7][2] != "geen")
                     output += this.selectToHTML(4, ["2", "3", "4"]) + this.stringToHTML(8, 2) + "A";
                 if (this.getKey("zekering") == "differentieel") {
@@ -478,7 +478,7 @@ var Electro_Item = /** @class */ (function (_super) {
                 output += "&nbsp;";
                 if (typeof Parent != 'undefined')
                     output += "Nr: " + this.stringToHTML(10, 5) + ", ";
-                output += "Zekering: " + this.selectToHTML(7, ["automatisch", "differentieel", "smelt", "geen"]) +
+                output += "Zekering: " + this.selectToHTML(7, ["automatisch", "differentieel", "smelt", "geen", "---", "schakelaar", "schemer"]) +
                     this.selectToHTML(4, ["2", "3", "4"]) +
                     this.stringToHTML(8, 2) + "A";
                 if (this.getKey("zekering") == "differentieel") {
@@ -2074,6 +2074,20 @@ var Hierarchical_List = /** @class */ (function () {
                                     "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
                                     htmlspecialchars(this.data[i].getKey("aantal") + "P - " + this.data[i].getKey("amperage") + "A") + "</text>";
                                 break;
+                            case "schakelaar":
+                                inSVG[elementCounter].yup += 30;
+                                inSVG[elementCounter].data +=
+                                    '<use xlink:href="#zekering_empty" x=\"' + inSVG[elementCounter].xleft +
+                                        '" y="' + inSVG[elementCounter].yup + '" />';
+                                inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 15) +
+                                    "\" y=\"" + (inSVG[elementCounter].yup - 10) +
+                                    "\"" +
+                                    " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 15) +
+                                    "," + (inSVG[elementCounter].yup - 10) +
+                                    ")" +
+                                    "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
+                                    htmlspecialchars(this.data[i].getKey("aantal") + "P - " + this.data[i].getKey("amperage") + "A") + "</text>";
+                                break;
                             case "schemer":
                                 inSVG[elementCounter].yup += 30;
                                 inSVG[elementCounter].data +=
@@ -2225,6 +2239,20 @@ var Hierarchical_List = /** @class */ (function () {
                                 inSVG[elementCounter].yup += 30;
                                 inSVG[elementCounter].data +=
                                     '<use xlink:href="#zekering_automatisch" x=\"' + inSVG[elementCounter].xleft +
+                                        '" y="' + inSVG[elementCounter].yup + '" />';
+                                inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 15) +
+                                    "\" y=\"" + (inSVG[elementCounter].yup - 10) +
+                                    "\"" +
+                                    " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 15) +
+                                    "," + (inSVG[elementCounter].yup - 10) +
+                                    ")" +
+                                    "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
+                                    htmlspecialchars(this.data[i].getKey("aantal") + "P - " + this.data[i].getKey("amperage") + "A") + "</text>";
+                                break;
+                            case "schakelaar":
+                                inSVG[elementCounter].yup += 30;
+                                inSVG[elementCounter].data +=
+                                    '<use xlink:href="#zekering_empty" x=\"' + inSVG[elementCounter].xleft +
                                         '" y="' + inSVG[elementCounter].yup + '" />';
                                 inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 15) +
                                     "\" y=\"" + (inSVG[elementCounter].yup - 10) +

@@ -205,7 +205,7 @@ class Electro_Item extends List_Item {
     switch (this.keys[0][2]) {
       case "Kring":
         output += "&nbsp;Naam: " + this.stringToHTML(10,5) + "<br>";
-        output += "Zekering: " + this.selectToHTML(7,["automatisch","differentieel","smelt","geen","---","schemer"]);
+        output += "Zekering: " + this.selectToHTML(7,["automatisch","differentieel","smelt","geen","---","schakelaar","schemer"]);
         if (this.keys[7][2] != "geen") output += this.selectToHTML(4,["2","3","4"]) + this.stringToHTML(8,2) + "A";
         if (this.getKey("zekering")=="differentieel") {
           output += ", \u0394 " + this.stringToHTML(11,3) + "mA";
@@ -220,7 +220,7 @@ class Electro_Item extends List_Item {
       case "Aansluiting":
         output += "&nbsp;";
         if (typeof Parent != 'undefined') output += "Nr: " + this.stringToHTML(10,5) + ", ";
-        output += "Zekering: " + this.selectToHTML(7,["automatisch","differentieel","smelt","geen"]) +
+        output += "Zekering: " + this.selectToHTML(7,["automatisch","differentieel","smelt","geen","---","schakelaar","schemer"]) +
                                        this.selectToHTML(4,["2","3","4"]) +
                                        this.stringToHTML(8,2) + "A";
         if (this.getKey("zekering")=="differentieel") {

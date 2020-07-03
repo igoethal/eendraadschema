@@ -737,6 +737,20 @@ class Hierarchical_List {
                     "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
                    htmlspecialchars(this.data[i].getKey("aantal") + "P - " + this.data[i].getKey("amperage") + "A") +"</text>";
                 break;
+              case "schakelaar":
+                inSVG[elementCounter].yup += 30;
+                inSVG[elementCounter].data +=
+                  '<use xlink:href="#zekering_empty" x=\"' + inSVG[elementCounter].xleft +
+                  '" y="' + inSVG[elementCounter].yup + '" />';
+                inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft+15) +
+                   "\" y=\"" + (inSVG[elementCounter].yup-10) +
+                   "\"" +
+                   " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft+15) +
+                   "," + (inSVG[elementCounter].yup-10) +
+                   ")" +
+                    "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
+                   htmlspecialchars(this.data[i].getKey("aantal") + "P - " + this.data[i].getKey("amperage") + "A") + "</text>";
+              break;
               case "schemer":
                 inSVG[elementCounter].yup += 30;
                 inSVG[elementCounter].data +=
@@ -911,6 +925,20 @@ class Hierarchical_List {
                    ")" +
                     "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
                    htmlspecialchars(this.data[i].getKey("aantal") + "P - " + this.data[i].getKey("amperage") + "A") + "</text>";
+                break;
+              case "schakelaar":
+                inSVG[elementCounter].yup += 30;
+                inSVG[elementCounter].data +=
+                  '<use xlink:href="#zekering_empty" x=\"' + inSVG[elementCounter].xleft +
+                  '" y="' + inSVG[elementCounter].yup + '" />';
+                inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft+15) +
+                  "\" y=\"" + (inSVG[elementCounter].yup-10) +
+                  "\"" +
+                   " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft+15) +
+                  "," + (inSVG[elementCounter].yup-10) +
+                  ")" +
+                  "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
+                  htmlspecialchars(this.data[i].getKey("aantal") + "P - " + this.data[i].getKey("amperage") + "A") + "</text>";
                 break;
               case "schemer":
                 inSVG[elementCounter].yup += 30;
