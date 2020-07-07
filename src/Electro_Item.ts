@@ -139,6 +139,8 @@ class Electro_Item extends List_Item {
     switch (this.keys[0][2]) { //Special cases
       case "Kring":
         this.keys[10][2] = "---";
+        this.keys[16][2] = "N/A";
+        this.keys[19][2] = false;
         break;
       case "Splitsing":
         //this.keys[10][2] = "";
@@ -214,6 +216,10 @@ class Electro_Item extends List_Item {
         output += "Kabel: " + this.checkboxToHTML(12);
         if (this.getKey("kabel_aanwezig")) {
           output += ", Type: " + this.stringToHTML(9,10);
+          output += ", Plaatsing: " + this.selectToHTML(16,["N/A","Ondergronds","Luchtleiding","In wand","Op wand"]);
+          if (this.keys[16][2] != "Luchtleiding") {
+            output += ", In buis: " + this.checkboxToHTML(19);
+          }
         }
         output += ", Tekst: " + this.stringToHTML(15,10);
         break;
