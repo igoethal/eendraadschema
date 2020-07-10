@@ -910,42 +910,37 @@ class Hierarchical_List {
                if (cable_location_available) {
                  if ( (this.data[i].keys[19][2]) && (this.data[i].keys[16][2] != "Luchtleiding") )  {
                    inSVG[elementCounter].data += '<circle cx="' + (inSVG[elementCounter].xleft-10)
-                                               + '" cy="' + (inSVG[elementCounter].yup+30)
+                                               + '" cy="' + (inSVG[elementCounter].yup+40)
                                                +'" r="4" style="stroke:black;fill:none" />';
                  }
                  switch (this.data[i].keys[16][2]) {
                    case "Ondergronds":
                      inSVG[elementCounter].data += '<line x1="' + (inSVG[elementCounter].xleft-13)
                                                + '" x2="' + (inSVG[elementCounter].xleft-13)
-                                               + '" y1="' + (inSVG[elementCounter].yup+50)
-                                               + '" y2="' + (inSVG[elementCounter].yup+70)
+                                               + '" y1="' + (inSVG[elementCounter].yup+60)
+                                               + '" y2="' + (inSVG[elementCounter].yup+80)
                                                +'" style="stroke:black" />';
                      inSVG[elementCounter].data += '<line x1="' + (inSVG[elementCounter].xleft-10)
                                                + '" x2="' + (inSVG[elementCounter].xleft-10)
-                                               + '" y1="' + (inSVG[elementCounter].yup+52)
-                                               + '" y2="' + (inSVG[elementCounter].yup+68)
+                                               + '" y1="' + (inSVG[elementCounter].yup+62)
+                                               + '" y2="' + (inSVG[elementCounter].yup+78)
                                                +'" style="stroke:black" />';
                      inSVG[elementCounter].data += '<line x1="' + (inSVG[elementCounter].xleft-7)
                                                + '" x2="' + (inSVG[elementCounter].xleft-7)
-                                               + '" y1="' + (inSVG[elementCounter].yup+54)
-                                               + '" y2="' + (inSVG[elementCounter].yup+66)
+                                               + '" y1="' + (inSVG[elementCounter].yup+64)
+                                               + '" y2="' + (inSVG[elementCounter].yup+76)
                                                +'" style="stroke:black" />';
                      break;
                    case "Luchtleiding":
                      inSVG[elementCounter].data += '<circle cx="' + (inSVG[elementCounter].xleft)
-                                                   + '" cy="' + (inSVG[elementCounter].yup+10)
+                                                   + '" cy="' + (inSVG[elementCounter].yup+20)
                                                    +'" r="4" style="stroke:black;fill:none" />';
                      break;
                    case "In wand":
                      inSVG[elementCounter].data += '<line x1="' + (inSVG[elementCounter].xleft-15)
                                                + '" x2="' + (inSVG[elementCounter].xleft-15)
-                                               + '" y1="' + (inSVG[elementCounter].yup+0)
-                                               + '" y2="' + (inSVG[elementCounter].yup+20)
-                                               +'" style="stroke:black" />';
-                     inSVG[elementCounter].data += '<line x1="' + (inSVG[elementCounter].xleft-15)
-                                               + '" x2="' + (inSVG[elementCounter].xleft-5)
-                                               + '" y1="' + (inSVG[elementCounter].yup+0)
-                                               + '" y2="' + (inSVG[elementCounter].yup+0)
+                                               + '" y1="' + (inSVG[elementCounter].yup+10)
+                                               + '" y2="' + (inSVG[elementCounter].yup+30)
                                                +'" style="stroke:black" />';
                      inSVG[elementCounter].data += '<line x1="' + (inSVG[elementCounter].xleft-15)
                                                + '" x2="' + (inSVG[elementCounter].xleft-5)
@@ -958,36 +953,36 @@ class Hierarchical_List {
                                                + '" y2="' + (inSVG[elementCounter].yup+20)
                                                +'" style="stroke:black" />';
                      inSVG[elementCounter].data += '<line x1="' + (inSVG[elementCounter].xleft-15)
+                                               + '" x2="' + (inSVG[elementCounter].xleft-5)
+                                               + '" y1="' + (inSVG[elementCounter].yup+30)
+                                               + '" y2="' + (inSVG[elementCounter].yup+30)
+                                               +'" style="stroke:black" />';
+                     inSVG[elementCounter].data += '<line x1="' + (inSVG[elementCounter].xleft-15)
                                                + '" x2="' + (inSVG[elementCounter].xleft-15)
-                                               + '" y1="' + (inSVG[elementCounter].yup+60)
-                                               + '" y2="' + (inSVG[elementCounter].yup+80)
+                                               + '" y1="' + (inSVG[elementCounter].yup+65)
+                                               + '" y2="' + (inSVG[elementCounter].yup+85)
                                                +'" style="stroke:black" />';
                      inSVG[elementCounter].data += '<line x1="' + (inSVG[elementCounter].xleft-15)
                                                + '" x2="' + (inSVG[elementCounter].xleft-5)
-                                               + '" y1="' + (inSVG[elementCounter].yup+80)
-                                               + '" y2="' + (inSVG[elementCounter].yup+80)
+                                               + '" y1="' + (inSVG[elementCounter].yup+85)
+                                               + '" y2="' + (inSVG[elementCounter].yup+85)
                                                +'" style="stroke:black" />';
                      inSVG[elementCounter].data += '<line x1="' + (inSVG[elementCounter].xleft-15)
                                                + '" x2="' + (inSVG[elementCounter].xleft-5)
-                                               + '" y1="' + (inSVG[elementCounter].yup+60)
-                                               + '" y2="' + (inSVG[elementCounter].yup+60)
+                                               + '" y1="' + (inSVG[elementCounter].yup+65)
+                                               + '" y2="' + (inSVG[elementCounter].yup+65)
                                                +'" style="stroke:black" />';
                      inSVG[elementCounter].data += '<line x1="' + (inSVG[elementCounter].xleft-15)
                                                + '" x2="' + (inSVG[elementCounter].xleft-5)
-                                               + '" y1="' + (inSVG[elementCounter].yup+70)
-                                               + '" y2="' + (inSVG[elementCounter].yup+70)
+                                               + '" y1="' + (inSVG[elementCounter].yup+75)
+                                               + '" y2="' + (inSVG[elementCounter].yup+75)
                                                +'" style="stroke:black" />';
                      break;
                    case "Op wand":
                      inSVG[elementCounter].data += '<line x1="' + (inSVG[elementCounter].xleft-5)
                                                + '" x2="' + (inSVG[elementCounter].xleft-5)
-                                               + '" y1="' + (inSVG[elementCounter].yup+0)
-                                               + '" y2="' + (inSVG[elementCounter].yup+20)
-                                               +'" style="stroke:black" />';
-                     inSVG[elementCounter].data += '<line x1="' + (inSVG[elementCounter].xleft-15)
-                                               + '" x2="' + (inSVG[elementCounter].xleft-5)
-                                               + '" y1="' + (inSVG[elementCounter].yup+0)
-                                               + '" y2="' + (inSVG[elementCounter].yup+0)
+                                               + '" y1="' + (inSVG[elementCounter].yup+10)
+                                               + '" y2="' + (inSVG[elementCounter].yup+30)
                                                +'" style="stroke:black" />';
                      inSVG[elementCounter].data += '<line x1="' + (inSVG[elementCounter].xleft-15)
                                                + '" x2="' + (inSVG[elementCounter].xleft-5)
@@ -999,25 +994,30 @@ class Hierarchical_List {
                                                + '" y1="' + (inSVG[elementCounter].yup+20)
                                                + '" y2="' + (inSVG[elementCounter].yup+20)
                                                +'" style="stroke:black" />';
+                     inSVG[elementCounter].data += '<line x1="' + (inSVG[elementCounter].xleft-15)
+                                               + '" x2="' + (inSVG[elementCounter].xleft-5)
+                                               + '" y1="' + (inSVG[elementCounter].yup+30)
+                                               + '" y2="' + (inSVG[elementCounter].yup+30)
+                                               +'" style="stroke:black" />';
                      inSVG[elementCounter].data += '<line x1="' + (inSVG[elementCounter].xleft-5)
                                                + '" x2="' + (inSVG[elementCounter].xleft-5)
-                                               + '" y1="' + (inSVG[elementCounter].yup+60)
-                                               + '" y2="' + (inSVG[elementCounter].yup+80)
+                                               + '" y1="' + (inSVG[elementCounter].yup+65)
+                                               + '" y2="' + (inSVG[elementCounter].yup+85)
                                                +'" style="stroke:black" />';
                      inSVG[elementCounter].data += '<line x1="' + (inSVG[elementCounter].xleft-15)
                                                + '" x2="' + (inSVG[elementCounter].xleft-5)
-                                               + '" y1="' + (inSVG[elementCounter].yup+80)
-                                               + '" y2="' + (inSVG[elementCounter].yup+80)
+                                               + '" y1="' + (inSVG[elementCounter].yup+85)
+                                               + '" y2="' + (inSVG[elementCounter].yup+85)
                                                +'" style="stroke:black" />';
                      inSVG[elementCounter].data += '<line x1="' + (inSVG[elementCounter].xleft-15)
                                                + '" x2="' + (inSVG[elementCounter].xleft-5)
-                                               + '" y1="' + (inSVG[elementCounter].yup+60)
-                                               + '" y2="' + (inSVG[elementCounter].yup+60)
+                                               + '" y1="' + (inSVG[elementCounter].yup+65)
+                                               + '" y2="' + (inSVG[elementCounter].yup+65)
                                                +'" style="stroke:black" />';
                      inSVG[elementCounter].data += '<line x1="' + (inSVG[elementCounter].xleft-15)
                                                + '" x2="' + (inSVG[elementCounter].xleft-5)
-                                               + '" y1="' + (inSVG[elementCounter].yup+70)
-                                               + '" y2="' + (inSVG[elementCounter].yup+70)
+                                               + '" y1="' + (inSVG[elementCounter].yup+75)
+                                               + '" y2="' + (inSVG[elementCounter].yup+75)
                                                +'" style="stroke:black" />';
                      break;
                  }
