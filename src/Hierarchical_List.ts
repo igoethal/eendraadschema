@@ -328,6 +328,11 @@ class Hierarchical_List {
       <line x1="20" y1="-10" x2="25" y2="-10"  stroke="black" />
       <text x="22" y="11" style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="10">PIR</text>
     </g>
+    <g id="schakelaar">
+      <line x1="0" y1="0" x2="5" y2="0"  stroke="black" />
+      <line x1="5" y1="0" x2="35" y2="-10"  stroke="black" />
+      <line x1="35" y1="0" x2="40" y2="0"  stroke="black" />
+    </g>
     <g id="schemerschakelaar">
       <line x1="0" y1="0" x2="5" y2="0"  stroke="black" />
       <line x1="5" y1="0" x2="35" y2="-10"  stroke="black" />

@@ -285,7 +285,7 @@ class Electro_Item extends List_Item {
         break;
       case "Lichtcircuit":
         output += "&nbsp;Nr: " + this.stringToHTML(10,5);
-        output += ", " + this.selectToHTML(5,["enkelpolig", "dubbelpolig", "dubbelaansteking", "---", "dimschakelaar", "bewegingsschakelaar", "schemerschakelaar", "---", "teleruptor", "relais", "dimmer", "tijdschakelaar", "minuterie", "thermostaat"]);
+        output += ", " + this.selectToHTML(5,["enkelpolig", "dubbelpolig", "dubbelaansteking", "---", "schakelaar", "dimschakelaar", "bewegingsschakelaar", "schemerschakelaar", "---", "teleruptor", "relais", "dimmer", "tijdschakelaar", "minuterie", "thermostaat"]);
         output += ", Halfwaterdicht: " + this.checkboxToHTML(20);
         if ( (this.keys[5][2] == "enkelpolig") || (this.keys[5][2] == "dubbelpolig") || (this.keys[5][2] == "kruis_enkel") ||
              (this.keys[5][2] == "dubbelaansteking") || (this.keys[5][2] == "wissel_enkel") || (this.keys[5][2] == "dubbel") ||
@@ -307,7 +307,7 @@ class Electro_Item extends List_Item {
         break;
       case "Schakelaars":
         output += "&nbsp;Nr: " + this.stringToHTML(10,5);
-        output += ", " + this.selectToHTML(5,["enkelpolig", "dubbelpolig", "dubbelaansteking", "wissel_enkel", "wissel_dubbel", "kruis_enkel", "---", "dimschakelaar", "bewegingsschakelaar", "schemerschakelaar", "---", "teleruptor", "relais", "dimmer", "tijdschakelaar", "minuterie", "thermostaat", "rolluikschakelaar"]);
+        output += ", " + this.selectToHTML(5,["enkelpolig", "dubbelpolig", "dubbelaansteking", "wissel_enkel", "wissel_dubbel", "kruis_enkel", "---", "schakelaar", "dimschakelaar", "bewegingsschakelaar", "schemerschakelaar", "---", "teleruptor", "relais", "dimmer", "tijdschakelaar", "minuterie", "thermostaat", "rolluikschakelaar"]);
         if ( (this.keys[5][2] == "enkelpolig") || (this.keys[5][2] == "dubbelpolig") || (this.keys[5][2] == "kruis_enkel") ||
              (this.keys[5][2] == "dubbelaansteking") || (this.keys[5][2] == "wissel_enkel") || (this.keys[5][2] == "wissel_dubbel") || (this.keys[5][2] == "dubbel") ||
              (this.keys[5][2] == "dimschakelaar") || (this.keys[5][2] == "rolluikschakelaar") ) {
@@ -425,6 +425,13 @@ class Electro_Item extends List_Item {
         break;
       case "schemerschakelaar":
         elements.push("schemerschakelaar");
+        signalisatielamp.push(false);
+        halfwaterdicht.push(false);
+        verklikkerlamp.push(false);
+        trekschakelaar.push(false);
+        break;
+      case "schakelaar":
+        elements.push("schakelaar");
         signalisatielamp.push(false);
         halfwaterdicht.push(false);
         verklikkerlamp.push(false);
@@ -641,6 +648,13 @@ class Electro_Item extends List_Item {
           outputstr += '<use xlink:href="#moving_man" x="' + (endx + 1.5) + '" y="20" />';
           startx = endx + 40;
           lowerbound = Math.max(lowerbound,30);
+          break;
+        case "schakelaar":
+          endx = startx + 20;
+          outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />';
+          //outputstr += '<path d="M' + startx + ' 25 L' + endx + ' 25" stroke="black" />';
+          outputstr += '<use xlink:href="#schakelaar" x="' + endx + '" y="25" />';
+          startx = endx + 40;
           break;
         case "schemerschakelaar":
           endx = startx + 20;
