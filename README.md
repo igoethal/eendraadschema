@@ -28,7 +28,10 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>.
 
-Want to contribute?, use the contact-form on https://eendraadschema.goethals-jacobs.be.
+Licenses for embedded content
+
+- This program uses the Pako.js entropy coding library. Pako is released under an MIT license by Andrey Tupitsin and Vitaly Puzrin. For more information on Pako and the full license text, please visit https://github.com/nodeca/pako
+- Pako implements ZLib in javascript. Zlib is released under the ZLIB License.  See https://www.zlib.net/zlib_license.html
 
 === History ===
 
