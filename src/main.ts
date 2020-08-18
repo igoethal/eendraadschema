@@ -316,13 +316,38 @@ function load_example(nr: number) {
 var importjson = function(event) {
   var input = event.target;
   var reader = new FileReader();
+  var text:string = "";
+  var encoder = new TextEncoder();
+  var decoder = new TextDecoder("utf-8");
+
   reader.onload = function(){
-    let text:string = reader.result.toString();
+    var mystring = reader.result.toString();
+
+    //If first 3 bytes read "EDS", it is an entropy coded file
+    //The first 3 bytes are EDS, the next 3 bytes indicate the version (currently only 001 implemented)
+    //the next 4 bytes are decimal zeroes "0000"
+    //thereafter is a base64 encoded data-structure
+    if ( (mystring.charCodeAt(0)==69) && (mystring.charCodeAt(1)==68) && (mystring.charCodeAt(2)==83) ) { //recognize as EDS
+      mystring = atob(mystring.substring(10,mystring.length))
+      var buffer:Uint8Array = new Uint8Array(mystring.length);
+      for (var i = 0; i < mystring.length; i++) {
+        buffer[i-0] = mystring.charCodeAt(i);
+      }
+      text = decoder.decode(pako.inflate(buffer));
+    }
+
+    //If first 3 bytes do not read "EDS", the file is in the old non encoded format and can be used as is
+    else {
+      text = mystring;
+    }
+
+    //code to transform input read into memory structure
     import_to_structure(text);
   };
 
   reader.readAsText(input.files[0]);
 };
+
 
 function importclicked() {
   document.getElementById('importfile').click();
