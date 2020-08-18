@@ -317,8 +317,6 @@ var importjson = function(event) {
   var input = event.target;
   var reader = new FileReader();
   var text:string = "";
-  var encoder = new TextEncoder();
-  var decoder = new TextDecoder("utf-8");
 
   reader.onload = function(){
     var mystring = reader.result.toString();
@@ -333,7 +331,16 @@ var importjson = function(event) {
       for (var i = 0; i < mystring.length; i++) {
         buffer[i-0] = mystring.charCodeAt(i);
       }
-      text = decoder.decode(pako.inflate(buffer));
+      try { //See if the text decoder works, if not, we will do it manually (slower)
+        var decoder = new TextDecoder("utf-8");
+        text = decoder.decode(pako.inflate(buffer));
+      } catch (error) { //Continue without the text decoder (old browsers)
+        var inflated:Uint8Array = pako.inflate(buffer);
+        text = "";
+        for (i=0; i<inflated.length; i++) {
+          text += String.fromCharCode(inflated[i])
+        }
+      }
     }
 
     //If first 3 bytes do not read "EDS", the file is in the old non encoded format and can be used as is
