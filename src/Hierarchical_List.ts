@@ -168,8 +168,8 @@ class Hierarchical_List {
           break;
         case "move":
           output+= 'Modus (Invoegen/verplaatsen) <select id="edit_mode" onchange="HL_editmode()"><option value="edit">Invoegen</option><option value="move" selected>Verplaatsen</option></select>'+
-                   '<span style="color:red">&nbsp;Verplaatsen is experimenteel!, feedback welkom via het contact-form. Gebruik de pijlen om de volgorde van elementen te wijzigen. '+
-                   'Gebruik het Moeder-veld om een component elders in het schema te hangen.</span><br><br>';
+                   '<span style="color:black"><i>&nbsp;Gebruik de pijlen om de volgorde van elementen te wijzigen. '+
+                   'Gebruik het Moeder-veld om een component elders in het schema te hangen.</i></span><br><br>';
           break;
       }
     }
