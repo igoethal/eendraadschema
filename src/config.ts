@@ -24,7 +24,7 @@ var CONFIGPAGE_LEFT:string = `
           <b>Leeg schema</b>
         </td>
         <td width="25%" align="center" bgcolor="LightGrey">
-          <b>Importeren</b>
+          <b>Openen</b>
         </td>
       </tr>
       <tr>
@@ -51,7 +51,7 @@ var CONFIGPAGE_RIGHT:string = `
         <td width="25%" align="center">
           <br>
           <img src="examples/import_icon.svg" height="100px"><br><br>
-          Importeer een vooraf opgeslagen schema (EDS-bestand). Enkel bestanden aangemaakt na 12 juli 2019 worden herkend.
+          Open een schema dat u eerder heeft opgeslagen op uw computer (EDS-bestand). Enkel bestanden aangemaakt na 12 juli 2019 worden herkend.
           <br><br>
         </td>
       </tr>
