@@ -272,7 +272,37 @@ function restart_all() {
   }
 }
 
-function import_to_structure(text: string) {
+function import_to_structure(mystring: string) {
+
+  var text:string = "";
+
+  //If first 3 bytes read "EDS", it is an entropy coded file
+  //The first 3 bytes are EDS, the next 3 bytes indicate the version (currently only 001 implemented)
+  //the next 4 bytes are decimal zeroes "0000"
+  //thereafter is a base64 encoded data-structure
+  if ( (mystring.charCodeAt(0)==69) && (mystring.charCodeAt(1)==68) && (mystring.charCodeAt(2)==83) ) { //recognize as EDS
+    mystring = atob(mystring.substring(10,mystring.length))
+    var buffer:Uint8Array = new Uint8Array(mystring.length);
+    for (var i = 0; i < mystring.length; i++) {
+      buffer[i-0] = mystring.charCodeAt(i);
+    }
+    try { //See if the text decoder works, if not, we will do it manually (slower)
+      var decoder = new TextDecoder("utf-8");
+      text = decoder.decode(pako.inflate(buffer));
+    } catch (error) { //Continue without the text decoder (old browsers)
+      var inflated:Uint8Array = pako.inflate(buffer);
+      text = "";
+      for (i=0; i<inflated.length; i++) {
+        text += String.fromCharCode(inflated[i])
+      }
+    }
+  }
+
+  //If first 3 bytes do not read "EDS", the file is in the old non encoded format and can be used as is
+  else {
+    text = mystring;
+  }
+  
   var mystructure: Hierarchical_List = new Hierarchical_List();
   structure = new Hierarchical_List();
   var obj = JSON.parse(text);
