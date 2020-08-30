@@ -68,12 +68,12 @@ class Electro_Item extends List_Item {
           break;
         }
         case "Kring": {
-          this.consumers = ["", "Aansluiting", "Bord", "Domotica", "Meerdere verbruikers", "Kring", "Splitsing", "---", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Schakelaars", "Stopcontact", "Transformator", "Vaatwasmachine", "Ventilator", "Verwarmingstoestel", "Vrije tekst", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt",
+          this.consumers = ["", "Aansluiting", "Bord", "Domotica", "Meerdere verbruikers", "Kring", "Splitsing", "---", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Schakelaars", "Stopcontact", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verwarmingstoestel", "Vrije tekst", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt",
                             "Aftakdoos", "Leeg"];
           break;
         }
         case "Meerdere verbruikers": {
-          this.consumers = ["", "Domotica", "Splitsing", "---", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Transformator", "Vaatwasmachine", "Ventilator", "Verwarmingstoestel", "Vrije tekst", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt",
+          this.consumers = ["", "Domotica", "Splitsing", "---", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verwarmingstoestel", "Vrije tekst", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt",
                             "Aftakdoos", "Leeg"];
           break;
         }
@@ -338,6 +338,11 @@ class Electro_Item extends List_Item {
       case "Transformator":
         output += "&nbsp;Nr: " + this.stringToHTML(10,5);
         output += ", Voltage: " + this.stringToHTML(14,8);
+        output += ", Adres/tekst: " + this.stringToHTML(15,5);
+        break;
+      case "USB lader":
+        output += "&nbsp;Nr: " + this.stringToHTML(10,5);
+        output += ", Aantal: " + this.selectToHTML(4,["1","2","3","4","5","6","7","8","9","10"]);
         output += ", Adres/tekst: " + this.stringToHTML(15,5);
         break;
       case "Verwarmingstoestel":
@@ -1256,6 +1261,20 @@ class Electro_Item extends List_Item {
           outputstr += '<text x="' + ((mySVG.xright-20)/2 + 21) + '" y="58" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
           mySVG.ydown += 15;
         }
+        break;
+      case "USB lader":
+        var shifty = 0; if (this.keys[4][2]>1) {
+          shifty = 12;
+          outputstr += '<text x="51" y="14" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">x' + htmlspecialchars(this.keys[4][2]) + '</text>'
+        }
+        outputstr += '<line x1="1" y1="' + (shifty+25) + '" x2="21" y2="' + (shifty+25) + '" stroke="black"></line>';
+        outputstr += '<use xlink:href="#usblader" x="21" y="' + (shifty+25) + '"></use>';
+        mySVG.xright = 80;
+        if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
+          outputstr += '<text x="' + ((mySVG.xright-20)/2 + 21) + '" y="' + (shifty+55) + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
+          mySVG.ydown += 10;
+        }
+        mySVG.yup += shifty;
         break;
       case "Vaatwasmachine":
         outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';

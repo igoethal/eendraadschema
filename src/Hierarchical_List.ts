@@ -458,6 +458,13 @@ class Hierarchical_List {
       <line x1="0" y1="-5" x2="40" y2="-5" stroke="black" />
       <circle cx="20" cy="7.5" r="3" style="stroke:black;fill:black" />
     </g>
+    <g id="usblader">
+      <rect x="0" y="-15" width="60" height="30" fill="none" style="stroke:black" />
+      <circle cx="12" cy="-5" r="5" style="stroke:black;fill:none" />
+      <circle cx="19" cy="-5" r="5" style="stroke:black;fill:none" />
+      <text x="15" y="8" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="8">AC/DC</text>
+      <text x="42" y="4" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="11">USB</text>
+    </g>
     <g id="vaatwasmachine">
       <rect x="0" y="-20" width="40" height="40" fill="none" style="stroke:black" />
       <line x1="0" y1="-20" x2="40" y2="20" style="stroke:black;fill:none" />
