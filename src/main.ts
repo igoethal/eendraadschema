@@ -96,7 +96,18 @@ function HL_changeparent(my_id: number) {
   HLRedrawTree();
 }
 
+function HL_changeFilename() {
+  var regex:RegExp = new RegExp('^[-_ A-Za-z0-9]{2,}\\.eds$');
+  var filename = (document.getElementById("filename") as HTMLInputElement).value;
+  if (regex.test(filename)) {
+    structure.properties.setFilename((document.getElementById("filename") as HTMLInputElement).value);
+    document.getElementById("settings").innerHTML = '<code>' + structure.properties.filename + '</code>&nbsp;<button onclick="HL_enterSettings()">Wijzigen</button>&nbsp;<button onclick="exportjson()">Opslaan</button>';
+  }
+}
 
+function HL_enterSettings() {
+  document.getElementById("settings").innerHTML = '<input type="text" id="filename" onchange="HL_changeFilename()" value="" pattern="^[-_ A-Za-z0-9]{2,}\\\.eds$">&nbsp;<i>Gebruik enkel alphanumerieke karakters a-z A-Z 0-9, streepjes en spaties. Eindig met ".eds". Druk daarna op enter.</i>';
+}
 
 function HLRedrawTreeHTML() {
   document.getElementById("configsection").innerHTML = "";
@@ -302,11 +313,15 @@ function import_to_structure(mystring: string) {
   else {
     text = mystring;
   }
-  
+
   var mystructure: Hierarchical_List = new Hierarchical_List();
   structure = new Hierarchical_List();
   var obj = JSON.parse(text);
   (<any> Object).assign(mystructure, obj);
+
+  if (typeof structure.properties.filename != "undefined") {
+    structure.properties.filename = mystructure.properties.filename;
+  }
 
   for (var i = 0; i < mystructure.length; i++) {
     if (mystructure.data[i].parent==0) {

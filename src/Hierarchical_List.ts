@@ -2,6 +2,7 @@ class Hierarchical_List {
   data: Array<List_Item>;
   active: Array<Boolean>;
   id: Array<number>;
+  properties: Properties;
   length: number;
   curid: number;
   mode: string; //can be "edit" or "move"
@@ -11,6 +12,7 @@ class Hierarchical_List {
     this.data = new Array<List_Item>();
     this.active = new Array<Boolean>();
     this.id = new Array<number>();
+    this.properties = new Properties();
     this.curid = 1;
     this.mode = "edit";
   };
@@ -159,19 +161,20 @@ class Hierarchical_List {
   toHTML(myParent: number) {
     var output: string = "";
     var numberDrawn: number = 0;
-
     //-- bovenaan de switch van editeer-mode (teken of verplaats) --
     if (myParent == 0) {
       switch (this.mode) {
         case "edit":
-          output+= 'Modus (Invoegen/Verplaatsen) <select id="edit_mode" onchange="HL_editmode()"><option value="edit" selected>Invoegen</option><option value="move">Verplaatsen</option></select><br><br>';
+          output+= 'Modus (Invoegen/Verplaatsen) <select id="edit_mode" onchange="HL_editmode()"><option value="edit" selected>Invoegen</option><option value="move">Verplaatsen</option></select><br>';
           break;
         case "move":
           output+= 'Modus (Invoegen/verplaatsen) <select id="edit_mode" onchange="HL_editmode()"><option value="edit">Invoegen</option><option value="move" selected>Verplaatsen</option></select>'+
                    '<span style="color:black"><i>&nbsp;Gebruik de pijlen om de volgorde van elementen te wijzigen. '+
-                   'Gebruik het Moeder-veld om een component elders in het schema te hangen.</i></span><br><br>';
+                   'Gebruik het Moeder-veld om een component elders in het schema te hangen.</i></span><br>';
           break;
       }
+      //-- plaats input box voor naam van het schema bovenaan --
+      output += 'Bestandsnaam: <span id="settings"><code>' + this.properties.filename + '</code>&nbsp;<button onclick="HL_enterSettings()">Wijzigen</button>&nbsp;<button onclick="exportjson()">Opslaan</button></span><br><br>'
     }
 
     //--Teken het volledige schema in HTML--

@@ -7,6 +7,7 @@ cat SVGelement.ts >> eendraadschema.ts
 cat List_Item.ts >> eendraadschema.ts
 cat Electro_Item.ts >> eendraadschema.ts
 cat Simple_Item.ts >> eendraadschema.ts
+cat Properties.ts >> eendraadschema.ts
 cat Hierarchical_List.ts >> eendraadschema.ts
 cat config.ts >> eendraadschema.ts
 cat ../prop/prop_scripts.ts >> eendraadschema.ts

@@ -1746,12 +1746,23 @@ var Simple_Item = /** @class */ (function (_super) {
     };
     return Simple_Item;
 }(List_Item));
+var Properties = /** @class */ (function () {
+    function Properties() {
+        this.filename = "eendraadschema.eds";
+    }
+    ;
+    Properties.prototype.setFilename = function (name) {
+        this.filename = name;
+    };
+    return Properties;
+}());
 var Hierarchical_List = /** @class */ (function () {
     function Hierarchical_List() {
         this.length = 0;
         this.data = new Array();
         this.active = new Array();
         this.id = new Array();
+        this.properties = new Properties();
         this.curid = 1;
         this.mode = "edit";
     }
@@ -1886,14 +1897,16 @@ var Hierarchical_List = /** @class */ (function () {
         if (myParent == 0) {
             switch (this.mode) {
                 case "edit":
-                    output += 'Modus (Invoegen/Verplaatsen) <select id="edit_mode" onchange="HL_editmode()"><option value="edit" selected>Invoegen</option><option value="move">Verplaatsen</option></select><br><br>';
+                    output += 'Modus (Invoegen/Verplaatsen) <select id="edit_mode" onchange="HL_editmode()"><option value="edit" selected>Invoegen</option><option value="move">Verplaatsen</option></select><br>';
                     break;
                 case "move":
                     output += 'Modus (Invoegen/verplaatsen) <select id="edit_mode" onchange="HL_editmode()"><option value="edit">Invoegen</option><option value="move" selected>Verplaatsen</option></select>' +
                         '<span style="color:black"><i>&nbsp;Gebruik de pijlen om de volgorde van elementen te wijzigen. ' +
-                        'Gebruik het Moeder-veld om een component elders in het schema te hangen.</i></span><br><br>';
+                        'Gebruik het Moeder-veld om een component elders in het schema te hangen.</i></span><br>';
                     break;
             }
+            //-- plaats input box voor naam van het schema bovenaan --
+            output += 'Bestandsnaam: <span id="settings"><code>' + this.properties.filename + '</code>&nbsp;<button onclick="HL_enterSettings()">Wijzigen</button>&nbsp;<button onclick="exportjson()">Opslaan</button></span><br><br>';
         }
         //--Teken het volledige schema in HTML--
         for (var i = 0; i < this.length; i++) {
@@ -2660,7 +2673,8 @@ function exportjson() {
     var filename;
     //We use the Pako library to entropy code the data
     //Final data reads "EDS0010000" and thereafter a 64base encoding of the deflated output from Pako
-    filename = "eendraadschema.eds";
+    //filename = "eendraadschema.eds";
+    filename = structure.properties.filename;
     var text = JSON.stringify(structure);
     try {
         var decoder = new TextDecoder("utf-8");
@@ -2768,6 +2782,17 @@ function HL_changeparent(my_id) {
         structure.data[structure.getOrdinalById(my_id)].Parent_Item = structure.data[parentOrdinal];
     }
     HLRedrawTree();
+}
+function HL_changeFilename() {
+    var regex = new RegExp('^[-_ A-Za-z0-9]{2,}\\.eds$');
+    var filename = document.getElementById("filename").value;
+    if (regex.test(filename)) {
+        structure.properties.setFilename(document.getElementById("filename").value);
+        document.getElementById("settings").innerHTML = '<code>' + structure.properties.filename + '</code>&nbsp;<button onclick="HL_enterSettings()">Wijzigen</button>&nbsp;<button onclick="exportjson()">Opslaan</button>';
+    }
+}
+function HL_enterSettings() {
+    document.getElementById("settings").innerHTML = '<input type="text" id="filename" onchange="HL_changeFilename()" value="" pattern="^[-_ A-Za-z0-9]{2,}\\\.eds$">&nbsp;<i>Gebruik enkel alphanumerieke karakters a-z A-Z 0-9, streepjes en spaties. Eindig met ".eds". Druk daarna op enter.</i>';
 }
 function HLRedrawTreeHTML() {
     document.getElementById("configsection").innerHTML = "";
@@ -2910,6 +2935,9 @@ function import_to_structure(mystring) {
     structure = new Hierarchical_List();
     var obj = JSON.parse(text);
     Object.assign(mystructure, obj);
+    if (typeof structure.properties.filename != "undefined") {
+        structure.properties.filename = mystructure.properties.filename;
+    }
     for (var i = 0; i < mystructure.length; i++) {
         if (mystructure.data[i].parent == 0) {
             structure.addItem(new Electro_Item());

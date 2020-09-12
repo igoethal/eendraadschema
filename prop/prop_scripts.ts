@@ -1,9 +1,11 @@
 function exportjson() {
   var filename:string;
-  
+
   //We use the Pako library to entropy code the data
   //Final data reads "EDS0010000" and thereafter a 64base encoding of the deflated output from Pako
-  filename = "eendraadschema.eds";
+  //filename = "eendraadschema.eds";
+  filename = structure.properties.filename;
+  
   var text:string = JSON.stringify(structure);
   try {
     var decoder = new TextDecoder("utf-8");
