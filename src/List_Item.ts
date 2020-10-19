@@ -18,6 +18,10 @@ class List_Item {
     resetKeys() {
     }
 
+    getMaxNumChilds(Parent?: List_Item) : number {
+      return(2^24);
+    }
+
     setKey(key: string, setvalue: any) {
       for (var i: number = 0; i<this.keys.length; i++) {
         if (this.keys[i][0]==key) {

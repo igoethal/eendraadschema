@@ -49,15 +49,16 @@ class Electro_Item extends List_Item {
     this.keys.push(["bool4","BOOLEAN",false]); //25, algemeen veld
       //Indien schakelaar, indicatie trekschakelaar of niet
 
-    this.Parent_Item = Parent;
-    this.updateConsumers();
+    this.updateConsumers(Parent);
   }
 
-  updateConsumers() {
-    if (this.Parent_Item == null) {
+  updateConsumers(Parent?: List_Item) {
+    this.Parent_Item = Parent;
+
+    if (Parent == null) {
       this.consumers = ["", "Kring", "Aansluiting"];
     } else {
-      switch (this.Parent_Item.getKey("type")) {
+      switch (Parent.getKey("type")) {
         case "Bord": {
           this.consumers = ["", "Kring"];
           break;
@@ -82,7 +83,9 @@ class Electro_Item extends List_Item {
           break;
         }
         default: {
-          this.consumers = [""];
+          this.consumers = ["", "Aansluiting", "Domotica", "Meerdere verbruikers", "Splitsing", "---", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verwarmingstoestel", "Vrije tekst", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt",
+                            "Aftakdoos", "Leeg"];
+          //this.consumers = [""];
           break;
         }
       }
@@ -185,6 +188,100 @@ class Electro_Item extends List_Item {
     }
   }
 
+  checkInsertChild(Parent?: List_Item) { //Checks if the insert after button should be displayed or not
+    var allow = false;
+    switch (this.keys[0][2]) {
+      case "Aansluiting":
+      case "Bord":
+      case "Kring":
+      case "Domotica":
+      case "Splitsing":
+        allow = true;
+        break;
+      case "Bel":
+      case "Lichtcircuit":
+        allow = false;
+        break;
+      default:
+        if (typeof Parent == 'undefined') {
+          allow = true;
+        } else {
+          switch(Parent.keys[0][2]) {
+            case "Aansluiting":
+            case "Bord":
+            case "Domotica":
+            case "Splitsing":
+            case "Meerdere verbruikers":
+              allow = false;
+              break;
+            default:
+              allow = true;
+              break;
+          }
+        }
+    }
+    return(allow);
+  }
+
+  getMaxNumChilds(Parent?: List_Item) {
+    var maxchilds = 0;
+    switch (this.keys[0][2]) {
+      case "Aansluiting":
+      case "Bord":
+      case "Kring":
+      case "Domotica":
+      case "Splitsing":
+      case "Meerdere verbruikers":
+        maxchilds = 256;
+        break;
+      case "Bel":
+      case "Lichtcircuit":
+        maxchilds = 0;
+        break;
+      default:
+        if (typeof Parent == 'undefined') {
+          maxchilds = 256;
+        } else {
+          switch(Parent.keys[0][2]) {
+            case "Aansluiting":
+            case "Bord":
+            case "Domotica":
+            case "Splitsing":
+            case "Meerdere verbruikers":
+              maxchilds = 0;
+              break;
+            default:
+              maxchilds = 1;
+              break;
+          }
+        }
+    }
+    return(maxchilds);
+  }
+
+  checkInsertAfter(Parent?: List_Item) { //Checks if the insert after button should be displayed or not
+    var allow = false;
+    if (typeof Parent == 'undefined') {
+      allow = true;
+    } else {
+      //alert(Parent.keys[0][2]);
+      switch(Parent.keys[0][2]) {
+        case "Aansluiting":
+        case "Bord":
+        case "Kring":
+        case "Domotica":
+        case "Splitsing":
+        case "Meerdere verbruikers":
+          allow = true;
+          break;
+        default:
+          allow = false;
+          break;
+      }
+    }
+    return(allow);
+  }
+
   toHTML(mode: string, Parent?: List_Item) {
     let output:string = "";
 
@@ -194,14 +291,18 @@ class Electro_Item extends List_Item {
       output += " <button style=\"background-color:lightblue;\" onclick=\"HLMoveUp(" + this.id +")\">&#9650;</button>";
       output += " <button style=\"background-color:lightblue;\" onclick=\"HLMoveDown(" + this.id +")\">&#9660;</button>";
     } else {
-      output += " <button style=\"background-color:green;\" onclick=\"HLInsertBefore(" + this.id +")\">&#9650;</button>";
-      output += " <button style=\"background-color:green;\" onclick=\"HLInsertAfter(" + this.id +")\">&#9660;</button>";
-      output += " <button style=\"background-color:green;\" onclick=\"HLInsertChild(" + this.id +")\">&#9654;</button>";
+      if (this.checkInsertAfter(Parent)) {
+        output += " <button style=\"background-color:green;\" onclick=\"HLInsertBefore(" + this.id +")\">&#9650;</button>";
+        output += " <button style=\"background-color:green;\" onclick=\"HLInsertAfter(" + this.id +")\">&#9660;</button>";
+      }
+      if (this.checkInsertChild(Parent)) {
+        output += " <button style=\"background-color:green;\" onclick=\"HLInsertChild(" + this.id +")\">&#9654;</button>";
+      }
     };
     output += " <button style=\"background-color:red;\" onclick=\"HLDelete(" + this.id +")\">&#9851;</button>";
     output += "&nbsp;"
 
-    this.updateConsumers();
+    this.updateConsumers(Parent);
     output += this.selectToHTML(0, this.consumers);
 
     switch (this.keys[0][2]) {
@@ -1213,7 +1314,7 @@ class Electro_Item extends List_Item {
                 outputstr += '<use xlink:href="#lamp" x="' + 30 + '" y="25" />';
                 outputstr += '<circle cx="30" cy="25" r="5" style="stroke:black;fill:black" />';
                 if ( hasChild ) {
-                  outputstr += '<line x1="'+30+'" y1="25" x2="'+(30+10)+'" y2="25" stroke="black" />';
+                  outputstr += '<line x1="'+30+'" y1="25" x2="'+(30+11)+'" y2="25" stroke="black" />';
                 }
                 break;
               case "Decentraal":
@@ -1225,7 +1326,7 @@ class Electro_Item extends List_Item {
               default:
                 outputstr += '<use xlink:href="#lamp" x="' + 30 + '" y="25" />';
                 if ( hasChild ) {
-                  outputstr += '<line x1="'+30+'" y1="25" x2="'+(30+10)+'" y2="25" stroke="black" />';
+                  outputstr += '<line x1="'+30+'" y1="25" x2="'+(30+11)+'" y2="25" stroke="black" />';
                 }
                 break;
             }

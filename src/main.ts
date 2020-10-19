@@ -30,12 +30,12 @@ function HLInsertAfter(my_id: number) {
 }
 
 function HLMoveDown(my_id: number) {
-  structure.MoveDown(my_id);
+  structure.moveDown(my_id);
   HLRedrawTree();
 }
 
 function HLMoveUp(my_id: number) {
-  structure.MoveUp(my_id);
+  structure.moveUp(my_id);
   HLRedrawTree();
 }
 
@@ -93,6 +93,8 @@ function HL_changeparent(my_id: number) {
     structure.data[structure.getOrdinalById(my_id)].Parent_Item = structure.data[parentOrdinal];
   }
 
+  structure.reSort();
+
   HLRedrawTree();
 }
 
@@ -118,7 +120,7 @@ function HLRedrawTreeSVG() {
   document.getElementById("right_col_inner").innerHTML = '<b>Tekening: </b><button onclick=download("html")>Download als html</button>';
   document.getElementById("right_col_inner").innerHTML += '&nbsp;<button onclick=download("svg")>Download als svg</button>';
   document.getElementById("right_col_inner").innerHTML += '&nbsp;<input type="checkbox" id="noGroup" checked></input><small>SVG elementen niet groeperen (aanbevolen voor meeste tekenprogramma\'s)</small>';
-  document.getElementById("right_col_inner").innerHTML += '<br><small><i>Noot: De knoppen hierboven laden enkel de tekening. Wenst u het schema ook later te bewerken, gebruik dan "Export" in het hoofdmenu.</i></small><br><br>';
+  document.getElementById("right_col_inner").innerHTML += '<br><small><i>Noot: De knoppen hierboven laden enkel de tekening. Wenst u het schema ook later te bewerken, gebruik dan "Opslaan" in het hoofdmenu.</i></small><br><br>';
 
   document.getElementById("right_col_inner").innerHTML += structure.toSVG(0,"horizontal").data;
   document.getElementById("right_col_inner").innerHTML += `
@@ -341,9 +343,15 @@ function import_to_structure(mystring: string) {
     structure.data[i].id = mystructure.data[i].id;
     structure.data[i].indent = mystructure.data[i].indent;
     structure.data[i].collapsed = mystructure.data[i].collapsed;
-
-    //Parent_Item: List_Item;
   }
+
+  //As we re-read the structure and it might be shorter then it once was (due to deletions) but we might still have the old high ID's, always take over the curid from the file
+  structure.curid = mystructure.curid;
+
+  //Sort the entire new structure
+  structure.reSort();
+
+  //Draw the structure
   HLRedrawTree();
 }
 
