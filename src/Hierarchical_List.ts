@@ -447,21 +447,24 @@ class Hierarchical_List {
             //Algoritme werkt gelijkaardig aan een "Bord", eerst maken we een tekening van het geheel
             inSVG[elementCounter] = this.toSVG(this.id[i],"horizontal");
 
-            //If child of "meerdere verbruikers, shift everything by 24 pixels to the right
-            if ((this.data[this.getOrdinalById(myParent)]).getKey("type") == "Meerdere verbruikers") {
-              if ((inSVG[elementCounter].xright + inSVG[elementCounter].xleft) <=0) inSVG[elementCounter].xrightmin = 15; // ensure we see there is a "splitsing"
-              if (inSVG[elementCounter].yup < 25) inSVG[elementCounter].yup = 25;
-              if (inSVG[elementCounter].ydown < 25) inSVG[elementCounter].ydown = 25;
-              inSVG[elementCounter].data = inSVG[elementCounter].data +
-                '<line x1="' + (1) + '" x2="' + (inSVG[elementCounter].xleft + inSVG[elementCounter].xrightmin) +
-                '" y1="' + inSVG[elementCounter].yup + '" y2="' + inSVG[elementCounter].yup + '" stroke="black" />'
-              var toShift = inSVG[elementCounter].xleft;
-              inSVG[elementCounter].xleft -= toShift - 1; //we leave one pixel for the bold kring-line at the left
-              inSVG[elementCounter].xright += toShift;
-            } else {
-              inSVG[elementCounter].data = inSVG[elementCounter].data +
-                '<line x1="' + (inSVG[elementCounter].xleft) + '" x2="' + (inSVG[elementCounter].xleft + inSVG[elementCounter].xrightmin) +
-                '" y1="' + inSVG[elementCounter].yup + '" y2="' + inSVG[elementCounter].yup + '" stroke="black" />'
+            switch ((this.data[this.getOrdinalById(myParent)]).getKey("type")) {
+              case "Aansluiting":
+              case "Kring": //in-line with kring or aansluiting
+                inSVG[elementCounter].data = inSVG[elementCounter].data +
+                  '<line x1="' + (inSVG[elementCounter].xleft) + '" x2="' + (inSVG[elementCounter].xleft + inSVG[elementCounter].xrightmin) +
+                  '" y1="' + inSVG[elementCounter].yup + '" y2="' + inSVG[elementCounter].yup + '" stroke="black" />'
+                break;
+              default:
+                if ((inSVG[elementCounter].xright + inSVG[elementCounter].xleft) <=0) inSVG[elementCounter].xrightmin = 15; // ensure we see there is a "splitsing"
+                if (inSVG[elementCounter].yup < 25) inSVG[elementCounter].yup = 25;
+                if (inSVG[elementCounter].ydown < 25) inSVG[elementCounter].ydown = 25;
+                inSVG[elementCounter].data = inSVG[elementCounter].data +
+                  '<line x1="' + (1) + '" x2="' + (inSVG[elementCounter].xleft + inSVG[elementCounter].xrightmin) +
+                  '" y1="' + inSVG[elementCounter].yup + '" y2="' + inSVG[elementCounter].yup + '" stroke="black" />'
+                var toShift = inSVG[elementCounter].xleft;
+                inSVG[elementCounter].xleft -= toShift - 1; //we leave one pixel for the bold kring-line at the left
+                inSVG[elementCounter].xright += toShift;
+                break;
             }
             break;
 
