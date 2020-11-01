@@ -2941,6 +2941,7 @@ var Hierarchical_List = /** @class */ (function () {
 }());
 var CONFIGPAGE_LEFT = "\n    <center>\n        <p><font size=\"+2\">\n          <b>Eendraadschema ontwerpen: </b>\n          Kies &eacute;&eacute;n van onderstaande voorbeelden om van te starten (u kan zelf kringen toevoegen achteraf) of\n          start van een leeg schema met voorgekozen aantal kringen (optie 3).\n        </font></p>\n      <font size=\"+1\">\n        <i>\n          <b>Tip: </b>Om de mogelijkheden van het programma te leren kennen is het vaak beter eerst een voorbeeldschema te\n          bekijken alvorens van een leeg schema te vertrekken.\n        </i>\n      </font>\n    </center><br><br>\n    <table border=\"1px\" style=\"border-collapse:collapse\" align=\"center\" width=\"100%\">\n      <tr>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Voorbeeld 1</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Voorbeeld 2</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Leeg schema</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Openen</b>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/example000.svg\" height=\"300px\"><br><br>\n          Eenvoudig schema, enkel stopcontacten en lichtpunten.\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/example001.svg\" height=\"300px\"><br><br>\n          Iets complexer schema met teleruptoren, verbruikers achter stopcontacten en gesplitste kringen.\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/gear.svg\" height=\"100px\"><br><br>\n";
 var CONFIGPAGE_RIGHT = "\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/import_icon.svg\" height=\"100px\"><br><br>\n          Open een schema dat u eerder heeft opgeslagen op uw computer (EDS-bestand). Enkel bestanden aangemaakt na 12 juli 2019 worden herkend.\n          <br><br>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"load_example(0)\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"load_example(1)\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"read_settings()\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"importclicked()\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n      </tr>\n    </table>\n  ";
+var CONFIGPRINTPAGE = "\n<div>\n</div>\n<br>\n";
 var EXAMPLE0 = "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";
 var EXAMPLE1 = "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";
 function exportjson() {
@@ -3070,6 +3071,14 @@ function HL_enterSettings() {
     document.getElementById("settings").innerHTML = '<input type="text" id="filename" onchange="HL_changeFilename()" value="" pattern="^[-_ A-Za-z0-9]{2,}\\\.eds$">&nbsp;<i>Gebruik enkel alphanumerieke karakters a-z A-Z 0-9, streepjes en spaties. Eindig met ".eds". Druk daarna op enter.</i>';
 }
 function HLRedrawTreeHTML() {
+    /*document.getElementById("minitabs").innerHTML = `
+      <li><a href="javascript:restart_all()">Nieuw</a></li>
+      <li><a href="javascript:importclicked()">Openen</a></li>
+      <li><a href="javascript:exportjson()">Opslaan</a></li>
+      <li><a href="javascript:printsvg()">Print</a></li>
+      <li><a href="Documentation/edsdoc.pdf" target="_blank">Documentatie</a></li>
+      <li><a href="javascript:openContactForm()">Info/Contact</a></li>
+    `*/
     document.getElementById("configsection").innerHTML = "";
     document.getElementById("left_col_inner").innerHTML = structure.toHTML(0);
 }
@@ -3146,6 +3155,66 @@ function reset_all() {
     buildNewStructure(structure);
     HLRedrawTree();
 }
+function doprint() {
+    var prtContent = document.getElementById("printarea");
+    //var WinPrint = window.open('', '', 'left=0,top=0,width=800,height=900,toolbar=0,scrollbars=0,status=0');
+    //var WinPrint = window.open('', '', 'toolbar=0,scrollbars=0,status=0');
+    var WinPrint = window.open();
+    WinPrint.document.write(prtContent.innerHTML);
+    WinPrint.document.close();
+    WinPrint.focus();
+    WinPrint.print();
+    WinPrint.close();
+}
+function dosvgdownload() {
+    var prtContent = document.getElementById("printarea").innerHTML;
+    var filename = document.getElementById("dosvgname").value;
+    download_by_blob(prtContent, filename, 'data:text/plain;charset=utf-8');
+}
+function renderPrintSVG() {
+    var outSVG = new SVGelement();
+    outSVG = structure.toSVG(0, "horizontal");
+    var scale = 1;
+    var height = outSVG.yup + outSVG.ydown;
+    var startx = parseInt(document.getElementById("printoffset").value);
+    var width = parseInt(document.getElementById("printwidth").value);
+    var viewbox = '' + startx + ' 0 ' + width + ' ' + height;
+    document.getElementById("printarea").innerHTML
+        = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" transform="scale(1,1)" style="border:1px solid white" ' +
+            'height="' + (height * scale) + '" width="' + (width * scale) + '" viewBox="' + viewbox + '">' +
+            outSVG.data + '</svg>';
+}
+function changePrintParams() {
+    renderPrintSVG();
+}
+function printsvg() {
+    var strleft = "";
+    var outSVG = new SVGelement();
+    outSVG = structure.toSVG(0, "horizontal");
+    var scale = 1;
+    var startx = 0;
+    var height = outSVG.yup + outSVG.ydown;
+    var width = outSVG.xleft + outSVG.xright;
+    strleft += '<br><table border="0"><tr><td style="vertical-align:top;">';
+    strleft += '<table border="1" cellpadding="3"><tr><th align="left">Eigenschap</th><th align="right">Standaard</th><th align"left">Instelling</th></tr>'
+        + '<tr><td>Hoogte in pixels</td><td align="right">' + height + '</td><td>Niet instelbaar</td></tr>'
+        + '<tr><td>Breedte in pixels</td><td align="right">' + width + '</td><td><input size="4" type="number" min="0" step="1" max="' + width + '" id="printwidth" onchange="changePrintParams()" value="' + width + '"></td></tr>'
+        + '<tr><td>Offset</td><td align="right">' + (0) + '</td><td><input size="4" type="number" min="0" step="1" max="' + width + '" id="printoffset" onchange="changePrintParams()" value="' + startx + '"></td></tr></table><br>';
+    strleft += '</td><td style="vertical-align:top;padding:5px">';
+    strleft += 'Deze print-functie is nog zeer experimenteel en biedt nog niet de mogelijkheid uw naam en adres op het schema te plaatsen. In tussentijd van verdere ontwikkeling '
+        + 'van deze functie kan u ook gebruik maken van een schermafdruk (screenshot) of een externe convertor. We verwijzen naar het print-hoofdstuk in de documentatie (zie menu).'
+        + '<br><br>'
+        + 'Wenst u deze experimentele functie toch te gebruiken, wijzig dan "offset" en "breedte" in de tabel rechts en kies daarmee het stukje van het schema dat u wenst te printen en klik daarna '
+        + 'ofwel op de "print nu"-knop of sla op als SVG en converteer naar PDF met een tekenprogramma zoals Inkscape (gratis te downloaden).';
+    strleft += '</td></tr></table>';
+    strleft += '<div><button onclick="doprint()">Print nu</button>&nbsp;&nbsp;Print tekening hieronder vanuit uw browser. Opgelet, in de meeste browsers moet u zelf "landscape" en eventueel schaling instellen.</div><br>';
+    strleft += '<div><button onclick="dosvgdownload()">Download SVG</button>&nbsp;<input id="dosvgname" size="20" value="eendraadschema_print.svg">&nbsp;&nbsp;Sla tekening hieronder op als SVG en converteer met een ander programma naar PDF (bvb Inkscape).</div><br>';
+    strleft += '<div id="printarea"></div>';
+    document.getElementById("configsection").innerHTML = strleft;
+    document.getElementById("left_col_inner").innerHTML = "";
+    document.getElementById("right_col_inner").innerHTML = "";
+    renderPrintSVG();
+}
 function restart_all() {
     var strleft = CONFIGPAGE_LEFT;
     strleft +=
@@ -3177,6 +3246,14 @@ function restart_all() {
     if (browser_ie_detected()) {
         alert("Deze appicatie werkt niet in Internet Explorer. Wij raden aan een moderne browser te gebruiken zoals Edge, Firefox, Google Chrome, Opera, Vivaldi, ...");
     }
+    /*document.getElementById("minitabs").innerHTML = `
+      <li><a href="javascript:HLRedrawTree()">Bewerken</a></li>
+      <li><a href="javascript:importclicked()">Openen</a></li>
+      <li><a href="javascript:exportjson()">Opslaan</a></li>
+      <li><a href="javascript:printsvg()">Print</a></li>
+      <li><a href="Documentation/edsdoc.pdf" target="_blank">Documentatie</a></li>
+      <li><a href="javascript:openContactForm()">Info/Contact</a></li>
+    `*/
 }
 function import_to_structure(mystring) {
     var text = "";

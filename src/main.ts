@@ -112,6 +112,14 @@ function HL_enterSettings() {
 }
 
 function HLRedrawTreeHTML() {
+  /*document.getElementById("minitabs").innerHTML = `
+    <li><a href="javascript:restart_all()">Nieuw</a></li>
+    <li><a href="javascript:importclicked()">Openen</a></li>
+    <li><a href="javascript:exportjson()">Opslaan</a></li>
+    <li><a href="javascript:printsvg()">Print</a></li>
+    <li><a href="Documentation/edsdoc.pdf" target="_blank">Documentatie</a></li>
+    <li><a href="javascript:openContactForm()">Info/Contact</a></li>
+  `*/
   document.getElementById("configsection").innerHTML = "";
   document.getElementById("left_col_inner").innerHTML = structure.toHTML(0);
 }
@@ -207,6 +215,81 @@ function reset_all() {
 }
 
 
+function doprint() {
+  var prtContent = document.getElementById("printarea");
+  //var WinPrint = window.open('', '', 'left=0,top=0,width=800,height=900,toolbar=0,scrollbars=0,status=0');
+  //var WinPrint = window.open('', '', 'toolbar=0,scrollbars=0,status=0');
+  var WinPrint = window.open();
+  WinPrint.document.write(prtContent.innerHTML);
+  WinPrint.document.close();
+  WinPrint.focus();
+  WinPrint.print();
+  WinPrint.close();
+}
+
+function dosvgdownload() {
+  var prtContent = document.getElementById("printarea").innerHTML;
+  var filename = (document.getElementById("dosvgname") as HTMLInputElement).value;
+  download_by_blob(prtContent, filename, 'data:text/plain;charset=utf-8');
+}
+
+function renderPrintSVG() {
+  var outSVG = new SVGelement();
+  outSVG = structure.toSVG(0,"horizontal");
+
+  var scale = 1;
+  var height = outSVG.yup + outSVG.ydown;
+  var startx = parseInt((document.getElementById("printoffset") as HTMLInputElement).value);
+  var width = parseInt((document.getElementById("printwidth") as HTMLInputElement).value);
+
+  var viewbox = '' + startx + ' 0 ' + width + ' ' + height;
+
+  document.getElementById("printarea").innerHTML
+           = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" transform="scale(1,1)" style="border:1px solid white" ' +
+             'height="' + (height*scale) + '" width="' + (width*scale) + '" viewBox="' + viewbox + '">' +
+             outSVG.data + '</svg>';
+}
+
+function changePrintParams() {
+  renderPrintSVG();
+}
+
+function printsvg() {
+  var strleft: string = "";
+
+  var outSVG = new SVGelement();
+  outSVG = structure.toSVG(0,"horizontal");
+
+  var scale = 1;
+  var startx = 0
+  var height = outSVG.yup + outSVG.ydown;
+  var width = outSVG.xleft + outSVG.xright;
+
+  strleft += '<br><table border="0"><tr><td style="vertical-align:top;">';
+  strleft += '<table border="1" cellpadding="3"><tr><th align="left">Eigenschap</th><th align="right">Standaard</th><th align"left">Instelling</th></tr>'
+          +  '<tr><td>Hoogte in pixels</td><td align="right">' + height + '</td><td>Niet instelbaar</td></tr>'
+          +  '<tr><td>Breedte in pixels</td><td align="right">' + width + '</td><td><input size="4" type="number" min="0" step="1" max="' + width + '" id="printwidth" onchange="changePrintParams()" value="' + width + '"></td></tr>'
+          +  '<tr><td>Offset</td><td align="right">' + (0) + '</td><td><input size="4" type="number" min="0" step="1" max="' + width + '" id="printoffset" onchange="changePrintParams()" value="' + startx + '"></td></tr></table><br>'
+  strleft += '</td><td style="vertical-align:top;padding:5px">';
+  strleft += 'Deze print-functie is nog zeer experimenteel en biedt nog niet de mogelijkheid uw naam en adres op het schema te plaatsen. In tussentijd van verdere ontwikkeling '
+          +  'van deze functie kan u ook gebruik maken van een schermafdruk (screenshot) of een externe convertor. We verwijzen naar het print-hoofdstuk in de documentatie (zie menu).'
+          +  '<br><br>'
+          +  'Wenst u deze experimentele functie toch te gebruiken, wijzig dan "offset" en "breedte" in de tabel rechts en kies daarmee het stukje van het schema dat u wenst te printen en klik daarna '
+          +  'ofwel op de "print nu"-knop of sla op als SVG en converteer naar PDF met een tekenprogramma zoals Inkscape (gratis te downloaden).'
+  strleft += '</td></tr></table>'
+
+  strleft += '<div><button onclick="doprint()">Print nu</button>&nbsp;&nbsp;Print tekening hieronder vanuit uw browser. Opgelet, in de meeste browsers moet u zelf "landscape" en eventueel schaling instellen.</div><br>'
+  strleft += '<div><button onclick="dosvgdownload()">Download SVG</button>&nbsp;<input id="dosvgname" size="20" value="eendraadschema_print.svg">&nbsp;&nbsp;Sla tekening hieronder op als SVG en converteer met een ander programma naar PDF (bvb Inkscape).</div><br>'
+
+  strleft += '<div id="printarea"></div>';
+
+  document.getElementById("configsection").innerHTML = strleft;
+  document.getElementById("left_col_inner").innerHTML = "";
+  document.getElementById("right_col_inner").innerHTML = "";
+
+  renderPrintSVG();
+}
+
 
 function restart_all() {
   var strleft: string = CONFIGPAGE_LEFT;
@@ -283,6 +366,16 @@ function restart_all() {
   if (browser_ie_detected()) {
     alert("Deze appicatie werkt niet in Internet Explorer. Wij raden aan een moderne browser te gebruiken zoals Edge, Firefox, Google Chrome, Opera, Vivaldi, ...");
   }
+
+  /*document.getElementById("minitabs").innerHTML = `
+    <li><a href="javascript:HLRedrawTree()">Bewerken</a></li>
+    <li><a href="javascript:importclicked()">Openen</a></li>
+    <li><a href="javascript:exportjson()">Opslaan</a></li>
+    <li><a href="javascript:printsvg()">Print</a></li>
+    <li><a href="Documentation/edsdoc.pdf" target="_blank">Documentatie</a></li>
+    <li><a href="javascript:openContactForm()">Info/Contact</a></li>
+  `*/
+
 }
 
 function import_to_structure(mystring: string) {
