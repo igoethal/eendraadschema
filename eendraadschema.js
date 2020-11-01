@@ -3205,7 +3205,8 @@ function printsvg() {
         + 'van deze functie kan u ook gebruik maken van een schermafdruk (screenshot) of een externe convertor. We verwijzen naar het print-hoofdstuk in de documentatie (zie menu).'
         + '<br><br>'
         + 'Wenst u deze experimentele functie toch te gebruiken, wijzig dan "offset" en "breedte" in de tabel rechts en kies daarmee het stukje van het schema dat u wenst te printen en klik daarna '
-        + 'ofwel op de "print nu"-knop of sla op als SVG en converteer naar PDF met een tekenprogramma zoals Inkscape (gratis te downloaden).';
+        + 'ofwel op de "print nu"-knop of sla op als SVG en converteer naar PDF met een tekenprogramma zoals Inkscape (gratis te downloaden).'
+        + '<br><br><button onclick="HLRedrawTree()">Sluiten en terug naar schema bewerken</button>';
     strleft += '</td></tr></table>';
     strleft += '<div><button onclick="doprint()">Print nu</button>&nbsp;&nbsp;Print tekening hieronder vanuit uw browser. Opgelet, in de meeste browsers moet u zelf "landscape" en eventueel schaling instellen.</div><br>';
     strleft += '<div><button onclick="dosvgdownload()">Download SVG</button>&nbsp;<input id="dosvgname" size="20" value="eendraadschema_print.svg">&nbsp;&nbsp;Sla tekening hieronder op als SVG en converteer met een ander programma naar PDF (bvb Inkscape).</div><br>';

@@ -276,6 +276,7 @@ function printsvg() {
           +  '<br><br>'
           +  'Wenst u deze experimentele functie toch te gebruiken, wijzig dan "offset" en "breedte" in de tabel rechts en kies daarmee het stukje van het schema dat u wenst te printen en klik daarna '
           +  'ofwel op de "print nu"-knop of sla op als SVG en converteer naar PDF met een tekenprogramma zoals Inkscape (gratis te downloaden).'
+          +  '<br><br><button onclick="HLRedrawTree()">Sluiten en terug naar schema bewerken</button>'
   strleft += '</td></tr></table>'
 
   strleft += '<div><button onclick="doprint()">Print nu</button>&nbsp;&nbsp;Print tekening hieronder vanuit uw browser. Opgelet, in de meeste browsers moet u zelf "landscape" en eventueel schaling instellen.</div><br>'
