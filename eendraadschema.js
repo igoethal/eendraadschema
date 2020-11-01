@@ -3157,10 +3157,10 @@ function reset_all() {
 }
 function doprint() {
     var prtContent = document.getElementById("printarea");
-    //var WinPrint = window.open('', '', 'left=0,top=0,width=800,height=900,toolbar=0,scrollbars=0,status=0');
-    //var WinPrint = window.open('', '', 'toolbar=0,scrollbars=0,status=0');
     var WinPrint = window.open();
-    WinPrint.document.write(prtContent.innerHTML);
+    var prtStr = "\n  <html>\n    <head>\n      <style type=\"text/css\" media=\"print\">\n        @page {\n          size: landscape;\n        }\n      </style>\n    </head>\n    <body>"
+        + prtContent.innerHTML + '</body></html>';
+    WinPrint.document.write(prtStr);
     WinPrint.document.close();
     WinPrint.focus();
     WinPrint.print();
