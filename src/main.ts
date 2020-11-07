@@ -98,17 +98,21 @@ function HL_changeparent(my_id: number) {
   HLRedrawTree();
 }
 
+function HL_cancelFilename() {
+  document.getElementById("settings").innerHTML = '<code>' + structure.properties.filename + '</code>&nbsp;<button onclick="HL_enterSettings()">Wijzigen</button>&nbsp;<button onclick="exportjson()">Opslaan</button>';
+}
+
 function HL_changeFilename() {
   var regex:RegExp = new RegExp('^[-_ A-Za-z0-9]{2,}\\.eds$');
   var filename = (document.getElementById("filename") as HTMLInputElement).value;
   if (regex.test(filename)) {
     structure.properties.setFilename((document.getElementById("filename") as HTMLInputElement).value);
-    document.getElementById("settings").innerHTML = '<code>' + structure.properties.filename + '</code>&nbsp;<button onclick="HL_enterSettings()">Wijzigen</button>&nbsp;<button onclick="exportjson()">Opslaan</button>';
+    document.getElementById("settings").innerHTML = '<code>' + structure.properties.filename + '</code><br><button onclick="HL_enterSettings()">Wijzigen</button>&nbsp;<button onclick="exportjson()">Opslaan</button>';
   }
 }
 
 function HL_enterSettings() {
-  document.getElementById("settings").innerHTML = '<input type="text" id="filename" onchange="HL_changeFilename()" value="" pattern="^[-_ A-Za-z0-9]{2,}\\\.eds$">&nbsp;<i>Gebruik enkel alphanumerieke karakters a-z A-Z 0-9, streepjes en spaties. Eindig met ".eds". Druk daarna op enter.</i>';
+  document.getElementById("settings").innerHTML = '<input type="text" id="filename" onchange="HL_changeFilename()" value="" pattern="^[-_ A-Za-z0-9]{2,}\\\.eds$">&nbsp;<i>Gebruik enkel alphanumerieke karakters a-z A-Z 0-9, streepjes en spaties. <b>Eindig met ".eds"</b>. Druk daarna op enter.</i><br><button onclick="HL_cancelFilename()">Annuleer</button>&nbsp;<button onclick="HL_changeFilename()">Toepassen</button>';
 }
 
 function HLRedrawTreeHTML() {
@@ -301,6 +305,33 @@ function printsvg() {
   document.getElementById("right_col_inner").innerHTML = "";
 
   renderPrintSVG();
+}
+
+function exportscreen() {
+  var strleft: string = "";
+
+  strleft += '<br>';
+  strleft += '<table border=0><tr><td width=500 style="vertical-align:top;padding:5px">'
+  strleft += 'Bestandsnaam: <span id="settings"><code>' + structure.properties.filename + '</code><br><button onclick="HL_enterSettings()">Wijzigen</button>&nbsp;<button onclick="exportjson()">Opslaan</button></span>';
+  strleft += '</td><td style="vertical-align:top;padding:5px">'
+  strleft += 'U kan het schema opslaan op uw lokale harde schijf voor later gebruik. De standaard-naam is eendraadschema.eds. U kan deze wijzigen door links op "wijzigen" te klikken. ';
+  strleft += 'Klik vervolgens op "opslaan" en volg de instructies van uw browser. '
+  strleft += 'In de meeste gevallen zal uw browser het bestand automatisch plaatsen in de Downloads-folder tenzij u uw browser instelde dat die eerst een locatie moet vragen.<br><br>'
+  strleft += 'Eens opgeslagen kan het schema later opnieuw geladen worden door in het meny "openen" te kiezen en vervolgens het bestand op uw harde schijf te selecteren.<br><br>'
+  strleft += '</td></tr>';
+
+  strleft += PROP_GDPR(); //Function returns empty for GIT version, returns GDPR notice when used online.
+
+  '</table>';
+  //-- plaats input box voor naam van het schema bovenaan --
+
+  strleft += '<br>';
+
+  document.getElementById("configsection").innerHTML = strleft;
+  document.getElementById("left_col_inner").innerHTML = "";
+  document.getElementById("right_col_inner").innerHTML = "";
+
+  //renderPrintSVG();
 }
 
 
