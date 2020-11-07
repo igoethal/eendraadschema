@@ -3225,7 +3225,6 @@ function printsvg() {
 }
 function exportscreen() {
     var strleft = "";
-    strleft += '<br>';
     strleft += '<table border=0><tr><td width=500 style="vertical-align:top;padding:5px">';
     strleft += 'Bestandsnaam: <span id="settings"><code>' + structure.properties.filename + '</code><br><button onclick="HL_enterSettings()">Wijzigen</button>&nbsp;<button onclick="exportjson()">Opslaan</button></span>';
     strleft += '</td><td style="vertical-align:top;padding:5px">';
