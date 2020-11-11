@@ -35,8 +35,9 @@ Licenses for embedded content
 
 === History ===
 
-Software developed by Ivan Goethals between March 2019 and May 2020.
-Placed on Github as-is on June 1st 2020.
+Software developed by Ivan Goethals between as of March 2019.
+Placed on Github as-is on June 1st 2020 and further developed on Github.
+So far, Ivan is the only known contributor to the project.
 
 === Build / Compile ===
 
