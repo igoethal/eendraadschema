@@ -1,5 +1,19 @@
 var VERSION = "git"; //can be "git" or "online"
 
+var PROP_Contact_Text = `<html>
+  <head>
+    <title>Eendraadschema online</title>
+    <link rel="stylesheet" href="css/about.css">
+  </head>
+  <body>
+    <h2>Een &eacute;&eacute;ndraadschema tekenen.</h2>
+    <p class="ondertitel">Een cr&eacute;atie van <a target="_blank" href="https://ivan.goethals-jacobs.be">Ivan Goethals</a></p>
+    <p>Dit is een standalone versie (development) waarbij enkele functionaliteiten zijn uitgeschakeld.</p>
+    <p>Gebruik de online versie op <a href="https://eendraadschema.goethals-jacobs.be">https://eendraadschema.goethals-jacobs.be</a> om toegang te krijgen tot het contactformulier.</p>
+    <p>Kies <b>Bewerken</b> in het menu om verder te gaan met tekenen.</p>
+  </body>
+</html>`
+
 function PROP_GDPR() {
   return("");
 }

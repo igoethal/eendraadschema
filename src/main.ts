@@ -333,6 +333,13 @@ function exportscreen() {
   //renderPrintSVG();
 }
 
+function openContactForm() {
+  var strleft: string = PROP_Contact_Text;
+
+  document.getElementById("configsection").innerHTML = strleft;
+  document.getElementById("left_col_inner").innerHTML = "";
+  document.getElementById("right_col_inner").innerHTML = "";
+}
 
 function restart_all() {
   var strleft: string = CONFIGPAGE_LEFT;
@@ -409,19 +416,9 @@ function restart_all() {
   if (browser_ie_detected()) {
     alert("Deze appicatie werkt niet in Internet Explorer. Wij raden aan een moderne browser te gebruiken zoals Edge, Firefox, Google Chrome, Opera, Vivaldi, ...");
   }
-
-  /*document.getElementById("minitabs").innerHTML = `
-    <li><a href="javascript:HLRedrawTree()">Bewerken</a></li>
-    <li><a href="javascript:importclicked()">Openen</a></li>
-    <li><a href="javascript:exportjson()">Opslaan</a></li>
-    <li><a href="javascript:printsvg()">Print</a></li>
-    <li><a href="Documentation/edsdoc.pdf" target="_blank">Documentatie</a></li>
-    <li><a href="javascript:openContactForm()">Info/Contact</a></li>
-  `*/
-
 }
 
-function import_to_structure(mystring: string) {
+function import_to_structure(mystring: string, redraw = true) {
 
   var text:string = "";
 
@@ -488,7 +485,9 @@ function import_to_structure(mystring: string) {
   structure.reSort();
 
   //Draw the structure
-  HLRedrawTree();
+  if (redraw == true) {
+    HLRedrawTree();
+  }
 }
 
 function load_example(nr: number) {
@@ -550,7 +549,6 @@ function importclicked() {
   (document.getElementById('importfile') as HTMLInputElement).value = "";
 }
 
-
 function download_by_blob(text, filename, mimeType) {
   var element = document.createElement('a');
   if (navigator.msSaveBlob) {
@@ -566,20 +564,6 @@ function download_by_blob(text, filename, mimeType) {
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
-
-/*    const id = GetUniqueID();
-    this.renderer.setAttribute(a, 'id', id);
-    this.renderer.setAttribute(a, 'href', URL.createObjectURL(new Blob([content], {
-      type: mimeType
-    })));
-
-    this.renderer.setAttribute(a, 'download', fileName);
-    this.renderer.appendChild(document.body, a);
-
-    const anchor = this.renderer.selectRootElement(`#${id}`);
-    anchor.click();
-
-    this.renderer.removeChild(document.body, a);*/
   } else {
     this.location.go(`${mimeType},${encodeURIComponent(text)}`);
   }
@@ -606,8 +590,6 @@ function download(type: string) {
   download_by_blob(text, filename, 'data:text/plain;charset=utf-8');
 }
 
-
-
 function read_settings() {
   CONF_aantal_droge_kringen = parseInt((document.getElementById("aantal_droge_kringen") as HTMLInputElement).value);
   CONF_aantal_natte_kringen = parseInt((document.getElementById("aantal_natte_kringen") as HTMLInputElement).value);
@@ -619,7 +601,10 @@ function read_settings() {
   reset_all();
 }
 
-declare var CONF_builddate: any;
+//--- MAIN PROGRAM ---
+
+declare var CONF_builddate: any; //needed to be able to read the variable from the builddate.js file (otherwise compiler will complain)
+
 var CONF_aantal_droge_kringen = 7;
 var CONF_aantal_natte_kringen = 3;
 var CONF_aantal_fazen_droog = 2;
@@ -627,6 +612,9 @@ var CONF_aantal_fazen_nat = 2;
 var CONF_hoofdzekering = 65;
 var CONF_differentieel_droog = 300;
 var CONF_differentieel_nat = 30;
-var CONF_upload_OK = "ask"; //can be "ask", "yes", "no";
+var CONF_upload_OK = "ask"; //can be "ask", "yes", "no"; //before uploading, we ask
+
 var structure: Hierarchical_List;
+import_to_structure(EXAMPLE_DEFAULT,false); //Just in case the user doesn't select a scheme and goes to drawing immediately, there should be something there
+
 restart_all();

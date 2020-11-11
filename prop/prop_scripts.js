@@ -1,10 +1,4 @@
-function openContactForm() {
-  let w=750;
-  let h=600;
-  var left = (screen.width/2)-(w/2);
-  var top = (screen.height/2)-(h/2);
-  window.open("about.html", "Contact form", "width=750,height=600,directories=0,titlebar=0,toolbar=0,location=0,status=0,menubar=0,scrollbars=yes,resizable=no,top="+top+",left="+left);
-}
+
 
 function popUp(URL) {
   //day = new Date();
