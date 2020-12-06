@@ -227,11 +227,25 @@ function doprint() {
   var prtStr = `
   <html>
     <head>
-      <style type="text/css" media="print">
-        @page {
-          size: landscape;
-        }
-      </style>
+    <style type="text/css">
+    @media print {
+      .header, .hide { visibility: hidden }
+    }
+    @page
+    {
+	    size: landscape;
+	    margin: 0cm;
+      body { margin: 2cm; }
+    }
+    </style>
+    <style type="text/css" media="print">
+    @page
+    {
+	    size: landscape;
+	    margin: 0cm;
+      body { margin: 2cm; }
+    }
+    </style>
     </head>
     <body>`
     + prtContent.innerHTML + '</body></html>';
@@ -249,6 +263,22 @@ function dosvgdownload() {
   download_by_blob(prtContent, filename, 'data:text/plain;charset=utf-8');
 }
 
+function renderAddress() {
+  var outHTML: string = "";
+
+  outHTML = '<div align="left">' +
+            '<div style="display:inline-block; width:25px;"></div><div style="display:inline-block;"><table cols="3" rows="1" style="border-collapse: collapse;border-style: solid; border-width:medium;" cellpadding="5">' +
+            '  <tr><th style="text-align: left;border-style: solid; border-width:thin;">Plaats van de elektrische installatie</th><th style="text-align: left;border-style: solid; border-width:thin;">Installateur</th><th style="text-align: left;border-style: solid; border-width:thin;">Info</th></tr>' +
+            '  <tr>' +
+            '    <td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_owner" onkeyup="javascript:changeAddressParams()">' + structure.properties.owner + '</td>' +
+            '    <td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_installer" onkeyup="javascript:changeAddressParams()">' + structure.properties.installer + '</td>' +
+            '    <td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_info" onkeyup="javascript:changeAddressParams()">' + structure.properties.info + '</td>' +
+            '  </tr>' +
+            '</table></div></div>';
+
+  return outHTML;
+}
+
 function renderPrintSVG() {
   var outSVG = new SVGelement();
   outSVG = structure.toSVG(0,"horizontal");
@@ -263,11 +293,17 @@ function renderPrintSVG() {
   document.getElementById("printarea").innerHTML
            = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" transform="scale(1,1)" style="border:1px solid white" ' +
              'height="' + (height*scale) + '" width="' + (width*scale) + '" viewBox="' + viewbox + '">' +
-             outSVG.data + '</svg>';
+             outSVG.data + '</svg>' + '<br><br>' + renderAddress();
 }
 
 function changePrintParams() {
   renderPrintSVG();
+}
+
+function changeAddressParams() {
+  structure.properties.owner = (document.getElementById("conf_owner") as HTMLElement).innerHTML;
+  structure.properties.installer = (document.getElementById("conf_installer") as HTMLElement).innerHTML;
+  structure.properties.info = (document.getElementById("conf_info") as HTMLElement).innerHTML;
 }
 
 function printsvg() {
@@ -287,7 +323,7 @@ function printsvg() {
           +  '<tr><td>Breedte in pixels</td><td align="right">' + width + '</td><td><input size="4" type="number" min="0" step="1" max="' + width + '" id="printwidth" onchange="changePrintParams()" value="' + width + '"></td></tr>'
           +  '<tr><td>Offset</td><td align="right">' + (0) + '</td><td><input size="4" type="number" min="0" step="1" max="' + width + '" id="printoffset" onchange="changePrintParams()" value="' + startx + '"></td></tr></table><br>'
   strleft += '</td><td style="vertical-align:top;padding:5px">';
-  strleft += 'Deze print-functie is nog zeer experimenteel en biedt nog niet de mogelijkheid uw naam en adres op het schema te plaatsen. In tussentijd van verdere ontwikkeling '
+  strleft += 'Deze print-functie is nog zeer experimenteel. U kan uw naam en adres onderaan de pagina zelf wijzigen door op de tekst te klikken. In tussentijd van verdere ontwikkeling '
           +  'van deze functie kan u ook gebruik maken van een schermafdruk (screenshot) of een externe convertor. We verwijzen naar het print-hoofdstuk in de documentatie (zie menu).'
           +  '<br><br>'
           +  'Wenst u deze experimentele functie toch te gebruiken, wijzig dan "offset" en "breedte" in de tabel rechts en kies daarmee het stukje van het schema dat u wenst te printen en klik daarna '
@@ -295,10 +331,10 @@ function printsvg() {
           +  '<br><br><button onclick="HLRedrawTree()">Sluiten en terug naar schema bewerken</button>'
   strleft += '</td></tr></table>'
 
-  strleft += '<div><button onclick="doprint()">Print nu</button>&nbsp;&nbsp;Print tekening hieronder vanuit uw browser. Opgelet, in de meeste browsers moet u zelf "landscape" en eventueel schaling instellen.</div><br>'
-  strleft += '<div><button onclick="dosvgdownload()">Download SVG</button>&nbsp;<input id="dosvgname" size="20" value="eendraadschema_print.svg">&nbsp;&nbsp;Sla tekening hieronder op als SVG en converteer met een ander programma naar PDF (bvb Inkscape).</div><br>'
+  strleft += '<div><button onclick="doprint()">Print voorbeeld onder de lijn</button>&nbsp;&nbsp;Print tekening hieronder vanuit uw browser. Opgelet, in de meeste browsers moet u zelf "landscape" en eventueel schaling instellen.</div><br>'
+  strleft += '<div><button onclick="dosvgdownload()">Download SVG</button>&nbsp;<input id="dosvgname" size="20" value="eendraadschema_print.svg">&nbsp;&nbsp;Sla tekening hieronder op als SVG en converteer met een ander programma naar PDF (bvb Inkscape). <b>Adresgegevens worden niet opgenomen in de SVG!</b></div><br>'
 
-  strleft += '<div id="printarea"></div>';
+  strleft += '<hr><div id="printarea"></div>';
 
   document.getElementById("configsection").innerHTML = strleft;
   document.getElementById("left_col_inner").innerHTML = "";
@@ -316,7 +352,7 @@ function exportscreen() {
   strleft += 'U kan het schema opslaan op uw lokale harde schijf voor later gebruik. De standaard-naam is eendraadschema.eds. U kan deze wijzigen door links op "wijzigen" te klikken. ';
   strleft += 'Klik vervolgens op "opslaan" en volg de instructies van uw browser. '
   strleft += 'In de meeste gevallen zal uw browser het bestand automatisch plaatsen in de Downloads-folder tenzij u uw browser instelde dat die eerst een locatie moet vragen.<br><br>'
-  strleft += 'Eens opgeslagen kan het schema later opnieuw geladen worden door in het meny "openen" te kiezen en vervolgens het bestand op uw harde schijf te selecteren.<br><br>'
+  strleft += 'Eens opgeslagen kan het schema later opnieuw geladen worden door in het menu "openen" te kiezen en vervolgens het bestand op uw harde schijf te selecteren.<br><br>'
   strleft += '</td></tr>';
 
   strleft += PROP_GDPR(); //Function returns empty for GIT version, returns GDPR notice when used online.
@@ -454,8 +490,17 @@ function import_to_structure(mystring: string, redraw = true) {
   var obj = JSON.parse(text);
   (<any> Object).assign(mystructure, obj);
 
-  if (typeof structure.properties.filename != "undefined") {
+  if (typeof mystructure.properties.filename != "undefined") {
     structure.properties.filename = mystructure.properties.filename;
+  }
+  if (typeof mystructure.properties.owner != "undefined") {
+    structure.properties.owner = mystructure.properties.owner;
+  }
+  if (typeof mystructure.properties.installer != "undefined") {
+    structure.properties.installer = mystructure.properties.installer;
+  }
+  if (typeof mystructure.properties.info != "undefined") {
+    structure.properties.info = mystructure.properties.info;
   }
 
   for (var i = 0; i < mystructure.length; i++) {
