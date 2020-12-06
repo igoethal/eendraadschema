@@ -3180,7 +3180,7 @@ function doprint() {
     WinPrint.close();
 }
 function dosvgdownload() {
-    var prtContent = document.getElementById("printarea").innerHTML;
+    var prtContent = document.getElementById("printsvgarea").innerHTML;
     var filename = document.getElementById("dosvgname").value;
     download_by_blob(prtContent, filename, 'data:text/plain;charset=utf-8');
 }
@@ -3206,9 +3206,9 @@ function renderPrintSVG() {
     var width = parseInt(document.getElementById("printwidth").value);
     var viewbox = '' + startx + ' 0 ' + width + ' ' + height;
     document.getElementById("printarea").innerHTML
-        = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" transform="scale(1,1)" style="border:1px solid white" ' +
+        = '<div id="printsvgarea"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" transform="scale(1,1)" style="border:1px solid white" ' +
             'height="' + (height * scale) + '" width="' + (width * scale) + '" viewBox="' + viewbox + '">' +
-            outSVG.data + '</svg>' + '<br><br>' + renderAddress();
+            outSVG.data + '</svg></div>' + '<br><br>' + renderAddress();
 }
 function changePrintParams() {
     renderPrintSVG();
