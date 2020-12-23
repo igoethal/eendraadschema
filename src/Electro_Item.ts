@@ -33,6 +33,7 @@ class Electro_Item extends List_Item {
       //Indien drukknop, bool1 is de selector voor afgeschermd of niet
       //Indien schakelaar/lichtcircuit, bool1 is de selector voor signalisatielamp of niet
       //Indien vrije tekst, bool1 is de selector voor vet
+      //Indien stopcontact, bool1 is de selector voor ingebouwde schakelaar
     this.keys.push(["bool2","BOOLEAN",false]); //20, algemeen veld
       //Indien lichtpunt, schakelaar, drukknop of stopcontact, bool2 is de selector voor halfwaterdicht of niet
       //Indien vrije tekst, bool2 is de selector voor schuin
@@ -355,6 +356,7 @@ class Electro_Item extends List_Item {
         output += "Geaard: " + this.checkboxToHTML(1) + ", ";
         output += "Kinderveiligheid: " + this.checkboxToHTML(2) + " ";
         output += "Halfwaterdicht: " + this.checkboxToHTML(20) + ", ";
+        output += "Ingebouwde schakelaar: " + this.checkboxToHTML(19) + ", ";
         output += "Aantal: " + this.selectToHTML(4,["1","2","3","4","5","6"]);
         output += ", Adres/tekst: " + this.stringToHTML(15,5);
         break;
@@ -884,6 +886,15 @@ class Electro_Item extends List_Item {
     switch (this.keys[0][2]) {
       case "Stopcontact":
         var startx: number = 1;
+        mySVG.xright = 0;
+        if (this.keys[19][2]) { //Met ingebouwde schakelaar
+          startx += 10;
+          mySVG.xright += 10;
+          outputstr += '<line x1="1" y1="25" x2="11" y2="25" stroke="black" />';
+          outputstr += '<line x1="30" y1="25" x2="20" y2="5" stroke="black" />';
+          outputstr += '<line x1="20" y1="5" x2="15" y2="7.5" stroke="black" />';
+          outputstr += '<line x1="22" y1="9" x2="17" y2="11.5" stroke="black" />';
+        }
         for (var i=0; i<this.getKey("aantal"); i++) {
           outputstr += '<use xlink:href="#stopcontact" x="' + startx + '" y="25"></use>';
           if (this.getKey("geaard")) outputstr += '<use xlink:href="#stopcontact_aarding" x="' + startx + '" y="25"></use>';
@@ -895,7 +906,7 @@ class Electro_Item extends List_Item {
         if (hasChild) {
           outputstr += '<line x1="'+startx+'" y1="25" x2="'+(startx+21)+'" y2="25" stroke="black" />';
         };
-        mySVG.xright = 20 + this.getKey("aantal")*20;
+        mySVG.xright += 20 + this.getKey("aantal")*20;
         //-- Plaats adres onderaan --
         if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
           outputstr += '<text x="' + ((mySVG.xright-20)/2 + 21) + '" y="60" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
