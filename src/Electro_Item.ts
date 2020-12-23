@@ -36,7 +36,8 @@ class Electro_Item extends List_Item {
     this.keys.push(["bool2","BOOLEAN",false]); //20, algemeen veld
       //Indien lichtpunt, schakelaar, drukknop of stopcontact, bool2 is de selector voor halfwaterdicht of niet
       //Indien vrije tekst, bool2 is de selector voor schuin
-      //Indien vrije tekst, bool2 is de selector voor energiebron
+      //Indien ketel, bool2 is de selector voor energiebron
+      //Indien kring, bool2 is de selector voor selectieve differentieel
     this.keys.push(["bool3","BOOLEAN",false]); //21, algemeen veld
       //Indien lichtpunt, bool3 is de selector voor ingebouwde schakelaar of niet
       //Indien schakelaar of drukknop, bool3 is de selector voor verklikkerlamp of niet
@@ -69,12 +70,12 @@ class Electro_Item extends List_Item {
           break;
         }
         case "Kring": {
-          this.consumers = ["", "Aansluiting", "Bord", "Domotica", "Meerdere verbruikers", "Kring", "Splitsing", "---", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Schakelaars", "Stopcontact", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verwarmingstoestel", "Vrije tekst", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt",
+          this.consumers = ["", "Aansluiting", "Bord", "Domotica", "Meerdere verbruikers", "Kring", "Splitsing", "---", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verwarmingstoestel", "Vrije tekst", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt",
                             "Aftakdoos", "Leeg"];
           break;
         }
         case "Meerdere verbruikers": {
-          this.consumers = ["", "Domotica", "Splitsing", "---", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verwarmingstoestel", "Vrije tekst", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt",
+          this.consumers = ["", "Domotica", "Splitsing", "---", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verwarmingstoestel", "Vrije tekst", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt",
                             "Aftakdoos", "Leeg"];
           break;
         }
@@ -83,8 +84,7 @@ class Electro_Item extends List_Item {
           break;
         }
         default: {
-          this.consumers = ["", "Aansluiting", "Domotica", "Meerdere verbruikers", "Splitsing", "---", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verwarmingstoestel", "Vrije tekst", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt",
-                            "Aftakdoos", "Leeg"];
+          this.consumers = ["", "Aansluiting", "Domotica", "Meerdere verbruikers", "Splitsing", "---", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verwarmingstoestel", "Vrije tekst", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg"];
           //this.consumers = [""];
           break;
         }
@@ -143,7 +143,6 @@ class Electro_Item extends List_Item {
       case "Kring":
         this.keys[10][2] = "---";
         this.keys[16][2] = "N/A";
-        this.keys[19][2] = false;
         break;
       case "Splitsing":
         //this.keys[10][2] = "";
@@ -312,9 +311,9 @@ class Electro_Item extends List_Item {
         if (this.keys[7][2] != "geen") output += this.selectToHTML(4,["2","3","4"]) + this.stringToHTML(8,2) + "A";
         if (this.getKey("zekering")=="differentieel") {
           output += ", \u0394 " + this.stringToHTML(11,3) + "mA";
+          output += ", Selectief: " + this.checkboxToHTML(20);
         }
-        output += "<br>";
-        output += "Kabel: " + this.checkboxToHTML(12);
+        output += ", Kabel: " + this.checkboxToHTML(12);
         if (this.getKey("kabel_aanwezig")) {
           output += ", Type: " + this.stringToHTML(9,10);
           output += ", Plaatsing: " + this.selectToHTML(16,["N/A","Ondergronds","Luchtleiding","In wand","Op wand"]);
@@ -332,6 +331,7 @@ class Electro_Item extends List_Item {
                                        this.stringToHTML(8,2) + "A";
         if (this.getKey("zekering")=="differentieel") {
           output += ", \u0394 " + this.stringToHTML(11,3) + "mA";
+          output += ", Selectief: " + this.checkboxToHTML(20);
         }
         output += ", Kabeltype: " + this.stringToHTML(9,10);
         output += ", Adres/tekst: " + this.stringToHTML(15,5);
@@ -1126,6 +1126,15 @@ class Electro_Item extends List_Item {
         outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
         outputstr += '<use xlink:href="#omvormer" x="21" y="25"></use>';
         mySVG.xright = 80;
+        if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
+          outputstr += '<text x="' + ((mySVG.xright-20)/2 + 21) + '" y="55" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
+          mySVG.ydown += 10;
+        }
+        break;
+      case "Overspanningsbeveiliging":
+        outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
+        outputstr += '<use xlink:href="#overspanningsbeveiliging" x="21" y="25"></use>';
+        mySVG.xright = 35;
         if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
           outputstr += '<text x="' + ((mySVG.xright-20)/2 + 21) + '" y="55" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
           mySVG.ydown += 10;

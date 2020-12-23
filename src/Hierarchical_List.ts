@@ -622,6 +622,24 @@ class Hierarchical_List {
                    '" y="' + (inSVG[elementCounter].yup-12) + '" />';
                 break;
               case "differentieel":
+                if (this.data[i].keys[20][2]) { //Differentieel is selectief
+                  inSVG[elementCounter].data += '<line x1="' + inSVG[elementCounter].xleft +
+                    '" x2="' + inSVG[elementCounter].xleft +
+                    '" y1="' + inSVG[elementCounter].yup +
+                    '" y2="' + (inSVG[elementCounter].yup+30) + '" stroke="black" />';
+                  inSVG[elementCounter].data += '<rect x="' + (inSVG[elementCounter].xleft+7) +
+                    '" y="' + (inSVG[elementCounter].yup) +
+                    '" width="16" height="16" stroke="black" fill="white" />';
+                  inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft+15) +
+                     "\" y=\"" + (inSVG[elementCounter].yup+12) +
+                     "\"" +
+                     " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft+15) +
+                     "," + (inSVG[elementCounter].yup+8) +
+                     ")" +
+                      "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
+                     "S" + "</text>";
+                  inSVG[elementCounter].yup += 23;
+                }
                 inSVG[elementCounter].yup += 30;
                 inSVG[elementCounter].data +=
                   '<use xlink:href="#zekering_automatisch" x=\"' + inSVG[elementCounter].xleft +
@@ -738,6 +756,8 @@ class Hierarchical_List {
 
             //get image of the entire kring
             inSVG[elementCounter] = this.toSVG(this.id[i],"vertical",35 + 20*cable_location_available);
+
+            //--- Code for the cable including text and indications where the cable is located ---
 
             if (this.data[i].getKey("kabel_aanwezig")) {
               //foresee space for the conductor specifications
@@ -881,6 +901,29 @@ class Hierarchical_List {
                 '" y2="' + (inSVG[elementCounter].yup+20) + '" stroke="black" />';
               inSVG[elementCounter].yup += 20;
             }
+
+            //--- Code for selective diff ---
+
+            if (this.data[i].keys[20][2]) { //Differentieel is selectief
+              inSVG[elementCounter].data += '<line x1="' + inSVG[elementCounter].xleft +
+                '" x2="' + inSVG[elementCounter].xleft +
+                '" y1="' + inSVG[elementCounter].yup +
+                '" y2="' + (inSVG[elementCounter].yup+30) + '" stroke="black" />';
+              inSVG[elementCounter].data += '<rect x="' + (inSVG[elementCounter].xleft+7) +
+                '" y="' + (inSVG[elementCounter].yup) +
+                '" width="16" height="16" stroke="black" fill="white" />';
+                inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft+15) +
+                   "\" y=\"" + (inSVG[elementCounter].yup+12) +
+                   "\"" +
+                   " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft+15) +
+                   "," + (inSVG[elementCounter].yup+8) +
+                   ")" +
+                    "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
+                   "S" + "</text>";
+              inSVG[elementCounter].yup += 23;
+            }
+
+            //--- End of large code block ---
 
             //add the fuse below
 
@@ -1409,6 +1452,15 @@ class Hierarchical_List {
       <line x1="35" y1="-12" x2="25" y2="12" stroke="black" />
       <text x="15" y="-1" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="12">AC</text>
       <text x="45" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="12">DC</text>
+    </g>
+    <g id="overspanningsbeveiliging">
+      <rect x="0" y="-15" width="15" height="30" fill="none" style="stroke:black" />
+      <line x1="7.5" y1="-18" x2="7.5" y2="-5" stroke="black" />
+      <line x1="7.5" y1="-5" x2="4.5" y2="-9" stroke="black" />
+      <line x1="7.5" y1="-5" x2="10.5" y2="-9" stroke="black" />
+      <line x1="7.5" y1="18" x2="7.5" y2="5" stroke="black" />
+      <line x1="7.5" y1="5" x2="4.5" y2="9" stroke="black" />
+      <line x1="7.5" y1="5" x2="10.5" y2="9" stroke="black" />
     </g>
     <g id="koelkast">
       <rect x="0" y="-20" width="40" height="40" fill="none" style="stroke:black" />
