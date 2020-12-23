@@ -762,6 +762,7 @@ class Electro_Item extends List_Item {
           if (halfwaterdicht[i]) { outputstr += '<text x="' + endx + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">h</text>'; }
           if (verklikkerlamp[i]) { outputstr += '<line x1="' + (endx-3) + '" x2="' + (endx+3) + '" y1="22" y2="28" stroke="black" /><line x1="' + (endx-3) + '" x2="' + (endx+3) + '" y1="28" y2="22" stroke="black" />'; };
           startx = endx+5;
+          lowerbound = Math.max(lowerbound,35);
           break;
         case "bewegingsschakelaar":
           endx = startx + 20;

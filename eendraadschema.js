@@ -1084,6 +1084,7 @@ var Electro_Item = /** @class */ (function (_super) {
                     }
                     ;
                     startx = endx + 5;
+                    lowerbound = Math.max(lowerbound, 35);
                     break;
                 case "bewegingsschakelaar":
                     endx = startx + 20;
