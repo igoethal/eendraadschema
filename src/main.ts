@@ -116,14 +116,6 @@ function HL_enterSettings() {
 }
 
 function HLRedrawTreeHTML() {
-  /*document.getElementById("minitabs").innerHTML = `
-    <li><a href="javascript:restart_all()">Nieuw</a></li>
-    <li><a href="javascript:importclicked()">Openen</a></li>
-    <li><a href="javascript:exportjson()">Opslaan</a></li>
-    <li><a href="javascript:printsvg()">Print</a></li>
-    <li><a href="Documentation/edsdoc.pdf" target="_blank">Documentatie</a></li>
-    <li><a href="javascript:openContactForm()">Info/Contact</a></li>
-  `*/
   document.getElementById("configsection").innerHTML = "";
   document.getElementById("left_col_inner").innerHTML = structure.toHTML(0);
 }
