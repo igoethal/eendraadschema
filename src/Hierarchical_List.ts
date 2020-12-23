@@ -1301,6 +1301,14 @@ class Hierarchical_List {
       <circle cx="0" cy="0" r="5" fill="white" stroke="black" />
       <polygon points="-1,-8 11,-8 11,-15" fill="black" stroke="black" />
     </g>
+    <g id="schakelaar_wissel_dim">
+      <line x1="0" y1="0" x2="10" y2="-20" stroke="black" />
+      <line x1="10" y1="-20" x2="15" y2="-17.5" stroke="black" />
+      <line x1="0" y1="0" x2="-10" y2="20" stroke="black" />
+      <line x1="-10" y1="20" x2="-15" y2="17.5" stroke="black" />
+      <circle cx="0" cy="0" r="5" fill="white" stroke="black" />
+      <polygon points="-1,-8 11,-8 11,-15" fill="black" stroke="black" />
+    </g>
     <g id="schakelaar_kruis_enkel">
       <line x1="0" y1="0" x2="10" y2="-20" stroke="black" />
       <line x1="10" y1="-20" x2="15" y2="-17.5" stroke="black" />

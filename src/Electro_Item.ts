@@ -410,18 +410,18 @@ class Electro_Item extends List_Item {
         break;
       case "Schakelaars":
         output += "&nbsp;Nr: " + this.stringToHTML(10,5);
-        output += ", " + this.selectToHTML(5,["enkelpolig", "dubbelpolig", "dubbelaansteking", "wissel_enkel", "wissel_dubbel", "kruis_enkel", "---", "schakelaar", "dimschakelaar", "bewegingsschakelaar", "schemerschakelaar", "---", "teleruptor", "relais", "dimmer", "tijdschakelaar", "minuterie", "thermostaat", "rolluikschakelaar"]);
+        output += ", " + this.selectToHTML(5,["enkelpolig", "dubbelpolig", "dubbelaansteking", "wissel_enkel", "wissel_dubbel", "kruis_enkel", "---", "schakelaar", "dimschakelaar", "dimschakelaar wissel", "bewegingsschakelaar", "schemerschakelaar", "---", "teleruptor", "relais", "dimmer", "tijdschakelaar", "minuterie", "thermostaat", "rolluikschakelaar"]);
         if ( (this.keys[5][2] == "enkelpolig") || (this.keys[5][2] == "dubbelpolig") || (this.keys[5][2] == "kruis_enkel") ||
              (this.keys[5][2] == "dubbelaansteking") || (this.keys[5][2] == "wissel_enkel") || (this.keys[5][2] == "wissel_dubbel") || (this.keys[5][2] == "dubbel") ||
-             (this.keys[5][2] == "dimschakelaar") || (this.keys[5][2] == "rolluikschakelaar") ) {
+             (this.keys[5][2] == "dimschakelaar") || (this.keys[5][2] == "dimschakelaar wissel") || (this.keys[5][2] == "rolluikschakelaar") ) {
           output += ", Halfwaterdicht: " + this.checkboxToHTML(20);
         }
         if ( (this.keys[5][2] == "enkelpolig") || (this.keys[5][2] == "dubbelpolig") || (this.keys[5][2] == "kruis_enkel") ||
              (this.keys[5][2] == "dubbelaansteking") || (this.keys[5][2] == "wissel_enkel") || (this.keys[5][2] == "wissel_dubbel") || (this.keys[5][2] == "dubbel") ||
-             (this.keys[5][2] == "dimschakelaar") ) {
+             (this.keys[5][2] == "dimschakelaar") || (this.keys[5][2] == "dimschakelaar wissel") ) {
           output += ", Verklikkerlampje: " + this.checkboxToHTML(21);
           output += ", Signalisatielampje: " + this.checkboxToHTML(19);
-          if (this.keys[5][2] != "dimschakelaar") {output += ", Trekschakelaar: " + this.checkboxToHTML(25); }
+          if ( (this.keys[5][2] != "dimschakelaar") && (this.keys[5][2] != "dimschakelaar wissel") ) {output += ", Trekschakelaar: " + this.checkboxToHTML(25); }
         }
         switch (this.getKey("lichtkring_poligheid")) {
           case "enkelpolig":
@@ -601,6 +601,13 @@ class Electro_Item extends List_Item {
         verklikkerlamp.push(this.keys[25][2]);
         trekschakelaar.push(false);
         break;
+      case "dimschakelaar wissel":
+        elements.push("dimschakelaar wissel");
+        signalisatielamp.push(this.keys[19][2]);
+        halfwaterdicht.push(this.keys[20][2]);
+        verklikkerlamp.push(this.keys[25][2]);
+        trekschakelaar.push(false);
+        break;
       default: {
         if (this.getKey("aantal") == "0") {
           //do nothing
@@ -741,8 +748,16 @@ class Electro_Item extends List_Item {
         case "dimschakelaar":
           endx = startx + 30;
           outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />';
-          //outputstr += '<path d="M' + startx + ' 25 L' + endx + ' 25" stroke="black" />';
           outputstr += '<use xlink:href="#schakelaar_enkel_dim" x="' + endx + '" y="25" />';
+          if (signalisatielamp[i]) outputstr += '<use xlink:href="#signalisatielamp" x="' + (endx-10) + '" y="25" />';
+          if (halfwaterdicht[i]) { outputstr += '<text x="' + endx + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">h</text>'; }
+          if (verklikkerlamp[i]) { outputstr += '<line x1="' + (endx-3) + '" x2="' + (endx+3) + '" y1="22" y2="28" stroke="black" /><line x1="' + (endx-3) + '" x2="' + (endx+3) + '" y1="28" y2="22" stroke="black" />'; };
+          startx = endx+5;
+          break;
+        case "dimschakelaar wissel":
+          endx = startx + 30;
+          outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />';
+          outputstr += '<use xlink:href="#schakelaar_wissel_dim" x="' + endx + '" y="25" />';
           if (signalisatielamp[i]) outputstr += '<use xlink:href="#signalisatielamp" x="' + (endx-10) + '" y="25" />';
           if (halfwaterdicht[i]) { outputstr += '<text x="' + endx + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">h</text>'; }
           if (verklikkerlamp[i]) { outputstr += '<line x1="' + (endx-3) + '" x2="' + (endx+3) + '" y1="22" y2="28" stroke="black" /><line x1="' + (endx-3) + '" x2="' + (endx+3) + '" y1="28" y2="22" stroke="black" />'; };
