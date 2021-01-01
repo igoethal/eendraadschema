@@ -3056,6 +3056,14 @@ function exportjson() {
         download_by_blob(text, filename, 'data:text/plain;charset=utf-8');
     }
 }
+function displayButtonPrintToPdf() {
+    return ("");
+    //Does nothing in the serverless version, only used on https://eendraadschema.goethals-jacobs.be
+}
+function handleButtonPrintToPdf() {
+    return (0);
+    //Does nothing in the serverless version, only used on https://eendraadschema.goethals-jacobs.be
+}
 function HLCollapseExpand(my_id, state) {
     var ordinal;
     ordinal = structure.getOrdinalById(my_id);
@@ -3165,14 +3173,6 @@ function HL_enterSettings() {
     document.getElementById("settings").innerHTML = '<input type="text" id="filename" onchange="HL_changeFilename()" value="" pattern="^[-_ A-Za-z0-9]{2,}\\\.eds$">&nbsp;<i>Gebruik enkel alphanumerieke karakters a-z A-Z 0-9, streepjes en spaties. <b>Eindig met ".eds"</b>. Druk daarna op enter.</i><br><button onclick="HL_cancelFilename()">Annuleer</button>&nbsp;<button onclick="HL_changeFilename()">Toepassen</button>';
 }
 function HLRedrawTreeHTML() {
-    /*document.getElementById("minitabs").innerHTML = `
-      <li><a href="javascript:restart_all()">Nieuw</a></li>
-      <li><a href="javascript:importclicked()">Openen</a></li>
-      <li><a href="javascript:exportjson()">Opslaan</a></li>
-      <li><a href="javascript:printsvg()">Print</a></li>
-      <li><a href="Documentation/edsdoc.pdf" target="_blank">Documentatie</a></li>
-      <li><a href="javascript:openContactForm()">Info/Contact</a></li>
-    `*/
     document.getElementById("configsection").innerHTML = "";
     document.getElementById("left_col_inner").innerHTML = structure.toHTML(0);
 }
@@ -3278,7 +3278,7 @@ function renderAddress() {
         '</table></div></div>';
     return outHTML;
 }
-function renderPrintSVG() {
+function getPrintSVGWithoutAddress() {
     var outSVG = new SVGelement();
     outSVG = structure.toSVG(0, "horizontal");
     var scale = 1;
@@ -3286,10 +3286,15 @@ function renderPrintSVG() {
     var startx = parseInt(document.getElementById("printoffset").value);
     var width = parseInt(document.getElementById("printwidth").value);
     var viewbox = '' + startx + ' 0 ' + width + ' ' + height;
-    document.getElementById("printarea").innerHTML
-        = '<div id="printsvgarea"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" transform="scale(1,1)" style="border:1px solid white" ' +
-            'height="' + (height * scale) + '" width="' + (width * scale) + '" viewBox="' + viewbox + '">' +
-            outSVG.data + '</svg></div>' + '<br><br>' + renderAddress();
+    var outstr = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" transform="scale(1,1)" style="border:1px solid white" ' +
+        'height="' + (height * scale) + '" width="' + (width * scale) + '" viewBox="' + viewbox + '">' +
+        outSVG.data + '</svg>';
+    return (outstr);
+}
+function renderPrintSVG() {
+    document.getElementById("printarea").innerHTML = '<div id="printsvgarea">' +
+        getPrintSVGWithoutAddress() +
+        '</div>' + '<br><br>' + renderAddress();
 }
 function changePrintParams() {
     renderPrintSVG();
@@ -3313,15 +3318,19 @@ function printsvg() {
         + '<tr><td>Breedte in pixels</td><td align="right">' + width + '</td><td><input size="4" type="number" min="0" step="1" max="' + width + '" id="printwidth" onchange="changePrintParams()" value="' + width + '"></td></tr>'
         + '<tr><td>Offset</td><td align="right">' + (0) + '</td><td><input size="4" type="number" min="0" step="1" max="' + width + '" id="printoffset" onchange="changePrintParams()" value="' + startx + '"></td></tr></table><br>';
     strleft += '</td><td style="vertical-align:top;padding:5px">';
-    strleft += 'Deze print-functie is nog zeer experimenteel. U kan uw naam en adres onderaan de pagina zelf wijzigen door op de tekst te klikken. In tussentijd van verdere ontwikkeling '
-        + 'van deze functie kan u ook gebruik maken van een schermafdruk (screenshot) of een externe convertor. We verwijzen naar het print-hoofdstuk in de documentatie (zie menu).'
+    strleft += 'Deze pagina biedt enkele faciliteiten om het schema te printen zonder gebruik te maken van een schermafdruk (screenshot) of een '
+        + 'externe convertor zoals beschreven in de documentatie (zie menu). De faciliteiten op deze pagina zijn experimenteel. Laat ons weten wat er al dan niet werkt '
+        + 'via het contactformulier.'
         + '<br><br>'
-        + 'Wenst u deze experimentele functie toch te gebruiken, wijzig dan "offset" en "breedte" in de tabel rechts en kies daarmee het stukje van het schema dat u wenst te printen en klik daarna '
-        + 'ofwel op de "print nu"-knop of sla op als SVG en converteer naar PDF met een tekenprogramma zoals Inkscape (gratis te downloaden).'
+        + 'Op deze pagina kiest u &eacute;&eacute;n welbepaald segment (&eacute;&eacute;n pagina) uit uw schema door de parameters "offset" en "breedte" in de links te wijzigen. '
+        + 'Geef eveneens in de tabel helemaal onderaan de pagina uw adresgegevens in. '
+        + 'Klik daarna op &eacute;&eacute;n van de knoppen om het via offset en breedte geselecteerde deel van het schema te printen of exporteren.'
         + '<br><br><button onclick="HLRedrawTree()">Sluiten en terug naar schema bewerken</button>';
     strleft += '</td></tr></table>';
-    strleft += '<div><button onclick="doprint()">Print voorbeeld onder de lijn</button>&nbsp;&nbsp;Print tekening hieronder vanuit uw browser. Opgelet, in de meeste browsers moet u zelf "landscape" en eventueel schaling instellen.</div><br>';
-    strleft += '<div><button onclick="dosvgdownload()">Download SVG</button>&nbsp;<input id="dosvgname" size="20" value="eendraadschema_print.svg">&nbsp;&nbsp;Sla tekening hieronder op als SVG en converteer met een ander programma naar PDF (bvb Inkscape). <b>Adresgegevens worden niet opgenomen in de SVG!</b></div><br>';
+    strleft += '<table border="0"><tr><td style="vertical-align:top"><button onclick="doprint()">Print voorbeeld onder de lijn</button></td><td>&nbsp;&nbsp;</td>' +
+        '<td style="vertical-align:top">Print tekening hieronder vanuit uw browser. Opgelet, in de meeste browsers moet u zelf "landscape" en eventueel schaling naar paginagrootte (fit-to-page) instellen.</td></tr></table><br>';
+    strleft += '<table border="0"><tr><td style="vertical-align:top"><button onclick="dosvgdownload()">Download SVG</button></td><td>&nbsp;</td><td style="vertical-align:top"><input id="dosvgname" size="20" value="eendraadschema_print.svg"></td><td>&nbsp;&nbsp;</td><td>Sla tekening hieronder op als SVG en converteer met een ander programma naar PDF (bvb Inkscape). <b>Adresgegevens worden niet opgenomen in de SVG!</b></td></tr></table><br>';
+    strleft += displayButtonPrintToPdf();
     strleft += '<hr><div id="printarea"></div>';
     document.getElementById("configsection").innerHTML = strleft;
     document.getElementById("left_col_inner").innerHTML = "";

@@ -1,5 +1,3 @@
-
-
 function popUp(URL) {
   //day = new Date();
   //id = day.getTime();

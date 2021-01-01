@@ -39,3 +39,13 @@ function exportjson() {
     download_by_blob(text, filename, 'data:text/plain;charset=utf-8');
   }
 }
+
+function displayButtonPrintToPdf() {
+  return("");
+  //Does nothing in the serverless version, only used on https://eendraadschema.goethals-jacobs.be
+}
+
+function handleButtonPrintToPdf() {
+  return(0);
+  //Does nothing in the serverless version, only used on https://eendraadschema.goethals-jacobs.be
+}
