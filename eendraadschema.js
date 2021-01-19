@@ -287,6 +287,7 @@ var Electro_Item = /** @class */ (function (_super) {
         //Indien drukknop, select1 kan "standaard", "dimmer" or "rolluik" zijn
         //Indien vrije tekst, select1 kan "verbruiker" of "zonder kader" zijn
         //Indien ketel, type is het soort verwarming
+        //Indien stopcontact, select1 is het aantal fasen
         _this.keys.push(["select2", "SELECT", "standaard"]); //17, algemeen veld
         //Indien lichtpunt, select2 is de selector voor het type noodverlichting (indien aanwezig)
         //Indien vrije tekst kan "links", "centreer", "rechts" zijn
@@ -302,10 +303,12 @@ var Electro_Item = /** @class */ (function (_super) {
         //Indien vrije tekst, bool2 is de selector voor schuin
         //Indien ketel, bool2 is de selector voor energiebron
         //Indien kring, bool2 is de selector voor selectieve differentieel
+        //Indien stopcontact, bool2 is de selector voor halfwaterdicht
         _this.keys.push(["bool3", "BOOLEAN", false]); //21, algemeen veld
         //Indien lichtpunt, bool3 is de selector voor ingebouwde schakelaar of niet
         //Indien schakelaar of drukknop, bool3 is de selector voor verklikkerlamp of niet
         //Indien vrije tekst, bool3 is de selector voor warmtefunctie
+        //Indien stopcontact, bool3 is de selector voor meerfasig
         _this.keys.push(["string1", "STRING", ""]); //22, algemeen veld
         //Indien vrije tekst, breedte van het veld
         _this.keys.push(["string2", "STRING", ""]); //23, algemeen veld
@@ -313,6 +316,7 @@ var Electro_Item = /** @class */ (function (_super) {
         _this.keys.push(["string3", "STRING", ""]); //24, algemeen veld
         _this.keys.push(["bool4", "BOOLEAN", false]); //25, algemeen veld
         //Indien schakelaar, indicatie trekschakelaar of niet
+        //Indien stopcontact, bool4 is de selector voor nulgeleider of niet
         _this.updateConsumers(Parent);
         return _this;
     }
@@ -412,6 +416,9 @@ var Electro_Item = /** @class */ (function (_super) {
             case "Kring":
                 this.keys[10][2] = "---";
                 this.keys[16][2] = "N/A";
+                break;
+            case "Stopcontact":
+                this.keys[16][2] = "3";
                 break;
             case "Splitsing":
                 //this.keys[10][2] = "";
@@ -624,6 +631,12 @@ var Electro_Item = /** @class */ (function (_super) {
                 output += "Geaard: " + this.checkboxToHTML(1) + ", ";
                 output += "Kinderveiligheid: " + this.checkboxToHTML(2) + " ";
                 output += "Halfwaterdicht: " + this.checkboxToHTML(20) + ", ";
+                output += "Meerfasig: " + this.checkboxToHTML(21) + ", ";
+                if (this.keys[21][2]) {
+                    output += "Aantal fasen: " + this.selectToHTML(16, ["1", "2", "3"]) + ", ";
+                    output += "Met nul: " + this.checkboxToHTML(25) + ", ";
+                }
+                ;
                 output += "Ingebouwde schakelaar: " + this.checkboxToHTML(19) + ", ";
                 output += "Aantal: " + this.selectToHTML(4, ["1", "2", "3", "4", "5", "6"]);
                 output += ", Adres/tekst: " + this.stringToHTML(15, 5);
@@ -1218,13 +1231,39 @@ var Electro_Item = /** @class */ (function (_super) {
             case "Stopcontact":
                 var startx = 1;
                 mySVG.xright = 0;
+                if (this.keys[21][2]) { //Meerfasig
+                    outputstr += '<line x1="1" y1="25" x2="35" y2="25" stroke="black" />';
+                    startx += 34;
+                    mySVG.xright += 34;
+                    switch (this.keys[16][2]) {
+                        case "1":
+                            outputstr += '<line x1="21" y1="35" x2="27" y2="15" stroke="black" />';
+                            break;
+                        case "2":
+                            outputstr += '<line x1="16.5" y1="35" x2="22.5" y2="15" stroke="black" />';
+                            outputstr += '<line x1="22.5" y1="35" x2="28.5" y2="15" stroke="black" />';
+                            break;
+                        case "3":
+                            outputstr += '<line x1="15" y1="35" x2="21" y2="15" stroke="black" />';
+                            outputstr += '<line x1="21" y1="35" x2="27" y2="15" stroke="black" />';
+                            outputstr += '<line x1="27" y1="35" x2="33" y2="15" stroke="black" />';
+                            break;
+                        default:
+                            outputstr += '<line x1="21" y1="35" x2="27" y2="15" stroke="black" />';
+                            break;
+                    }
+                    if (this.keys[25][2]) {
+                        outputstr += '<line x1="39" y1="35" x2="45" y2="15" stroke="black" />';
+                        outputstr += '<circle cx="39" cy="35" r="2" fill="black" stroke="black" />';
+                    }
+                }
                 if (this.keys[19][2]) { //Met ingebouwde schakelaar
+                    outputstr += '<line x1="' + (startx + 0) + '" y1="25" x2="' + (startx + 11) + '" y2="25" stroke="black" />';
+                    outputstr += '<line x1="' + (startx + 30) + '" y1="25" x2="' + (startx + 20) + '" y2="5" stroke="black" />';
+                    outputstr += '<line x1="' + (startx + 20) + '" y1="5" x2="' + (startx + 15) + '" y2="7.5" stroke="black" />';
+                    outputstr += '<line x1="' + (startx + 22) + '" y1="9" x2="' + (startx + 17) + '" y2="11.5" stroke="black" />';
                     startx += 10;
                     mySVG.xright += 10;
-                    outputstr += '<line x1="1" y1="25" x2="11" y2="25" stroke="black" />';
-                    outputstr += '<line x1="30" y1="25" x2="20" y2="5" stroke="black" />';
-                    outputstr += '<line x1="20" y1="5" x2="15" y2="7.5" stroke="black" />';
-                    outputstr += '<line x1="22" y1="9" x2="17" y2="11.5" stroke="black" />';
                 }
                 for (var i = 0; i < this.getKey("aantal"); i++) {
                     outputstr += '<use xlink:href="#stopcontact" x="' + startx + '" y="25"></use>';
