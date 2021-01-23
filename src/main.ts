@@ -116,6 +116,7 @@ function HL_enterSettings() {
 }
 
 function HLRedrawTreeHTML() {
+  show2col();
   document.getElementById("configsection").innerHTML = "";
   document.getElementById("left_col_inner").innerHTML = structure.toHTML(0);
 }
@@ -340,10 +341,9 @@ function printsvg() {
   strleft += '<hr><div id="printarea"></div>';
 
   document.getElementById("configsection").innerHTML = strleft;
-  document.getElementById("left_col_inner").innerHTML = "";
-  document.getElementById("right_col_inner").innerHTML = "";
-
   renderPrintSVG();
+
+  hide2col();
 }
 
 function exportscreen() {
@@ -366,8 +366,7 @@ function exportscreen() {
   strleft += '<br>';
 
   document.getElementById("configsection").innerHTML = strleft;
-  document.getElementById("left_col_inner").innerHTML = "";
-  document.getElementById("right_col_inner").innerHTML = "";
+  hide2col();
 
   //renderPrintSVG();
 }
@@ -376,8 +375,7 @@ function openContactForm() {
   var strleft: string = PROP_Contact_Text;
 
   document.getElementById("configsection").innerHTML = strleft;
-  document.getElementById("left_col_inner").innerHTML = "";
-  document.getElementById("right_col_inner").innerHTML = "";
+  hide2col();
 }
 
 function restart_all() {
@@ -448,13 +446,29 @@ function restart_all() {
   strleft += CONFIGPAGE_RIGHT;
 
   document.getElementById("configsection").innerHTML = strleft;
-
-  document.getElementById("left_col_inner").innerHTML = "";
-  document.getElementById("right_col_inner").innerHTML = "";
+  hide2col();
 
   if (browser_ie_detected()) {
     alert("Deze appicatie werkt niet in Internet Explorer. Wij raden aan een moderne browser te gebruiken zoals Edge, Firefox, Google Chrome, Opera, Vivaldi, ...");
   }
+}
+
+function hide2col() {
+  var leftElement = document.getElementById("left_col_inner");
+  var rightElement = document.getElementById("right_col_inner");
+  if(typeof(leftElement) != 'undefined' && leftElement != null){
+    leftElement.innerHTML = "";
+  };
+  if(typeof(rightElement) != 'undefined' && rightElement != null){
+    rightElement.innerHTML = "";
+  };
+  document.getElementById("canvas_2col").innerHTML = "";
+}
+
+function show2col() {
+  if (document.getElementById("canvas_2col").innerHTML == "") {
+    document.getElementById("canvas_2col").innerHTML = '<div id="left_col"><div id="left_col_inner"></div></div><div id="right_col"><div id="right_col_inner"></div></div>';
+  }  
 }
 
 function import_to_structure(mystring: string, redraw = true) {
