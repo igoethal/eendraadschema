@@ -39,6 +39,11 @@ function HLMoveUp(my_id: number) {
   HLRedrawTree();
 }
 
+function HLClone(my_id: number) {
+  structure.clone(my_id);
+  HLRedrawTree();
+}
+
 function HLInsertChild(my_id: number) {
   structure.insertChildAfterId(new Electro_Item(), my_id);
   HLCollapseExpand(my_id, false);
@@ -468,7 +473,7 @@ function hide2col() {
 function show2col() {
   if (document.getElementById("canvas_2col").innerHTML == "") {
     document.getElementById("canvas_2col").innerHTML = '<div id="left_col"><div id="left_col_inner"></div></div><div id="right_col"><div id="right_col_inner"></div></div>';
-  }  
+  }
 }
 
 function import_to_structure(mystring: string, redraw = true) {

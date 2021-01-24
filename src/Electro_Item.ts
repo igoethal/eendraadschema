@@ -58,6 +58,17 @@ class Electro_Item extends List_Item {
     this.updateConsumers(Parent);
   }
 
+  clone(source_item: List_Item) {
+    this.parent = source_item.parent;
+    this.indent = source_item.indent;
+    this.collapsed = source_item.collapsed;
+    for (var i = 0; i<this.keys.length; i++) {
+      for (var j=0; j<3; j++) {
+        this.keys[i][j] = source_item.keys[i][j];
+      }
+    }
+  }
+
   updateConsumers(Parent?: List_Item) {
     this.Parent_Item = Parent;
 
@@ -297,6 +308,9 @@ class Electro_Item extends List_Item {
       output += 'Moeder: <input id="id_parent_change_' + this.id + '" type="text" size="2" value="' + this.parent + '" onchange="HL_changeparent(' + this.id + ')"> ';
       output += " <button style=\"background-color:lightblue;\" onclick=\"HLMoveUp(" + this.id +")\">&#9650;</button>";
       output += " <button style=\"background-color:lightblue;\" onclick=\"HLMoveDown(" + this.id +")\">&#9660;</button>";
+      if (this.checkInsertAfter(Parent)) {
+        output += " <button style=\"background-color:lightblue;\" onclick=\"HLClone(" + this.id +")\">Clone</button>";
+      }
     } else {
       if (this.checkInsertAfter(Parent)) {
         output += " <button style=\"background-color:green;\" onclick=\"HLInsertBefore(" + this.id +")\">&#9650;</button>";

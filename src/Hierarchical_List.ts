@@ -306,6 +306,44 @@ class Hierarchical_List {
 
   //-----------------------------------------------------
 
+  clone(my_id: number, parent_id?: number) {
+    //-- First find the ordinal number of the current location and the desired location --
+    //   Also look for the original length of the structure
+    let currentOrdinal = this.getOrdinalById(my_id);
+    var original_length = this.length;
+    //-- Then create a clone of the object and assign the correct parent_id
+    if(arguments.length < 2) {
+      parent_id = this.data[currentOrdinal].parent
+    }
+    let parentOrdinal = this.getOrdinalById(parent_id);
+    var my_item = new Electro_Item(this.data[parentOrdinal]);
+    my_item.clone(this.data[currentOrdinal]);
+    //-- Now add the clone to the structure
+    //   The clone will have id this.curid-1
+    if(arguments.length < 2) {
+      this.insertItemAfterId(my_item, my_id); //Cloning the top-element, this messes up the ordinals !!
+    } else {
+      this.insertChildAfterId(my_item, parent_id); //Cloning childs, this messes up the ordinals !!
+    }
+    var new_id = this.curid-1;
+    this.data[this.getOrdinalById(new_id)].collapsed = this.data[this.getOrdinalById(my_id)].collapsed;
+    //-- Now loop over the childs of the original and also clone those
+    var toClone = new Array(); //list of id's to clone
+    for (var i = 0; i<original_length; i++) {
+      if (this.id[i]==my_id) {
+        for (var j=original_length-1; j>=0; j--) { //We need to loop in opposite sense
+          if (this.data[j].parent==my_id) toClone.push(this.id[j]);
+        }
+      }
+    }
+    for (var clone_id=0; clone_id<toClone.length; clone_id++) {
+      this.clone(toClone[clone_id],new_id);
+    }
+    this.reSort();
+  }
+
+  //-----------------------------------------------------
+
   deleteById(my_id: number) {
     for (var i = 0; i<this.length; i++) {
       if (this.id[i]==my_id) {
@@ -327,12 +365,12 @@ class Hierarchical_List {
     if (myParent == 0) {
       switch (this.mode) {
         case "edit":
-          output+= 'Modus (Invoegen/Verplaatsen) <select id="edit_mode" onchange="HL_editmode()"><option value="edit" selected>Invoegen</option><option value="move">Verplaatsen</option></select><br><br>';
+          output+= 'Modus (Invoegen/Verplaatsen) <select id="edit_mode" onchange="HL_editmode()"><option value="edit" selected>Invoegen</option><option value="move">Verplaatsen/Clone</option></select><br><br>';
           break;
         case "move":
-          output+= 'Modus (Invoegen/verplaatsen) <select id="edit_mode" onchange="HL_editmode()"><option value="edit">Invoegen</option><option value="move" selected>Verplaatsen</option></select>'+
+          output+= 'Modus (Invoegen/verplaatsen) <select id="edit_mode" onchange="HL_editmode()"><option value="edit">Invoegen</option><option value="move" selected>Verplaatsen/Clone</option></select>'+
                    '<span style="color:black"><i>&nbsp;Gebruik de pijlen om de volgorde van elementen te wijzigen. '+
-                   'Gebruik het Moeder-veld om een component elders in het schema te hangen.</i></span><br><br>';
+                   'Gebruik het Moeder-veld om een component elders in het schema te hangen. Kies "clone" om een dubbel te maken van een element.</i></span><br><br>';
           break;
       }
       //-- plaats input box voor naam van het schema bovenaan --
