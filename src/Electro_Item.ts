@@ -1,6 +1,9 @@
 class Electro_Item extends List_Item {
   consumers:Array<String>;
 
+  //-- Constructor, can be invoked with the List_Item of the parent to know better what kind of
+  //   elements are acceptable (e.g. not all parent can have all possible childs) --
+
   constructor(Parent?: List_Item) {
     super();
     this.keys.push(["type","SELECT",""]); //0
@@ -58,16 +61,7 @@ class Electro_Item extends List_Item {
     this.updateConsumers(Parent);
   }
 
-  clone(source_item: List_Item) {
-    this.parent = source_item.parent;
-    this.indent = source_item.indent;
-    this.collapsed = source_item.collapsed;
-    for (var i = 0; i<this.keys.length; i++) {
-      for (var j=0; j<3; j++) {
-        this.keys[i][j] = source_item.keys[i][j];
-      }
-    }
-  }
+  //-- When called, this one ensures we cannot have a child that doesn't align with its parent --
 
   updateConsumers(Parent?: List_Item) {
     this.Parent_Item = Parent;
@@ -107,6 +101,25 @@ class Electro_Item extends List_Item {
       }
     }
   }
+
+  //-- Make the current item a copy of source_item --
+
+  clone(source_item: List_Item) {
+    this.parent = source_item.parent;
+    this.indent = source_item.indent;
+    this.collapsed = source_item.collapsed;
+    this.Parent_Item = source_item.Parent_Item;
+    for (var i = 0; i<this.keys.length; i++) {
+      for (var j=0; j<3; j++) {
+        this.keys[i][j] = source_item.keys[i][j];
+      }
+    }
+    for (i = 0; i<this.consumers.length; i++) {
+      this.consumers[i] = (source_item as Electro_Item).consumers[i];
+    }
+  }
+
+  //-- When a new element is created, we will call resetKeys to set the keys to their default values --
 
   resetKeys() {
     this.keys[1][2] = true;
@@ -178,6 +191,9 @@ class Electro_Item extends List_Item {
     };
   }
 
+  //-- Algorithm to manually set a key, but most of the time, the keys-array is updated directly
+  //   Note that getKey is defined in List_Item --
+
   setKey(key: string, setvalue: any) {
     super.setKey(key, setvalue);
     //If type of component changed, reset everything
@@ -205,6 +221,9 @@ class Electro_Item extends List_Item {
         break;
     }
   }
+
+  //-- Returns true if the Electro_Item can have childs in case it is or
+  //   will become a child of Parent --
 
   checkInsertChild(Parent?: List_Item) { //Checks if the insert after button should be displayed or not
     var allow = false;
@@ -240,6 +259,9 @@ class Electro_Item extends List_Item {
     }
     return(allow);
   }
+
+  //-- returns the maximum number of childs the current Electro_Item can have in case
+  //   it is or will become a child of Parent --
 
   getMaxNumChilds(Parent?: List_Item) {
     var maxchilds = 0;
@@ -277,7 +299,10 @@ class Electro_Item extends List_Item {
     return(maxchilds);
   }
 
-  checkInsertAfter(Parent?: List_Item) { //Checks if the insert after button should be displayed or not
+  //-- Checks if the insert after button should be displayed or not in case the
+  //   element is or will become a child of Parent --
+
+  checkInsertAfter(Parent?: List_Item) {
     var allow = false;
     if (typeof Parent == 'undefined') {
       allow = true;
@@ -299,6 +324,9 @@ class Electro_Item extends List_Item {
     }
     return(allow);
   }
+
+  //-- Display the element in the editing grid at the left of the screen in case the
+  //   element is or will become a child of Parent --
 
   toHTML(mode: string, Parent?: List_Item) {
     let output:string = "";
@@ -511,6 +539,8 @@ class Electro_Item extends List_Item {
     return(output);
   }
 
+  //-- Generates SVG code for switches --
+
   toSVGswitches(hasChild: Boolean, mySVG: SVGelement) {
     let outputstr:string = "";
     var elements:Array<string> = new Array<string>();
@@ -682,20 +712,12 @@ class Electro_Item extends List_Item {
       }
     }
 
-    //--START CHANGE below old code which put a lot of lamps next to each other--
-    /*for (var i=0; i<this.getKey("aantal2"); i++) {
-      elements.push("lamp");
-      halfwaterdicht.push(this.keys[20][2]);
-      verklikkerlamp.push(this.keys[21][2]);
-    }*/
-    //--here new code which pushes the lamp only once and then puts for instance a "x5" next to it
     if (this.getKey("aantal2")>=1) {
       elements.push("lamp");
       signalisatielamp.push(this.keys[19][2]);
       halfwaterdicht.push(this.keys[20][2]);
       verklikkerlamp.push(this.keys[21][2]);
     }
-    //--END CHANGE--
 
     var startx = 1;
     var endx = 0;
@@ -902,11 +924,10 @@ class Electro_Item extends List_Item {
       }
     }
 
-    //mySVG.xright = 10 + elements.length*35 - 1; //we take off "1" as xleft is already "1"
     endx = startx-2;
     mySVG.xright = endx;
 
-    //Place adred underneath
+    //Place adress underneath
     if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
       outputstr += '<text x="' + ((mySVG.xright-20)/2 + 21) + '" y="' + (25 + lowerbound) + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-style="italic" font-size="10">' + htmlspecialchars(this.keys[15][2]) + '</text>';
       mySVG.ydown += Math.max(0,lowerbound-20);
@@ -914,6 +935,8 @@ class Electro_Item extends List_Item {
 
     return(outputstr);
   }
+
+  //-- Make the SVG for the entire electro item --
 
   toSVG(hasChild: Boolean = false) {
     let mySVG:SVGelement = new SVGelement();

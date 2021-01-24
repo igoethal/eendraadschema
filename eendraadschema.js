@@ -264,6 +264,8 @@ var List_Item = /** @class */ (function () {
 }());
 var Electro_Item = /** @class */ (function (_super) {
     __extends(Electro_Item, _super);
+    //-- Constructor, can be invoked with the List_Item of the parent to know better what kind of
+    //   elements are acceptable (e.g. not all parent can have all possible childs) --
     function Electro_Item(Parent) {
         var _this = _super.call(this) || this;
         _this.keys.push(["type", "SELECT", ""]); //0
@@ -320,16 +322,7 @@ var Electro_Item = /** @class */ (function (_super) {
         _this.updateConsumers(Parent);
         return _this;
     }
-    Electro_Item.prototype.clone = function (source_item) {
-        this.parent = source_item.parent;
-        this.indent = source_item.indent;
-        this.collapsed = source_item.collapsed;
-        for (var i = 0; i < this.keys.length; i++) {
-            for (var j = 0; j < 3; j++) {
-                this.keys[i][j] = source_item.keys[i][j];
-            }
-        }
-    };
+    //-- When called, this one ensures we cannot have a child that doesn't align with its parent --
     Electro_Item.prototype.updateConsumers = function (Parent) {
         this.Parent_Item = Parent;
         if (Parent == null) {
@@ -368,6 +361,22 @@ var Electro_Item = /** @class */ (function (_super) {
             }
         }
     };
+    //-- Make the current item a copy of source_item --
+    Electro_Item.prototype.clone = function (source_item) {
+        this.parent = source_item.parent;
+        this.indent = source_item.indent;
+        this.collapsed = source_item.collapsed;
+        this.Parent_Item = source_item.Parent_Item;
+        for (var i = 0; i < this.keys.length; i++) {
+            for (var j = 0; j < 3; j++) {
+                this.keys[i][j] = source_item.keys[i][j];
+            }
+        }
+        for (i = 0; i < this.consumers.length; i++) {
+            this.consumers[i] = source_item.consumers[i];
+        }
+    };
+    //-- When a new element is created, we will call resetKeys to set the keys to their default values --
     Electro_Item.prototype.resetKeys = function () {
         this.keys[1][2] = true;
         this.keys[2][2] = true;
@@ -445,6 +454,8 @@ var Electro_Item = /** @class */ (function (_super) {
         }
         ;
     };
+    //-- Algorithm to manually set a key, but most of the time, the keys-array is updated directly
+    //   Note that getKey is defined in List_Item --
     Electro_Item.prototype.setKey = function (key, setvalue) {
         _super.prototype.setKey.call(this, key, setvalue);
         //If type of component changed, reset everything
@@ -472,6 +483,8 @@ var Electro_Item = /** @class */ (function (_super) {
                 break;
         }
     };
+    //-- Returns true if the Electro_Item can have childs in case it is or
+    //   will become a child of Parent --
     Electro_Item.prototype.checkInsertChild = function (Parent) {
         var allow = false;
         switch (this.keys[0][2]) {
@@ -507,6 +520,8 @@ var Electro_Item = /** @class */ (function (_super) {
         }
         return (allow);
     };
+    //-- returns the maximum number of childs the current Electro_Item can have in case
+    //   it is or will become a child of Parent --
     Electro_Item.prototype.getMaxNumChilds = function (Parent) {
         var maxchilds = 0;
         switch (this.keys[0][2]) {
@@ -543,6 +558,8 @@ var Electro_Item = /** @class */ (function (_super) {
         }
         return (maxchilds);
     };
+    //-- Checks if the insert after button should be displayed or not in case the
+    //   element is or will become a child of Parent --
     Electro_Item.prototype.checkInsertAfter = function (Parent) {
         var allow = false;
         if (typeof Parent == 'undefined') {
@@ -566,6 +583,8 @@ var Electro_Item = /** @class */ (function (_super) {
         }
         return (allow);
     };
+    //-- Display the element in the editing grid at the left of the screen in case the
+    //   element is or will become a child of Parent --
     Electro_Item.prototype.toHTML = function (mode, Parent) {
         var output = "";
         if (mode == "move") {
@@ -783,6 +802,7 @@ var Electro_Item = /** @class */ (function (_super) {
         //output += "id: " + this.id + " parent: " + this.parent;
         return (output);
     };
+    //-- Generates SVG code for switches --
     Electro_Item.prototype.toSVGswitches = function (hasChild, mySVG) {
         var outputstr = "";
         var elements = new Array();
@@ -955,20 +975,12 @@ var Electro_Item = /** @class */ (function (_super) {
                 }
             }
         }
-        //--START CHANGE below old code which put a lot of lamps next to each other--
-        /*for (var i=0; i<this.getKey("aantal2"); i++) {
-          elements.push("lamp");
-          halfwaterdicht.push(this.keys[20][2]);
-          verklikkerlamp.push(this.keys[21][2]);
-        }*/
-        //--here new code which pushes the lamp only once and then puts for instance a "x5" next to it
         if (this.getKey("aantal2") >= 1) {
             elements.push("lamp");
             signalisatielamp.push(this.keys[19][2]);
             halfwaterdicht.push(this.keys[20][2]);
             verklikkerlamp.push(this.keys[21][2]);
         }
-        //--END CHANGE--
         var startx = 1;
         var endx = 0;
         for (i = 0; i < elements.length; i++) {
@@ -1221,16 +1233,16 @@ var Electro_Item = /** @class */ (function (_super) {
                     break;
             }
         }
-        //mySVG.xright = 10 + elements.length*35 - 1; //we take off "1" as xleft is already "1"
         endx = startx - 2;
         mySVG.xright = endx;
-        //Place adred underneath
+        //Place adress underneath
         if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
             outputstr += '<text x="' + ((mySVG.xright - 20) / 2 + 21) + '" y="' + (25 + lowerbound) + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-style="italic" font-size="10">' + htmlspecialchars(this.keys[15][2]) + '</text>';
             mySVG.ydown += Math.max(0, lowerbound - 20);
         }
         return (outputstr);
     };
+    //-- Make the SVG for the entire electro item --
     Electro_Item.prototype.toSVG = function (hasChild) {
         if (hasChild === void 0) { hasChild = false; }
         var mySVG = new SVGelement();
@@ -2276,10 +2288,10 @@ var Hierarchical_List = /** @class */ (function () {
         if (myParent == 0) {
             switch (this.mode) {
                 case "edit":
-                    output += 'Modus (Invoegen/Verplaatsen) <select id="edit_mode" onchange="HL_editmode()"><option value="edit" selected>Invoegen</option><option value="move">Verplaatsen/Clone</option></select><br><br>';
+                    output += 'Modus (Invoegen/Verplaatsen/Clone) <select id="edit_mode" onchange="HL_editmode()"><option value="edit" selected>Invoegen</option><option value="move">Verplaatsen/Clone</option></select><br><br>';
                     break;
                 case "move":
-                    output += 'Modus (Invoegen/verplaatsen) <select id="edit_mode" onchange="HL_editmode()"><option value="edit">Invoegen</option><option value="move" selected>Verplaatsen/Clone</option></select>' +
+                    output += 'Modus (Invoegen/Verplaatsen/Clone) <select id="edit_mode" onchange="HL_editmode()"><option value="edit">Invoegen</option><option value="move" selected>Verplaatsen/Clone</option></select>' +
                         '<span style="color:black"><i>&nbsp;Gebruik de pijlen om de volgorde van elementen te wijzigen. ' +
                         'Gebruik het Moeder-veld om een component elders in het schema te hangen. Kies "clone" om een dubbel te maken van een element.</i></span><br><br>';
                     break;
