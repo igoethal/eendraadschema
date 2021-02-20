@@ -450,6 +450,8 @@ function restart_all() {
 
   strleft += CONFIGPAGE_RIGHT;
 
+  strleft += PROP_getCookieText(); //Will only be displayed in the online version
+
   document.getElementById("configsection").innerHTML = strleft;
   hide2col();
 

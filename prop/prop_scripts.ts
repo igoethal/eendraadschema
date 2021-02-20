@@ -18,6 +18,10 @@ function PROP_GDPR() {
   return("");
 }
 
+function PROP_getCookieText() {
+  return("");
+}
+
 function exportjson() {
   var filename:string;
 

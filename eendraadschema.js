@@ -3137,6 +3137,9 @@ var PROP_Contact_Text = "<html>\n  <head>\n    <title>Eendraadschema online</tit
 function PROP_GDPR() {
     return ("");
 }
+function PROP_getCookieText() {
+    return ("");
+}
 function exportjson() {
     var filename;
     //We use the Pako library to entropy code the data
@@ -3491,6 +3494,7 @@ function restart_all() {
     //<button onclick="read_settings()">Start</button>
     var strright = "<br><br><br><br>\n    Deze tool tekent een &eacute;&eacute;ndraadschema.\n    De tool is in volle ontwikkeling en laat thans toe meer complexe\n    schakelingen met gesplitste kringen en horizontale aaneenschakelingen\n    van gebruikers (bvb koelkast achter een stopcontact) uit te voeren.\n    <br><br>\n    Eveneens kunnen de schemas worden opgeslagen en weer ingeladen\n    voor latere aanpassing (zie knoppen \"export\" en \"bladeren\").\n    <br><br>\n    Op basis van een screenshot-tool (bvb snipping-tool in Windows) kan het gegenereerde\n    &eacute;&eacute;ndraadschema verder verwerkt worden in een meer complete schets.\n    Een andere mogelijkheid is het eendraadschema te exporteren (SVG-vector-graphics) en verder te verwerken\n    met een professionele tool zoals Inkscape (open source optie).\n    <br><br>\n     Nuttige tips:\n    <ul>\n      <li>Kies \"meerdere gebruikers\" om horizontale ketens te bouwen, bijvoorbeeld een koelkast na een stopcontact.</li>\n      <li>Een schakelbaar stopcontact kan gemaakt worden door onder \"meerdere gebruikers\" eerst een lichtcircuit met \"0\" lampen gevolgd door een stopcontact te voorzien.</li>\n    </ul>\n  ";
     strleft += CONFIGPAGE_RIGHT;
+    strleft += PROP_getCookieText(); //Will only be displayed in the online version
     document.getElementById("configsection").innerHTML = strleft;
     hide2col();
     if (browser_ie_detected()) {
