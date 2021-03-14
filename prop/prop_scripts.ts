@@ -40,7 +40,7 @@ function exportjson() {
   } catch (error) {
     //We keep the non encoded text and do nothing
   } finally {
-    download_by_blob(text, filename, 'data:text/plain;charset=utf-8');
+    download_by_blob(text, filename, 'data:text/eds;charset=utf-8');
   }
 }
 

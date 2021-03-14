@@ -3163,7 +3163,7 @@ function exportjson() {
         //We keep the non encoded text and do nothing
     }
     finally {
-        download_by_blob(text, filename, 'data:text/plain;charset=utf-8');
+        download_by_blob(text, filename, 'data:text/eds;charset=utf-8');
     }
 }
 function displayButtonPrintToPdf() {
@@ -3378,7 +3378,7 @@ function doprint() {
 function dosvgdownload() {
     var prtContent = document.getElementById("printsvgarea").innerHTML;
     var filename = document.getElementById("dosvgname").value;
-    download_by_blob(prtContent, filename, 'data:text/plain;charset=utf-8');
+    download_by_blob(prtContent, filename, 'data:image/svg+xml;charset=utf-8'); //Was text/plain
 }
 function renderAddress() {
     var outHTML = "";
@@ -3670,13 +3670,16 @@ function download_by_blob(text, filename, mimeType) {
 }
 function download(type) {
     var filename;
+    var mimeType;
     switch (type) {
         case "html": {
             filename = "eendraadschema.html";
+            mimeType = 'data:image/svg+xml;charset=utf-8';
             break;
         }
         case "svg": {
             filename = "eendraadschema.svg";
+            mimeType = 'data:text/html;charset=utf-8';
             break;
         }
     }
@@ -3685,7 +3688,7 @@ function download(type) {
     if (document.getElementById("noGroup").checked == true) {
         text = flattenSVGfromString(text);
     }
-    download_by_blob(text, filename, 'data:text/plain;charset=utf-8');
+    download_by_blob(text, filename, mimeType); //was text/plain
 }
 function read_settings() {
     CONF_aantal_droge_kringen = parseInt(document.getElementById("aantal_droge_kringen").value);

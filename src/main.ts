@@ -258,7 +258,7 @@ function doprint() {
 function dosvgdownload() {
   var prtContent = document.getElementById("printsvgarea").innerHTML;
   var filename = (document.getElementById("dosvgname") as HTMLInputElement).value;
-  download_by_blob(prtContent, filename, 'data:text/plain;charset=utf-8');
+  download_by_blob(prtContent, filename, 'data:image/svg+xml;charset=utf-8'); //Was text/plain
 }
 
 function renderAddress() {
@@ -640,13 +640,16 @@ function download_by_blob(text, filename, mimeType) {
 
 function download(type: string) {
   var filename:string;
+  var mimeType:string;
   switch (type) {
     case "html": {
       filename = "eendraadschema.html";
+      mimeType = 'data:image/svg+xml;charset=utf-8';
       break;
     }
     case "svg": {
       filename = "eendraadschema.svg";
+      mimeType = 'data:text/html;charset=utf-8';
       break;
     }
   }
@@ -656,7 +659,7 @@ function download(type: string) {
     text = flattenSVGfromString(text);
   }
 
-  download_by_blob(text, filename, 'data:text/plain;charset=utf-8');
+  download_by_blob(text, filename, mimeType); //was text/plain
 }
 
 function read_settings() {
