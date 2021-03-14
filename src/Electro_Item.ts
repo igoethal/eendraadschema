@@ -170,6 +170,7 @@ class Electro_Item extends List_Item {
     this.keys[21][2] = false;
     switch (this.keys[0][2]) { //Special cases
       case "Kring":
+        this.keys[4][2] = 2;
         this.keys[10][2] = "---";
         this.keys[16][2] = "N/A";
         break;
@@ -215,7 +216,7 @@ class Electro_Item extends List_Item {
         }
         break;
       case "Kring":
-        if ( ( (this.getKey("aantal") as Number) < 2 ) || ( (this.getKey("aantal") as Number) > 4 ) ) {
+        if ( ( (this.getKey("aantal") as Number) < 1 ) || ( (this.getKey("aantal") as Number) > 4 ) ) {
           this.setKey("aantal","2");
         }
         break;
@@ -358,7 +359,7 @@ class Electro_Item extends List_Item {
       case "Kring":
         output += "&nbsp;Naam: " + this.stringToHTML(10,5) + "<br>";
         output += "Zekering: " + this.selectToHTML(7,["automatisch","differentieel","smelt","geen","---","schakelaar","schemer"]);
-        if (this.keys[7][2] != "geen") output += this.selectToHTML(4,["2","3","4"]) + this.stringToHTML(8,2) + "A";
+        if (this.keys[7][2] != "geen") output += this.selectToHTML(4,["2","3","4","-","1"]) + this.stringToHTML(8,2) + "A";
         if (this.getKey("zekering")=="differentieel") {
           output += ", \u0394 " + this.stringToHTML(11,3) + "mA";
           output += ", Selectief: " + this.checkboxToHTML(20);

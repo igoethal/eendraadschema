@@ -245,6 +245,10 @@ var List_Item = /** @class */ (function () {
                 options += " disabled";
                 items[i] = "---------------------------";
             }
+            if (items[i] == "-") {
+                options += " disabled";
+                items[i] = "---";
+            }
             output += '<option value="' + items[i] + '" ' + options + '>' + items[i] + '</option>';
         }
         output += "</select>";
@@ -433,6 +437,7 @@ var Electro_Item = /** @class */ (function (_super) {
         this.keys[21][2] = false;
         switch (this.keys[0][2]) { //Special cases
             case "Kring":
+                this.keys[4][2] = 2;
                 this.keys[10][2] = "---";
                 this.keys[16][2] = "N/A";
                 break;
@@ -477,7 +482,7 @@ var Electro_Item = /** @class */ (function (_super) {
                 }
                 break;
             case "Kring":
-                if ((this.getKey("aantal") < 2) || (this.getKey("aantal") > 4)) {
+                if ((this.getKey("aantal") < 1) || (this.getKey("aantal") > 4)) {
                     this.setKey("aantal", "2");
                 }
                 break;
@@ -615,7 +620,7 @@ var Electro_Item = /** @class */ (function (_super) {
                 output += "&nbsp;Naam: " + this.stringToHTML(10, 5) + "<br>";
                 output += "Zekering: " + this.selectToHTML(7, ["automatisch", "differentieel", "smelt", "geen", "---", "schakelaar", "schemer"]);
                 if (this.keys[7][2] != "geen")
-                    output += this.selectToHTML(4, ["2", "3", "4"]) + this.stringToHTML(8, 2) + "A";
+                    output += this.selectToHTML(4, ["2", "3", "4", "-", "1"]) + this.stringToHTML(8, 2) + "A";
                 if (this.getKey("zekering") == "differentieel") {
                     output += ", \u0394 " + this.stringToHTML(11, 3) + "mA";
                     output += ", Selectief: " + this.checkboxToHTML(20);

@@ -73,6 +73,10 @@ class List_Item {
           options += " disabled";
           items[i] = "---------------------------";
         }
+        if (items[i] == "-") {
+          options += " disabled";
+          items[i] = "---";
+        }
         output += '<option value="' + items[i] + '" ' + options + '>' + items[i] + '</option>';
       }
       output += "</select>"
