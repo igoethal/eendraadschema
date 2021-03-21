@@ -358,7 +358,7 @@ class Electro_Item extends List_Item {
     switch (this.keys[0][2]) {
       case "Kring":
         output += "&nbsp;Naam: " + this.stringToHTML(10,5) + "<br>";
-        output += "Zekering: " + this.selectToHTML(7,["automatisch","differentieel","smelt","geen","---","schakelaar","schemer"]);
+        output += "Zekering: " + this.selectToHTML(7,["automatisch","differentieel","smelt","geen","---","schakelaar","schemer","overspanningsbeveiliging"]);
         if (this.keys[7][2] != "geen") output += this.selectToHTML(4,["2","3","4","-","1"]) + this.stringToHTML(8,2) + "A";
         if (this.getKey("zekering")=="differentieel") {
           output += ", \u0394 " + this.stringToHTML(11,3) + "mA";

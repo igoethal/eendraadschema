@@ -964,7 +964,7 @@ class Hierarchical_List {
             //--- End of large code block ---
 
             //add the fuse below
-
+            var nameshift = -6;
             switch (this.data[i].getKey("zekering")) {
               case "automatisch":
                 inSVG[elementCounter].yup += 30;
@@ -993,6 +993,21 @@ class Hierarchical_List {
                   ")" +
                   "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
                   htmlspecialchars(this.data[i].getKey("aantal") + "P - " + this.data[i].getKey("amperage") + "A") + "</text>";
+                break;
+              case "overspanningsbeveiliging":
+                inSVG[elementCounter].yup += 30;
+                inSVG[elementCounter].data +=
+                  '<use xlink:href="#overspanningsbeveiliging_inline" x=\"' + inSVG[elementCounter].xleft +
+                  '" y="' + inSVG[elementCounter].yup + '" />';
+                inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft+20) +
+                  "\" y=\"" + (inSVG[elementCounter].yup-10) +
+                  "\"" +
+                   " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft+20) +
+                  "," + (inSVG[elementCounter].yup-10) +
+                  ")" +
+                  "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
+                  htmlspecialchars(this.data[i].getKey("aantal") + "P - " + this.data[i].getKey("amperage") + "A") + "</text>";
+                  nameshift = -11;
                 break;
               case "schemer":
                 inSVG[elementCounter].yup += 30;
@@ -1069,7 +1084,7 @@ class Hierarchical_List {
 
             //--Naam onderaan zetten (links-onder)--
             inSVG[elementCounter].data +=
-                  '<text x="' + (inSVG[elementCounter].xleft-6) + '" '
+                  '<text x="' + (inSVG[elementCounter].xleft+nameshift) + '" '
                   + 'y="' + (inSVG[elementCounter].yup+3) + '" '
                   //+ 'transform="rotate(-90 ' + (inSVG[elementCounter].xleft-6) + ',' + (inSVG[elementCounter].yup+3) + ')" '
                   + 'style="text-anchor:end" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="12"'
@@ -1579,6 +1594,15 @@ class Hierarchical_List {
     <g id="zekering_smelt">
       <rect x="-4" y="-30" width="8" height="30" style="stroke:black;fill:none" />
       <line x1="0" y1="-30" x2="0" y2="0" stroke="black" />
+    </g>
+    <g id="overspanningsbeveiliging_inline">   -> shift x -7.5  y -15
+      <rect x="-7.5" y="-30" width="15" height="30" fill="none" style="stroke:black" />
+      <line x1="0" y1="-30" x2="0" y2="-20" stroke="black" />
+      <line x1="0" y1="-20" x2="-3" y2="-24" stroke="black" />
+      <line x1="0" y1="-20" x2="3" y2="-24" stroke="black" />
+      <line x1="0" y1="0" x2="0" y2="-10" stroke="black" />
+      <line x1="0" y1="-10" x2="-3" y2="-6" stroke="black" />
+      <line x1="0" y1="-10" x2="3" y2="-6" stroke="black" />
     </g>
     <g transform="rotate(-20)" id="zekering_empty">
       <line x1="0" y1="-30" x2="0" y2="0"  stroke="black" />
