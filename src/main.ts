@@ -132,7 +132,7 @@ function HLRedrawTreeSVG() {
   document.getElementById("right_col_inner").innerHTML += '&nbsp;<input type="checkbox" id="noGroup" checked></input><small>SVG elementen niet groeperen (aanbevolen voor meeste tekenprogramma\'s)</small>';
   document.getElementById("right_col_inner").innerHTML += '<br><small><i>Noot: De knoppen hierboven laden enkel de tekening. Wenst u het schema ook later te bewerken, gebruik dan "Opslaan" in het hoofdmenu.</i></small><br><br>';
 
-  document.getElementById("right_col_inner").innerHTML += structure.toSVG(0,"horizontal").data;
+  document.getElementById("right_col_inner").innerHTML += flattenSVGfromString(structure.toSVG(0,"horizontal").data);
   document.getElementById("right_col_inner").innerHTML += `
     <h2>Legend:</h2>
     <button style="background-color:green;">&#9650;</button> Item hierboven invoegen (zelfde niveau)<br>
@@ -290,7 +290,7 @@ function getPrintSVGWithoutAddress() {
 
   var outstr = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" transform="scale(1,1)" style="border:1px solid white" ' +
              'height="' + (height*scale) + '" width="' + (width*scale) + '" viewBox="' + viewbox + '">' +
-             outSVG.data + '</svg>';
+             flattenSVGfromString(outSVG.data) + '</svg>';
 
   return(outstr);
 }

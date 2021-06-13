@@ -344,12 +344,12 @@ var Electro_Item = /** @class */ (function (_super) {
                     break;
                 }
                 case "Kring": {
-                    this.consumers = ["", "Aansluiting", "Bord", "Domotica", "Meerdere verbruikers", "Kring", "Splitsing", "---", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verwarmingstoestel", "Vrije tekst", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt",
+                    this.consumers = ["", "Aansluiting", "Bord", "Domotica", "Meerdere verbruikers", "Kring", "Splitsing", "---", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt",
                         "Aftakdoos", "Leeg"];
                     break;
                 }
                 case "Meerdere verbruikers": {
-                    this.consumers = ["", "Domotica", "Splitsing", "---", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verwarmingstoestel", "Vrije tekst", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt",
+                    this.consumers = ["", "Domotica", "Splitsing", "---", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt",
                         "Aftakdoos", "Leeg"];
                     break;
                 }
@@ -358,7 +358,7 @@ var Electro_Item = /** @class */ (function (_super) {
                     break;
                 }
                 default: {
-                    this.consumers = ["", "Aansluiting", "Domotica", "Meerdere verbruikers", "Splitsing", "---", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verwarmingstoestel", "Vrije tekst", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg"];
+                    this.consumers = ["", "Aansluiting", "Domotica", "Meerdere verbruikers", "Splitsing", "---", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg"];
                     //this.consumers = [""];
                     break;
                 }
@@ -398,6 +398,10 @@ var Electro_Item = /** @class */ (function (_super) {
             this.keys[7][2] = "automatisch";
             this.keys[8][2] = "20";
             this.keys[9][2] = "XVB 3G2,5";
+        }
+        ;
+        if (this.keys[0][2] == "Verlenging") {
+            this.keys[22][2] = 40;
         }
         ;
         if (this.keys[0][2] == "Vrije tekst") {
@@ -769,6 +773,11 @@ var Electro_Item = /** @class */ (function (_super) {
                 output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
                 output += ", Aantal: " + this.selectToHTML(4, ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]);
                 output += ", Adres/tekst: " + this.stringToHTML(15, 5);
+                break;
+            case "Verlenging":
+                output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
+                output += ", Breedte: " + this.stringToHTML(22, 3);
+                output += ", Adres/tekst: " + this.stringToHTML(23, 2);
                 break;
             case "Verwarmingstoestel":
                 output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
@@ -1859,6 +1868,26 @@ var Electro_Item = /** @class */ (function (_super) {
                 if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
                     outputstr += '<text x="' + ((mySVG.xright - 20) / 2 + 21) + '" y="55" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
                     mySVG.ydown += 10;
+                }
+                break;
+            case "Verlenging":
+                var width;
+                if (isNaN(Number(this.keys[22][2]))) {
+                    width = 40;
+                }
+                else {
+                    if (Number(this.keys[22][2] == "")) {
+                        width = 40;
+                    }
+                    else {
+                        width = Math.max(Number(this.keys[22][2]) * 1, 0);
+                    }
+                }
+                mySVG.xright = width - 1;
+                outputstr += '<line x1="1" y1="25" x2="' + (width + 1) + '" y2="25" stroke="black" />';
+                if (!(/^\s*$/.test(this.keys[23][2]))) { //check if adres contains only white space
+                    outputstr += '<text x="' + (1 + width / 2) + '" y="40" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[23][2]) + '</text>';
+                    //mySVG.ydown += 15;
                 }
                 break;
             case "Vrije tekst":
@@ -3312,7 +3341,7 @@ function HLRedrawTreeSVG() {
     document.getElementById("right_col_inner").innerHTML += '&nbsp;<button onclick=download("svg")>Download als svg</button>';
     document.getElementById("right_col_inner").innerHTML += '&nbsp;<input type="checkbox" id="noGroup" checked></input><small>SVG elementen niet groeperen (aanbevolen voor meeste tekenprogramma\'s)</small>';
     document.getElementById("right_col_inner").innerHTML += '<br><small><i>Noot: De knoppen hierboven laden enkel de tekening. Wenst u het schema ook later te bewerken, gebruik dan "Opslaan" in het hoofdmenu.</i></small><br><br>';
-    document.getElementById("right_col_inner").innerHTML += structure.toSVG(0, "horizontal").data;
+    document.getElementById("right_col_inner").innerHTML += flattenSVGfromString(structure.toSVG(0, "horizontal").data);
     document.getElementById("right_col_inner").innerHTML += "\n    <h2>Legend:</h2>\n    <button style=\"background-color:green;\">&#9650;</button> Item hierboven invoegen (zelfde niveau)<br>\n    <button style=\"background-color:green;\">&#9660;</button> Item hieronder invoegen (zelfde niveau)<br>\n    <button style=\"background-color:green;\">&#9654;</button> Afhankelijk item hieronder toevoegen (niveau dieper)<br>\n    <button style=\"background-color:red;\">&#9851;</button> Item verwijderen<br>\n  ";
     document.getElementById("right_col_inner").innerHTML += '<i><br><small>Versie: ' + CONF_builddate +
         ' (C) Ivan Goethals -- <a href="license.html" target="popup" onclick="window.open(\'license.html\',\'popup\',\'width=800,height=600\'); return false;">GPLv3</a></small></i><br><br>';
@@ -3419,7 +3448,7 @@ function getPrintSVGWithoutAddress() {
     var viewbox = '' + startx + ' 0 ' + width + ' ' + height;
     var outstr = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" transform="scale(1,1)" style="border:1px solid white" ' +
         'height="' + (height * scale) + '" width="' + (width * scale) + '" viewBox="' + viewbox + '">' +
-        outSVG.data + '</svg>';
+        flattenSVGfromString(outSVG.data) + '</svg>';
     return (outstr);
 }
 function renderPrintSVG() {

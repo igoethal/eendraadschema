@@ -80,12 +80,12 @@ class Electro_Item extends List_Item {
           break;
         }
         case "Kring": {
-          this.consumers = ["", "Aansluiting", "Bord", "Domotica", "Meerdere verbruikers", "Kring", "Splitsing", "---", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verwarmingstoestel", "Vrije tekst", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt",
+          this.consumers = ["", "Aansluiting", "Bord", "Domotica", "Meerdere verbruikers", "Kring", "Splitsing", "---", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt",
                             "Aftakdoos", "Leeg"];
           break;
         }
         case "Meerdere verbruikers": {
-          this.consumers = ["", "Domotica", "Splitsing", "---", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verwarmingstoestel", "Vrije tekst", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt",
+          this.consumers = ["", "Domotica", "Splitsing", "---", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt",
                             "Aftakdoos", "Leeg"];
           break;
         }
@@ -94,7 +94,7 @@ class Electro_Item extends List_Item {
           break;
         }
         default: {
-          this.consumers = ["", "Aansluiting", "Domotica", "Meerdere verbruikers", "Splitsing", "---", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verwarmingstoestel", "Vrije tekst", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg"];
+          this.consumers = ["", "Aansluiting", "Domotica", "Meerdere verbruikers", "Splitsing", "---", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg"];
           //this.consumers = [""];
           break;
         }
@@ -137,6 +137,9 @@ class Electro_Item extends List_Item {
       this.keys[7][2] = "automatisch";
       this.keys[8][2] = "20";
       this.keys[9][2] = "XVB 3G2,5";
+    };
+    if (this.keys[0][2] == "Verlenging") {
+      this.keys[22][2] = 40;
     };
     if (this.keys[0][2] == "Vrije tekst") {
       this.keys[22][2] = 40;
@@ -502,6 +505,11 @@ class Electro_Item extends List_Item {
         output += "&nbsp;Nr: " + this.stringToHTML(10,5);
         output += ", Aantal: " + this.selectToHTML(4,["1","2","3","4","5","6","7","8","9","10"]);
         output += ", Adres/tekst: " + this.stringToHTML(15,5);
+        break;
+      case "Verlenging":
+        output += "&nbsp;Nr: " + this.stringToHTML(10,5);
+        output += ", Breedte: " + this.stringToHTML(22,3);
+        output += ", Adres/tekst: " + this.stringToHTML(23,2);
         break;
       case "Verwarmingstoestel":
         output += "&nbsp;Nr: " + this.stringToHTML(10,5);
@@ -1531,6 +1539,29 @@ class Electro_Item extends List_Item {
           mySVG.ydown += 10;
         }
         break;
+      case "Verlenging":
+        var width;
+        if (isNaN(Number(this.keys[22][2]))) {
+          width = 40;
+        } else {
+          if (Number(this.keys[22][2] == "")) {
+            width = 40;
+          } else {
+            width = Math.max(Number(this.keys[22][2])*1,0);
+          }
+        }
+        mySVG.xright = width-1;
+
+        outputstr += '<line x1="1" y1="25" x2="' + (width+1) + '" y2="25" stroke="black" />';
+
+        if (!(/^\s*$/.test(this.keys[23][2]))) { //check if adres contains only white space
+          outputstr += '<text x="' + (1 + width/2) + '" y="40" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[23][2]) + '</text>';
+          //mySVG.ydown += 15;
+        }
+
+        break;
+
+
       case "Vrije tekst":
         var width;
         if (isNaN(Number(this.keys[22][2]))) {
