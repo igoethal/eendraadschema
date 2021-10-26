@@ -1333,6 +1333,13 @@ class Hierarchical_List {
       <line x1="8" y1="-16" x2="13" y2="-13.5" stroke="black" />
       <circle cx="0" cy="0" r="5" fill="white" stroke="black" />
     </g>
+    <g id="schakelaar_trippel">
+      <line x1="0" y1="0" x2="10" y2="-20" stroke="black" />
+      <line x1="10" y1="-20" x2="15" y2="-17.5" stroke="black" />
+      <line x1="8" y1="-16" x2="13" y2="-13.5" stroke="black" />
+      <line x1="6" y1="-12" x2="11" y2="-9.5" stroke="black" />
+      <circle cx="0" cy="0" r="5" fill="white" stroke="black" />
+    </g>
     <g id="schakelaar_wissel_enkel">
       <line x1="0" y1="0" x2="10" y2="-20" stroke="black" />
       <line x1="10" y1="-20" x2="15" y2="-17.5" stroke="black" />
