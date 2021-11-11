@@ -698,6 +698,17 @@ class Hierarchical_List {
                   ")" +
                   "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
                   "\u0394" + htmlspecialchars(this.data[i].getKey("differentieel_waarde") + "mA") + "</text>";
+                if ( (this.data[i].keys[17][2]=='A') || (this.data[i].keys[17][2]=='B') ) {
+                  inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft+35) +
+                    "\" y=\"" + (inSVG[elementCounter].yup-10) +
+                    "\"" +
+                    " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft+35) +
+                    "," + (inSVG[elementCounter].yup-10) +
+                    ")" +
+                    "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
+                    htmlspecialchars("Type " + this.data[i].keys[17][2]) + "</text>";
+                  inSVG[elementCounter].xright = Math.max(inSVG[elementCounter].xright,40);
+                }
                 break;
               case "smelt":
                 inSVG[elementCounter].yup += 30;
@@ -950,10 +961,10 @@ class Hierarchical_List {
               inSVG[elementCounter].data += '<rect x="' + (inSVG[elementCounter].xleft+7) +
                 '" y="' + (inSVG[elementCounter].yup) +
                 '" width="16" height="16" stroke="black" fill="white" />';
-                inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft+15) +
-                   "\" y=\"" + (inSVG[elementCounter].yup+12) +
+                inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft+19) +
+                   "\" y=\"" + (inSVG[elementCounter].yup+8) +
                    "\"" +
-                   " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft+15) +
+                   " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft+19) +
                    "," + (inSVG[elementCounter].yup+8) +
                    ")" +
                     "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
@@ -1034,14 +1045,6 @@ class Hierarchical_List {
                 inSVG[elementCounter].data +=
                   '<use xlink:href="#zekering_automatisch" x=\"' + inSVG[elementCounter].xleft +
                   '" y="' + inSVG[elementCounter].yup + '" />';
-                inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft+25) +
-                   "\" y=\"" + (inSVG[elementCounter].yup-10) +
-                   "\"" +
-                   " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft+25) +
-                   "," + (inSVG[elementCounter].yup-10) +
-                   ")" +
-                    "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                   htmlspecialchars(this.data[i].getKey("aantal") + "P - " + this.data[i].getKey("amperage") + "A") + "</text>";
                 inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft+15) +
                   "\" y=\"" + (inSVG[elementCounter].yup-10) +
                   "\"" +
@@ -1050,6 +1053,25 @@ class Hierarchical_List {
                   ")" +
                   "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
                   "\u0394" + htmlspecialchars(this.data[i].getKey("differentieel_waarde") + "mA") + "</text>";
+                inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft+25) +
+                   "\" y=\"" + (inSVG[elementCounter].yup-10) +
+                   "\"" +
+                   " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft+25) +
+                   "," + (inSVG[elementCounter].yup-10) +
+                   ")" +
+                    "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
+                   htmlspecialchars(this.data[i].getKey("aantal") + "P - " + this.data[i].getKey("amperage") + "A") + "</text>";
+                if ( (this.data[i].keys[17][2]=='A') || (this.data[i].keys[17][2]=='B') ) {
+                  inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft+35) +
+                    "\" y=\"" + (inSVG[elementCounter].yup-10) +
+                    "\"" +
+                    " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft+35) +
+                    "," + (inSVG[elementCounter].yup-10) +
+                    ")" +
+                    "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
+                    htmlspecialchars("Type " + this.data[i].keys[17][2]) + "</text>";
+                  inSVG[elementCounter].xright = Math.max(inSVG[elementCounter].xright,40);
+                }
                 break;
               case "smelt":
                 inSVG[elementCounter].yup += 30;
@@ -1285,8 +1307,17 @@ class Hierarchical_List {
       <line x1="-4.33" y1="-2.5" x2="4.33" y2="2.5" style="stroke:black" />
       <line x1="-4.66" y1="2.5" x2="4.33" y2="-2.5" style="stroke:black" />
     </g>
-    <g id="sinus">
-      <path d="M0,0 C2,-5 8,-5 10,0 S18,5 20,0" style="stroke:black;fill:none" />
+    <g id="EVlader">
+      <rect x="0" y="-20" width="40" height="40" fill="none" style="stroke:black" />
+      <rect style="fill:black;stroke:black" width="18" height="6" x="12" y="-10" />
+      <rect style="fill:black;stroke:black" width="28" height="10" x="6" y="-4" ry="0" />
+      <circle cx="12" cy="6" r="4" style="stroke:black;fill:black" />
+      <circle cx="28" cy="6" r="4" style="stroke:black;fill:black" />
+      <line x1="20" y1="-7.2" x2="17" y2="-2" stroke="white"/>
+      <line x1="17" y1="-2" x2="23" y2="-2" stroke="white"/>
+      <line x1="23" y1="-2" x2="20" y2="3.2" stroke="white"/>
+      <line x1="20" y1="3.2" x2="20" y2="0.2" stroke="white"/>
+      <line x1="20" y1="3.2" x2="22.6" y2="1.7" stroke="white"/>
     </g>
     <g id="lamp">
       <line x1="-10.61" y1="-10.61" x2="10.61" y2="10.61" stroke="black" stroke-width="2" />
@@ -1303,6 +1334,9 @@ class Hierarchical_List {
       <line x1="9" y1="-6" x2="10" y2="-11" stroke="black" stroke-width="1" />
       <line x1="10" y1="-11" x2="11.11" y2="-9.34" stroke="black" stroke-width="1" />
       <line x1="10" y1="-11" x2="8.34" y2="-9.9" stroke="black" stroke-width="1" />
+    </g>
+    <g id="sinus">
+      <path d="M0,0 C2,-5 8,-5 10,0 S18,5 20,0" style="stroke:black;fill:none" />
     </g>
     <g id="spot">
       <path d="M0 0 A10 10 0 0 1 10 -10" stroke="black" fill="white" stroke-width="1" />
