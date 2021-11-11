@@ -1463,6 +1463,12 @@ class Hierarchical_List {
       <path d="M20 0 A15 15 0 0 0 35 15" stroke="black" fill="white" stroke-width="2" />
       <line x1="0" y1="0" x2="20" y2="0" stroke="black" />
     </g>
+    <g id="stoomoven">
+      <rect x="0" y="-20" width="40" height="40" fill="none" style="stroke:black" />
+      <path d="M 6 -2 A 7 5 0 0 1 13 -7 A 7 5 0 0 1 27 -7 A 7 5 0 0 1 33 -2" stroke="black" fill="none" />
+      <path d="M 6  5 A 7 5 0 0 1 13  0 A 7 5 0 0 1 27  0 A 7 5 0 0 1 33  5" stroke="black" fill="none" />
+      <path d="M 6 12 A 7 5 0 0 1 13  7 A 7 5 0 0 1 27  7 A 7 5 0 0 1 33 12" stroke="black" fill="none" />
+    </g>
     <g id="stopcontact_aarding">
       <line x1="20" y1="-15" x2="20" y2="15"  stroke="black" stroke-width="2" />
     </g>
