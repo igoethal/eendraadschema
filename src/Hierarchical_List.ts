@@ -1302,6 +1302,14 @@ class Hierarchical_List {
       patternUnits="userSpaceOnUse" >
       <line x1="0" y1="0" x2="0" y2="10" stroke="black" />
     </pattern>
+    <g id="batterij">
+      <rect x="1" y="-12" width="40" height="27" stroke="black" fill="none"/>
+      <rect x="6" y="-15" width="10" height="3" stroke="black" fill="none"/>
+      <rect x="26" y="-15" width="10" height="3" stroke="black" fill="none"/>
+      <line x1="9" y1="-5" x2="13" y2="-5" stroke="black"/>
+      <line x1="11" y1="-7" x2="11" y2="-3" stroke="black"/>
+      <line x1="29" y1="-5" x2="33" y2="-5" stroke="black"/>
+    </g>
     <g id="ster">
       <line x1="0" y1="-5" x2="0" y2="5" style="stroke:black" />
       <line x1="-4.33" y1="-2.5" x2="4.33" y2="2.5" style="stroke:black" />

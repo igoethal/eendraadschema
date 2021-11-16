@@ -339,12 +339,12 @@ class Electro_Item extends List_Item {
           break;
         }
         case "Kring": {
-          this.consumers = ["", "Aansluiting", "Bord", "Domotica", "Meerdere verbruikers", "Kring", "Splitsing", "---", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt",
+          this.consumers = ["", "Aansluiting", "Bord", "Domotica", "Meerdere verbruikers", "Kring", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt",
                             "Aftakdoos", "Leeg"];
           break;
         }
         case "Meerdere verbruikers": {
-          this.consumers = ["", "Domotica", "Splitsing", "---", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt",
+          this.consumers = ["", "Domotica", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt",
                             "Aftakdoos", "Leeg"];
           break;
         }
@@ -353,7 +353,7 @@ class Electro_Item extends List_Item {
           break;
         }
         default: {
-          this.consumers = ["", "Aansluiting", "Domotica", "Meerdere verbruikers", "Splitsing", "---", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg"];
+          this.consumers = ["", "Aansluiting", "Domotica", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg"];
           //this.consumers = [""];
           break;
         }
@@ -679,6 +679,10 @@ class Electro_Item extends List_Item {
         };
         output += "Ingebouwde schakelaar: " + this.checkboxToHTML(19) + ", ";
         output += "Aantal: " + this.selectToHTML(4,["1","2","3","4","5","6"]);
+        output += ", Adres/tekst: " + this.stringToHTML(15,5);
+        break;
+      case "Batterij":
+        output += "&nbsp;Nr: " + this.stringToHTML(10,5) + ", ";
         output += ", Adres/tekst: " + this.stringToHTML(15,5);
         break;
       case "Boiler":
@@ -1289,6 +1293,23 @@ class Electro_Item extends List_Item {
           mySVG.ydown += 15;
         }
         break;
+      case "Batterij":
+        outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
+        outputstr += '<use xlink:href="#batterij" x="21" y="25"></use>';
+        mySVG.xright = 40+20;
+        if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
+          outputstr += '<text x="' + ((mySVG.xright-20)/2 + 21) + '" y="60" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
+          mySVG.ydown += 15;
+        }
+        /*      if (!(/^\s*$/.test(this.keys[27][2]))) { //check if adres contains only white space
+                outputstr += '<text x="' + ((mySVG.xright-20)/2 + 21) + '" y="75" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">SN : ' + htmlspecialchars(this.keys[27][2]) + '</text>';
+                mySVG.ydown += 15;
+              }
+              if (!(/^\s*$/.test(this.keys[28][2]))) { //check if adres contains only white space
+                outputstr += '<text x="' + ((mySVG.xright-20)/2 + 21) + '" y="90" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">Capaciteit: ' + htmlspecialchars(this.keys[28][2]) + '</text>';
+                mySVG.ydown += 15;
+              }*/
+              break;
       case "Bel":
         outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
         outputstr += '<use xlink:href="#bel" x="21" y="25"></use>';
@@ -3271,6 +3292,14 @@ class Hierarchical_List {
       patternUnits="userSpaceOnUse" >
       <line x1="0" y1="0" x2="0" y2="10" stroke="black" />
     </pattern>
+    <g id="batterij">
+      <rect x="1" y="-12" width="40" height="27" stroke="black" fill="none"/>
+      <rect x="6" y="-15" width="10" height="3" stroke="black" fill="none"/>
+      <rect x="26" y="-15" width="10" height="3" stroke="black" fill="none"/>
+      <line x1="9" y1="-5" x2="13" y2="-5" stroke="black"/>
+      <line x1="11" y1="-7" x2="11" y2="-3" stroke="black"/>
+      <line x1="29" y1="-5" x2="33" y2="-5" stroke="black"/>
+    </g>
     <g id="ster">
       <line x1="0" y1="-5" x2="0" y2="5" style="stroke:black" />
       <line x1="-4.33" y1="-2.5" x2="4.33" y2="2.5" style="stroke:black" />
