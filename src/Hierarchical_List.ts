@@ -1503,6 +1503,15 @@ class Hierarchical_List {
       <use xlink:href="#ster" x="20" y="0" />
       <use xlink:href="#ster" x="30" y="0" />
     </g>
+    <g id="batterij">
+      <line x1="1" y1="-15" x2="1" y2="15" stroke="black"/>
+      <line x1="10" y1="-8" x2="10" y2="8" stroke-width="3" stroke="black"/>
+      <line x1="17" y1="0" x2="11" y2="0" stroke="black"/>
+      <line x1="30" y1="0" x2="23" y2="0" stroke="black"/>
+      <line x1="42" y1="0" x2="36" y2="0" stroke="black"/>
+      <line x1="43" y1="-15" x2="43" y2="15" stroke="black"/>
+      <line x1="51" y1="-8" x2="51" y2="8" stroke-width="3" stroke="black"/>
+    </g>
     <g id="zonnepaneel">
       <rect x="0" y="-12" width="80" height="30" fill="none" style="stroke:black" />
       <line x1="3" y1="3" x2="77" y2="3" stroke="black" />
