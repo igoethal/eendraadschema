@@ -1040,18 +1040,10 @@ class Electro_Item extends List_Item {
         outputstr += '<use xlink:href="#batterij" x="21" y="25"></use>';
         mySVG.xright = 40+20;
         if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
-          outputstr += '<text x="' + ((mySVG.xright-20)/2 + 21) + '" y="60" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
-          mySVG.ydown += 15;
+          outputstr += '<text x="' + ((mySVG.xright-20)/2 + 21) + '" y="55" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
+          mySVG.ydown += 10;
         }
-        /*      if (!(/^\s*$/.test(this.keys[27][2]))) { //check if adres contains only white space
-                outputstr += '<text x="' + ((mySVG.xright-20)/2 + 21) + '" y="75" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">SN : ' + htmlspecialchars(this.keys[27][2]) + '</text>';
-                mySVG.ydown += 15;
-              }
-              if (!(/^\s*$/.test(this.keys[28][2]))) { //check if adres contains only white space
-                outputstr += '<text x="' + ((mySVG.xright-20)/2 + 21) + '" y="90" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">Capaciteit: ' + htmlspecialchars(this.keys[28][2]) + '</text>';
-                mySVG.ydown += 15;
-              }*/
-              break;
+        break;
       case "Bel":
         outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
         outputstr += '<use xlink:href="#bel" x="21" y="25"></use>';
