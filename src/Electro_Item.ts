@@ -530,7 +530,7 @@ class Electro_Item extends List_Item {
         break;
       case "Vrije tekst":
         output += "&nbsp;Nr: " + this.stringToHTML(10,5);
-        output += ", Tekst: " + this.stringToHTML(15,10);
+        output += ", Tekst (nieuwe lijn = \"|\"): " + this.stringToHTML(15,10);
         output += ", Type: " + this.selectToHTML(16,["","verbruiker","zonder kader"]);
         output += ", Horizontale alignering: " + this.selectToHTML(17,["links","centreer","rechts"]);
         output += ", Vet: " + this.checkboxToHTML(19);
@@ -1627,33 +1627,56 @@ class Electro_Item extends List_Item {
         if (this.keys[19][2]) options += ' font-weight="bold"';
         if (this.keys[20][2]) options += ' font-style="italic"';
 
-        //width = Math.max(this.getKey("commentaar").length * 8, width)
+
+
+        //--Tekst plaatsen --
+        var strlines = htmlspecialchars(this.getKey("commentaar")).split("|");
+        switch (this.keys[17][2]) {
+          case "links":
+            var outputstr_common = '<text style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-size="10" x="' + (20 + 5) + '" ';
+            for (i = 0; i<strlines.length; i++) {
+              var dispy = 28 - 7.5 * Math.min(1,strlines.length-1) + 15 * i;
+              outputstr += outputstr_common + ' y="' + dispy + '"' + options + '>' + strlines[i] + '</text>';
+            }
+            mySVG.xright = 20 + width;
+            break;
+          case "rechts":
+            var outputstr_common = '<text style="text-anchor:end" font-family="Arial, Helvetica, sans-serif" font-size="10" x="' + (20 + width - 4) + '" ';
+            for (i = 0; i<strlines.length; i++) {
+              var dispy = 28 - 7.5 * Math.min(1,strlines.length-1) + 15 * i;
+              outputstr += outputstr_common + ' y="' + dispy + '"' + options + '>' + strlines[i] + '</text>';
+            }
+            mySVG.xright = 20 + width;
+            break;
+          default:
+            var outputstr_common = '<text style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" x="' + (21 + width/2) + '" ';
+            for (i = 0; i<strlines.length; i++) {
+              var dispy = 28 - 7.5 * Math.min(1,strlines.length-1) + 15 * i;
+              outputstr += outputstr_common + ' y="' + dispy + '"' + options + '>' + strlines[i] + '</text>';
+            }
+            mySVG.xright = 20 + width;
+            break;
+        }
+
+        //--Extra plaats voorzien als nodig
+        var extraplace = 15 * Math.max(strlines.length-2,0);
+        mySVG.yup += extraplace / 2.0;
+        mySVG.ydown += extraplace / 2.0;
+
+        //-- Kader en adres tekenen --
         switch (this.keys[16][2]) {
           case "zonder kader":
             break;
           default:
-            outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black" />';
-            outputstr += '<rect x="21" y="5" width="' + width + '" height="40" fill="none" style="stroke:black" />';
+            outputstr += '<line x1="1" y1="' + (25 + extraplace/2.0) + '" x2="21" y2="' + (25 + extraplace/2.0) + '" stroke="black" />';
+            outputstr += '<rect x="21" y="5" width="' + width + '" height="' + (40 + extraplace) + '" fill="none" style="stroke:black" />';
             if (!(/^\s*$/.test(this.keys[23][2]))) { //check if adres contains only white space
-              outputstr += '<text x="' + (21 + width/2) + '" y="60" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[23][2]) + '</text>';
+              outputstr += '<text x="' + (21 + width/2) + '" y="' + (60 + extraplace) + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[23][2]) + '</text>';
               mySVG.ydown += 15;
             }
             break;
         }
-        switch (this.keys[17][2]) {
-          case "links":
-            outputstr += '<text x="' + (20 + 5) + '" y="28" style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-size="10"' + options + '>' + htmlspecialchars(this.getKey("commentaar")) + '</text>'
-            mySVG.xright = 20 + width;
-            break;
-          case "rechts":
-            outputstr += '<text x="' + (20 + width - 4) + '" y="28" style="text-anchor:end" font-family="Arial, Helvetica, sans-serif" font-size="10"' + options + '>' + htmlspecialchars(this.getKey("commentaar")) + '</text>'
-            mySVG.xright = 20 + width;
-            break;
-          default:
-            outputstr += '<text x="' + (21 + width/2) + '" y="28" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10"' + options + '>' + htmlspecialchars(this.getKey("commentaar")) + '</text>'
-            mySVG.xright = 20 + width;
-            break;
-        }
+
         break;
       case "Wasmachine":
         outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
