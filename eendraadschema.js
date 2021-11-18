@@ -1280,20 +1280,18 @@ var Electro_Item = /** @class */ (function (_super) {
         endx = startx - 2;
         mySVG.xright = endx;
         //Place adress underneath
-        if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
-            outputstr += '<text x="' + ((mySVG.xright - 20) / 2 + 21) + '" y="' + (25 + lowerbound) + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-style="italic" font-size="10">' + htmlspecialchars(this.keys[15][2]) + '</text>';
-            mySVG.ydown += Math.max(0, lowerbound - 20);
-        }
+        outputstr += this.addAddress(mySVG, 25 + lowerbound, Math.max(0, lowerbound - 20));
         return (outputstr);
     };
     //-- Add the addressline below --
-    Electro_Item.prototype.addAddress = function (mySVG, starty, godown, shiftx) {
+    Electro_Item.prototype.addAddress = function (mySVG, starty, godown, shiftx, key) {
         if (starty === void 0) { starty = 60; }
         if (godown === void 0) { godown = 15; }
         if (shiftx === void 0) { shiftx = 0; }
+        if (key === void 0) { key = 15; }
         var returnstr = "";
-        if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
-            returnstr = '<text x="' + ((mySVG.xright - 20) / 2 + 21 + shiftx) + '" y="' + starty + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
+        if (!(/^\s*$/.test(this.keys[key][2]))) { //check if adres contains only white space
+            returnstr = '<text x="' + ((mySVG.xright - 20) / 2 + 21 + shiftx) + '" y="' + starty + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[key][2]) + '</text>';
             mySVG.ydown = mySVG.ydown + godown;
         }
         return returnstr;
@@ -1448,15 +1446,11 @@ var Electro_Item = /** @class */ (function (_super) {
                 //-- Bereken correcte breedte
                 mySVG.xright = 44;
                 //-- Plaats adres onderaan --
-                if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
-                    if (printstr != '') {
-                        outputstr += '<text x="' + ((mySVG.xright - 20) / 2 + 21) + '" y="65" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
-                        mySVG.ydown += 20;
-                    }
-                    else {
-                        outputstr += '<text x="' + ((mySVG.xright - 20) / 2 + 21) + '" y="49" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
-                        mySVG.ydown += 5;
-                    }
+                if (printstr != '') {
+                    outputstr += this.addAddress(mySVG, 65, 20);
+                }
+                else {
+                    outputstr += this.addAddress(mySVG, 49, 5);
                 }
                 break;
             case "Elektriciteitsmeter":
@@ -1870,10 +1864,7 @@ var Electro_Item = /** @class */ (function (_super) {
                 }
                 mySVG.xright = width - 1;
                 outputstr += '<line x1="1" y1="25" x2="' + (width + 1) + '" y2="25" stroke="black" />';
-                //outputstr += this.addAddress(mySVG,40,0,(width - mySVG.xright - 20)/2);
-                if (!(/^\s*$/.test(this.keys[23][2]))) { //check if adres contains only white space
-                    outputstr += '<text x="' + (1 + width / 2) + '" y="40" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[23][2]) + '</text>';
-                }
+                outputstr += this.addAddress(mySVG, 40, 0, width / 2 - mySVG.xright / 2 - 10, 23);
                 break;
             case "Vrije tekst":
                 var width;
@@ -1932,10 +1923,7 @@ var Electro_Item = /** @class */ (function (_super) {
                     default:
                         outputstr += '<line x1="1" y1="' + (25 + extraplace / 2.0) + '" x2="21" y2="' + (25 + extraplace / 2.0) + '" stroke="black" />';
                         outputstr += '<rect x="21" y="5" width="' + width + '" height="' + (40 + extraplace) + '" fill="none" style="stroke:black" />';
-                        if (!(/^\s*$/.test(this.keys[23][2]))) { //check if adres contains only white space
-                            outputstr += '<text x="' + (21 + width / 2) + '" y="' + (60 + extraplace) + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[23][2]) + '</text>';
-                            mySVG.ydown += 15;
-                        }
+                        outputstr += this.addAddress(mySVG, 60 + extraplace, 15, width / 2 - (mySVG.xright - 20) / 2, 23);
                         break;
                 }
                 break;
