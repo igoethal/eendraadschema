@@ -339,7 +339,7 @@ class Electro_Item extends List_Item {
           break;
         }
         case "Kring": {
-          this.consumers = ["", "Aansluiting", "Bord", "Domotica", "Meerdere verbruikers", "Kring", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt",
+          this.consumers = ["", "Aansluiting", "Bord", "Domotica", "Kring", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt",
                             "Aftakdoos", "Leeg"];
           break;
         }
@@ -1225,6 +1225,17 @@ class Electro_Item extends List_Item {
     return(outputstr);
   }
 
+  //-- Add the addressline below --
+
+  addAddress(mySVG: SVGelement, starty:number = 60, godown:number = 15, shiftx:number = 0): String {
+    let returnstr:string = "";
+    if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
+      returnstr = '<text x="' + ((mySVG.xright-20)/2 + 21 + shiftx) + '" y="' + starty + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
+      mySVG.ydown = mySVG.ydown + godown;
+    }
+    return returnstr;
+  }
+
   //-- Make the SVG for the entire electro item --
 
   toSVG(hasChild: Boolean = false) {
@@ -1288,28 +1299,19 @@ class Electro_Item extends List_Item {
         };
         mySVG.xright += 20 + this.getKey("aantal")*20;
         //-- Plaats adres onderaan --
-        if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
-          outputstr += '<text x="' + ((mySVG.xright-20)/2 + 21) + '" y="60" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
-          mySVG.ydown += 15;
-        }
+        outputstr += this.addAddress(mySVG,60,15);
         break;
       case "Batterij":
         outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
         outputstr += '<use xlink:href="#batterij" x="21" y="25"></use>';
         mySVG.xright = 40+20;
-        if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
-          outputstr += '<text x="' + ((mySVG.xright-20)/2 + 21) + '" y="55" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
-          mySVG.ydown += 10;
-        }
+        outputstr += this.addAddress(mySVG,55,10);
         break;
       case "Bel":
         outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
         outputstr += '<use xlink:href="#bel" x="21" y="25"></use>';
         mySVG.xright = 40;
-        if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
-          outputstr += '<text x="' + ((mySVG.xright-20)/2 + 21) + '" y="58" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
-          mySVG.ydown += 14;
-        }
+        outputstr += this.addAddress(mySVG,58,14);
         break;
       case "Boiler":
         outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
@@ -1322,28 +1324,19 @@ class Electro_Item extends List_Item {
             break;
         }
         mySVG.xright = 60;
-        if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
-          outputstr += '<text x="' + ((mySVG.xright-20)/2 + 21) + '" y="60" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
-          mySVG.ydown += 15;
-        }
+        outputstr += this.addAddress(mySVG,60,15);
         break;
       case "Diepvriezer":
         outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
         outputstr += '<use xlink:href="#diepvriezer" x="21" y="25"></use>';
         mySVG.xright = 60;
-        if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
-          outputstr += '<text x="' + ((mySVG.xright-20)/2 + 21) + '" y="60" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
-          mySVG.ydown += 15;
-        }
+        outputstr += this.addAddress(mySVG,60,15);
         break;
       case "Droogkast":
         outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
         outputstr += '<use xlink:href="#droogkast" x="21" y="25"></use>';
         mySVG.xright = 60;
-        if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
-          outputstr += '<text x="' + ((mySVG.xright-20)/2 + 21) + '" y="60" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
-          mySVG.ydown += 15;
-        }
+        outputstr += this.addAddress(mySVG,60,15);
         break;
       case "Drukknop":
         var printstr:string = "";
@@ -1401,28 +1394,19 @@ class Electro_Item extends List_Item {
         outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
         outputstr += '<use xlink:href="#elektriciteitsmeter" x="21" y="25"></use>';
         mySVG.xright = 60;
-        if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
-          outputstr += '<text x="' + ((mySVG.xright-20)/2 + 21) + '" y="60" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
-          mySVG.ydown += 15;
-        }
+        outputstr += this.addAddress(mySVG,60,15);
         break;
       case "Elektrische oven":
         outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
         outputstr += '<use xlink:href="#oven" x="21" y="25"></use>';
         mySVG.xright = 60;
-        if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
-          outputstr += '<text x="' + ((mySVG.xright-20)/2 + 21) + '" y="60" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
-          mySVG.ydown += 15;
-        }
+        outputstr += this.addAddress(mySVG,60,15);
         break;
       case "EV lader":
         outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
         outputstr += '<use xlink:href="#EVlader" x="21" y="25"></use>';
         mySVG.xright = 60;
-        if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
-          outputstr += '<text x="' + ((mySVG.xright-20)/2 + 21) + '" y="58" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
-          mySVG.ydown += 14;
-        }
+        outputstr += this.addAddress(mySVG,58,14);
         break;
       case "Ketel":
         var shifty = 0; if (this.keys[4][2]>1) {
@@ -1490,83 +1474,56 @@ class Electro_Item extends List_Item {
         mySVG.xright = 60;
         mySVG.yup += shifty;
         //Place adres underneath
-        if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
-          outputstr += '<text x="' + ((mySVG.xright-20)/2 + 21) + '" y="' + (shifty+60) + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-style="italic" font-size="10">' + htmlspecialchars(this.keys[15][2]) + '</text>';
-          mySVG.ydown += 15;
-        }
+        outputstr += this.addAddress(mySVG,shifty+60,15);
         break;
       case "Koelkast":
         outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
         outputstr += '<use xlink:href="#koelkast" x="21" y="25"></use>';
         mySVG.xright = 60;
-        if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
-          outputstr += '<text x="' + ((mySVG.xright-20)/2 + 21) + '" y="60" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
-          mySVG.ydown += 15;
-        }
+        outputstr += this.addAddress(mySVG,60,15);
         break;
       case "Kookfornuis":
         outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
         outputstr += '<use xlink:href="#kookfornuis" x="21" y="25"></use>';
         mySVG.xright = 60;
-        if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
-          outputstr += '<text x="' + ((mySVG.xright-20)/2 + 21) + '" y="60" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
-          mySVG.ydown += 15;
-        }
+        outputstr += this.addAddress(mySVG,60,15);
         break;
       case "Microgolfoven":
         outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
         outputstr += '<use xlink:href="#microgolf" x="21" y="25"></use>';
         mySVG.xright = 60;
-        if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
-          outputstr += '<text x="' + ((mySVG.xright-20)/2 + 21) + '" y="60" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
-          mySVG.ydown += 15;
-        }
+        outputstr += this.addAddress(mySVG,60,15);
         break;
       case "Motor":
         outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
         outputstr += '<use xlink:href="#motor" x="21" y="25"></use>';
         mySVG.xright = 60;
-        if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
-          outputstr += '<text x="' + ((mySVG.xright-20)/2 + 21) + '" y="60" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
-          mySVG.ydown += 15;
-        }
+        outputstr += this.addAddress(mySVG,60,15);
         break;
       case "Omvormer":
         outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
         outputstr += '<use xlink:href="#omvormer" x="21" y="25"></use>';
         mySVG.xright = 80;
-        if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
-          outputstr += '<text x="' + ((mySVG.xright-20)/2 + 21) + '" y="55" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
-          mySVG.ydown += 10;
-        }
+        outputstr += this.addAddress(mySVG,55,10);
         break;
       case "Overspanningsbeveiliging":
         outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
         outputstr += '<use xlink:href="#overspanningsbeveiliging" x="21" y="25"></use>';
         mySVG.xright = 35;
-        if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
-          outputstr += '<text x="' + ((mySVG.xright-20)/2 + 21) + '" y="55" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
-          mySVG.ydown += 10;
-        }
+        outputstr += this.addAddress(mySVG,55,10);
         break;
       case "Leeg":
       case "Aansluitpunt":
         outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
         outputstr += '<use xlink:href="#aansluitpunt" x="21" y="25"></use>';
         mySVG.xright = 29;
-        if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
-          outputstr += '<text x="' + ((mySVG.xright-20)/2 + 21) + '" y="45" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
-          mySVG.ydown += 0;
-        }
+        outputstr += this.addAddress(mySVG,45,0);
         break;
       case "Aftakdoos":
         outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
         outputstr += '<use xlink:href="#aftakdoos" x="21" y="25"></use>';
         mySVG.xright = 49;
-        if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
-          outputstr += '<text x="' + ((mySVG.xright-20)/2 + 21) + '" y="55" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
-          mySVG.ydown += 10;
-        }
+        outputstr += this.addAddress(mySVG,55,10);
         break;
       case "Lichtcircuit":
         outputstr += this.toSVGswitches(hasChild, mySVG);
@@ -1628,10 +1585,7 @@ class Electro_Item extends List_Item {
             }
             mySVG.xright = 42;
             //-- Plaats adres onderaan --
-            if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
-              outputstr += '<text x="' + ((mySVG.xright-20)/2 + 23) + '" y="50" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
-              mySVG.ydown += 5;
-            }
+            outputstr += this.addAddress(mySVG,50,5,2);
             break;
           case "spot":
             outputstr += '<use xlink:href="#spot" x="' + 30 + '" y="25" />';
@@ -1678,10 +1632,7 @@ class Electro_Item extends List_Item {
             }
             mySVG.xright = 45;
             //-- Plaats adres onderaan --
-            if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
-              outputstr += '<text x="' + ((mySVG.xright-20)/2 + 25) + '" y="52" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
-              mySVG.ydown += 7;
-            }
+            outputstr += this.addAddress(mySVG,52,7,4);
             break;
           case "TL":
             var aantal_buizen = this.keys[13][2];
@@ -1721,10 +1672,7 @@ class Electro_Item extends List_Item {
             }
             mySVG.xright = 90;
             //-- Plaats adres onderaan --
-            if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
-              outputstr += '<text x="' + ((mySVG.xright-20)/2 + 23) + '" y="' + (endy+13) + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
-              mySVG.ydown = Math.max(mySVG.ydown,endy+18-25);
-            }
+            outputstr += this.addAddress(mySVG,endy+13,Math.max(mySVG.ydown,endy+18-25),2);
             break;
           default:
             switch (this.keys[17][2]) {
@@ -1759,10 +1707,7 @@ class Electro_Item extends List_Item {
             }
             mySVG.xright = 39;
             //-- Plaats adres onderaan --
-            if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
-              outputstr += '<text x="' + ((mySVG.xright-20)/2 + 20) + '" y="54" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
-              mySVG.ydown += 10;
-            }
+            outputstr += this.addAddress(mySVG,54,10,-1);
             break;
         }
         break;
@@ -1774,10 +1719,7 @@ class Electro_Item extends List_Item {
         outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
         outputstr += '<use xlink:href="#stoomoven" x="21" y="25"></use>';
         mySVG.xright = 60;
-        if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
-          outputstr += '<text x="' + ((mySVG.xright-20)/2 + 21) + '" y="60" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
-          mySVG.ydown += 15;
-        }
+        outputstr += this.addAddress(mySVG,60,15);
         break;
       case "Transformator":
         outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
@@ -1785,10 +1727,7 @@ class Electro_Item extends List_Item {
         outputstr += '<text x="35" y="44" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' +
           htmlspecialchars(this.getKey("voltage")) + "</text>";
         mySVG.xright = 48;
-        if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
-          outputstr += '<text x="' + ((mySVG.xright-20)/2 + 21) + '" y="58" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
-          mySVG.ydown += 15;
-        }
+        outputstr += this.addAddress(mySVG,58,15);
         break;
       case "USB lader":
         var shifty = 0; if (this.keys[4][2]>1) {
@@ -1798,29 +1737,20 @@ class Electro_Item extends List_Item {
         outputstr += '<line x1="1" y1="' + (shifty+25) + '" x2="21" y2="' + (shifty+25) + '" stroke="black"></line>';
         outputstr += '<use xlink:href="#usblader" x="21" y="' + (shifty+25) + '"></use>';
         mySVG.xright = 80;
-        if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
-          outputstr += '<text x="' + ((mySVG.xright-20)/2 + 21) + '" y="' + (shifty+55) + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
-          mySVG.ydown += 10;
-        }
+        outputstr += this.addAddress(mySVG,shifty + 55,10);
         mySVG.yup += shifty;
         break;
       case "Vaatwasmachine":
         outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
         outputstr += '<use xlink:href="#vaatwasmachine" x="21" y="25"></use>';
         mySVG.xright = 60;
-        if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
-          outputstr += '<text x="' + ((mySVG.xright-20)/2 + 21) + '" y="60" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
-          mySVG.ydown += 15;
-        }
+        outputstr += this.addAddress(mySVG,60,15);
         break;
       case "Ventilator":
         outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
         outputstr += '<use xlink:href="#ventilator" x="21" y="25"></use>';
         mySVG.xright = 50;
-        if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
-          outputstr += '<text x="' + ((mySVG.xright-20)/2 + 21) + '" y="55" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
-          mySVG.ydown += 10;
-        }
+        outputstr += this.addAddress(mySVG,55,10);
         break;
       case "Verwarmingstoestel":
         outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
@@ -1841,10 +1771,7 @@ class Electro_Item extends List_Item {
             }
           break;
         }
-        if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
-          outputstr += '<text x="' + ((mySVG.xright-20)/2 + 21) + '" y="55" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
-          mySVG.ydown += 10;
-        }
+        outputstr += this.addAddress(mySVG,55,10);
         break;
       case "Verlenging":
         var width;
@@ -1861,9 +1788,9 @@ class Electro_Item extends List_Item {
 
         outputstr += '<line x1="1" y1="25" x2="' + (width+1) + '" y2="25" stroke="black" />';
 
+        //outputstr += this.addAddress(mySVG,40,0,(width - mySVG.xright - 20)/2);
         if (!(/^\s*$/.test(this.keys[23][2]))) { //check if adres contains only white space
           outputstr += '<text x="' + (1 + width/2) + '" y="40" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[23][2]) + '</text>';
-          //mySVG.ydown += 15;
         }
 
         break;
@@ -1940,20 +1867,14 @@ class Electro_Item extends List_Item {
         outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
         outputstr += '<use xlink:href="#wasmachine" x="21" y="25"></use>';
         mySVG.xright = 60;
-        if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
-          outputstr += '<text x="' + ((mySVG.xright-20)/2 + 21) + '" y="60" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
-          mySVG.ydown += 15;
-        }
+        outputstr += this.addAddress(mySVG,60,15);
         break;
       case "Zonnepaneel":
         outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
         outputstr += '<use xlink:href="#zonnepaneel" x="21" y="25"></use>';
         outputstr += '<text x="60" y="9" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' + htmlspecialchars(this.keys[4][2]) + 'x</text>';
         mySVG.xright = 100;
-        if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
-          outputstr += '<text x="' + ((mySVG.xright-20)/2 + 21) + '" y="60" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
-          mySVG.ydown += 15;
-        }
+        outputstr += this.addAddress(mySVG,60,15);
         break;
     }
     mySVG.data = outputstr + "\n";
