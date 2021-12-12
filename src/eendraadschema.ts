@@ -340,12 +340,12 @@ class Electro_Item extends List_Item {
         }
         case "Kring": {
           this.consumers = ["", "Aansluiting", "Bord", "Domotica", "Kring", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt",
-                            "Aftakdoos", "Leeg"];
+                            "Aftakdoos", "Leeg", "Zeldzame symbolen"];
           break;
         }
         case "Meerdere verbruikers": {
           this.consumers = ["", "Domotica", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt",
-                            "Aftakdoos", "Leeg"];
+                            "Aftakdoos", "Leeg", "Zeldzame symbolen"];
           break;
         }
         case "Aansluiting": {
@@ -463,6 +463,9 @@ class Electro_Item extends List_Item {
         break;
       case "Lichtpunt":
         this.keys[17][2] = "Geen"; //Geen noodverlichting
+        break;
+      case "Zeldzame symbolen":
+        this.keys[16][2] = "";
         break;
       default:
         //this.keys[10][2] = "";
@@ -819,6 +822,11 @@ class Electro_Item extends List_Item {
         output += ", Schuin: " + this.checkboxToHTML(20);
         output += ", Breedte: " + this.stringToHTML(22,3);
         if (this.keys[16][2] != "zonder kader") output += ", Adres/tekst: " + this.stringToHTML(23,2);
+        break;
+      case "Zeldzame symbolen":
+        output += "&nbsp;Nr: " + this.stringToHTML(10,5);
+        output += ", Symbool: " + this.selectToHTML(16,["","deurslot"]);
+        output += ", Adres/tekst: " + this.stringToHTML(15,5);
         break;
       case "Zonnepaneel":
         output += "&nbsp;Nr: " + this.stringToHTML(10,5) + ", ";
@@ -1822,8 +1830,6 @@ class Electro_Item extends List_Item {
         if (this.keys[19][2]) options += ' font-weight="bold"';
         if (this.keys[20][2]) options += ' font-style="italic"';
 
-
-
         //--Tekst plaatsen --
         var strlines = htmlspecialchars(this.getKey("commentaar")).split("|");
         switch (this.keys[17][2]) {
@@ -1882,6 +1888,22 @@ class Electro_Item extends List_Item {
         outputstr += '<text x="60" y="9" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' + htmlspecialchars(this.keys[4][2]) + 'x</text>';
         mySVG.xright = 100;
         outputstr += this.addAddress(mySVG,60,15);
+        break;
+
+      case "Zeldzame symbolen":
+
+        switch (this.keys[16][2]) {
+          case "deurslot":
+            outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
+            outputstr += '<use xlink:href="#deurslot" x="21" y="25"></use>';
+            mySVG.xright = 60;
+            outputstr += this.addAddress(mySVG,55,10,2);
+            break;
+          default:
+            outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
+            break;
+        }
+
         break;
     }
     mySVG.data = outputstr + "\n";
@@ -3365,6 +3387,13 @@ class Hierarchical_List {
       <line x1="9" y1="-5" x2="13" y2="-5" stroke="black"/>
       <line x1="11" y1="-7" x2="11" y2="-3" stroke="black"/>
       <line x1="29" y1="-5" x2="33" y2="-5" stroke="black"/>
+    </g>
+    <g id="deurslot">
+      <line x1="1" y1="-15" x2="31" y2="-15" stroke="black"/>
+      <line x1="1" y1="15"  x2="46" y2="15" stroke="black"/>
+      <line x1="1" y1="-15" x2="1" y2="15" stroke="black"/>
+      <line x1="31" y1="-15" x2="46" y2="15" stroke="black"/>
+      <path d="M 7 3 A 6 6 0 0 1 19 3 A 6 6 0 0 1 31 3" stroke="black" fill="none" />
     </g>
     <g id="ster">
       <line x1="0" y1="-5" x2="0" y2="5" style="stroke:black" />

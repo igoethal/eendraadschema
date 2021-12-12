@@ -82,12 +82,12 @@ class Electro_Item extends List_Item {
         }
         case "Kring": {
           this.consumers = ["", "Aansluiting", "Bord", "Domotica", "Kring", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt",
-                            "Aftakdoos", "Leeg"];
+                            "Aftakdoos", "Leeg", "Zeldzame symbolen"];
           break;
         }
         case "Meerdere verbruikers": {
           this.consumers = ["", "Domotica", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt",
-                            "Aftakdoos", "Leeg"];
+                            "Aftakdoos", "Leeg", "Zeldzame symbolen"];
           break;
         }
         case "Aansluiting": {
@@ -205,6 +205,9 @@ class Electro_Item extends List_Item {
         break;
       case "Lichtpunt":
         this.keys[17][2] = "Geen"; //Geen noodverlichting
+        break;
+      case "Zeldzame symbolen":
+        this.keys[16][2] = "";
         break;
       default:
         //this.keys[10][2] = "";
@@ -561,6 +564,11 @@ class Electro_Item extends List_Item {
         output += ", Schuin: " + this.checkboxToHTML(20);
         output += ", Breedte: " + this.stringToHTML(22,3);
         if (this.keys[16][2] != "zonder kader") output += ", Adres/tekst: " + this.stringToHTML(23,2);
+        break;
+      case "Zeldzame symbolen":
+        output += "&nbsp;Nr: " + this.stringToHTML(10,5);
+        output += ", Symbool: " + this.selectToHTML(16,["","deurslot"]);
+        output += ", Adres/tekst: " + this.stringToHTML(15,5);
         break;
       case "Zonnepaneel":
         output += "&nbsp;Nr: " + this.stringToHTML(10,5) + ", ";
@@ -1564,8 +1572,6 @@ class Electro_Item extends List_Item {
         if (this.keys[19][2]) options += ' font-weight="bold"';
         if (this.keys[20][2]) options += ' font-style="italic"';
 
-
-
         //--Tekst plaatsen --
         var strlines = htmlspecialchars(this.getKey("commentaar")).split("|");
         switch (this.keys[17][2]) {
@@ -1624,6 +1630,22 @@ class Electro_Item extends List_Item {
         outputstr += '<text x="60" y="9" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' + htmlspecialchars(this.keys[4][2]) + 'x</text>';
         mySVG.xright = 100;
         outputstr += this.addAddress(mySVG,60,15);
+        break;
+
+      case "Zeldzame symbolen":
+
+        switch (this.keys[16][2]) {
+          case "deurslot":
+            outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
+            outputstr += '<use xlink:href="#deurslot" x="21" y="25"></use>';
+            mySVG.xright = 60;
+            outputstr += this.addAddress(mySVG,55,10,2);
+            break;
+          default:
+            outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
+            break;
+        }
+
         break;
     }
     mySVG.data = outputstr + "\n";

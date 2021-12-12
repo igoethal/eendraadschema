@@ -1433,6 +1433,13 @@ class Hierarchical_List {
       <line x1="11" y1="-7" x2="11" y2="-3" stroke="black"/>
       <line x1="29" y1="-5" x2="33" y2="-5" stroke="black"/>
     </g>
+    <g id="deurslot">
+      <line x1="1" y1="-15" x2="31" y2="-15" stroke="black"/>
+      <line x1="1" y1="15"  x2="46" y2="15" stroke="black"/>
+      <line x1="1" y1="-15" x2="1" y2="15" stroke="black"/>
+      <line x1="31" y1="-15" x2="46" y2="15" stroke="black"/>
+      <path d="M 7 3 A 6 6 0 0 1 19 3 A 6 6 0 0 1 31 3" stroke="black" fill="none" />
+    </g>
     <g id="ster">
       <line x1="0" y1="-5" x2="0" y2="5" style="stroke:black" />
       <line x1="-4.33" y1="-2.5" x2="4.33" y2="2.5" style="stroke:black" />
