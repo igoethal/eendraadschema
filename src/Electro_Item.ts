@@ -128,6 +128,7 @@ class Electro_Item extends List_Item {
     this.keys[3][2] = false;
     this.keys[5][2] = "enkelpolig";
     this.keys[6][2] = false;
+
     if (this.keys[0][2] == "Aansluiting") {
       this.keys[4][2] = "2";
       this.keys[7][2] = "differentieel";
@@ -140,14 +141,18 @@ class Electro_Item extends List_Item {
       this.keys[8][2] = "20";
       this.keys[9][2] = "XVB 3G2,5";
     };
+
     if (this.keys[0][2] == "Verlenging") {
       this.keys[22][2] = 40;
     };
+
     if (this.keys[0][2] == "Vrije tekst") {
       this.keys[22][2] = 40;
       this.keys[17][2] = "centreer";
     };
+
     this.keys[11][2] = "300"; //Differentieel
+
     if (this.Parent_Item == null) {
       this.keys[12][2] = true;
     } else {
@@ -165,14 +170,23 @@ class Electro_Item extends List_Item {
           break;
       }
     };
+
     if (this.keys[0][2] == "Schakelaars") {this.keys[25][2] = false; }
+
     this.keys[13][2] = "1";
     this.keys[14][2] = "230V/24V";
     this.keys[15][2] = "";
+
     //-- Set each of the optional booleans to false --
     this.keys[19][2] = false;
     this.keys[20][2] = false;
     this.keys[21][2] = false;
+
+    //-- Empty the strings
+    this.keys[22][2] = "";
+    this.keys[23][2] = "";
+    this.keys[24][2] = "";
+
     switch (this.keys[0][2]) { //Special cases
       case "Kring":
         this.keys[4][2] = 2;
@@ -369,7 +383,12 @@ class Electro_Item extends List_Item {
         if (this.getKey("zekering")=="differentieel") {
           output += ", \u0394 " + this.stringToHTML(11,3) + "mA";
           output += ", Type:" + this.selectToHTML(17,["","A","B"]);
+          output += ", Kortsluitvermogen: " + this.stringToHTML(22,3) + "V";
           output += ", Selectief: " + this.checkboxToHTML(20);
+        }
+        if (this.getKey("zekering")=="automatisch") {
+          output += ", Type:" + this.selectToHTML(17,["","B","C","D"]);
+          output += ", Kortsluitvermogen: " + this.stringToHTML(22,3) + "V";
         }
         output += ", Kabel: " + this.checkboxToHTML(12);
         if (this.getKey("kabel_aanwezig")) {
@@ -390,7 +409,12 @@ class Electro_Item extends List_Item {
         if (this.getKey("zekering")=="differentieel") {
           output += ", \u0394 " + this.stringToHTML(11,3) + "mA";
           output += ", Type:" + this.selectToHTML(17,["","A","B"]);
+          output += ", Kortsluitvermogen: " + this.stringToHTML(22,3) + "V";
           output += ", Selectief: " + this.checkboxToHTML(20);
+        }
+        if (this.getKey("zekering")=="automatisch") {
+          output += ", Type:" + this.selectToHTML(17,["","B","C","D"]);
+          output += ", Kortsluitvermogen: " + this.stringToHTML(22,3) + "V";
         }
         output += ", Kabeltype: " + this.stringToHTML(9,10);
         output += ", Adres/tekst: " + this.stringToHTML(15,5);
