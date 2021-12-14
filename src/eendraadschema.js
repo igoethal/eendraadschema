@@ -636,12 +636,12 @@ var Electro_Item = /** @class */ (function (_super) {
                 if (this.getKey("zekering") == "differentieel") {
                     output += ", \u0394 " + this.stringToHTML(11, 3) + "mA";
                     output += ", Type:" + this.selectToHTML(17, ["", "A", "B"]);
-                    output += ", Kortsluitvermogen: " + this.stringToHTML(22, 3) + "V";
+                    output += ", Kortsluitvermogen: " + this.stringToHTML(22, 3) + "kA";
                     output += ", Selectief: " + this.checkboxToHTML(20);
                 }
                 if (this.getKey("zekering") == "automatisch") {
                     output += ", Type:" + this.selectToHTML(17, ["", "B", "C", "D"]);
-                    output += ", Kortsluitvermogen: " + this.stringToHTML(22, 3) + "V";
+                    output += ", Kortsluitvermogen: " + this.stringToHTML(22, 3) + "kA";
                 }
                 output += ", Kabel: " + this.checkboxToHTML(12);
                 if (this.getKey("kabel_aanwezig")) {
@@ -663,12 +663,12 @@ var Electro_Item = /** @class */ (function (_super) {
                 if (this.getKey("zekering") == "differentieel") {
                     output += ", \u0394 " + this.stringToHTML(11, 3) + "mA";
                     output += ", Type:" + this.selectToHTML(17, ["", "A", "B"]);
-                    output += ", Kortsluitvermogen: " + this.stringToHTML(22, 3) + "V";
+                    output += ", Kortsluitvermogen: " + this.stringToHTML(22, 3) + "kA";
                     output += ", Selectief: " + this.checkboxToHTML(20);
                 }
                 if (this.getKey("zekering") == "automatisch") {
                     output += ", Type:" + this.selectToHTML(17, ["", "B", "C", "D"]);
-                    output += ", Kortsluitvermogen: " + this.stringToHTML(22, 3) + "V";
+                    output += ", Kortsluitvermogen: " + this.stringToHTML(22, 3) + "kA";
                 }
                 output += ", Kabeltype: " + this.stringToHTML(9, 10);
                 output += ", Adres/tekst: " + this.stringToHTML(15, 5);
@@ -2612,7 +2612,7 @@ var Hierarchical_List = /** @class */ (function () {
                                         "," + (inSVG[elementCounter].yup - 10) +
                                         ")" +
                                         "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                        htmlspecialchars("" + this.data[i].keys[22][2]) + "V</text>";
+                                        htmlspecialchars("" + this.data[i].keys[22][2]) + "kA</text>";
                                 }
                                 //genoeg plaats voorzien aan de rechterkant en eindigen
                                 inSVG[elementCounter].xright = Math.max(inSVG[elementCounter].xright, 20 + 11 * (numlines - 1));
@@ -2681,7 +2681,7 @@ var Hierarchical_List = /** @class */ (function () {
                                         "," + (inSVG[elementCounter].yup - 10) +
                                         ")" +
                                         "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                        htmlspecialchars("" + this.data[i].keys[22][2]) + "V</text>";
+                                        htmlspecialchars("" + this.data[i].keys[22][2]) + "kA</text>";
                                 }
                                 //genoeg plaats voorzien aan de rechterkant en eindigen
                                 inSVG[elementCounter].xright = Math.max(inSVG[elementCounter].xright, 20 + 11 * (numlines - 1));
@@ -3005,7 +3005,7 @@ var Hierarchical_List = /** @class */ (function () {
                                         "," + (inSVG[elementCounter].yup - 10) +
                                         ")" +
                                         "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                        htmlspecialchars("" + this.data[i].keys[22][2]) + "V</text>";
+                                        htmlspecialchars("" + this.data[i].keys[22][2]) + "kA</text>";
                                 }
                                 //genoeg plaats voorzien aan de rechterkant en eindigen
                                 inSVG[elementCounter].xright = Math.max(inSVG[elementCounter].xright, 20 + 11 * (numlines - 1));
@@ -3055,7 +3055,7 @@ var Hierarchical_List = /** @class */ (function () {
                                         "," + (inSVG[elementCounter].yup - 10) +
                                         ")" +
                                         "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                        htmlspecialchars("" + this.data[i].keys[22][2]) + "V</text>";
+                                        htmlspecialchars("" + this.data[i].keys[22][2]) + "kA</text>";
                                 }
                                 //genoeg plaats voorzien aan de rechterkant en eindigen
                                 inSVG[elementCounter].xright = Math.max(inSVG[elementCounter].xright, 20 + 11 * (numlines - 1));
