@@ -384,12 +384,12 @@ class Electro_Item extends List_Item {
         if (this.getKey("zekering")=="differentieel") {
           output += ", \u0394 " + this.stringToHTML(11,3) + "mA";
           output += ", Type:" + this.selectToHTML(17,["","A","B"]);
-          output += ", Kortsluitvermogen: " + this.stringToHTML(22,3) + "V";
+          output += ", Kortsluitvermogen: " + this.stringToHTML(22,3) + "kA";
           output += ", Selectief: " + this.checkboxToHTML(20);
         }
         if (this.getKey("zekering")=="automatisch") {
           output += ", Type:" + this.selectToHTML(17,["","B","C","D"]);
-          output += ", Kortsluitvermogen: " + this.stringToHTML(22,3) + "V";
+          output += ", Kortsluitvermogen: " + this.stringToHTML(22,3) + "kA";
         }
         output += ", Kabel: " + this.checkboxToHTML(12);
         if (this.getKey("kabel_aanwezig")) {
@@ -410,12 +410,12 @@ class Electro_Item extends List_Item {
         if (this.getKey("zekering")=="differentieel") {
           output += ", \u0394 " + this.stringToHTML(11,3) + "mA";
           output += ", Type:" + this.selectToHTML(17,["","A","B"]);
-          output += ", Kortsluitvermogen: " + this.stringToHTML(22,3) + "V";
+          output += ", Kortsluitvermogen: " + this.stringToHTML(22,3) + "kA";
           output += ", Selectief: " + this.checkboxToHTML(20);
         }
         if (this.getKey("zekering")=="automatisch") {
           output += ", Type:" + this.selectToHTML(17,["","B","C","D"]);
-          output += ", Kortsluitvermogen: " + this.stringToHTML(22,3) + "V";
+          output += ", Kortsluitvermogen: " + this.stringToHTML(22,3) + "kA";
         }
         output += ", Kabeltype: " + this.stringToHTML(9,10);
         output += ", Adres/tekst: " + this.stringToHTML(15,5);

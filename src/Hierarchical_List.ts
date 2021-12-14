@@ -652,7 +652,7 @@ class Hierarchical_List {
                     "," + (inSVG[elementCounter].yup-10) +
                     ")" +
                     "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                    htmlspecialchars("" + this.data[i].keys[22][2]) + "V</text>";
+                    htmlspecialchars("" + this.data[i].keys[22][2]) + "kA</text>";
                 }
 
                 //genoeg plaats voorzien aan de rechterkant en eindigen
@@ -728,7 +728,7 @@ class Hierarchical_List {
                     "," + (inSVG[elementCounter].yup-10) +
                     ")" +
                     "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                    htmlspecialchars("" + this.data[i].keys[22][2]) + "V</text>";
+                    htmlspecialchars("" + this.data[i].keys[22][2]) + "kA</text>";
                 }
 
                 //genoeg plaats voorzien aan de rechterkant en eindigen
@@ -1079,7 +1079,7 @@ class Hierarchical_List {
                     "," + (inSVG[elementCounter].yup-10) +
                     ")" +
                     "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                    htmlspecialchars("" + this.data[i].keys[22][2]) + "V</text>";
+                    htmlspecialchars("" + this.data[i].keys[22][2]) + "kA</text>";
                 }
 
                 //genoeg plaats voorzien aan de rechterkant en eindigen
@@ -1135,7 +1135,7 @@ class Hierarchical_List {
                       "," + (inSVG[elementCounter].yup-10) +
                       ")" +
                       "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                      htmlspecialchars("" + this.data[i].keys[22][2]) + "V</text>";
+                      htmlspecialchars("" + this.data[i].keys[22][2]) + "kA</text>";
                   }
 
                   //genoeg plaats voorzien aan de rechterkant en eindigen
