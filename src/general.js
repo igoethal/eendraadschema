@@ -37,7 +37,7 @@ function flattenSVG(SVGstruct,shiftx,shifty,node) {
     if (node <= 0) {
       //---output[0] = outstruct;
       if (outstruct.attributes.getNamedItem("width")) { // make SVG a 0,0 element
-        str = '<svg width="' + (outstruct.attributes.getNamedItem("width").nodeValue)  +
+        str = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" transform="scale(1,1)" width="' + (outstruct.attributes.getNamedItem("width").nodeValue)  +
                     '" height="' + (outstruct.attributes.getNamedItem("height").nodeValue) + '">' + str + '</svg>';
       } else {
         str = '<svg>' + str + '</svg>';
