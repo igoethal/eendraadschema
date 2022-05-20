@@ -29,4 +29,5 @@ jobs:
       - name: Start building
         run: |
           # run script
-          echo "${GITHUB_WORKSPACE}/compile"
+          ./compile
+        shell: bash
