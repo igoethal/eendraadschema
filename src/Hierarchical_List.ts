@@ -670,10 +670,10 @@ class Hierarchical_List {
                   inSVG[elementCounter].data += '<rect x="' + (inSVG[elementCounter].xleft+7) +
                     '" y="' + (inSVG[elementCounter].yup) +
                     '" width="16" height="16" stroke="black" fill="white" />';
-                  inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft+15) +
-                     "\" y=\"" + (inSVG[elementCounter].yup+12) +
+                  inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft+19) +
+                     "\" y=\"" + (inSVG[elementCounter].yup+8) +
                      "\"" +
-                     " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft+15) +
+                     " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft+19) +
                      "," + (inSVG[elementCounter].yup+8) +
                      ")" +
                       "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
@@ -826,6 +826,17 @@ class Hierarchical_List {
               inSVG[elementCounter].data += '<text x="41" y="' + (inSVG[elementCounter].yup+inSVG[elementCounter].ydown+10) + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.data[i].keys[15][2]) + '</text>';
               inSVG[elementCounter].ydown += 15;
             }
+
+            //--Naam onderaan zetten (links-onder)--
+            inSVG[elementCounter].data +=
+                  '<text x="' + (inSVG[elementCounter].xleft+(-6)) + '" '
+                  + 'y="' + (inSVG[elementCounter].yup-10) + '" '
+                  //+ 'transform="rotate(-90 ' + (inSVG[elementCounter].xleft-6) + ',' + (inSVG[elementCounter].yup+3) + ')" '
+                  + 'style="text-anchor:end" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="12"'
+                  + '>'
+                  + htmlspecialchars(this.data[i].keys[23][2])
+                  + '</text>';
+
 
             //rework xleft and xright to ensure the entire structure is always at the right of a potential parent kring
             var width = inSVG[elementCounter].xleft + inSVG[elementCounter].xright;

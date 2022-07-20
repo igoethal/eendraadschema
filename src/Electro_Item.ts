@@ -54,6 +54,7 @@ class Electro_Item extends List_Item {
       //Indien vrije tekst, breedte van het veld
     this.keys.push(["string2","STRING",""]); //23, algemeen veld
       //Indien vrije tekst, het adres-veld (want reeds gebruikt voor de tekst zelf)
+      //Indien aansluiting, hier kan ook een extra naam voor de aansluiting staan
     this.keys.push(["string3","STRING",""]); //24, algemeen veld
     this.keys.push(["bool4","BOOLEAN",false]); //25, algemeen veld
       //Indien schakelaar, indicatie trekschakelaar of niet
@@ -192,6 +193,8 @@ class Electro_Item extends List_Item {
         this.keys[16][2] = "N/A";
         this.keys[17][2] = "";
         break;
+      case "Aansluiting":
+        this.keys[23][2] = "";  
       case "Stopcontact":
         this.keys[16][2] = "3";
         break;
@@ -402,7 +405,7 @@ class Electro_Item extends List_Item {
         output += ", Tekst: " + this.stringToHTML(15,10);
         break;
       case "Aansluiting":
-        output += "&nbsp;";
+        output += "&nbsp;Naam: " + this.stringToHTML(23,5) + "<br>";
         if (typeof Parent != 'undefined') output += "Nr: " + this.stringToHTML(10,5) + ", ";
         output += "Zekering: " + this.selectToHTML(7,["automatisch","differentieel","smelt","geen","---","schakelaar","schemer"]) +
                                        this.selectToHTML(4,["2","3","4"]) +

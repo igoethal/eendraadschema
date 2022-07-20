@@ -320,6 +320,7 @@ var Electro_Item = /** @class */ (function (_super) {
         //Indien vrije tekst, breedte van het veld
         _this.keys.push(["string2", "STRING", ""]); //23, algemeen veld
         //Indien vrije tekst, het adres-veld (want reeds gebruikt voor de tekst zelf)
+        //Indien aansluiting, hier kan ook een extra naam voor de aansluiting staan
         _this.keys.push(["string3", "STRING", ""]); //24, algemeen veld
         _this.keys.push(["bool4", "BOOLEAN", false]); //25, algemeen veld
         //Indien schakelaar, indicatie trekschakelaar of niet
@@ -450,6 +451,8 @@ var Electro_Item = /** @class */ (function (_super) {
                 this.keys[16][2] = "N/A";
                 this.keys[17][2] = "";
                 break;
+            case "Aansluiting":
+                this.keys[23][2] = "";
             case "Stopcontact":
                 this.keys[16][2] = "3";
                 break;
@@ -654,7 +657,7 @@ var Electro_Item = /** @class */ (function (_super) {
                 output += ", Tekst: " + this.stringToHTML(15, 10);
                 break;
             case "Aansluiting":
-                output += "&nbsp;";
+                output += "&nbsp;Naam: " + this.stringToHTML(23, 5) + "<br>";
                 if (typeof Parent != 'undefined')
                     output += "Nr: " + this.stringToHTML(10, 5) + ", ";
                 output += "Zekering: " + this.selectToHTML(7, ["automatisch", "differentieel", "smelt", "geen", "---", "schakelaar", "schemer"]) +
@@ -2627,10 +2630,10 @@ var Hierarchical_List = /** @class */ (function () {
                                     inSVG[elementCounter].data += '<rect x="' + (inSVG[elementCounter].xleft + 7) +
                                         '" y="' + (inSVG[elementCounter].yup) +
                                         '" width="16" height="16" stroke="black" fill="white" />';
-                                    inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 15) +
-                                        "\" y=\"" + (inSVG[elementCounter].yup + 12) +
+                                    inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 19) +
+                                        "\" y=\"" + (inSVG[elementCounter].yup + 8) +
                                         "\"" +
-                                        " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 15) +
+                                        " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 19) +
                                         "," + (inSVG[elementCounter].yup + 8) +
                                         ")" +
                                         "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
@@ -2768,6 +2771,15 @@ var Hierarchical_List = /** @class */ (function () {
                             inSVG[elementCounter].data += '<text x="41" y="' + (inSVG[elementCounter].yup + inSVG[elementCounter].ydown + 10) + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.data[i].keys[15][2]) + '</text>';
                             inSVG[elementCounter].ydown += 15;
                         }
+                        //--Naam onderaan zetten (links-onder)--
+                        inSVG[elementCounter].data +=
+                            '<text x="' + (inSVG[elementCounter].xleft + (-6)) + '" '
+                                + 'y="' + (inSVG[elementCounter].yup - 10) + '" '
+                                //+ 'transform="rotate(-90 ' + (inSVG[elementCounter].xleft-6) + ',' + (inSVG[elementCounter].yup+3) + ')" '
+                                + 'style="text-anchor:end" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="12"'
+                                + '>'
+                                + htmlspecialchars(this.data[i].keys[23][2])
+                                + '</text>';
                         //rework xleft and xright to ensure the entire structure is always at the right of a potential parent kring
                         var width = inSVG[elementCounter].xleft + inSVG[elementCounter].xright;
                         inSVG[elementCounter].xleft = 1;
