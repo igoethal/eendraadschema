@@ -297,9 +297,10 @@ var Electro_Item = /** @class */ (function (_super) {
         _this.keys.push(["select2", "SELECT", "standaard"]); //17, algemeen veld
         //Indien lichtpunt, select2 is de selector voor het type noodverlichting (indien aanwezig)
         //Indien vrije tekst kan "links", "centreer", "rechts" zijn
-        //Indien differentieel of aansluiting, kan type "", "A", of "B" zijn
-        //Indien automaat, kan curve "", "A", "B", of "C" zijn
+        //Indien differentieel of differentieelautomaat (in kring of aansluiting), kan type "", "A", of "B" zijn
+        //Indien automaat (in kring of aansluiting), kan curve "", "A", "B", of "C" zijn
         _this.keys.push(["select3", "SELECT", "standaard"]); //18, algemeen veld
+        //Indien differentieelautomaat (in kring of aansluiting), kan curve "", "A", "B", of "C" zijn.  Veld 17 is dan het Type.
         _this.keys.push(["bool1", "BOOLEAN", false]); //19, algemeen veld
         //Indien lichtpunt, bool1 is de selector voor wandverlichting of niet
         //Indien drukknop, bool1 is de selector voor afgeschermd of niet
@@ -451,6 +452,7 @@ var Electro_Item = /** @class */ (function (_super) {
                 this.keys[10][2] = "---";
                 this.keys[16][2] = "N/A";
                 this.keys[17][2] = "";
+                this.keys[18][2] = "";
                 break;
             case "Aansluiting":
                 this.keys[23][2] = "";
@@ -634,7 +636,7 @@ var Electro_Item = /** @class */ (function (_super) {
         switch (this.keys[0][2]) {
             case "Kring":
                 output += "&nbsp;Naam: " + this.stringToHTML(10, 5) + "<br>";
-                output += "Zekering: " + this.selectToHTML(7, ["automatisch", "differentieel", "smelt", "geen", "---", "schakelaar", "schemer", "overspanningsbeveiliging"]);
+                output += "Zekering: " + this.selectToHTML(7, ["automatisch", "differentieel", "differentieelautomaat", "smelt", "geen", "---", "schakelaar", "schemer", "overspanningsbeveiliging"]);
                 if (this.keys[7][2] != "geen")
                     output += this.selectToHTML(4, ["2", "3", "4", "-", "1"]) + this.stringToHTML(8, 2) + "A";
                 if (this.getKey("zekering") == "differentieel") {
@@ -646,6 +648,13 @@ var Electro_Item = /** @class */ (function (_super) {
                 if (this.getKey("zekering") == "automatisch") {
                     output += ", Curve:" + this.selectToHTML(17, ["", "B", "C", "D"]);
                     output += ", Kortsluitvermogen: " + this.stringToHTML(22, 3) + "kA";
+                }
+                if (this.getKey("zekering") == "differentieelautomaat") {
+                    output += ", \u0394 " + this.stringToHTML(11, 3) + "mA";
+                    output += ", Curve:" + this.selectToHTML(18, ["", "B", "C", "D"]);
+                    output += ", Type:" + this.selectToHTML(17, ["", "A", "B"]);
+                    output += ", Kortsluitvermogen: " + this.stringToHTML(22, 3) + "kA";
+                    output += ", Selectief: " + this.checkboxToHTML(20);
                 }
                 output += ", Kabel: " + this.checkboxToHTML(12);
                 if (this.getKey("kabel_aanwezig")) {
@@ -661,7 +670,7 @@ var Electro_Item = /** @class */ (function (_super) {
                 output += "&nbsp;Naam: " + this.stringToHTML(23, 5) + "<br>";
                 if (typeof Parent != 'undefined')
                     output += "Nr: " + this.stringToHTML(10, 5) + ", ";
-                output += "Zekering: " + this.selectToHTML(7, ["automatisch", "differentieel", "smelt", "geen", "---", "schakelaar", "schemer"]) +
+                output += "Zekering: " + this.selectToHTML(7, ["automatisch", "differentieel", "differentieelautomaat", "smelt", "geen", "---", "schakelaar", "schemer"]) +
                     this.selectToHTML(4, ["2", "3", "4"]) +
                     this.stringToHTML(8, 2) + "A";
                 if (this.getKey("zekering") == "differentieel") {
@@ -670,8 +679,15 @@ var Electro_Item = /** @class */ (function (_super) {
                     output += ", Kortsluitvermogen: " + this.stringToHTML(22, 3) + "kA";
                     output += ", Selectief: " + this.checkboxToHTML(20);
                 }
+                if (this.getKey("zekering") == "differentieelautomaat") {
+                    output += ", \u0394 " + this.stringToHTML(11, 3) + "mA";
+                    output += ", Curve:" + this.selectToHTML(18, ["", "B", "C", "D"]);
+                    output += ", Type:" + this.selectToHTML(17, ["", "A", "B"]);
+                    output += ", Kortsluitvermogen: " + this.stringToHTML(22, 3) + "kA";
+                    output += ", Selectief: " + this.checkboxToHTML(20);
+                }
                 if (this.getKey("zekering") == "automatisch") {
-                    output += ", Type:" + this.selectToHTML(17, ["", "B", "C", "D"]);
+                    output += ", Curve:" + this.selectToHTML(17, ["", "B", "C", "D"]);
                     output += ", Kortsluitvermogen: " + this.stringToHTML(22, 3) + "kA";
                 }
                 output += ", Kabeltype: " + this.stringToHTML(9, 10);
@@ -2594,7 +2610,7 @@ var Hierarchical_List = /** @class */ (function () {
                                     ")" +
                                     "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
                                     htmlspecialchars(this.data[i].getKey("aantal") + "P - " + this.data[i].getKey("amperage") + "A") + "</text>";
-                                //Code om het type toe te voegen
+                                //Code om de curve toe te voegen
                                 if ((this.data[i].keys[17][2] == 'B') || (this.data[i].keys[17][2] == 'C') || (this.data[i].keys[17][2] == 'D')) {
                                     numlines = numlines + 1;
                                     inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
@@ -2663,6 +2679,87 @@ var Hierarchical_List = /** @class */ (function () {
                                     ")" +
                                     "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
                                     htmlspecialchars(this.data[i].getKey("aantal") + "P - " + this.data[i].getKey("amperage") + "A") + "</text>";
+                                //Code om het type toe te voegen
+                                if ((this.data[i].keys[17][2] == 'A') || (this.data[i].keys[17][2] == 'B')) {
+                                    numlines = numlines + 1;
+                                    inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
+                                        "\" y=\"" + (inSVG[elementCounter].yup - 10) +
+                                        "\"" +
+                                        " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
+                                        "," + (inSVG[elementCounter].yup - 10) +
+                                        ")" +
+                                        "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
+                                        htmlspecialchars("Type " + this.data[i].keys[17][2]) + "</text>";
+                                }
+                                //Code om kortsluitvermogen toe te voegen
+                                if ((this.data[i].keys[22][2] != '')) {
+                                    numlines = numlines + 1;
+                                    inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
+                                        "\" y=\"" + (inSVG[elementCounter].yup - 10) +
+                                        "\"" +
+                                        " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
+                                        "," + (inSVG[elementCounter].yup - 10) +
+                                        ")" +
+                                        "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
+                                        htmlspecialchars("" + this.data[i].keys[22][2]) + "kA</text>";
+                                }
+                                //genoeg plaats voorzien aan de rechterkant en eindigen
+                                inSVG[elementCounter].xright = Math.max(inSVG[elementCounter].xright, 20 + 11 * (numlines - 1));
+                                break;
+                            case "differentieelautomaat":
+                                //Code als differentieel selectief is
+                                if (this.data[i].keys[20][2]) {
+                                    inSVG[elementCounter].data += '<line x1="' + inSVG[elementCounter].xleft +
+                                        '" x2="' + inSVG[elementCounter].xleft +
+                                        '" y1="' + inSVG[elementCounter].yup +
+                                        '" y2="' + (inSVG[elementCounter].yup + 30) + '" stroke="black" />';
+                                    inSVG[elementCounter].data += '<rect x="' + (inSVG[elementCounter].xleft + 7) +
+                                        '" y="' + (inSVG[elementCounter].yup) +
+                                        '" width="16" height="16" stroke="black" fill="white" />';
+                                    inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 19) +
+                                        "\" y=\"" + (inSVG[elementCounter].yup + 8) +
+                                        "\"" +
+                                        " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 19) +
+                                        "," + (inSVG[elementCounter].yup + 8) +
+                                        ")" +
+                                        "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
+                                        "S" + "</text>";
+                                    inSVG[elementCounter].yup += 23;
+                                }
+                                //Basiscode voor het amperage en de sluitstroom
+                                var numlines = 2;
+                                inSVG[elementCounter].yup += 30;
+                                inSVG[elementCounter].data +=
+                                    '<use xlink:href="#zekering_automatisch" x=\"' + inSVG[elementCounter].xleft +
+                                        '" y="' + inSVG[elementCounter].yup + '" />';
+                                inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 15) +
+                                    "\" y=\"" + (inSVG[elementCounter].yup - 10) +
+                                    "\"" +
+                                    " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 15) +
+                                    "," + (inSVG[elementCounter].yup - 10) +
+                                    ")" +
+                                    "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
+                                    "\u0394" + htmlspecialchars(this.data[i].getKey("differentieel_waarde") + "mA") + "</text>";
+                                inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 26) +
+                                    "\" y=\"" + (inSVG[elementCounter].yup - 10) +
+                                    "\"" +
+                                    " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 26) +
+                                    "," + (inSVG[elementCounter].yup - 10) +
+                                    ")" +
+                                    "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
+                                    htmlspecialchars(this.data[i].getKey("aantal") + "P - " + this.data[i].getKey("amperage") + "A") + "</text>";
+                                //Code om de curve toe te voegen
+                                if ((this.data[i].keys[18][2] == 'B') || (this.data[i].keys[18][2] == 'C') || (this.data[i].keys[18][2] == 'D')) {
+                                    numlines = numlines + 1;
+                                    inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
+                                        "\" y=\"" + (inSVG[elementCounter].yup - 10) +
+                                        "\"" +
+                                        " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
+                                        "," + (inSVG[elementCounter].yup - 10) +
+                                        ")" +
+                                        "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
+                                        htmlspecialchars("Curve " + this.data[i].keys[18][2]) + "</text>";
+                                }
                                 //Code om het type toe te voegen
                                 if ((this.data[i].keys[17][2] == 'A') || (this.data[i].keys[17][2] == 'B')) {
                                     numlines = numlines + 1;
@@ -2996,7 +3093,7 @@ var Hierarchical_List = /** @class */ (function () {
                                     ")" +
                                     "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
                                     htmlspecialchars(this.data[i].getKey("aantal") + "P - " + this.data[i].getKey("amperage") + "A") + "</text>";
-                                //Code om het type toe te voegen
+                                //Code om de curve toe te voegen
                                 if ((this.data[i].keys[17][2] == 'B') || (this.data[i].keys[17][2] == 'C') || (this.data[i].keys[17][2] == 'D')) {
                                     numlines = numlines + 1;
                                     inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
@@ -3046,6 +3143,68 @@ var Hierarchical_List = /** @class */ (function () {
                                     ")" +
                                     "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
                                     htmlspecialchars(this.data[i].getKey("aantal") + "P - " + this.data[i].getKey("amperage") + "A") + "</text>";
+                                //Code om het type toe te voegen
+                                if ((this.data[i].keys[17][2] == 'A') || (this.data[i].keys[17][2] == 'B')) {
+                                    numlines = numlines + 1;
+                                    inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
+                                        "\" y=\"" + (inSVG[elementCounter].yup - 10) +
+                                        "\"" +
+                                        " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
+                                        "," + (inSVG[elementCounter].yup - 10) +
+                                        ")" +
+                                        "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
+                                        htmlspecialchars("Type " + this.data[i].keys[17][2]) + "</text>";
+                                }
+                                //Code om kortsluitvermogen toe te voegen
+                                if ((this.data[i].keys[22][2] != '')) {
+                                    numlines = numlines + 1;
+                                    inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
+                                        "\" y=\"" + (inSVG[elementCounter].yup - 10) +
+                                        "\"" +
+                                        " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
+                                        "," + (inSVG[elementCounter].yup - 10) +
+                                        ")" +
+                                        "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
+                                        htmlspecialchars("" + this.data[i].keys[22][2]) + "kA</text>";
+                                }
+                                //genoeg plaats voorzien aan de rechterkant en eindigen
+                                inSVG[elementCounter].xright = Math.max(inSVG[elementCounter].xright, 20 + 11 * (numlines - 1));
+                                break;
+                            case "differentieelautomaat":
+                                //Basiscode voor het amperage en de sluitstroom
+                                var numlines = 2;
+                                inSVG[elementCounter].yup += 30;
+                                inSVG[elementCounter].data +=
+                                    '<use xlink:href="#zekering_automatisch" x=\"' + inSVG[elementCounter].xleft +
+                                        '" y="' + inSVG[elementCounter].yup + '" />';
+                                inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 15) +
+                                    "\" y=\"" + (inSVG[elementCounter].yup - 10) +
+                                    "\"" +
+                                    " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 15) +
+                                    "," + (inSVG[elementCounter].yup - 10) +
+                                    ")" +
+                                    "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
+                                    "\u0394" + htmlspecialchars(this.data[i].getKey("differentieel_waarde") + "mA") + "</text>";
+                                inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 26) +
+                                    "\" y=\"" + (inSVG[elementCounter].yup - 10) +
+                                    "\"" +
+                                    " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 26) +
+                                    "," + (inSVG[elementCounter].yup - 10) +
+                                    ")" +
+                                    "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
+                                    htmlspecialchars(this.data[i].getKey("aantal") + "P - " + this.data[i].getKey("amperage") + "A") + "</text>";
+                                //Code om de curve toe te voegen
+                                if ((this.data[i].keys[18][2] == 'B') || (this.data[i].keys[18][2] == 'C') || (this.data[i].keys[18][2] == 'D')) {
+                                    numlines = numlines + 1;
+                                    inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
+                                        "\" y=\"" + (inSVG[elementCounter].yup - 10) +
+                                        "\"" +
+                                        " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
+                                        "," + (inSVG[elementCounter].yup - 10) +
+                                        ")" +
+                                        "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
+                                        htmlspecialchars("Curve " + this.data[i].keys[18][2]) + "</text>";
+                                }
                                 //Code om het type toe te voegen
                                 if ((this.data[i].keys[17][2] == 'A') || (this.data[i].keys[17][2] == 'B')) {
                                     numlines = numlines + 1;

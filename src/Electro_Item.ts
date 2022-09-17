@@ -31,9 +31,10 @@ class Electro_Item extends List_Item {
     this.keys.push(["select2","SELECT","standaard"]); //17, algemeen veld
       //Indien lichtpunt, select2 is de selector voor het type noodverlichting (indien aanwezig)
       //Indien vrije tekst kan "links", "centreer", "rechts" zijn
-      //Indien differentieel of aansluiting, kan type "", "A", of "B" zijn
-      //Indien automaat, kan curve "", "A", "B", of "C" zijn
+      //Indien differentieel of differentieelautomaat (in kring of aansluiting), kan type "", "A", of "B" zijn
+      //Indien automaat (in kring of aansluiting), kan curve "", "A", "B", of "C" zijn
     this.keys.push(["select3","SELECT","standaard"]); //18, algemeen veld
+      //Indien differentieelautomaat (in kring of aansluiting), kan curve "", "A", "B", of "C" zijn.  Veld 17 is dan het Type.
     this.keys.push(["bool1","BOOLEAN",false]); //19, algemeen veld
       //Indien lichtpunt, bool1 is de selector voor wandverlichting of niet
       //Indien drukknop, bool1 is de selector voor afgeschermd of niet
@@ -193,6 +194,7 @@ class Electro_Item extends List_Item {
         this.keys[10][2] = "---";
         this.keys[16][2] = "N/A";
         this.keys[17][2] = "";
+        this.keys[18][2] = "";
         break;
       case "Aansluiting":
         this.keys[23][2] = "";
@@ -383,7 +385,7 @@ class Electro_Item extends List_Item {
     switch (this.keys[0][2]) {
       case "Kring":
         output += "&nbsp;Naam: " + this.stringToHTML(10,5) + "<br>";
-        output += "Zekering: " + this.selectToHTML(7,["automatisch","differentieel","smelt","geen","---","schakelaar","schemer","overspanningsbeveiliging"]);
+        output += "Zekering: " + this.selectToHTML(7,["automatisch","differentieel","differentieelautomaat","smelt","geen","---","schakelaar","schemer","overspanningsbeveiliging"]);
         if (this.keys[7][2] != "geen") output += this.selectToHTML(4,["2","3","4","-","1"]) + this.stringToHTML(8,2) + "A";
         if (this.getKey("zekering")=="differentieel") {
           output += ", \u0394 " + this.stringToHTML(11,3) + "mA";
@@ -394,6 +396,13 @@ class Electro_Item extends List_Item {
         if (this.getKey("zekering")=="automatisch") {
           output += ", Curve:" + this.selectToHTML(17,["","B","C","D"]);
           output += ", Kortsluitvermogen: " + this.stringToHTML(22,3) + "kA";
+        }
+        if (this.getKey("zekering")=="differentieelautomaat") {
+          output += ", \u0394 " + this.stringToHTML(11,3) + "mA";
+          output += ", Curve:" + this.selectToHTML(18,["","B","C","D"]);
+          output += ", Type:" + this.selectToHTML(17,["","A","B"]);
+          output += ", Kortsluitvermogen: " + this.stringToHTML(22,3) + "kA";
+          output += ", Selectief: " + this.checkboxToHTML(20);
         }
         output += ", Kabel: " + this.checkboxToHTML(12);
         if (this.getKey("kabel_aanwezig")) {
@@ -408,7 +417,7 @@ class Electro_Item extends List_Item {
       case "Aansluiting":
         output += "&nbsp;Naam: " + this.stringToHTML(23,5) + "<br>";
         if (typeof Parent != 'undefined') output += "Nr: " + this.stringToHTML(10,5) + ", ";
-        output += "Zekering: " + this.selectToHTML(7,["automatisch","differentieel","smelt","geen","---","schakelaar","schemer"]) +
+        output += "Zekering: " + this.selectToHTML(7,["automatisch","differentieel","differentieelautomaat","smelt","geen","---","schakelaar","schemer"]) +
                                        this.selectToHTML(4,["2","3","4"]) +
                                        this.stringToHTML(8,2) + "A";
         if (this.getKey("zekering")=="differentieel") {
@@ -417,8 +426,15 @@ class Electro_Item extends List_Item {
           output += ", Kortsluitvermogen: " + this.stringToHTML(22,3) + "kA";
           output += ", Selectief: " + this.checkboxToHTML(20);
         }
+        if (this.getKey("zekering")=="differentieelautomaat") {
+          output += ", \u0394 " + this.stringToHTML(11,3) + "mA";
+          output += ", Curve:" + this.selectToHTML(18,["","B","C","D"]);
+          output += ", Type:" + this.selectToHTML(17,["","A","B"]);
+          output += ", Kortsluitvermogen: " + this.stringToHTML(22,3) + "kA";
+          output += ", Selectief: " + this.checkboxToHTML(20);
+        }
         if (this.getKey("zekering")=="automatisch") {
-          output += ", Type:" + this.selectToHTML(17,["","B","C","D"]);
+          output += ", Curve:" + this.selectToHTML(17,["","B","C","D"]);
           output += ", Kortsluitvermogen: " + this.stringToHTML(22,3) + "kA";
         }
         output += ", Kabeltype: " + this.stringToHTML(9,10);
