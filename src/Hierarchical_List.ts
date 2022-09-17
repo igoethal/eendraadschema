@@ -639,7 +639,7 @@ class Hierarchical_List {
                     "," + (inSVG[elementCounter].yup-10) +
                     ")" +
                     "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                    htmlspecialchars("Type " + this.data[i].keys[17][2]) + "</text>";
+                    htmlspecialchars("Curve " + this.data[i].keys[17][2]) + "</text>";
                 }
 
                 //Code om kortsluitvermogen toe te voegen
@@ -1077,7 +1077,7 @@ class Hierarchical_List {
                     "," + (inSVG[elementCounter].yup-10) +
                     ")" +
                     "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                    htmlspecialchars("Type " + this.data[i].keys[17][2]) + "</text>";
+                    htmlspecialchars("Curve " + this.data[i].keys[17][2]) + "</text>";
                 }
 
                 //Code om kortsluitvermogen toe te voegen

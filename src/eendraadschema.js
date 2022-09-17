@@ -298,6 +298,7 @@ var Electro_Item = /** @class */ (function (_super) {
         //Indien lichtpunt, select2 is de selector voor het type noodverlichting (indien aanwezig)
         //Indien vrije tekst kan "links", "centreer", "rechts" zijn
         //Indien differentieel of aansluiting, kan type "", "A", of "B" zijn
+        //Indien automaat, kan curve "", "A", "B", of "C" zijn
         _this.keys.push(["select3", "SELECT", "standaard"]); //18, algemeen veld
         _this.keys.push(["bool1", "BOOLEAN", false]); //19, algemeen veld
         //Indien lichtpunt, bool1 is de selector voor wandverlichting of niet
@@ -643,7 +644,7 @@ var Electro_Item = /** @class */ (function (_super) {
                     output += ", Selectief: " + this.checkboxToHTML(20);
                 }
                 if (this.getKey("zekering") == "automatisch") {
-                    output += ", Type:" + this.selectToHTML(17, ["", "B", "C", "D"]);
+                    output += ", Curve:" + this.selectToHTML(17, ["", "B", "C", "D"]);
                     output += ", Kortsluitvermogen: " + this.stringToHTML(22, 3) + "kA";
                 }
                 output += ", Kabel: " + this.checkboxToHTML(12);
@@ -2603,7 +2604,7 @@ var Hierarchical_List = /** @class */ (function () {
                                         "," + (inSVG[elementCounter].yup - 10) +
                                         ")" +
                                         "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                        htmlspecialchars("Type " + this.data[i].keys[17][2]) + "</text>";
+                                        htmlspecialchars("Curve " + this.data[i].keys[17][2]) + "</text>";
                                 }
                                 //Code om kortsluitvermogen toe te voegen
                                 if ((this.data[i].keys[22][2] != '')) {
@@ -3005,7 +3006,7 @@ var Hierarchical_List = /** @class */ (function () {
                                         "," + (inSVG[elementCounter].yup - 10) +
                                         ")" +
                                         "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                        htmlspecialchars("Type " + this.data[i].keys[17][2]) + "</text>";
+                                        htmlspecialchars("Curve " + this.data[i].keys[17][2]) + "</text>";
                                 }
                                 //Code om kortsluitvermogen toe te voegen
                                 if ((this.data[i].keys[22][2] != '')) {
