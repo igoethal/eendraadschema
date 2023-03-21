@@ -27,10 +27,12 @@ var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
         extendStatics(d, b);
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -3605,7 +3607,7 @@ function HL_changeparent(my_id) {
             error = 1;
         }
         else {
-            if (!structure.active[parentOrdinal]) {
+            if ((!structure.active[parentOrdinal]) || (int_newparentid == my_id)) {
                 error = 1;
             }
         }
@@ -4013,7 +4015,7 @@ function download_by_blob(text, filename, mimeType) {
         document.body.removeChild(element);
     }
     else {
-        this.location.go(mimeType + "," + encodeURIComponent(text));
+        this.location.go("".concat(mimeType, ",").concat(encodeURIComponent(text)));
     }
 }
 function download(type) {

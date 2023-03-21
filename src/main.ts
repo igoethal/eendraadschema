@@ -1,3 +1,7 @@
+interface Navigator{
+  msSaveBlob:(blob: Blob,fileName:string) => boolean
+}
+
 function HLCollapseExpand(my_id: number, state?: Boolean) {
   var ordinal: number;
   ordinal = structure.getOrdinalById(my_id);
@@ -87,7 +91,7 @@ function HL_changeparent(my_id: number) {
   if (int_newparentid != 0) {
     parentOrdinal = structure.getOrdinalById(int_newparentid);
     if (typeof(parentOrdinal) == "undefined") {error=1; } else {
-      if (!structure.active[parentOrdinal]) {error=1; }
+      if ( (!structure.active[parentOrdinal]) || (int_newparentid == my_id) ) {error=1; }
     }
   }
 
