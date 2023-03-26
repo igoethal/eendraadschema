@@ -350,11 +350,11 @@ var Electro_Item = /** @class */ (function (_super) {
                     break;
                 }
                 case "Kring": {
-                    this.consumers = ["", "Aansluiting", "Bord", "Domotica", "Kring", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
+                    this.consumers = ["", "Aansluiting", "Bord", "Domotica", "Kring", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
                     break;
                 }
                 case "Meerdere verbruikers": {
-                    this.consumers = ["", "Domotica", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
+                    this.consumers = ["", "Domotica", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
                     break;
                 }
                 case "Aansluiting": {
@@ -362,7 +362,7 @@ var Electro_Item = /** @class */ (function (_super) {
                     break;
                 }
                 default: {
-                    this.consumers = ["", "Aansluiting", "Domotica", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
+                    this.consumers = ["", "Aansluiting", "Domotica", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
                     //this.consumers = [""];
                     break;
                 }
@@ -472,6 +472,9 @@ var Electro_Item = /** @class */ (function (_super) {
                 break;
             case "Zeldzame symbolen":
                 this.keys[16][2] = "";
+                break;
+            case "Warmtepomp/airco":
+                this.keys[18][2] = "Koelend";
                 break;
             default:
                 //this.keys[10][2] = "";
@@ -843,6 +846,12 @@ var Electro_Item = /** @class */ (function (_super) {
                 output += ", Breedte: " + this.stringToHTML(22, 3);
                 if (this.keys[16][2] != "zonder kader")
                     output += ", Adres/tekst: " + this.stringToHTML(23, 2);
+                break;
+            case "Warmtepomp/airco":
+                output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
+                output += ", Warmte functie: " + this.selectToHTML(18, ["", "Koelend", "Verwarmend", "Verwarmend en koelend"]);
+                output += ", Aantal: " + this.selectToHTML(4, ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"]);
+                output += ", Adres/tekst: " + this.stringToHTML(15, 5);
                 break;
             case "Zeldzame symbolen":
                 output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
@@ -1968,6 +1977,44 @@ var Electro_Item = /** @class */ (function (_super) {
                         outputstr += this.addAddress(mySVG, 60 + extraplace, 15, width / 2 - (mySVG.xright - 20) / 2, 23);
                         break;
                 }
+                break;
+            case "Warmtepomp/airco":
+                var shifty = 0;
+                if (this.keys[4][2] > 1) {
+                    shifty = 15;
+                    outputstr += '<text x="41" y="12" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">x' + htmlspecialchars(this.keys[4][2]) + '</text>';
+                }
+                outputstr += '<line x1="1" y1="' + (shifty + 25) + '" x2="21" y2="' + (shifty + 25) + '" stroke="black"></line>';
+                outputstr += '<use xlink:href="#verbruiker" x="21" y="' + (shifty + 25) + '"></use>';
+                outputstr += '<line x1="26" y1="' + (shifty + 0) + '" x2="26" y2="' + (shifty + 5) + '" stroke="black" />';
+                outputstr += '<line x1="56" y1="' + (shifty + 0) + '" x2="56" y2="' + (shifty + 5) + '" stroke="black" />';
+                outputstr += '<line x1="26" y1="' + (shifty + 5) + '" x2="33.5" y2="' + (shifty + 23) + '" stroke="black" />';
+                outputstr += '<line x1="56" y1="' + (shifty + 5) + '" x2="48.5" y2="' + (shifty + 23) + '" stroke="black" />';
+                outputstr += '<line x1="33.5" y1="' + (shifty + 23) + '" x2="41" y2="' + (shifty + 14) + '" stroke="black" />';
+                outputstr += '<line x1="48.5" y1="' + (shifty + 23) + '" x2="41" y2="' + (shifty + 14) + '" stroke="black" />';
+                //Waar gaan we de andere symbolen plaatsen, indien slechts 1, midden onderaan, zoniet links en rechts
+                var shift_symbol_energiebron = 41;
+                var shift_symbol_warmtefunctie = 41;
+                if ((this.keys[17][2] != "") && (this.keys[18][2] != "")) {
+                    var shift_symbol_energiebron = 31;
+                    var shift_symbol_warmtefunctie = 51;
+                }
+                outputstr += '<use xlink:href="#bliksem" x="' + (shift_symbol_energiebron) + '" y="' + (shifty + 35) + '"/>';
+                switch (this.keys[18][2]) {
+                    case "Verwarmend":
+                        outputstr += '<text x="' + (shift_symbol_warmtefunctie - 1) + '" y="' + (shifty + 36) + '" style="text-anchor:middle;dominant-baseline:middle" font-family="Arial, Helvetica, sans-serif" font-size="12">+</text>';
+                        break;
+                    case "Koelend":
+                        outputstr += '<text x="' + (shift_symbol_warmtefunctie - 1) + '" y="' + (shifty + 36) + '" style="text-anchor:middle;dominant-baseline:middle" font-family="Arial, Helvetica, sans-serif" font-size="12">-</text>';
+                        break;
+                    case "Verwarmend en koelend":
+                        outputstr += '<text x="' + (shift_symbol_warmtefunctie - 1) + '" y="' + (shifty + 36) + '" style="text-anchor:middle;dominant-baseline:middle" font-family="Arial, Helvetica, sans-serif" font-size="12">+/-</text>';
+                        break;
+                }
+                mySVG.xright = 60;
+                mySVG.yup += shifty;
+                //Place adres underneath
+                outputstr += this.addAddress(mySVG, shifty + 60, 15);
                 break;
             case "Wasmachine":
                 outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
