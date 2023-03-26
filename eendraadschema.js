@@ -2082,7 +2082,7 @@ var Properties = /** @class */ (function () {
         this.owner = "Voornaam Achternaam<br>Straat 0<br>0000 gemeente<br>Tel: +32 00 00 00 00<br>GSM: +32 000 00 00 00<br>e-mail: voornaam.achternaam@domein.be";
         ;
         this.installer = "idem";
-        this.info = "getekend met<br>https://www.eendraadschema.goethals-jacobs.be";
+        this.info = "230V ~50 Hz<br><br>EAN ...<br><br>getekend met<br>https://www.eendraadschema.goethals-jacobs.be";
     }
     ;
     Properties.prototype.setFilename = function (name) {
@@ -3686,7 +3686,8 @@ function HL_enterSettings() {
 function HLRedrawTreeHTML() {
     show2col();
     document.getElementById("configsection").innerHTML = "";
-    document.getElementById("left_col_inner").innerHTML = structure.toHTML(0);
+    var output = structure.toHTML(0) + "<br>" + renderAddressStacked();
+    document.getElementById("left_col_inner").innerHTML = output;
 }
 function HLRedrawTreeSVG() {
     document.getElementById("right_col_inner").innerHTML = '<b>Tekening: </b><button onclick=download("html")>Download als html</button>';
@@ -3788,6 +3789,22 @@ function renderAddress() {
         '    <td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_info" onkeyup="javascript:changeAddressParams()">' + structure.properties.info + '</td>' +
         '  </tr>' +
         '</table></div></div>';
+    return outHTML;
+}
+function renderAddressStacked() {
+    var outHTML = "";
+    outHTML = 'Plaats van de elektrische installatie' +
+        '<table width="90%" cols="1" rows="1" style="border-collapse: collapse;border-style: solid; border-width:thin;" cellpadding="5">' +
+        '<tr><td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_owner" onkeyup="javascript:changeAddressParams()">' + structure.properties.owner + '</td></tr>' +
+        '</table><br>' +
+        'Installateur' +
+        '<table width="90%" cols="1" rows="1" style="border-collapse: collapse;border-style: solid; border-width:thin;" cellpadding="5">' +
+        '<tr><td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_installer" onkeyup="javascript:changeAddressParams()">' + structure.properties.installer + '</td></tr>' +
+        '</table><br>' +
+        'Info' +
+        '<table width="90%" cols="1" rows="1" style="border-collapse: collapse;border-style: solid; border-width:thin;" cellpadding="5">' +
+        '<tr><td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_info" onkeyup="javascript:changeAddressParams()">' + structure.properties.info + '</td></tr>' +
+        '</table>';
     return outHTML;
 }
 function getPrintSVGWithoutAddress() {

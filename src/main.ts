@@ -127,7 +127,8 @@ function HL_enterSettings() {
 function HLRedrawTreeHTML() {
   show2col();
   document.getElementById("configsection").innerHTML = "";
-  document.getElementById("left_col_inner").innerHTML = structure.toHTML(0);
+  var output:string = structure.toHTML(0) + "<br>" + renderAddressStacked();
+  document.getElementById("left_col_inner").innerHTML = output;
 }
 
 function HLRedrawTreeSVG() {
@@ -277,6 +278,25 @@ function renderAddress() {
             '    <td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_info" onkeyup="javascript:changeAddressParams()">' + structure.properties.info + '</td>' +
             '  </tr>' +
             '</table></div></div>';
+
+  return outHTML;
+}
+
+function renderAddressStacked() {
+  var outHTML: string = "";
+
+  outHTML = 'Plaats van de elektrische installatie' +
+            '<table width="90%" cols="1" rows="1" style="border-collapse: collapse;border-style: solid; border-width:thin;" cellpadding="5">' +
+            '<tr><td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_owner" onkeyup="javascript:changeAddressParams()">' + structure.properties.owner + '</td></tr>' +
+            '</table><br>' +
+            'Installateur' +
+            '<table width="90%" cols="1" rows="1" style="border-collapse: collapse;border-style: solid; border-width:thin;" cellpadding="5">' +
+            '<tr><td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_installer" onkeyup="javascript:changeAddressParams()">' + structure.properties.installer + '</td></tr>' +
+            '</table><br>' +
+            'Info' +
+            '<table width="90%" cols="1" rows="1" style="border-collapse: collapse;border-style: solid; border-width:thin;" cellpadding="5">' +
+            '<tr><td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_info" onkeyup="javascript:changeAddressParams()">' + structure.properties.info + '</td></tr>' +
+            '</table>';
 
   return outHTML;
 }
