@@ -322,7 +322,7 @@ function getPrintSVGWithoutAddress() {
 function renderPrintSVG() {
   document.getElementById("printarea").innerHTML = '<div id="printsvgarea">' +
                                                       getPrintSVGWithoutAddress() +
-                                                   '</div>' + '<br><br>' + renderAddress();
+                                                   '</div>'; // + '<br><br>' + renderAddress();
 }
 
 function changePrintParams() {
@@ -352,19 +352,20 @@ function printsvg() {
           +  '<tr><td>Breedte in pixels</td><td align="right">' + width + '</td><td><input size="4" type="number" min="0" step="1" max="' + width + '" id="printwidth" onchange="changePrintParams()" value="' + width + '"></td></tr>'
           +  '<tr><td>Offset</td><td align="right">' + (0) + '</td><td><input size="4" type="number" min="0" step="1" max="' + width + '" id="printoffset" onchange="changePrintParams()" value="' + startx + '"></td></tr></table><br>'
   strleft += '</td><td style="vertical-align:top;padding:5px">';
-  strleft += 'Deze pagina biedt enkele faciliteiten om het schema te printen zonder gebruik te maken van een schermafdruk (screenshot) of een '
-          +  'externe convertor zoals beschreven in de documentatie (zie menu). De faciliteiten op deze pagina zijn experimenteel. Laat ons weten wat er al dan niet werkt '
-          +  'via het contactformulier.'
-          +  '<br><br>'
-          +  'Op deze pagina kiest u &eacute;&eacute;n welbepaald segment (&eacute;&eacute;n pagina) uit uw schema door de parameters "offset" en "breedte" in de tabel links te wijzigen. '
-          +  'Geef eveneens in de tabel helemaal onderaan de pagina uw adresgegevens in (klik op de adresgegevens om aan te passen). '
-          +  'Klik daarna op &eacute;&eacute;n van de knoppen om het via offset en breedte geselecteerde deel van het schema te printen of exporteren.'
-          +  '<br><br><button onclick="HLRedrawTree()">Sluiten en terug naar schema bewerken</button>'
+  //strleft += 'Deze pagina biedt enkele faciliteiten om het schema te printen zonder gebruik te maken van een schermafdruk (screenshot) of een '
+  //        +  'externe convertor zoals beschreven in de documentatie (zie menu). De faciliteiten op deze pagina zijn experimenteel. Laat ons weten wat er al dan niet werkt '
+  //        +  'via het contactformulier.'
+  //        +  '<br><br>'
+  strleft += 'Op deze pagina kiest u &eacute;&eacute;n welbepaald segment (&eacute;&eacute;n pagina) uit uw schema door de parameters "offset" en "breedte" in de tabel links te wijzigen. '
+          +  'Klik daarna op &eacute;&eacute;n van de knoppen om het via offset en breedte geselecteerde deel van het schema te printen en/of exporteren.<br><br>'
+          +  "Om het schema over meerdere pagina's te printen dient u de procedure meerdere keren te herhalen voor elk van de af te printen pagina's";
+                    //+  'Geef eveneens in de tabel helemaal onderaan de pagina uw adresgegevens in (klik op de adresgegevens om aan te passen). '
+          //+  '<br><br><button onclick="HLRedrawTree()">Sluiten en terug naar schema bewerken</button>'
   strleft += '</td></tr></table>'
 
-  strleft += '<table border="0"><tr><td style="vertical-align:top"><button onclick="doprint()">Print voorbeeld onder de lijn</button></td><td>&nbsp;&nbsp;</td>' +
-             '<td style="vertical-align:top">Print tekening hieronder vanuit uw browser. Opgelet, in de meeste browsers moet u zelf "landscape" en eventueel schaling naar paginagrootte (fit-to-page) instellen.</td></tr></table><br>'
-  strleft += '<table border="0"><tr><td style="vertical-align:top"><button onclick="dosvgdownload()">Download SVG</button></td><td>&nbsp;</td><td style="vertical-align:top"><input id="dosvgname" size="20" value="eendraadschema_print.svg"></td><td>&nbsp;&nbsp;</td><td>Sla tekening hieronder op als SVG en converteer met een ander programma naar PDF (bvb Inkscape). <b>Adresgegevens worden niet opgenomen in de SVG!</b></td></tr></table><br>'
+  //strleft += '<table border="0"><tr><td style="vertical-align:top"><button onclick="doprint()">Print voorbeeld onder de lijn</button></td><td>&nbsp;&nbsp;</td>' +
+  //           '<td style="vertical-align:top">Print tekening hieronder vanuit uw browser. Opgelet, in de meeste browsers moet u zelf "landscape" en eventueel schaling naar paginagrootte (fit-to-page) instellen.</td></tr></table><br>'
+  strleft += '<table border="0"><tr><td style="vertical-align:top"><button onclick="dosvgdownload()">Download SVG</button></td><td>&nbsp;</td><td style="vertical-align:top"><input id="dosvgname" size="20" value="eendraadschema_print.svg"></td><td>&nbsp;&nbsp;</td><td>Sla tekening hieronder op als SVG en converteer met een ander programma naar PDF (bvb Inkscape).</td></tr></table><br>'
   strleft += displayButtonPrintToPdf();
 
   strleft += '<hr><div id="printarea"></div>';

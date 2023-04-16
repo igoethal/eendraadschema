@@ -401,7 +401,7 @@ class Hierarchical_List {
       }
     }
     if ( (myParent == 0) && (numberDrawn<1) ) {
-      output += "<button onclick=\"HLAdd()\">Voeg eerste object toe of kies bovenaan \"opnieuw beginnen\"</button>"; //no need for the add button if we have items
+      output += "<button onclick=\"HLAdd()\">Voeg eerste object toe of kies bovenaan \"Nieuw\"</button><br>"; //no need for the add button if we have items
     }
     return(output);
   }
@@ -599,8 +599,13 @@ class Hierarchical_List {
             break;
 
           case "Aansluiting":
+            var extrashift = 0;
+            if (this.data[i].keys[24][2] != "") {
+              extrashift += 50;
+            }
+
             //get image of the entire stack, make sure it is shifted to the right sufficiently so-that the counter can be added below
-            inSVG[elementCounter] = this.toSVG(this.id[i],"vertical",150); //shift 100 to the right
+            inSVG[elementCounter] = this.toSVG(this.id[i],"vertical",150+extrashift); //shift 100 to the right
 
             //add the fuse below
 
@@ -881,11 +886,11 @@ class Hierarchical_List {
             //draw the counter
             inSVG[elementCounter].data += '<line x1="1" ' +
               'y1="' + (inSVG[elementCounter].yup+25) +
-              '" x2="21" '+
+              '" x2="' + (21+extrashift)  + '" '+
               'y2="' + (inSVG[elementCounter].yup+25) + '" stroke="black"></line>';
 
             //draw outgoing connecting lines
-            inSVG[elementCounter].data += '<line x1="60" ' +
+            inSVG[elementCounter].data += '<line x1="' + (61+extrashift) + '" ' +
               'y1="' + (inSVG[elementCounter].yup+25) +
               '" x2="' + (inSVG[elementCounter].xleft) + '" '+
               'y2="' + (inSVG[elementCounter].yup+25) + '" stroke="black"></line>';
@@ -895,12 +900,17 @@ class Hierarchical_List {
               'y2="' + (inSVG[elementCounter].yup+25) + '" stroke="black"></line>';
 
             //Draw the counter
-            inSVG[elementCounter].data += '<use xlink:href="#elektriciteitsmeter" x="21" y="' + (inSVG[elementCounter].yup+25) + '"></use>';
+            inSVG[elementCounter].data += '<use xlink:href="#elektriciteitsmeter" x="' + (21+extrashift) + '" y="' + (inSVG[elementCounter].yup+25) + '"></use>';
 
             //set kabel type Text
-            inSVG[elementCounter].data += '<text x="100" y="' + (inSVG[elementCounter].yup+40) +
-               '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' +
+            inSVG[elementCounter].data += '<text x="' + (85+extrashift) + '" y="' + (inSVG[elementCounter].yup+40) +
+               '" style="text-anchor:left" font-family="Arial, Helvetica, sans-serif" font-size="10">' +
                htmlspecialchars(this.data[i].getKey("kabel")) + '</text>';
+            if (this.data[i].keys[24][2] != "") {
+              inSVG[elementCounter].data += '<text x="55" y="' + (inSVG[elementCounter].yup+40) +
+                 '" style="text-anchor:end" font-family="Arial, Helvetica, sans-serif" font-size="10">' +
+                 htmlspecialchars(this.data[i].keys[24][2]) + '</text>';
+            }
 
             //inSVG[elementCounter].xleft = Math.max(inSVG[elementCounter].xleft,60);
             //inSVG[elementCounter].xright = Math.max(inSVG[elementCounter].xright,10);
@@ -910,7 +920,7 @@ class Hierarchical_List {
 
             //If adres is not empty, put it below
             if (!(/^\s*$/.test(this.data[i].keys[15][2]))) { //check if adres contains only white space
-              inSVG[elementCounter].data += '<text x="41" y="' + (inSVG[elementCounter].yup+inSVG[elementCounter].ydown+10) + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.data[i].keys[15][2]) + '</text>';
+              inSVG[elementCounter].data += '<text x="' + (41+extrashift) + '" y="' + (inSVG[elementCounter].yup+inSVG[elementCounter].ydown+10) + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.data[i].keys[15][2]) + '</text>';
               inSVG[elementCounter].ydown += 15;
             }
 

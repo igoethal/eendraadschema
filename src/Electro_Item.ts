@@ -215,7 +215,7 @@ class Electro_Item extends List_Item {
         break;
       case "Warmtepomp/airco":
         this.keys[18][2] = "Koelend";
-        break;  
+        break;
       default:
         //this.keys[10][2] = "";
         break;
@@ -440,7 +440,8 @@ class Electro_Item extends List_Item {
           output += ", Curve:" + this.selectToHTML(17,["","B","C","D"]);
           output += ", Kortsluitvermogen: " + this.stringToHTML(22,3) + "kA";
         }
-        output += ", Kabeltype: " + this.stringToHTML(9,10);
+        output += ", Kabeltype na teller: " + this.stringToHTML(9,10);
+        output += ", Kabeltype v&oacute;&oacute;r teller: " + this.stringToHTML(24,10);
         output += ", Adres/tekst: " + this.stringToHTML(15,5);
         break;
       case "Bord":
@@ -591,7 +592,7 @@ class Electro_Item extends List_Item {
         output += ", Warmte functie: " + this.selectToHTML(18,["", "Koelend", "Verwarmend", "Verwarmend en koelend"]);
         output += ", Aantal: " + this.selectToHTML(4,["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]);
         output += ", Adres/tekst: " + this.stringToHTML(15,5);
-        break;  
+        break;
       case "Zeldzame symbolen":
         output += "&nbsp;Nr: " + this.stringToHTML(10,5);
         output += ", Symbool: " + this.selectToHTML(16,["","deurslot"]);
@@ -1652,14 +1653,14 @@ class Electro_Item extends List_Item {
         }
         outputstr += '<line x1="1" y1="' + (shifty+25) + '" x2="21" y2="' + (shifty+25) + '" stroke="black"></line>';
         outputstr += '<use xlink:href="#verbruiker" x="21" y="' + (shifty+25) + '"></use>';
-          
+
         outputstr += '<line x1="26" y1="' + (shifty+0) + '" x2="26" y2="' + (shifty+5) + '" stroke="black" />';
         outputstr += '<line x1="56" y1="' + (shifty+0) + '" x2="56" y2="' + (shifty+5) + '" stroke="black" />';
         outputstr += '<line x1="26" y1="' + (shifty+5) + '" x2="33.5" y2="' + (shifty+23) + '" stroke="black" />';
         outputstr += '<line x1="56" y1="' + (shifty+5) + '" x2="48.5" y2="' + (shifty+23) + '" stroke="black" />';
         outputstr += '<line x1="33.5" y1="' + (shifty+23) + '" x2="41" y2="' + (shifty+14) + '" stroke="black" />';
         outputstr += '<line x1="48.5" y1="' + (shifty+23) + '" x2="41" y2="' + (shifty+14) + '" stroke="black" />';
-          
+
         //Waar gaan we de andere symbolen plaatsen, indien slechts 1, midden onderaan, zoniet links en rechts
         var shift_symbol_energiebron = 41;
         var shift_symbol_warmtefunctie = 41;
@@ -1669,7 +1670,7 @@ class Electro_Item extends List_Item {
         }
 
         outputstr += '<use xlink:href="#bliksem" x="' + (shift_symbol_energiebron) + '" y="' + (shifty+35) + '"/>';
-                
+
         switch (this.keys[18][2]) {
           case "Verwarmend":
             outputstr += '<text x="' + (shift_symbol_warmtefunctie-1) + '" y="' + (shifty+36) + '" style="text-anchor:middle;dominant-baseline:middle" font-family="Arial, Helvetica, sans-serif" font-size="12">+</text>'
@@ -1686,7 +1687,7 @@ class Electro_Item extends List_Item {
         mySVG.yup += shifty;
         //Place adres underneath
         outputstr += this.addAddress(mySVG,shifty+60,15);
-        break;  
+        break;
       case "Wasmachine":
         outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
         outputstr += '<use xlink:href="#wasmachine" x="21" y="25"></use>';
