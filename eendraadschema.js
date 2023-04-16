@@ -2166,6 +2166,7 @@ var Hierarchical_List = /** @class */ (function () {
         this.data = new Array();
         this.active = new Array();
         this.id = new Array();
+        this.print_table = new Print_Table();
         this.properties = new Properties();
         this.curid = 1;
         this.mode = "edit";
@@ -3538,6 +3539,117 @@ var Hierarchical_List = /** @class */ (function () {
     };
     return Hierarchical_List;
 }());
+var Page_Info = /** @class */ (function () {
+    function Page_Info() {
+        this.height = 0;
+        this.start = 0;
+        this.stop = 0;
+    }
+    return Page_Info;
+}());
+var Print_Table = /** @class */ (function () {
+    function Print_Table() {
+        this.height = 0;
+        this.maxwidth = 0;
+        this.displaypage = 0;
+        this.pages = new Array();
+        var page_info;
+        page_info = new Page_Info();
+        this.pages.push(page_info);
+    }
+    Print_Table.prototype.setHeight = function (height) {
+        var pagenum;
+        this.height = height;
+        for (pagenum = 0; pagenum < this.pages.length; pagenum++) {
+            this.pages[pagenum].height = height;
+        }
+    };
+    Print_Table.prototype.getHeight = function () {
+        return (this.height);
+    };
+    Print_Table.prototype.forceCorrectFigures = function () {
+        var pagenum;
+        this.pages[this.pages.length - 1].stop = this.maxwidth;
+        for (pagenum = 0; pagenum < this.pages.length; pagenum++) {
+            if (pagenum > 0) {
+                this.pages[pagenum].start = this.pages[pagenum - 1].stop;
+            }
+            if (this.pages[pagenum].stop > this.maxwidth) {
+                this.pages[this.pages.length - 1].stop = this.maxwidth;
+            }
+            ;
+            if (this.pages[pagenum].start > this.pages[pagenum].stop) {
+                this.pages[pagenum].start = this.pages[pagenum].stop;
+            }
+            ;
+        }
+    };
+    Print_Table.prototype.setMaxWidth = function (maxwidth) {
+        this.maxwidth = maxwidth;
+        this.forceCorrectFigures();
+    };
+    Print_Table.prototype.getMaxWidth = function () {
+        return (this.maxwidth);
+    };
+    Print_Table.prototype.setStop = function (page, stop) {
+        if (page > 0) {
+            if (stop < this.pages[page - 1].stop)
+                stop = this.pages[page - 1].stop;
+        }
+        if (page < this.pages.length - 1) {
+            if (stop > this.pages[page + 1].stop)
+                stop = this.pages[page + 1].stop;
+        }
+        if (stop > this.maxwidth)
+            stop = this.maxwidth;
+        this.pages[page].stop = stop;
+        this.forceCorrectFigures();
+    };
+    Print_Table.prototype.addPage = function () {
+        var page_info;
+        page_info = new Page_Info();
+        page_info.height = this.height;
+        page_info.start = this.pages[this.pages.length - 1].stop;
+        page_info.stop = this.maxwidth;
+        this.pages.push(page_info);
+    };
+    Print_Table.prototype.deletePage = function (page) {
+        if (page == 0) {
+            this.pages[1].start = 0;
+        }
+        else {
+            this.pages[page - 1].stop = this.pages[page].stop;
+        }
+        this.pages.splice(page, 1);
+    };
+    Print_Table.prototype.toHTML = function () {
+        var outstr = "";
+        var pagenum;
+        outstr += '<table border="1" cellpadding="3">';
+        outstr += '<tr><th align="center">Pagina</th><th align="center">Start</th><th align"center">Stop</th><th align"left">Acties</th></tr>';
+        for (pagenum = 0; pagenum < this.pages.length; pagenum++) {
+            outstr += '<tr><td align=center>' + (pagenum + 1) + '</td><td align=center>' + this.pages[pagenum].start + '</td><td align=center>';
+            if (pagenum != this.pages.length - 1) {
+                outstr += '<input size="4" id="id_stop_change_' + pagenum + '" type="number" min="' + this.pages[pagenum].start + '" step="1" max="' + this.maxwidth + '" onchange="HLChangePrintStop(' + pagenum + ')" value="' + this.pages[pagenum].stop + '">';
+            }
+            else {
+                outstr += this.pages[pagenum].stop.toString();
+            }
+            outstr += '</td><td align=left>';
+            if (pagenum == this.pages.length - 1) {
+                outstr += '<button style="background-color:green;" onclick="HLAddPrintPage()">&#9660;</button>';
+            }
+            if (this.pages.length > 1) {
+                outstr += '<button style="background-color:red;" onclick="HLDeletePrintPage(' + pagenum + ')">&#9851</button>';
+            }
+            outstr += '</td></tr>';
+            //outstr += this.Pages[pagenum].height.toString();
+        }
+        outstr += "</table>";
+        return (outstr);
+    };
+    return Print_Table;
+}());
 var CONFIGPAGE_LEFT = "\n    <center>\n        <p><font size=\"+2\">\n          <b>Eendraadschema ontwerpen: </b>\n          Kies &eacute;&eacute;n van onderstaande voorbeelden om van te starten (u kan zelf kringen toevoegen achteraf) of\n          start van een leeg schema met voorgekozen aantal kringen (optie 3).\n        </font></p>\n      <font size=\"+1\">\n        <i>\n          <b>Tip: </b>Om de mogelijkheden van het programma te leren kennen is het vaak beter eerst een voorbeeldschema te\n          bekijken alvorens van een leeg schema te vertrekken.\n        </i>\n      </font>\n    </center><br><br>\n    <table border=\"1px\" style=\"border-collapse:collapse\" align=\"center\" width=\"100%\">\n      <tr>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Voorbeeld 1</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Voorbeeld 2</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Leeg schema</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Openen</b>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/example000.svg\" height=\"300px\"><br><br>\n          Eenvoudig schema, enkel stopcontacten en lichtpunten.\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/example001.svg\" height=\"300px\"><br><br>\n          Iets complexer schema met teleruptoren, verbruikers achter stopcontacten en gesplitste kringen.\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/gear.svg\" height=\"100px\"><br><br>\n";
 var CONFIGPAGE_RIGHT = "\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/import_icon.svg\" height=\"100px\"><br><br>\n          Open een schema dat u eerder heeft opgeslagen op uw computer (EDS-bestand). Enkel bestanden aangemaakt na 12 juli 2019 worden herkend.\n          <br><br>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"load_example(0)\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"load_example(1)\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"read_settings()\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"importclicked()\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n      </tr>\n    </table>\n  ";
 var CONFIGPRINTPAGE = "\n<div>\n</div>\n<br>\n";
@@ -3713,6 +3825,24 @@ function HLRedrawTree() {
     HLRedrawTreeHTML();
     HLRedrawTreeSVG();
 }
+function HLAddPrintPage() {
+    this.structure.print_table.addPage();
+    printsvg();
+}
+function HLDeletePrintPage(mypage) {
+    this.structure.print_table.deletePage(mypage);
+    printsvg();
+}
+function HLChangePrintStop(page) {
+    var str_newstop = document.getElementById("id_stop_change_" + page).value;
+    var int_newstop = parseInt(str_newstop);
+    structure.print_table.setStop(page, int_newstop);
+    printsvg();
+}
+function HLDisplayPage() {
+    structure.print_table.displaypage = parseInt(document.getElementById("id_select_page").value) - 1;
+    printsvg();
+}
 function buildNewStructure(structure) {
     //Paremeterisation of the electro board
     var aantalDrogeKringen = CONF_aantal_droge_kringen;
@@ -3822,8 +3952,11 @@ function getPrintSVGWithoutAddress() {
     outSVG = structure.toSVG(0, "horizontal");
     var scale = 1;
     var height = outSVG.yup + outSVG.ydown;
-    var startx = parseInt(document.getElementById("printoffset").value);
-    var width = parseInt(document.getElementById("printwidth").value);
+    var page = structure.print_table.displaypage;
+    //var startx = parseInt((document.getElementById("printoffset") as HTMLInputElement).value);
+    //var width = parseInt((document.getElementById("printwidth") as HTMLInputElement).value);
+    var startx = structure.print_table.pages[page].start;
+    var width = structure.print_table.pages[page].stop - structure.print_table.pages[page].start;
     var viewbox = '' + startx + ' 0 ' + width + ' ' + height;
     var outstr = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" transform="scale(1,1)" style="border:1px solid white" ' +
         'height="' + (height * scale) + '" width="' + (width * scale) + '" viewBox="' + viewbox + '">' +
@@ -3851,27 +3984,41 @@ function printsvg() {
     var startx = 0;
     var height = outSVG.yup + outSVG.ydown;
     var width = outSVG.xleft + outSVG.xright;
+    structure.print_table.setHeight(height);
+    structure.print_table.setMaxWidth(width);
     strleft += '<br><table border="0"><tr><td style="vertical-align:top;">';
-    strleft += '<table border="1" cellpadding="3"><tr><th align="left">Eigenschap</th><th align="right">Standaard</th><th align"left">Instelling</th></tr>'
-        + '<tr><td>Hoogte in pixels</td><td align="right">' + height + '</td><td>Niet instelbaar</td></tr>'
-        + '<tr><td>Breedte in pixels</td><td align="right">' + width + '</td><td><input size="4" type="number" min="0" step="1" max="' + width + '" id="printwidth" onchange="changePrintParams()" value="' + width + '"></td></tr>'
-        + '<tr><td>Offset</td><td align="right">' + (0) + '</td><td><input size="4" type="number" min="0" step="1" max="' + width + '" id="printoffset" onchange="changePrintParams()" value="' + startx + '"></td></tr></table><br>';
+    strleft += structure.print_table.toHTML() + '<br>';
+    /*strleft += '<table border="1" cellpadding="3"><tr><th align="left">Eigenschap</th><th align="right">Standaard</th><th align"left">Instelling</th></tr>'
+            +  '<tr><td>Hoogte in pixels</td><td align="right">' + height + '</td><td>Niet instelbaar</td></tr>'
+            +  '<tr><td>Breedte in pixels</td><td align="right">' + width + '</td><td><input size="4" type="number" min="0" step="1" max="' + width + '" id="printwidth" onchange="changePrintParams()" value="' + width + '"></td></tr>'
+            +  '<tr><td>Offset</td><td align="right">' + (0) + '</td><td><input size="4" type="number" min="0" step="1" max="' + width + '" id="printoffset" onchange="changePrintParams()" value="' + startx + '"></td></tr></table><br>'*/
     strleft += '</td><td style="vertical-align:top;padding:5px">';
     //strleft += 'Deze pagina biedt enkele faciliteiten om het schema te printen zonder gebruik te maken van een schermafdruk (screenshot) of een '
     //        +  'externe convertor zoals beschreven in de documentatie (zie menu). De faciliteiten op deze pagina zijn experimenteel. Laat ons weten wat er al dan niet werkt '
     //        +  'via het contactformulier.'
     //        +  '<br><br>'
-    strleft += 'Op deze pagina kiest u &eacute;&eacute;n welbepaald segment (&eacute;&eacute;n pagina) uit uw schema door de parameters "offset" en "breedte" in de tabel links te wijzigen. '
-        + 'Klik daarna op &eacute;&eacute;n van de knoppen om het via offset en breedte geselecteerde deel van het schema te printen en/of exporteren.<br><br>'
-        + "Om het schema over meerdere pagina's te printen dient u de procedure meerdere keren te herhalen voor elk van de af te printen pagina's";
+    strleft += 'Klik op de groene pijl om het schema over meerdere pagina\'s te printen en kies voor elke pagina de start- en stop-positie in het schema (in pixels). '
+        + '<br><br>Onderaan kan je bekijken welk deel van het schema op welke pagina belandt en de pagina exporteren en/of omzetten naar PDF. '
+        + "Het exporteren of omzetten naar PDF dient voor elke pagina herhaald te worden.";
     //+  'Geef eveneens in de tabel helemaal onderaan de pagina uw adresgegevens in (klik op de adresgegevens om aan te passen). '
     //+  '<br><br><button onclick="HLRedrawTree()">Sluiten en terug naar schema bewerken</button>'
     strleft += '</td></tr></table>';
     //strleft += '<table border="0"><tr><td style="vertical-align:top"><button onclick="doprint()">Print voorbeeld onder de lijn</button></td><td>&nbsp;&nbsp;</td>' +
     //           '<td style="vertical-align:top">Print tekening hieronder vanuit uw browser. Opgelet, in de meeste browsers moet u zelf "landscape" en eventueel schaling naar paginagrootte (fit-to-page) instellen.</td></tr></table><br>'
+    strleft += '<hr>';
+    strleft += 'Pagina <select onchange="HLDisplayPage()" id="id_select_page">';
+    for (var i = 0; i < structure.print_table.pages.length; i++) {
+        if (i == structure.print_table.displaypage) {
+            strleft += '<option value=' + (i + 1) + ' selected>' + (i + 1) + '</option>';
+        }
+        else {
+            strleft += '<option value=' + (i + 1) + '>' + (i + 1) + '</option>';
+        }
+    }
+    strleft += '</select><br><br>';
     strleft += '<table border="0"><tr><td style="vertical-align:top"><button onclick="dosvgdownload()">Download SVG</button></td><td>&nbsp;</td><td style="vertical-align:top"><input id="dosvgname" size="20" value="eendraadschema_print.svg"></td><td>&nbsp;&nbsp;</td><td>Sla tekening hieronder op als SVG en converteer met een ander programma naar PDF (bvb Inkscape).</td></tr></table><br>';
     strleft += displayButtonPrintToPdf();
-    strleft += '<hr><div id="printarea"></div>';
+    strleft += '<div id="printarea"></div>';
     document.getElementById("configsection").innerHTML = strleft;
     renderPrintSVG();
     hide2col();
@@ -3993,6 +4140,17 @@ function import_to_structure(mystring, redraw) {
     }
     if (typeof mystructure.properties.info != "undefined") {
         structure.properties.info = mystructure.properties.info;
+    }
+    if (typeof mystructure.print_table != "undefined") {
+        structure.print_table.setHeight(mystructure.print_table.height);
+        structure.print_table.setMaxWidth(mystructure.print_table.maxwidth);
+        for (var i = 0; i < mystructure.print_table.pages.length; i++) {
+            if (i != 0)
+                this.structure.print_table.addPage();
+            this.structure.print_table.pages[i].height = mystructure.print_table.pages[i].height;
+            this.structure.print_table.pages[i].start = mystructure.print_table.pages[i].start;
+            this.structure.print_table.pages[i].stop = mystructure.print_table.pages[i].stop;
+        }
     }
     for (var i = 0; i < mystructure.length; i++) {
         if (mystructure.data[i].parent == 0) {

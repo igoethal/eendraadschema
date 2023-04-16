@@ -72,6 +72,7 @@ class Hierarchical_List {
   active: Array<Boolean>;
   id: Array<number>;
   properties: Properties;
+  print_table: Print_Table;
   length: number;
   curid: number;
   mode: string; //can be "edit" or "move"
@@ -83,6 +84,7 @@ class Hierarchical_List {
     this.data = new Array<List_Item>();
     this.active = new Array<Boolean>();
     this.id = new Array<number>();
+    this.print_table = new Print_Table();
     this.properties = new Properties();
     this.curid = 1;
     this.mode = "edit";
