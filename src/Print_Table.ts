@@ -16,6 +16,10 @@ class Print_Table {
   height: number;
   maxwidth: number;
   displaypage: number;
+  modevertical: string; //default "alles" means full vertical page is always printed, expert "kies" means starty and stopy can be selected
+  starty: number;
+  stopy: number;
+  papersize: string;
 
   constructor() {
     this.height = 0;
@@ -26,6 +30,17 @@ class Print_Table {
     var page_info: Page_Info;
     page_info = new Page_Info();
     this.pages.push(page_info); 
+  }
+
+  setPaperSize(papersize : string) {
+    this.papersize = papersize;
+  }
+
+  getPaperSize() : string {
+    if (!this.papersize) {
+      this.papersize = "A4";
+    }
+    return(this.papersize);
   }
 
   setHeight(height: number) {
@@ -40,7 +55,28 @@ class Print_Table {
     return(this.height);
   }
 
+  setModeVertical(mode: string) {
+    this.modevertical = mode;
+  }
+
+  getModeVertical(): string {
+    this.forceCorrectFigures();
+    return(this.modevertical);
+  }
+
   forceCorrectFigures() {
+    if (!this.modevertical) {
+      this.modevertical = "alles";
+    }
+    switch (this.modevertical) {
+      case "kies":
+        this.starty = Math.min(Math.max(0,this.starty),this.height);
+        this.stopy = Math.min(Math.max(this.starty,this.stopy),this.height);
+        break;
+      default:  
+        this.starty = 0;
+        this.stopy = this.height;
+    }
     let pagenum: number;
     this.pages[this.pages.length-1].stop = this.maxwidth;
     for (pagenum=0; pagenum<this.pages.length; pagenum++) {
@@ -63,6 +99,26 @@ class Print_Table {
 
   getMaxWidth(): number {
     return(this.maxwidth);
+  }
+
+  getstarty(): number {
+    this.forceCorrectFigures();
+    return(this.starty);
+  }
+
+  getstopy(): number {
+    this.forceCorrectFigures();
+    return(this.stopy);
+  }
+
+  setstarty(starty: number) {
+    this.starty = starty;
+    this.forceCorrectFigures;
+  }
+
+  setstopy(stopy: number) {
+    this.stopy = stopy;
+    this.forceCorrectFigures;
   }
 
   setStop(page: number, stop: number) {

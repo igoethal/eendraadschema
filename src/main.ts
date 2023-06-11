@@ -178,6 +178,35 @@ function HLDisplayPage() {
   printsvg();
 }
 
+function HLChangeModeVertical() {
+  structure.print_table.setModeVertical((document.getElementById("id_modeVerticalSelect") as HTMLInputElement).value);
+  printsvg();
+}
+
+function HLChangeStartY() {
+  var starty = parseInt((document.getElementById("id_starty") as HTMLInputElement).value);
+  if (isNaN(starty)) {
+    starty = 0;
+  }
+  structure.print_table.setstarty(starty);
+  structure.print_table.forceCorrectFigures();
+  printsvg();
+}
+
+function HLChangeStopY() {
+  var stopy = parseInt((document.getElementById("id_stopy") as HTMLInputElement).value);
+  if (isNaN(stopy)) {
+    stopy = structure.print_table.getHeight();
+  }
+  structure.print_table.setstopy(stopy);
+  structure.print_table.forceCorrectFigures();
+  printsvg();
+}
+
+function HLChangePaperSize() {
+  structure.print_table.setPaperSize((document.getElementById("id_papersize") as HTMLInputElement).value);
+}
+
 function buildNewStructure(structure: Hierarchical_List) {
 
   //Paremeterisation of the electro board
@@ -328,15 +357,15 @@ function getPrintSVGWithoutAddress() {
   outSVG = structure.toSVG(0,"horizontal");
 
   var scale = 1;
-  var height = outSVG.yup + outSVG.ydown;
+  //var height = outSVG.yup + outSVG.ydown;
 
   var page = structure.print_table.displaypage;
-  //var startx = parseInt((document.getElementById("printoffset") as HTMLInputElement).value);
-  //var width = parseInt((document.getElementById("printwidth") as HTMLInputElement).value);
   var startx = structure.print_table.pages[page].start;
-  var width = structure.print_table.pages[page].stop - structure.print_table.pages[page].start;
+  var width = structure.print_table.pages[page].stop - startx;
+  var starty = structure.print_table.getstarty();
+  var height = structure.print_table.getstopy() - starty;
 
-  var viewbox = '' + startx + ' 0 ' + width + ' ' + height;
+  var viewbox = '' + startx + ' ' + starty + ' ' + width + ' ' + height;
 
   var outstr = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" transform="scale(1,1)" style="border:1px solid white" ' +
              'height="' + (height*scale) + '" width="' + (width*scale) + '" viewBox="' + viewbox + '">' +
@@ -379,29 +408,17 @@ function printsvg() {
 
   strleft += structure.print_table.toHTML() + '<br>';
 
-  /*strleft += '<table border="1" cellpadding="3"><tr><th align="left">Eigenschap</th><th align="right">Standaard</th><th align"left">Instelling</th></tr>'
-          +  '<tr><td>Hoogte in pixels</td><td align="right">' + height + '</td><td>Niet instelbaar</td></tr>'
-          +  '<tr><td>Breedte in pixels</td><td align="right">' + width + '</td><td><input size="4" type="number" min="0" step="1" max="' + width + '" id="printwidth" onchange="changePrintParams()" value="' + width + '"></td></tr>'
-          +  '<tr><td>Offset</td><td align="right">' + (0) + '</td><td><input size="4" type="number" min="0" step="1" max="' + width + '" id="printoffset" onchange="changePrintParams()" value="' + startx + '"></td></tr></table><br>'*/
   strleft += '</td><td style="vertical-align:top;padding:5px">';
-  //strleft += 'Deze pagina biedt enkele faciliteiten om het schema te printen zonder gebruik te maken van een schermafdruk (screenshot) of een '
-  //        +  'externe convertor zoals beschreven in de documentatie (zie menu). De faciliteiten op deze pagina zijn experimenteel. Laat ons weten wat er al dan niet werkt '
-  //        +  'via het contactformulier.'
-  //        +  '<br><br>'
+
   strleft += 'Klik op de groene pijl om het schema over meerdere pagina\'s te printen en kies voor elke pagina de start- en stop-positie in het schema (in pixels). '
           +  '<br><br>Onderaan kan je bekijken welk deel van het schema op welke pagina belandt en de pagina exporteren en/of omzetten naar PDF. '
           +  "Het exporteren of omzetten naar PDF dient voor elke pagina herhaald te worden.";
-                    //+  'Geef eveneens in de tabel helemaal onderaan de pagina uw adresgegevens in (klik op de adresgegevens om aan te passen). '
-          //+  '<br><br><button onclick="HLRedrawTree()">Sluiten en terug naar schema bewerken</button>'
-  strleft += '</td></tr></table>'
 
-  //strleft += '<table border="0"><tr><td style="vertical-align:top"><button onclick="doprint()">Print voorbeeld onder de lijn</button></td><td>&nbsp;&nbsp;</td>' +
-  //           '<td style="vertical-align:top">Print tekening hieronder vanuit uw browser. Opgelet, in de meeste browsers moet u zelf "landscape" en eventueel schaling naar paginagrootte (fit-to-page) instellen.</td></tr></table><br>'
+  strleft += '</td></tr></table>'
 
   strleft += '<hr>';
 
   strleft += 'Pagina <select onchange="HLDisplayPage()" id="id_select_page">'
-  
   for (var i=0; i<structure.print_table.pages.length; i++) {
     if (i==structure.print_table.displaypage) {
       strleft += '<option value=' + (i+1) + ' selected>' + (i+1) + '</option>';
@@ -409,10 +426,33 @@ function printsvg() {
       strleft += '<option value=' + (i+1) + '>' + (i+1) + '</option>';
     }  
   }
-  
-  strleft += '</select><br><br>'
+  strleft += '</select>&nbsp;&nbsp;';
+  strleft += 'Layout ';
+  switch (structure.print_table.getPaperSize()) {
+    case "A3":
+      strleft += '<select onchange="HLChangePaperSize()" id="id_papersize"><option value="A4">A4</option><option value="A3" selected="selected">A3</option></select>';
+      break;
+    case "A4":
+      strleft += '<select onchange="HLChangePaperSize()" id="id_papersize"><option value="A4" selected="Selected">A4</option><option value="A3">A3</option></select>';
+    default:
+  }
+  strleft += '&nbsp;&nbsp;';
 
-  strleft += '<table border="0"><tr><td style="vertical-align:top"><button onclick="dosvgdownload()">Download SVG</button></td><td>&nbsp;</td><td style="vertical-align:top"><input id="dosvgname" size="20" value="eendraadschema_print.svg"></td><td>&nbsp;&nbsp;</td><td>Sla tekening hieronder op als SVG en converteer met een ander programma naar PDF (bvb Inkscape).</td></tr></table><br>'
+  switch (structure.print_table.getModeVertical()) {
+    case "kies":
+      strleft += 'Hoogte <select onchange="HLChangeModeVertical()" id="id_modeVerticalSelect"><option value="alles">Alles (standaard)</option><option value="kies" selected="Selected">Kies (expert)</option></select>';
+      strleft += '&nbsp;&nbsp;StartY ';
+      strleft += '<input size="4" id="id_starty" type="number" min="0" step="1" max="' + structure.print_table.getHeight() + '" onchange="HLChangeStartY()" value="' + structure.print_table.getstarty() + '">';
+      strleft += '&nbsp;&nbsp;StopY '
+      strleft += '<input size="4" id="id_stopy" type="number" min="0" step="1" max="' + structure.print_table.getHeight() + '" onchange="HLChangeStopY()" value="' + structure.print_table.getstopy() + '">';
+      break;
+    case "alles":  
+    default:
+      strleft += 'Hoogte <select onchange="HLChangeModeVertical()" id="id_modeVerticalSelect"><option value="alles">Alles (standaard)</option><option value="kies">Kies (expert)</option></select>';  
+  }
+  strleft += '<br><br>';
+  
+  strleft += '<table border="0"><tr><td style="vertical-align:top"><button onclick="dosvgdownload()">Download SVG</button></td><td>&nbsp;</td><td style="vertical-align:top"><input id="dosvgname" size="20" value="eendraadschema_print.svg"></td><td>&nbsp;&nbsp;</td><td>Sla tekening hieronder op als SVG en converteer met een ander programma naar PDF (bvb Inkscape).</td></tr></table><br>';
   strleft += displayButtonPrintToPdf();
 
   strleft += '<div id="printarea"></div>';
@@ -602,6 +642,11 @@ function import_to_structure(mystring: string, redraw = true) {
   if (typeof mystructure.print_table != "undefined") {
     structure.print_table.setHeight(mystructure.print_table.height);
     structure.print_table.setMaxWidth(mystructure.print_table.maxwidth);
+    structure.print_table.setPaperSize(mystructure.print_table.papersize);
+    structure.print_table.setModeVertical(mystructure.print_table.modevertical);
+    structure.print_table.setstarty(mystructure.print_table.starty);
+    structure.print_table.setstopy(mystructure.print_table.stopy);
+
     for (var i=0; i<mystructure.print_table.pages.length; i++) {
       if (i != 0) this.structure.print_table.addPage();
       this.structure.print_table.pages[i].height = mystructure.print_table.pages[i].height;
