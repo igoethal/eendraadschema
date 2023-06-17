@@ -117,6 +117,9 @@ function HL_changeFilename() {
   if (regex.test(filename)) {
     structure.properties.setFilename((document.getElementById("filename") as HTMLInputElement).value);
     document.getElementById("settings").innerHTML = '<code>' + structure.properties.filename + '</code><br><button onclick="HL_enterSettings()">Wijzigen</button>&nbsp;<button onclick="exportjson()">Opslaan</button>';
+  } else {
+    structure.properties.setFilename((document.getElementById("filename") as HTMLInputElement).value+'.eds');
+    document.getElementById("settings").innerHTML = '<code>' + structure.properties.filename + '</code><br><button onclick="HL_enterSettings()">Wijzigen</button>&nbsp;<button onclick="exportjson()">Opslaan</button>';
   }
 }
 
