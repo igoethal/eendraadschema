@@ -299,17 +299,20 @@ class Electro_Item extends List_Item {
       //Indien schakelaar/lichtcircuit, bool1 is de selector voor signalisatielamp of niet
       //Indien vrije tekst, bool1 is de selector voor vet
       //Indien stopcontact, bool1 is de selector voor ingebouwde schakelaar
+      //Indien domotica gestuurde verbruiker, bool1 is de selector voor draadloos
     this.keys.push(["bool2","BOOLEAN",false]); //20, algemeen veld
       //Indien lichtpunt, schakelaar, drukknop of stopcontact, bool2 is de selector voor halfwaterdicht of niet
       //Indien vrije tekst, bool2 is de selector voor schuin
       //Indien ketel, bool2 is de selector voor energiebron
       //Indien kring, bool2 is de selector voor selectieve differentieel
       //Indien stopcontact, bool2 is de selector voor halfwaterdicht
+      //Indien domotica gestuurde verbruiker, bool2 is de selector voor drukknop
     this.keys.push(["bool3","BOOLEAN",false]); //21, algemeen veld
       //Indien lichtpunt, bool3 is de selector voor ingebouwde schakelaar of niet
       //Indien schakelaar of drukknop, bool3 is de selector voor verklikkerlamp of niet
       //Indien vrije tekst, bool3 is de selector voor warmtefunctie
       //Indien stopcontact, bool3 is de selector voor meerfasig
+      //Indien domotica gestuurde verbruiker, bool3 is de selector voor geprogrammeerd
     this.keys.push(["string1","STRING",""]); //22, algemeen veld
       //Indien vrije tekst, breedte van het veld
     this.keys.push(["string2","STRING",""]); //23, algemeen veld
@@ -319,6 +322,9 @@ class Electro_Item extends List_Item {
     this.keys.push(["bool4","BOOLEAN",false]); //25, algemeen veld
       //Indien schakelaar, indicatie trekschakelaar of niet
       //Indien stopcontact, bool4 is de selector voor nulgeleider of niet
+      //Indien domotica gestuurde verbruiker, bool4 is de selector voor detectie
+    this.keys.push(["bool5","BOOLEAN",false]); //26, algemeen veld
+      //Indien domotica gestuurde verbruiker, bool5 is de selector voor uitbreiding van de sturing met drukknop
 
     this.updateConsumers(Parent);
   }
@@ -342,11 +348,15 @@ class Electro_Item extends List_Item {
           break;
         }
         case "Kring": {
-          this.consumers = ["", "Aansluiting", "Bord", "Domotica", "Kring", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
+          this.consumers = ["", "Aansluiting", "Bord", "Domotica", "Domotica gestuurde verbruiker", "Kring", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
           break;
         }
         case "Meerdere verbruikers": {
-          this.consumers = ["", "Domotica", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
+          this.consumers = ["", "Domotica", "Domotica gestuurde verbruiker", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
+          break;
+        }
+        case "Domotica gestuurde verbruiker": {
+          this.consumers = ["", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
           break;
         }
         case "Aansluiting": {
@@ -354,7 +364,7 @@ class Electro_Item extends List_Item {
           break;
         }
         default: {
-          this.consumers = ["", "Aansluiting", "Domotica", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
+          this.consumers = ["", "Aansluiting", "Domotica", "Domotica gestuurde verbruiker", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
           //this.consumers = [""];
           break;
         }
@@ -440,6 +450,8 @@ class Electro_Item extends List_Item {
     this.keys[19][2] = false;
     this.keys[20][2] = false;
     this.keys[21][2] = false;
+    this.keys[25][2] = false;
+    this.keys[26][2] = false;
 
     //-- Empty the strings
     this.keys[22][2] = "";
@@ -465,6 +477,10 @@ class Electro_Item extends List_Item {
       case "Domotica":
         this.keys[15][2] = "Domotica";
         break;
+      case "Domotica gestuurde verbruiker":
+        this.keys[19][2] = true;
+        this.keys[20][2] = true;
+        this.keys[21][2] = true;
       case "Lichtpunt":
         this.keys[17][2] = "Geen"; //Geen noodverlichting
         break;
@@ -521,6 +537,7 @@ class Electro_Item extends List_Item {
       case "Bord":
       case "Kring":
       case "Domotica":
+      case "Domotica gestuurde verbruiker":
       case "Splitsing":
         allow = true;
         break;
@@ -562,11 +579,17 @@ class Electro_Item extends List_Item {
       case "Splitsing":
       case "Meerdere verbruikers":
         maxchilds = 256;
-        break;
+        break;  
+
+      case "Domotica gestuurde verbruiker":
+        maxchilds = 1;
+        break;  
+      
       case "Bel":
       case "Lichtcircuit":
         maxchilds = 0;
         break;
+
       default:
         if (typeof Parent == 'undefined') {
           maxchilds = 256;
@@ -810,6 +833,14 @@ class Electro_Item extends List_Item {
       case "Domotica":
         output += "&nbsp;Nr: " + this.stringToHTML(10,5);
         output += ", Tekst: " + this.stringToHTML(15,10);
+      case "Domotica gestuurde verbruiker":
+        output += "&nbsp;Nr: " + this.stringToHTML(10,5);
+        output += ", Draadloos: " + this.checkboxToHTML(19);  
+        output += ", Lokale Drukknop: " + this.checkboxToHTML(20);  
+        output += ", Uitbreiding drukknop: " + this.checkboxToHTML(26);    
+        output += ", Geprogrammeerd: " + this.checkboxToHTML(21);  
+        output += ", Detectie: " + this.checkboxToHTML(25);
+        output += ", Adres/tekst: " + this.stringToHTML(15,5);
       case "Splitsing":
         break;
       case "Transformator":
@@ -1071,6 +1102,7 @@ class Electro_Item extends List_Item {
           if (halfwaterdicht[i]) outputstr += '<text x="' + endx + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">h</text>';
           if (verklikkerlamp[i]) outputstr += '<line x1="' + (endx-3) + '" x2="' + (endx+3) + '" y1="22" y2="28" stroke="black" /><line x1="' + (endx-3) + '" x2="' + (endx+3) + '" y1="28" y2="22" stroke="black" />';
           if (trekschakelaar[i]) outputstr += '<line x1="' + (endx+10.5) + '" x2="' + (endx+10.5) + '" y1="5" y2="15" stroke="black" /><line x1="' + (endx+10.5) + '" x2="' + (endx+8.5) + '" y1="15" y2="11" stroke="black" /><line x1="' + (endx+10.5) + '" x2="' + (endx+12.5) + '" y1="15" y2="11" stroke="black" />';
+          if ((i==elements.length-1) && (!hasChild)) { endx += 10; }
           startx = endx+5;
           break;
         case "dubbel":
@@ -1082,6 +1114,7 @@ class Electro_Item extends List_Item {
           if (halfwaterdicht[i]) { outputstr += '<text x="' + endx + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">h</text>'; }
           if (verklikkerlamp[i]) { outputstr += '<line x1="' + (endx-3) + '" x2="' + (endx+3) + '" y1="22" y2="28" stroke="black" /><line x1="' + (endx-3) + '" x2="' + (endx+3) + '" y1="28" y2="22" stroke="black" />'; };
           if (trekschakelaar[i]) outputstr += '<line x1="' + (endx+8.5) + '" x2="' + (endx+8.5) + '" y1="9" y2="19" stroke="black" /><line x1="' + (endx+8.5) + '" x2="' + (endx+6.5) + '" y1="19" y2="15" stroke="black" /><line x1="' + (endx+8.5) + '" x2="' + (endx+10.5) + '" y1="19" y2="15" stroke="black" />';
+          if ((i==elements.length-1) && (!hasChild)) { endx += 10; }
           startx = endx+5;
           break;
         case "driepolig":
@@ -1093,6 +1126,7 @@ class Electro_Item extends List_Item {
           if (halfwaterdicht[i]) { outputstr += '<text x="' + endx + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">h</text>'; }
           if (verklikkerlamp[i]) { outputstr += '<line x1="' + (endx-3) + '" x2="' + (endx+3) + '" y1="22" y2="28" stroke="black" /><line x1="' + (endx-3) + '" x2="' + (endx+3) + '" y1="28" y2="22" stroke="black" />'; };
           if (trekschakelaar[i]) outputstr += '<line x1="' + (endx+8.5) + '" x2="' + (endx+8.5) + '" y1="9" y2="19" stroke="black" /><line x1="' + (endx+8.5) + '" x2="' + (endx+6.5) + '" y1="19" y2="15" stroke="black" /><line x1="' + (endx+8.5) + '" x2="' + (endx+10.5) + '" y1="19" y2="15" stroke="black" />';
+          if ((i==elements.length-1) && (!hasChild)) { endx += 10; }
           startx = endx+5;
           break;
         case "dubbelaansteking":
@@ -1104,6 +1138,7 @@ class Electro_Item extends List_Item {
           if (halfwaterdicht[i]) { outputstr += '<text x="' + endx + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">h</text>'; }
           if (verklikkerlamp[i]) { outputstr += '<line x1="' + (endx-3) + '" x2="' + (endx+3) + '" y1="22" y2="28" stroke="black" /><line x1="' + (endx-3) + '" x2="' + (endx+3) + '" y1="28" y2="22" stroke="black" />'; };
           if (trekschakelaar[i]) outputstr += '<line x1="' + (endx+10.5) + '" x2="' + (endx+10.5) + '" y1="5" y2="15" stroke="black" /><line x1="' + (endx+10.5) + '" x2="' + (endx+8.5) + '" y1="15" y2="11" stroke="black" /><line x1="' + (endx+10.5) + '" x2="' + (endx+12.5) + '" y1="15" y2="11" stroke="black" />';
+          if ((i==elements.length-1) && (!hasChild)) { endx += 10; }
           startx = endx+5;
           break;
         case "wissel_enkel":
@@ -1115,6 +1150,7 @@ class Electro_Item extends List_Item {
           if (halfwaterdicht[i]) { outputstr += '<text x="' + endx + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">h</text>'; }
           if (verklikkerlamp[i]) { outputstr += '<line x1="' + (endx-3) + '" x2="' + (endx+3) + '" y1="22" y2="28" stroke="black" /><line x1="' + (endx-3) + '" x2="' + (endx+3) + '" y1="28" y2="22" stroke="black" />'; };
           if (trekschakelaar[i]) outputstr += '<line x1="' + (endx+10.5) + '" x2="' + (endx+10.5) + '" y1="5" y2="15" stroke="black" /><line x1="' + (endx+10.5) + '" x2="' + (endx+8.5) + '" y1="15" y2="11" stroke="black" /><line x1="' + (endx+10.5) + '" x2="' + (endx+12.5) + '" y1="15" y2="11" stroke="black" />';
+          if ((i==elements.length-1) && (!hasChild)) { endx += 10; }
           startx = endx+5;
           lowerbound = Math.max(lowerbound,35);
           break;
@@ -1127,6 +1163,7 @@ class Electro_Item extends List_Item {
           if (halfwaterdicht[i]) { outputstr += '<text x="' + endx + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">h</text>'; }
           if (verklikkerlamp[i]) { outputstr += '<line x1="' + (endx-3) + '" x2="' + (endx+3) + '" y1="22" y2="28" stroke="black" /><line x1="' + (endx-3) + '" x2="' + (endx+3) + '" y1="28" y2="22" stroke="black" />'; };
           if (trekschakelaar[i]) outputstr += '<line x1="' + (endx+8.5) + '" x2="' + (endx+8.5) + '" y1="9" y2="19" stroke="black" /><line x1="' + (endx+8.5) + '" x2="' + (endx+6.5) + '" y1="19" y2="15" stroke="black" /><line x1="' + (endx+8.5) + '" x2="' + (endx+10.5) + '" y1="19" y2="15" stroke="black" />';
+          if ((i==elements.length-1) && (!hasChild)) { endx += 10; }
           startx = endx+5;
           lowerbound = Math.max(lowerbound,35);
           break;
@@ -1139,6 +1176,7 @@ class Electro_Item extends List_Item {
           if (halfwaterdicht[i]) { outputstr += '<text x="' + endx + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">h</text>'; }
           if (verklikkerlamp[i]) { outputstr += '<line x1="' + (endx-3) + '" x2="' + (endx+3) + '" y1="22" y2="28" stroke="black" /><line x1="' + (endx-3) + '" x2="' + (endx+3) + '" y1="28" y2="22" stroke="black" />'; };
           if (trekschakelaar[i]) outputstr += '<line x1="' + (endx+10.5) + '" x2="' + (endx+10.5) + '" y1="5" y2="15" stroke="black" /><line x1="' + (endx+10.5) + '" x2="' + (endx+8.5) + '" y1="15" y2="11" stroke="black" /><line x1="' + (endx+10.5) + '" x2="' + (endx+12.5) + '" y1="15" y2="11" stroke="black" />';
+          if ((i==elements.length-1) && (!hasChild)) { endx += 10; }
           startx = endx+5;
           lowerbound = Math.max(lowerbound,35);
           break;
@@ -1149,6 +1187,7 @@ class Electro_Item extends List_Item {
           if (signalisatielamp[i]) outputstr += '<use xlink:href="#signalisatielamp" x="' + (endx-10) + '" y="25" />';
           if (halfwaterdicht[i]) { outputstr += '<text x="' + endx + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">h</text>'; }
           if (verklikkerlamp[i]) { outputstr += '<line x1="' + (endx-3) + '" x2="' + (endx+3) + '" y1="22" y2="28" stroke="black" /><line x1="' + (endx-3) + '" x2="' + (endx+3) + '" y1="28" y2="22" stroke="black" />'; };
+          if ((i==elements.length-1) && (!hasChild)) { endx += 10; }
           startx = endx+5;
           break;
         case "dimschakelaar wissel":
@@ -1158,6 +1197,7 @@ class Electro_Item extends List_Item {
           if (signalisatielamp[i]) outputstr += '<use xlink:href="#signalisatielamp" x="' + (endx-10) + '" y="25" />';
           if (halfwaterdicht[i]) { outputstr += '<text x="' + endx + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">h</text>'; }
           if (verklikkerlamp[i]) { outputstr += '<line x1="' + (endx-3) + '" x2="' + (endx+3) + '" y1="22" y2="28" stroke="black" /><line x1="' + (endx-3) + '" x2="' + (endx+3) + '" y1="28" y2="22" stroke="black" />'; };
+          if ((i==elements.length-1) && (!hasChild)) { endx += 10; }
           startx = endx+5;
           lowerbound = Math.max(lowerbound,35);
           break;
@@ -1966,7 +2006,7 @@ class Electro_Item extends List_Item {
           case "deurslot":
             outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
             outputstr += '<use xlink:href="#deurslot" x="21" y="25"></use>';
-            mySVG.xright = 58;
+            mySVG.xright = 63;
             outputstr += this.addAddress(mySVG,55,10,2);
             break;
           default:
@@ -2993,6 +3033,106 @@ class Hierarchical_List {
 
             break;
 
+          case "Domotica gestuurde verbruiker":
+
+            inSVG[elementCounter] = new SVGelement();
+
+            var childcounter; //We will count the number of childs we encounter
+                              //  child 1 is the element being controller
+            childcounter = 0;
+            for (var j = 0; j<this.length; j++) {
+              if ( this.active[j] && (this.data[j].parent == this.id[i]) ) {
+                childcounter++; //we have found a valid child
+                switch (childcounter) {
+                  case 1: //Draw the element being controlled, we only draw the first element
+                    inSVG[elementCounter] = this.toSVG(this.id[j],"horizontal",35,true);
+                    break;      
+                }
+              }
+            }
+
+            if (inSVG[elementCounter].yup + inSVG[elementCounter].ydown < 50) { //Give box a minimal height 
+              inSVG[elementCounter].yup = 25;
+              inSVG[elementCounter].ydown = 25;
+            }
+
+            if (inSVG[elementCounter].xleft + inSVG[elementCounter].xright < 56) { //Give box a minimal width
+              inSVG[elementCounter].xleft = 1;
+              inSVG[elementCounter].xright = 55;
+            }
+
+            inSVG[elementCounter].data = '<svg x="' + (21+5) + '" y="25">' + inSVG[elementCounter].data + '</svg>';
+            inSVG[elementCounter].data += '<rect x="' + (21) +
+                                          '" y="' + (5) +
+                                          '" width="' + (inSVG[elementCounter].xleft + inSVG[elementCounter].xright+12) +
+                                          '" height="' + (inSVG[elementCounter].yup + inSVG[elementCounter].ydown + 20) + '" stroke="black" fill="none" />';
+            inSVG[elementCounter].data += '<line x1="' + (21) +
+                                          '" x2="' + (21 + inSVG[elementCounter].xleft + inSVG[elementCounter].xright+12) +
+                                          '" y1="' + (25) +
+                                          '" y2="' + (25) + '" stroke="black" />';                              
+            
+            inSVG[elementCounter].xright += (21 + 12); //We shifted the element by 21 and then added a margin of 5 left and 7 right
+            inSVG[elementCounter].yup += 25; 
+            inSVG[elementCounter].ydown += 5; 
+            inSVG[elementCounter].data += '<line x1="'+ inSVG[elementCounter].xleft +
+                                          '" x2="' + (inSVG[elementCounter].xleft+20) +
+                                          '" y1="' + (inSVG[elementCounter].yup) + '" y2="' + (inSVG[elementCounter].yup) + '" stroke="black" />';                              
+
+            //Put the symbols on top
+            if (this.data[i].keys[19][2]) {
+              inSVG[elementCounter].data += '<use xlink:href="#draadloos_klein" x="22" y="15"></use>';
+            }
+            if (this.data[i].keys[20][2]) {
+              inSVG[elementCounter].data += '<use xlink:href="#drukknop_klein" x="38" y="15"></use>';
+            }
+            if (this.data[i].keys[21][2]) {
+              inSVG[elementCounter].data += '<use xlink:href="#tijdschakelaar_klein" x="54" y="15"></use>';
+            }
+            if (this.data[i].keys[25][2]) {
+              inSVG[elementCounter].data += '<use xlink:href="#detectie_klein" x="70" y="15"></use>';
+            }
+            if (this.data[i].keys[26][2]) {
+              inSVG[elementCounter].data = '<svg x="' + (0) + '" y="20">' + inSVG[elementCounter].data + '</svg>';
+              inSVG[elementCounter].data += '<use xlink:href="#drukknop_klein" x="70" y="14"></use>';
+              inSVG[elementCounter].data += '<line x1="78" y1="21" x2="78" y2="25" stroke="black" />';
+              inSVG[elementCounter].yup += 20;
+            }
+
+            //Please text below if there is any
+            if (!(/^\s*$/.test(this.data[i].keys[15][2]))) { //check if adres contains only white space
+              inSVG[elementCounter].data += '<text x="' + ((inSVG[elementCounter].xright-20)/2 + 21 + 0) + '" y="' + (inSVG[elementCounter].ydown + inSVG[elementCounter].yup + 10) + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.data[i].keys[15][2]) + '</text>';
+              inSVG[elementCounter].ydown += 15;
+            }  
+            
+            //If direct child of a Kring, put a vertical pipe and "nr" at the left
+            if ((this.data[this.getOrdinalById(myParent)]).getKey("type") == "Kring") {
+
+              var y1, y2: number;
+              if (i !== lastChildOrdinal) {
+                y1 = 0;
+                y2 = inSVG[elementCounter].yup + inSVG[elementCounter].ydown;
+              } else {
+                y1 = inSVG[elementCounter].yup;
+                y2 = inSVG[elementCounter].yup + inSVG[elementCounter].ydown;
+              }
+
+              inSVG[elementCounter].data = inSVG[elementCounter].data +
+                '<line x1="' + inSVG[elementCounter].xleft +
+                '" x2="' + inSVG[elementCounter].xleft +
+                '" y1="' + y1 + '" y2="' + y2 + '" stroke="black" />';
+
+              inSVG[elementCounter].data +=
+                '<text x="' + (inSVG[elementCounter].xleft+9) + '" y="' + (inSVG[elementCounter].yup - 5) + '" ' +
+                'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' +
+                htmlspecialchars(this.data[i].getKey("naam"))+'</text>';
+
+              //--See if we can add childs to the left --
+              //elementCounter++
+              //inSVG[elementCounter] = this.toSVG(this.id[i],"horizontal");
+            };
+          
+            break;
+
           case "Kring":
             let cable_location_available: number = 0;
             if ( (this.data[i].getKey("kabel_aanwezig"))
@@ -3219,7 +3359,7 @@ class Hierarchical_List {
 
                 //genoeg plaats voorzien aan de rechterkant en eindigen
                 inSVG[elementCounter].xright = Math.max(inSVG[elementCounter].xright,20+11*(numlines-1));
-                break;
+                break;  
 
               case "differentieel":
 
@@ -3853,6 +3993,19 @@ class Hierarchical_List {
       <line x1="40" y1="-9" x2="40" y2="15" stroke="black" />
       <line x1="60" y1="-9" x2="60" y2="15" stroke="black" />
     </g>
+    <g id="drukknop_klein">
+      <circle cx="8" cy="0" r="7" style="stroke:black;fill:none" />
+      <circle cx="8" cy="0" r="4" style="stroke:black;fill:none" />
+    </g>
+    <g id="draadloos_klein">
+      <path d="M 10 -7 A 10 10 0 0 1 10 7" stroke="black" fill="none" /> 
+      <path d="M 7 -5 A 8 8 0 0 1 7 5" stroke="black" fill="none" /> 
+      <path d="M 4 -3 A 6 6 0 0 1 4 3" stroke="black" fill="none" /> 
+    </g>
+    <g id="detectie_klein">
+      <path d="M 10 -7 A 10 10 0 0 1 10 7" stroke="black" fill="none" /> 
+      <path d="M 5 -7 A 10 10 0 0 1 5 7" stroke="black" fill="none" /> 
+    </g>
     <g id="drukknop">
       <circle cx="12" cy="0" r="12" style="stroke:black;fill:none" />
       <circle cx="12" cy="0" r="7" style="stroke:black;fill:none" />
@@ -3891,6 +4044,11 @@ class Hierarchical_List {
       <line x1="21" y1="0"  x2="25" y2="0"  stroke="black" />
       <line x1="25" y1="0"  x2="31" y2="-5"  stroke="black" />
       <line x1="31" y1="0"  x2="36" y2="0"  stroke="black" />
+    </g>
+    <g id="tijdschakelaar_klein">
+      <circle cx="8" cy="0" r="7" style="stroke:black;fill:none" />
+      <line x1="7" y1="0"  x2="13" y2="0"  stroke="black" />
+      <line x1="8" y1="-5" x2="8" y2="1"  stroke="black" />
     </g>
     <g id="droogkast">
       <rect x="0" y="-20" width="40" height="40" fill="none" style="stroke:black" />
