@@ -270,6 +270,8 @@ class Electro_Item extends List_Item {
     this.keys.push(["accumulatie","BOOLEAN",false]); //3
     this.keys.push(["aantal","SELECT","1"]); //4
     this.keys.push(["lichtkring_poligheid","SELECT","enkelpolig"]); //5
+      //Ook gebruikt voor schakelaar (type schakelaar)
+      //Ook gebruikt voor externe sturing Domotica gestuurde verbruiker (type sturing)
     this.keys.push(["ventilator","BOOLEAN",false]); //6
     this.keys.push(["zekering","SELECT","automatisch"]); //7
     this.keys.push(["amperage","STRING","20"]); //8
@@ -837,9 +839,12 @@ class Electro_Item extends List_Item {
         output += "&nbsp;Nr: " + this.stringToHTML(10,5);
         output += ", Draadloos: " + this.checkboxToHTML(19);  
         output += ", Lokale Drukknop: " + this.checkboxToHTML(20);  
-        output += ", Uitbreiding drukknop: " + this.checkboxToHTML(26);    
         output += ", Geprogrammeerd: " + this.checkboxToHTML(21);  
         output += ", Detectie: " + this.checkboxToHTML(25);
+        output += ", Externe sturing: " + this.checkboxToHTML(26);    
+        if (this.keys[26][2]) {
+          output += ", Externe sturing: " + this.selectToHTML(5,["drukknop","schakelaar"]);    
+        }
         output += ", Adres/tekst: " + this.stringToHTML(15,5);
       case "Splitsing":
         break;
@@ -3092,10 +3097,19 @@ class Hierarchical_List {
               inSVG[elementCounter].data += '<use xlink:href="#detectie_klein" x="70" y="15"></use>';
             }
             if (this.data[i].keys[26][2]) {
-              inSVG[elementCounter].data = '<svg x="' + (0) + '" y="20">' + inSVG[elementCounter].data + '</svg>';
-              inSVG[elementCounter].data += '<use xlink:href="#drukknop_klein" x="70" y="14"></use>';
-              inSVG[elementCounter].data += '<line x1="78" y1="21" x2="78" y2="25" stroke="black" />';
-              inSVG[elementCounter].yup += 20;
+              switch(this.data[i].keys[5][2]) {
+              case "schakelaar":
+                inSVG[elementCounter].data = '<svg x="' + (0) + '" y="20">' + inSVG[elementCounter].data + '</svg>';
+                inSVG[elementCounter].data += '<use xlink:href="#schakelaar_klein" x="78" y="18"></use>';
+                inSVG[elementCounter].data += '<line x1="78" y1="21" x2="78" y2="25" stroke="black" />';
+                inSVG[elementCounter].yup += 20;
+                break; 
+              default:  
+                inSVG[elementCounter].data = '<svg x="' + (0) + '" y="20">' + inSVG[elementCounter].data + '</svg>';
+                inSVG[elementCounter].data += '<use xlink:href="#drukknop_klein" x="70" y="14"></use>';
+                inSVG[elementCounter].data += '<line x1="78" y1="21" x2="78" y2="25" stroke="black" />';
+                inSVG[elementCounter].yup += 20;
+              }
             }
 
             //Please text below if there is any
@@ -3843,6 +3857,11 @@ class Hierarchical_List {
       <line x1="0" y1="0" x2="10" y2="-20" stroke="black" />
       <line x1="10" y1="-20" x2="15" y2="-17.5" stroke="black" />
       <circle cx="0" cy="0" r="5" fill="white" stroke="black" />
+    </g>
+    <g id="schakelaar_klein">
+      <line x1="0" y1="0" x2="6" y2="-12" stroke="black" />
+      <line x1="6" y1="-12" x2="9" y2="-10.5" stroke="black" />
+      <circle cx="0" cy="0" r="3" fill="white" stroke="black" />
     </g>
     <g id="schakelaar_dubbel">
       <line x1="0" y1="0" x2="10" y2="-20" stroke="black" />
