@@ -135,10 +135,11 @@ function HLRedrawTreeHTML() {
 }
 
 function HLRedrawTreeSVG() {
-  document.getElementById("right_col_inner").innerHTML = '<b>Tekening: </b><button onclick=download("html")>Download als html</button>';
+  document.getElementById("right_col_inner").innerHTML = '<b>Tekening: </b>Ga naar het print-menu om de tekening af te printen of te exporteren als SVG vector graphics.<br><br>';
+  /*document.getElementById("right_col_inner").innerHTML = '<b>Tekening: </b><button onclick=download("html")>Download als html</button>';
   document.getElementById("right_col_inner").innerHTML += '&nbsp;<button onclick=download("svg")>Download als svg</button>';
   document.getElementById("right_col_inner").innerHTML += '&nbsp;<input type="checkbox" id="noGroup" checked></input><small>SVG elementen niet groeperen (aanbevolen voor meeste tekenprogramma\'s)</small>';
-  document.getElementById("right_col_inner").innerHTML += '<br><small><i>Noot: De knoppen hierboven laden enkel de tekening. Wenst u het schema ook later te bewerken, gebruik dan "Opslaan" in het hoofdmenu.</i></small><br><br>';
+  document.getElementById("right_col_inner").innerHTML += '<br><small><i>Noot: De knoppen hierboven laden enkel de tekening. Wenst u het schema ook later te bewerken, gebruik dan "Opslaan" in het hoofdmenu.</i></small><br><br>';*/
 
   document.getElementById("right_col_inner").innerHTML += flattenSVGfromString(structure.toSVG(0,"horizontal").data);
   document.getElementById("right_col_inner").innerHTML += `
@@ -252,21 +253,21 @@ function buildNewStructure(structure: Hierarchical_List) {
   itemCounter++;
 
   //3 kringen toevoegen aan nat bord
-  let natBordCounter:number = itemCounter;
+  /*let natBordCounter:number = itemCounter;
   for (var i=0; i<aantalNatteKringen; i++) {
     structure.insertChildAfterId(new Electro_Item(structure.data[natBordCounter-1]),natBordCounter);
     structure.data[structure.getOrdinalById(itemCounter+1)].setKey("type","Kring");
     structure.data[structure.getOrdinalById(itemCounter+1)].setKey("naam",aantalDrogeKringen+aantalNatteKringen-i);
     itemCounter++;
-  };
+  };*/
 
   //7 droge kringen toevoegen aan droog bord
-  for (var i=0; i<aantalDrogeKringen; i++) {
+  /*for (var i=0; i<aantalDrogeKringen; i++) {
     structure.insertChildAfterId(new Electro_Item(structure.data[structure.getOrdinalById(droogBordCounter)]),droogBordCounter);
     structure.data[structure.getOrdinalById(itemCounter+1)].setKey("type","Kring");
     structure.data[structure.getOrdinalById(itemCounter+1)].setKey("naam",aantalDrogeKringen-i);
     itemCounter++;
-  }
+  }*/
 }
 
 function reset_all() {
@@ -503,11 +504,12 @@ function restart_all() {
 
   strleft +=
   `
-    Hoofddifferentieel (in mA) <input id="differentieel_droog" type="text" size="5" maxlength="5" value="300"><br>
+    Hoofddifferentieel (in mA) <input id="differentieel_droog" type="text" size="5" maxlength="5" value="300"><br><br>
     Hoofdzekering (in A) <input id="hoofdzekering" type="text" size="4" maxlength="4" value="65"><br><br>
     Aantal fazen:
-    <select id="aantal_fazen_droog"><option value="2">2p</option><option value="3">3p</option><option value="4">4p (3p+n)</option></select>
-    <br><br>
+    <select id="aantal_fazen_droog"><option value="2">2p</option><option value="3">3p</option><option value="4">4p (3p+n)</option></select>`;
+
+    /*<br><br>
     Aantal kringen droog:
     <select id="aantal_droge_kringen">
   `
@@ -539,10 +541,10 @@ function restart_all() {
     </select><br><br>
     Aantal fazen nat: <select id="aantal_fazen_nat"><option value="2">2p</option><option value="3">3p</option><option value="4">4p (3p+n)</option></select><br>
     Differentieel nat (in mA) <input id="differentieel_nat" type="text" size="5" maxlength="5" value="30"><br>
-  `
+  `*/
   //<button onclick="read_settings()">Start</button>
 
-  var strright:string = `<br><br><br><br>
+  /*var strright:string = `<br><br><br><br>
     Deze tool tekent een &eacute;&eacute;ndraadschema.
     De tool is in volle ontwikkeling en laat thans toe meer complexe
     schakelingen met gesplitste kringen en horizontale aaneenschakelingen
@@ -561,7 +563,7 @@ function restart_all() {
       <li>Kies "meerdere gebruikers" om horizontale ketens te bouwen, bijvoorbeeld een koelkast na een stopcontact.</li>
       <li>Een schakelbaar stopcontact kan gemaakt worden door onder "meerdere gebruikers" eerst een lichtcircuit met "0" lampen gevolgd door een stopcontact te voorzien.</li>
     </ul>
-  `
+  `*/
 
   strleft += CONFIGPAGE_RIGHT;
 
@@ -794,13 +796,13 @@ function download(type: string) {
 }
 
 function read_settings() {
-  CONF_aantal_droge_kringen = parseInt((document.getElementById("aantal_droge_kringen") as HTMLInputElement).value);
-  CONF_aantal_natte_kringen = parseInt((document.getElementById("aantal_natte_kringen") as HTMLInputElement).value);
+  //CONF_aantal_droge_kringen = parseInt((document.getElementById("aantal_droge_kringen") as HTMLInputElement).value);
+  //CONF_aantal_natte_kringen = parseInt((document.getElementById("aantal_natte_kringen") as HTMLInputElement).value);
   CONF_aantal_fazen_droog = parseInt((document.getElementById("aantal_fazen_droog") as HTMLInputElement).value);
-  CONF_aantal_fazen_nat = parseInt((document.getElementById("aantal_fazen_nat") as HTMLInputElement).value);
+  CONF_aantal_fazen_nat = CONF_aantal_fazen_droog;
   CONF_hoofdzekering = parseInt((document.getElementById("hoofdzekering") as HTMLInputElement).value);
   CONF_differentieel_droog = parseInt((document.getElementById("differentieel_droog") as HTMLInputElement).value);
-  CONF_differentieel_nat = parseInt((document.getElementById("differentieel_nat") as HTMLInputElement).value);
+  //CONF_differentieel_nat = parseInt((document.getElementById("differentieel_nat") as HTMLInputElement).value);
   reset_all();
 }
 
