@@ -69,6 +69,7 @@ class Electro_Item extends List_Item {
       //Indien domotica gestuurde verbruiker, bool4 is de selector voor detectie
     this.keys.push(["bool5","BOOLEAN",false]); //26, algemeen veld
       //Indien domotica gestuurde verbruiker, bool5 is de selector voor uitbreiding van de sturing met drukknop
+      //Indien stopcontact, geeft aan dat deze in een verdeelbord zit
 
     this.updateConsumers(Parent);
   }
@@ -496,7 +497,8 @@ class Electro_Item extends List_Item {
           output += "Met nul: " + this.checkboxToHTML(25) + ", ";
         };
         output += "Ingebouwde schakelaar: " + this.checkboxToHTML(19) + ", ";
-        output += "Aantal: " + this.selectToHTML(4,["1","2","3","4","5","6"]);
+        output += "Aantal: " + this.selectToHTML(4,["1","2","3","4","5","6"]) + ", ";
+        output += "In verdeelbord: " + this.checkboxToHTML(26);
         output += ", Adres/tekst: " + this.stringToHTML(15,5);
         break;
       case "Batterij":
@@ -1137,12 +1139,18 @@ class Electro_Item extends List_Item {
           if (this.getKey("kinderveiligheid")) outputstr += '<use xlink:href="#stopcontact_kinderveilig" x="' + startx + '" y="25"></use>';
           startx += 20;
         }
-        //--check halfwaterdicht--
-        if (this.keys[20][2]) outputstr += '<text x="25" y="8" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">h</text>';
+        mySVG.xright += 20 + this.getKey("aantal")*20;
+        //-- Check in verdeelbord --
+        if (this.keys[26][2]) {
+          outputstr += '<rect x="' + (mySVG.xright - this.getKey("aantal") * 20 - 3 - (this.keys[19][2]) * 12) + '" y="3" width="' + (this.getKey("aantal")*20 + 6 + (this.keys[19][2]) * 12) + '" height="44" fill="none" style="stroke:black" />';
+          outputstr += '<line x1="' + (17 + (mySVG.xright-20+3)) + '" y1="3" x2="' + (17 + (mySVG.xright-20+3)) + '" y2="47" fill="none" style="stroke:black" />';
+        };  
+        //-- check halfwaterdicht--
+        if (this.keys[20][2]) outputstr += '<rect x="' + (22+(this.keys[19][2])*10+(this.keys[21][2])*34) + '" y="0" width="6" height="8" style="fill:rgb(255,255,255)" /><text x="' + (25+(this.keys[19][2])*10+(this.keys[21][2])*34) + '" y="8" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">h</text>';
+        //-- check any childs? --
         if (hasChild) {
           outputstr += '<line x1="'+startx+'" y1="25" x2="'+(startx+21)+'" y2="25" stroke="black" />';
         };
-        mySVG.xright += 20 + this.getKey("aantal")*20;
         //-- Plaats adres onderaan --
         outputstr += this.addAddress(mySVG,60,15);
         break;
@@ -1345,7 +1353,7 @@ class Electro_Item extends List_Item {
       case "Omvormer":
         outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
         outputstr += '<use xlink:href="#omvormer" x="21" y="25"></use>';
-        mySVG.xright = 80;
+        mySVG.xright = 60;
         outputstr += this.addAddress(mySVG,55,10);
         break;
       case "Overspanningsbeveiliging":

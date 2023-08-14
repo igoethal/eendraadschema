@@ -522,7 +522,7 @@ class Hierarchical_List {
               '<rect x="' + (20) + '" width="' + (width) +
               '" y="' + (inSVG[elementCounter].yup-20) + '" height="' + (40) + '" stroke="black" stroke-width="2" fill="white" />'
             inSVG[elementCounter].data = inSVG[elementCounter].data +
-              '<line x1="0" x2="20" y1="' + (inSVG[elementCounter].yup) + '" y2="' + (inSVG[elementCounter].yup) + '" stroke="black" />'
+              '<line x1="1" x2="20" y1="' + (inSVG[elementCounter].yup) + '" y2="' + (inSVG[elementCounter].yup) + '" stroke="black" />'
             inSVG[elementCounter].data +=
               '<text x="' + (21 + width/2) + '" y="' + (inSVG[elementCounter].yup+3) + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="bold">' + htmlspecialchars(this.data[i].keys[15][2]) + '</text>';
 
@@ -2044,11 +2044,11 @@ class Hierarchical_List {
       <circle cx="20" cy="7.5" r="3" style="stroke:black;fill:black" />
     </g>
     <g id="omvormer">
-      <rect x="0" y="-15" width="60" height="30" fill="none" style="stroke:black" />
-      <line x1="35" y1="-12" x2="25" y2="12" stroke="black" />
-      <use xlink:href="#sinus" x="5" y="-7" />"
-      <line x1="40" y1="8" x2="55" y2="8" stroke="black" />
-      <line x1="40" y1="11" x2="55" y2="11" stroke="black" stroke-dasharray="3" />
+      <rect x="0" y="-20" width="40" height="40" fill="none" style="stroke:black" />
+      <line x1="0" y1="20" x2="40" y2="-20" stroke="black" />
+      <use xlink:href="#sinus" x="5" y="-12" />"
+      <line x1="20" y1="10" x2="35" y2="10" stroke="black" />
+      <line x1="20" y1="13" x2="35" y2="13" stroke="black" stroke-dasharray="3" />
     </g>
     <g id="overspanningsbeveiliging">
       <rect x="0" y="-15" width="15" height="30" fill="none" style="stroke:black" />

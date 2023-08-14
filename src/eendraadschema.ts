@@ -327,6 +327,7 @@ class Electro_Item extends List_Item {
       //Indien domotica gestuurde verbruiker, bool4 is de selector voor detectie
     this.keys.push(["bool5","BOOLEAN",false]); //26, algemeen veld
       //Indien domotica gestuurde verbruiker, bool5 is de selector voor uitbreiding van de sturing met drukknop
+      //Indien stopcontact, geeft aan dat deze in een verdeelbord zit
 
     this.updateConsumers(Parent);
   }
@@ -754,7 +755,8 @@ class Electro_Item extends List_Item {
           output += "Met nul: " + this.checkboxToHTML(25) + ", ";
         };
         output += "Ingebouwde schakelaar: " + this.checkboxToHTML(19) + ", ";
-        output += "Aantal: " + this.selectToHTML(4,["1","2","3","4","5","6"]);
+        output += "Aantal: " + this.selectToHTML(4,["1","2","3","4","5","6"]) + ", ";
+        output += "In verdeelbord: " + this.checkboxToHTML(26);
         output += ", Adres/tekst: " + this.stringToHTML(15,5);
         break;
       case "Batterij":
@@ -1395,12 +1397,18 @@ class Electro_Item extends List_Item {
           if (this.getKey("kinderveiligheid")) outputstr += '<use xlink:href="#stopcontact_kinderveilig" x="' + startx + '" y="25"></use>';
           startx += 20;
         }
-        //--check halfwaterdicht--
-        if (this.keys[20][2]) outputstr += '<text x="25" y="8" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">h</text>';
+        mySVG.xright += 20 + this.getKey("aantal")*20;
+        //-- Check in verdeelbord --
+        if (this.keys[26][2]) {
+          outputstr += '<rect x="' + (mySVG.xright - this.getKey("aantal") * 20 - 3 - (this.keys[19][2]) * 12) + '" y="3" width="' + (this.getKey("aantal")*20 + 6 + (this.keys[19][2]) * 12) + '" height="44" fill="none" style="stroke:black" />';
+          outputstr += '<line x1="' + (17 + (mySVG.xright-20+3)) + '" y1="3" x2="' + (17 + (mySVG.xright-20+3)) + '" y2="47" fill="none" style="stroke:black" />';
+        };  
+        //-- check halfwaterdicht--
+        if (this.keys[20][2]) outputstr += '<rect x="' + (22+(this.keys[19][2])*10+(this.keys[21][2])*34) + '" y="0" width="6" height="8" style="fill:rgb(255,255,255)" /><text x="' + (25+(this.keys[19][2])*10+(this.keys[21][2])*34) + '" y="8" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">h</text>';
+        //-- check any childs? --
         if (hasChild) {
           outputstr += '<line x1="'+startx+'" y1="25" x2="'+(startx+21)+'" y2="25" stroke="black" />';
         };
-        mySVG.xright += 20 + this.getKey("aantal")*20;
         //-- Plaats adres onderaan --
         outputstr += this.addAddress(mySVG,60,15);
         break;
@@ -1603,7 +1611,7 @@ class Electro_Item extends List_Item {
       case "Omvormer":
         outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
         outputstr += '<use xlink:href="#omvormer" x="21" y="25"></use>';
-        mySVG.xright = 80;
+        mySVG.xright = 60;
         outputstr += this.addAddress(mySVG,55,10);
         break;
       case "Overspanningsbeveiliging":
@@ -2596,7 +2604,7 @@ class Hierarchical_List {
               '<rect x="' + (20) + '" width="' + (width) +
               '" y="' + (inSVG[elementCounter].yup-20) + '" height="' + (40) + '" stroke="black" stroke-width="2" fill="white" />'
             inSVG[elementCounter].data = inSVG[elementCounter].data +
-              '<line x1="0" x2="20" y1="' + (inSVG[elementCounter].yup) + '" y2="' + (inSVG[elementCounter].yup) + '" stroke="black" />'
+              '<line x1="1" x2="20" y1="' + (inSVG[elementCounter].yup) + '" y2="' + (inSVG[elementCounter].yup) + '" stroke="black" />'
             inSVG[elementCounter].data +=
               '<text x="' + (21 + width/2) + '" y="' + (inSVG[elementCounter].yup+3) + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="bold">' + htmlspecialchars(this.data[i].keys[15][2]) + '</text>';
 
@@ -4118,11 +4126,11 @@ class Hierarchical_List {
       <circle cx="20" cy="7.5" r="3" style="stroke:black;fill:black" />
     </g>
     <g id="omvormer">
-      <rect x="0" y="-15" width="60" height="30" fill="none" style="stroke:black" />
-      <line x1="35" y1="-12" x2="25" y2="12" stroke="black" />
-      <use xlink:href="#sinus" x="5" y="-7" />"
-      <line x1="40" y1="8" x2="55" y2="8" stroke="black" />
-      <line x1="40" y1="11" x2="55" y2="11" stroke="black" stroke-dasharray="3" />
+      <rect x="0" y="-20" width="40" height="40" fill="none" style="stroke:black" />
+      <line x1="0" y1="20" x2="40" y2="-20" stroke="black" />
+      <use xlink:href="#sinus" x="5" y="-12" />"
+      <line x1="20" y1="10" x2="35" y2="10" stroke="black" />
+      <line x1="20" y1="13" x2="35" y2="13" stroke="black" stroke-dasharray="3" />
     </g>
     <g id="overspanningsbeveiliging">
       <rect x="0" y="-15" width="15" height="30" fill="none" style="stroke:black" />
