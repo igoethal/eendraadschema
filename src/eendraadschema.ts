@@ -671,8 +671,8 @@ class Electro_Item extends List_Item {
     switch (this.keys[0][2]) {
       case "Kring":
         output += "&nbsp;Naam: " + this.stringToHTML(10,5) + "<br>";
-        output += "Zekering: " + this.selectToHTML(7,["automatisch","differentieel","differentieelautomaat","smelt","geen","---","schakelaar","schemer","overspanningsbeveiliging"]);
-        if (this.keys[7][2] != "geen") output += this.selectToHTML(4,["2","3","4","-","1"]) + this.stringToHTML(8,2) + "A";
+        output += "Zekering: " + this.selectToHTML(7,["automatisch","differentieel","differentieelautomaat","smelt","geen","---","schakelaar","relais","schemer","overspanningsbeveiliging"]);
+        if ( (this.keys[7][2] != "geen") && (this.keys[7][2] != "relais") ) output += this.selectToHTML(4,["2","3","4","-","1"]) + this.stringToHTML(8,2) + "A";
         if (this.getKey("zekering")=="differentieel") {
           output += ", \u0394 " + this.stringToHTML(11,3) + "mA";
           output += ", Type:" + this.selectToHTML(17,["","A","B"]);
@@ -689,6 +689,8 @@ class Electro_Item extends List_Item {
           output += ", Type:" + this.selectToHTML(17,["","A","B"]);
           output += ", Kortsluitvermogen: " + this.stringToHTML(22,3) + "kA";
           output += ", Selectief: " + this.checkboxToHTML(20);
+        }
+        if (this.getKey("zekering")=="relais") {
         }
         output += ", Kabel: " + this.checkboxToHTML(12);
         if (this.getKey("kabel_aanwezig")) {
@@ -1998,11 +2000,13 @@ class Electro_Item extends List_Item {
         outputstr += this.addAddress(mySVG,60,15);
         break;
       case "Zonnepaneel":
-        outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-        outputstr += '<use xlink:href="#zonnepaneel" x="21" y="25"></use>';
-        outputstr += '<text x="60" y="9" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' + htmlspecialchars(this.keys[4][2]) + 'x</text>';
-        mySVG.xright = 100;
-        outputstr += this.addAddress(mySVG,60,15);
+        outputstr += '<line x1="1" y1="35" x2="21" y2="35" stroke="black"></line>';
+        outputstr += '<use xlink:href="#zonnepaneel" x="21" y="35"></use>';
+        outputstr += '<text x="45" y="9" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' + htmlspecialchars(this.keys[4][2]) + 'x</text>';
+        mySVG.xright = 69;
+        mySVG.yup += 10;
+        //mySVG.ydown += 10;
+        outputstr += this.addAddress(mySVG,70,15);
         break;
 
       case "Zeldzame symbolen":
@@ -3323,7 +3327,7 @@ class Hierarchical_List {
               inSVG[elementCounter].yup += 23;
             }
 
-            //--- End of large code block ---
+            //--- Now the bottom part ---
 
             //add the fuse below
             var nameshift = -6;
@@ -3551,7 +3555,21 @@ class Hierarchical_List {
                   '" y="' + (inSVG[elementCounter].yup-12) + '" />';
                 break;
 
-
+              case "relais":
+                inSVG[elementCounter].yup += 30;
+                inSVG[elementCounter].data +=
+                  '<use xlink:href="#relais_kring" x=\"' + inSVG[elementCounter].xleft +
+                  '" y="' + inSVG[elementCounter].yup + '" />';
+                /*inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft+15) +
+                   "\" y=\"" + (inSVG[elementCounter].yup-10) +
+                   "\"" +
+                   " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft+15) +
+                   "," + (inSVG[elementCounter].yup-10) +
+                   ")" +
+                    "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
+                   htmlspecialchars(this.data[i].getKey("aantal") + "P - " +  this.data[i].getKey("amperage") + "A") + "</text>";*/
+                nameshift = -11;
+                break;
 
               case "smelt":
                 inSVG[elementCounter].yup += 30;
@@ -3567,12 +3585,11 @@ class Hierarchical_List {
                     "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
                    htmlspecialchars(this.data[i].getKey("aantal") + "P - " +  this.data[i].getKey("amperage") + "A") + "</text>";
                 break;
+
               case "geen":
                 inSVG[elementCounter].yup += 0;
                 break;
             }
-
-
 
             //--Tekst naast de kring--
             var tekstlocatie = (inSVG[elementCounter].yup-40); //Standaard staat tekst boven de zekering
@@ -3776,6 +3793,26 @@ class Hierarchical_List {
 
   //-----------------------------------------------------
 
+  /*<rect x="0" y="-20" width="40" height="40" fill="none" style="stroke:black" />
+  <rect style="fill:black;stroke:black" width="18" height="6" x="12" y="-10" />
+  <rect style="fill:black;stroke:black" width="28" height="10" x="6" y="-4" ry="0" />
+  <circle cx="12" cy="6" r="4" style="stroke:black;fill:black" />
+  <circle cx="28" cy="6" r="4" style="stroke:black;fill:black" />
+  <line x1="20" y1="-7.2" x2="17" y2="-2" stroke="white"/>
+  <line x1="17" y1="-2" x2="23" y2="-2" stroke="white"/>
+  <line x1="23" y1="-2" x2="20" y2="3.2" stroke="white"/>
+  <line x1="20" y1="3.2" x2="20" y2="0.2" stroke="white"/>
+  <line x1="20" y1="3.2" x2="22.6" y2="1.7" stroke="white"/>
+  
+  <text x="15" y="-1" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="12">AC</text>
+  <text x="45" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="12">DC</text>
+  
+  <line x1="3" y1="3" x2="77" y2="3" stroke="black" />
+      <line x1="20" y1="-9" x2="20" y2="15" stroke="black" />
+      <line x1="40" y1="-9" x2="40" y2="15" stroke="black" />
+      <line x1="60" y1="-9" x2="60" y2="15" stroke="black" />*/
+
+
   outputSVGDefs() {
     var output: string = `
     <defs>
@@ -3805,16 +3842,22 @@ class Hierarchical_List {
       <line x1="-4.66" y1="2.5" x2="4.33" y2="-2.5" style="stroke:black" />
     </g>
     <g id="EVlader">
-      <rect x="0" y="-20" width="40" height="40" fill="none" style="stroke:black" />
-      <rect style="fill:black;stroke:black" width="18" height="6" x="12" y="-10" />
-      <rect style="fill:black;stroke:black" width="28" height="10" x="6" y="-4" ry="0" />
-      <circle cx="12" cy="6" r="4" style="stroke:black;fill:black" />
-      <circle cx="28" cy="6" r="4" style="stroke:black;fill:black" />
-      <line x1="20" y1="-7.2" x2="17" y2="-2" stroke="white"/>
-      <line x1="17" y1="-2" x2="23" y2="-2" stroke="white"/>
-      <line x1="23" y1="-2" x2="20" y2="3.2" stroke="white"/>
-      <line x1="20" y1="3.2" x2="20" y2="0.2" stroke="white"/>
-      <line x1="20" y1="3.2" x2="22.6" y2="1.7" stroke="white"/>
+      <rect x="0" y="13" width="40" height="7" fill="none" style="stroke:black" />
+      <line x1="0" y1="0" x2="7" y2="0" style="stroke:black" />
+      <line x1="7" y1="-20" x2="7" y2="13" style="stroke:black" />
+      <line x1="33" y1="-20" x2="33" y2="13" style="stroke:black" />
+      <line x1="7" y1="-20" x2="33" y2="-20" style="stroke:black" />
+      <rect x="10" y="-17" width="20" height="8" fill="none" style="stroke:black" />
+      <line x1="20" y1="-6" x2="20" y2="10" style="stroke:black" />
+      <line x1="33" y1="-6" x2="36" y2="-6" style="stroke:black" />
+      <line x1="36" y1="-6" x2="36" y2="4" style="stroke:black" />
+      <line x1="36" y1="4" x2="39" y2="4" style="stroke:black" />
+      <line x1="39" y1="4" x2="39" y2="-15" style="stroke:black" />
+      <line x1="39" y1="-6" x2="39" y2="-15" style="stroke:black;stroke-width:2" />
+      <text x="15" y="1" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="6">V</text>
+      <text x="25" y="1" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="6">E</text>
+      <text x="15" y="9" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="6">E</text>
+      <text x="25" y="9" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="6">V</text>
     </g>
     <g id="lamp">
       <line x1="-10.61" y1="-10.61" x2="10.61" y2="10.61" stroke="black" stroke-width="2" />
@@ -4006,11 +4049,10 @@ class Hierarchical_List {
       <use xlink:href="#ster" x="30" y="0" />
     </g>
     <g id="zonnepaneel">
-      <rect x="0" y="-12" width="80" height="30" fill="none" style="stroke:black" />
-      <line x1="3" y1="3" x2="77" y2="3" stroke="black" />
-      <line x1="20" y1="-9" x2="20" y2="15" stroke="black" />
-      <line x1="40" y1="-9" x2="40" y2="15" stroke="black" />
-      <line x1="60" y1="-9" x2="60" y2="15" stroke="black" />
+      <rect x="0" y="-20" width="50" height="40" fill="none" style="stroke:black" />
+      <line x1="0" y1="0" x2="50" y2="0" stroke="black" />
+      <use xlink:href="#arrow" x="5" y="-12" transform="rotate(45 5 -10)" />
+      <use xlink:href="#arrow" x="10" y="-14" transform="rotate(45 10 -14)" />
     </g>
     <g id="drukknop_klein">
       <circle cx="8" cy="0" r="7" style="stroke:black;fill:none" />
@@ -4038,7 +4080,7 @@ class Hierarchical_List {
     </g>
     <g id="dimmer">
       <rect x="0" y="-13" width="40" height="26" fill="none" style="stroke:black" />
-      <line x1="10" y1="5" x2="30" y2="6"  stroke="black" />
+      <line x1="10" y1="5" x2="30" y2="5"  stroke="black" />
       <line x1="10" y1="5" x2="10" y2="-5"  stroke="black" />
       <line x1="10" y1="-5" x2="30" y2="5"  stroke="black" />
     </g>
@@ -4078,8 +4120,9 @@ class Hierarchical_List {
     <g id="omvormer">
       <rect x="0" y="-15" width="60" height="30" fill="none" style="stroke:black" />
       <line x1="35" y1="-12" x2="25" y2="12" stroke="black" />
-      <text x="15" y="-1" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="12">AC</text>
-      <text x="45" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="12">DC</text>
+      <use xlink:href="#sinus" x="5" y="-7" />"
+      <line x1="40" y1="8" x2="55" y2="8" stroke="black" />
+      <line x1="40" y1="11" x2="55" y2="11" stroke="black" stroke-dasharray="3" />
     </g>
     <g id="overspanningsbeveiliging">
       <rect x="0" y="-15" width="15" height="30" fill="none" style="stroke:black" />
@@ -4161,6 +4204,10 @@ class Hierarchical_List {
     <g id="zekering_smelt">
       <rect x="-4" y="-30" width="8" height="30" style="stroke:black;fill:none" />
       <line x1="0" y1="-30" x2="0" y2="0" stroke="black" />
+    </g>
+    <g id="relais_kring">
+      <rect x="-8" y="-30" width="16" height="30" style="stroke:black;fill:none" />
+      <line x1="8" y1="-22.5" x2="-8" y2="-7.5" stroke="black" />
     </g>
     <g id="overspanningsbeveiliging_inline">   -> shift x -7.5  y -15
       <rect x="-7.5" y="-30" width="15" height="30" fill="none" style="stroke:black" />

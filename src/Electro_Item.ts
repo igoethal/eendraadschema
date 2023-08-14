@@ -413,8 +413,8 @@ class Electro_Item extends List_Item {
     switch (this.keys[0][2]) {
       case "Kring":
         output += "&nbsp;Naam: " + this.stringToHTML(10,5) + "<br>";
-        output += "Zekering: " + this.selectToHTML(7,["automatisch","differentieel","differentieelautomaat","smelt","geen","---","schakelaar","schemer","overspanningsbeveiliging"]);
-        if (this.keys[7][2] != "geen") output += this.selectToHTML(4,["2","3","4","-","1"]) + this.stringToHTML(8,2) + "A";
+        output += "Zekering: " + this.selectToHTML(7,["automatisch","differentieel","differentieelautomaat","smelt","geen","---","schakelaar","relais","schemer","overspanningsbeveiliging"]);
+        if ( (this.keys[7][2] != "geen") && (this.keys[7][2] != "relais") ) output += this.selectToHTML(4,["2","3","4","-","1"]) + this.stringToHTML(8,2) + "A";
         if (this.getKey("zekering")=="differentieel") {
           output += ", \u0394 " + this.stringToHTML(11,3) + "mA";
           output += ", Type:" + this.selectToHTML(17,["","A","B"]);
@@ -431,6 +431,8 @@ class Electro_Item extends List_Item {
           output += ", Type:" + this.selectToHTML(17,["","A","B"]);
           output += ", Kortsluitvermogen: " + this.stringToHTML(22,3) + "kA";
           output += ", Selectief: " + this.checkboxToHTML(20);
+        }
+        if (this.getKey("zekering")=="relais") {
         }
         output += ", Kabel: " + this.checkboxToHTML(12);
         if (this.getKey("kabel_aanwezig")) {
@@ -1740,11 +1742,13 @@ class Electro_Item extends List_Item {
         outputstr += this.addAddress(mySVG,60,15);
         break;
       case "Zonnepaneel":
-        outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-        outputstr += '<use xlink:href="#zonnepaneel" x="21" y="25"></use>';
-        outputstr += '<text x="60" y="9" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' + htmlspecialchars(this.keys[4][2]) + 'x</text>';
-        mySVG.xright = 100;
-        outputstr += this.addAddress(mySVG,60,15);
+        outputstr += '<line x1="1" y1="35" x2="21" y2="35" stroke="black"></line>';
+        outputstr += '<use xlink:href="#zonnepaneel" x="21" y="35"></use>';
+        outputstr += '<text x="45" y="9" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' + htmlspecialchars(this.keys[4][2]) + 'x</text>';
+        mySVG.xright = 69;
+        mySVG.yup += 10;
+        //mySVG.ydown += 10;
+        outputstr += this.addAddress(mySVG,70,15);
         break;
 
       case "Zeldzame symbolen":
