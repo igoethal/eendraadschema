@@ -71,7 +71,7 @@ table.html_edit_table td:nth-child(2) {
 #canvas_2col {
   padding:7px;
   margin:7 0 0 40%;
-  background: url(right.jpg);
+  /*background: url(right.jpg);*/
   color:#fff; width:60%;
   min-height:100%; float:right;
 }
