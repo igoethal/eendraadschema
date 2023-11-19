@@ -610,7 +610,7 @@ function import_to_structure(mystring: string, redraw = true) {
       buffer[i-0] = mystring.charCodeAt(i);
     }
     try { //See if the text decoder works, if not, we will do it manually (slower)
-      var decoder = new TextDecoder("utf-8");
+      let decoder = new TextDecoder("utf-8");
       text = decoder.decode(pako.inflate(buffer));
     } catch (error) { //Continue without the text decoder (old browsers)
       var inflated:Uint8Array = pako.inflate(buffer);
@@ -722,7 +722,7 @@ var importjson = function(event) {
         buffer[i-0] = mystring.charCodeAt(i);
       }
       try { //See if the text decoder works, if not, we will do it manually (slower)
-        var decoder = new TextDecoder("utf-8");
+        let decoder = new TextDecoder("utf-8");
         text = decoder.decode(pako.inflate(buffer));
       } catch (error) { //Continue without the text decoder (old browsers)
         var inflated:Uint8Array = pako.inflate(buffer);

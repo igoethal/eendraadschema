@@ -1214,8 +1214,12 @@ class Electro_Item extends List_Item {
           endx = startx + 20;
           outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />';
           //outputstr += '<path d="M' + startx + ' 25 L' + endx + ' 25" stroke="black" />';
-          outputstr += '<use xlink:href="#relais" x="' + endx + '" y="25" />';
-          outputstr += '<use xlink:href="#moving_man" x="' + (endx + 1.5) + '" y="20" />';
+          outputstr += '<use xlink:href="#relais" x="' + endx + '" y="16" />';
+          outputstr += '<use xlink:href="#moving_man" x="' + (endx + 1.5) + '" y="11" />';
+          outputstr += '<use xlink:href="#detectie_klein" x="' + (endx + 23) +'" y="13"></use>';
+          outputstr += '<line x1="' + endx + '" x2="' + endx + '" y1="29" y2="43" fill="none" style="stroke:black" />';
+          outputstr += '<line x1="' + (endx+40) + '" x2="' + (endx+40) + '" y1="29" y2="43" fill="none" style="stroke:black" />';
+          outputstr += '<line x1="' + (endx) + '" x2="' + (endx+40) + '" y1="43" y2="43" fill="none" style="stroke:black" />';
           startx = endx + 40;
           lowerbound = Math.max(lowerbound,30);
           break;
@@ -4575,10 +4579,10 @@ function exportjson() {
 
   var text:string = JSON.stringify(structure);
   try {
-    var decoder = new TextDecoder("utf-8");
-    var encoder = new TextEncoder();
-    var pako_inflated = new Uint8Array(encoder.encode(text));
-    var pako_deflated = new Uint8Array(pako.deflate(pako_inflated));
+    let decoder = new TextDecoder("utf-8");
+    let encoder = new TextEncoder();
+    let pako_inflated = new Uint8Array(encoder.encode(text));
+    let pako_deflated = new Uint8Array(pako.deflate(pako_inflated));
     text = "EDS0010000" + btoa(String.fromCharCode.apply(null, pako_deflated));
   } catch (error) {
     //We keep the non encoded text and do nothing
@@ -5208,7 +5212,7 @@ function import_to_structure(mystring: string, redraw = true) {
       buffer[i-0] = mystring.charCodeAt(i);
     }
     try { //See if the text decoder works, if not, we will do it manually (slower)
-      var decoder = new TextDecoder("utf-8");
+      let decoder = new TextDecoder("utf-8");
       text = decoder.decode(pako.inflate(buffer));
     } catch (error) { //Continue without the text decoder (old browsers)
       var inflated:Uint8Array = pako.inflate(buffer);
@@ -5320,7 +5324,7 @@ var importjson = function(event) {
         buffer[i-0] = mystring.charCodeAt(i);
       }
       try { //See if the text decoder works, if not, we will do it manually (slower)
-        var decoder = new TextDecoder("utf-8");
+        let decoder = new TextDecoder("utf-8");
         text = decoder.decode(pako.inflate(buffer));
       } catch (error) { //Continue without the text decoder (old browsers)
         var inflated:Uint8Array = pako.inflate(buffer);

@@ -32,10 +32,10 @@ function exportjson() {
 
   var text:string = JSON.stringify(structure);
   try {
-    var decoder = new TextDecoder("utf-8");
-    var encoder = new TextEncoder();
-    var pako_inflated = new Uint8Array(encoder.encode(text));
-    var pako_deflated = new Uint8Array(pako.deflate(pako_inflated));
+    let decoder = new TextDecoder("utf-8");
+    let encoder = new TextEncoder();
+    let pako_inflated = new Uint8Array(encoder.encode(text));
+    let pako_deflated = new Uint8Array(pako.deflate(pako_inflated));
     text = "EDS0010000" + btoa(String.fromCharCode.apply(null, pako_deflated));
   } catch (error) {
     //We keep the non encoded text and do nothing

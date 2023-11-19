@@ -1288,8 +1288,12 @@ var Electro_Item = /** @class */ (function (_super) {
                     endx = startx + 20;
                     outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />';
                     //outputstr += '<path d="M' + startx + ' 25 L' + endx + ' 25" stroke="black" />';
-                    outputstr += '<use xlink:href="#relais" x="' + endx + '" y="25" />';
-                    outputstr += '<use xlink:href="#moving_man" x="' + (endx + 1.5) + '" y="20" />';
+                    outputstr += '<use xlink:href="#relais" x="' + endx + '" y="16" />';
+                    outputstr += '<use xlink:href="#moving_man" x="' + (endx + 1.5) + '" y="11" />';
+                    outputstr += '<use xlink:href="#detectie_klein" x="' + (endx + 23) + '" y="13"></use>';
+                    outputstr += '<line x1="' + endx + '" x2="' + endx + '" y1="29" y2="43" fill="none" style="stroke:black" />';
+                    outputstr += '<line x1="' + (endx + 40) + '" x2="' + (endx + 40) + '" y1="29" y2="43" fill="none" style="stroke:black" />';
+                    outputstr += '<line x1="' + (endx) + '" x2="' + (endx + 40) + '" y1="43" y2="43" fill="none" style="stroke:black" />';
                     startx = endx + 40;
                     lowerbound = Math.max(lowerbound, 30);
                     break;
