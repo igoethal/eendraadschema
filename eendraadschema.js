@@ -3920,7 +3920,15 @@ function exportjson() {
     //Final data reads "EDS0010000" and thereafter a 64base encoding of the deflated output from Pako
     //filename = "eendraadschema.eds";
     filename = structure.properties.filename;
+    for (var _i = 0, _a = structure.data; _i < _a.length; _i++) {
+        var listitem = _a[_i];
+        listitem.Parent_Item = null;
+    }
     var text = JSON.stringify(structure);
+    for (var _b = 0, _c = structure.data; _b < _c.length; _b++) {
+        var listitem = _c[_b];
+        listitem.Parent_Item = structure.data[structure.getOrdinalById(listitem.parent)];
+    }
     try {
         var decoder = new TextDecoder("utf-8");
         var encoder = new TextEncoder();
@@ -4453,6 +4461,11 @@ function import_to_structure(mystring, redraw) {
     structure = new Hierarchical_List();
     var obj = JSON.parse(text);
     Object.assign(mystructure, obj);
+    for (var _i = 0, _a = structure.data; _i < _a.length; _i++) {
+        var listitem = _a[_i];
+        listitem.Parent_Item = structure.data[structure.getOrdinalById(listitem.parent)];
+        ;
+    }
     if (typeof mystructure.properties.filename != "undefined") {
         structure.properties.filename = mystructure.properties.filename;
     }

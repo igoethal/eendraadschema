@@ -512,7 +512,7 @@ class Electro_Item extends List_Item {
     switch (this.keys[0][2]) {
       case "Lichtcircuit":
         if (this.getKey("lichtkring_poligheid") == "dubbelpolig") {
-          if ((this.getKey("aantal") as Number) > 2) {
+          if ((this.getKey("aantal") as number) > 2) {
             this.setKey("aantal","2");
           }
         }
@@ -523,7 +523,7 @@ class Electro_Item extends List_Item {
         }
         break;
       case "Kring":
-        if ( ( (this.getKey("aantal") as Number) < 1 ) || ( (this.getKey("aantal") as Number) > 4 ) ) {
+        if ( ( (this.getKey("aantal") as number) < 1 ) || ( (this.getKey("aantal") as number) > 4 ) ) {
           this.setKey("aantal","2");
         }
         break;
@@ -4577,7 +4577,13 @@ function exportjson() {
   //filename = "eendraadschema.eds";
   filename = structure.properties.filename;
 
+  for (var listitem of structure.data) {
+    listitem.Parent_Item = null;
+  }
   var text:string = JSON.stringify(structure);
+  for (var listitem of structure.data) {
+    listitem.Parent_Item = structure.data[structure.getOrdinalById(listitem.parent)];
+  }
   try {
     let decoder = new TextDecoder("utf-8");
     let encoder = new TextEncoder();
@@ -5232,6 +5238,9 @@ function import_to_structure(mystring: string, redraw = true) {
   structure = new Hierarchical_List();
   var obj = JSON.parse(text);
   (<any> Object).assign(mystructure, obj);
+  for (var listitem of structure.data) {
+    listitem.Parent_Item = structure.data[structure.getOrdinalById(listitem.parent)];;
+  }
 
   if (typeof mystructure.properties.filename != "undefined") {
     structure.properties.filename = mystructure.properties.filename;
