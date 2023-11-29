@@ -630,6 +630,9 @@ function import_to_structure(mystring: string, redraw = true) {
   structure = new Hierarchical_List();
   var obj = JSON.parse(text);
   (<any> Object).assign(mystructure, obj);
+  for (var listitem of structure.data) {
+    listitem.Parent_Item = structure.data[structure.getOrdinalById(listitem.parent)];;
+  }
 
   if (typeof mystructure.properties.filename != "undefined") {
     structure.properties.filename = mystructure.properties.filename;
