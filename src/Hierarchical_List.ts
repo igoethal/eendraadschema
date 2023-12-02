@@ -1717,28 +1717,6 @@ class Hierarchical_List {
 
   }
 
-  //-----------------------------------------------------
-
-  /*<rect x="0" y="-20" width="40" height="40" fill="none" style="stroke:black" />
-  <rect style="fill:black;stroke:black" width="18" height="6" x="12" y="-10" />
-  <rect style="fill:black;stroke:black" width="28" height="10" x="6" y="-4" ry="0" />
-  <circle cx="12" cy="6" r="4" style="stroke:black;fill:black" />
-  <circle cx="28" cy="6" r="4" style="stroke:black;fill:black" />
-  <line x1="20" y1="-7.2" x2="17" y2="-2" stroke="white"/>
-  <line x1="17" y1="-2" x2="23" y2="-2" stroke="white"/>
-  <line x1="23" y1="-2" x2="20" y2="3.2" stroke="white"/>
-  <line x1="20" y1="3.2" x2="20" y2="0.2" stroke="white"/>
-  <line x1="20" y1="3.2" x2="22.6" y2="1.7" stroke="white"/>
-  
-  <text x="15" y="-1" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="12">AC</text>
-  <text x="45" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="12">DC</text>
-  
-  <line x1="3" y1="3" x2="77" y2="3" stroke="black" />
-      <line x1="20" y1="-9" x2="20" y2="15" stroke="black" />
-      <line x1="40" y1="-9" x2="40" y2="15" stroke="black" />
-      <line x1="60" y1="-9" x2="60" y2="15" stroke="black" />*/
-
-
   outputSVGDefs() {
     var output: string = `
     <defs>
