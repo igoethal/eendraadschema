@@ -14,7 +14,7 @@ cat config.ts >> eendraadschema.ts
 cat ../prop/prop_scripts.ts >> eendraadschema.ts
 cat main.ts >> eendraadschema.ts
 
-tsc --outfile swap.js eendraadschema.ts
+tsc SVGSymbols.ts eendraadschema.ts --outfile swap.js 
 cat GPL3.js swap.js > eendraadschema.js
 cp eendraadschema.js ..
 rm swap.js
