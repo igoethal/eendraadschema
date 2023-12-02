@@ -336,6 +336,7 @@ var Electro_Item = /** @class */ (function (_super) {
         //Indien domotica gestuurde verbruiker, bool3 is de selector voor geprogrammeerd
         _this.keys.push(["string1", "STRING", ""]); //22, algemeen veld
         //Indien vrije tekst, breedte van het veld
+        //Indien vrije ruimte, breede van de ruimte
         _this.keys.push(["string2", "STRING", ""]); //23, algemeen veld
         //Indien vrije tekst, het adres-veld (want reeds gebruikt voor de tekst zelf)
         //Indien aansluiting, hier kan ook een extra naam voor de aansluiting staan
@@ -359,7 +360,7 @@ var Electro_Item = /** @class */ (function (_super) {
         else {
             switch (Parent.getKey("type")) {
                 case "Bord": {
-                    this.consumers = ["", "Kring"];
+                    this.consumers = ["", "Kring", "Vrije ruimte"];
                     break;
                 }
                 case "Splitsing":
@@ -373,6 +374,10 @@ var Electro_Item = /** @class */ (function (_super) {
                 }
                 case "Meerdere verbruikers": {
                     this.consumers = ["", "Domotica", "Domotica gestuurde verbruiker", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
+                    break;
+                }
+                case "Vrije ruimte": {
+                    this.consumers = [""];
                     break;
                 }
                 case "Domotica gestuurde verbruiker": {
@@ -425,15 +430,6 @@ var Electro_Item = /** @class */ (function (_super) {
             this.keys[7][2] = "automatisch";
             this.keys[8][2] = "20";
             this.keys[9][2] = "XVB 3G2,5";
-        }
-        ;
-        if (this.keys[0][2] == "Verlenging") {
-            this.keys[22][2] = 40;
-        }
-        ;
-        if (this.keys[0][2] == "Vrije tekst") {
-            this.keys[22][2] = 40;
-            this.keys[17][2] = "centreer";
         }
         ;
         this.keys[11][2] = "300"; //Differentieel
@@ -497,6 +493,16 @@ var Electro_Item = /** @class */ (function (_super) {
                 this.keys[21][2] = true;
             case "Lichtpunt":
                 this.keys[17][2] = "Geen"; //Geen noodverlichting
+                break;
+            case "Verlenging":
+                this.keys[22][2] = 40;
+                break;
+            case "Vrije ruimte":
+                this.keys[22][2] = 25;
+                break;
+            case "Vrije tekst":
+                this.keys[22][2] = 40;
+                this.keys[17][2] = "centreer";
                 break;
             case "Zeldzame symbolen":
                 this.keys[16][2] = "";
@@ -595,6 +601,7 @@ var Electro_Item = /** @class */ (function (_super) {
                 break;
             case "Bel":
             case "Lichtcircuit":
+            case "Vrije ruimte":
                 maxchilds = 0;
                 break;
             default:
@@ -882,6 +889,9 @@ var Electro_Item = /** @class */ (function (_super) {
                     output += ", Ventilator: " + this.checkboxToHTML(6);
                 }
                 output += ", Adres/tekst: " + this.stringToHTML(15, 5);
+                break;
+            case "Vrije ruimte":
+                output += "&nbsp;Breedte: " + this.stringToHTML(22, 3);
                 break;
             case "Vrije tekst":
                 output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
@@ -2178,7 +2188,7 @@ var Properties = /** @class */ (function () {
     return Properties;
 }());
 /*****************************************************************************
-  CLASS Hierarchival_List
+  CLASS Hierarchical_List
 
   Defines a list with a parent-child relationship.
 
@@ -3148,6 +3158,18 @@ var Hierarchical_List = /** @class */ (function () {
                             //inSVG[elementCounter] = this.toSVG(this.id[i],"horizontal");
                         }
                         ;
+                        break;
+                    case "Vrije ruimte":
+                        inSVG[elementCounter] = new SVGelement();
+                        inSVG[elementCounter].yup = 0;
+                        inSVG[elementCounter].ydown = 0;
+                        inSVG[elementCounter].xleft = 0;
+                        var desiredwidth = Number(this.data[i].keys[22][2]);
+                        if (isNaN(desiredwidth)) {
+                            desiredwidth = 25;
+                        }
+                        inSVG[elementCounter].xright = desiredwidth;
+                        inSVG[elementCounter].data = "";
                         break;
                     case "Kring":
                         var cable_location_available = 0;

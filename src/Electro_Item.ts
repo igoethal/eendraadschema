@@ -59,6 +59,7 @@ class Electro_Item extends List_Item {
       //Indien domotica gestuurde verbruiker, bool3 is de selector voor geprogrammeerd
     this.keys.push(["string1","STRING",""]); //22, algemeen veld
       //Indien vrije tekst, breedte van het veld
+      //Indien vrije ruimte, breede van de ruimte
     this.keys.push(["string2","STRING",""]); //23, algemeen veld
       //Indien vrije tekst, het adres-veld (want reeds gebruikt voor de tekst zelf)
       //Indien aansluiting, hier kan ook een extra naam voor de aansluiting staan
@@ -84,7 +85,7 @@ class Electro_Item extends List_Item {
     } else {
       switch (Parent.getKey("type")) {
         case "Bord": {
-          this.consumers = ["", "Kring"];
+          this.consumers = ["", "Kring", "Vrije ruimte"];
           break;
         }
         case "Splitsing":
@@ -98,6 +99,10 @@ class Electro_Item extends List_Item {
         }
         case "Meerdere verbruikers": {
           this.consumers = ["", "Domotica", "Domotica gestuurde verbruiker", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
+          break;
+        }
+        case "Vrije ruimte": {
+          this.consumers = [""];
           break;
         }
         case "Domotica gestuurde verbruiker": {
@@ -156,14 +161,6 @@ class Electro_Item extends List_Item {
       this.keys[9][2] = "XVB 3G2,5";
     };
 
-    if (this.keys[0][2] == "Verlenging") {
-      this.keys[22][2] = 40;
-    };
-
-    if (this.keys[0][2] == "Vrije tekst") {
-      this.keys[22][2] = 40;
-      this.keys[17][2] = "centreer";
-    };
 
     this.keys[11][2] = "300"; //Differentieel
 
@@ -229,6 +226,16 @@ class Electro_Item extends List_Item {
       case "Lichtpunt":
         this.keys[17][2] = "Geen"; //Geen noodverlichting
         break;
+      case "Verlenging":
+        this.keys[22][2] = 40;
+        break;      
+      case "Vrije ruimte":
+        this.keys[22][2] = 25;
+        break;
+      case "Vrije tekst":
+        this.keys[22][2] = 40;
+        this.keys[17][2] = "centreer";
+        break;    
       case "Zeldzame symbolen":
         this.keys[16][2] = "";
         break;
@@ -330,8 +337,9 @@ class Electro_Item extends List_Item {
         maxchilds = 1;
         break;  
       
-      case "Bel":
+      case "Bel": 
       case "Lichtcircuit":
+      case "Vrije ruimte":
         maxchilds = 0;
         break;
 
@@ -617,6 +625,9 @@ class Electro_Item extends List_Item {
         }
         output += ", Adres/tekst: " + this.stringToHTML(15,5);
         break;
+      case "Vrije ruimte":
+          output += "&nbsp;Breedte: " + this.stringToHTML(22,3);
+          break;  
       case "Vrije tekst":
         output += "&nbsp;Nr: " + this.stringToHTML(10,5);
         output += ", Tekst (nieuwe lijn = \"|\"): " + this.stringToHTML(15,10);

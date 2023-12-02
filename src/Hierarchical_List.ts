@@ -1,5 +1,5 @@
 /*****************************************************************************
-  CLASS Hierarchival_List
+  CLASS Hierarchical_List
 
   Defines a list with a parent-child relationship.
 
@@ -1075,6 +1075,20 @@ class Hierarchical_List {
               //inSVG[elementCounter] = this.toSVG(this.id[i],"horizontal");
             };
           
+            break;
+
+          case "Vrije ruimte":
+
+            inSVG[elementCounter] = new SVGelement();
+            inSVG[elementCounter].yup = 0;
+            inSVG[elementCounter].ydown = 0;
+            inSVG[elementCounter].xleft = 0;
+
+            let desiredwidth = Number(this.data[i].keys[22][2]);
+            if (isNaN(desiredwidth)) { desiredwidth = 25; }  
+            inSVG[elementCounter].xright = desiredwidth;
+
+            inSVG[elementCounter].data = "";
             break;
 
           case "Kring":
