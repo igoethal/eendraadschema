@@ -854,6 +854,7 @@ var Electro_Item = /** @class */ (function (_super) {
             case "Domotica":
                 output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
                 output += ", Tekst: " + this.stringToHTML(15, 10);
+                break;
             case "Domotica gestuurde verbruiker":
                 output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
                 output += ", Draadloos: " + this.checkboxToHTML(19);
