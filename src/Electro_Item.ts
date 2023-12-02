@@ -254,7 +254,7 @@ class Electro_Item extends List_Item {
     switch (this.keys[0][2]) {
       case "Lichtcircuit":
         if (this.getKey("lichtkring_poligheid") == "dubbelpolig") {
-          if ((this.getKey("aantal") as Number) > 2) {
+          if ((this.getKey("aantal") as number) > 2) {
             this.setKey("aantal","2");
           }
         }
@@ -265,7 +265,7 @@ class Electro_Item extends List_Item {
         }
         break;
       case "Kring":
-        if ( ( (this.getKey("aantal") as Number) < 1 ) || ( (this.getKey("aantal") as Number) > 4 ) ) {
+        if ( ( (this.getKey("aantal") as number) < 1 ) || ( (this.getKey("aantal") as number) > 4 ) ) {
           this.setKey("aantal","2");
         }
         break;

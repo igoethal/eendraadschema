@@ -30,7 +30,13 @@ function exportjson() {
   //filename = "eendraadschema.eds";
   filename = structure.properties.filename;
 
+  for (var listitem of structure.data) {
+    listitem.Parent_Item = null;
+  }
   var text:string = JSON.stringify(structure);
+  for (var listitem of structure.data) {
+    listitem.Parent_Item = structure.data[structure.getOrdinalById(listitem.parent)];
+  }
   try {
     let decoder = new TextDecoder("utf-8");
     let encoder = new TextEncoder();
