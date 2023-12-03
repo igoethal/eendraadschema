@@ -191,7 +191,6 @@ class Hierarchical_List {
         my_item.id = this.curid;
         my_item.parent = this.data[i].parent;
         my_item.indent = this.data[i].indent;
-        my_item.Parent_Item = this.data[this.getOrdinalById(my_item.parent)];
         my_item.collapsed = false;
 
         //Insert the data
@@ -218,7 +217,6 @@ class Hierarchical_List {
         my_item.id = this.curid;
         my_item.parent = this.data[i].parent;
         my_item.indent = this.data[i].indent;
-        my_item.Parent_Item = this.data[this.getOrdinalById(my_item.parent)];
         my_item.collapsed = false;
 
         //Insert the data
@@ -247,7 +245,6 @@ class Hierarchical_List {
       var ordinal:number = this.insertItemAfterId(my_item, my_id);
       this.data[ordinal].parent = my_id;
       this.data[ordinal].indent = this.data[ordinal-1].indent+1;
-      this.data[ordinal].Parent_Item = this.data[this.getOrdinalById(my_id)];
     } else {
       alert("Het maximum aantal kinderen van dit element is "+maxchilds);
     }
@@ -268,7 +265,7 @@ class Hierarchical_List {
       }
     }
     //Swap both items (we swap data and id, we do not need to swap active as both items are active by construction)
-    var swapItem: List_Item = new List_Item();
+    var swapItem: List_Item = new List_Item(this);
     swapItem = this.data[currentOrdinal];
     this.data[currentOrdinal] = this.data[newOrdinal];
     this.data[newOrdinal] = swapItem;
@@ -294,7 +291,7 @@ class Hierarchical_List {
       }
     }
     //Swap both items (we swap data and id, we do not need to swap active as both items are active by construction)
-    var swapItem: List_Item = new List_Item();
+    var swapItem: List_Item = new List_Item(this);
     swapItem = this.data[currentOrdinal];
     this.data[currentOrdinal] = this.data[newOrdinal];
     this.data[newOrdinal] = swapItem;
@@ -318,7 +315,7 @@ class Hierarchical_List {
       parent_id = this.data[currentOrdinal].parent
     }
     let parentOrdinal = this.getOrdinalById(parent_id);
-    var my_item = new Electro_Item(this.data[parentOrdinal]);
+    var my_item = new Electro_Item(this);
     my_item.clone(this.data[currentOrdinal]);
     //-- Now add the clone to the structure
     //   The clone will have id this.curid-1

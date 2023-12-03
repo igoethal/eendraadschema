@@ -2,18 +2,6 @@
 
 cd src
 
-#cat general.js > eendraadschema.ts
-#cat SVGelement.ts >> eendraadschema.ts
-#cat List_Item.ts >> eendraadschema.ts
-#cat Electro_Item.ts >> eendraadschema.ts
-#cat Simple_Item.ts >> eendraadschema.ts
-#cat Properties.ts >> eendraadschema.ts
-#cat Hierarchical_List.ts >> eendraadschema.ts
-#cat Print_Table.ts >> eendraadschema.ts
-#cat config.ts >> eendraadschema.ts
-#cat ../prop/prop_scripts.ts >> eendraadschema.ts
-#cat main.ts >> eendraadschema.ts
-
 tsc general.ts SVGelement.ts List_Item.ts Electro_Item.ts Simple_Item.ts Properties.ts SVGSymbols.ts Hierarchical_List.ts Print_Table.ts config.ts ../prop/prop_scripts.ts main.ts --outfile swap.js 
 cat GPL3.js swap.js > eendraadschema.js
 cp eendraadschema.js ..

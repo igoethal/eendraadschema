@@ -1,6 +1,6 @@
 class Simple_Item extends List_Item {
-  constructor() {
-    super();
+  constructor(mylist: Hierarchical_List) {
+    super(mylist);
     this.keys.push(["name","STRING","no_name"]);
   }
 

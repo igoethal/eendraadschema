@@ -19,17 +19,17 @@ function HLDelete(my_id: number) {
 }
 
 function HLAdd(my_id: number) {
-  structure.addItem(new Electro_Item());
+  structure.addItem(new Electro_Item(structure));
   HLRedrawTree();
 }
 
 function HLInsertBefore(my_id: number) {
-  structure.insertItemBeforeId(new Electro_Item(), my_id);
+  structure.insertItemBeforeId(new Electro_Item(structure), my_id);
   HLRedrawTree();
 }
 
 function HLInsertAfter(my_id: number) {
-  structure.insertItemAfterId(new Electro_Item(), my_id);
+  structure.insertItemAfterId(new Electro_Item(structure), my_id);
   HLRedrawTree();
 }
 
@@ -49,7 +49,7 @@ function HLClone(my_id: number) {
 }
 
 function HLInsertChild(my_id: number) {
-  structure.insertChildAfterId(new Electro_Item(), my_id);
+  structure.insertChildAfterId(new Electro_Item(structure), my_id);
   HLCollapseExpand(my_id, false);
   //No need to call HLRedrawTree as HLCollapseExpand already does that
 }
@@ -99,7 +99,6 @@ function HL_changeparent(my_id: number) {
     alert("Dat is geen geldig moeder-object. Probeer opnieuw.")
   } else {
     structure.data[structure.getOrdinalById(my_id)].parent = int_newparentid;
-    structure.data[structure.getOrdinalById(my_id)].Parent_Item = structure.data[parentOrdinal];
   }
 
   structure.reSort();
@@ -219,7 +218,7 @@ function buildNewStructure(structure: Hierarchical_List) {
 
   //Eerst het hoofddifferentieel maken
   let itemCounter:number = 0;
-  structure.addItem(new Electro_Item());
+  structure.addItem(new Electro_Item(structure));
   structure.data[0].setKey("type","Aansluiting");
   structure.data[0].setKey("naam","");
   structure.data[0].setKey("zekering","differentieel");
@@ -231,13 +230,13 @@ function buildNewStructure(structure: Hierarchical_List) {
   itemCounter++;
 
   //Dan het hoofdbord maken
-  structure.insertChildAfterId(new Electro_Item(structure.data[itemCounter-1]),itemCounter);
+  structure.insertChildAfterId(new Electro_Item(structure/*,structure.data[itemCounter-1]*/),itemCounter);
   structure.data[itemCounter].setKey("type","Bord");
   itemCounter++;
   let droogBordCounter:number = itemCounter;
 
   //Nat bord voorzien
-  structure.insertChildAfterId(new Electro_Item(structure.data[itemCounter-1]),itemCounter);
+  structure.insertChildAfterId(new Electro_Item(structure/*,structure.data[itemCounter-1]*/),itemCounter);
   structure.data[itemCounter].setKey("type","Kring");
   structure.data[itemCounter].setKey("naam","");
   structure.data[itemCounter].setKey("zekering","differentieel");
@@ -247,27 +246,10 @@ function buildNewStructure(structure: Hierarchical_List) {
   structure.data[itemCounter].setKey("kabel_aanwezig",false);
   structure.data[itemCounter].setKey("differentieel_waarde",CONF_differentieel_nat);
   itemCounter++;
-  structure.insertChildAfterId(new Electro_Item(structure.data[itemCounter-1]),itemCounter);
+  structure.insertChildAfterId(new Electro_Item(structure/*,structure.data[itemCounter-1]*/),itemCounter);
   structure.data[itemCounter].setKey("type","Bord");
   structure.data[itemCounter].setKey("geaard",false);
   itemCounter++;
-
-  //3 kringen toevoegen aan nat bord
-  /*let natBordCounter:number = itemCounter;
-  for (var i=0; i<aantalNatteKringen; i++) {
-    structure.insertChildAfterId(new Electro_Item(structure.data[natBordCounter-1]),natBordCounter);
-    structure.data[structure.getOrdinalById(itemCounter+1)].setKey("type","Kring");
-    structure.data[structure.getOrdinalById(itemCounter+1)].setKey("naam",aantalDrogeKringen+aantalNatteKringen-i);
-    itemCounter++;
-  };*/
-
-  //7 droge kringen toevoegen aan droog bord
-  /*for (var i=0; i<aantalDrogeKringen; i++) {
-    structure.insertChildAfterId(new Electro_Item(structure.data[structure.getOrdinalById(droogBordCounter)]),droogBordCounter);
-    structure.data[structure.getOrdinalById(itemCounter+1)].setKey("type","Kring");
-    structure.data[structure.getOrdinalById(itemCounter+1)].setKey("naam",aantalDrogeKringen-i);
-    itemCounter++;
-  }*/
 }
 
 function reset_all() {
@@ -509,62 +491,6 @@ function restart_all() {
     Aantal fazen:
     <select id="aantal_fazen_droog"><option value="2">2p</option><option value="3">3p</option><option value="4">4p (3p+n)</option></select>`;
 
-    /*<br><br>
-    Aantal kringen droog:
-    <select id="aantal_droge_kringen">
-  `
-
-  for (var i=1;i<51;i++) {
-    if (i==7) {
-      strleft = strleft + '<option selected="selected" value="'+i+'">'+i+'</option>'
-    } else {
-      strleft = strleft + '<option value="'+i+'">'+i+'</option>'
-    }
-  }
-
-  strleft += `
-    </select>
-    <br>
-    Aantal kringen nat:
-    <select id="aantal_natte_kringen">
-  `
-
-  for (var i=1;i<21;i++) {
-    if (i==3) {
-      strleft = strleft + '<option selected="selected" value="'+i+'">'+i+'</option>'
-    } else {
-      strleft = strleft + '<option value="'+i+'">'+i+'</option>'
-    }
-  }
-
-  strleft +=  `
-    </select><br><br>
-    Aantal fazen nat: <select id="aantal_fazen_nat"><option value="2">2p</option><option value="3">3p</option><option value="4">4p (3p+n)</option></select><br>
-    Differentieel nat (in mA) <input id="differentieel_nat" type="text" size="5" maxlength="5" value="30"><br>
-  `*/
-  //<button onclick="read_settings()">Start</button>
-
-  /*var strright:string = `<br><br><br><br>
-    Deze tool tekent een &eacute;&eacute;ndraadschema.
-    De tool is in volle ontwikkeling en laat thans toe meer complexe
-    schakelingen met gesplitste kringen en horizontale aaneenschakelingen
-    van gebruikers (bvb koelkast achter een stopcontact) uit te voeren.
-    <br><br>
-    Eveneens kunnen de schemas worden opgeslagen en weer ingeladen
-    voor latere aanpassing (zie knoppen "export" en "bladeren").
-    <br><br>
-    Op basis van een screenshot-tool (bvb snipping-tool in Windows) kan het gegenereerde
-    &eacute;&eacute;ndraadschema verder verwerkt worden in een meer complete schets.
-    Een andere mogelijkheid is het eendraadschema te exporteren (SVG-vector-graphics) en verder te verwerken
-    met een professionele tool zoals Inkscape (open source optie).
-    <br><br>
-     Nuttige tips:
-    <ul>
-      <li>Kies "meerdere gebruikers" om horizontale ketens te bouwen, bijvoorbeeld een koelkast na een stopcontact.</li>
-      <li>Een schakelbaar stopcontact kan gemaakt worden door onder "meerdere gebruikers" eerst een lichtcircuit met "0" lampen gevolgd door een stopcontact te voorzien.</li>
-    </ul>
-  `*/
-
   strleft += CONFIGPAGE_RIGHT;
 
   strleft += PROP_getCookieText(); //Will only be displayed in the online version
@@ -630,9 +556,6 @@ function import_to_structure(mystring: string, redraw = true) {
   structure = new Hierarchical_List();
   var obj = JSON.parse(text);
   (<any> Object).assign(mystructure, obj);
-  for (var listitem of structure.data) {
-    listitem.Parent_Item = structure.data[structure.getOrdinalById(listitem.parent)];;
-  }
 
   if (typeof mystructure.properties.filename != "undefined") {
     structure.properties.filename = mystructure.properties.filename;
@@ -665,10 +588,10 @@ function import_to_structure(mystring: string, redraw = true) {
 
   for (var i = 0; i < mystructure.length; i++) {
     if (mystructure.data[i].parent==0) {
-      structure.addItem(new Electro_Item());
+      structure.addItem(new Electro_Item(structure));
       structure.data[i].parent = 0;
     } else {
-      structure.addItem(new Electro_Item(structure.data[structure.getOrdinalById(mystructure.data[i].parent)]));
+      structure.addItem(new Electro_Item(structure/*,structure.data[structure.getOrdinalById(mystructure.data[i].parent)]*/));
       structure.data[i].parent = mystructure.data[i].parent;
     }
 

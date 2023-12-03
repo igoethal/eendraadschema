@@ -2,17 +2,18 @@ class List_Item {
     id: number;
     parent: number;
     indent: number;
-    Parent_Item: List_Item;
     collapsed: Boolean;
+    sourcelist: Hierarchical_List; //reference to the hierarchical list that the list-item is a member of
 
     keys: Array<[string,string,any]>;
 
-    constructor() {
+    constructor(mylist: Hierarchical_List) {
         this.id = 0; //undefined
         this.parent = 0; //no parent
         this.indent = 0; //at root note, no parent
         this.collapsed = false; //at the start, nothingh is collapsed
         this.keys = new Array<[string,string,any]>();
+        this.sourcelist = mylist;
     }
 
     resetKeys() {
@@ -35,6 +36,12 @@ class List_Item {
         if (this.keys[i][0]==key) {
           return(this.keys[i][2]);
         }
+      }
+    }
+
+    getParent() {
+      if ((this.sourcelist != null) && (this.parent != 0)) {
+        return this.sourcelist.data[this.sourcelist.getOrdinalById(this.parent)];
       }
     }
 

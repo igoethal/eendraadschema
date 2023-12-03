@@ -30,13 +30,20 @@ function exportjson() {
   //filename = "eendraadschema.eds";
   filename = structure.properties.filename;
 
+  //Remove some unneeded data members that would only inflate the size of the output file
   for (var listitem of structure.data) {
-    listitem.Parent_Item = null;
+    listitem.sourcelist = null;
   }
+
+  //Create the output structure in uncompressed form
   var text:string = JSON.stringify(structure);
+
+  //Put the removed data members back
   for (var listitem of structure.data) {
-    listitem.Parent_Item = structure.data[structure.getOrdinalById(listitem.parent)];
+    listitem.sourcelist = structure;
   }
+
+  //Compress the output structure and download to the user
   try {
     let decoder = new TextDecoder("utf-8");
     let encoder = new TextEncoder();

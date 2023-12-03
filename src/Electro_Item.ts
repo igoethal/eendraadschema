@@ -1,11 +1,10 @@
 class Electro_Item extends List_Item {
-  consumers:Array<String>;
 
   //-- Constructor, can be invoked with the List_Item of the parent to know better what kind of
   //   elements are acceptable (e.g. not all parent can have all possible childs) --
 
-  constructor(Parent?: List_Item) {
-    super();
+  constructor(mylist: Hierarchical_List) {
+    super(mylist);
     this.keys.push(["type","SELECT",""]); //0
     this.keys.push(["geaard","BOOLEAN",true]); //1
     this.keys.push(["kinderveiligheid","BOOLEAN",true]); //2
@@ -72,54 +71,52 @@ class Electro_Item extends List_Item {
       //Indien domotica gestuurde verbruiker, bool5 is de selector voor uitbreiding van de sturing met drukknop
       //Indien stopcontact, geeft aan dat deze in een verdeelbord zit
 
-    this.updateConsumers(Parent);
+    this.updateConsumers();
   }
 
   //-- When called, this one ensures we cannot have a child that doesn't align with its parent --
 
-  updateConsumers(Parent?: List_Item) {
-    this.Parent_Item = Parent;
+  getConsumers() {
+    var Parent = this.getParent();
 
+    var consumers = [];
     if (Parent == null) {
-      this.consumers = ["", "Kring", "Aansluiting"];
+      consumers = ["", "Kring", "Aansluiting"];
     } else {
       switch (Parent.getKey("type")) {
         case "Bord": {
-          this.consumers = ["", "Kring", "Vrije ruimte"];
+          consumers = ["", "Kring", "Vrije ruimte"];
           break;
         }
         case "Splitsing":
         case "Domotica": {
-          this.consumers = ["", "Kring"];
+          consumers = ["", "Kring"];
           break;
         }
         case "Kring": {
-          this.consumers = ["", "Aansluiting", "Bord", "Domotica", "Domotica gestuurde verbruiker", "Kring", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
+          consumers = ["", "Aansluiting", "Bord", "Domotica", "Domotica gestuurde verbruiker", "Kring", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
           break;
         }
         case "Meerdere verbruikers": {
-          this.consumers = ["", "Domotica", "Domotica gestuurde verbruiker", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
-          break;
-        }
-        case "Vrije ruimte": {
-          this.consumers = [""];
+          consumers = ["", "Domotica", "Domotica gestuurde verbruiker", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
           break;
         }
         case "Domotica gestuurde verbruiker": {
-          this.consumers = ["", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
+          consumers = ["", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
           break;
         }
         case "Aansluiting": {
-          this.consumers = ["", "Bord", "Kring", "Splitsing"];
+          consumers = ["", "Bord", "Kring", "Splitsing"];
           break;
         }
         default: {
-          this.consumers = ["", "Aansluiting", "Domotica", "Domotica gestuurde verbruiker", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
-          //this.consumers = [""];
+          consumers = ["", "Aansluiting", "Domotica", "Domotica gestuurde verbruiker", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
           break;
         }
       }
     }
+
+    return consumers;
   }
 
   //-- Make the current item a copy of source_item --
@@ -128,14 +125,12 @@ class Electro_Item extends List_Item {
     this.parent = source_item.parent;
     this.indent = source_item.indent;
     this.collapsed = source_item.collapsed;
-    this.Parent_Item = source_item.Parent_Item;
+    this.sourcelist = source_item.sourcelist;
+    
     for (var i = 0; i<this.keys.length; i++) {
       for (var j=0; j<3; j++) {
         this.keys[i][j] = source_item.keys[i][j];
       }
-    }
-    for (i = 0; i<this.consumers.length; i++) {
-      this.consumers[i] = (source_item as Electro_Item).consumers[i];
     }
   }
 
@@ -164,10 +159,11 @@ class Electro_Item extends List_Item {
 
     this.keys[11][2] = "300"; //Differentieel
 
-    if (this.Parent_Item == null) {
+    let parent = this.getParent();
+    if (parent == null) {
       this.keys[12][2] = true;
     } else {
-      switch (this.Parent_Item.getKey("type")) { //Kabel_aanwezig
+      switch (parent.getKey("type")) { //Kabel_aanwezig
         case "Splitsing":
           this.keys[7][2] = "geen"; //geen zekering per default na splitsing
           this.keys[12][2] = false; //geen kabel per default na splitsing
@@ -416,8 +412,7 @@ class Electro_Item extends List_Item {
     output += " <button style=\"background-color:red;\" onclick=\"HLDelete(" + this.id +")\">&#9851;</button>";
     output += "&nbsp;"
 
-    this.updateConsumers(Parent);
-    output += this.selectToHTML(0, this.consumers);
+    output += this.selectToHTML(0, this.getConsumers());
 
     switch (this.keys[0][2]) {
       case "Kring":
