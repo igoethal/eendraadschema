@@ -315,7 +315,14 @@ class Hierarchical_List {
       parent_id = this.data[currentOrdinal].parent
     }
     let parentOrdinal = this.getOrdinalById(parent_id);
-    var my_item = new Electro_Item(this);
+
+    let my_item;
+    switch (this.data[currentOrdinal].keys[0][2]) {
+      case 'Bel': my_item = new Bel(structure); break;
+      case 'Diepvriezer': my_item = new Diepvriezer(structure); break;
+      default: my_item = new Electro_Item(structure);
+    }
+
     my_item.clone(this.data[currentOrdinal]);
     //-- Now add the clone to the structure
     //   The clone will have id this.curid-1
