@@ -2,7 +2,7 @@
 
 cd src
 
-tsc general.ts SVGelement.ts List_Item.ts Electro_Item.ts Simple_Item.ts Properties.ts SVGSymbols.ts Hierarchical_List.ts Print_Table.ts config.ts ../prop/prop_scripts.ts main.ts --outfile swap.js 
+tsc general.ts SVGelement.ts List_Item.ts Electro_Item.ts Bel.ts Diepvriezer.ts Properties.ts SVGSymbols.ts Hierarchical_List.ts Print_Table.ts config.ts ../prop/prop_scripts.ts main.ts --outfile swap.js 
 cat GPL3.js swap.js > eendraadschema.js
 cp eendraadschema.js ..
 rm swap.js

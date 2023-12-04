@@ -357,6 +357,33 @@ class Hierarchical_List {
 
   //-----------------------------------------------------
 
+  adjustTypeByOrdinal(ordinal: number, electroType : string, resetkeys? : boolean) {
+    //this.data[ordinal].keys[0][2] = electroType; //We call setKey to ensure that also resetKeys is called in the Electro_Item
+
+    let tempval;
+    
+    switch (electroType) {
+        case 'Bel': tempval = new Bel(structure); break;
+        case 'Diepvriezer': tempval = new Diepvriezer(structure); break;
+        default: tempval = new Electro_Item(structure);
+    }
+
+    Object.assign(tempval,this.data[ordinal]);
+    tempval.keys[0][2] = electroType;
+    if (resetkeys) tempval.resetKeys();
+
+    this.data[ordinal] = tempval;
+  }
+
+  //-----------------------------------------------------
+
+  adjustTypeById(my_id: number, electroType : string, resetkeys? : boolean) {
+    let ordinal = structure.getOrdinalById(my_id);
+    this.adjustTypeByOrdinal(ordinal, electroType, resetkeys);
+  }
+
+  //-----------------------------------------------------
+
   toHTML(myParent: number) {
     var output: string = "";
     var numberDrawn: number = 0;

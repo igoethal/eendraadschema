@@ -642,9 +642,7 @@ var Electro_Item = /** @class */ (function (_super) {
         }
         return (allow);
     };
-    //-- Display the element in the editing grid at the left of the screen in case the
-    //   element is or will become a child of Parent --
-    Electro_Item.prototype.toHTML = function (mode, Parent) {
+    Electro_Item.prototype.toHTMLHeader = function (mode, Parent) {
         var output = "";
         if (mode == "move") {
             output += "<b>ID: " + this.id + "</b>, ";
@@ -668,6 +666,12 @@ var Electro_Item = /** @class */ (function (_super) {
         output += " <button style=\"background-color:red;\" onclick=\"HLDelete(" + this.id + ")\">&#9851;</button>";
         output += "&nbsp;";
         output += this.selectToHTML(0, this.getConsumers());
+        return (output);
+    };
+    //-- Display the element in the editing grid at the left of the screen in case the
+    //   element is or will become a child of Parent --
+    Electro_Item.prototype.toHTML = function (mode, Parent) {
+        var output = this.toHTMLHeader(mode, Parent);
         switch (this.keys[0][2]) {
             case "Kring":
                 output += "&nbsp;Naam: " + this.stringToHTML(10, 5) + "<br>";
@@ -1507,12 +1511,12 @@ var Electro_Item = /** @class */ (function (_super) {
                 mySVG.xright = 40 + 20;
                 outputstr += this.addAddress(mySVG, 55, 10);
                 break;
-            case "Bel":
-                outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-                outputstr += '<use xlink:href="#bel" x="21" y="25"></use>';
-                mySVG.xright = 40;
-                outputstr += this.addAddress(mySVG, 58, 14);
-                break;
+            /*case "Bel":
+              outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
+              outputstr += '<use xlink:href="#bel" x="21" y="25"></use>';
+              mySVG.xright = 40;
+              outputstr += this.addAddress(mySVG,58,14);
+              break;*/
             case "Boiler":
                 outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
                 switch (this.getKey("accumulatie")) {
@@ -1526,12 +1530,12 @@ var Electro_Item = /** @class */ (function (_super) {
                 mySVG.xright = 60;
                 outputstr += this.addAddress(mySVG, 60, 15);
                 break;
-            case "Diepvriezer":
-                outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-                outputstr += '<use xlink:href="#diepvriezer" x="21" y="25"></use>';
-                mySVG.xright = 60;
-                outputstr += this.addAddress(mySVG, 60, 15);
-                break;
+            /*case "Diepvriezer":
+              outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
+              outputstr += '<use xlink:href="#diepvriezer" x="21" y="25"></use>';
+              mySVG.xright = 60;
+              outputstr += this.addAddress(mySVG,60,15);
+              break;*/
             case "Droogkast":
                 outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
                 outputstr += '<use xlink:href="#droogkast" x="21" y="25"></use>';
@@ -2137,34 +2141,78 @@ var Electro_Item = /** @class */ (function (_super) {
     };
     return Electro_Item;
 }(List_Item));
-var Simple_Item = /** @class */ (function (_super) {
-    __extends(Simple_Item, _super);
-    function Simple_Item(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.keys.push(["name", "STRING", "no_name"]);
-        return _this;
+var Bel = /** @class */ (function (_super) {
+    __extends(Bel, _super);
+    function Bel(mylist) {
+        return _super.call(this, mylist) || this;
     }
-    Simple_Item.prototype.toHTML = function () {
-        var output = "";
-        for (var i = 0; i < this.keys.length; i++) {
-            switch (this.keys[i][1]) {
-                case "STRING": {
-                    output += this.keys[i][0] + ": ";
-                    var myId = "HL_edit_" + this.id + "_" + this.keys[i][0];
-                    output += "<input id=\"" + myId + "\" type=\"Text\" value=\"" + this.keys[i][2] + "\" onchange=HLUpdate(" + this.id + ",\"" + this.keys[i][0] + "\",\"" + myId + "\")>";
-                    break;
-                }
-            }
-        }
-        //output += " <input id=\"HL_name_"+this.id+"\" type=\"Text\" value=\""+this.name+"\" onchange=\"HLChangeName("+this.id+")\">";
-        output += " <button onclick=\"HLInsertBefore(" + this.id + ")\">InsertBefore</button>";
-        output += " <button onclick=\"HLDelete(" + this.id + ")\">Delete</button>";
-        output += " <button onclick=\"HLInsertAfter(" + this.id + ")\">Insert After</button>";
-        output += "id: " + this.id + " parent: " + this.parent;
+    Bel.prototype.resetKeys = function () {
+        //Whipe most keys; note how we don't reset keys[10][2] as usually we don't want the number to change
+        for (var i = 1; i < 10; i++)
+            this.keys[i][2] = "";
+        for (var i = 11; i < this.keys.length; i++)
+            this.keys[i][2] = "";
+        this.keys[0][2] = "Bel"; // This is rather a formality as we should already have this at this stage
+        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+    };
+    Bel.prototype.toHTML = function (mode, Parent) {
+        var output = this.toHTMLHeader(mode, Parent);
+        output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
+        output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
     };
-    return Simple_Item;
-}(List_Item));
+    Bel.prototype.toSVG = function (hasChild) {
+        if (hasChild === void 0) { hasChild = false; }
+        var mySVG = new SVGelement();
+        var outputstr = "";
+        mySVG.xleft = 1; // foresee at least some space for the conductor
+        mySVG.xright = 40;
+        mySVG.yup = 25;
+        mySVG.ydown = 25;
+        mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
+            + '<use xlink:href="#bel" x="21" y="25"></use>';
+        mySVG.data += this.addAddress(mySVG, 58, 14);
+        mySVG.data += "\n";
+        return (mySVG);
+    };
+    return Bel;
+}(Electro_Item));
+var Diepvriezer = /** @class */ (function (_super) {
+    __extends(Diepvriezer, _super);
+    function Diepvriezer(mylist) {
+        return _super.call(this, mylist) || this;
+    }
+    Diepvriezer.prototype.resetKeys = function () {
+        //Whipe most keys; note how we don't reset keys[10][2] as usually we don't want the number to change
+        for (var i = 1; i < 10; i++)
+            this.keys[i][2] = "";
+        for (var i = 11; i < this.keys.length; i++)
+            this.keys[i][2] = "";
+        this.keys[0][2] = "Diepvriezer"; // This is rather a formality as we should already have this at this stage
+        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+    };
+    Diepvriezer.prototype.toHTML = function (mode, Parent) {
+        var output = this.toHTMLHeader(mode, Parent);
+        output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
+        output += ", Adres/tekst: " + this.stringToHTML(15, 5);
+        return (output);
+    };
+    Diepvriezer.prototype.toSVG = function (hasChild) {
+        if (hasChild === void 0) { hasChild = false; }
+        var mySVG = new SVGelement();
+        var outputstr = "";
+        mySVG.xleft = 1; // foresee at least some space for the conductor
+        mySVG.xright = 60;
+        mySVG.yup = 25;
+        mySVG.ydown = 25;
+        mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
+            + '<use xlink:href="#diepvriezer" x="21" y="25"></use>';
+        mySVG.data += this.addAddress(mySVG, 60, 15);
+        mySVG.data += "\n";
+        return (mySVG);
+    };
+    return Diepvriezer;
+}(Electro_Item));
 var Properties = /** @class */ (function () {
     function Properties() {
         this.filename = "eendraadschema.eds";
@@ -2496,6 +2544,30 @@ var Hierarchical_List = /** @class */ (function () {
             }
         }
         this.reSort();
+    };
+    //-----------------------------------------------------
+    Hierarchical_List.prototype.adjustTypeByOrdinal = function (ordinal, electroType, resetkeys) {
+        //this.data[ordinal].keys[0][2] = electroType; //We call setKey to ensure that also resetKeys is called in the Electro_Item
+        var tempval;
+        switch (electroType) {
+            case 'Bel':
+                tempval = new Bel(structure);
+                break;
+            case 'Diepvriezer':
+                tempval = new Diepvriezer(structure);
+                break;
+            default: tempval = new Electro_Item(structure);
+        }
+        Object.assign(tempval, this.data[ordinal]);
+        tempval.keys[0][2] = electroType;
+        if (resetkeys)
+            tempval.resetKeys();
+        this.data[ordinal] = tempval;
+    };
+    //-----------------------------------------------------
+    Hierarchical_List.prototype.adjustTypeById = function (my_id, electroType, resetkeys) {
+        var ordinal = structure.getOrdinalById(my_id);
+        this.adjustTypeByOrdinal(ordinal, electroType, resetkeys);
     };
     //-----------------------------------------------------
     Hierarchical_List.prototype.toHTML = function (myParent) {
@@ -4009,7 +4081,12 @@ function HLUpdate(my_id, key, type, docId) {
     switch (type) {
         case "SELECT":
             var setvalueselect = document.getElementById(docId).value;
-            structure.data[structure.getOrdinalById(my_id)].setKey(key, setvalueselect);
+            if (key == "type") {
+                structure.adjustTypeById(my_id, setvalueselect, true);
+            }
+            else {
+                structure.data[structure.getOrdinalById(my_id)].setKey(key, setvalueselect);
+            }
             HLRedrawTreeHTML();
             break;
         case "STRING":
@@ -4429,14 +4506,8 @@ function import_to_structure(mystring, redraw) {
         }
     }
     for (var i = 0; i < mystructure.length; i++) {
-        if (mystructure.data[i].parent == 0) {
-            structure.addItem(new Electro_Item(structure));
-            structure.data[i].parent = 0;
-        }
-        else {
-            structure.addItem(new Electro_Item(structure /*,structure.data[structure.getOrdinalById(mystructure.data[i].parent)]*/));
-            structure.data[i].parent = mystructure.data[i].parent;
-        }
+        structure.addItem(new Electro_Item(structure));
+        structure.data[i].parent = mystructure.data[i].parent;
         structure.active[i] = mystructure.active[i];
         structure.id[i] = mystructure.id[i];
         for (var j = 0; j < mystructure.data[i].keys.length; j++) {
@@ -4445,6 +4516,7 @@ function import_to_structure(mystring, redraw) {
         structure.data[i].id = mystructure.data[i].id;
         structure.data[i].indent = mystructure.data[i].indent;
         structure.data[i].collapsed = mystructure.data[i].collapsed;
+        structure.adjustTypeByOrdinal(i, mystructure.data[i].keys[0][2]); //Make sure class is of the correct type
     }
     //As we re-read the structure and it might be shorter then it once was (due to deletions) but we might still have the old high ID's, always take over the curid from the file
     structure.curid = mystructure.curid;

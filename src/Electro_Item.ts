@@ -386,10 +386,7 @@ class Electro_Item extends List_Item {
     return(allow);
   }
 
-  //-- Display the element in the editing grid at the left of the screen in case the
-  //   element is or will become a child of Parent --
-
-  toHTML(mode: string, Parent?: List_Item) {
+  toHTMLHeader(mode: string, Parent?: List_Item) {
     let output:string = "";
 
     if (mode=="move") {
@@ -413,6 +410,15 @@ class Electro_Item extends List_Item {
     output += "&nbsp;"
 
     output += this.selectToHTML(0, this.getConsumers());
+
+    return(output);
+  }
+
+  //-- Display the element in the editing grid at the left of the screen in case the
+  //   element is or will become a child of Parent --
+
+  toHTML(mode: string, Parent?: List_Item) {
+    let output = this.toHTMLHeader(mode, Parent);
 
     switch (this.keys[0][2]) {
       case "Kring":
@@ -1171,12 +1177,12 @@ class Electro_Item extends List_Item {
         mySVG.xright = 40+20;
         outputstr += this.addAddress(mySVG,55,10);
         break;
-      case "Bel":
+      /*case "Bel":
         outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
         outputstr += '<use xlink:href="#bel" x="21" y="25"></use>';
         mySVG.xright = 40;
         outputstr += this.addAddress(mySVG,58,14);
-        break;
+        break;*/
       case "Boiler":
         outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
         switch (this.getKey("accumulatie")) {
@@ -1190,12 +1196,12 @@ class Electro_Item extends List_Item {
         mySVG.xright = 60;
         outputstr += this.addAddress(mySVG,60,15);
         break;
-      case "Diepvriezer":
+      /*case "Diepvriezer":
         outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
         outputstr += '<use xlink:href="#diepvriezer" x="21" y="25"></use>';
         mySVG.xright = 60;
         outputstr += this.addAddress(mySVG,60,15);
-        break;
+        break;*/
       case "Droogkast":
         outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
         outputstr += '<use xlink:href="#droogkast" x="21" y="25"></use>';

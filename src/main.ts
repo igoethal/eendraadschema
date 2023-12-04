@@ -58,7 +58,11 @@ function HLUpdate(my_id: number, key: string, type: string, docId: string) {
   switch (type) {
     case "SELECT":
       var setvalueselect: string = (document.getElementById(docId) as HTMLInputElement).value;
-      structure.data[structure.getOrdinalById(my_id)].setKey(key,setvalueselect);
+      if (key == "type") {
+        structure.adjustTypeById(my_id, setvalueselect, true);
+      } else {
+        structure.data[structure.getOrdinalById(my_id)].setKey(key,setvalueselect);
+      }
       HLRedrawTreeHTML();
       break;
     case "STRING":
@@ -587,13 +591,8 @@ function import_to_structure(mystring: string, redraw = true) {
   }
 
   for (var i = 0; i < mystructure.length; i++) {
-    if (mystructure.data[i].parent==0) {
-      structure.addItem(new Electro_Item(structure));
-      structure.data[i].parent = 0;
-    } else {
-      structure.addItem(new Electro_Item(structure/*,structure.data[structure.getOrdinalById(mystructure.data[i].parent)]*/));
-      structure.data[i].parent = mystructure.data[i].parent;
-    }
+    structure.addItem(new Electro_Item(structure));
+    structure.data[i].parent = mystructure.data[i].parent;
 
     structure.active[i] = mystructure.active[i];
     structure.id[i] = mystructure.id[i];
@@ -604,6 +603,8 @@ function import_to_structure(mystring: string, redraw = true) {
     structure.data[i].id = mystructure.data[i].id;
     structure.data[i].indent = mystructure.data[i].indent;
     structure.data[i].collapsed = mystructure.data[i].collapsed;
+
+    structure.adjustTypeByOrdinal(i,mystructure.data[i].keys[0][2]); //Make sure class is of the correct type
   }
 
   //As we re-read the structure and it might be shorter then it once was (due to deletions) but we might still have the old high ID's, always take over the curid from the file
