@@ -3,10 +3,7 @@ class Bel extends Electro_Item {
     constructor(mylist: Hierarchical_List) { super(mylist); }
 
     resetKeys() {
-        //Whipe most keys; note how we don't reset keys[10][2] as usually we don't want the number to change
-        for (let i = 1; i < 10; i++) this.keys[i][2] = "";
-        for (let i = 11; i < this.keys.length; i++) this.keys[i][2] = "";
-
+        this.clearKeys();
         this.keys[0][2] = "Bel"; // This is rather a formality as we should already have this at this stage
         this.keys[15][2] = "";           // Set Adres/tekst to "" when the item is cleared
     }

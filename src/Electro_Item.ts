@@ -134,6 +134,14 @@ class Electro_Item extends List_Item {
     }
   }
 
+  //-- Clear all keys --
+
+  clearKeys() {
+    //Whipe most keys; note how we don't reset keys[10][2] as usually we don't want the number to change
+    for (let i = 1; i < 10; i++) this.keys[i][2] = "";
+    for (let i = 11; i < this.keys.length; i++) this.keys[i][2] = "";  
+  }
+
   //-- When a new element is created, we will call resetKeys to set the keys to their default values --
 
   resetKeys() {
@@ -510,15 +518,15 @@ class Electro_Item extends List_Item {
         output += "In verdeelbord: " + this.checkboxToHTML(26);
         output += ", Adres/tekst: " + this.stringToHTML(15,5);
         break;
-      case "Batterij":
+      /*case "Batterij":
         output += "&nbsp;Nr: " + this.stringToHTML(10,5) + ", ";
         output += ", Adres/tekst: " + this.stringToHTML(15,5);
-        break;
-      case "Boiler":
+        break;*/
+      /*case "Boiler":
         output += "&nbsp;Nr: " + this.stringToHTML(10,5) + ", ";
         output += "Accumulatie: " + this.checkboxToHTML(3);
         output += ", Adres/tekst: " + this.stringToHTML(15,5);
-        break;
+        break;*/
       case "Ketel":
         output += "&nbsp;Nr: " + this.stringToHTML(10,5);
         output += ", Type: " + this.selectToHTML(16,["", "Met boiler", "Met tapspiraal", "Warmtekrachtkoppeling", "Warmtewisselaar"]);
@@ -1169,43 +1177,6 @@ class Electro_Item extends List_Item {
           outputstr += '<line x1="'+startx+'" y1="25" x2="'+(startx+21)+'" y2="25" stroke="black" />';
         };
         //-- Plaats adres onderaan --
-        outputstr += this.addAddress(mySVG,60,15);
-        break;
-      case "Batterij":
-        outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-        outputstr += '<use xlink:href="#batterij" x="21" y="25"></use>';
-        mySVG.xright = 40+20;
-        outputstr += this.addAddress(mySVG,55,10);
-        break;
-      /*case "Bel":
-        outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-        outputstr += '<use xlink:href="#bel" x="21" y="25"></use>';
-        mySVG.xright = 40;
-        outputstr += this.addAddress(mySVG,58,14);
-        break;*/
-      case "Boiler":
-        outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-        switch (this.getKey("accumulatie")) {
-          case false:
-            outputstr += '<use xlink:href="#boiler" x="21" y="25"></use>';
-            break;
-          case true:
-            outputstr += '<use xlink:href="#boiler_accu" x="21" y="25"></use>';
-            break;
-        }
-        mySVG.xright = 60;
-        outputstr += this.addAddress(mySVG,60,15);
-        break;
-      /*case "Diepvriezer":
-        outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-        outputstr += '<use xlink:href="#diepvriezer" x="21" y="25"></use>';
-        mySVG.xright = 60;
-        outputstr += this.addAddress(mySVG,60,15);
-        break;*/
-      case "Droogkast":
-        outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-        outputstr += '<use xlink:href="#droogkast" x="21" y="25"></use>';
-        mySVG.xright = 60;
         outputstr += this.addAddress(mySVG,60,15);
         break;
       case "Drukknop":
