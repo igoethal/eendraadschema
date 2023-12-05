@@ -402,6 +402,14 @@ var Electro_Item = /** @class */ (function (_super) {
             }
         }
     };
+    //-- Clear all keys --
+    Electro_Item.prototype.clearKeys = function () {
+        //Whipe most keys; note how we don't reset keys[10][2] as usually we don't want the number to change
+        for (var i = 1; i < 10; i++)
+            this.keys[i][2] = "";
+        for (var i = 11; i < this.keys.length; i++)
+            this.keys[i][2] = "";
+    };
     //-- When a new element is created, we will call resetKeys to set the keys to their default values --
     Electro_Item.prototype.resetKeys = function () {
         this.keys[1][2] = true;
@@ -765,15 +773,15 @@ var Electro_Item = /** @class */ (function (_super) {
                 output += "In verdeelbord: " + this.checkboxToHTML(26);
                 output += ", Adres/tekst: " + this.stringToHTML(15, 5);
                 break;
-            case "Batterij":
-                output += "&nbsp;Nr: " + this.stringToHTML(10, 5) + ", ";
-                output += ", Adres/tekst: " + this.stringToHTML(15, 5);
-                break;
-            case "Boiler":
-                output += "&nbsp;Nr: " + this.stringToHTML(10, 5) + ", ";
-                output += "Accumulatie: " + this.checkboxToHTML(3);
-                output += ", Adres/tekst: " + this.stringToHTML(15, 5);
-                break;
+            /*case "Batterij":
+              output += "&nbsp;Nr: " + this.stringToHTML(10,5) + ", ";
+              output += ", Adres/tekst: " + this.stringToHTML(15,5);
+              break;*/
+            /*case "Boiler":
+              output += "&nbsp;Nr: " + this.stringToHTML(10,5) + ", ";
+              output += "Accumulatie: " + this.checkboxToHTML(3);
+              output += ", Adres/tekst: " + this.stringToHTML(15,5);
+              break;*/
             case "Ketel":
                 output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
                 output += ", Type: " + this.selectToHTML(16, ["", "Met boiler", "Met tapspiraal", "Warmtekrachtkoppeling", "Warmtewisselaar"]);
@@ -1505,43 +1513,6 @@ var Electro_Item = /** @class */ (function (_super) {
                 //-- Plaats adres onderaan --
                 outputstr += this.addAddress(mySVG, 60, 15);
                 break;
-            case "Batterij":
-                outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-                outputstr += '<use xlink:href="#batterij" x="21" y="25"></use>';
-                mySVG.xright = 40 + 20;
-                outputstr += this.addAddress(mySVG, 55, 10);
-                break;
-            /*case "Bel":
-              outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-              outputstr += '<use xlink:href="#bel" x="21" y="25"></use>';
-              mySVG.xright = 40;
-              outputstr += this.addAddress(mySVG,58,14);
-              break;*/
-            case "Boiler":
-                outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-                switch (this.getKey("accumulatie")) {
-                    case false:
-                        outputstr += '<use xlink:href="#boiler" x="21" y="25"></use>';
-                        break;
-                    case true:
-                        outputstr += '<use xlink:href="#boiler_accu" x="21" y="25"></use>';
-                        break;
-                }
-                mySVG.xright = 60;
-                outputstr += this.addAddress(mySVG, 60, 15);
-                break;
-            /*case "Diepvriezer":
-              outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-              outputstr += '<use xlink:href="#diepvriezer" x="21" y="25"></use>';
-              mySVG.xright = 60;
-              outputstr += this.addAddress(mySVG,60,15);
-              break;*/
-            case "Droogkast":
-                outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-                outputstr += '<use xlink:href="#droogkast" x="21" y="25"></use>';
-                mySVG.xright = 60;
-                outputstr += this.addAddress(mySVG, 60, 15);
-                break;
             case "Drukknop":
                 var printstr = "";
                 outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
@@ -2147,11 +2118,7 @@ var Bel = /** @class */ (function (_super) {
         return _super.call(this, mylist) || this;
     }
     Bel.prototype.resetKeys = function () {
-        //Whipe most keys; note how we don't reset keys[10][2] as usually we don't want the number to change
-        for (var i = 1; i < 10; i++)
-            this.keys[i][2] = "";
-        for (var i = 11; i < this.keys.length; i++)
-            this.keys[i][2] = "";
+        this.clearKeys();
         this.keys[0][2] = "Bel"; // This is rather a formality as we should already have this at this stage
         this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
     };
@@ -2177,17 +2144,86 @@ var Bel = /** @class */ (function (_super) {
     };
     return Bel;
 }(Electro_Item));
+var Batterij = /** @class */ (function (_super) {
+    __extends(Batterij, _super);
+    function Batterij(mylist) {
+        return _super.call(this, mylist) || this;
+    }
+    Batterij.prototype.resetKeys = function () {
+        this.clearKeys();
+        this.keys[0][2] = "Batterij"; // This is rather a formality as we should already have this at this stage
+        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+    };
+    Batterij.prototype.toHTML = function (mode, Parent) {
+        var output = this.toHTMLHeader(mode, Parent);
+        output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
+        output += ", Adres/tekst: " + this.stringToHTML(15, 5);
+        return (output);
+    };
+    Batterij.prototype.toSVG = function (hasChild) {
+        if (hasChild === void 0) { hasChild = false; }
+        var mySVG = new SVGelement();
+        var outputstr = "";
+        mySVG.xleft = 1; // foresee at least some space for the conductor
+        mySVG.xright = 60;
+        mySVG.yup = 25;
+        mySVG.ydown = 25;
+        mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
+            + '<use xlink:href="#batterij" x="21" y="25"></use>';
+        mySVG.data += this.addAddress(mySVG, 55, 10);
+        mySVG.data += "\n";
+        return (mySVG);
+    };
+    return Batterij;
+}(Electro_Item));
+var Boiler = /** @class */ (function (_super) {
+    __extends(Boiler, _super);
+    function Boiler(mylist) {
+        return _super.call(this, mylist) || this;
+    }
+    Boiler.prototype.resetKeys = function () {
+        this.clearKeys();
+        this.keys[0][2] = "Boiler"; // This is rather a formality as we should already have this at this stage
+        this.keys[3][2] = false; // Per default geen accumulatie
+        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+    };
+    Boiler.prototype.toHTML = function (mode, Parent) {
+        var output = this.toHTMLHeader(mode, Parent);
+        output += "&nbsp;Nr: " + this.stringToHTML(10, 5) + ", ";
+        output += "Accumulatie: " + this.checkboxToHTML(3);
+        output += ", Adres/tekst: " + this.stringToHTML(15, 5);
+        return (output);
+    };
+    Boiler.prototype.toSVG = function (hasChild) {
+        if (hasChild === void 0) { hasChild = false; }
+        var mySVG = new SVGelement();
+        var outputstr = "";
+        mySVG.xleft = 1; // foresee at least some space for the conductor
+        mySVG.xright = 60;
+        mySVG.yup = 25;
+        mySVG.ydown = 25;
+        mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
+        switch (this.getKey("accumulatie")) {
+            case false:
+                mySVG.data += '<use xlink:href="#boiler" x="21" y="25"></use>';
+                break;
+            case true:
+                mySVG.data += '<use xlink:href="#boiler_accu" x="21" y="25"></use>';
+                break;
+        }
+        mySVG.data += this.addAddress(mySVG, 60, 15);
+        mySVG.data += "\n";
+        return (mySVG);
+    };
+    return Boiler;
+}(Electro_Item));
 var Diepvriezer = /** @class */ (function (_super) {
     __extends(Diepvriezer, _super);
     function Diepvriezer(mylist) {
         return _super.call(this, mylist) || this;
     }
     Diepvriezer.prototype.resetKeys = function () {
-        //Whipe most keys; note how we don't reset keys[10][2] as usually we don't want the number to change
-        for (var i = 1; i < 10; i++)
-            this.keys[i][2] = "";
-        for (var i = 11; i < this.keys.length; i++)
-            this.keys[i][2] = "";
+        this.clearKeys();
         this.keys[0][2] = "Diepvriezer"; // This is rather a formality as we should already have this at this stage
         this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
     };
@@ -2212,6 +2248,38 @@ var Diepvriezer = /** @class */ (function (_super) {
         return (mySVG);
     };
     return Diepvriezer;
+}(Electro_Item));
+var Droogkast = /** @class */ (function (_super) {
+    __extends(Droogkast, _super);
+    function Droogkast(mylist) {
+        return _super.call(this, mylist) || this;
+    }
+    Droogkast.prototype.resetKeys = function () {
+        this.clearKeys();
+        this.keys[0][2] = "Droogkast"; // This is rather a formality as we should already have this at this stage
+        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+    };
+    Droogkast.prototype.toHTML = function (mode, Parent) {
+        var output = this.toHTMLHeader(mode, Parent);
+        output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
+        output += ", Adres/tekst: " + this.stringToHTML(15, 5);
+        return (output);
+    };
+    Droogkast.prototype.toSVG = function (hasChild) {
+        if (hasChild === void 0) { hasChild = false; }
+        var mySVG = new SVGelement();
+        var outputstr = "";
+        mySVG.xleft = 1; // foresee at least some space for the conductor
+        mySVG.xright = 60;
+        mySVG.yup = 25;
+        mySVG.ydown = 25;
+        mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
+            + '<use xlink:href="#droogkast" x="21" y="25"></use>';
+        mySVG.data += this.addAddress(mySVG, 60, 15);
+        mySVG.data += "\n";
+        return (mySVG);
+    };
+    return Droogkast;
 }(Electro_Item));
 var Properties = /** @class */ (function () {
     function Properties() {
@@ -2379,19 +2447,48 @@ var Hierarchical_List = /** @class */ (function () {
         var returnval = newparentitem.getMaxNumChilds(newparentofparentitem);
         return (returnval);
     };
-    //-----------------------------------------------------
-    Hierarchical_List.prototype.addItem = function (my_item) {
+    Hierarchical_List.prototype.createItem = function (electroType) {
+        //Create the object
+        var tempval;
+        switch (electroType) {
+            case 'Bel':
+                tempval = new Bel(structure);
+                break;
+            case 'Batterij':
+                tempval = new Batterij(structure);
+                break;
+            case 'Boiler':
+                tempval = new Boiler(structure);
+                break;
+            case 'Diepvriezer':
+                tempval = new Diepvriezer(structure);
+                break;
+            case 'Droogkast':
+                tempval = new Droogkast(structure);
+                break;
+            default: tempval = new Electro_Item(structure);
+        }
+        tempval.keys[0][2] = electroType;
         //First set the correct identifyer
-        my_item.id = this.curid;
-        my_item.parent = 0;
-        my_item.indent = 0;
-        //Then push the data into the queue
-        this.data.push(my_item);
+        tempval.id = this.curid;
+        tempval.parent = 0;
+        tempval.indent = 0;
+        //Return the Object
+        return (tempval);
+    };
+    //-----------------------------------------------------
+    Hierarchical_List.prototype.addItem = function (electroType) {
+        //First create the item
+        var tempval = this.createItem(electroType);
+        //Then push the item into the queue
+        this.data.push(tempval);
         this.active.push(true);
         this.id.push(this.curid);
         //Adjust length of the queue and future identifyer
         this.curid += 1;
         this.length += 1;
+        //Return the Object
+        return (tempval);
     };
     //-----------------------------------------------------
     Hierarchical_List.prototype.insertItemBeforeId = function (my_item, my_id) {
@@ -2499,23 +2596,14 @@ var Hierarchical_List = /** @class */ (function () {
         //-- First find the ordinal number of the current location and the desired location --
         //   Also look for the original length of the structure
         var currentOrdinal = this.getOrdinalById(my_id);
-        var original_length = this.length;
         //-- Then create a clone of the object and assign the correct parent_id
         if (arguments.length < 2) {
             parent_id = this.data[currentOrdinal].parent;
         }
         var parentOrdinal = this.getOrdinalById(parent_id);
-        var my_item;
-        switch (this.data[currentOrdinal].keys[0][2]) {
-            case 'Bel':
-                my_item = new Bel(structure);
-                break;
-            case 'Diepvriezer':
-                my_item = new Diepvriezer(structure);
-                break;
-            default: my_item = new Electro_Item(structure);
-        }
+        var my_item = this.createItem(this.data[currentOrdinal].keys[0][2]);
         my_item.clone(this.data[currentOrdinal]);
+        //var original_length = this.length;
         //-- Now add the clone to the structure
         //   The clone will have id this.curid-1
         if (arguments.length < 2) {
@@ -2528,9 +2616,9 @@ var Hierarchical_List = /** @class */ (function () {
         this.data[this.getOrdinalById(new_id)].collapsed = this.data[this.getOrdinalById(my_id)].collapsed;
         //-- Now loop over the childs of the original and also clone those
         var toClone = new Array(); //list of id's to clone
-        for (var i = 0; i < original_length; i++) {
+        for (var i = 0; i < this.length; i++) {
             if (this.id[i] == my_id) {
-                for (var j = original_length - 1; j >= 0; j--) { //We need to loop in opposite sense
+                for (var j = this.length - 1; j >= 0; j--) { //We need to loop in opposite sense
                     if (this.data[j].parent == my_id)
                         toClone.push(this.id[j]);
                 }
@@ -2557,18 +2645,9 @@ var Hierarchical_List = /** @class */ (function () {
     //-----------------------------------------------------
     Hierarchical_List.prototype.adjustTypeByOrdinal = function (ordinal, electroType, resetkeys) {
         //this.data[ordinal].keys[0][2] = electroType; //We call setKey to ensure that also resetKeys is called in the Electro_Item
-        var tempval;
-        switch (electroType) {
-            case 'Bel':
-                tempval = new Bel(structure);
-                break;
-            case 'Diepvriezer':
-                tempval = new Diepvriezer(structure);
-                break;
-            default: tempval = new Electro_Item(structure);
-        }
+        var tempval = this.createItem(electroType);
         Object.assign(tempval, this.data[ordinal]);
-        tempval.keys[0][2] = electroType;
+        tempval.keys[0][2] = electroType; //We need to do this again as we overwrote it with assign
         if (resetkeys)
             tempval.resetKeys();
         this.data[ordinal] = tempval;
@@ -4058,7 +4137,7 @@ function HLDelete(my_id) {
     HLRedrawTree();
 }
 function HLAdd(my_id) {
-    structure.addItem(new Electro_Item(structure));
+    structure.addItem("");
     HLRedrawTree();
 }
 function HLInsertBefore(my_id) {
@@ -4233,7 +4312,7 @@ function buildNewStructure(structure) {
     ;
     //Eerst het hoofddifferentieel maken
     var itemCounter = 0;
-    structure.addItem(new Electro_Item(structure));
+    structure.addItem("");
     structure.data[0].setKey("type", "Aansluiting");
     structure.data[0].setKey("naam", "");
     structure.data[0].setKey("zekering", "differentieel");
@@ -4515,7 +4594,7 @@ function import_to_structure(mystring, redraw) {
         }
     }
     for (var i = 0; i < mystructure.length; i++) {
-        structure.addItem(new Electro_Item(structure));
+        structure.addItem(mystructure.data[i].keys[0][2]);
         structure.data[i].parent = mystructure.data[i].parent;
         structure.active[i] = mystructure.active[i];
         structure.id[i] = mystructure.id[i];
@@ -4525,7 +4604,7 @@ function import_to_structure(mystring, redraw) {
         structure.data[i].id = mystructure.data[i].id;
         structure.data[i].indent = mystructure.data[i].indent;
         structure.data[i].collapsed = mystructure.data[i].collapsed;
-        structure.adjustTypeByOrdinal(i, mystructure.data[i].keys[0][2]); //Make sure class is of the correct type
+        //structure.adjustTypeByOrdinal(i,mystructure.data[i].keys[0][2]); //Make sure class is of the correct type
     }
     //As we re-read the structure and it might be shorter then it once was (due to deletions) but we might still have the old high ID's, always take over the curid from the file
     structure.curid = mystructure.curid;

@@ -164,22 +164,45 @@ class Hierarchical_List {
     return(returnval);
   }
 
+  createItem(electroType: string) {
+    //Create the object
+    let tempval;
+    switch (electroType) {
+      case 'Bel': tempval = new Bel(structure); break;
+      case 'Batterij': tempval = new Batterij(structure); break;
+      case 'Boiler': tempval = new Boiler(structure); break;
+      case 'Diepvriezer': tempval = new Diepvriezer(structure); break;
+      case 'Droogkast': tempval = new Droogkast(structure); break; 
+      default: tempval = new Electro_Item(structure);
+    }
+    tempval.keys[0][2] = electroType;
+
+    //First set the correct identifyer
+    tempval.id = this.curid;
+    tempval.parent = 0;
+    tempval.indent = 0;
+
+    //Return the Object
+    return(tempval);
+  }
+
   //-----------------------------------------------------
 
-  addItem(my_item: List_Item) {
-    //First set the correct identifyer
-    my_item.id = this.curid;
-    my_item.parent = 0;
-    my_item.indent = 0;
-
-    //Then push the data into the queue
-    this.data.push(my_item);
+  addItem(electroType: string) {
+    //First create the item
+    let tempval = this.createItem(electroType);
+    
+    //Then push the item into the queue
+    this.data.push(tempval);
     this.active.push(true);
     this.id.push(this.curid);
 
     //Adjust length of the queue and future identifyer
     this.curid += 1;
     this.length += 1;
+
+    //Return the Object
+    return(tempval);
   }
 
   //-----------------------------------------------------
@@ -307,23 +330,17 @@ class Hierarchical_List {
 
   clone(my_id: number, parent_id?: number) {
     //-- First find the ordinal number of the current location and the desired location --
-    //   Also look for the original length of the structure
     let currentOrdinal = this.getOrdinalById(my_id);
-    var original_length = this.length;
     //-- Then create a clone of the object and assign the correct parent_id
     if(arguments.length < 2) {
       parent_id = this.data[currentOrdinal].parent
     }
     let parentOrdinal = this.getOrdinalById(parent_id);
 
-    let my_item;
-    switch (this.data[currentOrdinal].keys[0][2]) {
-      case 'Bel': my_item = new Bel(structure); break;
-      case 'Diepvriezer': my_item = new Diepvriezer(structure); break;
-      default: my_item = new Electro_Item(structure);
-    }
-
+    let my_item = this.createItem(this.data[currentOrdinal].keys[0][2]);
     my_item.clone(this.data[currentOrdinal]);
+    //var original_length = this.length;
+
     //-- Now add the clone to the structure
     //   The clone will have id this.curid-1
     if(arguments.length < 2) {
@@ -335,9 +352,9 @@ class Hierarchical_List {
     this.data[this.getOrdinalById(new_id)].collapsed = this.data[this.getOrdinalById(my_id)].collapsed;
     //-- Now loop over the childs of the original and also clone those
     var toClone = new Array(); //list of id's to clone
-    for (var i = 0; i<original_length; i++) {
+    for (var i = 0; i<this.length; i++) {
       if (this.id[i]==my_id) {
-        for (var j=original_length-1; j>=0; j--) { //We need to loop in opposite sense
+        for (var j=this.length-1; j>=0; j--) { //We need to loop in opposite sense
           if (this.data[j].parent==my_id) toClone.push(this.id[j]);
         }
       }
@@ -367,16 +384,10 @@ class Hierarchical_List {
   adjustTypeByOrdinal(ordinal: number, electroType : string, resetkeys? : boolean) {
     //this.data[ordinal].keys[0][2] = electroType; //We call setKey to ensure that also resetKeys is called in the Electro_Item
 
-    let tempval;
-    
-    switch (electroType) {
-        case 'Bel': tempval = new Bel(structure); break;
-        case 'Diepvriezer': tempval = new Diepvriezer(structure); break;
-        default: tempval = new Electro_Item(structure);
-    }
+    let tempval = this.createItem(electroType);
 
-    Object.assign(tempval,this.data[ordinal]);
-    tempval.keys[0][2] = electroType;
+    (<any> Object).assign(tempval,this.data[ordinal]);
+    tempval.keys[0][2] = electroType; //We need to do this again as we overwrote it with assign
     if (resetkeys) tempval.resetKeys();
 
     this.data[ordinal] = tempval;

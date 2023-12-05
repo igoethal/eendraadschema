@@ -19,7 +19,7 @@ function HLDelete(my_id: number) {
 }
 
 function HLAdd(my_id: number) {
-  structure.addItem(new Electro_Item(structure));
+  structure.addItem("");
   HLRedrawTree();
 }
 
@@ -222,7 +222,7 @@ function buildNewStructure(structure: Hierarchical_List) {
 
   //Eerst het hoofddifferentieel maken
   let itemCounter:number = 0;
-  structure.addItem(new Electro_Item(structure));
+  structure.addItem("");
   structure.data[0].setKey("type","Aansluiting");
   structure.data[0].setKey("naam","");
   structure.data[0].setKey("zekering","differentieel");
@@ -591,7 +591,7 @@ function import_to_structure(mystring: string, redraw = true) {
   }
 
   for (var i = 0; i < mystructure.length; i++) {
-    structure.addItem(new Electro_Item(structure));
+    structure.addItem(mystructure.data[i].keys[0][2]);
     structure.data[i].parent = mystructure.data[i].parent;
 
     structure.active[i] = mystructure.active[i];
@@ -604,7 +604,7 @@ function import_to_structure(mystring: string, redraw = true) {
     structure.data[i].indent = mystructure.data[i].indent;
     structure.data[i].collapsed = mystructure.data[i].collapsed;
 
-    structure.adjustTypeByOrdinal(i,mystructure.data[i].keys[0][2]); //Make sure class is of the correct type
+    //structure.adjustTypeByOrdinal(i,mystructure.data[i].keys[0][2]); //Make sure class is of the correct type
   }
 
   //As we re-read the structure and it might be shorter then it once was (due to deletions) but we might still have the old high ID's, always take over the curid from the file
