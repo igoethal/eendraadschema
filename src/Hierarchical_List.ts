@@ -174,6 +174,11 @@ class Hierarchical_List {
       case 'Diepvriezer': tempval = new Diepvriezer(structure); break;
       case 'Droogkast': tempval = new Droogkast(structure); break; 
       case 'Elektrische oven': tempval = new Elektrische_oven(structure); break; 
+      case 'Elektriciteitsmeter': tempval = new Elektriciteitsmeter(structure); break; 
+      case 'EV lader': tempval = new EV_lader(structure); break; 
+      case 'Koelkast': tempval = new Koelkast(structure); break;
+      case 'Kookfornuis': tempval = new Kookfornuis(structure); break;
+      case 'Microgolfoven': tempval = new Microgolfoven(structure); break;
       default: tempval = new Electro_Item(structure);
     }
     tempval.keys[0][2] = electroType;

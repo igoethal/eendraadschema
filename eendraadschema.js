@@ -773,15 +773,6 @@ var Electro_Item = /** @class */ (function (_super) {
                 output += "In verdeelbord: " + this.checkboxToHTML(26);
                 output += ", Adres/tekst: " + this.stringToHTML(15, 5);
                 break;
-            /*case "Batterij":
-              output += "&nbsp;Nr: " + this.stringToHTML(10,5) + ", ";
-              output += ", Adres/tekst: " + this.stringToHTML(15,5);
-              break;*/
-            /*case "Boiler":
-              output += "&nbsp;Nr: " + this.stringToHTML(10,5) + ", ";
-              output += "Accumulatie: " + this.checkboxToHTML(3);
-              output += ", Adres/tekst: " + this.stringToHTML(15,5);
-              break;*/
             case "Ketel":
                 output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
                 output += ", Type: " + this.selectToHTML(16, ["", "Met boiler", "Met tapspiraal", "Warmtekrachtkoppeling", "Warmtewisselaar"]);
@@ -1566,18 +1557,6 @@ var Electro_Item = /** @class */ (function (_super) {
                     outputstr += this.addAddress(mySVG, 49, 5);
                 }
                 break;
-            case "Elektriciteitsmeter":
-                outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-                outputstr += '<use xlink:href="#elektriciteitsmeter" x="21" y="25"></use>';
-                mySVG.xright = 60;
-                outputstr += this.addAddress(mySVG, 60, 15);
-                break;
-            case "EV lader":
-                outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-                outputstr += '<use xlink:href="#EVlader" x="21" y="25"></use>';
-                mySVG.xright = 60;
-                outputstr += this.addAddress(mySVG, 58, 14);
-                break;
             case "Ketel":
                 var shifty = 0;
                 if (this.keys[4][2] > 1) {
@@ -1646,24 +1625,6 @@ var Electro_Item = /** @class */ (function (_super) {
                 mySVG.yup += shifty;
                 //Place adres underneath
                 outputstr += this.addAddress(mySVG, shifty + 60, 15);
-                break;
-            case "Koelkast":
-                outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-                outputstr += '<use xlink:href="#koelkast" x="21" y="25"></use>';
-                mySVG.xright = 60;
-                outputstr += this.addAddress(mySVG, 60, 15);
-                break;
-            case "Kookfornuis":
-                outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-                outputstr += '<use xlink:href="#kookfornuis" x="21" y="25"></use>';
-                mySVG.xright = 60;
-                outputstr += this.addAddress(mySVG, 60, 15);
-                break;
-            case "Microgolfoven":
-                outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-                outputstr += '<use xlink:href="#microgolf" x="21" y="25"></use>';
-                mySVG.xright = 60;
-                outputstr += this.addAddress(mySVG, 60, 15);
                 break;
             case "Motor":
                 outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
@@ -2275,6 +2236,38 @@ var Droogkast = /** @class */ (function (_super) {
     };
     return Droogkast;
 }(Electro_Item));
+var Elektriciteitsmeter = /** @class */ (function (_super) {
+    __extends(Elektriciteitsmeter, _super);
+    function Elektriciteitsmeter(mylist) {
+        return _super.call(this, mylist) || this;
+    }
+    Elektriciteitsmeter.prototype.resetKeys = function () {
+        this.clearKeys();
+        this.keys[0][2] = "Elektriciteitsmeter"; // This is rather a formality as we should already have this at this stage
+        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+    };
+    Elektriciteitsmeter.prototype.toHTML = function (mode, Parent) {
+        var output = this.toHTMLHeader(mode, Parent);
+        output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
+        output += ", Adres/tekst: " + this.stringToHTML(15, 5);
+        return (output);
+    };
+    Elektriciteitsmeter.prototype.toSVG = function (hasChild) {
+        if (hasChild === void 0) { hasChild = false; }
+        var mySVG = new SVGelement();
+        var outputstr = "";
+        mySVG.xleft = 1; // foresee at least some space for the conductor
+        mySVG.xright = 60;
+        mySVG.yup = 25;
+        mySVG.ydown = 25;
+        mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
+            + '<use xlink:href="#elektriciteitsmeter" x="21" y="25"></use>';
+        mySVG.data += this.addAddress(mySVG, 60, 15);
+        mySVG.data += "\n";
+        return (mySVG);
+    };
+    return Elektriciteitsmeter;
+}(Electro_Item));
 var Elektrische_oven = /** @class */ (function (_super) {
     __extends(Elektrische_oven, _super);
     function Elektrische_oven(mylist) {
@@ -2306,6 +2299,134 @@ var Elektrische_oven = /** @class */ (function (_super) {
         return (mySVG);
     };
     return Elektrische_oven;
+}(Electro_Item));
+var EV_lader = /** @class */ (function (_super) {
+    __extends(EV_lader, _super);
+    function EV_lader(mylist) {
+        return _super.call(this, mylist) || this;
+    }
+    EV_lader.prototype.resetKeys = function () {
+        this.clearKeys();
+        this.keys[0][2] = "EV lader"; // This is rather a formality as we should already have this at this stage
+        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+    };
+    EV_lader.prototype.toHTML = function (mode, Parent) {
+        var output = this.toHTMLHeader(mode, Parent);
+        output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
+        output += ", Adres/tekst: " + this.stringToHTML(15, 5);
+        return (output);
+    };
+    EV_lader.prototype.toSVG = function (hasChild) {
+        if (hasChild === void 0) { hasChild = false; }
+        var mySVG = new SVGelement();
+        var outputstr = "";
+        mySVG.xleft = 1; // foresee at least some space for the conductor
+        mySVG.xright = 60;
+        mySVG.yup = 25;
+        mySVG.ydown = 25;
+        mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
+            + '<use xlink:href="#EVlader" x="21" y="25"></use>';
+        mySVG.data += this.addAddress(mySVG, 58, 14);
+        mySVG.data += "\n";
+        return (mySVG);
+    };
+    return EV_lader;
+}(Electro_Item));
+var Koelkast = /** @class */ (function (_super) {
+    __extends(Koelkast, _super);
+    function Koelkast(mylist) {
+        return _super.call(this, mylist) || this;
+    }
+    Koelkast.prototype.resetKeys = function () {
+        this.clearKeys();
+        this.keys[0][2] = "Koelkast"; // This is rather a formality as we should already have this at this stage
+        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+    };
+    Koelkast.prototype.toHTML = function (mode, Parent) {
+        var output = this.toHTMLHeader(mode, Parent);
+        output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
+        output += ", Adres/tekst: " + this.stringToHTML(15, 5);
+        return (output);
+    };
+    Koelkast.prototype.toSVG = function (hasChild) {
+        if (hasChild === void 0) { hasChild = false; }
+        var mySVG = new SVGelement();
+        var outputstr = "";
+        mySVG.xleft = 1; // foresee at least some space for the conductor
+        mySVG.xright = 60;
+        mySVG.yup = 25;
+        mySVG.ydown = 25;
+        mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
+            + '<use xlink:href="#koelkast" x="21" y="25"></use>';
+        mySVG.data += this.addAddress(mySVG, 60, 15);
+        mySVG.data += "\n";
+        return (mySVG);
+    };
+    return Koelkast;
+}(Electro_Item));
+var Kookfornuis = /** @class */ (function (_super) {
+    __extends(Kookfornuis, _super);
+    function Kookfornuis(mylist) {
+        return _super.call(this, mylist) || this;
+    }
+    Kookfornuis.prototype.resetKeys = function () {
+        this.clearKeys();
+        this.keys[0][2] = "Kookfornuis"; // This is rather a formality as we should already have this at this stage
+        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+    };
+    Kookfornuis.prototype.toHTML = function (mode, Parent) {
+        var output = this.toHTMLHeader(mode, Parent);
+        output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
+        output += ", Adres/tekst: " + this.stringToHTML(15, 5);
+        return (output);
+    };
+    Kookfornuis.prototype.toSVG = function (hasChild) {
+        if (hasChild === void 0) { hasChild = false; }
+        var mySVG = new SVGelement();
+        var outputstr = "";
+        mySVG.xleft = 1; // foresee at least some space for the conductor
+        mySVG.xright = 60;
+        mySVG.yup = 25;
+        mySVG.ydown = 25;
+        mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
+            + '<use xlink:href="#kookfornuis" x="21" y="25"></use>';
+        mySVG.data += this.addAddress(mySVG, 60, 15);
+        mySVG.data += "\n";
+        return (mySVG);
+    };
+    return Kookfornuis;
+}(Electro_Item));
+var Microgolfoven = /** @class */ (function (_super) {
+    __extends(Microgolfoven, _super);
+    function Microgolfoven(mylist) {
+        return _super.call(this, mylist) || this;
+    }
+    Microgolfoven.prototype.resetKeys = function () {
+        this.clearKeys();
+        this.keys[0][2] = "Microgolfoven"; // This is rather a formality as we should already have this at this stage
+        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+    };
+    Microgolfoven.prototype.toHTML = function (mode, Parent) {
+        var output = this.toHTMLHeader(mode, Parent);
+        output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
+        output += ", Adres/tekst: " + this.stringToHTML(15, 5);
+        return (output);
+    };
+    Microgolfoven.prototype.toSVG = function (hasChild) {
+        if (hasChild === void 0) { hasChild = false; }
+        var mySVG = new SVGelement();
+        var outputstr = "";
+        mySVG.xleft = 1; // foresee at least some space for the conductor
+        mySVG.xright = 60;
+        mySVG.yup = 25;
+        mySVG.ydown = 25;
+        mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
+            + '<use xlink:href="#microgolf" x="21" y="25"></use>';
+        mySVG.data += this.addAddress(mySVG, 60, 15);
+        mySVG.data += "\n";
+        return (mySVG);
+    };
+    return Microgolfoven;
 }(Electro_Item));
 var Properties = /** @class */ (function () {
     function Properties() {
@@ -2494,6 +2615,21 @@ var Hierarchical_List = /** @class */ (function () {
                 break;
             case 'Elektrische oven':
                 tempval = new Elektrische_oven(structure);
+                break;
+            case 'Elektriciteitsmeter':
+                tempval = new Elektriciteitsmeter(structure);
+                break;
+            case 'EV lader':
+                tempval = new EV_lader(structure);
+                break;
+            case 'Koelkast':
+                tempval = new Koelkast(structure);
+                break;
+            case 'Kookfornuis':
+                tempval = new Kookfornuis(structure);
+                break;
+            case 'Microgolfoven':
+                tempval = new Microgolfoven(structure);
                 break;
             default: tempval = new Electro_Item(structure);
         }

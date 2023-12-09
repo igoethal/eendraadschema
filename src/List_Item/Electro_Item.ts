@@ -518,15 +518,6 @@ class Electro_Item extends List_Item {
         output += "In verdeelbord: " + this.checkboxToHTML(26);
         output += ", Adres/tekst: " + this.stringToHTML(15,5);
         break;
-      /*case "Batterij":
-        output += "&nbsp;Nr: " + this.stringToHTML(10,5) + ", ";
-        output += ", Adres/tekst: " + this.stringToHTML(15,5);
-        break;*/
-      /*case "Boiler":
-        output += "&nbsp;Nr: " + this.stringToHTML(10,5) + ", ";
-        output += "Accumulatie: " + this.checkboxToHTML(3);
-        output += ", Adres/tekst: " + this.stringToHTML(15,5);
-        break;*/
       case "Ketel":
         output += "&nbsp;Nr: " + this.stringToHTML(10,5);
         output += ", Type: " + this.selectToHTML(16,["", "Met boiler", "Met tapspiraal", "Warmtekrachtkoppeling", "Warmtewisselaar"]);
@@ -1228,18 +1219,6 @@ class Electro_Item extends List_Item {
           outputstr += this.addAddress(mySVG,49,5);
         }
         break;
-      case "Elektriciteitsmeter":
-        outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-        outputstr += '<use xlink:href="#elektriciteitsmeter" x="21" y="25"></use>';
-        mySVG.xright = 60;
-        outputstr += this.addAddress(mySVG,60,15);
-        break;
-      case "EV lader":
-        outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-        outputstr += '<use xlink:href="#EVlader" x="21" y="25"></use>';
-        mySVG.xright = 60;
-        outputstr += this.addAddress(mySVG,58,14);
-        break;
       case "Ketel":
         var shifty = 0; if (this.keys[4][2]>1) {
           shifty = 15;
@@ -1307,24 +1286,6 @@ class Electro_Item extends List_Item {
         mySVG.yup += shifty;
         //Place adres underneath
         outputstr += this.addAddress(mySVG,shifty+60,15);
-        break;
-      case "Koelkast":
-        outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-        outputstr += '<use xlink:href="#koelkast" x="21" y="25"></use>';
-        mySVG.xright = 60;
-        outputstr += this.addAddress(mySVG,60,15);
-        break;
-      case "Kookfornuis":
-        outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-        outputstr += '<use xlink:href="#kookfornuis" x="21" y="25"></use>';
-        mySVG.xright = 60;
-        outputstr += this.addAddress(mySVG,60,15);
-        break;
-      case "Microgolfoven":
-        outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-        outputstr += '<use xlink:href="#microgolf" x="21" y="25"></use>';
-        mySVG.xright = 60;
-        outputstr += this.addAddress(mySVG,60,15);
         break;
       case "Motor":
         outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
