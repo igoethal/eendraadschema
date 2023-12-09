@@ -41,7 +41,6 @@ class Stopcontact extends Electro_Item {
 
     toSVG(hasChild: Boolean = false) {
         let mySVG:SVGelement = new SVGelement();
-        let outputstr:string = "";
 
         mySVG.xleft = 1; // Links voldoende ruimte voor een eventuele kring voorzien
         mySVG.xright = 20; // We starten met breedte 20 (leidings links) en vullen later aan in functie van wat moet getekend worden

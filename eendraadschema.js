@@ -747,16 +747,6 @@ var Electro_Item = /** @class */ (function (_super) {
                 output += "&nbsp;Naam: " + this.stringToHTML(10, 5) + ", ";
                 output += "Geaard: " + this.checkboxToHTML(1);
                 break;
-            case "Drukknop":
-                output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
-                output += ", Type: " + this.selectToHTML(16, ["standaard", "dimmer", "rolluik"]);
-                output += ", Verklikkerlampje: " + this.checkboxToHTML(21);
-                output += ", Halfwaterdicht: " + this.checkboxToHTML(20);
-                output += ", Afgeschermd: " + this.checkboxToHTML(19);
-                output += ", Aantal armaturen: " + this.selectToHTML(4, ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"]);
-                output += ", Aantal knoppen per armatuur: " + this.selectToHTML(13, ["1", "2", "3", "4", "5", "6", "7", "8"]);
-                output += ", Adres/tekst: " + this.stringToHTML(15, 5);
-                break;
             case "Lichtpunt":
                 output += "&nbsp;Nr: " + this.stringToHTML(10, 5) + ", ";
                 output += "Type: " + this.selectToHTML(16, ["standaard", "TL", "spot", "led" /*, "Spot", "Led", "Signalisatielamp" */]) + ", ";
@@ -1412,59 +1402,6 @@ var Electro_Item = /** @class */ (function (_super) {
         mySVG.yup = 25;
         mySVG.ydown = 25;
         switch (this.keys[0][2]) {
-            case "Drukknop":
-                var printstr = "";
-                outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-                outputstr += '<use xlink:href="#drukknop" x="21" y="25"></use>';
-                var aantal_knoppen = this.getKey("aantal");
-                if (this.keys[21][2]) { //met verklikkerlampje
-                    outputstr += '<line x1="28" y1="20" x2="38" y2="30" stroke="black"></line>'; // midden 33, 25, lengte 7
-                    outputstr += '<line x1="28" y1="30" x2="38" y2="20" stroke="black"></line>';
-                }
-                if (this.keys[19][2]) { //afgeschermd
-                    outputstr += '<line x1="26" y1="10" x2="40" y2="10" stroke="black"></line>'; // midden 33, 25 lengte 7
-                    outputstr += '<line x1="26" y1="10" x2="26" y2="15" stroke="black"></line>';
-                    outputstr += '<line x1="40" y1="10" x2="40" y2="15" stroke="black"></line>';
-                    outputstr += '<line x1="22" y1="15" x2="26" y2="15" stroke="black"></line>';
-                    outputstr += '<line x1="40" y1="15" x2="44" y2="15" stroke="black"></line>';
-                }
-                //-- Plaats tekst voor "h" en/of aantal armaturen onderaan --
-                if (this.keys[20][2])
-                    printstr += 'h';
-                if (aantal_knoppen > 1) {
-                    if (printstr != '') {
-                        printstr += ', ';
-                    }
-                    printstr += 'x' + aantal_knoppen;
-                }
-                if (printstr != '')
-                    outputstr += '<text x="33" y="49" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' + htmlspecialchars(printstr) + '</text>';
-                //-- Plaats tekst voor aantal knoppen --
-                if (this.keys[13][2] > 1) {
-                    outputstr += '<text x="44" y="13" style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-size="10">' + htmlspecialchars(this.keys[13][2]) + '</text>';
-                    outputstr += '<line x1="39" y1="19" x2="44" y2="14" stroke="black" />';
-                }
-                //-- Extra tekens voor rolluik of dimmer --
-                switch (this.keys[16][2]) {
-                    case "dimmer":
-                        outputstr += '<polygon points="18,20 18,13 28,20" fill="black" stroke="black" />';
-                        break;
-                    case "rolluik":
-                        outputstr += '<polygon points="18,15 22,15 20,12" fill="black" stroke="black" />';
-                        outputstr += '<polygon points="18,17 22,17 20,20" fill="black" stroke="black" />';
-                        break;
-                    default:
-                }
-                //-- Bereken correcte breedte
-                mySVG.xright = 44;
-                //-- Plaats adres onderaan --
-                if (printstr != '') {
-                    outputstr += this.addAddress(mySVG, 65, 20);
-                }
-                else {
-                    outputstr += this.addAddress(mySVG, 49, 5);
-                }
-                break;
             case "Leeg":
             case "Aansluitpunt":
                 outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
@@ -2021,6 +1958,97 @@ var Droogkast = /** @class */ (function (_super) {
     };
     return Droogkast;
 }(Electro_Item));
+var Drukknop = /** @class */ (function (_super) {
+    __extends(Drukknop, _super);
+    function Drukknop(mylist) {
+        return _super.call(this, mylist) || this;
+    }
+    Drukknop.prototype.resetKeys = function () {
+        this.clearKeys();
+        this.keys[0][2] = "Drukknop"; // This is rather a formality as we should already have this at this stage
+        this.keys[4][2] = "1"; // Per default 1 armatuur
+        this.keys[13][2] = "1"; // Per default 1 knop per armatuur
+        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+        this.keys[16][2] = "standaard"; // Per default een standaard drukknop
+        this.keys[19][2] = false; // Per default niet afgeschermd
+        this.keys[20][2] = false; // Per default niet halfwaterdicht
+        this.keys[21][2] = false; // Per default geen verklikkerslampje
+    };
+    Drukknop.prototype.toHTML = function (mode, Parent) {
+        var output = this.toHTMLHeader(mode, Parent);
+        output += "&nbsp;Nr: " + this.stringToHTML(10, 5)
+            + ", Type: " + this.selectToHTML(16, ["standaard", "dimmer", "rolluik"])
+            + ", Verklikkerlampje: " + this.checkboxToHTML(21)
+            + ", Halfwaterdicht: " + this.checkboxToHTML(20)
+            + ", Afgeschermd: " + this.checkboxToHTML(19)
+            + ", Aantal armaturen: " + this.selectToHTML(4, ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"])
+            + ", Aantal knoppen per armatuur: " + this.selectToHTML(13, ["1", "2", "3", "4", "5", "6", "7", "8"])
+            + ", Adres/tekst: " + this.stringToHTML(15, 5);
+        return (output);
+    };
+    Drukknop.prototype.toSVG = function (hasChild) {
+        if (hasChild === void 0) { hasChild = false; }
+        var mySVG = new SVGelement();
+        mySVG.xleft = 1; // Links voldoende ruimte voor een eventuele kring voorzien
+        mySVG.xright = 44;
+        mySVG.yup = 25;
+        mySVG.ydown = 25;
+        var aantal_knoppen = this.keys[4][2];
+        // Teken lijn links
+        mySVG.data += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
+            + '<use xlink:href="#drukknop" x="21" y="25"></use>';
+        // Teken verklikkerlampje indien van toepassing
+        if (this.keys[21][2]) {
+            mySVG.data += '<line x1="28" y1="20" x2="38" y2="30" stroke="black"></line>' // midden 33, 25, lengte 7
+                + '<line x1="28" y1="30" x2="38" y2="20" stroke="black"></line>';
+        }
+        // Teken afgeschermd indien van toepassing
+        if (this.keys[19][2]) {
+            mySVG.data += '<line x1="26" y1="10" x2="40" y2="10" stroke="black"></line>' // midden 33, 25 lengte 7
+                + '<line x1="26" y1="10" x2="26" y2="15" stroke="black"></line>'
+                + '<line x1="40" y1="10" x2="40" y2="15" stroke="black"></line>'
+                + '<line x1="22" y1="15" x2="26" y2="15" stroke="black"></line>'
+                + '<line x1="40" y1="15" x2="44" y2="15" stroke="black"></line>';
+        }
+        // Plaats tekst voor "h" en/of aantal armaturen onderaan
+        var printstr = "";
+        if (this.keys[20][2])
+            printstr += 'h';
+        if (aantal_knoppen > 1) {
+            if (printstr != '') {
+                printstr += ', ';
+            }
+            printstr += 'x' + aantal_knoppen;
+        }
+        if (printstr != '')
+            mySVG.data += '<text x="33" y="49" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' + htmlspecialchars(printstr) + '</text>';
+        // Plaats tekst voor aantal knoppen
+        if (this.keys[13][2] > 1) {
+            mySVG.data += '<text x="44" y="13" style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-size="10">' + htmlspecialchars(this.keys[13][2]) + '</text>'
+                + '<line x1="39" y1="19" x2="44" y2="14" stroke="black" />';
+        }
+        // Plaats extra tekens voor rolluik of dimmer
+        switch (this.keys[16][2]) {
+            case "dimmer":
+                mySVG.data += '<polygon points="18,20 18,13 28,20" fill="black" stroke="black" />';
+                break;
+            case "rolluik":
+                mySVG.data += '<polygon points="18,12 22,12 20,9" fill="black" stroke="black" />'
+                    + '<polygon points="18,15 22,15 20,18" fill="black" stroke="black" />';
+                break;
+            default:
+        }
+        // Plaats adres helemaal onderaan
+        if (printstr != '') {
+            mySVG.data += this.addAddress(mySVG, 65, 20);
+        }
+        else {
+            mySVG.data += this.addAddress(mySVG, 49, 5);
+        }
+        return (mySVG);
+    };
+    return Drukknop;
+}(Electro_Item));
 var Elektriciteitsmeter = /** @class */ (function (_super) {
     __extends(Elektriciteitsmeter, _super);
     function Elektriciteitsmeter(mylist) {
@@ -2484,7 +2512,6 @@ var Stopcontact = /** @class */ (function (_super) {
     Stopcontact.prototype.toSVG = function (hasChild) {
         if (hasChild === void 0) { hasChild = false; }
         var mySVG = new SVGelement();
-        var outputstr = "";
         mySVG.xleft = 1; // Links voldoende ruimte voor een eventuele kring voorzien
         mySVG.xright = 20; // We starten met breedte 20 (leidings links) en vullen later aan in functie van wat moet getekend worden
         mySVG.yup = 25;
@@ -2877,6 +2904,9 @@ var Hierarchical_List = /** @class */ (function () {
                 break;
             case 'Droogkast':
                 tempval = new Droogkast(structure);
+                break;
+            case 'Drukknop':
+                tempval = new Drukknop(structure);
                 break;
             case 'Elektriciteitsmeter':
                 tempval = new Elektriciteitsmeter(structure);
