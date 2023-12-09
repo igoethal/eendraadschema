@@ -29,7 +29,7 @@ class Bel extends Electro_Item {
         mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
                    + '<use xlink:href="#bel" x="21" y="25"></use>';
         
-        mySVG.data += this.addAddress(mySVG,58,14);
+        mySVG.data += this.addAddress(mySVG,60,15);
         mySVG.data += "\n";
 
         return(mySVG);

@@ -110,7 +110,7 @@ class Electro_Item extends List_Item {
           break;
         }
         default: {
-          consumers = ["", "Aansluiting", "Domotica", "Domotica gestuurde verbruiker", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
+          consumers = ["", "Aansluiting", "Domotica", "Domotica gestuurde verbruiker", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
           break;
         }
       }
@@ -606,11 +606,6 @@ class Electro_Item extends List_Item {
       case "Transformator":
         output += "&nbsp;Nr: " + this.stringToHTML(10,5);
         output += ", Voltage: " + this.stringToHTML(14,8);
-        output += ", Adres/tekst: " + this.stringToHTML(15,5);
-        break;
-      case "USB lader":
-        output += "&nbsp;Nr: " + this.stringToHTML(10,5);
-        output += ", Aantal: " + this.selectToHTML(4,["1","2","3","4","5","6","7","8","9","10"]);
         output += ", Adres/tekst: " + this.stringToHTML(15,5);
         break;
       case "Verlenging":
@@ -1287,18 +1282,6 @@ class Electro_Item extends List_Item {
         //Place adres underneath
         outputstr += this.addAddress(mySVG,shifty+60,15);
         break;
-      case "Motor":
-        outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-        outputstr += '<use xlink:href="#motor" x="21" y="25"></use>';
-        mySVG.xright = 60;
-        outputstr += this.addAddress(mySVG,60,15);
-        break;
-      case "Omvormer":
-        outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-        outputstr += '<use xlink:href="#omvormer" x="21" y="25"></use>';
-        mySVG.xright = 60;
-        outputstr += this.addAddress(mySVG,55,10);
-        break;
       case "Overspanningsbeveiliging":
         outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
         outputstr += '<use xlink:href="#overspanningsbeveiliging" x="21" y="25"></use>';
@@ -1508,12 +1491,6 @@ class Electro_Item extends List_Item {
         this.setKey("aantal2", 0);
         outputstr += this.toSVGswitches(hasChild, mySVG);
         break;
-      case "Stoomoven":
-        outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-        outputstr += '<use xlink:href="#stoomoven" x="21" y="25"></use>';
-        mySVG.xright = 60;
-        outputstr += this.addAddress(mySVG,60,15);
-        break;
       case "Transformator":
         outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
         outputstr += '<use xlink:href="#transformator" x="21" y="25"></use>';
@@ -1521,29 +1498,6 @@ class Electro_Item extends List_Item {
           htmlspecialchars(this.getKey("voltage")) + "</text>";
         mySVG.xright = 48;
         outputstr += this.addAddress(mySVG,58,15);
-        break;
-      case "USB lader":
-        var shifty = 0; if (this.keys[4][2]>1) {
-          shifty = 12;
-          outputstr += '<text x="51" y="14" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">x' + htmlspecialchars(this.keys[4][2]) + '</text>'
-        }
-        outputstr += '<line x1="1" y1="' + (shifty+25) + '" x2="21" y2="' + (shifty+25) + '" stroke="black"></line>';
-        outputstr += '<use xlink:href="#usblader" x="21" y="' + (shifty+25) + '"></use>';
-        mySVG.xright = 80;
-        outputstr += this.addAddress(mySVG,shifty + 55,10);
-        mySVG.yup += shifty;
-        break;
-      case "Vaatwasmachine":
-        outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-        outputstr += '<use xlink:href="#vaatwasmachine" x="21" y="25"></use>';
-        mySVG.xright = 60;
-        outputstr += this.addAddress(mySVG,60,15);
-        break;
-      case "Ventilator":
-        outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-        outputstr += '<use xlink:href="#ventilator" x="21" y="25"></use>';
-        mySVG.xright = 50;
-        outputstr += this.addAddress(mySVG,55,10);
         break;
       case "Verwarmingstoestel":
         outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
@@ -1581,7 +1535,6 @@ class Electro_Item extends List_Item {
         outputstr += '<line x1="1" y1="25" x2="' + (width+1) + '" y2="25" stroke="black" />';
         outputstr += this.addAddress(mySVG,40,0,width/2-mySVG.xright/2-10,23);
         break;
-
       case "Vrije tekst":
         var width;
         if (isNaN(Number(this.keys[22][2]))) {
@@ -1685,12 +1638,6 @@ class Electro_Item extends List_Item {
         mySVG.yup += shifty;
         //Place adres underneath
         outputstr += this.addAddress(mySVG,shifty+60,15);
-        break;
-      case "Wasmachine":
-        outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-        outputstr += '<use xlink:href="#wasmachine" x="21" y="25"></use>';
-        mySVG.xright = 60;
-        outputstr += this.addAddress(mySVG,60,15);
         break;
       case "Zonnepaneel":
         outputstr += '<line x1="1" y1="35" x2="21" y2="35" stroke="black"></line>';
