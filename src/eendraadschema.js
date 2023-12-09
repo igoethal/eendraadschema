@@ -757,22 +757,6 @@ var Electro_Item = /** @class */ (function (_super) {
                 output += ", Aantal knoppen per armatuur: " + this.selectToHTML(13, ["1", "2", "3", "4", "5", "6", "7", "8"]);
                 output += ", Adres/tekst: " + this.stringToHTML(15, 5);
                 break;
-            case "Stopcontact":
-                output += "&nbsp;Nr: " + this.stringToHTML(10, 5) + ", ";
-                output += "Geaard: " + this.checkboxToHTML(1) + ", ";
-                output += "Kinderveiligheid: " + this.checkboxToHTML(2) + " ";
-                output += "Halfwaterdicht: " + this.checkboxToHTML(20) + ", ";
-                output += "Meerfasig: " + this.checkboxToHTML(21) + ", ";
-                if (this.keys[21][2]) {
-                    output += "Aantal fasen: " + this.selectToHTML(16, ["1", "2", "3"]) + ", ";
-                    output += "Met nul: " + this.checkboxToHTML(25) + ", ";
-                }
-                ;
-                output += "Ingebouwde schakelaar: " + this.checkboxToHTML(19) + ", ";
-                output += "Aantal: " + this.selectToHTML(4, ["1", "2", "3", "4", "5", "6"]) + ", ";
-                output += "In verdeelbord: " + this.checkboxToHTML(26);
-                output += ", Adres/tekst: " + this.stringToHTML(15, 5);
-                break;
             case "Lichtpunt":
                 output += "&nbsp;Nr: " + this.stringToHTML(10, 5) + ", ";
                 output += "Type: " + this.selectToHTML(16, ["standaard", "TL", "spot", "led" /*, "Spot", "Led", "Signalisatielamp" */]) + ", ";
@@ -1428,69 +1412,6 @@ var Electro_Item = /** @class */ (function (_super) {
         mySVG.yup = 25;
         mySVG.ydown = 25;
         switch (this.keys[0][2]) {
-            case "Stopcontact":
-                var startx = 1;
-                mySVG.xright = 0;
-                if (this.keys[21][2]) { //Meerfasig
-                    outputstr += '<line x1="1" y1="25" x2="35" y2="25" stroke="black" />';
-                    startx += 34;
-                    mySVG.xright += 34;
-                    switch (this.keys[16][2]) {
-                        case "1":
-                            outputstr += '<line x1="21" y1="35" x2="27" y2="15" stroke="black" />';
-                            break;
-                        case "2":
-                            outputstr += '<line x1="16.5" y1="35" x2="22.5" y2="15" stroke="black" />';
-                            outputstr += '<line x1="22.5" y1="35" x2="28.5" y2="15" stroke="black" />';
-                            break;
-                        case "3":
-                            outputstr += '<line x1="15" y1="35" x2="21" y2="15" stroke="black" />';
-                            outputstr += '<line x1="21" y1="35" x2="27" y2="15" stroke="black" />';
-                            outputstr += '<line x1="27" y1="35" x2="33" y2="15" stroke="black" />';
-                            break;
-                        default:
-                            outputstr += '<line x1="21" y1="35" x2="27" y2="15" stroke="black" />';
-                            break;
-                    }
-                    if (this.keys[25][2]) {
-                        outputstr += '<line x1="39" y1="35" x2="45" y2="15" stroke="black" />';
-                        outputstr += '<circle cx="39" cy="35" r="2" fill="black" stroke="black" />';
-                    }
-                }
-                if (this.keys[19][2]) { //Met ingebouwde schakelaar
-                    outputstr += '<line x1="' + (startx + 0) + '" y1="25" x2="' + (startx + 11) + '" y2="25" stroke="black" />';
-                    outputstr += '<line x1="' + (startx + 30) + '" y1="25" x2="' + (startx + 20) + '" y2="5" stroke="black" />';
-                    outputstr += '<line x1="' + (startx + 20) + '" y1="5" x2="' + (startx + 15) + '" y2="7.5" stroke="black" />';
-                    outputstr += '<line x1="' + (startx + 22) + '" y1="9" x2="' + (startx + 17) + '" y2="11.5" stroke="black" />';
-                    startx += 10;
-                    mySVG.xright += 10;
-                }
-                for (var i = 0; i < this.getKey("aantal"); i++) {
-                    outputstr += '<use xlink:href="#stopcontact" x="' + startx + '" y="25"></use>';
-                    if (this.getKey("geaard"))
-                        outputstr += '<use xlink:href="#stopcontact_aarding" x="' + startx + '" y="25"></use>';
-                    if (this.getKey("kinderveiligheid"))
-                        outputstr += '<use xlink:href="#stopcontact_kinderveilig" x="' + startx + '" y="25"></use>';
-                    startx += 20;
-                }
-                mySVG.xright += 20 + this.getKey("aantal") * 20;
-                //-- Check in verdeelbord --
-                if (this.keys[26][2]) {
-                    outputstr += '<rect x="' + (mySVG.xright - this.getKey("aantal") * 20 - 3 - (this.keys[19][2]) * 12) + '" y="3" width="' + (this.getKey("aantal") * 20 + 6 + (this.keys[19][2]) * 12) + '" height="44" fill="none" style="stroke:black" />';
-                    outputstr += '<line x1="' + (17 + (mySVG.xright - 20 + 3)) + '" y1="3" x2="' + (17 + (mySVG.xright - 20 + 3)) + '" y2="47" fill="none" style="stroke:black" />';
-                }
-                ;
-                //-- check halfwaterdicht--
-                if (this.keys[20][2])
-                    outputstr += '<rect x="' + (22 + (this.keys[19][2]) * 10 + (this.keys[21][2]) * 34) + '" y="0" width="6" height="8" style="fill:rgb(255,255,255)" /><text x="' + (25 + (this.keys[19][2]) * 10 + (this.keys[21][2]) * 34) + '" y="8" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">h</text>';
-                //-- check any childs? --
-                if (hasChild) {
-                    outputstr += '<line x1="' + startx + '" y1="25" x2="' + (startx + 21) + '" y2="25" stroke="black" />';
-                }
-                ;
-                //-- Plaats adres onderaan --
-                outputstr += this.addAddress(mySVG, 60, 15);
-                break;
             case "Drukknop":
                 var printstr = "";
                 outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
@@ -1543,81 +1464,6 @@ var Electro_Item = /** @class */ (function (_super) {
                 else {
                     outputstr += this.addAddress(mySVG, 49, 5);
                 }
-                break;
-            case "Ketel":
-                var shifty = 0;
-                if (this.keys[4][2] > 1) {
-                    shifty = 15;
-                    outputstr += '<text x="41" y="12" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">x' + htmlspecialchars(this.keys[4][2]) + '</text>';
-                }
-                outputstr += '<line x1="1" y1="' + (shifty + 25) + '" x2="21" y2="' + (shifty + 25) + '" stroke="black"></line>';
-                outputstr += '<use xlink:href="#verbruiker" x="21" y="' + (shifty + 25) + '"></use>';
-                switch (this.keys[16][2]) {
-                    case "Met tapspiraal":
-                        outputstr += '<line x1="21" y1="' + (shifty + 15) + '" x2="61" y2="' + (shifty + 7) + '" stroke="black" />';
-                        outputstr += '<line x1="21" y1="' + (shifty + 15) + '" x2="61" y2="' + (shifty + 23) + '" stroke="black" />';
-                        break;
-                    case "Met boiler":
-                        outputstr += '<rect x="31" y="' + (shifty + 10) + '" width="20" height="10" stroke="black" fill="white" />';
-                        break;
-                    case "Warmtewisselaar":
-                        outputstr += '<line x1="26" y1="' + (shifty + 0) + '" x2="26" y2="' + (shifty + 5) + '" stroke="black" />';
-                        outputstr += '<line x1="56" y1="' + (shifty + 0) + '" x2="56" y2="' + (shifty + 5) + '" stroke="black" />';
-                        outputstr += '<line x1="26" y1="' + (shifty + 5) + '" x2="33.5" y2="' + (shifty + 23) + '" stroke="black" />';
-                        outputstr += '<line x1="56" y1="' + (shifty + 5) + '" x2="48.5" y2="' + (shifty + 23) + '" stroke="black" />';
-                        outputstr += '<line x1="33.5" y1="' + (shifty + 23) + '" x2="41" y2="' + (shifty + 14) + '" stroke="black" />';
-                        outputstr += '<line x1="48.5" y1="' + (shifty + 23) + '" x2="41" y2="' + (shifty + 14) + '" stroke="black" />';
-                        break;
-                    case "Warmtekrachtkoppeling":
-                        outputstr += '<circle cx="41" cy="' + (shifty + 16) + '" r="7" style="stroke:black;fill:none" />';
-                        outputstr += '<text x="41" y="' + (shifty + 17) + '" style="text-anchor:middle;dominant-baseline:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">G</text>';
-                        break;
-                }
-                //Waar gaan we de andere symbolen plaatsen, indien slechts 1, midden onderaan, zoniet links en rechts
-                var shift_symbol_energiebron = 41;
-                var shift_symbol_warmtefunctie = 41;
-                if ((this.keys[17][2] != "") && (this.keys[18][2] != "")) {
-                    var shift_symbol_energiebron = 31;
-                    var shift_symbol_warmtefunctie = 51;
-                }
-                switch (this.keys[17][2]) {
-                    case "Gas (ventilator)":
-                        outputstr += '<use xlink:href="#gas_ventilator" x="' + (shift_symbol_energiebron) + '" y="' + (shifty + 35) + '"/>';
-                        break;
-                    case "Gas (atmosferisch)":
-                        outputstr += '<use xlink:href="#gas_atmosferisch" x="' + (shift_symbol_energiebron) + '" y="' + (shifty + 35) + '"/>';
-                        break;
-                    case "Elektriciteit":
-                        outputstr += '<use xlink:href="#bliksem" x="' + (shift_symbol_energiebron) + '" y="' + (shifty + 35) + '"/>';
-                        break;
-                    case "Vaste brandstof":
-                        outputstr += '<rect x="' + (shift_symbol_energiebron - 6) + '" y="' + (shifty + 29) + '" width="12" height="12" style="stroke:black;fill:black" />';
-                        break;
-                    case "Vloeibare brandstof":
-                        outputstr += '<circle cx="' + (shift_symbol_energiebron) + '" cy="' + (shifty + 35) + '" r="6" style="stroke:black;fill:black" />';
-                        break;
-                }
-                switch (this.keys[18][2]) {
-                    case "Verwarmend":
-                        outputstr += '<text x="' + (shift_symbol_warmtefunctie - 1) + '" y="' + (shifty + 36) + '" style="text-anchor:middle;dominant-baseline:middle" font-family="Arial, Helvetica, sans-serif" font-size="12">+</text>';
-                        break;
-                    case "Koelend":
-                        outputstr += '<text x="' + (shift_symbol_warmtefunctie - 1) + '" y="' + (shifty + 36) + '" style="text-anchor:middle;dominant-baseline:middle" font-family="Arial, Helvetica, sans-serif" font-size="12">-</text>';
-                        break;
-                    case "Verwarmend en koelend":
-                        outputstr += '<text x="' + (shift_symbol_warmtefunctie - 1) + '" y="' + (shifty + 36) + '" style="text-anchor:middle;dominant-baseline:middle" font-family="Arial, Helvetica, sans-serif" font-size="12">+/-</text>';
-                        break;
-                }
-                mySVG.xright = 60;
-                mySVG.yup += shifty;
-                //Place adres underneath
-                outputstr += this.addAddress(mySVG, shifty + 60, 15);
-                break;
-            case "Overspanningsbeveiliging":
-                outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-                outputstr += '<use xlink:href="#overspanningsbeveiliging" x="21" y="25"></use>';
-                mySVG.xright = 35;
-                outputstr += this.addAddress(mySVG, 55, 10);
                 break;
             case "Leeg":
             case "Aansluitpunt":
@@ -2598,6 +2444,119 @@ var Stoomoven = /** @class */ (function (_super) {
     };
     return Stoomoven;
 }(Electro_Item));
+var Stopcontact = /** @class */ (function (_super) {
+    __extends(Stopcontact, _super);
+    function Stopcontact(mylist) {
+        return _super.call(this, mylist) || this;
+    }
+    Stopcontact.prototype.resetKeys = function () {
+        this.clearKeys();
+        this.keys[0][2] = "Stopcontact"; // This is rather a formality as we should already have this at this stage
+        this.keys[1][2] = true; // Per default geaard
+        this.keys[2][2] = true; // Per default kinderveilig
+        this.keys[4][2] = "1"; // Per default 1 Stopcontact
+        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+        this.keys[16][2] = "3"; // Indien meerfasig is de default 3 fasen
+        this.keys[19][2] = false; // Per default niet met ingebouwde schakelaar
+        this.keys[20][2] = false; // Per default niet halfwaterdicht
+        this.keys[21][2] = false; // Per default niet meerfasig
+        this.keys[25][2] = false; // Indien meerfasig, per default niet met nul
+        this.keys[26][2] = false; // Per default niet in verdeelbord
+    };
+    Stopcontact.prototype.toHTML = function (mode, Parent) {
+        var output = this.toHTMLHeader(mode, Parent);
+        output += "&nbsp;Nr: " + this.stringToHTML(10, 5) + ", "
+            + "Geaard: " + this.checkboxToHTML(1) + ", "
+            + "Kinderveiligheid: " + this.checkboxToHTML(2) + " "
+            + "Halfwaterdicht: " + this.checkboxToHTML(20) + ", "
+            + "Meerfasig: " + this.checkboxToHTML(21) + ", ";
+        if (this.keys[21][2]) {
+            output += "Aantal fasen: " + this.selectToHTML(16, ["1", "2", "3"]) + ", "
+                + "Met nul: " + this.checkboxToHTML(25) + ", ";
+        }
+        ;
+        output += "Ingebouwde schakelaar: " + this.checkboxToHTML(19) + ", "
+            + "Aantal: " + this.selectToHTML(4, ["1", "2", "3", "4", "5", "6"]) + ", "
+            + "In verdeelbord: " + this.checkboxToHTML(26)
+            + ", Adres/tekst: " + this.stringToHTML(15, 5);
+        return (output);
+    };
+    Stopcontact.prototype.toSVG = function (hasChild) {
+        if (hasChild === void 0) { hasChild = false; }
+        var mySVG = new SVGelement();
+        var outputstr = "";
+        mySVG.xleft = 1; // Links voldoende ruimte voor een eventuele kring voorzien
+        mySVG.xright = 20; // We starten met breedte 20 (leidings links) en vullen later aan in functie van wat moet getekend worden
+        mySVG.yup = 25;
+        mySVG.ydown = 25;
+        var startx = 1; // Punt waar we aan het tekenen zijn. Schuift gaandeweg op
+        // Teken lijnen voor meerfasig stopcontact
+        if (this.keys[21][2]) {
+            mySVG.data += '<line x1="1" y1="25" x2="35" y2="25" stroke="black" />';
+            switch (this.keys[16][2]) { //faselijnen
+                case "1":
+                    mySVG.data += '<line x1="21" y1="35" x2="27" y2="15" stroke="black" />';
+                    break;
+                case "2":
+                    mySVG.data += '<line x1="16.5" y1="35" x2="22.5" y2="15" stroke="black" />'
+                        + '<line x1="22.5" y1="35" x2="28.5" y2="15" stroke="black" />';
+                    break;
+                case "3":
+                    mySVG.data += '<line x1="15" y1="35" x2="21" y2="15" stroke="black" />'
+                        + '<line x1="21" y1="35" x2="27" y2="15" stroke="black" />'
+                        + '<line x1="27" y1="35" x2="33" y2="15" stroke="black" />';
+                    break;
+                default:
+                    mySVG.data += '<line x1="21" y1="35" x2="27" y2="15" stroke="black" />';
+                    break;
+            }
+            if (this.keys[25][2]) { //nullijn
+                mySVG.data += '<line x1="39" y1="35" x2="45" y2="15" stroke="black" />'
+                    + '<circle cx="39" cy="35" r="2" fill="black" stroke="black" />';
+            }
+            startx += 34;
+            mySVG.xright += 34; //We schuiven alles 34 pixels op
+        }
+        // Teken ingebouwde schakelaar
+        if (this.keys[19][2]) {
+            mySVG.data += '<line x1="' + (startx + 0) + '" y1="25" x2="' + (startx + 11) + '" y2="25" stroke="black" />'
+                + '<line x1="' + (startx + 30) + '" y1="25" x2="' + (startx + 20) + '" y2="5" stroke="black" />'
+                + '<line x1="' + (startx + 20) + '" y1="5" x2="' + (startx + 15) + '" y2="7.5" stroke="black" />'
+                + '<line x1="' + (startx + 22) + '" y1="9" x2="' + (startx + 17) + '" y2="11.5" stroke="black" />';
+            startx += 10;
+            mySVG.xright += 10; //We schuiven alles 10 pixels op
+        }
+        // Teken alle stopcontacten, inclusief aarding en kinderveiligheid indien van toepassing
+        for (var i = 0; i < this.keys[4][2]; ++i) {
+            mySVG.data += '<use xlink:href="#stopcontact" x="' + startx + '" y="25"></use>';
+            if (this.keys[1][2])
+                mySVG.data += '<use xlink:href="#stopcontact_aarding" x="' + startx + '" y="25"></use>';
+            if (this.keys[2][2])
+                mySVG.data += '<use xlink:href="#stopcontact_kinderveilig" x="' + startx + '" y="25"></use>';
+            startx += 20;
+            mySVG.xright += 20;
+        }
+        // Teken kader indien in verdeelbord
+        if (this.keys[26][2]) {
+            mySVG.data += '<rect x="' + (mySVG.xright - this.keys[4][2] * 20 - 3 - (this.keys[19][2]) * 12) + '" y="3" width="' + (this.keys[4][2] * 20 + 6 + (this.keys[19][2]) * 12) + '" height="44" fill="none" style="stroke:black" />';
+            +'<line x1="' + (17 + (mySVG.xright - 20 + 3)) + '" y1="3" x2="' + (17 + (mySVG.xright - 20 + 3)) + '" y2="47" fill="none" style="stroke:black" />';
+        }
+        ;
+        // Teken halfwaterdicht indien van toepassing
+        if (this.keys[20][2])
+            mySVG.data += '<rect x="' + (22 + (this.keys[19][2]) * 10 + (this.keys[21][2]) * 34) + '" y="0" width="6" height="8" style="fill:rgb(255,255,255)" /><text x="' + (25 + (this.keys[19][2]) * 10 + (this.keys[21][2]) * 34) + '" y="8" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">h</text>';
+        // Indien het stopcontact een kind heeft, teken een streepje rechts
+        if (hasChild) {
+            mySVG.data += '<line x1="' + startx + '" y1="25" x2="' + (startx + 21) + '" y2="25" stroke="black" />';
+        }
+        ;
+        // Adres helemaal onderaan plaatsen
+        mySVG.data += this.addAddress(mySVG, 60, 15);
+        mySVG.data += "\n";
+        return (mySVG);
+    };
+    return Stopcontact;
+}(Electro_Item));
 var USB_lader = /** @class */ (function (_super) {
     __extends(USB_lader, _super);
     function USB_lader(mylist) {
@@ -2951,6 +2910,9 @@ var Hierarchical_List = /** @class */ (function () {
                 break;
             case 'Stoomoven':
                 tempval = new Stoomoven(structure);
+                break;
+            case 'Stopcontact':
+                tempval = new Stopcontact(structure);
                 break;
             case 'USB lader':
                 tempval = new USB_lader(structure);

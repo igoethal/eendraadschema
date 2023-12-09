@@ -503,21 +503,6 @@ class Electro_Item extends List_Item {
         output += ", Aantal knoppen per armatuur: " + this.selectToHTML(13,["1","2","3","4","5","6","7","8"]);
         output += ", Adres/tekst: " + this.stringToHTML(15,5);
         break;
-      case "Stopcontact":
-        output += "&nbsp;Nr: " + this.stringToHTML(10,5) + ", ";
-        output += "Geaard: " + this.checkboxToHTML(1) + ", ";
-        output += "Kinderveiligheid: " + this.checkboxToHTML(2) + " ";
-        output += "Halfwaterdicht: " + this.checkboxToHTML(20) + ", ";
-        output += "Meerfasig: " + this.checkboxToHTML(21) + ", ";
-        if (this.keys[21][2]) {
-          output += "Aantal fasen: " + this.selectToHTML(16,["1","2","3"]) + ", ";
-          output += "Met nul: " + this.checkboxToHTML(25) + ", ";
-        };
-        output += "Ingebouwde schakelaar: " + this.checkboxToHTML(19) + ", ";
-        output += "Aantal: " + this.selectToHTML(4,["1","2","3","4","5","6"]) + ", ";
-        output += "In verdeelbord: " + this.checkboxToHTML(26);
-        output += ", Adres/tekst: " + this.stringToHTML(15,5);
-        break;
       case "Lichtpunt":
         output += "&nbsp;Nr: " + this.stringToHTML(10,5) + ", ";
         output += "Type: " + this.selectToHTML(16,["standaard", "TL", "spot", "led" /*, "Spot", "Led", "Signalisatielamp" */]) + ", ";
@@ -1099,64 +1084,6 @@ class Electro_Item extends List_Item {
     mySVG.ydown = 25;
 
     switch (this.keys[0][2]) {
-      case "Stopcontact":
-        var startx: number = 1;
-        mySVG.xright = 0;
-        if (this.keys[21][2]) { //Meerfasig
-          outputstr += '<line x1="1" y1="25" x2="35" y2="25" stroke="black" />';
-          startx += 34;
-          mySVG.xright += 34;
-          switch (this.keys[16][2]) {
-            case "1":
-              outputstr += '<line x1="21" y1="35" x2="27" y2="15" stroke="black" />';
-              break;
-            case "2":
-              outputstr += '<line x1="16.5" y1="35" x2="22.5" y2="15" stroke="black" />';
-              outputstr += '<line x1="22.5" y1="35" x2="28.5" y2="15" stroke="black" />';
-              break;
-            case "3":
-              outputstr += '<line x1="15" y1="35" x2="21" y2="15" stroke="black" />';
-              outputstr += '<line x1="21" y1="35" x2="27" y2="15" stroke="black" />';
-              outputstr += '<line x1="27" y1="35" x2="33" y2="15" stroke="black" />';
-              break;
-            default:
-              outputstr += '<line x1="21" y1="35" x2="27" y2="15" stroke="black" />';
-              break;
-          }
-          if (this.keys[25][2]) {
-            outputstr += '<line x1="39" y1="35" x2="45" y2="15" stroke="black" />';
-            outputstr += '<circle cx="39" cy="35" r="2" fill="black" stroke="black" />';
-          }
-        }
-        if (this.keys[19][2]) { //Met ingebouwde schakelaar
-          outputstr += '<line x1="' + (startx + 0) + '" y1="25" x2="' + (startx + 11) + '" y2="25" stroke="black" />';
-          outputstr += '<line x1="' + (startx + 30) + '" y1="25" x2="' + (startx + 20) + '" y2="5" stroke="black" />';
-          outputstr += '<line x1="' + (startx + 20) + '" y1="5" x2="' + (startx + 15) + '" y2="7.5" stroke="black" />';
-          outputstr += '<line x1="' + (startx + 22) + '" y1="9" x2="' + (startx + 17) + '" y2="11.5" stroke="black" />';
-          startx += 10;
-          mySVG.xright += 10;
-        }
-        for (var i=0; i<this.getKey("aantal"); i++) {
-          outputstr += '<use xlink:href="#stopcontact" x="' + startx + '" y="25"></use>';
-          if (this.getKey("geaard")) outputstr += '<use xlink:href="#stopcontact_aarding" x="' + startx + '" y="25"></use>';
-          if (this.getKey("kinderveiligheid")) outputstr += '<use xlink:href="#stopcontact_kinderveilig" x="' + startx + '" y="25"></use>';
-          startx += 20;
-        }
-        mySVG.xright += 20 + this.getKey("aantal")*20;
-        //-- Check in verdeelbord --
-        if (this.keys[26][2]) {
-          outputstr += '<rect x="' + (mySVG.xright - this.getKey("aantal") * 20 - 3 - (this.keys[19][2]) * 12) + '" y="3" width="' + (this.getKey("aantal")*20 + 6 + (this.keys[19][2]) * 12) + '" height="44" fill="none" style="stroke:black" />';
-          outputstr += '<line x1="' + (17 + (mySVG.xright-20+3)) + '" y1="3" x2="' + (17 + (mySVG.xright-20+3)) + '" y2="47" fill="none" style="stroke:black" />';
-        };  
-        //-- check halfwaterdicht--
-        if (this.keys[20][2]) outputstr += '<rect x="' + (22+(this.keys[19][2])*10+(this.keys[21][2])*34) + '" y="0" width="6" height="8" style="fill:rgb(255,255,255)" /><text x="' + (25+(this.keys[19][2])*10+(this.keys[21][2])*34) + '" y="8" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">h</text>';
-        //-- check any childs? --
-        if (hasChild) {
-          outputstr += '<line x1="'+startx+'" y1="25" x2="'+(startx+21)+'" y2="25" stroke="black" />';
-        };
-        //-- Plaats adres onderaan --
-        outputstr += this.addAddress(mySVG,60,15);
-        break;
       case "Drukknop":
         var printstr:string = "";
         outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';

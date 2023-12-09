@@ -184,6 +184,7 @@ class Hierarchical_List {
       case 'Omvormer': tempval = new Omvormer(structure); break;
       case 'Overspanningsbeveiliging': tempval = new Overspanningsbeveiliging(structure); break;
       case 'Stoomoven': tempval = new Stoomoven(structure); break;
+      case 'Stopcontact': tempval = new Stopcontact(structure); break;
       case 'USB lader': tempval = new USB_lader(structure); break;
       case 'Vaatwasmachine': tempval = new Vaatwasmachine(structure); break;
       case 'Ventilator': tempval = new Ventilator(structure); break;
