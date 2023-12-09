@@ -518,14 +518,6 @@ class Electro_Item extends List_Item {
         output += "In verdeelbord: " + this.checkboxToHTML(26);
         output += ", Adres/tekst: " + this.stringToHTML(15,5);
         break;
-      case "Ketel":
-        output += "&nbsp;Nr: " + this.stringToHTML(10,5);
-        output += ", Type: " + this.selectToHTML(16,["", "Met boiler", "Met tapspiraal", "Warmtekrachtkoppeling", "Warmtewisselaar"]);
-        output += ", Energiebron: " + this.selectToHTML(17,["", "Elektriciteit", "Gas (atmosferisch)", "Gas (ventilator)", "Vaste brandstof", "Vloeibare brandstof"]);
-        output += ", Warmte functie: " + this.selectToHTML(18,["", "Koelend", "Verwarmend", "Verwarmend en koelend"]);
-        output += ", Aantal: " + this.selectToHTML(4,["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]);
-        output += ", Adres/tekst: " + this.stringToHTML(15,5);
-        break;
       case "Lichtpunt":
         output += "&nbsp;Nr: " + this.stringToHTML(10,5) + ", ";
         output += "Type: " + this.selectToHTML(16,["standaard", "TL", "spot", "led" /*, "Spot", "Led", "Signalisatielamp" */]) + ", ";
@@ -1213,80 +1205,6 @@ class Electro_Item extends List_Item {
         } else {
           outputstr += this.addAddress(mySVG,49,5);
         }
-        break;
-      case "Ketel":
-        var shifty = 0; if (this.keys[4][2]>1) {
-          shifty = 15;
-          outputstr += '<text x="41" y="12" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">x' + htmlspecialchars(this.keys[4][2]) + '</text>'
-        }
-        outputstr += '<line x1="1" y1="' + (shifty+25) + '" x2="21" y2="' + (shifty+25) + '" stroke="black"></line>';
-        outputstr += '<use xlink:href="#verbruiker" x="21" y="' + (shifty+25) + '"></use>';
-        switch (this.keys[16][2]) {
-          case "Met tapspiraal":
-            outputstr += '<line x1="21" y1="' + (shifty+15) + '" x2="61" y2="' + (shifty+7) + '" stroke="black" />';
-            outputstr += '<line x1="21" y1="' + (shifty+15) + '" x2="61" y2="' + (shifty+23) + '" stroke="black" />';
-            break;
-          case "Met boiler":
-            outputstr += '<rect x="31" y="' + (shifty+10) + '" width="20" height="10" stroke="black" fill="white" />';
-            break;
-          case "Warmtewisselaar":
-            outputstr += '<line x1="26" y1="' + (shifty+0) + '" x2="26" y2="' + (shifty+5) + '" stroke="black" />';
-            outputstr += '<line x1="56" y1="' + (shifty+0) + '" x2="56" y2="' + (shifty+5) + '" stroke="black" />';
-            outputstr += '<line x1="26" y1="' + (shifty+5) + '" x2="33.5" y2="' + (shifty+23) + '" stroke="black" />';
-            outputstr += '<line x1="56" y1="' + (shifty+5) + '" x2="48.5" y2="' + (shifty+23) + '" stroke="black" />';
-            outputstr += '<line x1="33.5" y1="' + (shifty+23) + '" x2="41" y2="' + (shifty+14) + '" stroke="black" />';
-            outputstr += '<line x1="48.5" y1="' + (shifty+23) + '" x2="41" y2="' + (shifty+14) + '" stroke="black" />';
-            break;
-          case "Warmtekrachtkoppeling":
-            outputstr += '<circle cx="41" cy="' + (shifty+16) + '" r="7" style="stroke:black;fill:none" />';
-            outputstr += '<text x="41" y="' + (shifty+17) + '" style="text-anchor:middle;dominant-baseline:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">G</text>'
-            break;
-        }
-        //Waar gaan we de andere symbolen plaatsen, indien slechts 1, midden onderaan, zoniet links en rechts
-        var shift_symbol_energiebron = 41;
-        var shift_symbol_warmtefunctie = 41;
-        if ((this.keys[17][2] != "") && (this.keys[18][2] != "")) {
-          var shift_symbol_energiebron = 31;
-          var shift_symbol_warmtefunctie = 51;
-        }
-        switch (this.keys[17][2]) {
-          case "Gas (ventilator)":
-            outputstr += '<use xlink:href="#gas_ventilator" x="' + (shift_symbol_energiebron) + '" y="' + (shifty+35) + '"/>';
-            break;
-          case "Gas (atmosferisch)":
-            outputstr += '<use xlink:href="#gas_atmosferisch" x="' + (shift_symbol_energiebron) + '" y="' + (shifty+35) + '"/>';
-            break;
-          case "Elektriciteit":
-            outputstr += '<use xlink:href="#bliksem" x="' + (shift_symbol_energiebron) + '" y="' + (shifty+35) + '"/>';
-            break;
-          case "Vaste brandstof":
-            outputstr += '<rect x="' + (shift_symbol_energiebron-6) + '" y="' + (shifty+29) + '" width="12" height="12" style="stroke:black;fill:black" />';
-            break;
-          case "Vloeibare brandstof":
-            outputstr += '<circle cx="' + (shift_symbol_energiebron) + '" cy="' + (shifty+35) + '" r="6" style="stroke:black;fill:black" />';
-            break;
-        }
-        switch (this.keys[18][2]) {
-          case "Verwarmend":
-            outputstr += '<text x="' + (shift_symbol_warmtefunctie-1) + '" y="' + (shifty+36) + '" style="text-anchor:middle;dominant-baseline:middle" font-family="Arial, Helvetica, sans-serif" font-size="12">+</text>'
-            break;
-          case "Koelend":
-            outputstr += '<text x="' + (shift_symbol_warmtefunctie-1) + '" y="' + (shifty+36) + '" style="text-anchor:middle;dominant-baseline:middle" font-family="Arial, Helvetica, sans-serif" font-size="12">-</text>'
-            break;
-          case "Verwarmend en koelend":
-            outputstr += '<text x="' + (shift_symbol_warmtefunctie-1) + '" y="' + (shifty+36) + '" style="text-anchor:middle;dominant-baseline:middle" font-family="Arial, Helvetica, sans-serif" font-size="12">+/-</text>'
-            break;
-        }
-        mySVG.xright = 60;
-        mySVG.yup += shifty;
-        //Place adres underneath
-        outputstr += this.addAddress(mySVG,shifty+60,15);
-        break;
-      case "Overspanningsbeveiliging":
-        outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-        outputstr += '<use xlink:href="#overspanningsbeveiliging" x="21" y="25"></use>';
-        mySVG.xright = 35;
-        outputstr += this.addAddress(mySVG,55,10);
         break;
       case "Leeg":
       case "Aansluitpunt":
