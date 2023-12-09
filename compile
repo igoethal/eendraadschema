@@ -2,8 +2,10 @@
 
 cd src
 
-tsc general.ts SVGelement.ts List_Item.ts \
-    Electro_Item.ts Bel.ts Batterij.ts Boiler.ts Diepvriezer.ts Droogkast.ts \
+tsc general.ts SVGelement.ts \
+    List_Item/List_Item.ts \
+    List_Item/Electro_Item.ts \
+    List_Item/*.ts \
     Properties.ts SVGSymbols.ts Hierarchical_List.ts Print_Table.ts config.ts ../prop/prop_scripts.ts main.ts --outfile swap.js 
 
 cat GPL3.js swap.js > eendraadschema.js

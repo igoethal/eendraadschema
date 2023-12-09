@@ -1572,12 +1572,6 @@ var Electro_Item = /** @class */ (function (_super) {
                 mySVG.xright = 60;
                 outputstr += this.addAddress(mySVG, 60, 15);
                 break;
-            case "Elektrische oven":
-                outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-                outputstr += '<use xlink:href="#oven" x="21" y="25"></use>';
-                mySVG.xright = 60;
-                outputstr += this.addAddress(mySVG, 60, 15);
-                break;
             case "EV lader":
                 outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
                 outputstr += '<use xlink:href="#EVlader" x="21" y="25"></use>';
@@ -2112,38 +2106,6 @@ var Electro_Item = /** @class */ (function (_super) {
     };
     return Electro_Item;
 }(List_Item));
-var Bel = /** @class */ (function (_super) {
-    __extends(Bel, _super);
-    function Bel(mylist) {
-        return _super.call(this, mylist) || this;
-    }
-    Bel.prototype.resetKeys = function () {
-        this.clearKeys();
-        this.keys[0][2] = "Bel"; // This is rather a formality as we should already have this at this stage
-        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
-    };
-    Bel.prototype.toHTML = function (mode, Parent) {
-        var output = this.toHTMLHeader(mode, Parent);
-        output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
-        output += ", Adres/tekst: " + this.stringToHTML(15, 5);
-        return (output);
-    };
-    Bel.prototype.toSVG = function (hasChild) {
-        if (hasChild === void 0) { hasChild = false; }
-        var mySVG = new SVGelement();
-        var outputstr = "";
-        mySVG.xleft = 1; // foresee at least some space for the conductor
-        mySVG.xright = 40;
-        mySVG.yup = 25;
-        mySVG.ydown = 25;
-        mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
-            + '<use xlink:href="#bel" x="21" y="25"></use>';
-        mySVG.data += this.addAddress(mySVG, 58, 14);
-        mySVG.data += "\n";
-        return (mySVG);
-    };
-    return Bel;
-}(Electro_Item));
 var Batterij = /** @class */ (function (_super) {
     __extends(Batterij, _super);
     function Batterij(mylist) {
@@ -2175,6 +2137,38 @@ var Batterij = /** @class */ (function (_super) {
         return (mySVG);
     };
     return Batterij;
+}(Electro_Item));
+var Bel = /** @class */ (function (_super) {
+    __extends(Bel, _super);
+    function Bel(mylist) {
+        return _super.call(this, mylist) || this;
+    }
+    Bel.prototype.resetKeys = function () {
+        this.clearKeys();
+        this.keys[0][2] = "Bel"; // This is rather a formality as we should already have this at this stage
+        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+    };
+    Bel.prototype.toHTML = function (mode, Parent) {
+        var output = this.toHTMLHeader(mode, Parent);
+        output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
+        output += ", Adres/tekst: " + this.stringToHTML(15, 5);
+        return (output);
+    };
+    Bel.prototype.toSVG = function (hasChild) {
+        if (hasChild === void 0) { hasChild = false; }
+        var mySVG = new SVGelement();
+        var outputstr = "";
+        mySVG.xleft = 1; // foresee at least some space for the conductor
+        mySVG.xright = 40;
+        mySVG.yup = 25;
+        mySVG.ydown = 25;
+        mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
+            + '<use xlink:href="#bel" x="21" y="25"></use>';
+        mySVG.data += this.addAddress(mySVG, 58, 14);
+        mySVG.data += "\n";
+        return (mySVG);
+    };
+    return Bel;
 }(Electro_Item));
 var Boiler = /** @class */ (function (_super) {
     __extends(Boiler, _super);
@@ -2280,6 +2274,38 @@ var Droogkast = /** @class */ (function (_super) {
         return (mySVG);
     };
     return Droogkast;
+}(Electro_Item));
+var Elektrische_oven = /** @class */ (function (_super) {
+    __extends(Elektrische_oven, _super);
+    function Elektrische_oven(mylist) {
+        return _super.call(this, mylist) || this;
+    }
+    Elektrische_oven.prototype.resetKeys = function () {
+        this.clearKeys();
+        this.keys[0][2] = "Elektrische oven"; // This is rather a formality as we should already have this at this stage
+        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+    };
+    Elektrische_oven.prototype.toHTML = function (mode, Parent) {
+        var output = this.toHTMLHeader(mode, Parent);
+        output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
+        output += ", Adres/tekst: " + this.stringToHTML(15, 5);
+        return (output);
+    };
+    Elektrische_oven.prototype.toSVG = function (hasChild) {
+        if (hasChild === void 0) { hasChild = false; }
+        var mySVG = new SVGelement();
+        var outputstr = "";
+        mySVG.xleft = 1; // foresee at least some space for the conductor
+        mySVG.xright = 60;
+        mySVG.yup = 25;
+        mySVG.ydown = 25;
+        mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
+            + '<use xlink:href="#oven" x="21" y="25"></use>';
+        mySVG.data += this.addAddress(mySVG, 60, 15);
+        mySVG.data += "\n";
+        return (mySVG);
+    };
+    return Elektrische_oven;
 }(Electro_Item));
 var Properties = /** @class */ (function () {
     function Properties() {
@@ -2466,6 +2492,9 @@ var Hierarchical_List = /** @class */ (function () {
             case 'Droogkast':
                 tempval = new Droogkast(structure);
                 break;
+            case 'Elektrische oven':
+                tempval = new Elektrische_oven(structure);
+                break;
             default: tempval = new Electro_Item(structure);
         }
         tempval.keys[0][2] = electroType;
@@ -2594,7 +2623,6 @@ var Hierarchical_List = /** @class */ (function () {
     //-----------------------------------------------------
     Hierarchical_List.prototype.clone = function (my_id, parent_id) {
         //-- First find the ordinal number of the current location and the desired location --
-        //   Also look for the original length of the structure
         var currentOrdinal = this.getOrdinalById(my_id);
         //-- Then create a clone of the object and assign the correct parent_id
         if (arguments.length < 2) {

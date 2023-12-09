@@ -173,6 +173,7 @@ class Hierarchical_List {
       case 'Boiler': tempval = new Boiler(structure); break;
       case 'Diepvriezer': tempval = new Diepvriezer(structure); break;
       case 'Droogkast': tempval = new Droogkast(structure); break; 
+      case 'Elektrische oven': tempval = new Elektrische_oven(structure); break; 
       default: tempval = new Electro_Item(structure);
     }
     tempval.keys[0][2] = electroType;

@@ -1234,12 +1234,6 @@ class Electro_Item extends List_Item {
         mySVG.xright = 60;
         outputstr += this.addAddress(mySVG,60,15);
         break;
-      case "Elektrische oven":
-        outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-        outputstr += '<use xlink:href="#oven" x="21" y="25"></use>';
-        mySVG.xright = 60;
-        outputstr += this.addAddress(mySVG,60,15);
-        break;
       case "EV lader":
         outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
         outputstr += '<use xlink:href="#EVlader" x="21" y="25"></use>';
