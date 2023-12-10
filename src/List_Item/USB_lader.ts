@@ -31,7 +31,7 @@ class USB_lader extends Electro_Item {
         }
 
         mySVG.xleft = 1; // Links voldoende ruimte voor een eventuele kring voorzien
-        mySVG.xright = 80;
+        mySVG.xright = 79;
         mySVG.yup = 25 + shifty;
         mySVG.ydown = 25;
 

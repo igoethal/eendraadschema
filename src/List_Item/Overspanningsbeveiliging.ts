@@ -22,7 +22,7 @@ class Overspanningsbeveiliging extends Electro_Item {
         let outputstr:string = "";
 
         mySVG.xleft = 1; // foresee at least some space for the conductor
-        mySVG.xright = 35;
+        mySVG.xright = 34;
         mySVG.yup = 25;
         mySVG.ydown = 25;
 

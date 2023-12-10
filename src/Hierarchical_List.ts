@@ -168,6 +168,8 @@ class Hierarchical_List {
     //Create the object
     let tempval;
     switch (electroType) {
+      case 'Aansluitpunt': tempval = new Aansluitpunt(structure); break;
+      case 'Aftakdoos': tempval = new Aftakdoos(structure); break;
       case 'Batterij': tempval = new Batterij(structure); break;
       case 'Bel': tempval = new Bel(structure); break;
       case 'Boiler': tempval = new Boiler(structure); break;
@@ -190,6 +192,7 @@ class Hierarchical_List {
       case 'Vaatwasmachine': tempval = new Vaatwasmachine(structure); break;
       case 'Ventilator': tempval = new Ventilator(structure); break;
       case 'Wasmachine': tempval = new Wasmachine(structure); break;
+      case 'Zonnepaneel': tempval = new Zonnepaneel(structure); break;
       default: tempval = new Electro_Item(structure);
     }
     tempval.keys[0][2] = electroType;

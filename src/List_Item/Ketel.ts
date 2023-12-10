@@ -24,7 +24,6 @@ class Ketel extends Electro_Item {
 
     toSVG(hasChild: Boolean = false) {
         let mySVG:SVGelement = new SVGelement();
-        let outputstr:string = "";
 
         // Alles naar beneden schuiven als we het aantal laders boven het symbool willen plaatsen
         var shifty = 0;
@@ -34,7 +33,7 @@ class Ketel extends Electro_Item {
         }
 
         mySVG.xleft = 1; // Links voldoende ruimte voor een eventuele kring voorzien
-        mySVG.xright = 60;
+        mySVG.xright = 59;
         mySVG.yup = 25 + shifty;
         mySVG.ydown = 25;
 

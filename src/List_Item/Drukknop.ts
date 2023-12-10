@@ -34,7 +34,7 @@ class Drukknop extends Electro_Item {
         
 
         mySVG.xleft = 1; // Links voldoende ruimte voor een eventuele kring voorzien
-        mySVG.xright = 44; 
+        mySVG.xright = 43; 
         mySVG.yup = 25;
         mySVG.ydown = 25;
 
