@@ -23,6 +23,20 @@ class List_Item {
       return(2^24);
     }
 
+    getNumChilds() : number {
+        var numChilds = 0;
+        if (this.sourcelist != null) {
+            for (let i=0; i<this.sourcelist.data.length; ++i) {
+                if (this.sourcelist.data[i].parent === this.id) numChilds++;
+            }  
+        }
+        return(numChilds);
+    }
+
+    hasChild() : boolean {
+        return(this.getNumChilds()>0);
+    }
+
     setKey(key: string, setvalue: any) {
       for (var i: number = 0; i<this.keys.length; i++) {
         if (this.keys[i][0]==key) {

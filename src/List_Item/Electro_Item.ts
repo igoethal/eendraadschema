@@ -31,7 +31,7 @@ class Electro_Item extends List_Item {
       //Indien stopcontact, select1 is het aantal fasen
     this.keys.push(["select2","SELECT","standaard"]); //17, algemeen veld
       //Indien lichtpunt, select2 is de selector voor het type noodverlichting (indien aanwezig)
-      //Indien vrije tekst kan "links", "centreer", "rechts" zijn
+      //Indien vrije tekst of verbruiker, kan "links", "centreer", "rechts" zijn
       //Indien differentieel of differentieelautomaat (in kring of aansluiting), kan type "", "A", of "B" zijn
       //Indien automaat (in kring of aansluiting), kan curve "", "A", "B", of "C" zijn
     this.keys.push(["select3","SELECT","standaard"]); //18, algemeen veld
@@ -40,12 +40,12 @@ class Electro_Item extends List_Item {
       //Indien lichtpunt, bool1 is de selector voor wandverlichting of niet
       //Indien drukknop, bool1 is de selector voor afgeschermd of niet
       //Indien schakelaar/lichtcircuit, bool1 is de selector voor signalisatielamp of niet
-      //Indien vrije tekst, bool1 is de selector voor vet
+      //Indien vrije tekst of verbruiker, bool1 is de selector voor vet
       //Indien stopcontact, bool1 is de selector voor ingebouwde schakelaar
       //Indien domotica gestuurde verbruiker, bool1 is de selector voor draadloos
     this.keys.push(["bool2","BOOLEAN",false]); //20, algemeen veld
       //Indien lichtpunt, schakelaar, drukknop of stopcontact, bool2 is de selector voor halfwaterdicht of niet
-      //Indien vrije tekst, bool2 is de selector voor schuin
+      //Indien vrije tekst of verbruiker, bool2 is de selector voor schuin
       //Indien ketel, bool2 is de selector voor energiebron
       //Indien kring, bool2 is de selector voor selectieve differentieel
       //Indien stopcontact, bool2 is de selector voor halfwaterdicht
@@ -53,14 +53,14 @@ class Electro_Item extends List_Item {
     this.keys.push(["bool3","BOOLEAN",false]); //21, algemeen veld
       //Indien lichtpunt, bool3 is de selector voor ingebouwde schakelaar of niet
       //Indien schakelaar of drukknop, bool3 is de selector voor verklikkerlamp of niet
-      //Indien vrije tekst, bool3 is de selector voor warmtefunctie
+      //Indien ******, bool3 is de selector voor warmtefunctie
       //Indien stopcontact, bool3 is de selector voor meerfasig
       //Indien domotica gestuurde verbruiker, bool3 is de selector voor geprogrammeerd
     this.keys.push(["string1","STRING",""]); //22, algemeen veld
-      //Indien vrije tekst, breedte van het veld
+      //Indien vrije tekst of verbruiker, breedte van het veld
       //Indien vrije ruimte, breede van de ruimte
     this.keys.push(["string2","STRING",""]); //23, algemeen veld
-      //Indien vrije tekst, het adres-veld (want reeds gebruikt voor de tekst zelf)
+      //Indien vrije tekst of verbruiker, het adres-veld (want reeds gebruikt voor de tekst zelf)
       //Indien aansluiting, hier kan ook een extra naam voor de aansluiting staan
     this.keys.push(["string3","STRING",""]); //24, algemeen veld
     this.keys.push(["bool4","BOOLEAN",false]); //25, algemeen veld
@@ -94,15 +94,15 @@ class Electro_Item extends List_Item {
           break;
         }
         case "Kring": {
-          consumers = ["", "Aansluiting", "Bord", "Domotica", "Domotica gestuurde verbruiker", "Kring", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
+          consumers = ["", "Aansluiting", "Bord", "Domotica", "Domotica gestuurde verbruiker", "Kring", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
           break;
         }
         case "Meerdere verbruikers": {
-          consumers = ["", "Domotica", "Domotica gestuurde verbruiker", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
+          consumers = ["", "Domotica", "Domotica gestuurde verbruiker", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
           break;
         }
         case "Domotica gestuurde verbruiker": {
-          consumers = ["", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
+          consumers = ["", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
           break;
         }
         case "Aansluiting": {
@@ -110,7 +110,7 @@ class Electro_Item extends List_Item {
           break;
         }
         default: {
-          consumers = ["", "Aansluiting", "Domotica", "Domotica gestuurde verbruiker", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
+          consumers = ["", "Aansluiting", "Domotica", "Domotica gestuurde verbruiker", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
           break;
         }
       }
@@ -591,16 +591,6 @@ class Electro_Item extends List_Item {
       case "Vrije ruimte":
           output += "&nbsp;Breedte: " + this.stringToHTML(22,3);
           break;  
-      case "Vrije tekst":
-        output += "&nbsp;Nr: " + this.stringToHTML(10,5);
-        output += ", Tekst (nieuwe lijn = \"|\"): " + this.stringToHTML(15,10);
-        output += ", Type: " + this.selectToHTML(16,["","verbruiker","zonder kader"]);
-        output += ", Horizontale alignering: " + this.selectToHTML(17,["links","centreer","rechts"]);
-        output += ", Vet: " + this.checkboxToHTML(19);
-        output += ", Schuin: " + this.checkboxToHTML(20);
-        output += ", Breedte: " + this.stringToHTML(22,3);
-        if (this.keys[16][2] != "zonder kader") output += ", Adres/tekst: " + this.stringToHTML(23,2);
-        break;
       case "Warmtepomp/airco":
         output += "&nbsp;Nr: " + this.stringToHTML(10,5);
         output += ", Warmte functie: " + this.selectToHTML(18,["", "Koelend", "Verwarmend", "Verwarmend en koelend"]);
@@ -1302,68 +1292,6 @@ class Electro_Item extends List_Item {
         mySVG.xright = width-1;
         outputstr += '<line x1="1" y1="25" x2="' + (width+1) + '" y2="25" stroke="black" />';
         outputstr += this.addAddress(mySVG,40,0,width/2-mySVG.xright/2-10,23);
-        break;
-      case "Vrije tekst":
-        var width;
-        if (isNaN(Number(this.keys[22][2]))) {
-          width = 40;
-        } else {
-          if (Number(this.keys[22][2] == "")) {
-            width = 40;
-          } else {
-            width = Math.max(Number(this.keys[22][2])*1,1);
-          }
-        }
-
-        var options:string = "";
-        if (this.keys[19][2]) options += ' font-weight="bold"';
-        if (this.keys[20][2]) options += ' font-style="italic"';
-
-        //--Tekst plaatsen --
-        var strlines = htmlspecialchars(this.getKey("commentaar")).split("|");
-        switch (this.keys[17][2]) {
-          case "links":
-            var outputstr_common = '<text style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-size="10" x="' + (20 + 5) + '" ';
-            for (i = 0; i<strlines.length; i++) {
-              var dispy = 28 - 7.5 * Math.min(1,strlines.length-1) + 15 * i;
-              outputstr += outputstr_common + ' y="' + dispy + '"' + options + '>' + strlines[i] + '</text>';
-            }
-            mySVG.xright = 20 + width;
-            break;
-          case "rechts":
-            var outputstr_common = '<text style="text-anchor:end" font-family="Arial, Helvetica, sans-serif" font-size="10" x="' + (20 + width - 4) + '" ';
-            for (i = 0; i<strlines.length; i++) {
-              var dispy = 28 - 7.5 * Math.min(1,strlines.length-1) + 15 * i;
-              outputstr += outputstr_common + ' y="' + dispy + '"' + options + '>' + strlines[i] + '</text>';
-            }
-            mySVG.xright = 20 + width;
-            break;
-          default:
-            var outputstr_common = '<text style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" x="' + (21 + width/2) + '" ';
-            for (i = 0; i<strlines.length; i++) {
-              var dispy = 28 - 7.5 * Math.min(1,strlines.length-1) + 15 * i;
-              outputstr += outputstr_common + ' y="' + dispy + '"' + options + '>' + strlines[i] + '</text>';
-            }
-            mySVG.xright = 20 + width;
-            break;
-        }
-
-        //--Extra plaats voorzien als nodig
-        var extraplace = 15 * Math.max(strlines.length-2,0);
-        mySVG.yup += extraplace / 2.0;
-        mySVG.ydown += extraplace / 2.0;
-
-        //-- Kader en adres tekenen --
-        switch (this.keys[16][2]) {
-          case "zonder kader":
-            break;
-          default:
-            outputstr += '<line x1="1" y1="' + (25 + extraplace/2.0) + '" x2="21" y2="' + (25 + extraplace/2.0) + '" stroke="black" />';
-            outputstr += '<rect x="21" y="5" width="' + width + '" height="' + (40 + extraplace) + '" fill="none" style="stroke:black" />';
-            outputstr += this.addAddress(mySVG,60+extraplace,15,width/2-(mySVG.xright-20)/2,23);
-            break;
-        }
-
         break;
       case "Warmtepomp/airco":
         var shifty = 0; if (this.keys[4][2]>1) {

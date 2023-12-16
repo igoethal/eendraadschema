@@ -528,12 +528,20 @@ function show2col() {
 function import_to_structure(mystring: string, redraw = true) {
 
   var text:string = "";
+  var version;
 
   //If first 3 bytes read "EDS", it is an entropy coded file
   //The first 3 bytes are EDS, the next 3 bytes indicate the version (currently only 001 implemented)
   //the next 4 bytes are decimal zeroes "0000"
   //thereafter is a base64 encoded data-structure
   if ( (mystring.charCodeAt(0)==69) && (mystring.charCodeAt(1)==68) && (mystring.charCodeAt(2)==83) ) { //recognize as EDS
+
+    // Determine versioning
+    // < 16/12/2023: Version 1
+    //   16/12/2023: Version 2 (Vrije tekst moet 20 pixels groter gemaakt worden om nog mooi in het schema te passen)
+    version = Number(mystring.substring(3,6));
+    if (isNaN(version)) version = 1;
+
     mystring = atob(mystring.substring(10,mystring.length))
     var buffer:Uint8Array = new Uint8Array(mystring.length);
     for (var i = 0; i < mystring.length; i++) {
@@ -603,9 +611,16 @@ function import_to_structure(mystring: string, redraw = true) {
     structure.data[i].id = mystructure.data[i].id;
     structure.data[i].indent = mystructure.data[i].indent;
     structure.data[i].collapsed = mystructure.data[i].collapsed;
-
-    //structure.adjustTypeByOrdinal(i,mystructure.data[i].keys[0][2]); //Make sure class is of the correct type
   }
+
+  // Make some corrections if it is an old version
+  if (version < 2) {
+    for (var i = 0; i < mystructure.length; i++) {
+      // Breedte van Vrije tekst velden met 20 verhogen sinds 16/12/2023
+      if ( (structure.data[i].keys[0][2] === "Vrije tekst") && (Number(structure.data[i].keys[22][2])>0) ) 
+        structure.data[i].keys[22][2] = String(Number(structure.data[i].keys[22][2]) + 20);
+    } 
+  }   
 
   //As we re-read the structure and it might be shorter then it once was (due to deletions) but we might still have the old high ID's, always take over the curid from the file
   structure.curid = mystructure.curid;
@@ -636,37 +651,7 @@ var importjson = function(event) {
   var text:string = "";
 
   reader.onload = function(){
-    var mystring = reader.result.toString();
-
-    //If first 3 bytes read "EDS", it is an entropy coded file
-    //The first 3 bytes are EDS, the next 3 bytes indicate the version (currently only 001 implemented)
-    //the next 4 bytes are decimal zeroes "0000"
-    //thereafter is a base64 encoded data-structure
-    if ( (mystring.charCodeAt(0)==69) && (mystring.charCodeAt(1)==68) && (mystring.charCodeAt(2)==83) ) { //recognize as EDS
-      mystring = atob(mystring.substring(10,mystring.length))
-      var buffer:Uint8Array = new Uint8Array(mystring.length);
-      for (var i = 0; i < mystring.length; i++) {
-        buffer[i-0] = mystring.charCodeAt(i);
-      }
-      try { //See if the text decoder works, if not, we will do it manually (slower)
-        let decoder = new TextDecoder("utf-8");
-        text = decoder.decode(pako.inflate(buffer));
-      } catch (error) { //Continue without the text decoder (old browsers)
-        var inflated:Uint8Array = pako.inflate(buffer);
-        text = "";
-        for (i=0; i<inflated.length; i++) {
-          text += String.fromCharCode(inflated[i])
-        }
-      }
-    }
-
-    //If first 3 bytes do not read "EDS", the file is in the old non encoded format and can be used as is
-    else {
-      text = mystring;
-    }
-
-    //code to transform input read into memory structure
-    import_to_structure(text);
+    import_to_structure(reader.result.toString());
   };
 
   reader.readAsText(input.files[0]);

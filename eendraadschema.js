@@ -200,6 +200,19 @@ var List_Item = /** @class */ (function () {
     List_Item.prototype.getMaxNumChilds = function (Parent) {
         return (2 ^ 24);
     };
+    List_Item.prototype.getNumChilds = function () {
+        var numChilds = 0;
+        if (this.sourcelist != null) {
+            for (var i = 0; i < this.sourcelist.data.length; ++i) {
+                if (this.sourcelist.data[i].parent === this.id)
+                    numChilds++;
+            }
+        }
+        return (numChilds);
+    };
+    List_Item.prototype.hasChild = function () {
+        return (this.getNumChilds() > 0);
+    };
     List_Item.prototype.setKey = function (key, setvalue) {
         for (var i = 0; i < this.keys.length; i++) {
             if (this.keys[i][0] == key) {
@@ -306,7 +319,7 @@ var Electro_Item = /** @class */ (function (_super) {
         //Indien stopcontact, select1 is het aantal fasen
         _this.keys.push(["select2", "SELECT", "standaard"]); //17, algemeen veld
         //Indien lichtpunt, select2 is de selector voor het type noodverlichting (indien aanwezig)
-        //Indien vrije tekst kan "links", "centreer", "rechts" zijn
+        //Indien vrije tekst of verbruiker, kan "links", "centreer", "rechts" zijn
         //Indien differentieel of differentieelautomaat (in kring of aansluiting), kan type "", "A", of "B" zijn
         //Indien automaat (in kring of aansluiting), kan curve "", "A", "B", of "C" zijn
         _this.keys.push(["select3", "SELECT", "standaard"]); //18, algemeen veld
@@ -315,12 +328,12 @@ var Electro_Item = /** @class */ (function (_super) {
         //Indien lichtpunt, bool1 is de selector voor wandverlichting of niet
         //Indien drukknop, bool1 is de selector voor afgeschermd of niet
         //Indien schakelaar/lichtcircuit, bool1 is de selector voor signalisatielamp of niet
-        //Indien vrije tekst, bool1 is de selector voor vet
+        //Indien vrije tekst of verbruiker, bool1 is de selector voor vet
         //Indien stopcontact, bool1 is de selector voor ingebouwde schakelaar
         //Indien domotica gestuurde verbruiker, bool1 is de selector voor draadloos
         _this.keys.push(["bool2", "BOOLEAN", false]); //20, algemeen veld
         //Indien lichtpunt, schakelaar, drukknop of stopcontact, bool2 is de selector voor halfwaterdicht of niet
-        //Indien vrije tekst, bool2 is de selector voor schuin
+        //Indien vrije tekst of verbruiker, bool2 is de selector voor schuin
         //Indien ketel, bool2 is de selector voor energiebron
         //Indien kring, bool2 is de selector voor selectieve differentieel
         //Indien stopcontact, bool2 is de selector voor halfwaterdicht
@@ -328,14 +341,14 @@ var Electro_Item = /** @class */ (function (_super) {
         _this.keys.push(["bool3", "BOOLEAN", false]); //21, algemeen veld
         //Indien lichtpunt, bool3 is de selector voor ingebouwde schakelaar of niet
         //Indien schakelaar of drukknop, bool3 is de selector voor verklikkerlamp of niet
-        //Indien vrije tekst, bool3 is de selector voor warmtefunctie
+        //Indien ******, bool3 is de selector voor warmtefunctie
         //Indien stopcontact, bool3 is de selector voor meerfasig
         //Indien domotica gestuurde verbruiker, bool3 is de selector voor geprogrammeerd
         _this.keys.push(["string1", "STRING", ""]); //22, algemeen veld
-        //Indien vrije tekst, breedte van het veld
+        //Indien vrije tekst of verbruiker, breedte van het veld
         //Indien vrije ruimte, breede van de ruimte
         _this.keys.push(["string2", "STRING", ""]); //23, algemeen veld
-        //Indien vrije tekst, het adres-veld (want reeds gebruikt voor de tekst zelf)
+        //Indien vrije tekst of verbruiker, het adres-veld (want reeds gebruikt voor de tekst zelf)
         //Indien aansluiting, hier kan ook een extra naam voor de aansluiting staan
         _this.keys.push(["string3", "STRING", ""]); //24, algemeen veld
         _this.keys.push(["bool4", "BOOLEAN", false]); //25, algemeen veld
@@ -367,15 +380,15 @@ var Electro_Item = /** @class */ (function (_super) {
                     break;
                 }
                 case "Kring": {
-                    consumers = ["", "Aansluiting", "Bord", "Domotica", "Domotica gestuurde verbruiker", "Kring", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
+                    consumers = ["", "Aansluiting", "Bord", "Domotica", "Domotica gestuurde verbruiker", "Kring", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
                     break;
                 }
                 case "Meerdere verbruikers": {
-                    consumers = ["", "Domotica", "Domotica gestuurde verbruiker", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
+                    consumers = ["", "Domotica", "Domotica gestuurde verbruiker", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
                     break;
                 }
                 case "Domotica gestuurde verbruiker": {
-                    consumers = ["", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
+                    consumers = ["", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
                     break;
                 }
                 case "Aansluiting": {
@@ -383,7 +396,7 @@ var Electro_Item = /** @class */ (function (_super) {
                     break;
                 }
                 default: {
-                    consumers = ["", "Aansluiting", "Domotica", "Domotica gestuurde verbruiker", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
+                    consumers = ["", "Aansluiting", "Domotica", "Domotica gestuurde verbruiker", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
                     break;
                 }
             }
@@ -848,17 +861,6 @@ var Electro_Item = /** @class */ (function (_super) {
                 break;
             case "Vrije ruimte":
                 output += "&nbsp;Breedte: " + this.stringToHTML(22, 3);
-                break;
-            case "Vrije tekst":
-                output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
-                output += ", Tekst (nieuwe lijn = \"|\"): " + this.stringToHTML(15, 10);
-                output += ", Type: " + this.selectToHTML(16, ["", "verbruiker", "zonder kader"]);
-                output += ", Horizontale alignering: " + this.selectToHTML(17, ["links", "centreer", "rechts"]);
-                output += ", Vet: " + this.checkboxToHTML(19);
-                output += ", Schuin: " + this.checkboxToHTML(20);
-                output += ", Breedte: " + this.stringToHTML(22, 3);
-                if (this.keys[16][2] != "zonder kader")
-                    output += ", Adres/tekst: " + this.stringToHTML(23, 2);
                 break;
             case "Warmtepomp/airco":
                 output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
@@ -1643,67 +1645,6 @@ var Electro_Item = /** @class */ (function (_super) {
                 mySVG.xright = width - 1;
                 outputstr += '<line x1="1" y1="25" x2="' + (width + 1) + '" y2="25" stroke="black" />';
                 outputstr += this.addAddress(mySVG, 40, 0, width / 2 - mySVG.xright / 2 - 10, 23);
-                break;
-            case "Vrije tekst":
-                var width;
-                if (isNaN(Number(this.keys[22][2]))) {
-                    width = 40;
-                }
-                else {
-                    if (Number(this.keys[22][2] == "")) {
-                        width = 40;
-                    }
-                    else {
-                        width = Math.max(Number(this.keys[22][2]) * 1, 1);
-                    }
-                }
-                var options = "";
-                if (this.keys[19][2])
-                    options += ' font-weight="bold"';
-                if (this.keys[20][2])
-                    options += ' font-style="italic"';
-                //--Tekst plaatsen --
-                var strlines = htmlspecialchars(this.getKey("commentaar")).split("|");
-                switch (this.keys[17][2]) {
-                    case "links":
-                        var outputstr_common = '<text style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-size="10" x="' + (20 + 5) + '" ';
-                        for (i = 0; i < strlines.length; i++) {
-                            var dispy = 28 - 7.5 * Math.min(1, strlines.length - 1) + 15 * i;
-                            outputstr += outputstr_common + ' y="' + dispy + '"' + options + '>' + strlines[i] + '</text>';
-                        }
-                        mySVG.xright = 20 + width;
-                        break;
-                    case "rechts":
-                        var outputstr_common = '<text style="text-anchor:end" font-family="Arial, Helvetica, sans-serif" font-size="10" x="' + (20 + width - 4) + '" ';
-                        for (i = 0; i < strlines.length; i++) {
-                            var dispy = 28 - 7.5 * Math.min(1, strlines.length - 1) + 15 * i;
-                            outputstr += outputstr_common + ' y="' + dispy + '"' + options + '>' + strlines[i] + '</text>';
-                        }
-                        mySVG.xright = 20 + width;
-                        break;
-                    default:
-                        var outputstr_common = '<text style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" x="' + (21 + width / 2) + '" ';
-                        for (i = 0; i < strlines.length; i++) {
-                            var dispy = 28 - 7.5 * Math.min(1, strlines.length - 1) + 15 * i;
-                            outputstr += outputstr_common + ' y="' + dispy + '"' + options + '>' + strlines[i] + '</text>';
-                        }
-                        mySVG.xright = 20 + width;
-                        break;
-                }
-                //--Extra plaats voorzien als nodig
-                var extraplace = 15 * Math.max(strlines.length - 2, 0);
-                mySVG.yup += extraplace / 2.0;
-                mySVG.ydown += extraplace / 2.0;
-                //-- Kader en adres tekenen --
-                switch (this.keys[16][2]) {
-                    case "zonder kader":
-                        break;
-                    default:
-                        outputstr += '<line x1="1" y1="' + (25 + extraplace / 2.0) + '" x2="21" y2="' + (25 + extraplace / 2.0) + '" stroke="black" />';
-                        outputstr += '<rect x="21" y="5" width="' + width + '" height="' + (40 + extraplace) + '" fill="none" style="stroke:black" />';
-                        outputstr += this.addAddress(mySVG, 60 + extraplace, 15, width / 2 - (mySVG.xright - 20) / 2, 23);
-                        break;
-                }
                 break;
             case "Warmtepomp/airco":
                 var shifty = 0;
@@ -2721,6 +2662,168 @@ var Ventilator = /** @class */ (function (_super) {
     };
     return Ventilator;
 }(Electro_Item));
+var Verbruiker = /** @class */ (function (_super) {
+    __extends(Verbruiker, _super);
+    function Verbruiker(mylist) {
+        return _super.call(this, mylist) || this;
+    }
+    Verbruiker.prototype.resetKeys = function () {
+        this.clearKeys();
+        this.keys[0][2] = "Verbruiker"; // This is rather a formality as we should already have this at this stage
+        this.keys[15][2] = ""; // Set Tekst itself to "" when the item is cleared
+        this.keys[17][2] = "centreer"; // Per default gecentreerd
+        this.keys[19][2] = false; // Per default niet vet
+        this.keys[20][2] = false; // Per default niet schuin
+        this.keys[22][2] = 60; // Per default 60 breed
+        this.keys[23][2] = ""; // Set Adres/tekst to "" when the item is cleared
+    };
+    Verbruiker.prototype.toHTML = function (mode, Parent) {
+        var output = this.toHTMLHeader(mode, Parent);
+        output += "&nbsp;Nr: " + this.stringToHTML(10, 5)
+            + ", Tekst (nieuwe lijn = \"|\"): " + this.stringToHTML(15, 30)
+            + ", Breedte: " + this.stringToHTML(22, 3)
+            + ", Vet: " + this.checkboxToHTML(19)
+            + ", Schuin: " + this.checkboxToHTML(20)
+            + ", Horizontale alignering: " + this.selectToHTML(17, ["links", "centreer", "rechts"])
+            + ", Adres/tekst: " + this.stringToHTML(23, 2);
+        return (output);
+    };
+    Verbruiker.prototype.toSVG = function (hasChild) {
+        if (hasChild === void 0) { hasChild = false; }
+        var mySVG = new SVGelement();
+        var strlines = htmlspecialchars(this.keys[15][2]).split("|");
+        // Breedte van de vrije tekst bepalen
+        var width = (isNaN(Number(this.keys[22][2])) || (this.keys[22][2] === "") ? 40 : Math.max(Number(this.keys[22][2]) * 1, 1));
+        var extraplace = 15 * Math.max(strlines.length - 2, 0);
+        mySVG.xleft = 1; // Links voldoende ruimte voor een eventuele kring voorzien
+        mySVG.xright = 20 + width;
+        mySVG.yup = 25 + extraplace / 2.0; // Wordt hieronder nog aangepast als er teveel lijnen tekst zijn
+        mySVG.ydown = 25 + extraplace / 2.0; // Wordt hieronder nog aangepast als er teveel lijnen tekst zijn
+        // Optionele parameters voor vet en italic uitlezen
+        var options = "";
+        if (this.keys[19][2])
+            options += ' font-weight="bold"';
+        if (this.keys[20][2])
+            options += ' font-style="italic"';
+        // Tekst plaatsen --
+        var outputstr_common;
+        switch (this.keys[17][2]) {
+            case "links":
+                outputstr_common = '<text style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-size="10" x="' + (20 + 5) + '" ';
+                break;
+            case "rechts":
+                outputstr_common = '<text style="text-anchor:end" font-family="Arial, Helvetica, sans-serif" font-size="10" x="' + (20 + width - 4) + '" ';
+                break;
+            default:
+                outputstr_common = '<text style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" x="' + (20 + 1 + width / 2) + '" ';
+                break;
+        }
+        for (var i = 0; i < strlines.length; i++) {
+            var dispy = 28 - 7.5 * Math.min(1, strlines.length - 1) + 15 * i;
+            mySVG.data += outputstr_common + ' y="' + dispy + '"' + options + '>' + strlines[i] + '</text>';
+        }
+        // Kader en adres tekenen --
+        mySVG.data += '<line x1="1" y1="' + (25 + extraplace / 2.0) + '" x2="21" y2="' + (25 + extraplace / 2.0) + '" stroke="black" />'
+            + '<rect x="21" y="5" width="' + width + '" height="' + (40 + extraplace) + '" fill="none" style="stroke:black" />'
+            + this.addAddress(mySVG, 60 + extraplace, 15, width / 2 - (mySVG.xright - 20) / 2, 23);
+        return (mySVG);
+    };
+    return Verbruiker;
+}(Electro_Item));
+var Vrije_tekst = /** @class */ (function (_super) {
+    __extends(Vrije_tekst, _super);
+    function Vrije_tekst(mylist) {
+        return _super.call(this, mylist) || this;
+    }
+    Vrije_tekst.prototype.resetKeys = function () {
+        this.clearKeys();
+        this.keys[0][2] = "Vrije tekst"; // This is rather a formality as we should already have this at this stage
+        this.keys[15][2] = ""; // Set Tekst itself to "" when the item is cleared
+        this.keys[16][2] = "zonder kader"; // Per default zonder kader, gebruik symbool "Verbruiker (tekst)" voor de default met kader
+        this.keys[17][2] = "links"; // Per default gecentreerd
+        this.keys[19][2] = false; // Per default niet vet
+        this.keys[20][2] = false; // Per default niet schuin
+        this.keys[22][2] = 60; // Per default 60 breed
+        this.keys[23][2] = ""; // Set Adres/tekst to "" when the item is cleared
+    };
+    Vrije_tekst.prototype.overrideKeys = function () {
+        if (this.keys[16][2] === "")
+            this.keys[16][2] = "zonder kader";
+        if (this.hasChild())
+            this.keys[16][2] = "verbruiker";
+    };
+    Vrije_tekst.prototype.toHTML = function (mode, Parent) {
+        this.overrideKeys();
+        var output = this.toHTMLHeader(mode, Parent);
+        output += "&nbsp;Nr: " + this.stringToHTML(10, 5)
+            + ", Tekst (nieuwe lijn = \"|\"): " + this.stringToHTML(15, 30)
+            + ", Breedte: " + this.stringToHTML(22, 3)
+            + ", Vet: " + this.checkboxToHTML(19)
+            + ", Schuin: " + this.checkboxToHTML(20)
+            + ", Horizontale alignering: " + this.selectToHTML(17, ["links", "centreer", "rechts"])
+            + ", Type: " + this.selectToHTML(16, ["verbruiker", "zonder kader"]);
+        if (this.keys[16][2] != "zonder kader")
+            output += ", Adres/tekst: " + this.stringToHTML(23, 2);
+        return (output);
+    };
+    Vrije_tekst.prototype.toSVG = function (hasChild) {
+        if (hasChild === void 0) { hasChild = false; }
+        var mySVG = new SVGelement();
+        var strlines = htmlspecialchars(this.keys[15][2]).split("|");
+        // Breedte van de vrije tekst bepalen
+        var width = (isNaN(Number(this.keys[22][2])) || (this.keys[22][2] === "") ? 40 : Math.max(Number(this.keys[22][2]) * 1, 1));
+        var extraplace = 15 * Math.max(strlines.length - 2, 0);
+        var shiftx;
+        if (this.keys[16][2] === "zonder kader") {
+            if (this.getParent().keys[0][2] === "Kring")
+                shiftx = 10;
+            else if (this.getParent().keys[0][2] === "Stopcontact")
+                shiftx = 0;
+            else
+                shiftx = 5;
+        }
+        else
+            shiftx = 20;
+        mySVG.xleft = 1; // Links voldoende ruimte voor een eventuele kring voorzien
+        mySVG.xright = shiftx + width;
+        mySVG.yup = 25 + extraplace / 2.0; // Wordt hieronder nog aangepast als er teveel lijnen tekst zijn
+        mySVG.ydown = 25 + extraplace / 2.0; // Wordt hieronder nog aangepast als er teveel lijnen tekst zijn
+        // Optionele parameters voor vet en italic uitlezen
+        var options = "";
+        if (this.keys[19][2])
+            options += ' font-weight="bold"';
+        if (this.keys[20][2])
+            options += ' font-style="italic"';
+        // Tekst plaatsen --
+        var outputstr_common;
+        switch (this.keys[17][2]) {
+            case "links":
+                outputstr_common = '<text style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-size="10" x="' + (shiftx + 5) + '" ';
+                break;
+            case "rechts":
+                outputstr_common = '<text style="text-anchor:end" font-family="Arial, Helvetica, sans-serif" font-size="10" x="' + (shiftx + width - 4) + '" ';
+                break;
+            default:
+                outputstr_common = '<text style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" x="' + (shiftx + 1 + width / 2) + '" ';
+                break;
+        }
+        for (var i = 0; i < strlines.length; i++) {
+            var dispy = 28 - 7.5 * Math.min(1, strlines.length - 1) + 15 * i;
+            mySVG.data += outputstr_common + ' y="' + dispy + '"' + options + '>' + strlines[i] + '</text>';
+        }
+        // Kader en adres tekenen --
+        switch (this.keys[16][2]) {
+            case "zonder kader": break;
+            default: //Wegens compatibiliteit met oudere versies van de software is het ontbreken van eender welke parameter een "met kader"
+                mySVG.data += '<line x1="1" y1="' + (25 + extraplace / 2.0) + '" x2="21" y2="' + (25 + extraplace / 2.0) + '" stroke="black" />'
+                    + '<rect x="21" y="5" width="' + width + '" height="' + (40 + extraplace) + '" fill="none" style="stroke:black" />'
+                    + this.addAddress(mySVG, 60 + extraplace, 15, width / 2 - (mySVG.xright - 20) / 2, 23);
+                break;
+        }
+        return (mySVG);
+    };
+    return Vrije_tekst;
+}(Electro_Item));
 var Wasmachine = /** @class */ (function (_super) {
     __extends(Wasmachine, _super);
     function Wasmachine(mylist) {
@@ -3029,6 +3132,12 @@ var Hierarchical_List = /** @class */ (function () {
             case 'Ventilator':
                 tempval = new Ventilator(structure);
                 break;
+            case 'Verbruiker':
+                tempval = new Verbruiker(structure);
+                break;
+            case 'Vrije tekst':
+                tempval = new Vrije_tekst(structure);
+                break;
             case 'Wasmachine':
                 tempval = new Wasmachine(structure);
                 break;
@@ -3285,14 +3394,21 @@ var Hierarchical_List = /** @class */ (function () {
         var lastChildOrdinal = 0;
         if ((myParent != 0) && ((this.data[this.getOrdinalById(myParent)]).getKey("type") == "Meerdere verbruikers")) {
             for (var i = 0; i < this.length; i++) {
-                //empty tekst at the end does not count as a valid last child
+                //empty tekst at the end does not count as a valid last child of meerdere verbruikers (zo vermijden we een streepje op het einde van het stopcontact)
                 if (this.active[i] && (this.data[i].keys[16][2] != "zonder kader") && (this.data[i].parent == myParent))
+                    lastChildOrdinal = i;
+            }
+        }
+        else if ((myParent != 0) && ((this.data[this.getOrdinalById(myParent)]).getKey("type") == "Kring")) {
+            for (var i = 0; i < this.length; i++) {
+                //Hier is vrije tekst wel effectieve verbruiker
+                if (this.active[i] && (this.data[i].parent == myParent))
                     lastChildOrdinal = i;
             }
         }
         else { //if not a child of meerdere verbruikers, we also allow the parent to be the lastChild
             for (var i = 0; i < this.length; i++) {
-                //empty tekst at the end does not count as a valid last child
+                //empty tekst at the end does not count as a valid last child of meerdere verbruikers (zo vermijden we een streepje op het einde van het stopcontact)
                 if (this.active[i] && (this.data[i].keys[16][2] != "zonder kader") && (this.data[i].parent == myParent))
                     lastChildOrdinal = i;
                 if (this.active[i] && (this.data[i].keys[16][2] != "zonder kader") && (includeparent == true) && (this.id[i] == myParent))
@@ -4637,9 +4753,9 @@ var Print_Table = /** @class */ (function () {
 var CONFIGPAGE_LEFT = "\n    <center>\n        <p><font size=\"+2\">\n          <b>Eendraadschema ontwerpen: </b>\n          Kies &eacute;&eacute;n van onderstaande voorbeelden om van te starten (u kan zelf kringen toevoegen achteraf) of\n          start van een leeg schema met voorgekozen aantal kringen (optie 3).\n        </font></p>\n      <font size=\"+1\">\n        <i>\n          <b>Tip: </b>Om de mogelijkheden van het programma te leren kennen is het vaak beter eerst een voorbeeldschema te\n          bekijken alvorens van een leeg schema te vertrekken.\n        </i>\n      </font>\n    </center><br><br>\n    <table border=\"1px\" style=\"border-collapse:collapse\" align=\"center\" width=\"100%\">\n      <tr>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Voorbeeld 1</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Voorbeeld 2</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Leeg schema</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Openen</b>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/example000.svg\" height=\"300px\"><br><br>\n          Eenvoudig schema, enkel stopcontacten en lichtpunten.\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/example001.svg\" height=\"300px\"><br><br>\n          Iets complexer schema met teleruptoren, verbruikers achter stopcontacten en gesplitste kringen.\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/gear.svg\" height=\"100px\"><br><br>\n";
 var CONFIGPAGE_RIGHT = "\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/import_icon.svg\" height=\"100px\"><br><br>\n          Open een schema dat u eerder heeft opgeslagen op uw computer (EDS-bestand). Enkel bestanden aangemaakt na 12 juli 2019 worden herkend.\n          <br><br>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"load_example(0)\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"load_example(1)\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"read_settings()\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"importclicked()\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n      </tr>\n    </table>\n  ";
 var CONFIGPRINTPAGE = "\n<div>\n</div>\n<br>\n";
-var EXAMPLE0 = "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";
-var EXAMPLE1 = "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";
-var EXAMPLE_DEFAULT = "EDS0010000eJztWutv2zYQ/1cEfp3i2FLSD8YwNFmDoMhraDJ3aFAEtHSWWfEhkJTdpMj/vjv6Jc92gGxr0IeMxCDvyHvxfnck4C9Mgi78mPUPYpZzz1n/9gsTOev3YlZxC9qzfjdmQueLYWak5JUDXDPi0kHMSrh3uO+W+fsKWMyuT85Pfr/BwRHXTtbCC12wj/EtK4BzmyPj+Orq/OToksXe1kCckhTYCQgpijGIrWt4ltWqltwLaLKDEYHPteeyoT8hqhTZ2JcWTbirzEr60kbQJcjACSZO0E2BOozdquMBSiBZTQm5GI2AIiUAZBDCVQWWFyEWN+/eXp6y+NVhcJMPQTaoLPncexW2aM5VkxGIa5LvphS8psy0210KvUPvp/AgiidCkzSt7s3cNdKvG8qStDvYTw4GgZ8ZpVA/at4wzoGEzPeaMtMGY01Zg5426c5znYecoAVDY2Rvq/3ESXZy0q0c5+mgept2B3qyg55u0EnDwU7dh5ucj4QR7WoFlmDBcMXZPGfWAPEYz5CWrJDWWyGt9yykHZt5DF8YYvM0+vog47U3Cu1y2XgXxFjSZVtB9tfgOEpPk/jwXyONIdTY01hbhvBloLaOnC2Q27bgp8DeHwFLd289KNZve1nby9pe9hK9bGNdaEmr5deVFN6tNb50BctkBcvkWbCciW8BuQ2Q/wGM3xYWL/ePnovGHwyEW5pae21sr43ttbG9Nn7vXaq9Nv6QePoa18YdQpcXyoMVYNMVYNP/qyUuvW57YtsTfwYMb+mJ7ZutfbO1b7b2zdb2p7Y/fYsIa99s7ZutfbN9F2+2DU5TzVLoG6OMFxlvDKMCnK9rzKpoAnZoa4HZ3dB/AYA82+S6NbNitrf7Q6q594iXTzQMiX9shAwq3gioJlbAw2xmjSlK7nwY12WpTYXDEwklnkomPKBCBT4snlOxq0FkEK9EGkSS5zPbcRVpOjMg5xLPjClHxupakPXnVBAyYTMM0GJa1ZrGFyKzpjByNBd7YWZ14EpNjFVB/BWGwlVca3TfDWFWseanlY051hJM5xAkbyo8F88zP5thzGdSbyweD9qj5lXmz+vjpfUDzv2UO8WzsdAEy0GzHg3A0q+MZupwMuVWkR3e4DkGrwcYbIg8lMHx98j3UBlV7XN02ARSQ/gHozWgMxD2Pn2Ui5yah+po5HmZGxMiCkAGfQCZP3AFkbtXQ4OGYm4iFjAAYgKYmVTH4/UvZFOvue3FSZzGBzitMPX8nedDCdSJsFoX41nfUfzzVOT0C6su1VxXSX5fUe2iOQ1c+MlVYwdWF7sYYT71u48ElsoarM5YUh0pGGE+ajSa9RmAzi3nOSWW4h3IyTcz1XgwfTYwmEBYo6MjTBcIw1+H9rdrjzt81KVxFz+IKIVyPBDhBmQ/+iVNIqQv/oh+en2xoK8zYE9xgXsmc2UdvlT2OjcKhO4M6dyERtekDIaJHFQgjQzOSAqWoqjT6dCQ/gsERImuRYgfmo+9r1x/f386nXb+4XJhwI+xhu194pkZOlJG1aW2dEiHeAQmD4HKETmPfwPoje90";
+var EXAMPLE0 = "EDS0020000eJztnG1P4zgQgP9Kla/nLYkTQK1Op4MeQqvldqUr6p2EEHKTaeqNE0eJQ3kR//3GhtJ0adjjZbe51hJCxmPPjMd5Mo4dcusIyGI1dfpejzgRU8zpn906PMIK4uSsgEw5fZc4PIvmxVAKwfISsM2EiRKIk8B1if3OHHWdg0Oc4dHJ0eAUCwcsK0XFFc9i55ycOTEwVkQoOPzy5eTo4LNDVFGBliTaQHEJXPB4CnxlGxaGVVoJpjjUxcYJI2eZYqJunxqrgodTlRToxEUuF/ofW0GWgDAS0/wSB8rRiixWWrmBBLSuuoaITyagY8UBhFHC0hwKFptonP718fMxFgLXiBI2BlGvp1fenpFkjKV1wR+o1giW9F/MdBCXNPtuTfUFxmEGNzxeGUMTI1p33rsftRTqG3+p7452aDAy8lCmKTqAputNjKgEAaHy6jpLxbLIzPWiwZLRg5rAb+45llJ4K6dBS2ijxF8pKZWeOG8pcs5CQJ+OzNT7T+q1iaDR+O5TyTkOTFZFCIKXSFFWCXFH7jmjC868BWfeizg7lA/x+tmAeT8JMFYpmaJfZThtxIs24PXP6LDjH1Oyu5KxDeVrVYN1crZ2zHR+m3NGF5zRF3H2qbCZ7LlM9jxqL0hn36Htm0CtHzebzh7TmVvLZ70FaP57JbRH32xGsxltmzPafi2huU0ZTc/iVie0t3I2GLBnWDtoN2yfoEoga0LuY9aZITJNwA1eCdp8LBuT0vYsaO8E2sM+xzOgeQ2gHbYbtBEUJsLzSba0vZo2v5bX9l+7fhwqmYcSpylUdl/kVatIr93A2WXke/EWUMtbC3ijlrct4c2zvLWAN9/ytiW8uZa3FvAWWN62gze/Z3lrAW+7lrft4C3wF7wFtZPt4EXAjQr+FToKktICt4nHbn8zBUUiMSBN5N1IPa+dhEVLbZY8CFFxAUvydbK3566dPuqtPhwI7OHAS7H7/uFAE3qDdrN3yKKEpc3k2ZOB/8habaeS1t6V3LVLS3s0YJeWPwC4wALXBuDs2cC2ANd7D+BO9KUe8iKseJuJi6rxuLXItfx4YJhziB9e0LbkvQN5Xu0lr73X7lpa8N4Onl1cbgtx+5tAXJs2UOzi0gL33MEc3QTg/v9Pcy1fWlrg3gwc1rFQ8UtAhMzW/w/7hZY02mceocTrEeqSfbJH/H0SUBJ4JHCJ3yOBT/BhklJCA4JPmLjUxdzrU+ybYxDUhWJjga7eOkhRPL3/yEPKrmY80h+GcPU/hZa5YNe5vpj65nWaGErzoYhaD5zdYl6SORbuzu+0BYnc4EVeagMTLiBjKWpx4AqJEuC6bheiEuMqZxkUKBhJWWhkOgeIOJjir+Pit6EqGFMdV5exk9uJIQW8ekFXnILod37xaQfr5z+6/nj457x+WQAfUsaxz+WDsS57NPZ7JFPgWXesweEZDksI4xiPIDVVE4l/xaDwrpFFnRSU1jhVKi/7Ozuz2ayLfkXobYT3DkhZN5agpnixfPjKQjkutWaMTFgV5vgWn+1TGZmQRHhPvfsXXgCWFw==";
+var EXAMPLE1 = "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";
+var EXAMPLE_DEFAULT = "EDS0020000eJztWutv2zYQ/1cEfp3i2FLSD8YwNFmDoMhraDJ3aFAEtHSWWfEhkJTdpMj/vjv6Jc92gGxr0IeMxCDvyHvxfnck4C9Mgi78mPUPYpZzz1n/9gsTOev3YlZxC9qzfjdmQueLYWak5JUDXDPi0kHMSrh3uO+W+fsKWMyuT85Pfr/BwRHXTtbCC12wj/EtK4BzmyPj+Orq/OToksXe1kCckhTYCQgpijGIrWt4ltWqltwLaLKDEYHPteeyoT8hqhTZ2JcWTbirzEr60kbQJcjACSZO0E2BOozdquMBSiBZTQm5GI2AIiUAZBDCVQWWFyEWN+/eXp6y+NVhcJMPQTaoLPncexW2aM5VkxGIa5LvphS8psy0210KvUPvp/AgiidCkzSt7s3cNdKvG8qStDvYTw4GgZ8ZpVA/at4wzoGEzPeaMtMGY01Zg5426c5znYecoAVDY2Rvq/3ESXZy0q0c5+mgept2B3qyg55u0EnDwU7dh5ucj4QR7WoFlmDBcMXZPGfWAPEYz5CWrJDWWyGt9yykHZt5DF8YYvM0+vog47U3Cu1y2XgXxFjSZVtB9tfgOEpPk/jwXyONIdTY01hbhvBloLaOnC2Q27bgp8DeHwFLd289KNZve1nby9pe9hK9bGNdaEmr5deVFN6tNb50BctkBcvkWbCciW8BuQ2Q/wGM3xYWL/ePnovGHwyEW5pae21sr43ttbG9Nn7vXaq9Nv6QePoa18YdQpcXyoMVYNMVYNP/qyUuvW57YtsTfwYMb+mJ7ZutfbO1b7b2zdb2p7Y/fYsIa99s7ZutfbN9F2+2DU5TzVLoG6OMFxlvDKMCnK9rzKpoAnZoa4HZ3dB/AYA82+S6NbNitrf7Q6q594iXTzQMiX9shAwq3gioJlbAw2xmjSlK7nwY12WpTYXDEwklnkomPKBCBT4snlOxq0FkEK9EGkSS5zPbcRVpOjMg5xLPjClHxupakPXnVBAyYTMM0GJa1ZrGFyKzpjByNBd7YWZ14EpNjFVB/BWGwlVca3TfDWFWseanlY051hJM5xAkbyo8F88zP5thzGdSbyweD9qj5lXmz+vjpfUDzv2UO8WzsdAEy0GzHg3A0q+MZupwMuVWkR3e4DkGrwcYbIg8lMHx98j3UBlV7XN02ARSQ/gHozWgMxD2Pn2Ui5yah+po5HmZGxMiCkAGfQCZP3AFkbtXQ4OGYm4iFjAAYgKYmVTH4/UvZFOvue3FSZzGBzitMPX8nedDCdSJsFoX41nfUfzzVOT0C6su1VxXSX5fUe2iOQ1c+MlVYwdWF7sYYT71u48ElsoarM5YUh0pGGE+ajSa9RmAzi3nOSWW4h3IyTcz1XgwfTYwmEBYo6MjTBcIw1+H9rdrjzt81KVxFz+IKIVyPBDhBmQ/+iVNIqQv/oh+en2xoK8zYE9xgXsmc2UdvlT2OjcKhO4M6dyERtekDIaJHFQgjQzOSAqWoqjT6dCQ/gsERImuRYgfmo+9r1x/f386nXb+4XJhwI+xhu194pkZOlJG1aW2dEiHeAQmD4HKETmPfwPoje90";
 var VERSION = "git"; //can be "git" or "online"
 var PROP_Contact_Text = "<html>\n  <head>\n    <title>Eendraadschema online</title>\n    <link rel=\"stylesheet\" href=\"css/about.css\">\n  </head>\n  <body>\n    <h2>Een &eacute;&eacute;ndraadschema tekenen.</h2>\n    <p class=\"ondertitel\">Een cr&eacute;atie van <a target=\"_blank\" href=\"https://ivan.goethals-jacobs.be\">Ivan Goethals</a></p>\n    <p>Dit is een standalone versie (development) waarbij enkele functionaliteiten zijn uitgeschakeld.</p>\n    <p>Gebruik de online versie op <a href=\"https://eendraadschema.goethals-jacobs.be\">https://eendraadschema.goethals-jacobs.be</a> om toegang te krijgen tot het contactformulier.</p>\n    <p>Kies <b>Bewerken</b> in het menu om verder te gaan met tekenen.</p>\n  </body>\n</html>";
 function PROP_GDPR() {
@@ -4672,7 +4788,7 @@ function exportjson() {
         var encoder = new TextEncoder();
         var pako_inflated = new Uint8Array(encoder.encode(text));
         var pako_deflated = new Uint8Array(pako.deflate(pako_inflated));
-        text = "EDS0010000" + btoa(String.fromCharCode.apply(null, pako_deflated));
+        text = "EDS0020000" + btoa(String.fromCharCode.apply(null, pako_deflated));
     }
     catch (error) {
         //We keep the non encoded text and do nothing
@@ -5104,11 +5220,18 @@ function show2col() {
 function import_to_structure(mystring, redraw) {
     if (redraw === void 0) { redraw = true; }
     var text = "";
+    var version;
     //If first 3 bytes read "EDS", it is an entropy coded file
     //The first 3 bytes are EDS, the next 3 bytes indicate the version (currently only 001 implemented)
     //the next 4 bytes are decimal zeroes "0000"
     //thereafter is a base64 encoded data-structure
     if ((mystring.charCodeAt(0) == 69) && (mystring.charCodeAt(1) == 68) && (mystring.charCodeAt(2) == 83)) { //recognize as EDS
+        // Determine versioning
+        // < 16/12/2023: Version 1
+        //   16/12/2023: Version 2 (Vrije tekst moet 20 pixels groter gemaakt worden om nog mooi in het schema te passen)
+        version = Number(mystring.substring(3, 6));
+        if (isNaN(version))
+            version = 1;
         mystring = atob(mystring.substring(10, mystring.length));
         var buffer = new Uint8Array(mystring.length);
         for (var i = 0; i < mystring.length; i++) {
@@ -5172,7 +5295,14 @@ function import_to_structure(mystring, redraw) {
         structure.data[i].id = mystructure.data[i].id;
         structure.data[i].indent = mystructure.data[i].indent;
         structure.data[i].collapsed = mystructure.data[i].collapsed;
-        //structure.adjustTypeByOrdinal(i,mystructure.data[i].keys[0][2]); //Make sure class is of the correct type
+    }
+    // Make some corrections if it is an old version
+    if (version < 2) {
+        for (var i = 0; i < mystructure.length; i++) {
+            // Breedte van Vrije tekst velden met 20 verhogen sinds 16/12/2023
+            if ((structure.data[i].keys[0][2] === "Vrije tekst") && (Number(structure.data[i].keys[22][2]) > 0))
+                structure.data[i].keys[22][2] = String(Number(structure.data[i].keys[22][2]) + 20);
+        }
     }
     //As we re-read the structure and it might be shorter then it once was (due to deletions) but we might still have the old high ID's, always take over the curid from the file
     structure.curid = mystructure.curid;
@@ -5198,35 +5328,7 @@ var importjson = function (event) {
     var reader = new FileReader();
     var text = "";
     reader.onload = function () {
-        var mystring = reader.result.toString();
-        //If first 3 bytes read "EDS", it is an entropy coded file
-        //The first 3 bytes are EDS, the next 3 bytes indicate the version (currently only 001 implemented)
-        //the next 4 bytes are decimal zeroes "0000"
-        //thereafter is a base64 encoded data-structure
-        if ((mystring.charCodeAt(0) == 69) && (mystring.charCodeAt(1) == 68) && (mystring.charCodeAt(2) == 83)) { //recognize as EDS
-            mystring = atob(mystring.substring(10, mystring.length));
-            var buffer = new Uint8Array(mystring.length);
-            for (var i = 0; i < mystring.length; i++) {
-                buffer[i - 0] = mystring.charCodeAt(i);
-            }
-            try { //See if the text decoder works, if not, we will do it manually (slower)
-                var decoder = new TextDecoder("utf-8");
-                text = decoder.decode(pako.inflate(buffer));
-            }
-            catch (error) { //Continue without the text decoder (old browsers)
-                var inflated = pako.inflate(buffer);
-                text = "";
-                for (i = 0; i < inflated.length; i++) {
-                    text += String.fromCharCode(inflated[i]);
-                }
-            }
-        }
-        //If first 3 bytes do not read "EDS", the file is in the old non encoded format and can be used as is
-        else {
-            text = mystring;
-        }
-        //code to transform input read into memory structure
-        import_to_structure(text);
+        import_to_structure(reader.result.toString());
     };
     reader.readAsText(input.files[0]);
 };

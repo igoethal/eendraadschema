@@ -191,6 +191,8 @@ class Hierarchical_List {
       case 'USB lader': tempval = new USB_lader(structure); break;
       case 'Vaatwasmachine': tempval = new Vaatwasmachine(structure); break;
       case 'Ventilator': tempval = new Ventilator(structure); break;
+      case 'Verbruiker': tempval = new Verbruiker(structure); break;
+      case 'Vrije tekst': tempval = new Vrije_tekst(structure); break;
       case 'Wasmachine': tempval = new Wasmachine(structure); break;
       case 'Zonnepaneel': tempval = new Zonnepaneel(structure); break;
       default: tempval = new Electro_Item(structure);
@@ -482,12 +484,17 @@ class Hierarchical_List {
 
     if ( (myParent != 0) && ((this.data[this.getOrdinalById(myParent)]).getKey("type") == "Meerdere verbruikers") ) {
       for (var i = 0; i<this.length; i++) {
-        //empty tekst at the end does not count as a valid last child
+        //empty tekst at the end does not count as a valid last child of meerdere verbruikers (zo vermijden we een streepje op het einde van het stopcontact)
         if (this.active[i] && (this.data[i].keys[16][2] != "zonder kader") && (this.data[i].parent == myParent)) lastChildOrdinal = i;
-      }
+      } 
+    } else if ( (myParent != 0) && ((this.data[this.getOrdinalById(myParent)]).getKey("type") == "Kring") ) {
+        for (var i = 0; i<this.length; i++) {
+          //Hier is vrije tekst wel effectieve verbruiker
+          if (this.active[i] && (this.data[i].parent == myParent)) lastChildOrdinal = i;
+        }
     } else { //if not a child of meerdere verbruikers, we also allow the parent to be the lastChild
       for (var i = 0; i<this.length; i++) {
-        //empty tekst at the end does not count as a valid last child
+        //empty tekst at the end does not count as a valid last child of meerdere verbruikers (zo vermijden we een streepje op het einde van het stopcontact)
         if (this.active[i] && (this.data[i].keys[16][2] != "zonder kader") && (this.data[i].parent == myParent)) lastChildOrdinal = i;
         if (this.active[i] && (this.data[i].keys[16][2] != "zonder kader") && (includeparent==true) && (this.id[i] == myParent)) lastChildOrdinal = i;
       }
@@ -1672,9 +1679,9 @@ class Hierarchical_List {
               }
 
               inSVG[elementCounter].data = inSVG[elementCounter].data +
-                '<line x1="' + inSVG[elementCounter].xleft +
-                '" x2="' + inSVG[elementCounter].xleft +
-                '" y1="' + y1 + '" y2="' + y2 + '" stroke="black" />'
+                  '<line x1="' + inSVG[elementCounter].xleft +
+                  '" x2="' + inSVG[elementCounter].xleft +
+                  '" y1="' + y1 + '" y2="' + y2 + '" stroke="black" />'    
 
               inSVG[elementCounter].data +=
                 '<text x="' + (inSVG[elementCounter].xleft+9) + '" y="' + (inSVG[elementCounter].yup - 5) + '" ' +

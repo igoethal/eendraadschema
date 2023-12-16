@@ -49,7 +49,7 @@ function exportjson() {
     let encoder = new TextEncoder();
     let pako_inflated = new Uint8Array(encoder.encode(text));
     let pako_deflated = new Uint8Array(pako.deflate(pako_inflated));
-    text = "EDS0010000" + btoa(String.fromCharCode.apply(null, pako_deflated));
+    text = "EDS0020000" + btoa(String.fromCharCode.apply(null, pako_deflated));
   } catch (error) {
     //We keep the non encoded text and do nothing
   } finally {
