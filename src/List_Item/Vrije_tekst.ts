@@ -7,16 +7,18 @@ class Vrije_tekst extends Electro_Item {
         this.keys[0][2] = "Vrije tekst";   // This is rather a formality as we should already have this at this stage
         this.keys[15][2] = "";             // Set Tekst itself to "" when the item is cleared
         this.keys[16][2] = "zonder kader"; // Per default zonder kader, gebruik symbool "Verbruiker (tekst)" voor de default met kader
-        this.keys[17][2] = "links";     // Per default gecentreerd
+        this.keys[17][2] = "links";        // Per default gecentreerd
+        this.keys[18][2] = "automatisch";  // Per default automatische breedte
         this.keys[19][2] = false;          // Per default niet vet
         this.keys[20][2] = false;          // Per default niet schuin
-        this.keys[22][2] = 60;             // Per default 60 breed
         this.keys[23][2] = "";             // Set Adres/tekst to "" when the item is cleared
     }
 
     overrideKeys() {
-        if (this.keys[16][2] === "") this.keys[16][2] = "zonder kader";
-        if (this.hasChild()) this.keys[16][2] = "verbruiker";
+        if (this.keys[16][2] != "verbruiker") { this.keys[16][2] = "zonder kader"; }
+        if (this.keys[18][2] != "automatisch") { this.keys[18][2] = "handmatig"; }
+        if (this.hasChild()) { this.keys[16][2] = "verbruiker"; }
+        this.adjustTextWidthIfAuto();
     }
 
     toHTML(mode: string, Parent?: List_Item) {
@@ -25,8 +27,11 @@ class Vrije_tekst extends Electro_Item {
 
         output += "&nbsp;Nr: " + this.stringToHTML(10,5)
                +  ", Tekst (nieuwe lijn = \"|\"): " + this.stringToHTML(15,30)
-               +  ", Breedte: " + this.stringToHTML(22,3)
-               +  ", Vet: " + this.checkboxToHTML(19)
+               +  ", Breedte: " + this.selectToHTML(18,["automatisch","handmatig"]);
+
+        if (this.keys[18][2] != "automatisch") output += " " + this.stringToHTML(22,3);
+        
+        output += ", Vet: " + this.checkboxToHTML(19)
                +  ", Schuin: " + this.checkboxToHTML(20)
                +  ", Horizontale alignering: " + this.selectToHTML(17,["links","centreer","rechts"])
                +  ", Type: " + this.selectToHTML(16,(this.hasChild() ? ["verbruiker"] : ["verbruiker","zonder kader"]));
@@ -36,12 +41,29 @@ class Vrije_tekst extends Electro_Item {
         return(output);
     }
 
+    adjustTextWidthIfAuto() {
+        if (this.keys[18][2] === "automatisch") {
+            var options:string = "";
+            if (this.keys[19][2]) options += ' font-weight="bold"';
+            if (this.keys[20][2]) options += ' font-style="italic"';
+            var strlines = htmlspecialchars(this.keys[15][2]).split("|");
+            var width = 40;
+            for (let i = 0; i<strlines.length; i++) {
+                width = Math.round(Math.max(width,svgTextWidth(strlines[i],10,options)+10));
+            }
+            this.keys[22][2] = String(width);
+        }    
+    }
+
     toSVG(hasChild: Boolean = false) {
         let mySVG:SVGelement = new SVGelement();
         var strlines = htmlspecialchars(this.keys[15][2]).split("|");
 
         // Breedte van de vrije tekst bepalen
-        var width = ( isNaN(Number(this.keys[22][2])) || ( this.keys[22][2] === "" )  ? 40 : Math.max(Number(this.keys[22][2])*1,1) );
+        this.adjustTextWidthIfAuto();
+        var width = ( isNaN(Number(this.keys[22][2])) || ( this.keys[22][2] === "" )  ? 40 : Math.max(Number(this.keys[22][2])*1,1) ); 
+
+        // Voldoende ruimte voorzien voor alle elementen
         var extraplace = 15 * Math.max(strlines.length-2,0);
         var shiftx;
         if (this.keys[16][2] === "zonder kader") {

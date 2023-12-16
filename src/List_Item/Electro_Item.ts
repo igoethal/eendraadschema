@@ -36,6 +36,7 @@ class Electro_Item extends List_Item {
       //Indien automaat (in kring of aansluiting), kan curve "", "A", "B", of "C" zijn
     this.keys.push(["select3","SELECT","standaard"]); //18, algemeen veld
       //Indien differentieelautomaat (in kring of aansluiting), kan curve "", "A", "B", of "C" zijn.  Veld 17 is dan het Type.
+      //Indien vrije tekst kan je hier kiezen tussen automatisch of handmatige breedte
     this.keys.push(["bool1","BOOLEAN",false]); //19, algemeen veld
       //Indien lichtpunt, bool1 is de selector voor wandverlichting of niet
       //Indien drukknop, bool1 is de selector voor afgeschermd of niet

@@ -51,6 +51,16 @@ function isInt(value) {
         parseInt(value) == value &&
         !isNaN(parseInt(value, 10));
 }
+function svgTextWidth(input, fontsize, options) {
+    if (fontsize === void 0) { fontsize = 10; }
+    if (options === void 0) { options = ''; }
+    var div = document.createElement('div');
+    div.innerHTML = '<svg width="1000" height="20"><text x="0" y="10" style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-size="' + Number(fontsize) + '" ' + options + '>' + input + '</text></svg>';
+    document.body.appendChild(div);
+    var width = div.children[0].children[0].getBBox().width;
+    document.body.removeChild(div);
+    return width;
+}
 function flattenSVG(SVGstruct, shiftx, shifty, node) {
     var str = "";
     var X = new XMLSerializer();
@@ -344,6 +354,7 @@ var Electro_Item = /** @class */ (function (_super) {
         //Indien ******, bool3 is de selector voor warmtefunctie
         //Indien stopcontact, bool3 is de selector voor meerfasig
         //Indien domotica gestuurde verbruiker, bool3 is de selector voor geprogrammeerd
+        //Indien vrije tekst is dit het selectievak voor auto-breed
         _this.keys.push(["string1", "STRING", ""]); //22, algemeen veld
         //Indien vrije tekst of verbruiker, breedte van het veld
         //Indien vrije ruimte, breede van de ruimte
@@ -2672,28 +2683,53 @@ var Verbruiker = /** @class */ (function (_super) {
         this.keys[0][2] = "Verbruiker"; // This is rather a formality as we should already have this at this stage
         this.keys[15][2] = ""; // Set Tekst itself to "" when the item is cleared
         this.keys[17][2] = "centreer"; // Per default gecentreerd
+        this.keys[18][2] = "automatisch"; // Per default automatische breedte
         this.keys[19][2] = false; // Per default niet vet
         this.keys[20][2] = false; // Per default niet schuin
-        this.keys[22][2] = 60; // Per default 60 breed
         this.keys[23][2] = ""; // Set Adres/tekst to "" when the item is cleared
+    };
+    Verbruiker.prototype.overrideKeys = function () {
+        if (this.keys[18][2] != "automatisch") {
+            this.keys[18][2] = "handmatig";
+        }
+        this.adjustTextWidthIfAuto();
     };
     Verbruiker.prototype.toHTML = function (mode, Parent) {
         var output = this.toHTMLHeader(mode, Parent);
         output += "&nbsp;Nr: " + this.stringToHTML(10, 5)
             + ", Tekst (nieuwe lijn = \"|\"): " + this.stringToHTML(15, 30)
-            + ", Breedte: " + this.stringToHTML(22, 3)
-            + ", Vet: " + this.checkboxToHTML(19)
+            + ", Breedte: " + this.selectToHTML(18, ["automatisch", "handmatig"]);
+        if (this.keys[18][2] != "automatisch")
+            output += " " + this.stringToHTML(22, 3);
+        output += ", Vet: " + this.checkboxToHTML(19)
             + ", Schuin: " + this.checkboxToHTML(20)
             + ", Horizontale alignering: " + this.selectToHTML(17, ["links", "centreer", "rechts"])
             + ", Adres/tekst: " + this.stringToHTML(23, 2);
         return (output);
     };
+    Verbruiker.prototype.adjustTextWidthIfAuto = function () {
+        if (this.keys[18][2] === "automatisch") {
+            var options = "";
+            if (this.keys[19][2])
+                options += ' font-weight="bold"';
+            if (this.keys[20][2])
+                options += ' font-style="italic"';
+            var strlines = htmlspecialchars(this.keys[15][2]).split("|");
+            var width = 40;
+            for (var i = 0; i < strlines.length; i++) {
+                width = Math.round(Math.max(width, svgTextWidth(strlines[i], 10, options) + 10));
+            }
+            this.keys[22][2] = String(width);
+        }
+    };
     Verbruiker.prototype.toSVG = function (hasChild) {
         if (hasChild === void 0) { hasChild = false; }
         var mySVG = new SVGelement();
         var strlines = htmlspecialchars(this.keys[15][2]).split("|");
-        // Breedte van de vrije tekst bepalen
+        // Voldoende ruimte voorzien voor alle elementen
+        this.adjustTextWidthIfAuto();
         var width = (isNaN(Number(this.keys[22][2])) || (this.keys[22][2] === "") ? 40 : Math.max(Number(this.keys[22][2]) * 1, 1));
+        // Breedte van de vrije tekst bepalen
         var extraplace = 15 * Math.max(strlines.length - 2, 0);
         mySVG.xleft = 1; // Links voldoende ruimte voor een eventuele kring voorzien
         mySVG.xright = 20 + width;
@@ -2741,24 +2777,32 @@ var Vrije_tekst = /** @class */ (function (_super) {
         this.keys[15][2] = ""; // Set Tekst itself to "" when the item is cleared
         this.keys[16][2] = "zonder kader"; // Per default zonder kader, gebruik symbool "Verbruiker (tekst)" voor de default met kader
         this.keys[17][2] = "links"; // Per default gecentreerd
+        this.keys[18][2] = "automatisch"; // Per default automatische breedte
         this.keys[19][2] = false; // Per default niet vet
         this.keys[20][2] = false; // Per default niet schuin
-        this.keys[22][2] = 60; // Per default 60 breed
         this.keys[23][2] = ""; // Set Adres/tekst to "" when the item is cleared
     };
     Vrije_tekst.prototype.overrideKeys = function () {
-        if (this.keys[16][2] === "")
+        if (this.keys[16][2] != "verbruiker") {
             this.keys[16][2] = "zonder kader";
-        if (this.hasChild())
+        }
+        if (this.keys[18][2] != "automatisch") {
+            this.keys[18][2] = "handmatig";
+        }
+        if (this.hasChild()) {
             this.keys[16][2] = "verbruiker";
+        }
+        this.adjustTextWidthIfAuto();
     };
     Vrije_tekst.prototype.toHTML = function (mode, Parent) {
         this.overrideKeys();
         var output = this.toHTMLHeader(mode, Parent);
         output += "&nbsp;Nr: " + this.stringToHTML(10, 5)
             + ", Tekst (nieuwe lijn = \"|\"): " + this.stringToHTML(15, 30)
-            + ", Breedte: " + this.stringToHTML(22, 3)
-            + ", Vet: " + this.checkboxToHTML(19)
+            + ", Breedte: " + this.selectToHTML(18, ["automatisch", "handmatig"]);
+        if (this.keys[18][2] != "automatisch")
+            output += " " + this.stringToHTML(22, 3);
+        output += ", Vet: " + this.checkboxToHTML(19)
             + ", Schuin: " + this.checkboxToHTML(20)
             + ", Horizontale alignering: " + this.selectToHTML(17, ["links", "centreer", "rechts"])
             + ", Type: " + this.selectToHTML(16, (this.hasChild() ? ["verbruiker"] : ["verbruiker", "zonder kader"]));
@@ -2766,12 +2810,29 @@ var Vrije_tekst = /** @class */ (function (_super) {
             output += ", Adres/tekst: " + this.stringToHTML(23, 2);
         return (output);
     };
+    Vrije_tekst.prototype.adjustTextWidthIfAuto = function () {
+        if (this.keys[18][2] === "automatisch") {
+            var options = "";
+            if (this.keys[19][2])
+                options += ' font-weight="bold"';
+            if (this.keys[20][2])
+                options += ' font-style="italic"';
+            var strlines = htmlspecialchars(this.keys[15][2]).split("|");
+            var width = 40;
+            for (var i = 0; i < strlines.length; i++) {
+                width = Math.round(Math.max(width, svgTextWidth(strlines[i], 10, options) + 10));
+            }
+            this.keys[22][2] = String(width);
+        }
+    };
     Vrije_tekst.prototype.toSVG = function (hasChild) {
         if (hasChild === void 0) { hasChild = false; }
         var mySVG = new SVGelement();
         var strlines = htmlspecialchars(this.keys[15][2]).split("|");
         // Breedte van de vrije tekst bepalen
+        this.adjustTextWidthIfAuto();
         var width = (isNaN(Number(this.keys[22][2])) || (this.keys[22][2] === "") ? 40 : Math.max(Number(this.keys[22][2]) * 1, 1));
+        // Voldoende ruimte voorzien voor alle elementen
         var extraplace = 15 * Math.max(strlines.length - 2, 0);
         var shiftx;
         if (this.keys[16][2] === "zonder kader") {

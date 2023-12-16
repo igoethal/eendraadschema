@@ -7,10 +7,15 @@ class Verbruiker extends Electro_Item {
         this.keys[0][2] = "Verbruiker";    // This is rather a formality as we should already have this at this stage
         this.keys[15][2] = "";             // Set Tekst itself to "" when the item is cleared
         this.keys[17][2] = "centreer";     // Per default gecentreerd
+        this.keys[18][2] = "automatisch";  // Per default automatische breedte
         this.keys[19][2] = false;          // Per default niet vet
         this.keys[20][2] = false;          // Per default niet schuin
-        this.keys[22][2] = 60;             // Per default 60 breed
         this.keys[23][2] = "";             // Set Adres/tekst to "" when the item is cleared
+    }
+
+    overrideKeys() {
+        if (this.keys[18][2] != "automatisch") { this.keys[18][2] = "handmatig"; }
+        this.adjustTextWidthIfAuto();
     }
 
     toHTML(mode: string, Parent?: List_Item) {
@@ -18,8 +23,11 @@ class Verbruiker extends Electro_Item {
 
         output += "&nbsp;Nr: " + this.stringToHTML(10,5)
                +  ", Tekst (nieuwe lijn = \"|\"): " + this.stringToHTML(15,30)
-               +  ", Breedte: " + this.stringToHTML(22,3)
-               +  ", Vet: " + this.checkboxToHTML(19)
+               +  ", Breedte: " + this.selectToHTML(18,["automatisch","handmatig"]);
+
+        if (this.keys[18][2] != "automatisch") output += " " + this.stringToHTML(22,3);
+
+        output += ", Vet: " + this.checkboxToHTML(19)
                +  ", Schuin: " + this.checkboxToHTML(20)
                +  ", Horizontale alignering: " + this.selectToHTML(17,["links","centreer","rechts"])
                +  ", Adres/tekst: " + this.stringToHTML(23,2);
@@ -27,12 +35,29 @@ class Verbruiker extends Electro_Item {
         return(output);
     }
 
+    adjustTextWidthIfAuto() {
+        if (this.keys[18][2] === "automatisch") {
+            var options:string = "";
+            if (this.keys[19][2]) options += ' font-weight="bold"';
+            if (this.keys[20][2]) options += ' font-style="italic"';
+            var strlines = htmlspecialchars(this.keys[15][2]).split("|");
+            var width = 40;
+            for (let i = 0; i<strlines.length; i++) {
+                width = Math.round(Math.max(width,svgTextWidth(strlines[i],10,options)+10));
+            }
+            this.keys[22][2] = String(width);
+        }    
+    }
+
     toSVG(hasChild: Boolean = false) {
         let mySVG:SVGelement = new SVGelement();
         var strlines = htmlspecialchars(this.keys[15][2]).split("|");
 
+        // Voldoende ruimte voorzien voor alle elementen
+        this.adjustTextWidthIfAuto();
+        var width = ( isNaN(Number(this.keys[22][2])) || ( this.keys[22][2] === "" )  ? 40 : Math.max(Number(this.keys[22][2])*1,1) ); 
+
         // Breedte van de vrije tekst bepalen
-        var width = ( isNaN(Number(this.keys[22][2])) || ( this.keys[22][2] === "" )  ? 40 : Math.max(Number(this.keys[22][2])*1,1) );
         var extraplace = 15 * Math.max(strlines.length-2,0);
 
         mySVG.xleft = 1;                      // Links voldoende ruimte voor een eventuele kring voorzien
