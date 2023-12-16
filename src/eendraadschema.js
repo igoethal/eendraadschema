@@ -2761,7 +2761,7 @@ var Vrije_tekst = /** @class */ (function (_super) {
             + ", Vet: " + this.checkboxToHTML(19)
             + ", Schuin: " + this.checkboxToHTML(20)
             + ", Horizontale alignering: " + this.selectToHTML(17, ["links", "centreer", "rechts"])
-            + ", Type: " + this.selectToHTML(16, ["verbruiker", "zonder kader"]);
+            + ", Type: " + this.selectToHTML(16, (this.hasChild() ? ["verbruiker"] : ["verbruiker", "zonder kader"]));
         if (this.keys[16][2] != "zonder kader")
             output += ", Adres/tekst: " + this.stringToHTML(23, 2);
         return (output);
