@@ -188,12 +188,17 @@ class Hierarchical_List {
       case 'Overspanningsbeveiliging': tempval = new Overspanningsbeveiliging(structure); break;
       case 'Stoomoven': tempval = new Stoomoven(structure); break;
       case 'Stopcontact': tempval = new Stopcontact(structure); break;
+      case 'Transformator': tempval = new Transformator(structure); break;
       case 'USB lader': tempval = new USB_lader(structure); break;
       case 'Vaatwasmachine': tempval = new Vaatwasmachine(structure); break;
       case 'Ventilator': tempval = new Ventilator(structure); break;
       case 'Verbruiker': tempval = new Verbruiker(structure); break;
+      case 'Verlenging': tempval = new Verlenging(structure); break;
+      case 'Verwarmingstoestel': tempval = new Verwarmingstoestel(structure); break;
       case 'Vrije tekst': tempval = new Vrije_tekst(structure); break;
+      case 'Warmtepomp/airco': tempval = new Warmtepomp(structure); break;
       case 'Wasmachine': tempval = new Wasmachine(structure); break;
+      case 'Zeldzame symbolen': tempval = new Zeldzame_symbolen(structure); break;
       case 'Zonnepaneel': tempval = new Zonnepaneel(structure); break;
       default: tempval = new Electro_Item(structure);
     }

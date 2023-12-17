@@ -36,7 +36,7 @@ class Vrije_tekst extends Electro_Item {
                +  ", Horizontale alignering: " + this.selectToHTML(17,["links","centreer","rechts"])
                +  ", Type: " + this.selectToHTML(16,(this.hasChild() ? ["verbruiker"] : ["verbruiker","zonder kader"]));
                
-        if (this.keys[16][2] != "zonder kader") output += ", Adres/tekst: " + this.stringToHTML(23,2);
+        if (this.keys[16][2] != "zonder kader") output += ", Adres/tekst: " + this.stringToHTML(23,5);
 
         return(output);
     }

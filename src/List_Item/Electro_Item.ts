@@ -571,38 +571,9 @@ class Electro_Item extends List_Item {
         output += ", Adres/tekst: " + this.stringToHTML(15,5);
       case "Splitsing":
         break;
-      case "Transformator":
-        output += "&nbsp;Nr: " + this.stringToHTML(10,5);
-        output += ", Voltage: " + this.stringToHTML(14,8);
-        output += ", Adres/tekst: " + this.stringToHTML(15,5);
-        break;
-      case "Verlenging":
-        output += "&nbsp;Nr: " + this.stringToHTML(10,5);
-        output += ", Breedte: " + this.stringToHTML(22,3);
-        output += ", Adres/tekst: " + this.stringToHTML(23,2);
-        break;
-      case "Verwarmingstoestel":
-        output += "&nbsp;Nr: " + this.stringToHTML(10,5);
-        output += ", Accumulatie: " + this.checkboxToHTML(3);
-        if (this.getKey("accumulatie")) {
-          output += ", Ventilator: " + this.checkboxToHTML(6);
-        }
-        output += ", Adres/tekst: " + this.stringToHTML(15,5);
-        break;
       case "Vrije ruimte":
           output += "&nbsp;Breedte: " + this.stringToHTML(22,3);
           break;  
-      case "Warmtepomp/airco":
-        output += "&nbsp;Nr: " + this.stringToHTML(10,5);
-        output += ", Warmte functie: " + this.selectToHTML(18,["", "Koelend", "Verwarmend", "Verwarmend en koelend"]);
-        output += ", Aantal: " + this.selectToHTML(4,["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]);
-        output += ", Adres/tekst: " + this.stringToHTML(15,5);
-        break;
-      case "Zeldzame symbolen":
-        output += "&nbsp;Nr: " + this.stringToHTML(10,5);
-        output += ", Symbool: " + this.selectToHTML(16,["","deurslot"]);
-        output += ", Adres/tekst: " + this.stringToHTML(15,5);
-        break;
       case "Meerdere vebruikers":
         output += "&nbsp;Nr: " + this.stringToHTML(10,5);
         output += ", Adres/tekst: " + this.stringToHTML(15,5);
@@ -1249,105 +1220,6 @@ class Electro_Item extends List_Item {
       case "Schakelaars":
         this.setKey("aantal2", 0);
         outputstr += this.toSVGswitches(hasChild, mySVG);
-        break;
-      case "Transformator":
-        outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-        outputstr += '<use xlink:href="#transformator" x="21" y="25"></use>';
-        outputstr += '<text x="35" y="44" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' +
-          htmlspecialchars(this.getKey("voltage")) + "</text>";
-        mySVG.xright = 48;
-        outputstr += this.addAddress(mySVG,58,15);
-        break;
-      case "Verwarmingstoestel":
-        outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-        mySVG.xright = 70;
-        switch (this.getKey("accumulatie")) {
-          case false:
-            outputstr += '<use xlink:href="#verwarmingstoestel" x="21" y="25"></use>';
-            break;
-          case true:
-            switch (this.getKey("ventilator")) {
-              case false:
-                outputstr += '<use xlink:href="#verwarmingstoestel_accu" x="21" y="25"></use>';
-                break;
-              case true:
-                outputstr += '<use xlink:href="#verwarmingstoestel_accu_ventilator" x="21" y="25"></use>';
-                mySVG.xright = 95;
-                break;
-            }
-          break;
-        }
-        outputstr += this.addAddress(mySVG,55,10);
-        break;
-      case "Verlenging":
-        var width;
-        if (isNaN(Number(this.keys[22][2]))) {
-          width = 40;
-        } else {
-          if (Number(this.keys[22][2] == "")) {
-            width = 40;
-          } else {
-            width = Math.max(Number(this.keys[22][2])*1,0);
-          }
-        }
-        mySVG.xright = width-1;
-        outputstr += '<line x1="1" y1="25" x2="' + (width+1) + '" y2="25" stroke="black" />';
-        outputstr += this.addAddress(mySVG,40,0,width/2-mySVG.xright/2-10,23);
-        break;
-      case "Warmtepomp/airco":
-        var shifty = 0; if (this.keys[4][2]>1) {
-          shifty = 15;
-          outputstr += '<text x="41" y="12" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">x' + htmlspecialchars(this.keys[4][2]) + '</text>'
-        }
-        outputstr += '<line x1="1" y1="' + (shifty+25) + '" x2="21" y2="' + (shifty+25) + '" stroke="black"></line>';
-        outputstr += '<use xlink:href="#verbruiker" x="21" y="' + (shifty+25) + '"></use>';
-
-        outputstr += '<line x1="26" y1="' + (shifty+0) + '" x2="26" y2="' + (shifty+5) + '" stroke="black" />';
-        outputstr += '<line x1="56" y1="' + (shifty+0) + '" x2="56" y2="' + (shifty+5) + '" stroke="black" />';
-        outputstr += '<line x1="26" y1="' + (shifty+5) + '" x2="33.5" y2="' + (shifty+23) + '" stroke="black" />';
-        outputstr += '<line x1="56" y1="' + (shifty+5) + '" x2="48.5" y2="' + (shifty+23) + '" stroke="black" />';
-        outputstr += '<line x1="33.5" y1="' + (shifty+23) + '" x2="41" y2="' + (shifty+14) + '" stroke="black" />';
-        outputstr += '<line x1="48.5" y1="' + (shifty+23) + '" x2="41" y2="' + (shifty+14) + '" stroke="black" />';
-
-        //Waar gaan we de andere symbolen plaatsen, indien slechts 1, midden onderaan, zoniet links en rechts
-        var shift_symbol_energiebron = 41;
-        var shift_symbol_warmtefunctie = 41;
-        if ((this.keys[17][2] != "") && (this.keys[18][2] != "")) {
-          var shift_symbol_energiebron = 31;
-          var shift_symbol_warmtefunctie = 51;
-        }
-
-        outputstr += '<use xlink:href="#bliksem" x="' + (shift_symbol_energiebron) + '" y="' + (shifty+35) + '"/>';
-
-        switch (this.keys[18][2]) {
-          case "Verwarmend":
-            outputstr += '<text x="' + (shift_symbol_warmtefunctie-1) + '" y="' + (shifty+36) + '" style="text-anchor:middle;dominant-baseline:middle" font-family="Arial, Helvetica, sans-serif" font-size="12">+</text>'
-            break;
-          case "Koelend":
-            outputstr += '<text x="' + (shift_symbol_warmtefunctie-1) + '" y="' + (shifty+36) + '" style="text-anchor:middle;dominant-baseline:middle" font-family="Arial, Helvetica, sans-serif" font-size="12">-</text>'
-            break;
-          case "Verwarmend en koelend":
-            outputstr += '<text x="' + (shift_symbol_warmtefunctie-1) + '" y="' + (shifty+36) + '" style="text-anchor:middle;dominant-baseline:middle" font-family="Arial, Helvetica, sans-serif" font-size="12">+/-</text>'
-            break;
-        }
-
-        mySVG.xright = 60;
-        mySVG.yup += shifty;
-        //Place adres underneath
-        outputstr += this.addAddress(mySVG,shifty+60,15);
-        break;
-      case "Zeldzame symbolen":
-        switch (this.keys[16][2]) {
-          case "deurslot":
-            outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-            outputstr += '<use xlink:href="#deurslot" x="21" y="25"></use>';
-            mySVG.xright = 63;
-            outputstr += this.addAddress(mySVG,55,10,2);
-            break;
-          default:
-            outputstr += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-            break;
-        }
         break;
     }
     mySVG.data = outputstr + "\n";
