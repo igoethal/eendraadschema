@@ -29,10 +29,9 @@ class Drukknop extends Electro_Item {
         return(output);
     }
 
-    toSVG(hasChild: Boolean = false) {
+    toSVG() {
         let mySVG:SVGelement = new SVGelement();
         
-
         mySVG.xleft = 1; // Links voldoende ruimte voor een eventuele kring voorzien
         mySVG.xright = 43; 
         mySVG.yup = 25;

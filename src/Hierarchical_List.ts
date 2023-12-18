@@ -168,7 +168,7 @@ class Hierarchical_List {
     //Create the object
     let tempval;
     switch (electroType) {
-      case 'Aansluitpunt': tempval = new Aansluitpunt(structure); break;
+      case 'Aansluitpunt': case 'Leeg': tempval = new Aansluitpunt(structure); break;
       case 'Aftakdoos': tempval = new Aftakdoos(structure); break;
       case 'Batterij': tempval = new Batterij(structure); break;
       case 'Bel': tempval = new Bel(structure); break;
@@ -182,10 +182,13 @@ class Hierarchical_List {
       case 'Ketel': tempval = new Ketel(structure); break; 
       case 'Koelkast': tempval = new Koelkast(structure); break;
       case 'Kookfornuis': tempval = new Kookfornuis(structure); break;
+      case 'Lichtcircuit': tempval = new Lichtcircuit(structure); break;
+      case 'Lichtpunt': tempval = new Lichtpunt(structure); break;
       case 'Microgolfoven': tempval = new Microgolfoven(structure); break;
       case 'Motor': tempval = new Motor(structure); break;
       case 'Omvormer': tempval = new Omvormer(structure); break;
       case 'Overspanningsbeveiliging': tempval = new Overspanningsbeveiliging(structure); break;
+      case 'Schakelaars': tempval = new Schakelaars(structure); break;
       case 'Stoomoven': tempval = new Stoomoven(structure); break;
       case 'Stopcontact': tempval = new Stopcontact(structure); break;
       case 'Transformator': tempval = new Transformator(structure); break;
@@ -1653,7 +1656,7 @@ class Hierarchical_List {
             //get image of all lowest level elements
 
             if ((this.data[this.getOrdinalById(myParent)]).getKey("type") == "Meerdere verbruikers") {
-              inSVG[elementCounter] = this.data[i].toSVG(i !== lastChildOrdinal);
+              inSVG[elementCounter] = this.data[i].toSVG();
             } else if (stack == "vertical") {
               inSVG[elementCounter] = this.toSVG(this.id[i],"horizontal",0,true); //if we are still in vertical mode, switch to horizontal and take childs with us
             } else { //we are in horizontal mode and can start drawing
@@ -1662,7 +1665,7 @@ class Hierarchical_List {
                 //the following function takes true as an argument if there is still an element following in a horizontal chain.
                 //This is the case if the element is not last and/or not followed by empty tekst without border
                 if (this.id[i] == myParent) {
-                  inSVG[elementCounter] = this.data[i].toSVG(i !== lastChildOrdinal);
+                  inSVG[elementCounter] = this.data[i].toSVG();
                 } else {
                   inSVG[elementCounter] = this.toSVG(this.id[i],"horizontal",0,true); //if we are still in vertical mode, switch to horizontal and take childs with us
                 }

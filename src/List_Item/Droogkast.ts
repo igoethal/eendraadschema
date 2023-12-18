@@ -17,7 +17,7 @@ class Droogkast extends Electro_Item {
         return(output);
     }
 
-    toSVG(hasChild: Boolean = false) {
+    toSVG() {
         let mySVG:SVGelement = new SVGelement();
 
         mySVG.xleft = 1; // foresee at least some space for the conductor

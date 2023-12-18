@@ -22,7 +22,7 @@ class Ketel extends Electro_Item {
         return(output);
     }
 
-    toSVG(hasChild: Boolean = false) {
+    toSVG() {
         let mySVG:SVGelement = new SVGelement();
 
         // Alles naar beneden schuiven als we het aantal laders boven het symbool willen plaatsen

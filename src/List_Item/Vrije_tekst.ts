@@ -55,7 +55,7 @@ class Vrije_tekst extends Electro_Item {
         }    
     }
 
-    toSVG(hasChild: Boolean = false) {
+    toSVG() {
         let mySVG:SVGelement = new SVGelement();
         var strlines = htmlspecialchars(this.keys[15][2]).split("|");
 

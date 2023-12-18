@@ -616,9 +616,10 @@ function import_to_structure(mystring: string, redraw = true) {
   // Make some corrections if it is an old version
   if (version < 2) {
     for (var i = 0; i < mystructure.length; i++) {
-      // Breedte van Vrije tekst velden met 20 verhogen sinds 16/12/2023
-      if ( (structure.data[i].keys[0][2] === "Vrije tekst") && (Number(structure.data[i].keys[22][2])>0) ) 
-        structure.data[i].keys[22][2] = String(Number(structure.data[i].keys[22][2]) + 20);
+      // Breedte van Vrije tekst velden zonder kader met 30 verhogen sinds 16/12/2023
+      if ( (structure.data[i].keys[0][2] === "Vrije tekst") && (structure.data[i].keys[16][2] != "verbruiker") )
+        if (Number(structure.data[i].keys[22][2])>0) structure.data[i].keys[22][2] = String(Number(structure.data[i].keys[22][2]) + 30);
+        else structure.data[i].keys[18][2] = "automatisch";
     } 
   }   
 

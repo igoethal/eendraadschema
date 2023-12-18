@@ -19,7 +19,7 @@ class Boiler extends Electro_Item {
         return(output);
     }
 
-    toSVG(hasChild: Boolean = false) {
+    toSVG() {
         let mySVG:SVGelement = new SVGelement();
         let outputstr:string = "";
 

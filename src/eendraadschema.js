@@ -221,7 +221,31 @@ var List_Item = /** @class */ (function () {
         return (numChilds);
     };
     List_Item.prototype.hasChild = function () {
-        return (this.getNumChilds() > 0);
+        var parent = this.getParent();
+        if ((parent != null) && (parent.keys[0][2] == "Meerdere verbruikers")) {
+            var myOrdinal = this.sourcelist.getOrdinalById(this.id);
+            var lastOrdinal = 0;
+            for (var i = 0; i < this.sourcelist.data.length; ++i) {
+                //empty tekst at the end does not count as a valid last child of meerdere verbruikers (zo vermijden we een streepje op het einde van het stopcontact)
+                if (this.sourcelist.active[i] && (this.sourcelist.data[i].keys[16][2] != "zonder kader") && (this.sourcelist.data[i].parent == this.parent))
+                    lastOrdinal = i;
+            }
+            if (lastOrdinal > myOrdinal)
+                return true;
+            else
+                return false;
+        }
+        else {
+            if (this.sourcelist != null) {
+                for (var i = 0; i < this.sourcelist.data.length; ++i) {
+                    if ((this.sourcelist.data[i].parent === this.id) &&
+                        (this.sourcelist.active[i]) && (this.sourcelist.data[i].keys[16][2] != "zonder kader") &&
+                        (this.sourcelist.data[i].keys[0][2] != ""))
+                        return true;
+                }
+            }
+        }
+        return false;
     };
     List_Item.prototype.setKey = function (key, setvalue) {
         for (var i = 0; i < this.keys.length; i++) {
@@ -240,6 +264,9 @@ var List_Item = /** @class */ (function () {
     List_Item.prototype.getParent = function () {
         if ((this.sourcelist != null) && (this.parent != 0)) {
             return this.sourcelist.data[this.sourcelist.getOrdinalById(this.parent)];
+        }
+        else {
+            return null;
         }
     };
     List_Item.prototype.stringToHTML = function (keyid, size) {
@@ -288,8 +315,7 @@ var List_Item = /** @class */ (function () {
     List_Item.prototype.toHTML = function (mode, Parent) {
         return ("toHTML() function not defined for base class List_Item. Extend class first.");
     };
-    List_Item.prototype.toSVG = function (hasChild) {
-        if (hasChild === void 0) { hasChild = false; }
+    List_Item.prototype.toSVG = function () {
         var mySVG = new SVGelement();
         return (mySVG);
     };
@@ -476,9 +502,6 @@ var Electro_Item = /** @class */ (function (_super) {
             }
         }
         ;
-        if (this.keys[0][2] == "Schakelaars") {
-            this.keys[25][2] = false;
-        }
         this.keys[13][2] = "1";
         this.keys[14][2] = "230V/24V";
         this.keys[15][2] = "";
@@ -502,9 +525,6 @@ var Electro_Item = /** @class */ (function (_super) {
                 break;
             case "Aansluiting":
                 this.keys[23][2] = "";
-            case "Stopcontact":
-                this.keys[16][2] = "3";
-                break;
             case "Splitsing":
                 //this.keys[10][2] = "";
                 break;
@@ -515,27 +535,10 @@ var Electro_Item = /** @class */ (function (_super) {
                 this.keys[19][2] = true;
                 this.keys[20][2] = true;
                 this.keys[21][2] = true;
-            case "Lichtpunt":
-                this.keys[17][2] = "Geen"; //Geen noodverlichting
-                break;
-            case "Verlenging":
-                this.keys[22][2] = 40;
-                break;
             case "Vrije ruimte":
                 this.keys[22][2] = 25;
                 break;
-            case "Vrije tekst":
-                this.keys[22][2] = 40;
-                this.keys[17][2] = "centreer";
-                break;
-            case "Zeldzame symbolen":
-                this.keys[16][2] = "";
-                break;
-            case "Warmtepomp/airco":
-                this.keys[18][2] = "Koelend";
-                break;
             default:
-                //this.keys[10][2] = "";
                 break;
         }
         ;
@@ -771,70 +774,6 @@ var Electro_Item = /** @class */ (function (_super) {
                 output += "&nbsp;Naam: " + this.stringToHTML(10, 5) + ", ";
                 output += "Geaard: " + this.checkboxToHTML(1);
                 break;
-            case "Lichtpunt":
-                output += "&nbsp;Nr: " + this.stringToHTML(10, 5) + ", ";
-                output += "Type: " + this.selectToHTML(16, ["standaard", "TL", "spot", "led" /*, "Spot", "Led", "Signalisatielamp" */]) + ", ";
-                if (this.keys[16][2] == "TL") {
-                    output += "Aantal buizen: " + this.selectToHTML(13, ["1", "2", "3", "4"]) + ", ";
-                }
-                output += "Aantal lampen: " + this.selectToHTML(4, ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"]) + ", ";
-                output += "Wandlamp: " + this.checkboxToHTML(19) + ", ";
-                output += "Halfwaterdicht: " + this.checkboxToHTML(20) + ", ";
-                output += "Ingebouwde schakelaar: " + this.checkboxToHTML(21) + ", ";
-                output += "Noodverlichting: " + this.selectToHTML(17, ["Geen", "Centraal", "Decentraal"]);
-                output += ", Adres/tekst: " + this.stringToHTML(15, 5);
-                break;
-            case "Lichtcircuit":
-                output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
-                output += ", " + this.selectToHTML(5, ["enkelpolig", "dubbelpolig", "driepolig", "dubbelaansteking", "---", "schakelaar", "dimschakelaar", "bewegingsschakelaar", "schemerschakelaar", "---", "teleruptor", "relais", "dimmer", "tijdschakelaar", "minuterie", "thermostaat"]);
-                output += ", Halfwaterdicht: " + this.checkboxToHTML(20);
-                if ((this.keys[5][2] == "enkelpolig") || (this.keys[5][2] == "dubbelpolig") || (this.keys[5][2] == "driepolig") || (this.keys[5][2] == "kruis_enkel") ||
-                    (this.keys[5][2] == "dubbelaansteking") || (this.keys[5][2] == "wissel_enkel") || (this.keys[5][2] == "dubbel") ||
-                    (this.keys[5][2] == "dimschakelaar")) {
-                    output += ", Verklikkerlampje: " + this.checkboxToHTML(21);
-                    output += ", Signalisatielampje: " + this.checkboxToHTML(19);
-                    if (this.keys[5][2] != "dimschakelaar") {
-                        output += ", Trekschakelaar: " + this.checkboxToHTML(25);
-                    }
-                }
-                switch (this.getKey("lichtkring_poligheid")) {
-                    case "enkelpolig":
-                        output += ", Aantal schakelaars: " + this.selectToHTML(4, ["0", "1", "2", "3", "4", "5"]);
-                        break;
-                    case "dubbelpolig":
-                        output += ", Aantal schakelaars: " + this.selectToHTML(4, ["0", "1", "2"]);
-                        break;
-                }
-                output += ", Aantal lichtpunten: " + this.selectToHTML(13, ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]);
-                output += ", Adres/tekst: " + this.stringToHTML(15, 5);
-                break;
-            case "Schakelaars":
-                output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
-                output += ", " + this.selectToHTML(5, ["enkelpolig", "dubbelpolig", "driepolig", "dubbelaansteking", "wissel_enkel", "wissel_dubbel", "kruis_enkel", "---", "schakelaar", "dimschakelaar", "dimschakelaar wissel", "bewegingsschakelaar", "schemerschakelaar", "---", "teleruptor", "relais", "dimmer", "tijdschakelaar", "minuterie", "thermostaat", "rolluikschakelaar"]);
-                if ((this.keys[5][2] == "enkelpolig") || (this.keys[5][2] == "dubbelpolig") || (this.keys[5][2] == "driepolig") || (this.keys[5][2] == "kruis_enkel") ||
-                    (this.keys[5][2] == "dubbelaansteking") || (this.keys[5][2] == "wissel_enkel") || (this.keys[5][2] == "wissel_dubbel") || (this.keys[5][2] == "dubbel") ||
-                    (this.keys[5][2] == "dimschakelaar") || (this.keys[5][2] == "dimschakelaar wissel") || (this.keys[5][2] == "rolluikschakelaar")) {
-                    output += ", Halfwaterdicht: " + this.checkboxToHTML(20);
-                }
-                if ((this.keys[5][2] == "enkelpolig") || (this.keys[5][2] == "dubbelpolig") || (this.keys[5][2] == "driepolig") || (this.keys[5][2] == "kruis_enkel") ||
-                    (this.keys[5][2] == "dubbelaansteking") || (this.keys[5][2] == "wissel_enkel") || (this.keys[5][2] == "wissel_dubbel") || (this.keys[5][2] == "dubbel") ||
-                    (this.keys[5][2] == "dimschakelaar") || (this.keys[5][2] == "dimschakelaar wissel")) {
-                    output += ", Verklikkerlampje: " + this.checkboxToHTML(21);
-                    output += ", Signalisatielampje: " + this.checkboxToHTML(19);
-                    if ((this.keys[5][2] != "dimschakelaar") && (this.keys[5][2] != "dimschakelaar wissel")) {
-                        output += ", Trekschakelaar: " + this.checkboxToHTML(25);
-                    }
-                }
-                switch (this.getKey("lichtkring_poligheid")) {
-                    case "enkelpolig":
-                        output += ", Aantal schakelaars: " + this.selectToHTML(4, ["1", "2", "3", "4", "5"]);
-                        break;
-                    case "dubbelpolig":
-                        output += ", Aantal schakelaars: " + this.selectToHTML(4, ["1", "2"]);
-                        break;
-                }
-                output += ", Adres/tekst: " + this.stringToHTML(15, 5);
-                break;
             case "Domotica":
                 output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
                 output += ", Tekst: " + this.stringToHTML(15, 10);
@@ -867,495 +806,6 @@ var Electro_Item = /** @class */ (function (_super) {
         //output += "id: " + this.id + " parent: " + this.parent;
         return (output);
     };
-    //-- Generates SVG code for switches --
-    Electro_Item.prototype.toSVGswitches = function (hasChild, mySVG) {
-        var outputstr = "";
-        var elements = new Array();
-        var halfwaterdicht = new Array();
-        var verklikkerlamp = new Array();
-        var signalisatielamp = new Array();
-        var trekschakelaar = new Array();
-        var lowerbound = 20; // How low does the switch go below the baseline, needed to place adres afterwards
-        switch (this.getKey("lichtkring_poligheid")) {
-            case "wissel_enkel":
-                elements.push("wissel_enkel");
-                signalisatielamp.push(this.keys[19][2]);
-                halfwaterdicht.push(this.keys[20][2]);
-                verklikkerlamp.push(this.keys[21][2]);
-                trekschakelaar.push(this.keys[25][2]);
-                break;
-            case "wissel_dubbel":
-                elements.push("wissel_dubbel");
-                signalisatielamp.push(this.keys[19][2]);
-                halfwaterdicht.push(this.keys[20][2]);
-                verklikkerlamp.push(this.keys[21][2]);
-                trekschakelaar.push(this.keys[25][2]);
-                break;
-            case "kruis_enkel":
-                elements.push("kruis_enkel");
-                signalisatielamp.push(this.keys[19][2]);
-                halfwaterdicht.push(this.keys[20][2]);
-                verklikkerlamp.push(this.keys[21][2]);
-                trekschakelaar.push(this.keys[25][2]);
-                break;
-            case "teleruptor":
-                elements.push("teleruptor");
-                signalisatielamp.push(false);
-                halfwaterdicht.push(false);
-                verklikkerlamp.push(false);
-                trekschakelaar.push(false);
-                break;
-            case "bewegingsschakelaar":
-                elements.push("bewegingsschakelaar");
-                signalisatielamp.push(false);
-                halfwaterdicht.push(false);
-                verklikkerlamp.push(false);
-                trekschakelaar.push(false);
-                break;
-            case "schemerschakelaar":
-                elements.push("schemerschakelaar");
-                signalisatielamp.push(false);
-                halfwaterdicht.push(false);
-                verklikkerlamp.push(false);
-                trekschakelaar.push(false);
-                break;
-            case "schakelaar":
-                elements.push("schakelaar");
-                signalisatielamp.push(false);
-                halfwaterdicht.push(false);
-                verklikkerlamp.push(false);
-                trekschakelaar.push(false);
-                break;
-            case "dimmer":
-                elements.push("dimmer");
-                signalisatielamp.push(false);
-                halfwaterdicht.push(false);
-                verklikkerlamp.push(false);
-                trekschakelaar.push(false);
-                break;
-            case "relais":
-                elements.push("relais");
-                signalisatielamp.push(false);
-                halfwaterdicht.push(false);
-                verklikkerlamp.push(false);
-                trekschakelaar.push(false);
-                break;
-            case "minuterie":
-                elements.push("minuterie");
-                signalisatielamp.push(false);
-                halfwaterdicht.push(false);
-                verklikkerlamp.push(false);
-                trekschakelaar.push(false);
-                break;
-            case "thermostaat":
-                elements.push("thermostaat");
-                signalisatielamp.push(false);
-                halfwaterdicht.push(false);
-                verklikkerlamp.push(false);
-                trekschakelaar.push(false);
-                break;
-            case "tijdschakelaar":
-                elements.push("tijdschakelaar");
-                signalisatielamp.push(false);
-                halfwaterdicht.push(false);
-                verklikkerlamp.push(false);
-                trekschakelaar.push(false);
-                break;
-            case "rolluikschakelaar":
-                elements.push("rolluik");
-                signalisatielamp.push(false);
-                halfwaterdicht.push(this.keys[20][2]);
-                verklikkerlamp.push(false);
-                trekschakelaar.push(false);
-                break;
-            case "dubbelaansteking":
-                elements.push("dubbelaansteking");
-                signalisatielamp.push(this.keys[19][2]);
-                halfwaterdicht.push(this.keys[20][2]);
-                verklikkerlamp.push(this.keys[21][2]);
-                trekschakelaar.push(this.keys[25][2]);
-                break;
-            case "dimschakelaar":
-                elements.push("dimschakelaar");
-                signalisatielamp.push(this.keys[19][2]);
-                halfwaterdicht.push(this.keys[20][2]);
-                verklikkerlamp.push(this.keys[25][2]);
-                trekschakelaar.push(false);
-                break;
-            case "dimschakelaar wissel":
-                elements.push("dimschakelaar wissel");
-                signalisatielamp.push(this.keys[19][2]);
-                halfwaterdicht.push(this.keys[20][2]);
-                verklikkerlamp.push(this.keys[25][2]);
-                trekschakelaar.push(false);
-                break;
-            default: {
-                if (this.getKey("aantal") == "0") {
-                    //do nothing
-                }
-                else if (this.getKey("aantal") == "1") {
-                    if (this.getKey("lichtkring_poligheid") == "enkelpolig") {
-                        elements.push("enkel");
-                    }
-                    else if (this.getKey("lichtkring_poligheid") == "dubbelpolig") {
-                        elements.push("dubbel");
-                    }
-                    else if (this.getKey("lichtkring_poligheid") == "driepolig") {
-                        elements.push("driepolig");
-                    }
-                    signalisatielamp.push(this.keys[19][2]);
-                    halfwaterdicht.push(this.keys[20][2]);
-                    verklikkerlamp.push(this.keys[21][2]);
-                    trekschakelaar.push(this.keys[25][2]);
-                }
-                else {
-                    if (this.getKey("lichtkring_poligheid") == "enkelpolig") {
-                        elements.push("wissel_enkel");
-                        signalisatielamp.push(this.keys[19][2]);
-                        halfwaterdicht.push(this.keys[20][2]);
-                        verklikkerlamp.push(this.keys[21][2]);
-                        trekschakelaar.push(this.keys[25][2]);
-                        for (var i = 2; i < this.getKey("aantal"); i++) {
-                            elements.push("kruis_enkel");
-                            signalisatielamp.push(this.keys[19][2]);
-                            halfwaterdicht.push(this.keys[20][2]);
-                            verklikkerlamp.push(this.keys[21][2]);
-                            trekschakelaar.push(this.keys[25][2]);
-                        }
-                        elements.push("wissel_enkel");
-                        signalisatielamp.push(this.keys[19][2]);
-                        halfwaterdicht.push(this.keys[20][2]);
-                        verklikkerlamp.push(this.keys[21][2]);
-                        trekschakelaar.push(this.keys[25][2]);
-                    }
-                    else if (this.getKey("lichtkring_poligheid") == "dubbelpolig") {
-                        elements.push("wissel_dubbel");
-                        signalisatielamp.push(this.keys[19][2]);
-                        halfwaterdicht.push(this.keys[20][2]);
-                        verklikkerlamp.push(this.keys[21][2]);
-                        trekschakelaar.push(this.keys[25][2]);
-                        elements.push("wissel_dubbel");
-                        signalisatielamp.push(this.keys[19][2]);
-                        halfwaterdicht.push(this.keys[20][2]);
-                        verklikkerlamp.push(this.keys[21][2]);
-                        trekschakelaar.push(this.keys[25][2]);
-                    }
-                }
-            }
-        }
-        if (this.getKey("aantal2") >= 1) {
-            elements.push("lamp");
-            signalisatielamp.push(this.keys[19][2]);
-            halfwaterdicht.push(this.keys[20][2]);
-            verklikkerlamp.push(this.keys[21][2]);
-        }
-        var startx = 1;
-        var endx = 0;
-        for (i = 0; i < elements.length; i++) {
-            switch (elements[i]) {
-                case "enkel":
-                    endx = startx + 30;
-                    outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />';
-                    //outputstr += '<path d="M' + startx + ' 25 L' + endx + ' 25" stroke="black" />';
-                    outputstr += '<use xlink:href="#schakelaar_enkel" x="' + endx + '" y="25" />';
-                    if (signalisatielamp[i])
-                        outputstr += '<use xlink:href="#signalisatielamp" x="' + (endx - 10) + '" y="25" />';
-                    if (halfwaterdicht[i])
-                        outputstr += '<text x="' + endx + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">h</text>';
-                    if (verklikkerlamp[i])
-                        outputstr += '<line x1="' + (endx - 3) + '" x2="' + (endx + 3) + '" y1="22" y2="28" stroke="black" /><line x1="' + (endx - 3) + '" x2="' + (endx + 3) + '" y1="28" y2="22" stroke="black" />';
-                    if (trekschakelaar[i])
-                        outputstr += '<line x1="' + (endx + 10.5) + '" x2="' + (endx + 10.5) + '" y1="5" y2="15" stroke="black" /><line x1="' + (endx + 10.5) + '" x2="' + (endx + 8.5) + '" y1="15" y2="11" stroke="black" /><line x1="' + (endx + 10.5) + '" x2="' + (endx + 12.5) + '" y1="15" y2="11" stroke="black" />';
-                    if ((i == elements.length - 1) && (!hasChild)) {
-                        endx += 10;
-                    }
-                    startx = endx + 5;
-                    break;
-                case "dubbel":
-                    endx = startx + 30;
-                    outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />';
-                    //outputstr += '<path d="M' + startx + ' 25 L' + endx + ' 25" stroke="black" />';
-                    outputstr += '<use xlink:href="#schakelaar_dubbel" x="' + endx + '" y="25" />';
-                    if (signalisatielamp[i])
-                        outputstr += '<use xlink:href="#signalisatielamp" x="' + (endx - 10) + '" y="25" />';
-                    if (halfwaterdicht[i]) {
-                        outputstr += '<text x="' + endx + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">h</text>';
-                    }
-                    if (verklikkerlamp[i]) {
-                        outputstr += '<line x1="' + (endx - 3) + '" x2="' + (endx + 3) + '" y1="22" y2="28" stroke="black" /><line x1="' + (endx - 3) + '" x2="' + (endx + 3) + '" y1="28" y2="22" stroke="black" />';
-                    }
-                    ;
-                    if (trekschakelaar[i])
-                        outputstr += '<line x1="' + (endx + 8.5) + '" x2="' + (endx + 8.5) + '" y1="9" y2="19" stroke="black" /><line x1="' + (endx + 8.5) + '" x2="' + (endx + 6.5) + '" y1="19" y2="15" stroke="black" /><line x1="' + (endx + 8.5) + '" x2="' + (endx + 10.5) + '" y1="19" y2="15" stroke="black" />';
-                    if ((i == elements.length - 1) && (!hasChild)) {
-                        endx += 10;
-                    }
-                    startx = endx + 5;
-                    break;
-                case "driepolig":
-                    endx = startx + 30;
-                    outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />';
-                    //outputstr += '<path d="M' + startx + ' 25 L' + endx + ' 25" stroke="black" />';
-                    outputstr += '<use xlink:href="#schakelaar_trippel" x="' + endx + '" y="25" />';
-                    if (signalisatielamp[i])
-                        outputstr += '<use xlink:href="#signalisatielamp" x="' + (endx - 10) + '" y="25" />';
-                    if (halfwaterdicht[i]) {
-                        outputstr += '<text x="' + endx + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">h</text>';
-                    }
-                    if (verklikkerlamp[i]) {
-                        outputstr += '<line x1="' + (endx - 3) + '" x2="' + (endx + 3) + '" y1="22" y2="28" stroke="black" /><line x1="' + (endx - 3) + '" x2="' + (endx + 3) + '" y1="28" y2="22" stroke="black" />';
-                    }
-                    ;
-                    if (trekschakelaar[i])
-                        outputstr += '<line x1="' + (endx + 8.5) + '" x2="' + (endx + 8.5) + '" y1="9" y2="19" stroke="black" /><line x1="' + (endx + 8.5) + '" x2="' + (endx + 6.5) + '" y1="19" y2="15" stroke="black" /><line x1="' + (endx + 8.5) + '" x2="' + (endx + 10.5) + '" y1="19" y2="15" stroke="black" />';
-                    if ((i == elements.length - 1) && (!hasChild)) {
-                        endx += 10;
-                    }
-                    startx = endx + 5;
-                    break;
-                case "dubbelaansteking":
-                    endx = startx + 30;
-                    outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />';
-                    //outputstr += '<path d="M' + startx + ' 25 L' + endx + ' 25" stroke="black" />';
-                    outputstr += '<use xlink:href="#schakelaar_dubbelaansteking" x="' + endx + '" y="25" />';
-                    if (signalisatielamp[i])
-                        outputstr += '<use xlink:href="#signalisatielamp" x="' + (endx - 10) + '" y="25" />';
-                    if (halfwaterdicht[i]) {
-                        outputstr += '<text x="' + endx + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">h</text>';
-                    }
-                    if (verklikkerlamp[i]) {
-                        outputstr += '<line x1="' + (endx - 3) + '" x2="' + (endx + 3) + '" y1="22" y2="28" stroke="black" /><line x1="' + (endx - 3) + '" x2="' + (endx + 3) + '" y1="28" y2="22" stroke="black" />';
-                    }
-                    ;
-                    if (trekschakelaar[i])
-                        outputstr += '<line x1="' + (endx + 10.5) + '" x2="' + (endx + 10.5) + '" y1="5" y2="15" stroke="black" /><line x1="' + (endx + 10.5) + '" x2="' + (endx + 8.5) + '" y1="15" y2="11" stroke="black" /><line x1="' + (endx + 10.5) + '" x2="' + (endx + 12.5) + '" y1="15" y2="11" stroke="black" />';
-                    if ((i == elements.length - 1) && (!hasChild)) {
-                        endx += 10;
-                    }
-                    startx = endx + 5;
-                    break;
-                case "wissel_enkel":
-                    endx = startx + 30;
-                    outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />';
-                    //outputstr += '<path d="M' + startx + ' 25 L' + endx + ' 25" stroke="black" />';
-                    outputstr += '<use xlink:href="#schakelaar_wissel_enkel" x="' + endx + '" y="25" />';
-                    if (signalisatielamp[i])
-                        outputstr += '<use xlink:href="#signalisatielamp" x="' + (endx - 10) + '" y="25" />';
-                    if (halfwaterdicht[i]) {
-                        outputstr += '<text x="' + endx + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">h</text>';
-                    }
-                    if (verklikkerlamp[i]) {
-                        outputstr += '<line x1="' + (endx - 3) + '" x2="' + (endx + 3) + '" y1="22" y2="28" stroke="black" /><line x1="' + (endx - 3) + '" x2="' + (endx + 3) + '" y1="28" y2="22" stroke="black" />';
-                    }
-                    ;
-                    if (trekschakelaar[i])
-                        outputstr += '<line x1="' + (endx + 10.5) + '" x2="' + (endx + 10.5) + '" y1="5" y2="15" stroke="black" /><line x1="' + (endx + 10.5) + '" x2="' + (endx + 8.5) + '" y1="15" y2="11" stroke="black" /><line x1="' + (endx + 10.5) + '" x2="' + (endx + 12.5) + '" y1="15" y2="11" stroke="black" />';
-                    if ((i == elements.length - 1) && (!hasChild)) {
-                        endx += 10;
-                    }
-                    startx = endx + 5;
-                    lowerbound = Math.max(lowerbound, 35);
-                    break;
-                case "wissel_dubbel":
-                    endx = startx + 30;
-                    outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />';
-                    //outputstr += '<path d="M' + startx + ' 25 L' + endx + ' 25" stroke="black" />';
-                    outputstr += '<use xlink:href="#schakelaar_wissel_dubbel" x="' + endx + '" y="25" />';
-                    if (signalisatielamp[i])
-                        outputstr += '<use xlink:href="#signalisatielamp" x="' + (endx - 10) + '" y="25" />';
-                    if (halfwaterdicht[i]) {
-                        outputstr += '<text x="' + endx + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">h</text>';
-                    }
-                    if (verklikkerlamp[i]) {
-                        outputstr += '<line x1="' + (endx - 3) + '" x2="' + (endx + 3) + '" y1="22" y2="28" stroke="black" /><line x1="' + (endx - 3) + '" x2="' + (endx + 3) + '" y1="28" y2="22" stroke="black" />';
-                    }
-                    ;
-                    if (trekschakelaar[i])
-                        outputstr += '<line x1="' + (endx + 8.5) + '" x2="' + (endx + 8.5) + '" y1="9" y2="19" stroke="black" /><line x1="' + (endx + 8.5) + '" x2="' + (endx + 6.5) + '" y1="19" y2="15" stroke="black" /><line x1="' + (endx + 8.5) + '" x2="' + (endx + 10.5) + '" y1="19" y2="15" stroke="black" />';
-                    if ((i == elements.length - 1) && (!hasChild)) {
-                        endx += 10;
-                    }
-                    startx = endx + 5;
-                    lowerbound = Math.max(lowerbound, 35);
-                    break;
-                case "kruis_enkel":
-                    endx = startx + 30;
-                    outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />';
-                    //outputstr += '<path d="M' + startx + ' 25 L' + endx + ' 25" stroke="black" />';
-                    outputstr += '<use xlink:href="#schakelaar_kruis_enkel" x="' + endx + '" y="25" />';
-                    if (signalisatielamp[i])
-                        outputstr += '<use xlink:href="#signalisatielamp" x="' + (endx - 10) + '" y="25" />';
-                    if (halfwaterdicht[i]) {
-                        outputstr += '<text x="' + endx + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">h</text>';
-                    }
-                    if (verklikkerlamp[i]) {
-                        outputstr += '<line x1="' + (endx - 3) + '" x2="' + (endx + 3) + '" y1="22" y2="28" stroke="black" /><line x1="' + (endx - 3) + '" x2="' + (endx + 3) + '" y1="28" y2="22" stroke="black" />';
-                    }
-                    ;
-                    if (trekschakelaar[i])
-                        outputstr += '<line x1="' + (endx + 10.5) + '" x2="' + (endx + 10.5) + '" y1="5" y2="15" stroke="black" /><line x1="' + (endx + 10.5) + '" x2="' + (endx + 8.5) + '" y1="15" y2="11" stroke="black" /><line x1="' + (endx + 10.5) + '" x2="' + (endx + 12.5) + '" y1="15" y2="11" stroke="black" />';
-                    if ((i == elements.length - 1) && (!hasChild)) {
-                        endx += 10;
-                    }
-                    startx = endx + 5;
-                    lowerbound = Math.max(lowerbound, 35);
-                    break;
-                case "dimschakelaar":
-                    endx = startx + 30;
-                    outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />';
-                    outputstr += '<use xlink:href="#schakelaar_enkel_dim" x="' + endx + '" y="25" />';
-                    if (signalisatielamp[i])
-                        outputstr += '<use xlink:href="#signalisatielamp" x="' + (endx - 10) + '" y="25" />';
-                    if (halfwaterdicht[i]) {
-                        outputstr += '<text x="' + endx + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">h</text>';
-                    }
-                    if (verklikkerlamp[i]) {
-                        outputstr += '<line x1="' + (endx - 3) + '" x2="' + (endx + 3) + '" y1="22" y2="28" stroke="black" /><line x1="' + (endx - 3) + '" x2="' + (endx + 3) + '" y1="28" y2="22" stroke="black" />';
-                    }
-                    ;
-                    if ((i == elements.length - 1) && (!hasChild)) {
-                        endx += 10;
-                    }
-                    startx = endx + 5;
-                    break;
-                case "dimschakelaar wissel":
-                    endx = startx + 30;
-                    outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />';
-                    outputstr += '<use xlink:href="#schakelaar_wissel_dim" x="' + endx + '" y="25" />';
-                    if (signalisatielamp[i])
-                        outputstr += '<use xlink:href="#signalisatielamp" x="' + (endx - 10) + '" y="25" />';
-                    if (halfwaterdicht[i]) {
-                        outputstr += '<text x="' + endx + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">h</text>';
-                    }
-                    if (verklikkerlamp[i]) {
-                        outputstr += '<line x1="' + (endx - 3) + '" x2="' + (endx + 3) + '" y1="22" y2="28" stroke="black" /><line x1="' + (endx - 3) + '" x2="' + (endx + 3) + '" y1="28" y2="22" stroke="black" />';
-                    }
-                    ;
-                    if ((i == elements.length - 1) && (!hasChild)) {
-                        endx += 10;
-                    }
-                    startx = endx + 5;
-                    lowerbound = Math.max(lowerbound, 35);
-                    break;
-                case "bewegingsschakelaar":
-                    endx = startx + 20;
-                    outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />';
-                    //outputstr += '<path d="M' + startx + ' 25 L' + endx + ' 25" stroke="black" />';
-                    outputstr += '<use xlink:href="#relais" x="' + endx + '" y="16" />';
-                    outputstr += '<use xlink:href="#moving_man" x="' + (endx + 1.5) + '" y="11" />';
-                    outputstr += '<use xlink:href="#detectie_klein" x="' + (endx + 23) + '" y="13"></use>';
-                    outputstr += '<line x1="' + endx + '" x2="' + endx + '" y1="29" y2="43" fill="none" style="stroke:black" />';
-                    outputstr += '<line x1="' + (endx + 40) + '" x2="' + (endx + 40) + '" y1="29" y2="43" fill="none" style="stroke:black" />';
-                    outputstr += '<line x1="' + (endx) + '" x2="' + (endx + 40) + '" y1="43" y2="43" fill="none" style="stroke:black" />';
-                    startx = endx + 40;
-                    lowerbound = Math.max(lowerbound, 30);
-                    break;
-                case "schakelaar":
-                    endx = startx + 20;
-                    outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />';
-                    //outputstr += '<path d="M' + startx + ' 25 L' + endx + ' 25" stroke="black" />';
-                    outputstr += '<use xlink:href="#schakelaar" x="' + endx + '" y="25" />';
-                    startx = endx + 40;
-                    break;
-                case "schemerschakelaar":
-                    endx = startx + 20;
-                    outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />';
-                    //outputstr += '<path d="M' + startx + ' 25 L' + endx + ' 25" stroke="black" />';
-                    outputstr += '<use xlink:href="#schemerschakelaar" x="' + endx + '" y="25" />';
-                    startx = endx + 40;
-                    break;
-                case "teleruptor":
-                    endx = startx + 20;
-                    outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />';
-                    //outputstr += '<path d="M' + startx + ' 25 L' + endx + ' 25" stroke="black" />';
-                    outputstr += '<use xlink:href="#teleruptor" x="' + endx + '" y="25" />';
-                    startx = endx + 40;
-                    lowerbound = Math.max(lowerbound, 30);
-                    break;
-                case "dimmer":
-                    endx = startx + 20;
-                    outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />';
-                    //outputstr += '<path d="M' + startx + ' 25 L' + endx + ' 25" stroke="black" />';
-                    outputstr += '<use xlink:href="#dimmer" x="' + endx + '" y="25" />';
-                    startx = endx + 40;
-                    lowerbound = Math.max(lowerbound, 30);
-                    break;
-                case "relais":
-                    endx = startx + 20;
-                    outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />';
-                    //outputstr += '<path d="M' + startx + ' 25 L' + endx + ' 25" stroke="black" />';
-                    outputstr += '<use xlink:href="#relais" x="' + endx + '" y="25" />';
-                    startx = endx + 40;
-                    lowerbound = Math.max(lowerbound, 30);
-                    break;
-                case "minuterie":
-                    endx = startx + 20;
-                    outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />';
-                    //outputstr += '<path d="M' + startx + ' 25 L' + endx + ' 25" stroke="black" />';
-                    outputstr += '<use xlink:href="#minuterie" x="' + endx + '" y="25" />';
-                    startx = endx + 40;
-                    lowerbound = Math.max(lowerbound, 30);
-                    break;
-                case "thermostaat":
-                    endx = startx + 20;
-                    outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />';
-                    //outputstr += '<path d="M' + startx + ' 25 L' + endx + ' 25" stroke="black" />';
-                    outputstr += '<use xlink:href="#thermostaat" x="' + endx + '" y="25" />';
-                    startx = endx + 40;
-                    lowerbound = Math.max(lowerbound, 30);
-                    break;
-                case "tijdschakelaar":
-                    endx = startx + 20;
-                    outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />';
-                    //outputstr += '<path d="M' + startx + ' 25 L' + endx + ' 25" stroke="black" />';
-                    outputstr += '<use xlink:href="#tijdschakelaar" x="' + endx + '" y="25" />';
-                    startx = endx + 40;
-                    lowerbound = Math.max(lowerbound, 30);
-                    break;
-                case "rolluik":
-                    endx = startx + 30;
-                    outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />';
-                    //outputstr += '<path d="M' + startx + ' 25 L' + endx + ' 25" stroke="black" />';
-                    outputstr += '<use xlink:href="#schakelaar_rolluik" x="' + endx + '" y="25" />';
-                    if (halfwaterdicht[i]) {
-                        outputstr += '<text x="' + endx + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">h</text>';
-                    }
-                    startx = endx + 8;
-                    lowerbound = Math.max(lowerbound, 25);
-                    break;
-                case "lamp":
-                    endx = startx + 30;
-                    outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />';
-                    //outputstr += '<path d="M' + startx + ' 25 L' + endx + ' 25" stroke="black" />';
-                    outputstr += '<use xlink:href="#lamp" x="' + endx + '" y="25" />';
-                    var print_str_upper = "";
-                    if (this.keys[20][2]) {
-                        print_str_upper = "h";
-                        if (parseInt(this.keys[13][2]) > 1) { // Meer dan 1 lamp
-                            print_str_upper += ", x" + this.keys[13][2];
-                        }
-                    }
-                    else if (parseInt(this.keys[13][2]) > 1) {
-                        print_str_upper = "x" + this.keys[13][2];
-                    }
-                    //if (halfwaterdicht[i]) { outputstr += '<text x="' + endx + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">h</text>'; }
-                    if (print_str_upper != "") {
-                        outputstr += '<text x="' + endx + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' + htmlspecialchars(print_str_upper) + '</text>';
-                    }
-                    if ((i < elements.length - 1) || ((i == elements.length - 1) && (hasChild))) {
-                        outputstr += '<line x1="' + endx + '" y1="25" x2="' + (endx + 10) + '" y2="25" stroke="black" />';
-                    }
-                    startx = endx + 10;
-                    lowerbound = Math.max(lowerbound, 29);
-                    break;
-            }
-        }
-        endx = startx - 2;
-        mySVG.xright = endx;
-        //Place adress underneath
-        outputstr += this.addAddress(mySVG, 25 + lowerbound, Math.max(0, lowerbound - 20));
-        return (outputstr);
-    };
     //-- Add the addressline below --
     Electro_Item.prototype.addAddress = function (mySVG, starty, godown, shiftx, key) {
         if (starty === void 0) { starty = 60; }
@@ -1370,224 +820,526 @@ var Electro_Item = /** @class */ (function (_super) {
         return returnstr;
     };
     //-- Make the SVG for the entire electro item --
-    Electro_Item.prototype.toSVG = function (hasChild) {
-        if (hasChild === void 0) { hasChild = false; }
-        var mySVG = new SVGelement();
-        var outputstr = "";
-        mySVG.data = "";
-        mySVG.xleft = 1; // foresee at least some space for the conductor
-        mySVG.xright = 20;
-        mySVG.yup = 25;
-        mySVG.ydown = 25;
-        switch (this.keys[0][2]) {
-            case "Leeg":
-            case "Lichtcircuit":
-                outputstr += this.toSVGswitches(hasChild, mySVG);
-                break;
-            case "Lichtpunt":
-                outputstr += '<line x1="0" x2="30" y1="25" y2="25" stroke="black" />';
-                var print_str_upper = "";
-                if (this.keys[20][2]) {
-                    print_str_upper = "h";
-                    if (parseInt(this.keys[4][2]) > 1) { // Meer dan 1 lamp
-                        print_str_upper += ", x" + this.keys[4][2];
-                    }
-                }
-                else if (parseInt(this.keys[4][2]) > 1) {
-                    print_str_upper = "x" + this.keys[4][2];
-                }
-                switch (this.keys[16][2]) {
-                    case "led":
-                        outputstr += '<use xlink:href="#led" x="' + 30 + '" y="25" />';
-                        if (this.keys[19][2]) {
-                            outputstr += '<line x1="30" y1="35" x2="42" y2="35" stroke="black" />';
-                        }
-                        //determine positioning of emergency symbol and draw it
-                        var noodxpos;
-                        var textxpos;
-                        if (print_str_upper == "") {
-                            noodxpos = 36;
-                            textxpos = 36; // not used
-                        }
-                        else {
-                            noodxpos = 20;
-                            if ((print_str_upper.length > 2) && ((this.keys[17][2] == "Centraal") || (this.keys[17][2] == "Decentraal"))) {
-                                textxpos = 40;
-                            }
-                            else {
-                                textxpos = 36;
-                            }
-                        }
-                        ;
-                        if (print_str_upper != "") {
-                            outputstr += '<text x="' + textxpos + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="7">' + htmlspecialchars(print_str_upper) + '</text>';
-                        }
-                        if (this.keys[21][2]) {
-                            outputstr += '<line x1="42" y1="25" x2="45.75" y2="17.5" stroke="black" />';
-                            outputstr += '<line x1="45.75" y1="17.5" x2="48.25" y2="18.75" stroke="black" />';
-                        }
-                        var noodypos = 6.5;
-                        switch (this.keys[17][2]) {
-                            case "Centraal":
-                                outputstr += '<circle cx="' + noodxpos + '" cy="' + noodypos + '" r="2.5" style="stroke:black;fill:black" />';
-                                outputstr += '<line x1="' + (noodxpos - 5.6) + '" y1="' + (noodypos - 5.6) + '" x2="' + (noodxpos + 5.6) + '" y2="' + (noodypos + 5.6) + '" style="stroke:black;fill:black" />';
-                                outputstr += '<line x1="' + (noodxpos + 5.6) + '" y1="' + (noodypos - 5.6) + '" x2="' + (noodxpos - 5.6) + '" y2="' + (noodypos + 5.6) + '" style="stroke:black;fill:black" />';
-                                break;
-                            case "Decentraal":
-                                outputstr += '<rect x="' + (noodxpos - 5.6) + '" y="' + (noodypos - 5.6) + '" width="11.2" height="11.2" fill="white" stroke="black" />';
-                                outputstr += '<circle cx="' + noodxpos + '" cy="' + noodypos + '" r="2.5" style="stroke:black;fill:black" />';
-                                outputstr += '<line x1="' + (noodxpos - 5.6) + '" y1="' + (noodypos - 5.6) + '" x2="' + (noodxpos + 5.6) + '" y2="' + (noodypos + 5.6) + '" style="stroke:black;fill:black" />';
-                                outputstr += '<line x1="' + (noodxpos + 5.6) + '" y1="' + (noodypos - 5.6) + '" x2="' + (noodxpos - 5.6) + '" y2="' + (noodypos + 5.6) + '" style="stroke:black;fill:black" />';
-                                break;
-                            default:
-                                break;
-                        }
-                        mySVG.xright = 42;
-                        //-- Plaats adres onderaan --
-                        outputstr += this.addAddress(mySVG, 50, 5, 2);
-                        break;
-                    case "spot":
-                        outputstr += '<use xlink:href="#spot" x="' + 30 + '" y="25" />';
-                        if (this.keys[19][2]) {
-                            outputstr += '<line x1="30" y1="38" x2="46" y2="38" stroke="black" />';
-                        }
-                        //determine positioning of emergency symbol and draw it
-                        var noodxpos;
-                        var textxpos;
-                        if (print_str_upper == "") {
-                            noodxpos = 40;
-                            textxpos = 40; // not used
-                        }
-                        else {
-                            noodxpos = 24;
-                            if ((print_str_upper.length > 2) && ((this.keys[17][2] == "Centraal") || (this.keys[17][2] == "Decentraal"))) {
-                                textxpos = 44;
-                            }
-                            else {
-                                textxpos = 40;
-                            }
-                        }
-                        ;
-                        if (print_str_upper != "") {
-                            outputstr += '<text x="' + textxpos + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="7">' + htmlspecialchars(print_str_upper) + '</text>';
-                        }
-                        if (this.keys[21][2]) {
-                            outputstr += '<line x1="46" y1="25" x2="49.75" y2="17.5" stroke="black" />';
-                            outputstr += '<line x1="49.75" y1="17.5" x2="52.25" y2="18.75" stroke="black" />';
-                        }
-                        var noodypos = 6.5;
-                        switch (this.keys[17][2]) {
-                            case "Centraal":
-                                outputstr += '<circle cx="' + noodxpos + '" cy="' + noodypos + '" r="2.5" style="stroke:black;fill:black" />';
-                                outputstr += '<line x1="' + (noodxpos - 5.6) + '" y1="' + (noodypos - 5.6) + '" x2="' + (noodxpos + 5.6) + '" y2="' + (noodypos + 5.6) + '" style="stroke:black;fill:black" />';
-                                outputstr += '<line x1="' + (noodxpos + 5.6) + '" y1="' + (noodypos - 5.6) + '" x2="' + (noodxpos - 5.6) + '" y2="' + (noodypos + 5.6) + '" style="stroke:black;fill:black" />';
-                                break;
-                            case "Decentraal":
-                                outputstr += '<rect x="' + (noodxpos - 5.6) + '" y="' + (noodypos - 5.6) + '" width="11.2" height="11.2" fill="white" stroke="black" />';
-                                outputstr += '<circle cx="' + noodxpos + '" cy="' + noodypos + '" r="2.5" style="stroke:black;fill:black" />';
-                                outputstr += '<line x1="' + (noodxpos - 5.6) + '" y1="' + (noodypos - 5.6) + '" x2="' + (noodxpos + 5.6) + '" y2="' + (noodypos + 5.6) + '" style="stroke:black;fill:black" />';
-                                outputstr += '<line x1="' + (noodxpos + 5.6) + '" y1="' + (noodypos - 5.6) + '" x2="' + (noodxpos - 5.6) + '" y2="' + (noodypos + 5.6) + '" style="stroke:black;fill:black" />';
-                                break;
-                            default:
-                                break;
-                        }
-                        mySVG.xright = 45;
-                        //-- Plaats adres onderaan --
-                        outputstr += this.addAddress(mySVG, 52, 7, 4);
-                        break;
-                    case "TL":
-                        var aantal_buizen = this.keys[13][2];
-                        var starty = 25 - (aantal_buizen) * 3.5;
-                        var endy = 25 + (aantal_buizen) * 3.5;
-                        outputstr += '<line x1="30" y1="' + starty + '" x2="30" y2="' + endy + '" stroke="black" stroke-width="2" />';
-                        outputstr += '<line x1="90" y1="' + starty + '" x2="90" y2="' + endy + '" stroke="black" stroke-width="2" />';
-                        for (var i = 0; i < aantal_buizen; i++) {
-                            outputstr += '<line x1="30" y1="' + (starty + (i * 7) + 3.5) + '" x2="90" y2="' + (starty + (i * 7) + 3.5) + '" stroke="black" stroke-width="2" />';
-                        }
-                        if (this.keys[19][2]) {
-                            outputstr += '<line x1="50" y1="' + (27 + (aantal_buizen * 3.5)) + '" x2="70" y2="' + (27 + (aantal_buizen * 3.5)) + '" stroke="black" />';
-                        }
-                        if (print_str_upper != "") {
-                            outputstr += '<text x="60" y="' + (25 - (aantal_buizen * 3.5)) + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' + htmlspecialchars(print_str_upper) + '</text>';
-                        }
-                        if (this.keys[21][2]) {
-                            outputstr += '<line x1="77.5" y1="' + (29 - (aantal_buizen * 3.5)) + '" x2="85" y2="' + (14 - (aantal_buizen * 3.5)) + '" stroke="black" />';
-                            outputstr += '<line x1="85" y1="' + (14 - (aantal_buizen * 3.5)) + '" x2="90" y2="' + (16.5 - (aantal_buizen * 3.5)) + '" stroke="black" />';
-                        }
-                        //determine positioning of emergency symbol and draw it
-                        var noodxpos;
-                        if (print_str_upper == "") {
-                            noodxpos = 60;
-                        }
-                        else {
-                            noodxpos = 39;
-                        }
-                        ;
-                        var noodypos = (25 - (aantal_buizen * 3.5) - 5);
-                        switch (this.keys[17][2]) {
-                            case "Centraal":
-                                outputstr += '<circle cx="' + noodxpos + '" cy="' + noodypos + '" r="2.5" style="stroke:black;fill:black" />';
-                                outputstr += '<line x1="' + (noodxpos - 5.6) + '" y1="' + (noodypos - 5.6) + '" x2="' + (noodxpos + 5.6) + '" y2="' + (noodypos + 5.6) + '" style="stroke:black;fill:black" />';
-                                outputstr += '<line x1="' + (noodxpos + 5.6) + '" y1="' + (noodypos - 5.6) + '" x2="' + (noodxpos - 5.6) + '" y2="' + (noodypos + 5.6) + '" style="stroke:black;fill:black" />';
-                                break;
-                            case "Decentraal":
-                                outputstr += '<rect x="' + (noodxpos - 5.6) + '" y="' + (noodypos - 5.6) + '" width="11.2" height="11.2" fill="white" stroke="black" />';
-                                outputstr += '<circle cx="' + noodxpos + '" cy="' + noodypos + '" r="2.5" style="stroke:black;fill:black" />';
-                                outputstr += '<line x1="' + (noodxpos - 5.6) + '" y1="' + (noodypos - 5.6) + '" x2="' + (noodxpos + 5.6) + '" y2="' + (noodypos + 5.6) + '" style="stroke:black;fill:black" />';
-                                outputstr += '<line x1="' + (noodxpos + 5.6) + '" y1="' + (noodypos - 5.6) + '" x2="' + (noodxpos - 5.6) + '" y2="' + (noodypos + 5.6) + '" style="stroke:black;fill:black" />';
-                                break;
-                        }
-                        mySVG.xright = 90;
-                        //-- Plaats adres onderaan --
-                        outputstr += this.addAddress(mySVG, endy + 13, Math.max(mySVG.ydown, endy + 18 - 25), 2);
-                        break;
-                    default:
-                        switch (this.keys[17][2]) {
-                            case "Centraal":
-                                outputstr += '<use xlink:href="#lamp" x="' + 30 + '" y="25" />';
-                                outputstr += '<circle cx="30" cy="25" r="5" style="stroke:black;fill:black" />';
-                                if (hasChild) {
-                                    outputstr += '<line x1="' + 30 + '" y1="25" x2="' + (30 + 11) + '" y2="25" stroke="black" />';
-                                }
-                                break;
-                            case "Decentraal":
-                                outputstr += '<use xlink:href="#noodlamp_decentraal" x="' + 30 + '" y="25" />';
-                                if (this.keys[21][2]) { //Ingebouwde schakelaar
-                                    outputstr += '<line x1="37" y1="18" x2="40" y2="15" stroke="black" stroke-width="2" />';
-                                }
-                                break;
-                            default:
-                                outputstr += '<use xlink:href="#lamp" x="' + 30 + '" y="25" />';
-                                if (hasChild) {
-                                    outputstr += '<line x1="' + 30 + '" y1="25" x2="' + (30 + 11) + '" y2="25" stroke="black" />';
-                                }
-                                break;
-                        }
-                        if (print_str_upper != "") {
-                            outputstr += '<text x="30" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' + htmlspecialchars(print_str_upper) + '</text>';
-                        }
-                        if (this.keys[19][2]) {
-                            outputstr += '<line x1="20" y1="40" x2="40" y2="40" stroke="black" />';
-                        }
-                        if (this.keys[21][2]) {
-                            outputstr += '<line x1="40" y1="15" x2="45" y2="20" stroke="black" stroke-width="2" />';
-                        }
-                        mySVG.xright = 39;
-                        //-- Plaats adres onderaan --
-                        outputstr += this.addAddress(mySVG, 54, 10, -1);
-                        break;
-                }
-                break;
-            case "Schakelaars":
-                this.setKey("aantal2", 0);
-                outputstr += this.toSVGswitches(hasChild, mySVG);
-                break;
-        }
-        mySVG.data = outputstr + "\n";
-        return (mySVG);
+    Electro_Item.prototype.toSVG = function () {
+        return (new SVGelement());
     };
     return Electro_Item;
 }(List_Item));
+var Schakelaar = /** @class */ (function () {
+    function Schakelaar(type, halfwaterdicht, verklikkerlamp, signalisatielamp, trekschakelaar) {
+        if (halfwaterdicht === void 0) { halfwaterdicht = false; }
+        if (verklikkerlamp === void 0) { verklikkerlamp = false; }
+        if (signalisatielamp === void 0) { signalisatielamp = false; }
+        if (trekschakelaar === void 0) { trekschakelaar = false; }
+        this.type = type;
+        this.halfwaterdicht = halfwaterdicht;
+        this.verklikkerlamp = verklikkerlamp;
+        this.signalisatielamp = signalisatielamp;
+        this.trekschakelaar = trekschakelaar;
+    }
+    Schakelaar.prototype.schakelaarAttributentoSVGString = function (endx, isdubbel) {
+        if (isdubbel === void 0) { isdubbel = false; }
+        var outputstr = "";
+        if (this.signalisatielamp)
+            outputstr += '<use xlink:href="#signalisatielamp" x="' + (endx - 10) + '" y="25" />';
+        if (this.halfwaterdicht)
+            outputstr += '<text x="' + endx + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">h</text>';
+        if (this.verklikkerlamp)
+            outputstr += '<line x1="' + (endx - 3) + '" x2="' + (endx + 3) + '" y1="22" y2="28" stroke="black" /><line x1="' + (endx - 3) + '" x2="' + (endx + 3) + '" y1="28" y2="22" stroke="black" />';
+        if (this.trekschakelaar) {
+            switch (isdubbel) {
+                case false:
+                    outputstr += '<line x1="' + (endx + 10.5) + '" x2="' + (endx + 10.5) + '" y1="5" y2="15" stroke="black" /><line x1="' + (endx + 10.5) + '" x2="' + (endx + 8.5) + '" y1="15" y2="11" stroke="black" /><line x1="' + (endx + 10.5) + '" x2="' + (endx + 12.5) + '" y1="15" y2="11" stroke="black" />';
+                    break;
+                case true:
+                    outputstr += '<line x1="' + (endx + 8.5) + '" x2="' + (endx + 8.5) + '" y1="9" y2="19" stroke="black" /><line x1="' + (endx + 8.5) + '" x2="' + (endx + 6.5) + '" y1="19" y2="15" stroke="black" /><line x1="' + (endx + 8.5) + '" x2="' + (endx + 10.5) + '" y1="19" y2="15" stroke="black" />';
+                    break;
+            }
+        }
+        return outputstr;
+    };
+    Schakelaar.prototype.enkeltoDrawReturnObj = function (startx) {
+        var outputstr = "";
+        var endx = startx + 30;
+        outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
+            + '<use xlink:href="#schakelaar_enkel" x="' + endx + '" y="25" />'
+            + this.schakelaarAttributentoSVGString(endx);
+        return ({ endx: endx, str: outputstr, lowerbound: null });
+    };
+    Schakelaar.prototype.dubbeltoDrawReturnObj = function (startx) {
+        var outputstr = "";
+        var endx = startx + 30;
+        outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
+            + '<use xlink:href="#schakelaar_dubbel" x="' + endx + '" y="25" />'
+            + this.schakelaarAttributentoSVGString(endx, true);
+        return ({ endx: endx, str: outputstr, lowerbound: null });
+    };
+    Schakelaar.prototype.driepoligtoDrawReturnObj = function (startx) {
+        var outputstr = "";
+        var endx = startx + 30;
+        outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
+            + '<use xlink:href="#schakelaar_trippel" x="' + endx + '" y="25" />'
+            + this.schakelaarAttributentoSVGString(endx, true);
+        return ({ endx: endx, str: outputstr, lowerbound: null });
+    };
+    Schakelaar.prototype.dubbelaanstekingtoDrawReturnObj = function (startx) {
+        var outputstr = "";
+        var endx = startx + 30;
+        outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
+            + '<use xlink:href="#schakelaar_dubbelaansteking" x="' + endx + '" y="25" />'
+            + this.schakelaarAttributentoSVGString(endx);
+        return ({ endx: endx, str: outputstr, lowerbound: null });
+    };
+    Schakelaar.prototype.wissel_enkeltoDrawReturnObj = function (startx) {
+        var outputstr = "";
+        var endx = startx + 30;
+        outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
+            + '<use xlink:href="#schakelaar_wissel_enkel" x="' + endx + '" y="25" />'
+            + this.schakelaarAttributentoSVGString(endx);
+        return ({ endx: endx, str: outputstr, lowerbound: null });
+    };
+    Schakelaar.prototype.wissel_dubbeltoDrawReturnObj = function (startx) {
+        var outputstr = "";
+        var endx = startx + 30;
+        outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
+            + '<use xlink:href="#schakelaar_wissel_dubbel" x="' + endx + '" y="25" />'
+            + this.schakelaarAttributentoSVGString(endx, true);
+        return ({ endx: endx, str: outputstr, lowerbound: null });
+    };
+    Schakelaar.prototype.kruis_enkeltoDrawReturnObj = function (startx) {
+        var outputstr = "";
+        var endx = startx + 30;
+        outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
+            + '<use xlink:href="#schakelaar_kruis_enkel" x="' + endx + '" y="25" />'
+            + this.schakelaarAttributentoSVGString(endx);
+        return ({ endx: endx, str: outputstr, lowerbound: null });
+    };
+    Schakelaar.prototype.dimschakelaartoDrawReturnObj = function (startx) {
+        var outputstr = "";
+        var endx = startx + 30;
+        outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
+            + '<use xlink:href="#schakelaar_enkel_dim" x="' + endx + '" y="25" />'
+            + this.schakelaarAttributentoSVGString(endx);
+        return ({ endx: endx, str: outputstr, lowerbound: null });
+    };
+    Schakelaar.prototype.dimschakelaarWisseltoDrawReturnObj = function (startx) {
+        var outputstr = "";
+        var endx = startx + 30;
+        outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
+            + '<use xlink:href="#schakelaar_wissel_dim" x="' + endx + '" y="25" />'
+            + this.schakelaarAttributentoSVGString(endx);
+        return ({ endx: endx, str: outputstr, lowerbound: null });
+    };
+    Schakelaar.prototype.bewegingsschakelaartoDrawReturnObj = function (startx) {
+        var outputstr = "";
+        var endx = startx + 20;
+        outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
+            + '<use xlink:href="#relais" x="' + endx + '" y="16" />'
+            + '<use xlink:href="#moving_man" x="' + (endx + 1.5) + '" y="11" />'
+            + '<use xlink:href="#detectie_klein" x="' + (endx + 23) + '" y="13"></use>'
+            + '<line x1="' + endx + '" x2="' + endx + '" y1="29" y2="43" fill="none" style="stroke:black" />'
+            + '<line x1="' + (endx + 40) + '" x2="' + (endx + 40) + '" y1="29" y2="43" fill="none" style="stroke:black" />'
+            + '<line x1="' + (endx) + '" x2="' + (endx + 40) + '" y1="43" y2="43" fill="none" style="stroke:black" />';
+        return ({ endx: endx, str: outputstr, lowerbound: null });
+    };
+    Schakelaar.prototype.rolluikschakelaartoDrawReturnObj = function (startx) {
+        var outputstr = "";
+        var endx = startx + 30;
+        outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
+            + '<use xlink:href="#schakelaar_rolluik" x="' + endx + '" y="25" />';
+        if (this.halfwaterdicht)
+            outputstr += '<text x="' + endx + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">h</text>';
+        return ({ endx: endx, str: outputstr, lowerbound: null });
+    };
+    Schakelaar.prototype.defaulttoDrawReturnObj = function (startx, symbol) {
+        var outputstr = "";
+        var endx = startx + 20;
+        outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
+            + '<use xlink:href="' + symbol + '" x="' + endx + '" y="25" />';
+        return ({ endx: endx, str: outputstr, lowerbound: null });
+    };
+    Schakelaar.prototype.extraPlaatsRechts = function () {
+        if ((this.type == "enkel") || (this.type == "dubbel") || (this.type == "driepolig") || (this.type == "dubbelaansteking") ||
+            (this.type == "wissel_enkel") || (this.type == "wissel_dubbel") || (this.type == "kruis_enkel") || (this.type == "dimschakelaar") ||
+            (this.type == "dimschakelaar_wissel"))
+            return 10;
+        else if (this.type == "rolluikschakelaar")
+            return 7;
+        else
+            return 0;
+    };
+    Schakelaar.prototype.toSVGString = function (startx, last) {
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u;
+        var outputstr = "";
+        var endx;
+        var lowerbound = 20;
+        switch (this.type) {
+            case "enkel":
+                (_a = (this.enkeltoDrawReturnObj(startx)), endx = _a.endx, outputstr = _a.str);
+                endx += 5;
+                break;
+            case "dubbel":
+                (_b = (this.dubbeltoDrawReturnObj(startx)), endx = _b.endx, outputstr = _b.str);
+                endx += 5;
+                break;
+            case "driepolig":
+                (_c = (this.driepoligtoDrawReturnObj(startx)), endx = _c.endx, outputstr = _c.str);
+                endx += 5;
+                break;
+            case "dubbelaansteking":
+                (_d = (this.dubbelaanstekingtoDrawReturnObj(startx)), endx = _d.endx, outputstr = _d.str);
+                endx += 5;
+                break;
+            case "wissel_enkel":
+                (_e = (this.wissel_enkeltoDrawReturnObj(startx)), endx = _e.endx, outputstr = _e.str);
+                endx += 5;
+                lowerbound = Math.max(lowerbound, 35);
+                break;
+            case "wissel_dubbel":
+                (_f = (this.wissel_dubbeltoDrawReturnObj(startx)), endx = _f.endx, outputstr = _f.str);
+                endx += 5;
+                lowerbound = Math.max(lowerbound, 35);
+                break;
+            case "kruis_enkel":
+                (_g = (this.kruis_enkeltoDrawReturnObj(startx)), endx = _g.endx, outputstr = _g.str);
+                endx += 5;
+                lowerbound = Math.max(lowerbound, 35);
+                break;
+            case "dimschakelaar":
+                (_h = (this.dimschakelaartoDrawReturnObj(startx)), endx = _h.endx, outputstr = _h.str);
+                endx += 5;
+                break;
+            case "dimschakelaar_wissel":
+                (_j = (this.dimschakelaarWisseltoDrawReturnObj(startx)), endx = _j.endx, outputstr = _j.str);
+                endx += 5;
+                lowerbound = Math.max(lowerbound, 35);
+                break;
+            case "bewegingsschakelaar":
+                (_k = (this.bewegingsschakelaartoDrawReturnObj(startx)), endx = _k.endx, outputstr = _k.str);
+                endx += 40;
+                lowerbound = Math.max(lowerbound, 30);
+                break;
+            case "rolluikschakelaar":
+                (_l = (this.rolluikschakelaartoDrawReturnObj(startx)), endx = _l.endx, outputstr = _l.str);
+                endx += 8;
+                lowerbound = Math.max(lowerbound, 25);
+                break;
+            case "schakelaar":
+                (_m = (this.defaulttoDrawReturnObj(startx, '#schakelaar')), endx = _m.endx, outputstr = _m.str);
+                endx += 40;
+                break;
+            case "schemerschakelaar":
+                (_o = (this.defaulttoDrawReturnObj(startx, '#schemerschakelaar')), endx = _o.endx, outputstr = _o.str);
+                endx += 40;
+                break;
+            case "teleruptor":
+                (_p = (this.defaulttoDrawReturnObj(startx, '#teleruptor')), endx = _p.endx, outputstr = _p.str);
+                endx += 40;
+                lowerbound = Math.max(lowerbound, 30);
+                break;
+            case "dimmer":
+                (_q = (this.defaulttoDrawReturnObj(startx, '#dimmer')), endx = _q.endx, outputstr = _q.str);
+                endx += 40;
+                lowerbound = Math.max(lowerbound, 30);
+                break;
+            case "relais":
+                (_r = (this.defaulttoDrawReturnObj(startx, '#relais')), endx = _r.endx, outputstr = _r.str);
+                endx += 40;
+                lowerbound = Math.max(lowerbound, 30);
+                break;
+            case "minuterie":
+                (_s = (this.defaulttoDrawReturnObj(startx, '#minuterie')), endx = _s.endx, outputstr = _s.str);
+                endx += 40;
+                lowerbound = Math.max(lowerbound, 30);
+                break;
+            case "thermostaat":
+                (_t = (this.defaulttoDrawReturnObj(startx, '#thermostaat')), endx = _t.endx, outputstr = _t.str);
+                endx += 40;
+                lowerbound = Math.max(lowerbound, 30);
+                break;
+            case "tijdschakelaar":
+                (_u = (this.defaulttoDrawReturnObj(startx, '#tijdschakelaar')), endx = _u.endx, outputstr = _u.str);
+                endx += 40;
+                lowerbound = Math.max(lowerbound, 30);
+                break;
+            default:
+                endx = 30; //Indien type niet herkend wordt minstens deze variabele definieren
+        }
+        return ({ endx: endx, str: outputstr, lowerbound: lowerbound });
+    };
+    return Schakelaar;
+}());
+var Schakelaars = /** @class */ (function (_super) {
+    __extends(Schakelaars, _super);
+    function Schakelaars(mylist) {
+        var _this = _super.call(this, mylist) || this;
+        _this.tekenKeten = [];
+        return _this;
+    }
+    Schakelaars.prototype.resetKeys = function () {
+        this.clearKeys();
+        this.keys[0][2] = "Schakelaars"; // This is rather a formality as we should already have this at this stage
+        this.keys[4][2] = "1"; // Per default 1 schakelaar
+        this.keys[5][2] = "enkelpolig"; // Per default enkelpolig
+        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+        this.keys[19][2] = false; // Per default geen signalisatielampje
+        this.keys[20][2] = false; // Per default niet halfwaterdicht
+        this.keys[21][2] = false; // Per default geen verklikkerslampje
+        this.keys[25][2] = false; // Per default geen trekschakelaar
+    };
+    Schakelaars.prototype.kanHalfwaterdichtZijn = function () {
+        return ((this.keys[5][2] == "enkelpolig") || (this.keys[5][2] == "dubbelpolig") || (this.keys[5][2] == "driepolig") || (this.keys[5][2] == "kruis_enkel") ||
+            (this.keys[5][2] == "dubbelaansteking") || (this.keys[5][2] == "wissel_enkel") || (this.keys[5][2] == "wissel_dubbel") || (this.keys[5][2] == "dubbel") ||
+            (this.keys[5][2] == "dimschakelaar") || (this.keys[5][2] == "dimschakelaar wissel") || (this.keys[5][2] == "rolluikschakelaar"));
+    };
+    Schakelaars.prototype.kanVerklikkerlampjeHebben = function () {
+        return ((this.keys[5][2] == "enkelpolig") || (this.keys[5][2] == "dubbelpolig") || (this.keys[5][2] == "driepolig") || (this.keys[5][2] == "kruis_enkel") ||
+            (this.keys[5][2] == "dubbelaansteking") || (this.keys[5][2] == "wissel_enkel") || (this.keys[5][2] == "wissel_dubbel") || (this.keys[5][2] == "dubbel") ||
+            (this.keys[5][2] == "dimschakelaar") || (this.keys[5][2] == "dimschakelaar wissel"));
+    };
+    Schakelaars.prototype.kanSignalisatielampjeHebben = function () {
+        return this.kanVerklikkerlampjeHebben();
+    };
+    Schakelaars.prototype.kanTrekschakelaarHebben = function () {
+        return ((this.keys[5][2] == "enkelpolig") || (this.keys[5][2] == "dubbelpolig") || (this.keys[5][2] == "driepolig") || (this.keys[5][2] == "kruis_enkel") ||
+            (this.keys[5][2] == "dubbelaansteking") || (this.keys[5][2] == "wissel_enkel") || (this.keys[5][2] == "wissel_dubbel") || (this.keys[5][2] == "dubbel"));
+    };
+    Schakelaars.prototype.overrideKeys = function () {
+        switch (this.keys[5][2]) {
+            case "enkelpolig":
+                this.keys[4][2] = String(Math.min(Number(this.keys[4][2]), 5));
+                break;
+            case "dubbelpolig":
+                this.keys[4][2] = String(Math.min(Number(this.keys[4][2]), 2));
+                break;
+            default:
+                this.keys[4][2] = "1";
+                break;
+        }
+        if (!this.kanHalfwaterdichtZijn)
+            this.keys[20][2] = false;
+        if (!this.kanVerklikkerlampjeHebben)
+            this.keys[21][2] = false;
+        if (!this.kanSignalisatielampjeHebben)
+            this.keys[19][2] = false;
+        if (!this.kanTrekschakelaarHebben)
+            this.keys[25][2] = false;
+    };
+    Schakelaars.prototype.toHTML = function (mode, Parent) {
+        this.overrideKeys();
+        var output = this.toHTMLHeader(mode, Parent);
+        output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
+        output += ", " + this.selectToHTML(5, ["enkelpolig", "dubbelpolig", "driepolig", "dubbelaansteking", "wissel_enkel", "wissel_dubbel", "kruis_enkel", "---", "schakelaar", "dimschakelaar", "dimschakelaar wissel", "bewegingsschakelaar", "schemerschakelaar", "---", "teleruptor", "relais", "dimmer", "tijdschakelaar", "minuterie", "thermostaat", "rolluikschakelaar"]);
+        if (this.kanHalfwaterdichtZijn())
+            output += ", Halfwaterdicht: " + this.checkboxToHTML(20);
+        if (this.kanVerklikkerlampjeHebben())
+            output += ", Verklikkerlampje: " + this.checkboxToHTML(21);
+        if (this.kanSignalisatielampjeHebben())
+            output += ", Signalisatielampje: " + this.checkboxToHTML(19);
+        if (this.kanTrekschakelaarHebben())
+            output += ", Trekschakelaar: " + this.checkboxToHTML(25);
+        switch (this.keys[5][2]) {
+            case "enkelpolig":
+                output += ", Aantal schakelaars: " + this.selectToHTML(4, ["1", "2", "3", "4", "5"]);
+                break;
+            case "dubbelpolig":
+                output += ", Aantal schakelaars: " + this.selectToHTML(4, ["1", "2"]);
+                break;
+        }
+        output += ", Adres/tekst: " + this.stringToHTML(15, 5);
+        return (output);
+    };
+    Schakelaars.prototype.bouwSchakelaarKeten = function () {
+        this.tekenKeten = [];
+        switch (this.keys[5][2]) {
+            case "wissel_enkel":
+                this.tekenKeten.push(new Schakelaar("wissel_enkel", this.keys[20][2], this.keys[21][2], this.keys[19][2], this.keys[25][2]));
+                break;
+            case "wissel_dubbel":
+                this.tekenKeten.push(new Schakelaar("wissel_dubbel", this.keys[20][2], this.keys[21][2], this.keys[19][2], this.keys[25][2]));
+                break;
+            case "kruis_enkel":
+                this.tekenKeten.push(new Schakelaar("kruis_enkel", this.keys[20][2], this.keys[21][2], this.keys[19][2], this.keys[25][2]));
+                break;
+            case "teleruptor":
+                this.tekenKeten.push(new Schakelaar("teleruptor"));
+                break;
+            case "bewegingsschakelaar":
+                this.tekenKeten.push(new Schakelaar("bewegingsschakelaar"));
+                break;
+            case "schemerschakelaar":
+                this.tekenKeten.push(new Schakelaar("schemerschakelaar"));
+                break;
+            case "schakelaar":
+                this.tekenKeten.push(new Schakelaar("schakelaar"));
+                break;
+            case "dimmer":
+                this.tekenKeten.push(new Schakelaar("dimmer"));
+                break;
+            case "relais":
+                this.tekenKeten.push(new Schakelaar("relais"));
+                break;
+            case "minuterie":
+                this.tekenKeten.push(new Schakelaar("minuterie"));
+                break;
+            case "thermostaat":
+                this.tekenKeten.push(new Schakelaar("thermostaat"));
+                break;
+            case "tijdschakelaar":
+                this.tekenKeten.push(new Schakelaar("tijdschakelaar"));
+                break;
+            case "rolluikschakelaar":
+                this.tekenKeten.push(new Schakelaar("rolluikschakelaar", this.keys[20][2]));
+                break;
+            case "dubbelaansteking":
+                this.tekenKeten.push(new Schakelaar("dubbelaansteking", this.keys[20][2], this.keys[21][2], this.keys[19][2], this.keys[25][2]));
+                break;
+            case "dimschakelaar":
+                this.tekenKeten.push(new Schakelaar("dimschakelaar", this.keys[20][2], this.keys[21][2], this.keys[19][2], false));
+                break;
+            case "dimschakelaar wissel":
+                this.tekenKeten.push(new Schakelaar("dimschakelaar_wissel", this.keys[20][2], this.keys[21][2], this.keys[19][2], false));
+                break;
+            case "enkelpolig":
+                if (Number(this.keys[4][2]) == 1)
+                    this.tekenKeten.push(new Schakelaar("enkel", this.keys[20][2], this.keys[21][2], this.keys[19][2], this.keys[25][2]));
+                if (Number(this.keys[4][2]) > 1) {
+                    this.tekenKeten.push(new Schakelaar("wissel_enkel", this.keys[20][2], this.keys[21][2], this.keys[19][2], this.keys[25][2]));
+                    for (var i = 2; i < Number(this.keys[4][2]); ++i) {
+                        this.tekenKeten.push(new Schakelaar("kruis_enkel", this.keys[20][2], this.keys[21][2], this.keys[19][2], this.keys[25][2]));
+                    }
+                    this.tekenKeten.push(new Schakelaar("wissel_enkel", this.keys[20][2], this.keys[21][2], this.keys[19][2], this.keys[25][2]));
+                }
+                break;
+            case "dubbelpolig":
+                if (Number(this.keys[4][2]) == 1)
+                    this.tekenKeten.push(new Schakelaar("dubbel", this.keys[20][2], this.keys[21][2], this.keys[19][2], this.keys[25][2]));
+                if (Number(this.keys[4][2]) > 1) {
+                    this.tekenKeten.push(new Schakelaar("wissel_dubbel", this.keys[20][2], this.keys[21][2], this.keys[19][2], this.keys[25][2]));
+                    this.tekenKeten.push(new Schakelaar("wissel_dubbel", this.keys[20][2], this.keys[21][2], this.keys[19][2], this.keys[25][2]));
+                }
+                break;
+            case "driepolig":
+                this.tekenKeten.push(new Schakelaar("driepolig", this.keys[20][2], this.keys[21][2], this.keys[19][2], this.keys[25][2]));
+                break;
+        }
+    };
+    Schakelaars.prototype.toSVG = function () {
+        var _a;
+        var mySVG = new SVGelement();
+        // Eerst maken we een keten van unieke schakelaars. De aantallen worden hier vervangen door individuele elementen in een array
+        this.bouwSchakelaarKeten();
+        var lowerbound = 20; // How low does the switch go below the baseline, needed to place adres afterwards
+        var startx = 1;
+        var endx;
+        for (var i = 0; i < this.tekenKeten.length; i++) {
+            var islast = ((i == this.tekenKeten.length - 1) && (!this.hasChild()));
+            var str = void 0;
+            (_a = this.tekenKeten[i].toSVGString(startx, islast), startx = _a.endx, str = _a.str, lowerbound = _a.lowerbound);
+            mySVG.data += str;
+        }
+        // Voor bepaalde symbolen moet wat extra ruimte rechts voorzien worden om te vermijden dat de tekening door de volgende kring loopt
+        if (!this.hasChild())
+            startx += this.tekenKeten[this.tekenKeten.length - 1].extraPlaatsRechts();
+        mySVG.xleft = 1; // foresee at least some space for the conductor
+        mySVG.xright = startx - 2;
+        mySVG.yup = 25;
+        mySVG.ydown = 25;
+        mySVG.data += this.addAddress(mySVG, 25 + lowerbound, Math.max(0, lowerbound - 20));
+        mySVG.data += "\n";
+        return (mySVG);
+    };
+    return Schakelaars;
+}(Electro_Item));
+var Lichtcircuit = /** @class */ (function (_super) {
+    __extends(Lichtcircuit, _super);
+    function Lichtcircuit(mylist) {
+        return _super.call(this, mylist) || this; //Schakelaars
+    }
+    Lichtcircuit.prototype.resetKeys = function () {
+        _super.prototype.resetKeys.call(this); //Schakelaars
+        this.keys[0][2] = "Lichtcircuit"; // This is rather a formality as we should already have this at this stage
+        this.keys[13][2] = "1"; // Per default 1 lichtpunt
+    };
+    Lichtcircuit.prototype.toHTML = function (mode, Parent) {
+        this.overrideKeys();
+        var output = this.toHTMLHeader(mode, Parent);
+        output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
+        output += ", " + this.selectToHTML(5, ["enkelpolig", "dubbelpolig", "driepolig", "dubbelaansteking", "wissel_enkel", "wissel_dubbel", "kruis_enkel", "---", "schakelaar", "dimschakelaar", "dimschakelaar wissel", "bewegingsschakelaar", "schemerschakelaar", "---", "teleruptor", "relais", "dimmer", "tijdschakelaar", "minuterie", "thermostaat", "rolluikschakelaar"]);
+        if (this.kanHalfwaterdichtZijn())
+            output += ", Halfwaterdicht: " + this.checkboxToHTML(20);
+        if (this.kanVerklikkerlampjeHebben())
+            output += ", Verklikkerlampje: " + this.checkboxToHTML(21);
+        if (this.kanSignalisatielampjeHebben())
+            output += ", Signalisatielampje: " + this.checkboxToHTML(19);
+        if (this.kanTrekschakelaarHebben())
+            output += ", Trekschakelaar: " + this.checkboxToHTML(25);
+        switch (this.keys[5][2]) {
+            case "enkelpolig":
+                output += ", Aantal schakelaars: " + this.selectToHTML(4, ["1", "2", "3", "4", "5"]);
+                break;
+            case "dubbelpolig":
+                output += ", Aantal schakelaars: " + this.selectToHTML(4, ["1", "2"]);
+                break;
+        }
+        output += ", Aantal lichtpunten: " + this.selectToHTML(13, ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]);
+        output += ", Adres/tekst: " + this.stringToHTML(15, 5);
+        return (output);
+    };
+    Lichtcircuit.prototype.toSVG = function () {
+        var _a;
+        var mySVG = new SVGelement();
+        // Eerst maken we een keten van unieke schakelaars. De aantallen worden hier vervangen door individuele elementen in een array
+        this.bouwSchakelaarKeten();
+        var lowerbound = 20; // How low does the switch go below the baseline, needed to place adres afterwards
+        var startx = 1;
+        var endx;
+        // Teken de schakelaars
+        for (var i = 0; i < this.tekenKeten.length; i++) {
+            var islast = ((i == this.tekenKeten.length - 1) && (!this.hasChild()));
+            var str = void 0;
+            (_a = this.tekenKeten[i].toSVGString(startx, islast), startx = _a.endx, str = _a.str, lowerbound = _a.lowerbound);
+            mySVG.data += str;
+        }
+        if (this.keys[13][2] >= 1) { //1 of meerdere lampen
+            // Teken de lamp
+            endx = startx + 30;
+            mySVG.data += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
+                + '<use xlink:href="#lamp" x="' + endx + '" y="25" />';
+            // Teken aantal lampen en symbool 'h' voor halfwaterdicht
+            var print_str_upper = ""; //string om bovenaan te plaatsen
+            if (this.keys[20][2]) {
+                print_str_upper = "h";
+                if (parseInt(this.keys[13][2]) > 1)
+                    print_str_upper += ", x" + this.keys[13][2]; // Meer dan 1 lamp
+            }
+            else if (parseInt(this.keys[13][2]) > 1) {
+                print_str_upper = "x" + this.keys[13][2];
+            }
+            if (print_str_upper != "")
+                mySVG.data += '<text x="' + endx + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' + htmlspecialchars(print_str_upper) + '</text>';
+            // Teken een leiding achter de lamp indien er nog kinderen zijn
+            if (this.hasChild())
+                mySVG.data += '<line x1="' + endx + '" y1="25" x2="' + (endx + 10) + '" y2="25" stroke="black" />';
+            // Bepaal finale Bounding Box om het geheel te tekenen
+            startx = endx + 10;
+            lowerbound = Math.max(lowerbound, 29);
+        }
+        else { //Geen lampen
+            // Voor bepaalde symbolen moet wat extra ruimte rechts voorzien worden om te vermijden dat de tekening door de volgende kring loopt
+            if (!this.hasChild())
+                startx += this.tekenKeten[this.tekenKeten.length - 1].extraPlaatsRechts();
+        }
+        mySVG.xleft = 1; // foresee at least some space for the conductor
+        mySVG.xright = startx - 2;
+        mySVG.yup = 25;
+        mySVG.ydown = 25;
+        mySVG.data += this.addAddress(mySVG, 25 + lowerbound, Math.max(0, lowerbound - 20));
+        mySVG.data += "\n";
+        return (mySVG);
+    };
+    return Lichtcircuit;
+}(Schakelaars));
 var Aansluitpunt = /** @class */ (function (_super) {
     __extends(Aansluitpunt, _super);
     function Aansluitpunt(mylist) {
@@ -1604,8 +1356,7 @@ var Aansluitpunt = /** @class */ (function (_super) {
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
     };
-    Aansluitpunt.prototype.toSVG = function (hasChild) {
-        if (hasChild === void 0) { hasChild = false; }
+    Aansluitpunt.prototype.toSVG = function () {
         var mySVG = new SVGelement();
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 29;
@@ -1635,8 +1386,7 @@ var Aftakdoos = /** @class */ (function (_super) {
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
     };
-    Aftakdoos.prototype.toSVG = function (hasChild) {
-        if (hasChild === void 0) { hasChild = false; }
+    Aftakdoos.prototype.toSVG = function () {
         var mySVG = new SVGelement();
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 49;
@@ -1666,8 +1416,7 @@ var Batterij = /** @class */ (function (_super) {
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
     };
-    Batterij.prototype.toSVG = function (hasChild) {
-        if (hasChild === void 0) { hasChild = false; }
+    Batterij.prototype.toSVG = function () {
         var mySVG = new SVGelement();
         var outputstr = "";
         mySVG.xleft = 1; // foresee at least some space for the conductor
@@ -1698,8 +1447,7 @@ var Bel = /** @class */ (function (_super) {
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
     };
-    Bel.prototype.toSVG = function (hasChild) {
-        if (hasChild === void 0) { hasChild = false; }
+    Bel.prototype.toSVG = function () {
         var mySVG = new SVGelement();
         var outputstr = "";
         mySVG.xleft = 1; // foresee at least some space for the conductor
@@ -1732,8 +1480,7 @@ var Boiler = /** @class */ (function (_super) {
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
     };
-    Boiler.prototype.toSVG = function (hasChild) {
-        if (hasChild === void 0) { hasChild = false; }
+    Boiler.prototype.toSVG = function () {
         var mySVG = new SVGelement();
         var outputstr = "";
         mySVG.xleft = 1; // foresee at least some space for the conductor
@@ -1771,8 +1518,7 @@ var Diepvriezer = /** @class */ (function (_super) {
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
     };
-    Diepvriezer.prototype.toSVG = function (hasChild) {
-        if (hasChild === void 0) { hasChild = false; }
+    Diepvriezer.prototype.toSVG = function () {
         var mySVG = new SVGelement();
         var outputstr = "";
         mySVG.xleft = 1; // foresee at least some space for the conductor
@@ -1803,8 +1549,7 @@ var Droogkast = /** @class */ (function (_super) {
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
     };
-    Droogkast.prototype.toSVG = function (hasChild) {
-        if (hasChild === void 0) { hasChild = false; }
+    Droogkast.prototype.toSVG = function () {
         var mySVG = new SVGelement();
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 59;
@@ -1846,8 +1591,7 @@ var Drukknop = /** @class */ (function (_super) {
             + ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
     };
-    Drukknop.prototype.toSVG = function (hasChild) {
-        if (hasChild === void 0) { hasChild = false; }
+    Drukknop.prototype.toSVG = function () {
         var mySVG = new SVGelement();
         mySVG.xleft = 1; // Links voldoende ruimte voor een eventuele kring voorzien
         mySVG.xright = 43;
@@ -1925,8 +1669,7 @@ var Elektriciteitsmeter = /** @class */ (function (_super) {
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
     };
-    Elektriciteitsmeter.prototype.toSVG = function (hasChild) {
-        if (hasChild === void 0) { hasChild = false; }
+    Elektriciteitsmeter.prototype.toSVG = function () {
         var mySVG = new SVGelement();
         var outputstr = "";
         mySVG.xleft = 1; // foresee at least some space for the conductor
@@ -1957,8 +1700,7 @@ var Elektrische_oven = /** @class */ (function (_super) {
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
     };
-    Elektrische_oven.prototype.toSVG = function (hasChild) {
-        if (hasChild === void 0) { hasChild = false; }
+    Elektrische_oven.prototype.toSVG = function () {
         var mySVG = new SVGelement();
         var outputstr = "";
         mySVG.xleft = 1; // foresee at least some space for the conductor
@@ -1989,8 +1731,7 @@ var EV_lader = /** @class */ (function (_super) {
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
     };
-    EV_lader.prototype.toSVG = function (hasChild) {
-        if (hasChild === void 0) { hasChild = false; }
+    EV_lader.prototype.toSVG = function () {
         var mySVG = new SVGelement();
         var outputstr = "";
         mySVG.xleft = 1; // foresee at least some space for the conductor
@@ -2026,8 +1767,7 @@ var Ketel = /** @class */ (function (_super) {
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
     };
-    Ketel.prototype.toSVG = function (hasChild) {
-        if (hasChild === void 0) { hasChild = false; }
+    Ketel.prototype.toSVG = function () {
         var mySVG = new SVGelement();
         // Alles naar beneden schuiven als we het aantal laders boven het symbool willen plaatsen
         var shifty = 0;
@@ -2123,8 +1863,7 @@ var Koelkast = /** @class */ (function (_super) {
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
     };
-    Koelkast.prototype.toSVG = function (hasChild) {
-        if (hasChild === void 0) { hasChild = false; }
+    Koelkast.prototype.toSVG = function () {
         var mySVG = new SVGelement();
         var outputstr = "";
         mySVG.xleft = 1; // foresee at least some space for the conductor
@@ -2155,8 +1894,7 @@ var Kookfornuis = /** @class */ (function (_super) {
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
     };
-    Kookfornuis.prototype.toSVG = function (hasChild) {
-        if (hasChild === void 0) { hasChild = false; }
+    Kookfornuis.prototype.toSVG = function () {
         var mySVG = new SVGelement();
         var outputstr = "";
         mySVG.xleft = 1; // foresee at least some space for the conductor
@@ -2170,6 +1908,233 @@ var Kookfornuis = /** @class */ (function (_super) {
         return (mySVG);
     };
     return Kookfornuis;
+}(Electro_Item));
+var Lichtpunt = /** @class */ (function (_super) {
+    __extends(Lichtpunt, _super);
+    function Lichtpunt(mylist) {
+        return _super.call(this, mylist) || this;
+    }
+    Lichtpunt.prototype.resetKeys = function () {
+        this.clearKeys();
+        this.keys[0][2] = "Lichtpunt"; // This is rather a formality as we should already have this at this stage
+        this.keys[4][2] = "1"; // Per default 1 Lamp
+        this.keys[13][2] = "1"; // Per default 1 buis in een TL lamp
+        this.keys[16][2] = "standaard"; // Per default standaard lamp
+        this.keys[17][2] = "Geen"; // Per default geen noodverlichting
+        this.keys[19][2] = false; // Per default geen wandlamp
+        this.keys[20][2] = false; // Per default niet halfwaterdicht
+        this.keys[21][2] = false; // Per default geen ingebouwde schakelaar
+    };
+    Lichtpunt.prototype.toHTML = function (mode, Parent) {
+        var output = this.toHTMLHeader(mode, Parent);
+        output += "&nbsp;Nr: " + this.stringToHTML(10, 5) + ", "
+            + "Type: " + this.selectToHTML(16, ["standaard", "TL", "spot", "led" /*, "Spot", "Led", "Signalisatielamp" */]) + ", ";
+        if (this.keys[16][2] == "TL") {
+            output += "Aantal buizen: " + this.selectToHTML(13, ["1", "2", "3", "4"]) + ", ";
+        }
+        output += "Aantal lampen: " + this.selectToHTML(4, ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"]) + ", "
+            + "Wandlamp: " + this.checkboxToHTML(19) + ", "
+            + "Halfwaterdicht: " + this.checkboxToHTML(20) + ", "
+            + "Ingebouwde schakelaar: " + this.checkboxToHTML(21) + ", "
+            + "Noodverlichting: " + this.selectToHTML(17, ["Geen", "Centraal", "Decentraal"])
+            + ", Adres/tekst: " + this.stringToHTML(15, 5);
+        return (output);
+    };
+    Lichtpunt.prototype.toSVG = function () {
+        var mySVG = new SVGelement();
+        mySVG.xleft = 1; // Links voldoende ruimte voor een eventuele kring voorzien
+        mySVG.xright = 20; // We starten met breedte 20 (leidings links) en vullen later aan in functie van wat moet getekend worden
+        mySVG.yup = 25;
+        mySVG.ydown = 25;
+        // Teken de leiding links
+        mySVG.data = '<line x1="0" x2="30" y1="25" y2="25" stroke="black" />';
+        // Indien halfwaterdicht en/of meerdere lampen, voorzie de tekst bovenaan
+        var print_str_upper = "";
+        if (this.keys[20][2]) {
+            print_str_upper = "h";
+            if (parseInt(this.keys[4][2]) > 1)
+                print_str_upper += ", x" + this.keys[4][2]; //Meer dan 1 lamp
+        }
+        else if (parseInt(this.keys[4][2]) > 1)
+            print_str_upper = "x" + this.keys[4][2];
+        switch (this.keys[16][2]) {
+            case "led":
+                // Teken led
+                mySVG.data += '<use xlink:href="#led" x="' + 30 + '" y="25" />';
+                // Teken wandlamp indien van toepassing
+                if (this.keys[19][2])
+                    mySVG.data += '<line x1="30" y1="35" x2="42" y2="35" stroke="black" />'; //Wandlamp
+                // Teken ingebouwde schakelaar indien van toepassing
+                if (this.keys[21][2]) {
+                    mySVG.data += '<line x1="42" y1="25" x2="45.75" y2="17.5" stroke="black" />'
+                        + '<line x1="45.75" y1="17.5" x2="48.25" y2="18.75" stroke="black" />';
+                }
+                // Bepaal positie noodsymbool en teken het indien van toepassing
+                var noodxpos;
+                var textxpos;
+                var noodypos = 6.5;
+                if (print_str_upper == "") {
+                    noodxpos = 36;
+                    textxpos = 36;
+                }
+                else {
+                    noodxpos = 20;
+                    if ((print_str_upper.length > 2) && ((this.keys[17][2] == "Centraal") || (this.keys[17][2] == "Decentraal")))
+                        textxpos = 40;
+                    else
+                        textxpos = 36;
+                }
+                ;
+                if (print_str_upper != "")
+                    mySVG.data += '<text x="' + textxpos + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="7">' + htmlspecialchars(print_str_upper) + '</text>';
+                switch (this.keys[17][2]) { // Type noodverlichting
+                    case "Centraal":
+                        mySVG.data += '<circle cx="' + noodxpos + '" cy="' + noodypos + '" r="2.5" style="stroke:black;fill:black" />'
+                            + '<line x1="' + (noodxpos - 5.6) + '" y1="' + (noodypos - 5.6) + '" x2="' + (noodxpos + 5.6) + '" y2="' + (noodypos + 5.6) + '" style="stroke:black;fill:black" />'
+                            + '<line x1="' + (noodxpos + 5.6) + '" y1="' + (noodypos - 5.6) + '" x2="' + (noodxpos - 5.6) + '" y2="' + (noodypos + 5.6) + '" style="stroke:black;fill:black" />';
+                        break;
+                    case "Decentraal":
+                        mySVG.data += '<rect x="' + (noodxpos - 5.6) + '" y="' + (noodypos - 5.6) + '" width="11.2" height="11.2" fill="white" stroke="black" />'
+                            + '<circle cx="' + noodxpos + '" cy="' + noodypos + '" r="2.5" style="stroke:black;fill:black" />';
+                        +'<line x1="' + (noodxpos - 5.6) + '" y1="' + (noodypos - 5.6) + '" x2="' + (noodxpos + 5.6) + '" y2="' + (noodypos + 5.6) + '" style="stroke:black;fill:black" />';
+                        +'<line x1="' + (noodxpos + 5.6) + '" y1="' + (noodypos - 5.6) + '" x2="' + (noodxpos - 5.6) + '" y2="' + (noodypos + 5.6) + '" style="stroke:black;fill:black" />';
+                        break;
+                    default:
+                        break;
+                }
+                // Verdere uitlijning en adres onderaan   
+                mySVG.xright = 42;
+                mySVG.data += this.addAddress(mySVG, 50, 5, 2);
+                break;
+            case "spot":
+                // teken spot
+                mySVG.data += '<use xlink:href="#spot" x="' + 30 + '" y="25" />';
+                // Teken wandlamp indien van toepassing
+                if (this.keys[19][2])
+                    mySVG.data += '<line x1="30" y1="38" x2="46" y2="38" stroke="black" />';
+                // Teken ingebouwde schakelaar indien van toepassing
+                if (this.keys[21][2]) {
+                    mySVG.data += '<line x1="46" y1="25" x2="49.75" y2="17.5" stroke="black" />'
+                        + '<line x1="49.75" y1="17.5" x2="52.25" y2="18.75" stroke="black" />';
+                }
+                // Bepaal positie noodsymbool en teken het indien van toepassing
+                var noodxpos;
+                var textxpos;
+                var noodypos = 6.5;
+                if (print_str_upper == "") {
+                    noodxpos = 40;
+                    textxpos = 40;
+                }
+                else {
+                    noodxpos = 24;
+                    if ((print_str_upper.length > 2) && ((this.keys[17][2] == "Centraal") || (this.keys[17][2] == "Decentraal")))
+                        textxpos = 44;
+                    else
+                        textxpos = 40;
+                }
+                if (print_str_upper != "")
+                    mySVG.data += '<text x="' + textxpos + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="7">' + htmlspecialchars(print_str_upper) + '</text>';
+                switch (this.keys[17][2]) {
+                    case "Centraal":
+                        mySVG.data += '<circle cx="' + noodxpos + '" cy="' + noodypos + '" r="2.5" style="stroke:black;fill:black" />'
+                            + '<line x1="' + (noodxpos - 5.6) + '" y1="' + (noodypos - 5.6) + '" x2="' + (noodxpos + 5.6) + '" y2="' + (noodypos + 5.6) + '" style="stroke:black;fill:black" />'
+                            + '<line x1="' + (noodxpos + 5.6) + '" y1="' + (noodypos - 5.6) + '" x2="' + (noodxpos - 5.6) + '" y2="' + (noodypos + 5.6) + '" style="stroke:black;fill:black" />';
+                        break;
+                    case "Decentraal":
+                        mySVG.data += '<rect x="' + (noodxpos - 5.6) + '" y="' + (noodypos - 5.6) + '" width="11.2" height="11.2" fill="white" stroke="black" />'
+                            + '<circle cx="' + noodxpos + '" cy="' + noodypos + '" r="2.5" style="stroke:black;fill:black" />'
+                            + '<line x1="' + (noodxpos - 5.6) + '" y1="' + (noodypos - 5.6) + '" x2="' + (noodxpos + 5.6) + '" y2="' + (noodypos + 5.6) + '" style="stroke:black;fill:black" />'
+                            + '<line x1="' + (noodxpos + 5.6) + '" y1="' + (noodypos - 5.6) + '" x2="' + (noodxpos - 5.6) + '" y2="' + (noodypos + 5.6) + '" style="stroke:black;fill:black" />';
+                        break;
+                    default:
+                        break;
+                }
+                // Verdere uitlijning en adres onderaan
+                mySVG.xright = 45;
+                mySVG.data += this.addAddress(mySVG, 52, 7, 4);
+                break;
+            case "TL":
+                // Teken TL lampen
+                var aantal_buizen = this.keys[13][2];
+                var starty = 25 - (aantal_buizen) * 3.5;
+                var endy = 25 + (aantal_buizen) * 3.5;
+                mySVG.data += '<line x1="30" y1="' + starty + '" x2="30" y2="' + endy + '" stroke="black" stroke-width="2" />'
+                    + '<line x1="90" y1="' + starty + '" x2="90" y2="' + endy + '" stroke="black" stroke-width="2" />';
+                for (var i = 0; i < aantal_buizen; i++) {
+                    mySVG.data += '<line x1="30" y1="' + (starty + (i * 7) + 3.5) + '" x2="90" y2="' + (starty + (i * 7) + 3.5) + '" stroke="black" stroke-width="2" />';
+                }
+                // Teken wandlamp indien van toepassing
+                if (this.keys[19][2])
+                    mySVG.data += '<line x1="50" y1="' + (27 + (aantal_buizen * 3.5)) + '" x2="70" y2="' + (27 + (aantal_buizen * 3.5)) + '" stroke="black" />';
+                // Zet symbool halfwaterdicht en aantal lampen bovenaan
+                if (print_str_upper != "")
+                    mySVG.data += '<text x="60" y="' + (25 - (aantal_buizen * 3.5)) + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' + htmlspecialchars(print_str_upper) + '</text>';
+                // Teken ingebouwde schakelaar indien van toepassing
+                if (this.keys[21][2]) {
+                    mySVG.data += '<line x1="77.5" y1="' + (29 - (aantal_buizen * 3.5)) + '" x2="85" y2="' + (14 - (aantal_buizen * 3.5)) + '" stroke="black" />'
+                        + '<line x1="85" y1="' + (14 - (aantal_buizen * 3.5)) + '" x2="90" y2="' + (16.5 - (aantal_buizen * 3.5)) + '" stroke="black" />';
+                }
+                // Bepaal positie noodsymbool en teken het indien van toepassing
+                var noodxpos;
+                var noodypos = (25 - (aantal_buizen * 3.5) - 5);
+                if (print_str_upper == "")
+                    noodxpos = 60;
+                else
+                    noodxpos = 39;
+                switch (this.keys[17][2]) {
+                    case "Centraal":
+                        mySVG.data += '<circle cx="' + noodxpos + '" cy="' + noodypos + '" r="2.5" style="stroke:black;fill:black" />'
+                            + '<line x1="' + (noodxpos - 5.6) + '" y1="' + (noodypos - 5.6) + '" x2="' + (noodxpos + 5.6) + '" y2="' + (noodypos + 5.6) + '" style="stroke:black;fill:black" />'
+                            + '<line x1="' + (noodxpos + 5.6) + '" y1="' + (noodypos - 5.6) + '" x2="' + (noodxpos - 5.6) + '" y2="' + (noodypos + 5.6) + '" style="stroke:black;fill:black" />';
+                        break;
+                    case "Decentraal":
+                        mySVG.data += '<rect x="' + (noodxpos - 5.6) + '" y="' + (noodypos - 5.6) + '" width="11.2" height="11.2" fill="white" stroke="black" />'
+                            + '<circle cx="' + noodxpos + '" cy="' + noodypos + '" r="2.5" style="stroke:black;fill:black" />'
+                            + '<line x1="' + (noodxpos - 5.6) + '" y1="' + (noodypos - 5.6) + '" x2="' + (noodxpos + 5.6) + '" y2="' + (noodypos + 5.6) + '" style="stroke:black;fill:black" />'
+                            + '<line x1="' + (noodxpos + 5.6) + '" y1="' + (noodypos - 5.6) + '" x2="' + (noodxpos - 5.6) + '" y2="' + (noodypos + 5.6) + '" style="stroke:black;fill:black" />';
+                        break;
+                }
+                // Verdere uitlijning en adres onderaan
+                mySVG.xright = 90;
+                mySVG.data += this.addAddress(mySVG, endy + 13, Math.max(mySVG.ydown, endy + 18 - 25), 2);
+                break;
+            default: //Normaal lichtpunt (kruisje)
+                switch (this.keys[17][2]) {
+                    case "Centraal":
+                        mySVG.data += '<use xlink:href="#lamp" x="' + 30 + '" y="25" />'
+                            + '<circle cx="30" cy="25" r="5" style="stroke:black;fill:black" />';
+                        if (this.hasChild())
+                            mySVG.data += '<line x1="' + 30 + '" y1="25" x2="' + (30 + 11) + '" y2="25" stroke="black" />';
+                        break;
+                    case "Decentraal":
+                        mySVG.data += '<use xlink:href="#noodlamp_decentraal" x="' + 30 + '" y="25" />';
+                        if (this.keys[21][2])
+                            mySVG.data += '<line x1="37" y1="18" x2="40" y2="15" stroke="black" stroke-width="2" />'; //Ingebouwde schakelaar
+                        break;
+                    default:
+                        mySVG.data += '<use xlink:href="#lamp" x="' + 30 + '" y="25" />';
+                        if (this.hasChild())
+                            mySVG.data += '<line x1="' + 30 + '" y1="25" x2="' + (30 + 11) + '" y2="25" stroke="black" />';
+                        break;
+                }
+                // Zet symbool halfwaterdicht en aantal lampen bovenaan
+                if (print_str_upper != "")
+                    mySVG.data += '<text x="30" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' + htmlspecialchars(print_str_upper) + '</text>';
+                // Teken wandlamp indien van toepassing
+                if (this.keys[19][2])
+                    mySVG.data += '<line x1="20" y1="40" x2="40" y2="40" stroke="black" />';
+                // Teken ingebouwde schakelaar indien van toepassing
+                if (this.keys[21][2])
+                    mySVG.data += '<line x1="40" y1="15" x2="45" y2="20" stroke="black" stroke-width="2" />';
+                // Verdere uitlijning en adres onderaan
+                mySVG.xright = 39;
+                mySVG.data += this.addAddress(mySVG, 54, 10, -1);
+                break;
+        }
+        mySVG.data += "\n";
+        return (mySVG);
+    };
+    return Lichtpunt;
 }(Electro_Item));
 var Microgolfoven = /** @class */ (function (_super) {
     __extends(Microgolfoven, _super);
@@ -2187,8 +2152,7 @@ var Microgolfoven = /** @class */ (function (_super) {
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
     };
-    Microgolfoven.prototype.toSVG = function (hasChild) {
-        if (hasChild === void 0) { hasChild = false; }
+    Microgolfoven.prototype.toSVG = function () {
         var mySVG = new SVGelement();
         var outputstr = "";
         mySVG.xleft = 1; // foresee at least some space for the conductor
@@ -2219,8 +2183,7 @@ var Motor = /** @class */ (function (_super) {
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
     };
-    Motor.prototype.toSVG = function (hasChild) {
-        if (hasChild === void 0) { hasChild = false; }
+    Motor.prototype.toSVG = function () {
         var mySVG = new SVGelement();
         var outputstr = "";
         mySVG.xleft = 1; // foresee at least some space for the conductor
@@ -2251,8 +2214,7 @@ var Omvormer = /** @class */ (function (_super) {
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
     };
-    Omvormer.prototype.toSVG = function (hasChild) {
-        if (hasChild === void 0) { hasChild = false; }
+    Omvormer.prototype.toSVG = function () {
         var mySVG = new SVGelement();
         var outputstr = "";
         mySVG.xleft = 1; // foresee at least some space for the conductor
@@ -2283,8 +2245,7 @@ var Overspanningsbeveiliging = /** @class */ (function (_super) {
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
     };
-    Overspanningsbeveiliging.prototype.toSVG = function (hasChild) {
-        if (hasChild === void 0) { hasChild = false; }
+    Overspanningsbeveiliging.prototype.toSVG = function () {
         var mySVG = new SVGelement();
         var outputstr = "";
         mySVG.xleft = 1; // foresee at least some space for the conductor
@@ -2315,8 +2276,7 @@ var Stoomoven = /** @class */ (function (_super) {
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
     };
-    Stoomoven.prototype.toSVG = function (hasChild) {
-        if (hasChild === void 0) { hasChild = false; }
+    Stoomoven.prototype.toSVG = function () {
         var mySVG = new SVGelement();
         var outputstr = "";
         mySVG.xleft = 1; // foresee at least some space for the conductor
@@ -2368,8 +2328,7 @@ var Stopcontact = /** @class */ (function (_super) {
             + ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
     };
-    Stopcontact.prototype.toSVG = function (hasChild) {
-        if (hasChild === void 0) { hasChild = false; }
+    Stopcontact.prototype.toSVG = function () {
         var mySVG = new SVGelement();
         mySVG.xleft = 1; // Links voldoende ruimte voor een eventuele kring voorzien
         mySVG.xright = 20; // We starten met breedte 20 (leidings links) en vullen later aan in functie van wat moet getekend worden
@@ -2432,7 +2391,7 @@ var Stopcontact = /** @class */ (function (_super) {
         if (this.keys[20][2])
             mySVG.data += '<rect x="' + (22 + (this.keys[19][2]) * 10 + (this.keys[21][2]) * 34) + '" y="0" width="6" height="8" style="fill:rgb(255,255,255)" /><text x="' + (25 + (this.keys[19][2]) * 10 + (this.keys[21][2]) * 34) + '" y="8" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">h</text>';
         // Indien het stopcontact een kind heeft, teken een streepje rechts
-        if (hasChild) {
+        if (this.hasChild()) {
             mySVG.data += '<line x1="' + startx + '" y1="25" x2="' + (startx + 21) + '" y2="25" stroke="black" />';
         }
         ;
@@ -2461,8 +2420,7 @@ var Transformator = /** @class */ (function (_super) {
             + ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
     };
-    Transformator.prototype.toSVG = function (hasChild) {
-        if (hasChild === void 0) { hasChild = false; }
+    Transformator.prototype.toSVG = function () {
         var mySVG = new SVGelement();
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 47;
@@ -2496,8 +2454,7 @@ var USB_lader = /** @class */ (function (_super) {
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
     };
-    USB_lader.prototype.toSVG = function (hasChild) {
-        if (hasChild === void 0) { hasChild = false; }
+    USB_lader.prototype.toSVG = function () {
         var mySVG = new SVGelement();
         var outputstr = "";
         // Alles naar beneden schuiven als we het aantal laders boven het symbool willen plaatsen
@@ -2534,8 +2491,7 @@ var Vaatwasmachine = /** @class */ (function (_super) {
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
     };
-    Vaatwasmachine.prototype.toSVG = function (hasChild) {
-        if (hasChild === void 0) { hasChild = false; }
+    Vaatwasmachine.prototype.toSVG = function () {
         var mySVG = new SVGelement();
         var outputstr = "";
         mySVG.xleft = 1; // foresee at least some space for the conductor
@@ -2566,8 +2522,7 @@ var Ventilator = /** @class */ (function (_super) {
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
     };
-    Ventilator.prototype.toSVG = function (hasChild) {
-        if (hasChild === void 0) { hasChild = false; }
+    Ventilator.prototype.toSVG = function () {
         var mySVG = new SVGelement();
         var outputstr = "";
         mySVG.xleft = 1; // foresee at least some space for the conductor
@@ -2631,8 +2586,7 @@ var Verbruiker = /** @class */ (function (_super) {
             this.keys[22][2] = String(width);
         }
     };
-    Verbruiker.prototype.toSVG = function (hasChild) {
-        if (hasChild === void 0) { hasChild = false; }
+    Verbruiker.prototype.toSVG = function () {
         var mySVG = new SVGelement();
         var strlines = htmlspecialchars(this.keys[15][2]).split("|");
         // Voldoende ruimte voorzien voor alle elementen
@@ -2691,8 +2645,7 @@ var Verlenging = /** @class */ (function (_super) {
             + ", Breedte: " + this.stringToHTML(22, 3);
         return (output);
     };
-    Verlenging.prototype.toSVG = function (hasChild) {
-        if (hasChild === void 0) { hasChild = false; }
+    Verlenging.prototype.toSVG = function () {
         var mySVG = new SVGelement();
         var outputstr = "";
         var width;
@@ -2743,8 +2696,7 @@ var Verwarmingstoestel = /** @class */ (function (_super) {
             + ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
     };
-    Verwarmingstoestel.prototype.toSVG = function (hasChild) {
-        if (hasChild === void 0) { hasChild = false; }
+    Verwarmingstoestel.prototype.toSVG = function () {
         var mySVG = new SVGelement();
         var outputstr = "";
         mySVG.xleft = 1; // foresee at least some space for the conductor
@@ -2833,8 +2785,7 @@ var Vrije_tekst = /** @class */ (function (_super) {
             this.keys[22][2] = String(width);
         }
     };
-    Vrije_tekst.prototype.toSVG = function (hasChild) {
-        if (hasChild === void 0) { hasChild = false; }
+    Vrije_tekst.prototype.toSVG = function () {
         var mySVG = new SVGelement();
         var strlines = htmlspecialchars(this.keys[15][2]).split("|");
         // Breedte van de vrije tekst bepalen
@@ -2913,8 +2864,7 @@ var Warmtepomp = /** @class */ (function (_super) {
             + ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
     };
-    Warmtepomp.prototype.toSVG = function (hasChild) {
-        if (hasChild === void 0) { hasChild = false; }
+    Warmtepomp.prototype.toSVG = function () {
         var mySVG = new SVGelement();
         // Alles naar beneden schuiven als we het aantal laders boven het symbool willen plaatsen
         var shifty = 0;
@@ -2976,8 +2926,7 @@ var Wasmachine = /** @class */ (function (_super) {
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
     };
-    Wasmachine.prototype.toSVG = function (hasChild) {
-        if (hasChild === void 0) { hasChild = false; }
+    Wasmachine.prototype.toSVG = function () {
         var mySVG = new SVGelement();
         var outputstr = "";
         mySVG.xleft = 1; // foresee at least some space for the conductor
@@ -3010,8 +2959,7 @@ var Zeldzame_symbolen = /** @class */ (function (_super) {
             + ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
     };
-    Zeldzame_symbolen.prototype.toSVG = function (hasChild) {
-        if (hasChild === void 0) { hasChild = false; }
+    Zeldzame_symbolen.prototype.toSVG = function () {
         var mySVG = new SVGelement();
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 59;
@@ -3052,8 +3000,7 @@ var Zonnepaneel = /** @class */ (function (_super) {
             + ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
     };
-    Zonnepaneel.prototype.toSVG = function (hasChild) {
-        if (hasChild === void 0) { hasChild = false; }
+    Zonnepaneel.prototype.toSVG = function () {
         var mySVG = new SVGelement();
         mySVG.xleft = 1; // Links voldoende ruimte voor een eventuele kring voorzien
         mySVG.xright = 69;
@@ -3241,6 +3188,7 @@ var Hierarchical_List = /** @class */ (function () {
         var tempval;
         switch (electroType) {
             case 'Aansluitpunt':
+            case 'Leeg':
                 tempval = new Aansluitpunt(structure);
                 break;
             case 'Aftakdoos':
@@ -3282,6 +3230,12 @@ var Hierarchical_List = /** @class */ (function () {
             case 'Kookfornuis':
                 tempval = new Kookfornuis(structure);
                 break;
+            case 'Lichtcircuit':
+                tempval = new Lichtcircuit(structure);
+                break;
+            case 'Lichtpunt':
+                tempval = new Lichtpunt(structure);
+                break;
             case 'Microgolfoven':
                 tempval = new Microgolfoven(structure);
                 break;
@@ -3293,6 +3247,9 @@ var Hierarchical_List = /** @class */ (function () {
                 break;
             case 'Overspanningsbeveiliging':
                 tempval = new Overspanningsbeveiliging(structure);
+                break;
+            case 'Schakelaars':
+                tempval = new Schakelaars(structure);
                 break;
             case 'Stoomoven':
                 tempval = new Stoomoven(structure);
@@ -4654,7 +4611,7 @@ var Hierarchical_List = /** @class */ (function () {
                         var x = this.data[this.getOrdinalById(myParent)].getKey("type");
                         //get image of all lowest level elements
                         if ((this.data[this.getOrdinalById(myParent)]).getKey("type") == "Meerdere verbruikers") {
-                            inSVG[elementCounter] = this.data[i].toSVG(i !== lastChildOrdinal);
+                            inSVG[elementCounter] = this.data[i].toSVG();
                         }
                         else if (stack == "vertical") {
                             inSVG[elementCounter] = this.toSVG(this.id[i], "horizontal", 0, true); //if we are still in vertical mode, switch to horizontal and take childs with us
@@ -4665,7 +4622,7 @@ var Hierarchical_List = /** @class */ (function () {
                             //the following function takes true as an argument if there is still an element following in a horizontal chain.
                             //This is the case if the element is not last and/or not followed by empty tekst without border
                             if (this.id[i] == myParent) {
-                                inSVG[elementCounter] = this.data[i].toSVG(i !== lastChildOrdinal);
+                                inSVG[elementCounter] = this.data[i].toSVG();
                             }
                             else {
                                 inSVG[elementCounter] = this.toSVG(this.id[i], "horizontal", 0, true); //if we are still in vertical mode, switch to horizontal and take childs with us
@@ -5491,9 +5448,12 @@ function import_to_structure(mystring, redraw) {
     // Make some corrections if it is an old version
     if (version < 2) {
         for (var i = 0; i < mystructure.length; i++) {
-            // Breedte van Vrije tekst velden met 20 verhogen sinds 16/12/2023
-            if ((structure.data[i].keys[0][2] === "Vrije tekst") && (Number(structure.data[i].keys[22][2]) > 0))
-                structure.data[i].keys[22][2] = String(Number(structure.data[i].keys[22][2]) + 20);
+            // Breedte van Vrije tekst velden zonder kader met 30 verhogen sinds 16/12/2023
+            if ((structure.data[i].keys[0][2] === "Vrije tekst") && (structure.data[i].keys[16][2] != "verbruiker"))
+                if (Number(structure.data[i].keys[22][2]) > 0)
+                    structure.data[i].keys[22][2] = String(Number(structure.data[i].keys[22][2]) + 30);
+                else
+                    structure.data[i].keys[18][2] = "automatisch";
         }
     }
     //As we re-read the structure and it might be shorter then it once was (due to deletions) but we might still have the old high ID's, always take over the curid from the file

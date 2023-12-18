@@ -34,7 +34,27 @@ class List_Item {
     }
 
     hasChild() : boolean {
-        return(this.getNumChilds()>0);
+        let parent = this.getParent();
+
+        if ( (parent != null) && (parent.keys[0][2] == "Meerdere verbruikers") ) {
+            let myOrdinal = this.sourcelist.getOrdinalById(this.id);
+            let lastOrdinal = 0;
+            for (let i = 0; i<this.sourcelist.data.length; ++i) {
+                //empty tekst at the end does not count as a valid last child of meerdere verbruikers (zo vermijden we een streepje op het einde van het stopcontact)
+                if (this.sourcelist.active[i] && (this.sourcelist.data[i].keys[16][2] != "zonder kader") && (this.sourcelist.data[i].parent == this.parent)) lastOrdinal = i;
+            }
+            if (lastOrdinal > myOrdinal) return true; else return false; 
+        } else {
+            if (this.sourcelist != null) {
+                for (let i=0; i<this.sourcelist.data.length; ++i) {
+                    if ( (this.sourcelist.data[i].parent === this.id) && 
+                        (this.sourcelist.active[i]) && (this.sourcelist.data[i].keys[16][2] != "zonder kader") && 
+                        (this.sourcelist.data[i].keys[0][2] != "") ) return true;
+                }  
+            }
+        }  
+
+      return false;
     }
 
     setKey(key: string, setvalue: any) {
@@ -56,6 +76,8 @@ class List_Item {
     getParent() {
       if ((this.sourcelist != null) && (this.parent != 0)) {
         return this.sourcelist.data[this.sourcelist.getOrdinalById(this.parent)];
+      } else {
+        return null;
       }
     }
 
@@ -109,7 +131,7 @@ class List_Item {
       return("toHTML() function not defined for base class List_Item. Extend class first.");
     }
 
-    toSVG(hasChild: Boolean = false) {
+    toSVG() {
       let mySVG:SVGelement = new SVGelement();
       return(mySVG);
     }

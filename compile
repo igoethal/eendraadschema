@@ -5,6 +5,9 @@ cd src
 tsc general.ts SVGelement.ts \
     List_Item/List_Item.ts \
     List_Item/Electro_Item.ts \
+    List_Item/Schakelaars/Schakelaar.ts \
+    List_Item/Schakelaars/Schakelaars.ts \
+    List_Item/Schakelaars/Lichtcircuit.ts \
     List_Item/*.ts \
     Properties.ts SVGSymbols.ts Hierarchical_List.ts Print_Table.ts config.ts ../prop/prop_scripts.ts main.ts --outfile swap.js 
 
