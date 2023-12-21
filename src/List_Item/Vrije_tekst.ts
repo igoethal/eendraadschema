@@ -91,7 +91,7 @@ class Vrije_tekst extends Electro_Item {
         }
 
         for (let i = 0; i<strlines.length; i++) {
-            var dispy = 28 - 7.5 * Math.min(1,strlines.length-1) + 15 * i;
+            let dispy = 28 - 7.5 * Math.min(1,strlines.length-1) + 15 * i;
             mySVG.data += outputstr_common + ' y="' + dispy + '"' + options + '>' + strlines[i] + '</text>';
         }
        

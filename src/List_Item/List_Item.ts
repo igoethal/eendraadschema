@@ -33,6 +33,21 @@ class List_Item {
         return(numChilds);
     }
 
+    getNumActiveChilds() : number {
+      var numChilds = 0;
+      if (this.sourcelist != null) {
+          for (let i=0; i<this.sourcelist.data.length; ++i) {
+              if ( (this.sourcelist.data[i].parent === this.id) && 
+                   (this.sourcelist.active[i]) && (this.sourcelist.data[i].keys[0][2] != "") ) numChilds++;
+          }  
+      }
+      return(numChilds);
+    }
+
+    heeftActiefKind() : boolean {
+      return(this.getNumActiveChilds() > 0);
+    }
+
     heeftVerbruikerAlsKind() : boolean {
         let parent = this.getParent();
 

@@ -491,10 +491,6 @@ class Electro_Item extends List_Item {
       case "Vrije ruimte":
           output += "&nbsp;Breedte: " + this.stringToHTML(22,3);
           break;  
-      case "Meerdere vebruikers":
-        output += "&nbsp;Nr: " + this.stringToHTML(10,5);
-        output += ", Adres/tekst: " + this.stringToHTML(15,5);
-        break;
       default:
         output += "&nbsp;Nr: " + this.stringToHTML(10,5);
         output += ", Adres/tekst: " + this.stringToHTML(15,5);

@@ -174,6 +174,7 @@ class Hierarchical_List {
       case 'Bel': tempval = new Bel(structure); break;
       case 'Boiler': tempval = new Boiler(structure); break;
       case 'Diepvriezer': tempval = new Diepvriezer(structure); break;
+      case 'Domotica': tempval = new Domotica(structure); break; 
       case 'Droogkast': tempval = new Droogkast(structure); break; 
       case 'Drukknop': tempval = new Drukknop(structure); break; 
       case 'Elektriciteitsmeter': tempval = new Elektriciteitsmeter(structure); break; 
@@ -184,6 +185,7 @@ class Hierarchical_List {
       case 'Kookfornuis': tempval = new Kookfornuis(structure); break;
       case 'Lichtcircuit': tempval = new Lichtcircuit(structure); break;
       case 'Lichtpunt': tempval = new Lichtpunt(structure); break;
+      case 'Meerdere verbruikers': tempval = new Meerdere_verbruikers(structure); break;
       case 'Microgolfoven': tempval = new Microgolfoven(structure); break;
       case 'Motor': tempval = new Motor(structure); break;
       case 'Omvormer': tempval = new Omvormer(structure); break;
@@ -432,6 +434,45 @@ class Hierarchical_List {
 
   //-----------------------------------------------------
 
+  tekenVerticaleLijnIndienKindVanKring(item: Electro_Item, mySVG: SVGelement) {
+
+      // Eerst checken of het wel degelijk een kind van een kring is
+      let parent:Electro_Item = (item.getParent() as Electro_Item);
+      if (parent != null) {
+          if (parent.keys[0][2] == "Kring") {
+
+              // Bepaal hoogte van de lijn. Idien dit het laatste element van de kring is is het een halve lijn,
+              // zoniet een hele lijn
+              let y1, y2: number;
+              let lastOrdinalInKring = 0;
+              let myOrdinal = this.getOrdinalById(item.id);
+
+              for (let i = 0; i<item.sourcelist.length; i++) {
+                  if (this.active[i] && (this.data[i].parent == parent.id)) lastOrdinalInKring = i;
+              }
+
+              if (myOrdinal < lastOrdinalInKring) { // Teken een verticale lijn over de volledige hoogte
+                  y1 = 0;
+                  y2 = mySVG.yup + mySVG.ydown;
+              } else { // Teken een verticale lijn over de halve hoogte
+                  y1 = mySVG.yup;
+                  y2 = mySVG.yup + mySVG.ydown;    
+              }
+
+              // Teken de lijn
+              mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + y1 + '" y2="' + y2 + '" stroke="black" />'
+
+              // Plaats het nummer van het item naast de lijn
+              mySVG.data +=
+                '<text x="' + (mySVG.xleft+9) + '" y="' + (mySVG.yup - 5) + '" ' +
+                'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' +
+                htmlspecialchars(item.keys[10][2])+'</text>';
+            }
+      };
+  };
+
+  //-----------------------------------------------------
+
   toHTML(myParent: number) {
     var output: string = "";
     var numberDrawn: number = 0;
@@ -586,95 +627,13 @@ class Hierarchical_List {
             break;
 
           case "Domotica":
-            //Algoritme werkt gelijkaardig aan een "Bord" en "Splitsing", eerst maken we een tekening van het geheel
-            inSVG[elementCounter] = this.toSVG(this.id[i],"horizontal");
-
-            //Make sure there is always enough space to display the element
-            if ((inSVG[elementCounter].xright + inSVG[elementCounter].xleft) <=100) inSVG[elementCounter].xright = (100 - inSVG[elementCounter].xleft) ;
-            inSVG[elementCounter].yup = Math.max(inSVG[elementCounter].yup+20, 25);
-            inSVG[elementCounter].ydown += Math.max(inSVG[elementCounter].ydown, 25);
-
-            var width = (inSVG[elementCounter].xleft + inSVG[elementCounter].xright - 20);
-            inSVG[elementCounter].data = inSVG[elementCounter].data +
-              '<rect x="' + (20) + '" width="' + (width) +
-              '" y="' + (inSVG[elementCounter].yup-20) + '" height="' + (40) + '" stroke="black" stroke-width="2" fill="white" />'
-            inSVG[elementCounter].data = inSVG[elementCounter].data +
-              '<line x1="1" x2="20" y1="' + (inSVG[elementCounter].yup) + '" y2="' + (inSVG[elementCounter].yup) + '" stroke="black" />'
-            inSVG[elementCounter].data +=
-              '<text x="' + (21 + width/2) + '" y="' + (inSVG[elementCounter].yup+3) + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="bold">' + htmlspecialchars(this.data[i].keys[15][2]) + '</text>';
-
-            var toShift = inSVG[elementCounter].xleft;
-            inSVG[elementCounter].xleft -= toShift - 1; //we leave one pixel for the bold kring-line at the left
-            inSVG[elementCounter].xright += toShift - 1;
-
-            //If direct child of a Kring, put a vertical pipe and "nr" at the left
-            if (myParent != 0) {
-              if ((this.data[this.getOrdinalById(myParent)]).getKey("type") == "Kring") {
-
-                var y1, y2: number;
-                if (i !== lastChildOrdinal) {
-                  y1 = 0;
-                  y2 = inSVG[elementCounter].yup + inSVG[elementCounter].ydown;
-                } else {
-                  y1 = inSVG[elementCounter].yup;
-                  y2 = inSVG[elementCounter].yup + inSVG[elementCounter].ydown;
-                }
-
-                inSVG[elementCounter].data = inSVG[elementCounter].data +
-                  '<line x1="' + inSVG[elementCounter].xleft +
-                  '" x2="' + inSVG[elementCounter].xleft +
-                  '" y1="' + y1 + '" y2="' + y2 + '" stroke="black" />'
-
-                inSVG[elementCounter].data +=
-                  '<text x="' + (inSVG[elementCounter].xleft+9) + '" y="' + (inSVG[elementCounter].yup - 5) + '" ' +
-                  'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' +
-                  htmlspecialchars(this.data[i].getKey("naam"))+'</text>';
-              };
-            };
-
+            inSVG[elementCounter] = this.data[i].toSVG(); //Maak de tekening van Domotica
+            this.tekenVerticaleLijnIndienKindVanKring(this.data[i] as Electro_Item,inSVG[elementCounter]);
             break;
 
           case "Meerdere verbruikers":
-            //Algoritme werkt gelijkaardig aan een "Bord", eerst maken we een tekening van het geheel
-            inSVG[elementCounter] = this.toSVG(this.id[i],"horizontal");
-
-            //We voorzien altijd verticale ruimte, zelfs als de kinderen nog niet gedefinieerd zijn
-            inSVG[elementCounter].ydown = Math.max(inSVG[elementCounter].ydown,25);
-            inSVG[elementCounter].yup = Math.max(inSVG[elementCounter].yup,25);
-            inSVG[elementCounter].xleft = Math.max(inSVG[elementCounter].xleft,1);
-
-            //--plaats adres onderaan als nodig--
-            if (!(/^\s*$/.test(this.data[i].keys[15][2]))) { //check if adres contains only white space
-              inSVG[elementCounter].data += '<text x="' + ((inSVG[elementCounter].xright-20)/2 + 21) + '" y="' + (inSVG[elementCounter].yup+inSVG[elementCounter].ydown+10)
-                + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.data[i].keys[15][2]) + '</text>';
-              inSVG[elementCounter].ydown += 15;
-            }
-
-            //If direct child of a Kring, put a vertical pipe and "nr" at the left
-            if (myParent != 0) {
-              if ((this.data[this.getOrdinalById(myParent)]).getKey("type") == "Kring") {
-
-                var y1, y2: number;
-                if (i !== lastChildOrdinal) {
-                  y1 = 0;
-                  y2 = inSVG[elementCounter].yup + inSVG[elementCounter].ydown;
-                } else {
-                  y1 = inSVG[elementCounter].yup;
-                  y2 = inSVG[elementCounter].yup + inSVG[elementCounter].ydown;
-                }
-
-                inSVG[elementCounter].data = inSVG[elementCounter].data +
-                  '<line x1="' + inSVG[elementCounter].xleft +
-                  '" x2="' + inSVG[elementCounter].xleft +
-                  '" y1="' + y1 + '" y2="' + y2 + '" stroke="black" />'
-
-                inSVG[elementCounter].data +=
-                  '<text x="' + (inSVG[elementCounter].xleft+9) + '" y="' + (inSVG[elementCounter].yup - 5) + '" ' +
-                  'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' +
-                  htmlspecialchars(this.data[i].getKey("naam"))+'</text>';
-              };
-            };
-
+            inSVG[elementCounter] = this.data[i].toSVG(); //Maak de tekening van meerdere verbruikers
+            this.tekenVerticaleLijnIndienKindVanKring(this.data[i] as Electro_Item,inSVG[elementCounter]);
             break;
 
           case "Aansluiting":
