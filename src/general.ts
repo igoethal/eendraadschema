@@ -18,9 +18,9 @@ function isInt(value) {
 function svgTextWidth(input:String, fontsize:Number = 10, options:String = '') {
     const div = document.createElement('div');
     div.innerHTML = '<svg width="1000" height="20"><text x="0" y="10" style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-size="' + Number(fontsize) + '" ' + options + '>' + input + '</text></svg>';
-    document.body.appendChild(div);
+    document.getElementById("configsection").appendChild(div);
     const width = (div.children[0].children[0] as SVGGraphicsElement).getBBox().width;
-    document.body.removeChild(div);
+    document.getElementById("configsection").removeChild(div);
     return width;
 }
 

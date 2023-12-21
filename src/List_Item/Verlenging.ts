@@ -12,7 +12,8 @@ class Verlenging extends Electro_Item {
         let output = this.toHTMLHeader(mode, Parent);
 
         output += "&nbsp;Nr: " + this.stringToHTML(10,5)
-               +  ", Breedte: " + this.stringToHTML(22,3);
+               +  ", Breedte: " + this.stringToHTML(22,3)
+               +  ", Adres/tekst: " + this.stringToHTML(23,5);
 
         return(output);
     }

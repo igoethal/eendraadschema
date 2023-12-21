@@ -138,6 +138,9 @@ function HLRedrawTreeHTML() {
 }
 
 function HLRedrawTreeSVG() {
+  let scrolltop = document.getElementById("right_col").scrollTop;
+  let scrollleft = document.getElementById("right_col").scrollLeft;
+
   document.getElementById("right_col_inner").innerHTML = '<b>Tekening: </b>Ga naar het print-menu om de tekening af te printen of te exporteren als SVG vector graphics.<br><br>';
   /*document.getElementById("right_col_inner").innerHTML = '<b>Tekening: </b><button onclick=download("html")>Download als html</button>';
   document.getElementById("right_col_inner").innerHTML += '&nbsp;<button onclick=download("svg")>Download als svg</button>';
@@ -156,6 +159,8 @@ function HLRedrawTreeSVG() {
   document.getElementById("right_col_inner").innerHTML += '<i><br><small>Versie: ' + CONF_builddate +
                           ' (C) Ivan Goethals -- <a href="license.html" target="popup" onclick="window.open(\'license.html\',\'popup\',\'width=800,height=600\'); return false;">GPLv3</a></small></i><br><br>';
 
+  document.getElementById("right_col").scrollTop = scrolltop;
+  document.getElementById("right_col").scrollLeft = scrollleft;
 }
 
 function HLRedrawTree() {
@@ -619,7 +624,8 @@ function import_to_structure(mystring: string, redraw = true) {
       // Breedte van Vrije tekst velden zonder kader met 30 verhogen sinds 16/12/2023
       if ( (structure.data[i].keys[0][2] === "Vrije tekst") && (structure.data[i].keys[16][2] != "verbruiker") )
         if (Number(structure.data[i].keys[22][2])>0) structure.data[i].keys[22][2] = String(Number(structure.data[i].keys[22][2]) + 30);
-        else structure.data[i].keys[18][2] = "automatisch";
+          else structure.data[i].keys[18][2] = "automatisch";
+        if ( (structure.data[i].keys[16][2] == "") || (structure.data[i].keys[16][2] == "standaard") ) structure.data[i].keys[16][2] = "verbruiker";
     } 
   }   
 
@@ -656,6 +662,10 @@ var importjson = function(event) {
   };
 
   reader.readAsText(input.files[0]);
+
+  //Scroll to top left for the SVG
+  document.getElementById("right_col").scrollTop = 0;
+  document.getElementById("right_col").scrollLeft = 0;
 };
 
 

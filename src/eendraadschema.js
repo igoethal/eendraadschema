@@ -56,9 +56,9 @@ function svgTextWidth(input, fontsize, options) {
     if (options === void 0) { options = ''; }
     var div = document.createElement('div');
     div.innerHTML = '<svg width="1000" height="20"><text x="0" y="10" style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-size="' + Number(fontsize) + '" ' + options + '>' + input + '</text></svg>';
-    document.body.appendChild(div);
+    document.getElementById("configsection").appendChild(div);
     var width = div.children[0].children[0].getBBox().width;
-    document.body.removeChild(div);
+    document.getElementById("configsection").removeChild(div);
     return width;
 }
 function flattenSVG(SVGstruct, shiftx, shifty, node) {
@@ -1264,7 +1264,7 @@ var Schakelaars = /** @class */ (function (_super) {
 var Lichtcircuit = /** @class */ (function (_super) {
     __extends(Lichtcircuit, _super);
     function Lichtcircuit(mylist) {
-        return _super.call(this, mylist) || this; //Schakelaars
+        return _super.call(this, mylist) || this;
     }
     Lichtcircuit.prototype.resetKeys = function () {
         _super.prototype.resetKeys.call(this); //Schakelaars
@@ -2746,7 +2746,8 @@ var Verlenging = /** @class */ (function (_super) {
     Verlenging.prototype.toHTML = function (mode, Parent) {
         var output = this.toHTMLHeader(mode, Parent);
         output += "&nbsp;Nr: " + this.stringToHTML(10, 5)
-            + ", Breedte: " + this.stringToHTML(22, 3);
+            + ", Breedte: " + this.stringToHTML(22, 3)
+            + ", Adres/tekst: " + this.stringToHTML(23, 5);
         return (output);
     };
     Verlenging.prototype.toSVG = function () {
@@ -5152,6 +5153,8 @@ function HLRedrawTreeHTML() {
     document.getElementById("left_col_inner").innerHTML = output;
 }
 function HLRedrawTreeSVG() {
+    var scrolltop = document.getElementById("right_col").scrollTop;
+    var scrollleft = document.getElementById("right_col").scrollLeft;
     document.getElementById("right_col_inner").innerHTML = '<b>Tekening: </b>Ga naar het print-menu om de tekening af te printen of te exporteren als SVG vector graphics.<br><br>';
     /*document.getElementById("right_col_inner").innerHTML = '<b>Tekening: </b><button onclick=download("html")>Download als html</button>';
     document.getElementById("right_col_inner").innerHTML += '&nbsp;<button onclick=download("svg")>Download als svg</button>';
@@ -5161,6 +5164,8 @@ function HLRedrawTreeSVG() {
     document.getElementById("right_col_inner").innerHTML += "\n    <h2>Legend:</h2>\n    <button style=\"background-color:green;\">&#9650;</button> Item hierboven invoegen (zelfde niveau)<br>\n    <button style=\"background-color:green;\">&#9660;</button> Item hieronder invoegen (zelfde niveau)<br>\n    <button style=\"background-color:green;\">&#9654;</button> Afhankelijk item hieronder toevoegen (niveau dieper)<br>\n    <button style=\"background-color:red;\">&#9851;</button> Item verwijderen<br>\n  ";
     document.getElementById("right_col_inner").innerHTML += '<i><br><small>Versie: ' + CONF_builddate +
         ' (C) Ivan Goethals -- <a href="license.html" target="popup" onclick="window.open(\'license.html\',\'popup\',\'width=800,height=600\'); return false;">GPLv3</a></small></i><br><br>';
+    document.getElementById("right_col").scrollTop = scrolltop;
+    document.getElementById("right_col").scrollLeft = scrollleft;
 }
 function HLRedrawTree() {
     HLRedrawTreeHTML();
@@ -5525,6 +5530,8 @@ function import_to_structure(mystring, redraw) {
                     structure.data[i].keys[22][2] = String(Number(structure.data[i].keys[22][2]) + 30);
                 else
                     structure.data[i].keys[18][2] = "automatisch";
+            if ((structure.data[i].keys[16][2] == "") || (structure.data[i].keys[16][2] == "standaard"))
+                structure.data[i].keys[16][2] = "verbruiker";
         }
     }
     //As we re-read the structure and it might be shorter then it once was (due to deletions) but we might still have the old high ID's, always take over the curid from the file
@@ -5554,6 +5561,9 @@ var importjson = function (event) {
         import_to_structure(reader.result.toString());
     };
     reader.readAsText(input.files[0]);
+    //Scroll to top left for the SVG
+    document.getElementById("right_col").scrollTop = 0;
+    document.getElementById("right_col").scrollLeft = 0;
 };
 function importclicked() {
     document.getElementById('importfile').click();
