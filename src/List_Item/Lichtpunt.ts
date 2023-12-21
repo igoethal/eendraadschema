@@ -206,7 +206,7 @@ class Lichtpunt extends Electro_Item {
                     case "Centraal":
                         mySVG.data += '<use xlink:href="#lamp" x="' + 30 + '" y="25" />'
                                    +  '<circle cx="30" cy="25" r="5" style="stroke:black;fill:black" />';
-                        if (this.hasChild()) mySVG.data += '<line x1="'+30+'" y1="25" x2="'+(30+11)+'" y2="25" stroke="black" />';
+                        if (this.heeftVerbruikerAlsKind()) mySVG.data += '<line x1="'+30+'" y1="25" x2="'+(30+11)+'" y2="25" stroke="black" />';
                         break;
                     case "Decentraal":
                         mySVG.data += '<use xlink:href="#noodlamp_decentraal" x="' + 30 + '" y="25" />';
@@ -214,7 +214,7 @@ class Lichtpunt extends Electro_Item {
                         break;
                     default:
                         mySVG.data += '<use xlink:href="#lamp" x="' + 30 + '" y="25" />';
-                        if (this.hasChild()) mySVG.data += '<line x1="'+30+'" y1="25" x2="'+(30+11)+'" y2="25" stroke="black" />';
+                        if (this.heeftVerbruikerAlsKind()) mySVG.data += '<line x1="'+30+'" y1="25" x2="'+(30+11)+'" y2="25" stroke="black" />';
                         break;
                 }
 

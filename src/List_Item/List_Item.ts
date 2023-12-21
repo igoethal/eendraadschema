@@ -33,7 +33,7 @@ class List_Item {
         return(numChilds);
     }
 
-    hasChild() : boolean {
+    heeftVerbruikerAlsKind() : boolean {
         let parent = this.getParent();
 
         if ( (parent != null) && (parent.keys[0][2] == "Meerdere verbruikers") ) {
@@ -48,8 +48,8 @@ class List_Item {
             if (this.sourcelist != null) {
                 for (let i=0; i<this.sourcelist.data.length; ++i) {
                     if ( (this.sourcelist.data[i].parent === this.id) && 
-                        (this.sourcelist.active[i]) && (this.sourcelist.data[i].keys[16][2] != "zonder kader") && 
-                        (this.sourcelist.data[i].keys[0][2] != "") ) return true;
+                         (this.sourcelist.active[i]) && (this.sourcelist.data[i].keys[16][2] != "zonder kader") && 
+                         (this.sourcelist.data[i].keys[0][2] != "") ) return true;
                 }  
             }
         }  

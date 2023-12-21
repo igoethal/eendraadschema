@@ -17,7 +17,7 @@ class Vrije_tekst extends Electro_Item {
     overrideKeys() {
         if (this.keys[16][2] != "verbruiker") { this.keys[16][2] = "zonder kader"; }
         if (this.keys[18][2] != "automatisch") { this.keys[18][2] = "handmatig"; }
-        if (this.hasChild()) { this.keys[16][2] = "verbruiker"; }
+        if (this.heeftVerbruikerAlsKind()) { this.keys[16][2] = "verbruiker"; }
         this.adjustTextWidthIfAuto();
     }
 
@@ -34,7 +34,7 @@ class Vrije_tekst extends Electro_Item {
         output += ", Vet: " + this.checkboxToHTML(19)
                +  ", Schuin: " + this.checkboxToHTML(20)
                +  ", Horizontale alignering: " + this.selectToHTML(17,["links","centreer","rechts"])
-               +  ", Type: " + this.selectToHTML(16,(this.hasChild() ? ["verbruiker"] : ["verbruiker","zonder kader"]));
+               +  ", Type: " + this.selectToHTML(16,(this.heeftVerbruikerAlsKind() ? ["verbruiker"] : ["verbruiker","zonder kader"]));
                
         if (this.keys[16][2] != "zonder kader") output += ", Adres/tekst: " + this.stringToHTML(23,5);
 

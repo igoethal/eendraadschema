@@ -125,11 +125,11 @@ class Schakelaars extends Electro_Item {
         var endx;
 
         for (let i=0; i<this.tekenKeten.length; i++ ) {
-            let islast: boolean = ( (i == this.tekenKeten.length-1) && (!this.hasChild()) );
+            let islast: boolean = ( (i == this.tekenKeten.length-1) && (!this.heeftVerbruikerAlsKind()) );
             let str:string; ( {endx: startx, str: str, lowerbound: lowerbound} = this.tekenKeten[i].toSVGString(startx,islast) ); mySVG.data += str;
         }
         // Voor bepaalde symbolen moet wat extra ruimte rechts voorzien worden om te vermijden dat de tekening door de volgende kring loopt
-        if (!this.hasChild()) startx += this.tekenKeten[this.tekenKeten.length-1].extraPlaatsRechts();
+        if (!this.heeftVerbruikerAlsKind()) startx += this.tekenKeten[this.tekenKeten.length-1].extraPlaatsRechts();
 
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = startx-2;

@@ -107,7 +107,7 @@ class Stopcontact extends Electro_Item {
         if (this.keys[20][2]) mySVG.data += '<rect x="' + (22+(this.keys[19][2])*10+(this.keys[21][2])*34) + '" y="0" width="6" height="8" style="fill:rgb(255,255,255)" /><text x="' + (25+(this.keys[19][2])*10+(this.keys[21][2])*34) + '" y="8" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">h</text>';
 
         // Indien het stopcontact een kind heeft, teken een streepje rechts
-        if (this.hasChild()) {
+        if (this.heeftVerbruikerAlsKind()) {
             mySVG.data += '<line x1="'+startx+'" y1="25" x2="'+(startx+21)+'" y2="25" stroke="black" />';
         };
        

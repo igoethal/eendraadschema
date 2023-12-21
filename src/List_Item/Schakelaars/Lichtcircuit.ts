@@ -45,7 +45,7 @@ class Lichtcircuit extends Schakelaars {
 
         // Teken de schakelaars
         for (let i=0; i<this.tekenKeten.length; i++ ) {
-            let islast: boolean = ( (i == this.tekenKeten.length-1) && (!this.hasChild()) );
+            let islast: boolean = ( (i == this.tekenKeten.length-1) && (!this.heeftVerbruikerAlsKind()) );
             let str:string; ( {endx: startx, str: str, lowerbound: lowerbound} = this.tekenKeten[i].toSVGString(startx,islast) ); mySVG.data += str;
         }
 
@@ -66,14 +66,14 @@ class Lichtcircuit extends Schakelaars {
             if (print_str_upper != "") mySVG.data += '<text x="' + endx + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' + htmlspecialchars(print_str_upper) + '</text>';
 
             // Teken een leiding achter de lamp indien er nog kinderen zijn
-            if (this.hasChild()) mySVG.data += '<line x1="'+endx+'" y1="25" x2="'+(endx+10)+'" y2="25" stroke="black" />';
+            if (this.heeftVerbruikerAlsKind()) mySVG.data += '<line x1="'+endx+'" y1="25" x2="'+(endx+10)+'" y2="25" stroke="black" />';
                 
             // Bepaal finale Bounding Box om het geheel te tekenen
             startx = endx + 10;
             lowerbound = Math.max(lowerbound,29);
         } else { //Geen lampen
             // Voor bepaalde symbolen moet wat extra ruimte rechts voorzien worden om te vermijden dat de tekening door de volgende kring loopt
-            if (!this.hasChild()) startx += this.tekenKeten[this.tekenKeten.length-1].extraPlaatsRechts();
+            if (!this.heeftVerbruikerAlsKind()) startx += this.tekenKeten[this.tekenKeten.length-1].extraPlaatsRechts();
         }    
 
         mySVG.xleft = 1; // foresee at least some space for the conductor

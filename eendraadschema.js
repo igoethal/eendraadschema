@@ -220,7 +220,7 @@ var List_Item = /** @class */ (function () {
         }
         return (numChilds);
     };
-    List_Item.prototype.hasChild = function () {
+    List_Item.prototype.heeftVerbruikerAlsKind = function () {
         var parent = this.getParent();
         if ((parent != null) && (parent.keys[0][2] == "Meerdere verbruikers")) {
             var myOrdinal = this.sourcelist.getOrdinalById(this.id);
@@ -1233,13 +1233,13 @@ var Schakelaars = /** @class */ (function (_super) {
         var startx = 1;
         var endx;
         for (var i = 0; i < this.tekenKeten.length; i++) {
-            var islast = ((i == this.tekenKeten.length - 1) && (!this.hasChild()));
+            var islast = ((i == this.tekenKeten.length - 1) && (!this.heeftVerbruikerAlsKind()));
             var str = void 0;
             (_a = this.tekenKeten[i].toSVGString(startx, islast), startx = _a.endx, str = _a.str, lowerbound = _a.lowerbound);
             mySVG.data += str;
         }
         // Voor bepaalde symbolen moet wat extra ruimte rechts voorzien worden om te vermijden dat de tekening door de volgende kring loopt
-        if (!this.hasChild())
+        if (!this.heeftVerbruikerAlsKind())
             startx += this.tekenKeten[this.tekenKeten.length - 1].extraPlaatsRechts();
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = startx - 2;
@@ -1296,7 +1296,7 @@ var Lichtcircuit = /** @class */ (function (_super) {
         var endx;
         // Teken de schakelaars
         for (var i = 0; i < this.tekenKeten.length; i++) {
-            var islast = ((i == this.tekenKeten.length - 1) && (!this.hasChild()));
+            var islast = ((i == this.tekenKeten.length - 1) && (!this.heeftVerbruikerAlsKind()));
             var str = void 0;
             (_a = this.tekenKeten[i].toSVGString(startx, islast), startx = _a.endx, str = _a.str, lowerbound = _a.lowerbound);
             mySVG.data += str;
@@ -1319,7 +1319,7 @@ var Lichtcircuit = /** @class */ (function (_super) {
             if (print_str_upper != "")
                 mySVG.data += '<text x="' + endx + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' + htmlspecialchars(print_str_upper) + '</text>';
             // Teken een leiding achter de lamp indien er nog kinderen zijn
-            if (this.hasChild())
+            if (this.heeftVerbruikerAlsKind())
                 mySVG.data += '<line x1="' + endx + '" y1="25" x2="' + (endx + 10) + '" y2="25" stroke="black" />';
             // Bepaal finale Bounding Box om het geheel te tekenen
             startx = endx + 10;
@@ -1327,7 +1327,7 @@ var Lichtcircuit = /** @class */ (function (_super) {
         }
         else { //Geen lampen
             // Voor bepaalde symbolen moet wat extra ruimte rechts voorzien worden om te vermijden dat de tekening door de volgende kring loopt
-            if (!this.hasChild())
+            if (!this.heeftVerbruikerAlsKind())
                 startx += this.tekenKeten[this.tekenKeten.length - 1].extraPlaatsRechts();
         }
         mySVG.xleft = 1; // foresee at least some space for the conductor
@@ -2103,7 +2103,7 @@ var Lichtpunt = /** @class */ (function (_super) {
                     case "Centraal":
                         mySVG.data += '<use xlink:href="#lamp" x="' + 30 + '" y="25" />'
                             + '<circle cx="30" cy="25" r="5" style="stroke:black;fill:black" />';
-                        if (this.hasChild())
+                        if (this.heeftVerbruikerAlsKind())
                             mySVG.data += '<line x1="' + 30 + '" y1="25" x2="' + (30 + 11) + '" y2="25" stroke="black" />';
                         break;
                     case "Decentraal":
@@ -2113,7 +2113,7 @@ var Lichtpunt = /** @class */ (function (_super) {
                         break;
                     default:
                         mySVG.data += '<use xlink:href="#lamp" x="' + 30 + '" y="25" />';
-                        if (this.hasChild())
+                        if (this.heeftVerbruikerAlsKind())
                             mySVG.data += '<line x1="' + 30 + '" y1="25" x2="' + (30 + 11) + '" y2="25" stroke="black" />';
                         break;
                 }
@@ -2391,7 +2391,7 @@ var Stopcontact = /** @class */ (function (_super) {
         if (this.keys[20][2])
             mySVG.data += '<rect x="' + (22 + (this.keys[19][2]) * 10 + (this.keys[21][2]) * 34) + '" y="0" width="6" height="8" style="fill:rgb(255,255,255)" /><text x="' + (25 + (this.keys[19][2]) * 10 + (this.keys[21][2]) * 34) + '" y="8" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">h</text>';
         // Indien het stopcontact een kind heeft, teken een streepje rechts
-        if (this.hasChild()) {
+        if (this.heeftVerbruikerAlsKind()) {
             mySVG.data += '<line x1="' + startx + '" y1="25" x2="' + (startx + 21) + '" y2="25" stroke="black" />';
         }
         ;
@@ -2749,7 +2749,7 @@ var Vrije_tekst = /** @class */ (function (_super) {
         if (this.keys[18][2] != "automatisch") {
             this.keys[18][2] = "handmatig";
         }
-        if (this.hasChild()) {
+        if (this.heeftVerbruikerAlsKind()) {
             this.keys[16][2] = "verbruiker";
         }
         this.adjustTextWidthIfAuto();
@@ -2765,7 +2765,7 @@ var Vrije_tekst = /** @class */ (function (_super) {
         output += ", Vet: " + this.checkboxToHTML(19)
             + ", Schuin: " + this.checkboxToHTML(20)
             + ", Horizontale alignering: " + this.selectToHTML(17, ["links", "centreer", "rechts"])
-            + ", Type: " + this.selectToHTML(16, (this.hasChild() ? ["verbruiker"] : ["verbruiker", "zonder kader"]));
+            + ", Type: " + this.selectToHTML(16, (this.heeftVerbruikerAlsKind() ? ["verbruiker"] : ["verbruiker", "zonder kader"]));
         if (this.keys[16][2] != "zonder kader")
             output += ", Adres/tekst: " + this.stringToHTML(23, 5);
         return (output);
