@@ -1254,7 +1254,7 @@ var Schakelaars = /** @class */ (function (_super) {
 var Lichtcircuit = /** @class */ (function (_super) {
     __extends(Lichtcircuit, _super);
     function Lichtcircuit(mylist) {
-        return _super.call(this, mylist) || this; //Schakelaars
+        return _super.call(this, mylist) || this;
     }
     Lichtcircuit.prototype.resetKeys = function () {
         _super.prototype.resetKeys.call(this); //Schakelaars
