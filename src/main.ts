@@ -138,29 +138,31 @@ function HLRedrawTreeHTML() {
 }
 
 function HLRedrawTreeSVG() {
-  let scrolltop = document.getElementById("right_col").scrollTop;
-  let scrollleft = document.getElementById("right_col").scrollLeft;
+  //let scrolltop = document.getElementById("right_col").scrollTop;
+  //let scrollleft = document.getElementById("right_col").scrollLeft;
 
-  document.getElementById("right_col_inner").innerHTML = '<b>Tekening: </b>Ga naar het print-menu om de tekening af te printen of te exporteren als SVG vector graphics.<br><br>';
-  /*document.getElementById("right_col_inner").innerHTML = '<b>Tekening: </b><button onclick=download("html")>Download als html</button>';
+  let str:string = '<b>Tekening: </b>Ga naar het print-menu om de tekening af te printen of te exporteren als SVG vector graphics.<br><br>'
+                 +  flattenSVGfromString(structure.toSVG(0,"horizontal").data)
+                 + '<h2>Legende:</h2>'
+                 + '<button style="background-color:green;">&#9650;</button> Item hierboven invoegen (zelfde niveau)<br>'
+                 + '<button style="background-color:green;">&#9660;</button> Item hieronder invoegen (zelfde niveau)<br>'
+                 + '<button style="background-color:green;">&#9654;</button> Afhankelijk item hieronder toevoegen (niveau dieper)<br>'
+                 + '<button style="background-color:red;">&#9851;</button> Item verwijderen<br>'
+                 + '<i><br><small>Versie: ' + CONF_builddate
+                 + ' (C) Ivan Goethals -- <a href="license.html" target="popup" onclick="window.open(\'license.html\',\'popup\',\'width=800,height=600\'); return false;">GPLv3</a></small></i><br><br>';
+
+  document.getElementById("right_col_inner").innerHTML = str;
+
+  //document.getElementById("right_col").scrollTop = scrolltop;
+  //document.getElementById("right_col").scrollLeft = scrollleft;
+
+
+/*document.getElementById("right_col_inner").innerHTML = '<b>Tekening: </b><button onclick=download("html")>Download als html</button>';
   document.getElementById("right_col_inner").innerHTML += '&nbsp;<button onclick=download("svg")>Download als svg</button>';
   document.getElementById("right_col_inner").innerHTML += '&nbsp;<input type="checkbox" id="noGroup" checked></input><small>SVG elementen niet groeperen (aanbevolen voor meeste tekenprogramma\'s)</small>';
   document.getElementById("right_col_inner").innerHTML += '<br><small><i>Noot: De knoppen hierboven laden enkel de tekening. Wenst u het schema ook later te bewerken, gebruik dan "Opslaan" in het hoofdmenu.</i></small><br><br>';*/
 
-  document.getElementById("right_col_inner").innerHTML += flattenSVGfromString(structure.toSVG(0,"horizontal").data);
-  document.getElementById("right_col_inner").innerHTML += `
-    <h2>Legend:</h2>
-    <button style="background-color:green;">&#9650;</button> Item hierboven invoegen (zelfde niveau)<br>
-    <button style="background-color:green;">&#9660;</button> Item hieronder invoegen (zelfde niveau)<br>
-    <button style="background-color:green;">&#9654;</button> Afhankelijk item hieronder toevoegen (niveau dieper)<br>
-    <button style="background-color:red;">&#9851;</button> Item verwijderen<br>
-  `;
 
-  document.getElementById("right_col_inner").innerHTML += '<i><br><small>Versie: ' + CONF_builddate +
-                          ' (C) Ivan Goethals -- <a href="license.html" target="popup" onclick="window.open(\'license.html\',\'popup\',\'width=800,height=600\'); return false;">GPLv3</a></small></i><br><br>';
-
-  document.getElementById("right_col").scrollTop = scrolltop;
-  document.getElementById("right_col").scrollLeft = scrollleft;
 }
 
 function HLRedrawTree() {
@@ -625,7 +627,7 @@ function import_to_structure(mystring: string, redraw = true) {
       if ( (structure.data[i].keys[0][2] === "Vrije tekst") && (structure.data[i].keys[16][2] != "verbruiker") )
         if (Number(structure.data[i].keys[22][2])>0) structure.data[i].keys[22][2] = String(Number(structure.data[i].keys[22][2]) + 30);
           else structure.data[i].keys[18][2] = "automatisch";
-        if ( (structure.data[i].keys[16][2] == "") || (structure.data[i].keys[16][2] == "standaard") ) structure.data[i].keys[16][2] = "verbruiker";
+        if (structure.data[i].keys[16][2] != "zonder kader") structure.data[i].keys[16][2] = "verbruiker";
     } 
   }   
 
@@ -663,9 +665,9 @@ var importjson = function(event) {
 
   reader.readAsText(input.files[0]);
 
-  //Scroll to top left for the SVG
-  document.getElementById("right_col").scrollTop = 0;
-  document.getElementById("right_col").scrollLeft = 0;
+    //Scroll to top left for the SVG, this can only be done at the end because "right col" has to actually be visible
+    document.getElementById("right_col").scrollTop = 0;
+    document.getElementById("right_col").scrollLeft = 0;
 };
 
 
