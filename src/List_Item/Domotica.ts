@@ -28,7 +28,7 @@ class Domotica extends Electro_Item {
 
         // We voorzien altijd minimaal een kader van 80 en zeker genoeg voor de tekst in het Domotica-symbool
         let minwidth = 80;
-        for (let str of strlines) minwidth = Math.max(minwidth, svgTextWidth(str,10,'font-weight="bold"') + 15); //15 padding
+        for (let str of strlines) minwidth = Math.max(minwidth, svgTextWidth(htmlspecialchars(str),10,'font-weight="bold"') + 15); //15 padding
         minwidth += 20; //Ruimte voor leiding links
         if ((mySVG.xright + mySVG.xleft) <=minwidth) mySVG.xright = (minwidth - mySVG.xleft);
 

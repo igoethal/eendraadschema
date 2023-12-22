@@ -467,14 +467,6 @@ class Electro_Item extends List_Item {
         output += ", Kabeltype v&oacute;&oacute;r teller: " + this.stringToHTML(24,10);
         output += ", Adres/tekst: " + this.stringToHTML(15,5);
         break;
-      case "Bord":
-        output += "&nbsp;Naam: " + this.stringToHTML(10,5) + ", ";
-        output += "Geaard: " + this.checkboxToHTML(1);
-        break;
-      case "Domotica":
-        output += "&nbsp;Nr: " + this.stringToHTML(10,5);
-        output += ", Tekst: " + this.stringToHTML(15,10);
-        break;
       case "Domotica gestuurde verbruiker":
         output += "&nbsp;Nr: " + this.stringToHTML(10,5);
         output += ", Draadloos: " + this.checkboxToHTML(19);  
@@ -486,8 +478,6 @@ class Electro_Item extends List_Item {
           output += ", Externe sturing: " + this.selectToHTML(5,["drukknop","schakelaar"]);    
         }
         output += ", Adres/tekst: " + this.stringToHTML(15,5);
-      case "Splitsing":
-        break;
       case "Vrije ruimte":
           output += "&nbsp;Breedte: " + this.stringToHTML(22,3);
           break;  

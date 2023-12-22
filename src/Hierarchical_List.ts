@@ -173,6 +173,7 @@ class Hierarchical_List {
       case 'Batterij': tempval = new Batterij(structure); break;
       case 'Bel': tempval = new Bel(structure); break;
       case 'Boiler': tempval = new Boiler(structure); break;
+      case 'Bord': tempval = new Bord(structure); break;
       case 'Diepvriezer': tempval = new Diepvriezer(structure); break;
       case 'Domotica': tempval = new Domotica(structure); break; 
       case 'Droogkast': tempval = new Droogkast(structure); break; 
@@ -191,6 +192,7 @@ class Hierarchical_List {
       case 'Omvormer': tempval = new Omvormer(structure); break;
       case 'Overspanningsbeveiliging': tempval = new Overspanningsbeveiliging(structure); break;
       case 'Schakelaars': tempval = new Schakelaars(structure); break;
+      case 'Splitsing': tempval = new Splitsing(structure); break;
       case 'Stoomoven': tempval = new Stoomoven(structure); break;
       case 'Stopcontact': tempval = new Stopcontact(structure); break;
       case 'Transformator': tempval = new Transformator(structure); break;
@@ -552,78 +554,13 @@ class Hierarchical_List {
     for (var i = 0; i<this.length; i++) {
       if (this.active[i] && ( (this.data[i].parent == myParent) || ( (includeparent==true) && (this.id[i] == myParent) ) ) ) {
         switch (this.data[i].getKey("type")) {
+          
           case "Bord":
-            //get image of the entire bord
-            inSVG[elementCounter] = this.toSVG(this.id[i],"horizontal");
-            inSVG[elementCounter].xright += 10;
-            if (this.data[i].getKey("geaard")) {
-              if (inSVG[elementCounter].xleft <=100) {
-                var toShift = 100-inSVG[elementCounter].xleft;
-                inSVG[elementCounter].xleft = 100;
-                inSVG[elementCounter].xright -= toShift;
-              }
-            } else {
-              if (inSVG[elementCounter].xleft <=30) {
-                var toShift = 30-inSVG[elementCounter].xleft;
-                inSVG[elementCounter].xleft = 30;
-                inSVG[elementCounter].xright -= toShift;
-              }
-            }
-            if (inSVG[elementCounter].xright <=10) inSVG[elementCounter].xright = 10;
-
-            //Ensure there is enough space to draw the bottom line
-            inSVG[elementCounter].ydown = Math.max(inSVG[elementCounter].ydown,1);
-
-            //Draw the bottom line
-            inSVG[elementCounter].data = inSVG[elementCounter].data +
-              '<line x1="4" x2="' + (inSVG[elementCounter].xleft + inSVG[elementCounter].xright-6) +
-              '" y1="' + inSVG[elementCounter].yup + '" y2="' + inSVG[elementCounter].yup + '" stroke="black" stroke-width="3" />'
-
-            //Add name of the board
-            if (this.data[i].getKey("naam") !== "") {
-              inSVG[elementCounter].data += '<text x="' + (0) + '" y="' + (inSVG[elementCounter].yup + 13) + '" ' +
-                'style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="10">&lt;' +
-                htmlspecialchars(this.data[i].getKey("naam"))+'&gt;</text>';
-            };
-
-            //Add an image of the grounding
-            if (this.data[i].getKey("geaard")) {
-              inSVG[elementCounter].data += '<line x1="40" y1="' + (inSVG[elementCounter].yup + 0) + '" x2="40" y2="' + (inSVG[elementCounter].yup + 10) + '" stroke="black" />';
-              inSVG[elementCounter].data += '<line x1="40" y1="' + (inSVG[elementCounter].yup + 15) + '" x2="40" y2="' + (inSVG[elementCounter].yup + 25) + '" stroke="black" />';
-              inSVG[elementCounter].data += '<line x1="40" y1="' + (inSVG[elementCounter].yup + 30) + '" x2="40" y2="' + (inSVG[elementCounter].yup + 40) + '" stroke="black" />';
-              inSVG[elementCounter].data += '<line x1="35" y1="' + (inSVG[elementCounter].yup + 10) + '" x2="45" y2="' + (inSVG[elementCounter].yup + 10) + '" stroke="black" />';
-              inSVG[elementCounter].data += '<line x1="35" y1="' + (inSVG[elementCounter].yup + 15) + '" x2="45" y2="' + (inSVG[elementCounter].yup + 15) + '" stroke="black" />';
-              inSVG[elementCounter].data += '<line x1="35" y1="' + (inSVG[elementCounter].yup + 25) + '" x2="45" y2="' + (inSVG[elementCounter].yup + 25) + '" stroke="black" />';
-              inSVG[elementCounter].data += '<line x1="35" y1="' + (inSVG[elementCounter].yup + 30) + '" x2="45" y2="' + (inSVG[elementCounter].yup + 30) + '" stroke="black" />';
-              inSVG[elementCounter].data += '<line x1="30" y1="' + (inSVG[elementCounter].yup + 40) + '" x2="50" y2="' + (inSVG[elementCounter].yup + 40) + '" stroke="black" />';
-              inSVG[elementCounter].data += '<line x1="32.5" y1="' + (inSVG[elementCounter].yup + 43) + '" x2="47.5" y2="' + (inSVG[elementCounter].yup + 43) + '" stroke="black" />';
-              inSVG[elementCounter].data += '<line x1="35" y1="' + (inSVG[elementCounter].yup + 46) + '" x2="45" y2="' + (inSVG[elementCounter].yup + 46) + '" stroke="black" />';
-            };
+            inSVG[elementCounter] = this.data[i].toSVG();
             break;
 
           case "Splitsing":
-            //Algoritme werkt gelijkaardig aan een "Bord", eerst maken we een tekening van het geheel
-            inSVG[elementCounter] = this.toSVG(this.id[i],"horizontal");
-
-            switch ((this.data[this.getOrdinalById(myParent)]).getKey("type")) {
-              case "Aansluiting":
-              case "Kring": //in-line with kring or aansluiting
-                inSVG[elementCounter].data = inSVG[elementCounter].data +
-                  '<line x1="' + (inSVG[elementCounter].xleft) + '" x2="' + (inSVG[elementCounter].xleft + inSVG[elementCounter].xrightmin) +
-                  '" y1="' + inSVG[elementCounter].yup + '" y2="' + inSVG[elementCounter].yup + '" stroke="black" />'
-                break;
-              default:
-                if ((inSVG[elementCounter].xright + inSVG[elementCounter].xleft) <=0) inSVG[elementCounter].xrightmin = 15; // ensure we see there is a "splitsing"
-                if (inSVG[elementCounter].yup < 25) inSVG[elementCounter].yup = 25;
-                if (inSVG[elementCounter].ydown < 25) inSVG[elementCounter].ydown = 25;
-                inSVG[elementCounter].data = inSVG[elementCounter].data +
-                  '<line x1="' + (1) + '" x2="' + (inSVG[elementCounter].xleft + inSVG[elementCounter].xrightmin) +
-                  '" y1="' + inSVG[elementCounter].yup + '" y2="' + inSVG[elementCounter].yup + '" stroke="black" />'
-                var toShift = inSVG[elementCounter].xleft;
-                inSVG[elementCounter].xleft -= toShift - 1; //we leave one pixel for the bold kring-line at the left
-                inSVG[elementCounter].xright += toShift;
-                break;
-            }
+            inSVG[elementCounter] = this.data[i].toSVG();
             break;
 
           case "Domotica":

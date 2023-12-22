@@ -784,14 +784,6 @@ var Electro_Item = /** @class */ (function (_super) {
                 output += ", Kabeltype v&oacute;&oacute;r teller: " + this.stringToHTML(24, 10);
                 output += ", Adres/tekst: " + this.stringToHTML(15, 5);
                 break;
-            case "Bord":
-                output += "&nbsp;Naam: " + this.stringToHTML(10, 5) + ", ";
-                output += "Geaard: " + this.checkboxToHTML(1);
-                break;
-            case "Domotica":
-                output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
-                output += ", Tekst: " + this.stringToHTML(15, 10);
-                break;
             case "Domotica gestuurde verbruiker":
                 output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
                 output += ", Draadloos: " + this.checkboxToHTML(19);
@@ -803,8 +795,6 @@ var Electro_Item = /** @class */ (function (_super) {
                     output += ", Externe sturing: " + this.selectToHTML(5, ["drukknop", "schakelaar"]);
                 }
                 output += ", Adres/tekst: " + this.stringToHTML(15, 5);
-            case "Splitsing":
-                break;
             case "Vrije ruimte":
                 output += "&nbsp;Breedte: " + this.stringToHTML(22, 3);
                 break;
@@ -1512,6 +1502,65 @@ var Boiler = /** @class */ (function (_super) {
     };
     return Boiler;
 }(Electro_Item));
+var Bord = /** @class */ (function (_super) {
+    __extends(Bord, _super);
+    function Bord(mylist) {
+        return _super.call(this, mylist) || this;
+    }
+    Bord.prototype.resetKeys = function () {
+        this.clearKeys();
+        this.keys[0][2] = "Bord"; // This is rather a formality as we should already have this at this stage
+        this.keys[1][2] = true; // Per default geaard
+        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+    };
+    Bord.prototype.toHTML = function (mode, Parent) {
+        var output = this.toHTMLHeader(mode, Parent);
+        output += "&nbsp;Naam: " + this.stringToHTML(10, 5) + ", "
+            + "Geaard: " + this.checkboxToHTML(1);
+        return (output);
+    };
+    Bord.prototype.toSVG = function () {
+        var mySVG; // = new SVGelement();
+        // Maak een tekening van alle kinderen
+        mySVG = this.sourcelist.toSVG(this.id, "horizontal");
+        // Voorzie 10 extra pixels rechts na de allerlaatste kring
+        mySVG.xright += 10;
+        // Schuif het geheel voldoende naar links om plaats te hebben voor label en eventuele aarding
+        var mintextsize = Math.max(30, svgTextWidth('&lt' + htmlspecialchars(this.keys[10][2]) + '&gt', 10, 'font-weight="bold"') + 13);
+        var minxleft = mintextsize + (this.keys[1][2] ? 70 : 0); //Indien geaard hebben we 70 meer nodig
+        if (mySVG.xleft <= minxleft) { // Minstens 100 pixels indien aarding
+            mySVG.xright = mySVG.xleft + mySVG.xright - minxleft;
+            mySVG.xleft = minxleft;
+        }
+        // Indien door het schuiven er niets rechts over blijft, voorzie minstens 10 pixels
+        if (mySVG.xright <= 10)
+            mySVG.xright = 10;
+        // Voorzie voldoende plaats voor de lijn onderaan
+        mySVG.ydown = Math.max(mySVG.ydown, 1);
+        // Teken de lijn onderaan
+        mySVG.data += '<line x1="4" x2="' + (mySVG.xleft + mySVG.xright - 6) +
+            '" y1="' + mySVG.yup + '" y2="' + mySVG.yup + '" stroke="black" stroke-width="3" />';
+        // Voeg naam van het bord toe
+        if (this.keys[10][2] !== "")
+            mySVG.data += '<text x="' + (5) + '" y="' + (mySVG.yup + 13) + '" '
+                + 'style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="10">&lt;'
+                + htmlspecialchars(this.keys[10][2]) + '&gt;</text>';
+        // Teken aarding onderaan
+        if (this.keys[1][2])
+            mySVG.data += '<line x1="' + (mintextsize + 10) + '" y1="' + (mySVG.yup + 0) + '" x2="' + (mintextsize + 10) + '" y2="' + (mySVG.yup + 10) + '" stroke="black" />'
+                + '<line x1="' + (mintextsize + 10) + '" y1="' + (mySVG.yup + 15) + '" x2="' + (mintextsize + 10) + '" y2="' + (mySVG.yup + 25) + '" stroke="black" />'
+                + '<line x1="' + (mintextsize + 10) + '" y1="' + (mySVG.yup + 30) + '" x2="' + (mintextsize + 10) + '" y2="' + (mySVG.yup + 40) + '" stroke="black" />'
+                + '<line x1="' + (mintextsize + 5) + '" y1="' + (mySVG.yup + 10) + '" x2="' + (mintextsize + 15) + '" y2="' + (mySVG.yup + 10) + '" stroke="black" />'
+                + '<line x1="' + (mintextsize + 5) + '" y1="' + (mySVG.yup + 15) + '" x2="' + (mintextsize + 15) + '" y2="' + (mySVG.yup + 15) + '" stroke="black" />'
+                + '<line x1="' + (mintextsize + 5) + '" y1="' + (mySVG.yup + 25) + '" x2="' + (mintextsize + 15) + '" y2="' + (mySVG.yup + 25) + '" stroke="black" />'
+                + '<line x1="' + (mintextsize + 5) + '" y1="' + (mySVG.yup + 30) + '" x2="' + (mintextsize + 15) + '" y2="' + (mySVG.yup + 30) + '" stroke="black" />'
+                + '<line x1="' + (mintextsize + 0) + '" y1="' + (mySVG.yup + 40) + '" x2="' + (mintextsize + 20) + '" y2="' + (mySVG.yup + 40) + '" stroke="black" />'
+                + '<line x1="' + (mintextsize + 2.5) + '" y1="' + (mySVG.yup + 43) + '" x2="' + (mintextsize + 17.5) + '" y2="' + (mySVG.yup + 43) + '" stroke="black" />'
+                + '<line x1="' + (mintextsize + 5) + '" y1="' + (mySVG.yup + 46) + '" x2="' + (mintextsize + 15) + '" y2="' + (mySVG.yup + 46) + '" stroke="black" />';
+        return (mySVG);
+    };
+    return Bord;
+}(Electro_Item));
 var Diepvriezer = /** @class */ (function (_super) {
     __extends(Diepvriezer, _super);
     function Diepvriezer(mylist) {
@@ -1570,7 +1619,7 @@ var Domotica = /** @class */ (function (_super) {
         var minwidth = 80;
         for (var _i = 0, strlines_1 = strlines; _i < strlines_1.length; _i++) {
             var str = strlines_1[_i];
-            minwidth = Math.max(minwidth, svgTextWidth(str, 10, 'font-weight="bold"') + 15);
+            minwidth = Math.max(minwidth, svgTextWidth(htmlspecialchars(str), 10, 'font-weight="bold"') + 15);
         } //15 padding
         minwidth += 20; //Ruimte voor leiding links
         if ((mySVG.xright + mySVG.xleft) <= minwidth)
@@ -2363,6 +2412,46 @@ var Overspanningsbeveiliging = /** @class */ (function (_super) {
         return (mySVG);
     };
     return Overspanningsbeveiliging;
+}(Electro_Item));
+var Splitsing = /** @class */ (function (_super) {
+    __extends(Splitsing, _super);
+    function Splitsing(mylist) {
+        return _super.call(this, mylist) || this;
+    }
+    Splitsing.prototype.resetKeys = function () {
+        this.clearKeys();
+        this.keys[0][2] = "Splitsing"; // This is rather a formality as we should already have this at this stage
+        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+    };
+    Splitsing.prototype.toHTML = function (mode, Parent) {
+        var output = this.toHTMLHeader(mode, Parent);
+        return (output);
+    };
+    Splitsing.prototype.toSVG = function () {
+        var mySVG; // = new SVGelement();
+        // Maak een tekening van alle kinderen
+        mySVG = this.sourcelist.toSVG(this.id, "horizontal");
+        var parent = this.getParent();
+        // Teken de lijn onderaan
+        if ((parent.keys[0][2] == "Aansluiting") || (parent.keys[0][2] == "Kring")) {
+            mySVG.data += '<line x1="' + (mySVG.xleft) + '" x2="' + (mySVG.xleft + mySVG.xrightmin)
+                + '" y1="' + mySVG.yup + '" y2="' + mySVG.yup + '" stroke="black" />';
+        }
+        else {
+            if ((mySVG.xleft + mySVG.xright) <= 0)
+                mySVG.xrightmin = 15; // We teken altijd minstens een lijntje van 15 pixels om duidelijk te maken dat er een splitsing is
+            if (mySVG.yup < 25)
+                mySVG.yup = 25;
+            if (mySVG.ydown < 25)
+                mySVG.ydown = 25;
+            mySVG.data += '<line x1="' + (1) + '" x2="' + (mySVG.xleft + mySVG.xrightmin)
+                + '" y1="' + mySVG.yup + '" y2="' + mySVG.yup + '" stroke="black" />';
+            mySVG.xright = mySVG.xright + mySVG.xleft;
+            mySVG.xleft = 1; //we leave one pixel for the bold kring-line at the left
+        }
+        return (mySVG);
+    };
+    return Splitsing;
 }(Electro_Item));
 var Stoomoven = /** @class */ (function (_super) {
     __extends(Stoomoven, _super);
@@ -3308,6 +3397,9 @@ var Hierarchical_List = /** @class */ (function () {
             case 'Boiler':
                 tempval = new Boiler(structure);
                 break;
+            case 'Bord':
+                tempval = new Bord(structure);
+                break;
             case 'Diepvriezer':
                 tempval = new Diepvriezer(structure);
                 break;
@@ -3361,6 +3453,9 @@ var Hierarchical_List = /** @class */ (function () {
                 break;
             case 'Schakelaars':
                 tempval = new Schakelaars(structure);
+                break;
+            case 'Splitsing':
+                tempval = new Splitsing(structure);
                 break;
             case 'Stoomoven':
                 tempval = new Stoomoven(structure);
@@ -3714,78 +3809,10 @@ var Hierarchical_List = /** @class */ (function () {
             if (this.active[i] && ((this.data[i].parent == myParent) || ((includeparent == true) && (this.id[i] == myParent)))) {
                 switch (this.data[i].getKey("type")) {
                     case "Bord":
-                        //get image of the entire bord
-                        inSVG[elementCounter] = this.toSVG(this.id[i], "horizontal");
-                        inSVG[elementCounter].xright += 10;
-                        if (this.data[i].getKey("geaard")) {
-                            if (inSVG[elementCounter].xleft <= 100) {
-                                var toShift = 100 - inSVG[elementCounter].xleft;
-                                inSVG[elementCounter].xleft = 100;
-                                inSVG[elementCounter].xright -= toShift;
-                            }
-                        }
-                        else {
-                            if (inSVG[elementCounter].xleft <= 30) {
-                                var toShift = 30 - inSVG[elementCounter].xleft;
-                                inSVG[elementCounter].xleft = 30;
-                                inSVG[elementCounter].xright -= toShift;
-                            }
-                        }
-                        if (inSVG[elementCounter].xright <= 10)
-                            inSVG[elementCounter].xright = 10;
-                        //Ensure there is enough space to draw the bottom line
-                        inSVG[elementCounter].ydown = Math.max(inSVG[elementCounter].ydown, 1);
-                        //Draw the bottom line
-                        inSVG[elementCounter].data = inSVG[elementCounter].data +
-                            '<line x1="4" x2="' + (inSVG[elementCounter].xleft + inSVG[elementCounter].xright - 6) +
-                            '" y1="' + inSVG[elementCounter].yup + '" y2="' + inSVG[elementCounter].yup + '" stroke="black" stroke-width="3" />';
-                        //Add name of the board
-                        if (this.data[i].getKey("naam") !== "") {
-                            inSVG[elementCounter].data += '<text x="' + (0) + '" y="' + (inSVG[elementCounter].yup + 13) + '" ' +
-                                'style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="10">&lt;' +
-                                htmlspecialchars(this.data[i].getKey("naam")) + '&gt;</text>';
-                        }
-                        ;
-                        //Add an image of the grounding
-                        if (this.data[i].getKey("geaard")) {
-                            inSVG[elementCounter].data += '<line x1="40" y1="' + (inSVG[elementCounter].yup + 0) + '" x2="40" y2="' + (inSVG[elementCounter].yup + 10) + '" stroke="black" />';
-                            inSVG[elementCounter].data += '<line x1="40" y1="' + (inSVG[elementCounter].yup + 15) + '" x2="40" y2="' + (inSVG[elementCounter].yup + 25) + '" stroke="black" />';
-                            inSVG[elementCounter].data += '<line x1="40" y1="' + (inSVG[elementCounter].yup + 30) + '" x2="40" y2="' + (inSVG[elementCounter].yup + 40) + '" stroke="black" />';
-                            inSVG[elementCounter].data += '<line x1="35" y1="' + (inSVG[elementCounter].yup + 10) + '" x2="45" y2="' + (inSVG[elementCounter].yup + 10) + '" stroke="black" />';
-                            inSVG[elementCounter].data += '<line x1="35" y1="' + (inSVG[elementCounter].yup + 15) + '" x2="45" y2="' + (inSVG[elementCounter].yup + 15) + '" stroke="black" />';
-                            inSVG[elementCounter].data += '<line x1="35" y1="' + (inSVG[elementCounter].yup + 25) + '" x2="45" y2="' + (inSVG[elementCounter].yup + 25) + '" stroke="black" />';
-                            inSVG[elementCounter].data += '<line x1="35" y1="' + (inSVG[elementCounter].yup + 30) + '" x2="45" y2="' + (inSVG[elementCounter].yup + 30) + '" stroke="black" />';
-                            inSVG[elementCounter].data += '<line x1="30" y1="' + (inSVG[elementCounter].yup + 40) + '" x2="50" y2="' + (inSVG[elementCounter].yup + 40) + '" stroke="black" />';
-                            inSVG[elementCounter].data += '<line x1="32.5" y1="' + (inSVG[elementCounter].yup + 43) + '" x2="47.5" y2="' + (inSVG[elementCounter].yup + 43) + '" stroke="black" />';
-                            inSVG[elementCounter].data += '<line x1="35" y1="' + (inSVG[elementCounter].yup + 46) + '" x2="45" y2="' + (inSVG[elementCounter].yup + 46) + '" stroke="black" />';
-                        }
-                        ;
+                        inSVG[elementCounter] = this.data[i].toSVG();
                         break;
                     case "Splitsing":
-                        //Algoritme werkt gelijkaardig aan een "Bord", eerst maken we een tekening van het geheel
-                        inSVG[elementCounter] = this.toSVG(this.id[i], "horizontal");
-                        switch ((this.data[this.getOrdinalById(myParent)]).getKey("type")) {
-                            case "Aansluiting":
-                            case "Kring": //in-line with kring or aansluiting
-                                inSVG[elementCounter].data = inSVG[elementCounter].data +
-                                    '<line x1="' + (inSVG[elementCounter].xleft) + '" x2="' + (inSVG[elementCounter].xleft + inSVG[elementCounter].xrightmin) +
-                                    '" y1="' + inSVG[elementCounter].yup + '" y2="' + inSVG[elementCounter].yup + '" stroke="black" />';
-                                break;
-                            default:
-                                if ((inSVG[elementCounter].xright + inSVG[elementCounter].xleft) <= 0)
-                                    inSVG[elementCounter].xrightmin = 15; // ensure we see there is a "splitsing"
-                                if (inSVG[elementCounter].yup < 25)
-                                    inSVG[elementCounter].yup = 25;
-                                if (inSVG[elementCounter].ydown < 25)
-                                    inSVG[elementCounter].ydown = 25;
-                                inSVG[elementCounter].data = inSVG[elementCounter].data +
-                                    '<line x1="' + (1) + '" x2="' + (inSVG[elementCounter].xleft + inSVG[elementCounter].xrightmin) +
-                                    '" y1="' + inSVG[elementCounter].yup + '" y2="' + inSVG[elementCounter].yup + '" stroke="black" />';
-                                var toShift = inSVG[elementCounter].xleft;
-                                inSVG[elementCounter].xleft -= toShift - 1; //we leave one pixel for the bold kring-line at the left
-                                inSVG[elementCounter].xright += toShift;
-                                break;
-                        }
+                        inSVG[elementCounter] = this.data[i].toSVG();
                         break;
                     case "Domotica":
                         inSVG[elementCounter] = this.data[i].toSVG(); //Maak de tekening van Domotica
