@@ -44,6 +44,16 @@ class List_Item {
       return(numChilds);
     }
 
+    isActief() : Boolean {
+      if (this.sourcelist != null) {
+        let ordinal = this.sourcelist.getOrdinalById(this.id);
+        return(this.sourcelist.active[ordinal]);
+        
+      } else {
+        return(false);
+      }
+    }
+
     heeftActiefKind() : boolean {
       return(this.getNumActiveChilds() > 0);
     }

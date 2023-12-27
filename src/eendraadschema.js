@@ -231,6 +231,15 @@ var List_Item = /** @class */ (function () {
         }
         return (numChilds);
     };
+    List_Item.prototype.isActief = function () {
+        if (this.sourcelist != null) {
+            var ordinal = this.sourcelist.getOrdinalById(this.id);
+            return (this.sourcelist.active[ordinal]);
+        }
+        else {
+            return (false);
+        }
+    };
     List_Item.prototype.heeftActiefKind = function () {
         return (this.getNumActiveChilds() > 0);
     };
@@ -1588,6 +1597,106 @@ var Diepvriezer = /** @class */ (function (_super) {
         return (mySVG);
     };
     return Diepvriezer;
+}(Electro_Item));
+var Domotica_gestuurde_verbruiker = /** @class */ (function (_super) {
+    __extends(Domotica_gestuurde_verbruiker, _super);
+    function Domotica_gestuurde_verbruiker(mylist) {
+        return _super.call(this, mylist) || this;
+    }
+    Domotica_gestuurde_verbruiker.prototype.resetKeys = function () {
+        this.clearKeys();
+        this.keys[0][2] = "Domotica gestuurde verbruiker"; // This is rather a formality as we should already have this at this stage
+        this.keys[5][2] = "drukknop";
+        this.keys[15][2] = "";
+        this.keys[19][2] = true;
+        this.keys[20][2] = true;
+        this.keys[21][2] = true;
+        this.keys[25][2] = false;
+        this.keys[26][2] = false;
+    };
+    Domotica_gestuurde_verbruiker.prototype.toHTML = function (mode, Parent) {
+        var output = this.toHTMLHeader(mode, Parent);
+        output += "&nbsp;Nr: " + this.stringToHTML(10, 5)
+            + ", Draadloos: " + this.checkboxToHTML(19)
+            + ", Lokale Drukknop: " + this.checkboxToHTML(20)
+            + ", Geprogrammeerd: " + this.checkboxToHTML(21)
+            + ", Detectie: " + this.checkboxToHTML(25)
+            + ", Externe sturing: " + this.checkboxToHTML(26);
+        if (this.keys[26][2])
+            output += ", Externe sturing: " + this.selectToHTML(5, ["drukknop", "schakelaar"]);
+        output += ", Adres/tekst: " + this.stringToHTML(15, 5);
+        return (output);
+    };
+    Domotica_gestuurde_verbruiker.prototype.toSVG = function () {
+        var mySVG = new SVGelement();
+        // Eerst de tekening van de aangestuurde verbruiker maken
+        var childcounter = 0; // Variabele voor het aantal kinderen, op dit moment ondersteunt de tool slechts 1 kind
+        // Kind 1 is het element dat effectief gestuurd wordt.                
+        for (var i = 0; i < this.sourcelist.length; i++) {
+            if (this.isActief() && (this.sourcelist.data[i].parent == this.id)) {
+                childcounter++; // We hebben een kind gevonden
+                switch (childcounter) {
+                    case 1: // Het Kind is het eerste element, i.e. de aangestuurde verbruiker. We tekenen dit kind.
+                        mySVG = this.sourcelist.toSVG(this.sourcelist.data[i].id, "horizontal", 35, true);
+                        break;
+                }
+            }
+        }
+        // We maken het aangestuurde element altijd minstens 50 x 56 pixels groot
+        if (mySVG.yup + mySVG.ydown < 50) {
+            mySVG.yup = 25;
+            mySVG.ydown = 25;
+        }
+        if (mySVG.xleft + mySVG.xright < 56) {
+            mySVG.xleft = 1;
+            mySVG.xright = 55;
+        }
+        // We plaatsen het aangestuurde element in een kader
+        mySVG.data = '<svg x="' + (21 + 5) + '" y="25">' + mySVG.data + '</svg>';
+        mySVG.data += '<rect x="' + (21) + '" y="' + (5) +
+            '" width="' + (mySVG.xleft + mySVG.xright + 12) +
+            '" height="' + (mySVG.yup + mySVG.ydown + 20) + '" stroke="black" fill="none" />';
+        mySVG.data += '<line x1="' + (21) + '" x2="' + (21 + mySVG.xleft + mySVG.xright + 12) + '" y1="' + (25) + '" y2="' + (25) + '" stroke="black" />';
+        mySVG.xright += (21 + 12); //We shifted the element by 21 and then added a margin of 5 left and 7 right
+        mySVG.yup += 25;
+        mySVG.ydown += 5;
+        // We plaatsen de leiding links
+        mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + (mySVG.xleft + 20) +
+            '" y1="' + (mySVG.yup) + '" y2="' + (mySVG.yup) + '" stroke="black" />';
+        // We plaatsen de symbolen bovenaan
+        if (this.keys[19][2])
+            mySVG.data += '<use xlink:href="#draadloos_klein" x="22" y="15"></use>';
+        if (this.keys[20][2])
+            mySVG.data += '<use xlink:href="#drukknop_klein" x="38" y="15"></use>';
+        if (this.keys[21][2])
+            mySVG.data += '<use xlink:href="#tijdschakelaar_klein" x="54" y="15"></use>';
+        if (this.keys[25][2])
+            mySVG.data += '<use xlink:href="#detectie_klein" x="70" y="15"></use>';
+        if (this.keys[26][2]) {
+            switch (this.keys[5][2]) {
+                case "schakelaar":
+                    mySVG.data = '<svg x="' + (0) + '" y="20">' + mySVG.data + '</svg>'
+                        + '<use xlink:href="#schakelaar_klein" x="78" y="18"></use>'
+                        + '<line x1="78" y1="21" x2="78" y2="25" stroke="black" />';
+                    mySVG.yup += 20;
+                    break;
+                default:
+                    mySVG.data = '<svg x="' + (0) + '" y="20">' + mySVG.data + '</svg>'
+                        + '<use xlink:href="#drukknop_klein" x="70" y="14"></use>'
+                        + '<line x1="78" y1="21" x2="78" y2="25" stroke="black" />';
+                    mySVG.yup += 20;
+            }
+        }
+        //Place text below if there is any
+        if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
+            mySVG.data += '<text x="' + ((mySVG.xright - 20) / 2 + 21 + 0) + '" y="' + (mySVG.ydown + mySVG.yup + 10)
+                + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">'
+                + htmlspecialchars(this.keys[15][2]) + '</text>';
+            mySVG.ydown += 15;
+        }
+        return (mySVG);
+    };
+    return Domotica_gestuurde_verbruiker;
 }(Electro_Item));
 var Domotica = /** @class */ (function (_super) {
     __extends(Domotica, _super);
@@ -3435,6 +3544,9 @@ var Hierarchical_List = /** @class */ (function () {
             case 'Domotica':
                 tempval = new Domotica(structure);
                 break;
+            case 'Domotica gestuurde verbruiker':
+                tempval = new Domotica_gestuurde_verbruiker(structure);
+                break;
             case 'Droogkast':
                 tempval = new Droogkast(structure);
                 break;
@@ -3857,6 +3969,10 @@ var Hierarchical_List = /** @class */ (function () {
                     case "Vrije ruimte":
                         inSVG[elementCounter] = this.data[i].toSVG(); //Maak de tekening
                         break;
+                    case "Domotica gestuurde verbruiker":
+                        inSVG[elementCounter] = this.data[i].toSVG(); //Maak de tekening
+                        this.tekenVerticaleLijnIndienKindVanKring(this.data[i], inSVG[elementCounter]);
+                        break;
                     case "Aansluiting":
                         var extrashift = 0;
                         if (this.data[i].keys[24][2] != "") {
@@ -4185,102 +4301,6 @@ var Hierarchical_List = /** @class */ (function () {
                                         htmlspecialchars(this.data[i].getKey("naam")) + '</text>';
                             }
                             ;
-                        }
-                        ;
-                        break;
-                    case "Domotica gestuurde verbruiker":
-                        inSVG[elementCounter] = new SVGelement();
-                        var childcounter; //We will count the number of childs we encounter
-                        //  child 1 is the element being controller
-                        childcounter = 0;
-                        for (var j = 0; j < this.length; j++) {
-                            if (this.active[j] && (this.data[j].parent == this.id[i])) {
-                                childcounter++; //we have found a valid child
-                                switch (childcounter) {
-                                    case 1: //Draw the element being controlled, we only draw the first element
-                                        inSVG[elementCounter] = this.toSVG(this.id[j], "horizontal", 35, true);
-                                        break;
-                                }
-                            }
-                        }
-                        if (inSVG[elementCounter].yup + inSVG[elementCounter].ydown < 50) { //Give box a minimal height 
-                            inSVG[elementCounter].yup = 25;
-                            inSVG[elementCounter].ydown = 25;
-                        }
-                        if (inSVG[elementCounter].xleft + inSVG[elementCounter].xright < 56) { //Give box a minimal width
-                            inSVG[elementCounter].xleft = 1;
-                            inSVG[elementCounter].xright = 55;
-                        }
-                        inSVG[elementCounter].data = '<svg x="' + (21 + 5) + '" y="25">' + inSVG[elementCounter].data + '</svg>';
-                        inSVG[elementCounter].data += '<rect x="' + (21) +
-                            '" y="' + (5) +
-                            '" width="' + (inSVG[elementCounter].xleft + inSVG[elementCounter].xright + 12) +
-                            '" height="' + (inSVG[elementCounter].yup + inSVG[elementCounter].ydown + 20) + '" stroke="black" fill="none" />';
-                        inSVG[elementCounter].data += '<line x1="' + (21) +
-                            '" x2="' + (21 + inSVG[elementCounter].xleft + inSVG[elementCounter].xright + 12) +
-                            '" y1="' + (25) +
-                            '" y2="' + (25) + '" stroke="black" />';
-                        inSVG[elementCounter].xright += (21 + 12); //We shifted the element by 21 and then added a margin of 5 left and 7 right
-                        inSVG[elementCounter].yup += 25;
-                        inSVG[elementCounter].ydown += 5;
-                        inSVG[elementCounter].data += '<line x1="' + inSVG[elementCounter].xleft +
-                            '" x2="' + (inSVG[elementCounter].xleft + 20) +
-                            '" y1="' + (inSVG[elementCounter].yup) + '" y2="' + (inSVG[elementCounter].yup) + '" stroke="black" />';
-                        //Put the symbols on top
-                        if (this.data[i].keys[19][2]) {
-                            inSVG[elementCounter].data += '<use xlink:href="#draadloos_klein" x="22" y="15"></use>';
-                        }
-                        if (this.data[i].keys[20][2]) {
-                            inSVG[elementCounter].data += '<use xlink:href="#drukknop_klein" x="38" y="15"></use>';
-                        }
-                        if (this.data[i].keys[21][2]) {
-                            inSVG[elementCounter].data += '<use xlink:href="#tijdschakelaar_klein" x="54" y="15"></use>';
-                        }
-                        if (this.data[i].keys[25][2]) {
-                            inSVG[elementCounter].data += '<use xlink:href="#detectie_klein" x="70" y="15"></use>';
-                        }
-                        if (this.data[i].keys[26][2]) {
-                            switch (this.data[i].keys[5][2]) {
-                                case "schakelaar":
-                                    inSVG[elementCounter].data = '<svg x="' + (0) + '" y="20">' + inSVG[elementCounter].data + '</svg>';
-                                    inSVG[elementCounter].data += '<use xlink:href="#schakelaar_klein" x="78" y="18"></use>';
-                                    inSVG[elementCounter].data += '<line x1="78" y1="21" x2="78" y2="25" stroke="black" />';
-                                    inSVG[elementCounter].yup += 20;
-                                    break;
-                                default:
-                                    inSVG[elementCounter].data = '<svg x="' + (0) + '" y="20">' + inSVG[elementCounter].data + '</svg>';
-                                    inSVG[elementCounter].data += '<use xlink:href="#drukknop_klein" x="70" y="14"></use>';
-                                    inSVG[elementCounter].data += '<line x1="78" y1="21" x2="78" y2="25" stroke="black" />';
-                                    inSVG[elementCounter].yup += 20;
-                            }
-                        }
-                        //Please text below if there is any
-                        if (!(/^\s*$/.test(this.data[i].keys[15][2]))) { //check if adres contains only white space
-                            inSVG[elementCounter].data += '<text x="' + ((inSVG[elementCounter].xright - 20) / 2 + 21 + 0) + '" y="' + (inSVG[elementCounter].ydown + inSVG[elementCounter].yup + 10) + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.data[i].keys[15][2]) + '</text>';
-                            inSVG[elementCounter].ydown += 15;
-                        }
-                        //If direct child of a Kring, put a vertical pipe and "nr" at the left
-                        if ((this.data[this.getOrdinalById(myParent)]).getKey("type") == "Kring") {
-                            var y1, y2;
-                            if (i !== lastChildOrdinal) {
-                                y1 = 0;
-                                y2 = inSVG[elementCounter].yup + inSVG[elementCounter].ydown;
-                            }
-                            else {
-                                y1 = inSVG[elementCounter].yup;
-                                y2 = inSVG[elementCounter].yup + inSVG[elementCounter].ydown;
-                            }
-                            inSVG[elementCounter].data = inSVG[elementCounter].data +
-                                '<line x1="' + inSVG[elementCounter].xleft +
-                                '" x2="' + inSVG[elementCounter].xleft +
-                                '" y1="' + y1 + '" y2="' + y2 + '" stroke="black" />';
-                            inSVG[elementCounter].data +=
-                                '<text x="' + (inSVG[elementCounter].xleft + 9) + '" y="' + (inSVG[elementCounter].yup - 5) + '" ' +
-                                    'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' +
-                                    htmlspecialchars(this.data[i].getKey("naam")) + '</text>';
-                            //--See if we can add childs to the left --
-                            //elementCounter++
-                            //inSVG[elementCounter] = this.toSVG(this.id[i],"horizontal");
                         }
                         ;
                         break;
