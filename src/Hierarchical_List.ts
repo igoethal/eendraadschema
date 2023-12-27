@@ -202,6 +202,7 @@ class Hierarchical_List {
       case 'Verbruiker': tempval = new Verbruiker(structure); break;
       case 'Verlenging': tempval = new Verlenging(structure); break;
       case 'Verwarmingstoestel': tempval = new Verwarmingstoestel(structure); break;
+      case 'Vrije ruimte': tempval = new Vrije_ruimte(structure); break;
       case 'Vrije tekst': tempval = new Vrije_tekst(structure); break;
       case 'Warmtepomp/airco': tempval = new Warmtepomp(structure); break;
       case 'Wasmachine': tempval = new Wasmachine(structure); break;
@@ -572,6 +573,10 @@ class Hierarchical_List {
             inSVG[elementCounter] = this.data[i].toSVG(); //Maak de tekening van meerdere verbruikers
             this.tekenVerticaleLijnIndienKindVanKring(this.data[i] as Electro_Item,inSVG[elementCounter]);
             break;
+
+          case "Vrije ruimte":
+            inSVG[elementCounter] = this.data[i].toSVG(); //Maak de tekening
+            break;  
 
           case "Aansluiting":
             var extrashift = 0;
@@ -1048,20 +1053,6 @@ class Hierarchical_List {
               //inSVG[elementCounter] = this.toSVG(this.id[i],"horizontal");
             };
           
-            break;
-
-          case "Vrije ruimte":
-
-            inSVG[elementCounter] = new SVGelement();
-            inSVG[elementCounter].yup = 0;
-            inSVG[elementCounter].ydown = 0;
-            inSVG[elementCounter].xleft = 0;
-
-            let desiredwidth = Number(this.data[i].keys[22][2]);
-            if (isNaN(desiredwidth)) { desiredwidth = 25; }  
-            inSVG[elementCounter].xright = desiredwidth;
-
-            inSVG[elementCounter].data = "";
             break;
 
           case "Kring":

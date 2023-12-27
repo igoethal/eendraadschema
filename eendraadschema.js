@@ -795,9 +795,6 @@ var Electro_Item = /** @class */ (function (_super) {
                     output += ", Externe sturing: " + this.selectToHTML(5, ["drukknop", "schakelaar"]);
                 }
                 output += ", Adres/tekst: " + this.stringToHTML(15, 5);
-            case "Vrije ruimte":
-                output += "&nbsp;Breedte: " + this.stringToHTML(22, 3);
-                break;
             default:
                 output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
                 output += ", Adres/tekst: " + this.stringToHTML(15, 5);
@@ -2066,7 +2063,7 @@ var Lichtpunt = /** @class */ (function (_super) {
         mySVG.yup = 25;
         mySVG.ydown = 25;
         // Teken de leiding links
-        mySVG.data = '<line x1="0" x2="30" y1="25" y2="25" stroke="black" />';
+        mySVG.data = '<line x1="1" x2="30" y1="25" y2="25" stroke="black" />';
         // Indien halfwaterdicht en/of meerdere lampen, voorzie de tekst bovenaan
         var print_str_upper = "";
         if (this.keys[20][2]) {
@@ -2920,6 +2917,38 @@ var Verwarmingstoestel = /** @class */ (function (_super) {
     };
     return Verwarmingstoestel;
 }(Electro_Item));
+var Vrije_ruimte = /** @class */ (function (_super) {
+    __extends(Vrije_ruimte, _super);
+    function Vrije_ruimte(mylist) {
+        return _super.call(this, mylist) || this;
+    }
+    Vrije_ruimte.prototype.resetKeys = function () {
+        this.clearKeys();
+        this.keys[0][2] = "Vrije ruimte"; // This is rather a formality as we should already have this at this stage
+        this.keys[22][2] = 25; // Default breedte van de vrije ruimte
+    };
+    Vrije_ruimte.prototype.toHTML = function (mode, Parent) {
+        var output = this.toHTMLHeader(mode, Parent);
+        output += "&nbsp;Breedte: " + this.stringToHTML(22, 3);
+        return (output);
+    };
+    Vrije_ruimte.prototype.toSVG = function () {
+        var mySVG = new SVGelement();
+        // Bepaal breedte van het element
+        var desiredwidth = Number(this.keys[22][2]);
+        if (isNaN(desiredwidth)) {
+            desiredwidth = 25;
+        }
+        // Creëer het element en return
+        mySVG.yup = 0;
+        mySVG.ydown = 0;
+        mySVG.xleft = 0;
+        mySVG.xright = desiredwidth;
+        mySVG.data = "";
+        return (mySVG);
+    };
+    return Vrije_ruimte;
+}(Electro_Item));
 var Vrije_tekst = /** @class */ (function (_super) {
     __extends(Vrije_tekst, _super);
     function Vrije_tekst(mylist) {
@@ -3484,6 +3513,9 @@ var Hierarchical_List = /** @class */ (function () {
             case 'Verwarmingstoestel':
                 tempval = new Verwarmingstoestel(structure);
                 break;
+            case 'Vrije ruimte':
+                tempval = new Vrije_ruimte(structure);
+                break;
             case 'Vrije tekst':
                 tempval = new Vrije_tekst(structure);
                 break;
@@ -3821,6 +3853,9 @@ var Hierarchical_List = /** @class */ (function () {
                     case "Meerdere verbruikers":
                         inSVG[elementCounter] = this.data[i].toSVG(); //Maak de tekening van meerdere verbruikers
                         this.tekenVerticaleLijnIndienKindVanKring(this.data[i], inSVG[elementCounter]);
+                        break;
+                    case "Vrije ruimte":
+                        inSVG[elementCounter] = this.data[i].toSVG(); //Maak de tekening
                         break;
                     case "Aansluiting":
                         var extrashift = 0;
@@ -4248,18 +4283,6 @@ var Hierarchical_List = /** @class */ (function () {
                             //inSVG[elementCounter] = this.toSVG(this.id[i],"horizontal");
                         }
                         ;
-                        break;
-                    case "Vrije ruimte":
-                        inSVG[elementCounter] = new SVGelement();
-                        inSVG[elementCounter].yup = 0;
-                        inSVG[elementCounter].ydown = 0;
-                        inSVG[elementCounter].xleft = 0;
-                        var desiredwidth = Number(this.data[i].keys[22][2]);
-                        if (isNaN(desiredwidth)) {
-                            desiredwidth = 25;
-                        }
-                        inSVG[elementCounter].xright = desiredwidth;
-                        inSVG[elementCounter].data = "";
                         break;
                     case "Kring":
                         var cable_location_available = 0;
@@ -5264,7 +5287,7 @@ function buildNewStructure(structure) {
     structure.data[0].setKey("differentieel_waarde", CONF_differentieel_droog);
     itemCounter++;
     //Dan het hoofdbord maken
-    structure.insertChildAfterId(new Electro_Item(structure /*,structure.data[itemCounter-1]*/), itemCounter);
+    structure.insertChildAfterId(new Bord(structure /*,structure.data[itemCounter-1]*/), itemCounter);
     structure.data[itemCounter].setKey("type", "Bord");
     itemCounter++;
     var droogBordCounter = itemCounter;
@@ -5279,7 +5302,7 @@ function buildNewStructure(structure) {
     structure.data[itemCounter].setKey("kabel_aanwezig", false);
     structure.data[itemCounter].setKey("differentieel_waarde", CONF_differentieel_nat);
     itemCounter++;
-    structure.insertChildAfterId(new Electro_Item(structure /*,structure.data[itemCounter-1]*/), itemCounter);
+    structure.insertChildAfterId(new Bord(structure /*,structure.data[itemCounter-1]*/), itemCounter);
     structure.data[itemCounter].setKey("type", "Bord");
     structure.data[itemCounter].setKey("geaard", false);
     itemCounter++;

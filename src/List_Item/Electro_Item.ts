@@ -477,10 +477,7 @@ class Electro_Item extends List_Item {
         if (this.keys[26][2]) {
           output += ", Externe sturing: " + this.selectToHTML(5,["drukknop","schakelaar"]);    
         }
-        output += ", Adres/tekst: " + this.stringToHTML(15,5);
-      case "Vrije ruimte":
-          output += "&nbsp;Breedte: " + this.stringToHTML(22,3);
-          break;  
+        output += ", Adres/tekst: " + this.stringToHTML(15,5); 
       default:
         output += "&nbsp;Nr: " + this.stringToHTML(10,5);
         output += ", Adres/tekst: " + this.stringToHTML(15,5);

@@ -43,7 +43,7 @@ class Lichtpunt extends Electro_Item {
         mySVG.ydown = 25;
 
         // Teken de leiding links
-        mySVG.data = '<line x1="0" x2="30" y1="25" y2="25" stroke="black" />';
+        mySVG.data = '<line x1="1" x2="30" y1="25" y2="25" stroke="black" />';
 
         // Indien halfwaterdicht en/of meerdere lampen, voorzie de tekst bovenaan
         let print_str_upper = "";

@@ -241,7 +241,7 @@ function buildNewStructure(structure: Hierarchical_List) {
   itemCounter++;
 
   //Dan het hoofdbord maken
-  structure.insertChildAfterId(new Electro_Item(structure/*,structure.data[itemCounter-1]*/),itemCounter);
+  structure.insertChildAfterId(new Bord(structure/*,structure.data[itemCounter-1]*/),itemCounter);
   structure.data[itemCounter].setKey("type","Bord");
   itemCounter++;
   let droogBordCounter:number = itemCounter;
@@ -257,7 +257,7 @@ function buildNewStructure(structure: Hierarchical_List) {
   structure.data[itemCounter].setKey("kabel_aanwezig",false);
   structure.data[itemCounter].setKey("differentieel_waarde",CONF_differentieel_nat);
   itemCounter++;
-  structure.insertChildAfterId(new Electro_Item(structure/*,structure.data[itemCounter-1]*/),itemCounter);
+  structure.insertChildAfterId(new Bord(structure/*,structure.data[itemCounter-1]*/),itemCounter);
   structure.data[itemCounter].setKey("type","Bord");
   structure.data[itemCounter].setKey("geaard",false);
   itemCounter++;
