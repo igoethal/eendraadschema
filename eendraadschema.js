@@ -731,40 +731,6 @@ var Electro_Item = /** @class */ (function (_super) {
     Electro_Item.prototype.toHTML = function (mode, Parent) {
         var output = this.toHTMLHeader(mode, Parent);
         switch (this.keys[0][2]) {
-            case "Kring":
-                output += "&nbsp;Naam: " + this.stringToHTML(10, 5) + "<br>";
-                output += "Zekering: " + this.selectToHTML(7, ["automatisch", "differentieel", "differentieelautomaat", "smelt", "geen", "---", "schakelaar", "relais", "schemer", "overspanningsbeveiliging"]);
-                if ((this.keys[7][2] != "geen") && (this.keys[7][2] != "relais"))
-                    output += this.selectToHTML(4, ["2", "3", "4", "-", "1"]) + this.stringToHTML(8, 2) + "A";
-                if (this.getKey("zekering") == "differentieel") {
-                    output += ", \u0394 " + this.stringToHTML(11, 3) + "mA";
-                    output += ", Type:" + this.selectToHTML(17, ["", "A", "B"]);
-                    output += ", Kortsluitvermogen: " + this.stringToHTML(22, 3) + "kA";
-                    output += ", Selectief: " + this.checkboxToHTML(20);
-                }
-                if (this.getKey("zekering") == "automatisch") {
-                    output += ", Curve:" + this.selectToHTML(17, ["", "B", "C", "D"]);
-                    output += ", Kortsluitvermogen: " + this.stringToHTML(22, 3) + "kA";
-                }
-                if (this.getKey("zekering") == "differentieelautomaat") {
-                    output += ", \u0394 " + this.stringToHTML(11, 3) + "mA";
-                    output += ", Curve:" + this.selectToHTML(18, ["", "B", "C", "D"]);
-                    output += ", Type:" + this.selectToHTML(17, ["", "A", "B"]);
-                    output += ", Kortsluitvermogen: " + this.stringToHTML(22, 3) + "kA";
-                    output += ", Selectief: " + this.checkboxToHTML(20);
-                }
-                if (this.getKey("zekering") == "relais") {
-                }
-                output += ", Kabel: " + this.checkboxToHTML(12);
-                if (this.getKey("kabel_aanwezig")) {
-                    output += ", Type: " + this.stringToHTML(9, 10);
-                    output += ", Plaatsing: " + this.selectToHTML(16, ["N/A", "Ondergronds", "Luchtleiding", "In wand", "Op wand"]);
-                    if (this.keys[16][2] != "Luchtleiding") {
-                        output += ", In buis: " + this.checkboxToHTML(19);
-                    }
-                }
-                output += ", Tekst: " + this.stringToHTML(15, 10);
-                break;
             case "Aansluiting":
                 output += "&nbsp;Naam: " + this.stringToHTML(23, 5) + "<br>";
                 if (typeof Parent != 'undefined')
@@ -793,17 +759,6 @@ var Electro_Item = /** @class */ (function (_super) {
                 output += ", Kabeltype v&oacute;&oacute;r teller: " + this.stringToHTML(24, 10);
                 output += ", Adres/tekst: " + this.stringToHTML(15, 5);
                 break;
-            case "Domotica gestuurde verbruiker":
-                output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
-                output += ", Draadloos: " + this.checkboxToHTML(19);
-                output += ", Lokale Drukknop: " + this.checkboxToHTML(20);
-                output += ", Geprogrammeerd: " + this.checkboxToHTML(21);
-                output += ", Detectie: " + this.checkboxToHTML(25);
-                output += ", Externe sturing: " + this.checkboxToHTML(26);
-                if (this.keys[26][2]) {
-                    output += ", Externe sturing: " + this.selectToHTML(5, ["drukknop", "schakelaar"]);
-                }
-                output += ", Adres/tekst: " + this.stringToHTML(15, 5);
             default:
                 output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
                 output += ", Adres/tekst: " + this.stringToHTML(15, 5);
@@ -2133,6 +2088,347 @@ var Kookfornuis = /** @class */ (function (_super) {
         return (mySVG);
     };
     return Kookfornuis;
+}(Electro_Item));
+var Kring = /** @class */ (function (_super) {
+    __extends(Kring, _super);
+    function Kring(mylist) {
+        return _super.call(this, mylist) || this;
+    }
+    Kring.prototype.resetKeys = function () {
+        this.clearKeys();
+        this.keys[0][2] = "Kring"; // This is rather a formality as we should already have this at this stage
+        this.keys[4][2] = "2"; // Per default 2-polige automaat
+        this.keys[7][2] = "automatisch"; // Per default automatische zekering
+        this.keys[8][2] = "20"; // Per deault 20 Ampère
+        this.keys[9][2] = "XVB Cca 3G2,5"; // Default type kabel
+        this.keys[11][2] = "300"; // Differentieel per default 300 mA
+        this.keys[15][2] = ""; // Tekst naast de kabel
+        this.keys[16][2] = "N/A"; // Per default, locatie kabel niet geweten
+        this.keys[17][2] = ""; // Type differentieel, Type differentieelautomaat, of Curve automaat per default niet gegeven
+        this.keys[18][2] = ""; // Curve differentieelautomaat per default niet gegeven
+        this.keys[19][2] = false; // Per default kabel niet in buis
+        this.keys[20][2] = false; // Per default niet selectief
+        this.keys[22][2] = ""; // Kortsluitvermogen per default niet gegeven
+        //Bepalen of er per default een kabel aanwezig is en of we zekeringen plaatsen
+        var parent = this.getParent();
+        if (parent == null) {
+            this.keys[12][2] = true; // Kabel aanwezig
+            this.keys[10][2] = ""; // We geven de kring geen naam als er geen parent is
+        }
+        else
+            switch (parent.keys[0][2]) { // Selecteren op basis van parent
+                case "Bord":
+                    this.keys[7][2] = "automatisch"; // Wel een zekering na bord
+                    this.keys[10][2] = "---"; // We zetten iets als default dat gebruikers niet vergeten een naam aan de kring te geven na een bord
+                    this.keys[12][2] = true; // wel een kabel na bord
+                    break;
+                case "Splitsing":
+                    this.keys[7][2] = "geen"; // geen zekering per default na splitsing
+                    this.keys[10][2] = ""; // We geven de kring geen naam
+                    this.keys[12][2] = false; // geen kabel per default na splitsing
+                    break;
+                case "Kring":
+                    this.keys[9][2] = ""; // We geven geen kabeltype op
+                    this.keys[10][2] = ""; // We geven de kring geen naam
+                    this.keys[12][2] = true; // wel een kabel na domotica
+                    break;
+                case "Domotica":
+                    this.keys[7][2] = "geen"; // geen zekering per default na domotica
+                    this.keys[10][2] = ""; // We geven de kring geen naam
+                    this.keys[12][2] = true; // wel een kabel na domotica
+                    break;
+                default:
+                    this.keys[7][2] = "automatisch"; // wel een zekering na bord
+                    this.keys[10][2] = ""; // We geven de kring geen naam
+                    this.keys[12][2] = true; // wel een kabel na bord
+                    break;
+            }
+    };
+    Kring.prototype.overrideKeys = function () {
+        if ((this.keys[4][2] < 1) || (this.keys[4][2] > 4))
+            this.keys[4][2] = "2"; //Test dat aantal polen bestaat
+        if (this.keys[16][2] == "Luchtleiding")
+            this.keys[19][2] = false; //Indien luchtleiding nooit een buis tekenen
+    };
+    Kring.prototype.toHTML = function (mode, Parent) {
+        this.overrideKeys();
+        var output = this.toHTMLHeader(mode, Parent);
+        output += "&nbsp;Naam: " + this.stringToHTML(10, 5) + "<br>"
+            + "Zekering: " + this.selectToHTML(7, ["automatisch", "differentieel", "differentieelautomaat", "smelt", "geen", "---", "schakelaar", "relais", "schemer", "overspanningsbeveiliging"]);
+        // Aantal polen en Ampérage
+        if ((this.keys[7][2] != "geen") && (this.keys[7][2] != "relais"))
+            output += this.selectToHTML(4, ["2", "3", "4", "-", "1"]) + this.stringToHTML(8, 2) + "A";
+        // Specifieke input voor differentielen en automaten
+        switch (this.keys[7][2]) {
+            case "differentieel":
+                output += ", \u0394 " + this.stringToHTML(11, 3) + "mA"
+                    + ", Type:" + this.selectToHTML(17, ["", "A", "B"])
+                    + ", Kortsluitvermogen: " + this.stringToHTML(22, 3) + "kA"
+                    + ", Selectief: " + this.checkboxToHTML(20);
+                break;
+            case "automatisch":
+                output += ", Curve:" + this.selectToHTML(17, ["", "B", "C", "D"])
+                    + ", Kortsluitvermogen: " + this.stringToHTML(22, 3) + "kA";
+                break;
+            case "differentieelautomaat":
+                output += ", \u0394 " + this.stringToHTML(11, 3) + "mA"
+                    + ", Curve:" + this.selectToHTML(18, ["", "B", "C", "D"])
+                    + ", Type:" + this.selectToHTML(17, ["", "A", "B"])
+                    + ", Kortsluitvermogen: " + this.stringToHTML(22, 3) + "kA";
+                +", Selectief: " + this.checkboxToHTML(20);
+                break;
+        }
+        // Eigenschappen van de kabel
+        output += ", Kabel: " + this.checkboxToHTML(12);
+        if (this.keys[12][2]) { // Kabel aanwezig
+            output += ", Type: " + this.stringToHTML(9, 10)
+                + ", Plaatsing: " + this.selectToHTML(16, ["N/A", "Ondergronds", "Luchtleiding", "In wand", "Op wand"]);
+            if (this.keys[16][2] != "Luchtleiding")
+                output += ", In buis: " + this.checkboxToHTML(19);
+        }
+        output += ", Tekst: " + this.stringToHTML(15, 10);
+        return (output);
+    };
+    Kring.prototype.toSVG = function () {
+        var mySVG = new SVGelement();
+        // Bepalen of we de hele kring naar rechts moeten opschuiven om rekening te houden met symbooltjes qua kabel-locatie
+        var cable_location_available = 0;
+        if (this.keys[12][2] /* kabel aanwezig */ && (this.keys[19][2] /* kabel in buis */ || contains(["Ondergronds", "In wand", "Op wand"], this.keys[16][2]))) {
+            cable_location_available = 1;
+        }
+        // Alle verbruikers van de kring tekenen
+        mySVG = this.sourcelist.toSVG(this.id, "vertical", 35 + 20 * cable_location_available);
+        // Kabel tekenen
+        if (this.keys[12][2]) { // Kabel aanwezig
+            // Kabel tekenen en naam van de kabel ernaast zetten
+            mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + mySVG.yup + '" y2="' + (mySVG.yup + 100) + '" stroke="black" />'
+                + "<text x=\"" + (mySVG.xleft + 15) + "\" y=\"" + (mySVG.yup + 80) + "\""
+                + " transform=\"rotate(-90 " + (mySVG.xleft + 15) + "," + (mySVG.yup + 80) + ")"
+                + "\" style=\"text-anchor:start\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
+                + htmlspecialchars(this.keys[9][2]) + "</text>";
+            // Luchtleiding tekenen indien van toepassing
+            if (this.keys[16][2] == "Luchtleiding")
+                mySVG.data += '<circle cx="' + (mySVG.xleft) + '" cy="' + (mySVG.yup + 20) + '" r="4" style="stroke:black;fill:none" />';
+            // Symbolen naast de kabel zetten
+            if (cable_location_available) {
+                if ((this.keys[19][2]) && (this.keys[16][2] != "Luchtleiding")) // Rondje voor "in buis" tekenen
+                    mySVG.data += '<circle cx="' + (mySVG.xleft - 10) + '" cy="' + (mySVG.yup + 40) + '" r="4" style="stroke:black;fill:none" />';
+                switch (this.keys[16][2]) {
+                    case "Ondergronds":
+                        mySVG.data += '<line x1="' + (mySVG.xleft - 13) + '" x2="' + (mySVG.xleft - 13) + '" y1="' + (mySVG.yup + 60) + '" y2="' + (mySVG.yup + 80) + '" style="stroke:black" />'
+                            + '<line x1="' + (mySVG.xleft - 10) + '" x2="' + (mySVG.xleft - 10) + '" y1="' + (mySVG.yup + 62) + '" y2="' + (mySVG.yup + 78) + '" style="stroke:black" />'
+                            + '<line x1="' + (mySVG.xleft - 7) + '" x2="' + (mySVG.xleft - 7) + '" y1="' + (mySVG.yup + 64) + '" y2="' + (mySVG.yup + 76) + '" style="stroke:black" />';
+                        break;
+                    case "In wand":
+                        mySVG.data += '<line x1="' + (mySVG.xleft - 15) + '" x2="' + (mySVG.xleft - 15) + '" y1="' + (mySVG.yup + 10) + '" y2="' + (mySVG.yup + 30) + '" style="stroke:black" />'
+                            + '<line x1="' + (mySVG.xleft - 15) + '" x2="' + (mySVG.xleft - 5) + '" y1="' + (mySVG.yup + 10) + '" y2="' + (mySVG.yup + 10) + '" style="stroke:black" />'
+                            + '<line x1="' + (mySVG.xleft - 15) + '" x2="' + (mySVG.xleft - 5) + '" y1="' + (mySVG.yup + 20) + '" y2="' + (mySVG.yup + 20) + '" style="stroke:black" />'
+                            + '<line x1="' + (mySVG.xleft - 15) + '" x2="' + (mySVG.xleft - 5) + '" y1="' + (mySVG.yup + 30) + '" y2="' + (mySVG.yup + 30) + '" style="stroke:black" />'
+                            + '<line x1="' + (mySVG.xleft - 15) + '" x2="' + (mySVG.xleft - 15) + '" y1="' + (mySVG.yup + 65) + '" y2="' + (mySVG.yup + 85) + '" style="stroke:black" />'
+                            + '<line x1="' + (mySVG.xleft - 15) + '" x2="' + (mySVG.xleft - 5) + '" y1="' + (mySVG.yup + 85) + '" y2="' + (mySVG.yup + 85) + '" style="stroke:black" />'
+                            + '<line x1="' + (mySVG.xleft - 15) + '" x2="' + (mySVG.xleft - 5) + '" y1="' + (mySVG.yup + 65) + '" y2="' + (mySVG.yup + 65) + '" style="stroke:black" />'
+                            + '<line x1="' + (mySVG.xleft - 15) + '" x2="' + (mySVG.xleft - 5) + '" y1="' + (mySVG.yup + 75) + '" y2="' + (mySVG.yup + 75) + '" style="stroke:black" />';
+                        break;
+                    case "Op wand":
+                        mySVG.data += '<line x1="' + (mySVG.xleft - 5) + '" x2="' + (mySVG.xleft - 5) + '" y1="' + (mySVG.yup + 10) + '" y2="' + (mySVG.yup + 30) + '" style="stroke:black" />'
+                            + '<line x1="' + (mySVG.xleft - 15) + '" x2="' + (mySVG.xleft - 5) + '" y1="' + (mySVG.yup + 10) + '" y2="' + (mySVG.yup + 10) + '" style="stroke:black" />'
+                            + '<line x1="' + (mySVG.xleft - 15) + '" x2="' + (mySVG.xleft - 5) + '" y1="' + (mySVG.yup + 20) + '" y2="' + (mySVG.yup + 20) + '" style="stroke:black" />'
+                            + '<line x1="' + (mySVG.xleft - 15) + '" x2="' + (mySVG.xleft - 5) + '" y1="' + (mySVG.yup + 30) + '" y2="' + (mySVG.yup + 30) + '" style="stroke:black" />'
+                            + '<line x1="' + (mySVG.xleft - 5) + '" x2="' + (mySVG.xleft - 5) + '" y1="' + (mySVG.yup + 65) + '" y2="' + (mySVG.yup + 85) + '" style="stroke:black" />'
+                            + '<line x1="' + (mySVG.xleft - 15) + '" x2="' + (mySVG.xleft - 5) + '" y1="' + (mySVG.yup + 85) + '" y2="' + (mySVG.yup + 85) + '" style="stroke:black" />'
+                            + '<line x1="' + (mySVG.xleft - 15) + '" x2="' + (mySVG.xleft - 5) + '" y1="' + (mySVG.yup + 65) + '" y2="' + (mySVG.yup + 65) + '" style="stroke:black" />'
+                            + '<line x1="' + (mySVG.xleft - 15) + '" x2="' + (mySVG.xleft - 5) + '" y1="' + (mySVG.yup + 75) + '" y2="' + (mySVG.yup + 75) + '" style="stroke:black" />';
+                        break;
+                }
+            }
+            mySVG.yup += 100;
+        }
+        else { // Kabel niet aanwezig, we tekenen gewoon een verticaal lijntje van 20 pixels
+            mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + mySVG.yup + '" y2="' + (mySVG.yup + 20) + '" stroke="black" />';
+            mySVG.yup += 20;
+        }
+        // Selectief differentieel tekenen indien van toepassing
+        if (this.keys[20][2]) { //Differentieel is selectief
+            mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + mySVG.yup + '" y2="' + (mySVG.yup + 30) + '" stroke="black" />'
+                + '<rect x="' + (mySVG.xleft + 7) + '" y="' + (mySVG.yup) + '" width="16" height="16" stroke="black" fill="white" />'
+                + "<text x=\"" + (mySVG.xleft + 19) + "\" y=\"" + (mySVG.yup + 8) + "\""
+                + " transform=\"rotate(-90 " + (mySVG.xleft + 19) + "," + (mySVG.yup + 8) + ")"
+                + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" + "S" + "</text>";
+            mySVG.yup += 23;
+        }
+        // Zekering, differentieel, of ander symbool onderaan plaatsen
+        var nameshift = -6; // Deze geeft aan hoeveel de naam naar beneden geduwd kan worden
+        var numlines = 1; // Hier houden we het aantal lijnen tekst bij
+        switch (this.keys[7][2]) {
+            case "automatisch":
+                numlines = 1; // Hier houden we het aantal lijnen tekst bij
+                mySVG.yup += 30; // Hoeveel ruimte moeten we onderaan voorzien voor de zekering
+                // Basiscode voor het amperage        
+                mySVG.data += '<use xlink:href="#zekering_automatisch" x=\"' + mySVG.xleft + '" y="' + mySVG.yup + '" />'
+                    + "<text x=\"" + (mySVG.xleft + 15) + "\" y=\"" + (mySVG.yup - 10) + "\""
+                    + " transform=\"rotate(-90 " + (mySVG.xleft + 15) + "," + (mySVG.yup - 10) + ")"
+                    + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
+                    + htmlspecialchars(this.keys[4][2] + "P - " + this.keys[8][2] + "A") + "</text>";
+                // Code om de curve toe te voegen
+                if ((this.keys[17][2] == 'B') || (this.keys[17][2] == 'C') || (this.keys[17][2] == 'D')) {
+                    ++numlines;
+                    mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
+                        + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
+                        + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
+                        + htmlspecialchars("Curve " + this.keys[17][2]) + "</text>";
+                }
+                // Code om kortsluitvermogen toe te voegen
+                if ((this.keys[22][2] != '')) {
+                    ++numlines;
+                    mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
+                        + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
+                        + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
+                        + htmlspecialchars("" + this.keys[22][2]) + "kA</text>";
+                }
+                // Genoeg plaats voorzien aan de rechterkant en eindigen
+                mySVG.xright = Math.max(mySVG.xright, 20 + 11 * (numlines - 1));
+                break;
+            case "differentieel":
+                numlines = 2; // Hier houden we het aantal lijnen tekst bij
+                mySVG.yup += 30; // Hoeveel ruimte moeten we onderaan voorzien voor de zekering
+                // Basiscode voor het amperage        
+                mySVG.data += '<use xlink:href="#zekering_automatisch" x=\"' + mySVG.xleft + '" y="' + mySVG.yup + '" />'
+                    + "<text x=\"" + (mySVG.xleft + 15) + "\" y=\"" + (mySVG.yup - 10) + "\""
+                    + " transform=\"rotate(-90 " + (mySVG.xleft + 15) + "," + (mySVG.yup - 10) + ")"
+                    + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
+                    + "\u0394" + htmlspecialchars(this.keys[11][2] + "mA") + "</text>"
+                    + "<text x=\"" + (mySVG.xleft + 26) + "\" y=\"" + (mySVG.yup - 10) + "\""
+                    + " transform=\"rotate(-90 " + (mySVG.xleft + 26) + "," + (mySVG.yup - 10) + ")"
+                    + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
+                    + htmlspecialchars(this.keys[4][2] + "P - " + this.keys[8][2] + "A") + "</text>";
+                // Code om het type toe te voegen
+                if ((this.keys[17][2] == 'A') || (this.keys[17][2] == 'B')) {
+                    ++numlines;
+                    mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
+                        + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
+                        + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
+                        + htmlspecialchars("Type " + this.keys[17][2]) + "</text>";
+                }
+                // Code om kortsluitvermogen toe te voegen
+                if ((this.keys[22][2] != '')) {
+                    ++numlines;
+                    mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
+                        + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
+                        + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
+                        + htmlspecialchars("" + this.keys[22][2]) + "kA</text>";
+                }
+                // genoeg plaats voorzien aan de rechterkant en eindigen
+                mySVG.xright = Math.max(mySVG.xright, 20 + 11 * (numlines - 1));
+                break;
+            case "differentieelautomaat":
+                numlines = 2; // Hier houden we het aantal lijnen tekst bij
+                mySVG.yup += 30; // Hoeveel ruimte moeten we onderaan voorzien voor de zekering
+                // Basiscode voor het amperage        
+                mySVG.data += '<use xlink:href="#zekering_automatisch" x=\"' + mySVG.xleft + '" y="' + mySVG.yup + '" />'
+                    + "<text x=\"" + (mySVG.xleft + 15) + "\" y=\"" + (mySVG.yup - 10) + "\""
+                    + " transform=\"rotate(-90 " + (mySVG.xleft + 15) + "," + (mySVG.yup - 10) + ")"
+                    + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
+                    + "\u0394" + htmlspecialchars(this.keys[11][2] + "mA") + "</text>"
+                    + "<text x=\"" + (mySVG.xleft + 26) + "\" y=\"" + (mySVG.yup - 10) + "\""
+                    + " transform=\"rotate(-90 " + (mySVG.xleft + 26) + "," + (mySVG.yup - 10) + ")"
+                    + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
+                    + htmlspecialchars(this.keys[4][2] + "P - " + this.keys[8][2] + "A") + "</text>";
+                // Code om de curve toe te voegen
+                if ((this.keys[18][2] == 'B') || (this.keys[18][2] == 'C') || (this.keys[18][2] == 'D')) {
+                    ++numlines;
+                    mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
+                        + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
+                        + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
+                        + htmlspecialchars("Curve " + this.keys[18][2]) + "</text>";
+                }
+                // Code om het type toe te voegen
+                if ((this.keys[17][2] == 'A') || (this.keys[17][2] == 'B')) {
+                    ++numlines;
+                    mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
+                        + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
+                        + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
+                        + htmlspecialchars("Type " + this.keys[17][2]) + "</text>";
+                }
+                // Code om kortsluitvermogen toe te voegen
+                if ((this.keys[22][2] != '')) {
+                    ++numlines;
+                    mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
+                        + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
+                        + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
+                        + htmlspecialchars("" + this.keys[22][2]) + "kA</text>";
+                }
+                // genoeg plaats voorzien aan de rechterkant en eindigen
+                mySVG.xright = Math.max(mySVG.xright, 20 + 11 * (numlines - 1));
+                break;
+            case "schakelaar":
+                mySVG.yup += 30; // Hoeveel ruimte moeten we onderaan voorzien voor de zekering
+                mySVG.data += '<use xlink:href="#zekering_empty" x=\"' + mySVG.xleft + '" y="' + mySVG.yup + '" />'
+                    + "<text x=\"" + (mySVG.xleft + 15) + "\" y=\"" + (mySVG.yup - 10) + "\""
+                    + " transform=\"rotate(-90 " + (mySVG.xleft + 15) + "," + (mySVG.yup - 10) + ")"
+                    + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
+                    + htmlspecialchars(this.keys[4][2] + "P - " + this.keys[8][2] + "A") + "</text>";
+                break;
+            case "overspanningsbeveiliging":
+                mySVG.yup += 30; // Hoeveel ruimte moeten we onderaan voorzien voor de zekering
+                mySVG.data += '<use xlink:href="#overspanningsbeveiliging_inline" x=\"' + mySVG.xleft + '" y="' + mySVG.yup + '" />'
+                    + "<text x=\"" + (mySVG.xleft + 20) + "\" y=\"" + (mySVG.yup - 10) + "\""
+                    + " transform=\"rotate(-90 " + (mySVG.xleft + 20) + "," + (mySVG.yup - 10) + ")"
+                    + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
+                    + htmlspecialchars(this.keys[4][2] + "P - " + this.keys[8][2] + "A") + "</text>";
+                nameshift = -11; //
+                break;
+            case "schemer":
+                mySVG.yup += 30; // Hoeveel ruimte moeten we onderaan voorzien voor de zekering
+                mySVG.data += '<use xlink:href="#zekering_empty" x=\"' + mySVG.xleft + '" y="' + mySVG.yup + '" />'
+                    + "<text x=\"" + (mySVG.xleft + 15) + "\" y=\"" + (mySVG.yup - 10) + "\""
+                    + " transform=\"rotate(-90 " + (mySVG.xleft + 15) + "," + (mySVG.yup - 10) + ")"
+                    + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
+                    + htmlspecialchars(this.keys[4][2] + "P - " + this.keys[8][2] + "A") + "</text>"
+                    + '<use xlink:href="#arrow" x=\"' + (mySVG.xleft - 18) + '" y="' + (mySVG.yup - 15) + '" />'
+                    + '<use xlink:href="#arrow" x=\"' + (mySVG.xleft - 18) + '" y="' + (mySVG.yup - 12) + '" />';
+                break;
+            case "relais":
+                mySVG.yup += 30; // Hoeveel ruimte moeten we onderaan voorzien voor de zekering
+                mySVG.data += '<use xlink:href="#relais_kring" x=\"' + mySVG.xleft + '" y="' + mySVG.yup + '" />';
+                nameshift = -11;
+                break;
+            case "smelt":
+                mySVG.yup += 30; // Hoeveel ruimte moeten we onderaan voorzien voor de zekering
+                mySVG.data += '<use xlink:href="#zekering_smelt" x=\"' + mySVG.xleft + '" y="' + mySVG.yup + '" />'
+                    + "<text x=\"" + (mySVG.xleft + 15) + "\" y=\"" + (mySVG.yup - 10) + "\""
+                    + " transform=\"rotate(-90 " + (mySVG.xleft + 15) + "," + (mySVG.yup - 10) + ")"
+                    + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
+                    + htmlspecialchars(this.keys[4][2] + "P - " + this.keys[8][2] + "A") + "</text>";
+                break;
+            case "geen":
+                mySVG.yup += 0; // Hoeveel ruimte moeten we onderaan voorzien voor de zekering
+                break;
+        }
+        // Tekst naast de kring
+        var tekstlocatie = mySVG.yup - 40; //Standaard staat tekst boven de zekering
+        if (this.keys[7][2] == "geen")
+            tekstlocatie += 25; //Als er geen zekering is kan tekst naar beneden
+        mySVG.data += '<text x="' + (mySVG.xleft - 6 - 20 * cable_location_available) + '" ' + 'y="' + (tekstlocatie) + '" '
+            + 'transform="rotate(-90 ' + (mySVG.xleft - 6 - 20 * cable_location_available) + ',' + (tekstlocatie) + ')" '
+            + 'style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="12"' + '>'
+            + htmlspecialchars(this.keys[15][2]) + '</text>';
+        // Naam onderaan zetten (links-onder)
+        mySVG.data += '<text x="' + (mySVG.xleft + nameshift) + '" ' + 'y="' + (mySVG.yup + 3) + '" '
+            + 'style="text-anchor:end" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="12"' + '>'
+            + htmlspecialchars(this.keys[10][2]) + '</text>';
+        // Lijntje onder de zekering
+        mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + mySVG.yup + '" y2="' + (mySVG.yup + 15) + '" stroke="black" />';
+        mySVG.yup += 15;
+        // Als er helemaal niets getekend is voorzien we nog steeds een lege box
+        if (mySVG.yup <= 0) {
+            mySVG.xleft = 20;
+            mySVG.xright = 20;
+            mySVG.yup = 50;
+            mySVG.ydown = 0;
+        }
+        return (mySVG);
+    };
+    return Kring;
 }(Electro_Item));
 var Lichtpunt = /** @class */ (function (_super) {
     __extends(Lichtpunt, _super);
@@ -3571,6 +3867,9 @@ var Hierarchical_List = /** @class */ (function () {
             case 'Kookfornuis':
                 tempval = new Kookfornuis(structure);
                 break;
+            case 'Kring':
+                tempval = new Kring(structure);
+                break;
             case 'Lichtcircuit':
                 tempval = new Lichtcircuit(structure);
                 break;
@@ -3952,6 +4251,9 @@ var Hierarchical_List = /** @class */ (function () {
         for (var i = 0; i < this.length; i++) {
             if (this.active[i] && ((this.data[i].parent == myParent) || ((includeparent == true) && (this.id[i] == myParent)))) {
                 switch (this.data[i].getKey("type")) {
+                    case "":
+                        inSVG[elementCounter] = new SVGelement();
+                        break;
                     case "Bord":
                         inSVG[elementCounter] = this.data[i].toSVG();
                         break;
@@ -3972,6 +4274,9 @@ var Hierarchical_List = /** @class */ (function () {
                     case "Domotica gestuurde verbruiker":
                         inSVG[elementCounter] = this.data[i].toSVG(); //Maak de tekening
                         this.tekenVerticaleLijnIndienKindVanKring(this.data[i], inSVG[elementCounter]);
+                        break;
+                    case "Kring":
+                        inSVG[elementCounter] = this.data[i].toSVG(); //Maak de tekening
                         break;
                     case "Aansluiting":
                         var extrashift = 0;
@@ -4303,451 +4608,6 @@ var Hierarchical_List = /** @class */ (function () {
                             ;
                         }
                         ;
-                        break;
-                    case "Kring":
-                        var cable_location_available = 0;
-                        if ((this.data[i].getKey("kabel_aanwezig"))
-                            && (this.data[i].keys[19][2] || contains(["Ondergronds", "Luchtleiding", "In wand", "Op wand"], this.data[i].keys[16][2]))) {
-                            cable_location_available = 1;
-                        }
-                        //get image of the entire kring
-                        inSVG[elementCounter] = this.toSVG(this.id[i], "vertical", 35 + 20 * cable_location_available);
-                        //--- Code for the cable including text and indications where the cable is located ---
-                        if (this.data[i].getKey("kabel_aanwezig")) {
-                            //foresee space for the conductor specifications
-                            inSVG[elementCounter].data += '<line x1="' + inSVG[elementCounter].xleft +
-                                '" x2="' + inSVG[elementCounter].xleft +
-                                '" y1="' + inSVG[elementCounter].yup +
-                                '" y2="' + (inSVG[elementCounter].yup + 100) + '" stroke="black" />';
-                            inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 15) +
-                                "\" y=\"" + (inSVG[elementCounter].yup + 80) +
-                                "\"" +
-                                " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 15) +
-                                "," + (inSVG[elementCounter].yup + 80) +
-                                ")" +
-                                "\" style=\"text-anchor:start\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                htmlspecialchars(this.data[i].getKey("kabel")) + "</text>";
-                            //Draw the cable location symbols
-                            if (cable_location_available) {
-                                if ((this.data[i].keys[19][2]) && (this.data[i].keys[16][2] != "Luchtleiding")) {
-                                    inSVG[elementCounter].data += '<circle cx="' + (inSVG[elementCounter].xleft - 10)
-                                        + '" cy="' + (inSVG[elementCounter].yup + 40)
-                                        + '" r="4" style="stroke:black;fill:none" />';
-                                }
-                                switch (this.data[i].keys[16][2]) {
-                                    case "Ondergronds":
-                                        inSVG[elementCounter].data += '<line x1="' + (inSVG[elementCounter].xleft - 13)
-                                            + '" x2="' + (inSVG[elementCounter].xleft - 13)
-                                            + '" y1="' + (inSVG[elementCounter].yup + 60)
-                                            + '" y2="' + (inSVG[elementCounter].yup + 80)
-                                            + '" style="stroke:black" />';
-                                        inSVG[elementCounter].data += '<line x1="' + (inSVG[elementCounter].xleft - 10)
-                                            + '" x2="' + (inSVG[elementCounter].xleft - 10)
-                                            + '" y1="' + (inSVG[elementCounter].yup + 62)
-                                            + '" y2="' + (inSVG[elementCounter].yup + 78)
-                                            + '" style="stroke:black" />';
-                                        inSVG[elementCounter].data += '<line x1="' + (inSVG[elementCounter].xleft - 7)
-                                            + '" x2="' + (inSVG[elementCounter].xleft - 7)
-                                            + '" y1="' + (inSVG[elementCounter].yup + 64)
-                                            + '" y2="' + (inSVG[elementCounter].yup + 76)
-                                            + '" style="stroke:black" />';
-                                        break;
-                                    case "Luchtleiding":
-                                        inSVG[elementCounter].data += '<circle cx="' + (inSVG[elementCounter].xleft)
-                                            + '" cy="' + (inSVG[elementCounter].yup + 20)
-                                            + '" r="4" style="stroke:black;fill:none" />';
-                                        break;
-                                    case "In wand":
-                                        inSVG[elementCounter].data += '<line x1="' + (inSVG[elementCounter].xleft - 15)
-                                            + '" x2="' + (inSVG[elementCounter].xleft - 15)
-                                            + '" y1="' + (inSVG[elementCounter].yup + 10)
-                                            + '" y2="' + (inSVG[elementCounter].yup + 30)
-                                            + '" style="stroke:black" />';
-                                        inSVG[elementCounter].data += '<line x1="' + (inSVG[elementCounter].xleft - 15)
-                                            + '" x2="' + (inSVG[elementCounter].xleft - 5)
-                                            + '" y1="' + (inSVG[elementCounter].yup + 10)
-                                            + '" y2="' + (inSVG[elementCounter].yup + 10)
-                                            + '" style="stroke:black" />';
-                                        inSVG[elementCounter].data += '<line x1="' + (inSVG[elementCounter].xleft - 15)
-                                            + '" x2="' + (inSVG[elementCounter].xleft - 5)
-                                            + '" y1="' + (inSVG[elementCounter].yup + 20)
-                                            + '" y2="' + (inSVG[elementCounter].yup + 20)
-                                            + '" style="stroke:black" />';
-                                        inSVG[elementCounter].data += '<line x1="' + (inSVG[elementCounter].xleft - 15)
-                                            + '" x2="' + (inSVG[elementCounter].xleft - 5)
-                                            + '" y1="' + (inSVG[elementCounter].yup + 30)
-                                            + '" y2="' + (inSVG[elementCounter].yup + 30)
-                                            + '" style="stroke:black" />';
-                                        inSVG[elementCounter].data += '<line x1="' + (inSVG[elementCounter].xleft - 15)
-                                            + '" x2="' + (inSVG[elementCounter].xleft - 15)
-                                            + '" y1="' + (inSVG[elementCounter].yup + 65)
-                                            + '" y2="' + (inSVG[elementCounter].yup + 85)
-                                            + '" style="stroke:black" />';
-                                        inSVG[elementCounter].data += '<line x1="' + (inSVG[elementCounter].xleft - 15)
-                                            + '" x2="' + (inSVG[elementCounter].xleft - 5)
-                                            + '" y1="' + (inSVG[elementCounter].yup + 85)
-                                            + '" y2="' + (inSVG[elementCounter].yup + 85)
-                                            + '" style="stroke:black" />';
-                                        inSVG[elementCounter].data += '<line x1="' + (inSVG[elementCounter].xleft - 15)
-                                            + '" x2="' + (inSVG[elementCounter].xleft - 5)
-                                            + '" y1="' + (inSVG[elementCounter].yup + 65)
-                                            + '" y2="' + (inSVG[elementCounter].yup + 65)
-                                            + '" style="stroke:black" />';
-                                        inSVG[elementCounter].data += '<line x1="' + (inSVG[elementCounter].xleft - 15)
-                                            + '" x2="' + (inSVG[elementCounter].xleft - 5)
-                                            + '" y1="' + (inSVG[elementCounter].yup + 75)
-                                            + '" y2="' + (inSVG[elementCounter].yup + 75)
-                                            + '" style="stroke:black" />';
-                                        break;
-                                    case "Op wand":
-                                        inSVG[elementCounter].data += '<line x1="' + (inSVG[elementCounter].xleft - 5)
-                                            + '" x2="' + (inSVG[elementCounter].xleft - 5)
-                                            + '" y1="' + (inSVG[elementCounter].yup + 10)
-                                            + '" y2="' + (inSVG[elementCounter].yup + 30)
-                                            + '" style="stroke:black" />';
-                                        inSVG[elementCounter].data += '<line x1="' + (inSVG[elementCounter].xleft - 15)
-                                            + '" x2="' + (inSVG[elementCounter].xleft - 5)
-                                            + '" y1="' + (inSVG[elementCounter].yup + 10)
-                                            + '" y2="' + (inSVG[elementCounter].yup + 10)
-                                            + '" style="stroke:black" />';
-                                        inSVG[elementCounter].data += '<line x1="' + (inSVG[elementCounter].xleft - 15)
-                                            + '" x2="' + (inSVG[elementCounter].xleft - 5)
-                                            + '" y1="' + (inSVG[elementCounter].yup + 20)
-                                            + '" y2="' + (inSVG[elementCounter].yup + 20)
-                                            + '" style="stroke:black" />';
-                                        inSVG[elementCounter].data += '<line x1="' + (inSVG[elementCounter].xleft - 15)
-                                            + '" x2="' + (inSVG[elementCounter].xleft - 5)
-                                            + '" y1="' + (inSVG[elementCounter].yup + 30)
-                                            + '" y2="' + (inSVG[elementCounter].yup + 30)
-                                            + '" style="stroke:black" />';
-                                        inSVG[elementCounter].data += '<line x1="' + (inSVG[elementCounter].xleft - 5)
-                                            + '" x2="' + (inSVG[elementCounter].xleft - 5)
-                                            + '" y1="' + (inSVG[elementCounter].yup + 65)
-                                            + '" y2="' + (inSVG[elementCounter].yup + 85)
-                                            + '" style="stroke:black" />';
-                                        inSVG[elementCounter].data += '<line x1="' + (inSVG[elementCounter].xleft - 15)
-                                            + '" x2="' + (inSVG[elementCounter].xleft - 5)
-                                            + '" y1="' + (inSVG[elementCounter].yup + 85)
-                                            + '" y2="' + (inSVG[elementCounter].yup + 85)
-                                            + '" style="stroke:black" />';
-                                        inSVG[elementCounter].data += '<line x1="' + (inSVG[elementCounter].xleft - 15)
-                                            + '" x2="' + (inSVG[elementCounter].xleft - 5)
-                                            + '" y1="' + (inSVG[elementCounter].yup + 65)
-                                            + '" y2="' + (inSVG[elementCounter].yup + 65)
-                                            + '" style="stroke:black" />';
-                                        inSVG[elementCounter].data += '<line x1="' + (inSVG[elementCounter].xleft - 15)
-                                            + '" x2="' + (inSVG[elementCounter].xleft - 5)
-                                            + '" y1="' + (inSVG[elementCounter].yup + 75)
-                                            + '" y2="' + (inSVG[elementCounter].yup + 75)
-                                            + '" style="stroke:black" />';
-                                        break;
-                                }
-                            }
-                            inSVG[elementCounter].yup += 100;
-                        }
-                        else {
-                            inSVG[elementCounter].data += '<line x1="' + inSVG[elementCounter].xleft +
-                                '" x2="' + inSVG[elementCounter].xleft +
-                                '" y1="' + inSVG[elementCounter].yup +
-                                '" y2="' + (inSVG[elementCounter].yup + 20) + '" stroke="black" />';
-                            inSVG[elementCounter].yup += 20;
-                        }
-                        //--- Code for selective diff ---
-                        if (this.data[i].keys[20][2]) { //Differentieel is selectief
-                            inSVG[elementCounter].data += '<line x1="' + inSVG[elementCounter].xleft +
-                                '" x2="' + inSVG[elementCounter].xleft +
-                                '" y1="' + inSVG[elementCounter].yup +
-                                '" y2="' + (inSVG[elementCounter].yup + 30) + '" stroke="black" />';
-                            inSVG[elementCounter].data += '<rect x="' + (inSVG[elementCounter].xleft + 7) +
-                                '" y="' + (inSVG[elementCounter].yup) +
-                                '" width="16" height="16" stroke="black" fill="white" />';
-                            inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 19) +
-                                "\" y=\"" + (inSVG[elementCounter].yup + 8) +
-                                "\"" +
-                                " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 19) +
-                                "," + (inSVG[elementCounter].yup + 8) +
-                                ")" +
-                                "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                "S" + "</text>";
-                            inSVG[elementCounter].yup += 23;
-                        }
-                        //--- Now the bottom part ---
-                        //add the fuse below
-                        var nameshift = -6;
-                        switch (this.data[i].getKey("zekering")) {
-                            case "automatisch":
-                                //Basiscode voor het amperage
-                                var numlines = 1;
-                                inSVG[elementCounter].yup += 30;
-                                inSVG[elementCounter].data +=
-                                    '<use xlink:href="#zekering_automatisch" x=\"' + inSVG[elementCounter].xleft +
-                                        '" y="' + inSVG[elementCounter].yup + '" />';
-                                inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 15) +
-                                    "\" y=\"" + (inSVG[elementCounter].yup - 10) +
-                                    "\"" +
-                                    " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 15) +
-                                    "," + (inSVG[elementCounter].yup - 10) +
-                                    ")" +
-                                    "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                    htmlspecialchars(this.data[i].getKey("aantal") + "P - " + this.data[i].getKey("amperage") + "A") + "</text>";
-                                //Code om de curve toe te voegen
-                                if ((this.data[i].keys[17][2] == 'B') || (this.data[i].keys[17][2] == 'C') || (this.data[i].keys[17][2] == 'D')) {
-                                    numlines = numlines + 1;
-                                    inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
-                                        "\" y=\"" + (inSVG[elementCounter].yup - 10) +
-                                        "\"" +
-                                        " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
-                                        "," + (inSVG[elementCounter].yup - 10) +
-                                        ")" +
-                                        "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                        htmlspecialchars("Curve " + this.data[i].keys[17][2]) + "</text>";
-                                }
-                                //Code om kortsluitvermogen toe te voegen
-                                if ((this.data[i].keys[22][2] != '')) {
-                                    numlines = numlines + 1;
-                                    inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
-                                        "\" y=\"" + (inSVG[elementCounter].yup - 10) +
-                                        "\"" +
-                                        " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
-                                        "," + (inSVG[elementCounter].yup - 10) +
-                                        ")" +
-                                        "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                        htmlspecialchars("" + this.data[i].keys[22][2]) + "kA</text>";
-                                }
-                                //genoeg plaats voorzien aan de rechterkant en eindigen
-                                inSVG[elementCounter].xright = Math.max(inSVG[elementCounter].xright, 20 + 11 * (numlines - 1));
-                                break;
-                            case "differentieel":
-                                //Basiscode voor het amperage en de sluitstroom
-                                var numlines = 2;
-                                inSVG[elementCounter].yup += 30;
-                                inSVG[elementCounter].data +=
-                                    '<use xlink:href="#zekering_automatisch" x=\"' + inSVG[elementCounter].xleft +
-                                        '" y="' + inSVG[elementCounter].yup + '" />';
-                                inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 15) +
-                                    "\" y=\"" + (inSVG[elementCounter].yup - 10) +
-                                    "\"" +
-                                    " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 15) +
-                                    "," + (inSVG[elementCounter].yup - 10) +
-                                    ")" +
-                                    "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                    "\u0394" + htmlspecialchars(this.data[i].getKey("differentieel_waarde") + "mA") + "</text>";
-                                inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 26) +
-                                    "\" y=\"" + (inSVG[elementCounter].yup - 10) +
-                                    "\"" +
-                                    " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 26) +
-                                    "," + (inSVG[elementCounter].yup - 10) +
-                                    ")" +
-                                    "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                    htmlspecialchars(this.data[i].getKey("aantal") + "P - " + this.data[i].getKey("amperage") + "A") + "</text>";
-                                //Code om het type toe te voegen
-                                if ((this.data[i].keys[17][2] == 'A') || (this.data[i].keys[17][2] == 'B')) {
-                                    numlines = numlines + 1;
-                                    inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
-                                        "\" y=\"" + (inSVG[elementCounter].yup - 10) +
-                                        "\"" +
-                                        " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
-                                        "," + (inSVG[elementCounter].yup - 10) +
-                                        ")" +
-                                        "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                        htmlspecialchars("Type " + this.data[i].keys[17][2]) + "</text>";
-                                }
-                                //Code om kortsluitvermogen toe te voegen
-                                if ((this.data[i].keys[22][2] != '')) {
-                                    numlines = numlines + 1;
-                                    inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
-                                        "\" y=\"" + (inSVG[elementCounter].yup - 10) +
-                                        "\"" +
-                                        " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
-                                        "," + (inSVG[elementCounter].yup - 10) +
-                                        ")" +
-                                        "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                        htmlspecialchars("" + this.data[i].keys[22][2]) + "kA</text>";
-                                }
-                                //genoeg plaats voorzien aan de rechterkant en eindigen
-                                inSVG[elementCounter].xright = Math.max(inSVG[elementCounter].xright, 20 + 11 * (numlines - 1));
-                                break;
-                            case "differentieelautomaat":
-                                //Basiscode voor het amperage en de sluitstroom
-                                var numlines = 2;
-                                inSVG[elementCounter].yup += 30;
-                                inSVG[elementCounter].data +=
-                                    '<use xlink:href="#zekering_automatisch" x=\"' + inSVG[elementCounter].xleft +
-                                        '" y="' + inSVG[elementCounter].yup + '" />';
-                                inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 15) +
-                                    "\" y=\"" + (inSVG[elementCounter].yup - 10) +
-                                    "\"" +
-                                    " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 15) +
-                                    "," + (inSVG[elementCounter].yup - 10) +
-                                    ")" +
-                                    "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                    "\u0394" + htmlspecialchars(this.data[i].getKey("differentieel_waarde") + "mA") + "</text>";
-                                inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 26) +
-                                    "\" y=\"" + (inSVG[elementCounter].yup - 10) +
-                                    "\"" +
-                                    " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 26) +
-                                    "," + (inSVG[elementCounter].yup - 10) +
-                                    ")" +
-                                    "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                    htmlspecialchars(this.data[i].getKey("aantal") + "P - " + this.data[i].getKey("amperage") + "A") + "</text>";
-                                //Code om de curve toe te voegen
-                                if ((this.data[i].keys[18][2] == 'B') || (this.data[i].keys[18][2] == 'C') || (this.data[i].keys[18][2] == 'D')) {
-                                    numlines = numlines + 1;
-                                    inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
-                                        "\" y=\"" + (inSVG[elementCounter].yup - 10) +
-                                        "\"" +
-                                        " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
-                                        "," + (inSVG[elementCounter].yup - 10) +
-                                        ")" +
-                                        "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                        htmlspecialchars("Curve " + this.data[i].keys[18][2]) + "</text>";
-                                }
-                                //Code om het type toe te voegen
-                                if ((this.data[i].keys[17][2] == 'A') || (this.data[i].keys[17][2] == 'B')) {
-                                    numlines = numlines + 1;
-                                    inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
-                                        "\" y=\"" + (inSVG[elementCounter].yup - 10) +
-                                        "\"" +
-                                        " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
-                                        "," + (inSVG[elementCounter].yup - 10) +
-                                        ")" +
-                                        "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                        htmlspecialchars("Type " + this.data[i].keys[17][2]) + "</text>";
-                                }
-                                //Code om kortsluitvermogen toe te voegen
-                                if ((this.data[i].keys[22][2] != '')) {
-                                    numlines = numlines + 1;
-                                    inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
-                                        "\" y=\"" + (inSVG[elementCounter].yup - 10) +
-                                        "\"" +
-                                        " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
-                                        "," + (inSVG[elementCounter].yup - 10) +
-                                        ")" +
-                                        "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                        htmlspecialchars("" + this.data[i].keys[22][2]) + "kA</text>";
-                                }
-                                //genoeg plaats voorzien aan de rechterkant en eindigen
-                                inSVG[elementCounter].xright = Math.max(inSVG[elementCounter].xright, 20 + 11 * (numlines - 1));
-                                break;
-                            case "schakelaar":
-                                inSVG[elementCounter].yup += 30;
-                                inSVG[elementCounter].data +=
-                                    '<use xlink:href="#zekering_empty" x=\"' + inSVG[elementCounter].xleft +
-                                        '" y="' + inSVG[elementCounter].yup + '" />';
-                                inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 15) +
-                                    "\" y=\"" + (inSVG[elementCounter].yup - 10) +
-                                    "\"" +
-                                    " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 15) +
-                                    "," + (inSVG[elementCounter].yup - 10) +
-                                    ")" +
-                                    "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                    htmlspecialchars(this.data[i].getKey("aantal") + "P - " + this.data[i].getKey("amperage") + "A") + "</text>";
-                                break;
-                            case "overspanningsbeveiliging":
-                                inSVG[elementCounter].yup += 30;
-                                inSVG[elementCounter].data +=
-                                    '<use xlink:href="#overspanningsbeveiliging_inline" x=\"' + inSVG[elementCounter].xleft +
-                                        '" y="' + inSVG[elementCounter].yup + '" />';
-                                inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 20) +
-                                    "\" y=\"" + (inSVG[elementCounter].yup - 10) +
-                                    "\"" +
-                                    " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 20) +
-                                    "," + (inSVG[elementCounter].yup - 10) +
-                                    ")" +
-                                    "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                    htmlspecialchars(this.data[i].getKey("aantal") + "P - " + this.data[i].getKey("amperage") + "A") + "</text>";
-                                nameshift = -11;
-                                break;
-                            case "schemer":
-                                inSVG[elementCounter].yup += 30;
-                                inSVG[elementCounter].data +=
-                                    '<use xlink:href="#zekering_empty" x=\"' + inSVG[elementCounter].xleft +
-                                        '" y="' + inSVG[elementCounter].yup + '" />';
-                                inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 15) +
-                                    "\" y=\"" + (inSVG[elementCounter].yup - 10) +
-                                    "\"" +
-                                    " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 15) +
-                                    "," + (inSVG[elementCounter].yup - 10) +
-                                    ")" +
-                                    "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                    htmlspecialchars(this.data[i].getKey("aantal") + "P - " + this.data[i].getKey("amperage") + "A") + "</text>";
-                                inSVG[elementCounter].data +=
-                                    '<use xlink:href="#arrow" x=\"' + (inSVG[elementCounter].xleft - 18) +
-                                        '" y="' + (inSVG[elementCounter].yup - 15) + '" />';
-                                inSVG[elementCounter].data +=
-                                    '<use xlink:href="#arrow" x=\"' + (inSVG[elementCounter].xleft - 18) +
-                                        '" y="' + (inSVG[elementCounter].yup - 12) + '" />';
-                                break;
-                            case "relais":
-                                inSVG[elementCounter].yup += 30;
-                                inSVG[elementCounter].data +=
-                                    '<use xlink:href="#relais_kring" x=\"' + inSVG[elementCounter].xleft +
-                                        '" y="' + inSVG[elementCounter].yup + '" />';
-                                /*inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft+15) +
-                                   "\" y=\"" + (inSVG[elementCounter].yup-10) +
-                                   "\"" +
-                                   " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft+15) +
-                                   "," + (inSVG[elementCounter].yup-10) +
-                                   ")" +
-                                    "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                   htmlspecialchars(this.data[i].getKey("aantal") + "P - " +  this.data[i].getKey("amperage") + "A") + "</text>";*/
-                                nameshift = -11;
-                                break;
-                            case "smelt":
-                                inSVG[elementCounter].yup += 30;
-                                inSVG[elementCounter].data +=
-                                    '<use xlink:href="#zekering_smelt" x=\"' + inSVG[elementCounter].xleft +
-                                        '" y="' + inSVG[elementCounter].yup + '" />';
-                                inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 15) +
-                                    "\" y=\"" + (inSVG[elementCounter].yup - 10) +
-                                    "\"" +
-                                    " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 15) +
-                                    "," + (inSVG[elementCounter].yup - 10) +
-                                    ")" +
-                                    "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                    htmlspecialchars(this.data[i].getKey("aantal") + "P - " + this.data[i].getKey("amperage") + "A") + "</text>";
-                                break;
-                            case "geen":
-                                inSVG[elementCounter].yup += 0;
-                                break;
-                        }
-                        //--Tekst naast de kring--
-                        var tekstlocatie = (inSVG[elementCounter].yup - 40); //Standaard staat tekst boven de zekering
-                        if (this.data[i].getKey("zekering") == "geen")
-                            tekstlocatie += 25; //Als er geen zekering is kan tekst naar beneden
-                        inSVG[elementCounter].data +=
-                            '<text x="' + (inSVG[elementCounter].xleft - 6 - 20 * cable_location_available) + '" '
-                                + 'y="' + (tekstlocatie) + '" '
-                                + 'transform="rotate(-90 ' + (inSVG[elementCounter].xleft - 6 - 20 * cable_location_available) + ',' + (tekstlocatie) + ')" '
-                                + 'style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="12"'
-                                + '>'
-                                + htmlspecialchars(this.data[i].getKey("commentaar"))
-                                + '</text>';
-                        //--Naam onderaan zetten (links-onder)--
-                        inSVG[elementCounter].data +=
-                            '<text x="' + (inSVG[elementCounter].xleft + nameshift) + '" '
-                                + 'y="' + (inSVG[elementCounter].yup + 3) + '" '
-                                //+ 'transform="rotate(-90 ' + (inSVG[elementCounter].xleft-6) + ',' + (inSVG[elementCounter].yup+3) + ')" '
-                                + 'style="text-anchor:end" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="12"'
-                                + '>'
-                                + htmlspecialchars(this.data[i].getKey("naam"))
-                                + '</text>';
-                        //--Lijntje onder de zekering--
-                        inSVG[elementCounter].data += '<line x1="' + inSVG[elementCounter].xleft +
-                            '" x2="' + inSVG[elementCounter].xleft +
-                            '" y1="' + inSVG[elementCounter].yup +
-                            '" y2="' + (inSVG[elementCounter].yup + 15) + '" stroke="black" />';
-                        inSVG[elementCounter].yup += 15;
-                        //if there is nothing, still draw an empty one
-                        if (inSVG[elementCounter].yup <= 0) {
-                            inSVG[elementCounter].xleft = 20;
-                            inSVG[elementCounter].xright = 20;
-                            inSVG[elementCounter].yup = 50;
-                            inSVG[elementCounter].ydown = 0;
-                        }
-                        break;
-                    case "":
-                        inSVG[elementCounter] = new SVGelement();
                         break;
                     default:
                         var x = this.data[this.getOrdinalById(myParent)].getKey("type");
@@ -5296,7 +5156,7 @@ function buildNewStructure(structure) {
     ;
     //Eerst het hoofddifferentieel maken
     var itemCounter = 0;
-    structure.addItem("");
+    structure.addItem("Aansluiting");
     structure.data[0].setKey("type", "Aansluiting");
     structure.data[0].setKey("naam", "");
     structure.data[0].setKey("zekering", "differentieel");
@@ -5307,12 +5167,12 @@ function buildNewStructure(structure) {
     structure.data[0].setKey("differentieel_waarde", CONF_differentieel_droog);
     itemCounter++;
     //Dan het hoofdbord maken
-    structure.insertChildAfterId(new Bord(structure /*,structure.data[itemCounter-1]*/), itemCounter);
+    structure.insertChildAfterId(new Bord(structure), itemCounter);
     structure.data[itemCounter].setKey("type", "Bord");
     itemCounter++;
     var droogBordCounter = itemCounter;
     //Nat bord voorzien
-    structure.insertChildAfterId(new Electro_Item(structure /*,structure.data[itemCounter-1]*/), itemCounter);
+    structure.insertChildAfterId(new Kring(structure), itemCounter);
     structure.data[itemCounter].setKey("type", "Kring");
     structure.data[itemCounter].setKey("naam", "");
     structure.data[itemCounter].setKey("zekering", "differentieel");
@@ -5322,7 +5182,7 @@ function buildNewStructure(structure) {
     structure.data[itemCounter].setKey("kabel_aanwezig", false);
     structure.data[itemCounter].setKey("differentieel_waarde", CONF_differentieel_nat);
     itemCounter++;
-    structure.insertChildAfterId(new Bord(structure /*,structure.data[itemCounter-1]*/), itemCounter);
+    structure.insertChildAfterId(new Bord(structure), itemCounter);
     structure.data[itemCounter].setKey("type", "Bord");
     structure.data[itemCounter].setKey("geaard", false);
     itemCounter++;

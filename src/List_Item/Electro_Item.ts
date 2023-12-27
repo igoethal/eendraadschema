@@ -407,39 +407,6 @@ class Electro_Item extends List_Item {
     let output = this.toHTMLHeader(mode, Parent);
 
     switch (this.keys[0][2]) {
-      case "Kring":
-        output += "&nbsp;Naam: " + this.stringToHTML(10,5) + "<br>";
-        output += "Zekering: " + this.selectToHTML(7,["automatisch","differentieel","differentieelautomaat","smelt","geen","---","schakelaar","relais","schemer","overspanningsbeveiliging"]);
-        if ( (this.keys[7][2] != "geen") && (this.keys[7][2] != "relais") ) output += this.selectToHTML(4,["2","3","4","-","1"]) + this.stringToHTML(8,2) + "A";
-        if (this.getKey("zekering")=="differentieel") {
-          output += ", \u0394 " + this.stringToHTML(11,3) + "mA";
-          output += ", Type:" + this.selectToHTML(17,["","A","B"]);
-          output += ", Kortsluitvermogen: " + this.stringToHTML(22,3) + "kA";
-          output += ", Selectief: " + this.checkboxToHTML(20);
-        }
-        if (this.getKey("zekering")=="automatisch") {
-          output += ", Curve:" + this.selectToHTML(17,["","B","C","D"]);
-          output += ", Kortsluitvermogen: " + this.stringToHTML(22,3) + "kA";
-        }
-        if (this.getKey("zekering")=="differentieelautomaat") {
-          output += ", \u0394 " + this.stringToHTML(11,3) + "mA";
-          output += ", Curve:" + this.selectToHTML(18,["","B","C","D"]);
-          output += ", Type:" + this.selectToHTML(17,["","A","B"]);
-          output += ", Kortsluitvermogen: " + this.stringToHTML(22,3) + "kA";
-          output += ", Selectief: " + this.checkboxToHTML(20);
-        }
-        if (this.getKey("zekering")=="relais") {
-        }
-        output += ", Kabel: " + this.checkboxToHTML(12);
-        if (this.getKey("kabel_aanwezig")) {
-          output += ", Type: " + this.stringToHTML(9,10);
-          output += ", Plaatsing: " + this.selectToHTML(16,["N/A","Ondergronds","Luchtleiding","In wand","Op wand"]);
-          if (this.keys[16][2] != "Luchtleiding") {
-            output += ", In buis: " + this.checkboxToHTML(19);
-          }
-        }
-        output += ", Tekst: " + this.stringToHTML(15,10);
-        break;
       case "Aansluiting":
         output += "&nbsp;Naam: " + this.stringToHTML(23,5) + "<br>";
         if (typeof Parent != 'undefined') output += "Nr: " + this.stringToHTML(10,5) + ", ";
@@ -467,17 +434,6 @@ class Electro_Item extends List_Item {
         output += ", Kabeltype v&oacute;&oacute;r teller: " + this.stringToHTML(24,10);
         output += ", Adres/tekst: " + this.stringToHTML(15,5);
         break;
-      case "Domotica gestuurde verbruiker":
-        output += "&nbsp;Nr: " + this.stringToHTML(10,5);
-        output += ", Draadloos: " + this.checkboxToHTML(19);  
-        output += ", Lokale Drukknop: " + this.checkboxToHTML(20);  
-        output += ", Geprogrammeerd: " + this.checkboxToHTML(21);  
-        output += ", Detectie: " + this.checkboxToHTML(25);
-        output += ", Externe sturing: " + this.checkboxToHTML(26);    
-        if (this.keys[26][2]) {
-          output += ", Externe sturing: " + this.selectToHTML(5,["drukknop","schakelaar"]);    
-        }
-        output += ", Adres/tekst: " + this.stringToHTML(15,5); 
       default:
         output += "&nbsp;Nr: " + this.stringToHTML(10,5);
         output += ", Adres/tekst: " + this.stringToHTML(15,5);
