@@ -6,6 +6,7 @@ class Bord extends Electro_Item {
         this.clearKeys();
         this.keys[0][2] = "Bord";      // This is rather a formality as we should already have this at this stage
         this.keys[1][2] = true;        // Per default geaard
+        this.keys[10][2] = "";         // Bord heeft initieel geen naam
         this.keys[15][2] = "";         // Set Adres/tekst to "" when the item is cleared
     }
 

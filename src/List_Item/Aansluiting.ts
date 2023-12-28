@@ -20,7 +20,7 @@ class Aansluiting extends Electro_Item {
     }
 
     overrideKeys() {
-
+        if ( ( (this.keys[4][2] as number) < 1 ) || ( (this.keys[4][2] as number) > 4 ) ) this.keys[4][2] = "2"; //Test dat aantal polen bestaat
     }
 
     toHTML(mode: string, Parent?: List_Item) {

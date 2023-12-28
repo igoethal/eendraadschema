@@ -36,12 +36,12 @@ class Verwarmingstoestel extends Electro_Item {
         mySVG.ydown = 25;
 
         mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-        switch (this.getKey("accumulatie")) {
+        switch (this.keys[3][2]) { //accumulatie
             case false:
                 mySVG.data += '<use xlink:href="#verwarmingstoestel" x="21" y="25"></use>';
                 break;
             case true:
-                switch (this.getKey("ventilator")) {
+                switch (this.keys[6][2]) { //ventilator
                     case false:
                         mySVG.data += '<use xlink:href="#verwarmingstoestel_accu" x="21" y="25"></use>';
                         break;

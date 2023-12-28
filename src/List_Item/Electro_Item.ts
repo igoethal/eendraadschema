@@ -85,7 +85,7 @@ class Electro_Item extends List_Item {
     if (Parent == null) {
       consumers = ["", "Kring", "Aansluiting"];
     } else {
-      switch (Parent.getKey("type")) {
+      switch (Parent.keys[0][2]) {
         case "Bord": {
           consumers = ["", "Kring", "Vrije ruimte"];
           break;
@@ -146,90 +146,7 @@ class Electro_Item extends List_Item {
 
   //-- When a new element is created, we will call resetKeys to set the keys to their default values --
 
-  resetKeys() {
-    this.keys[1][2] = true;
-    this.keys[2][2] = true;
-    this.keys[3][2] = false;
-    this.keys[5][2] = "enkelpolig";
-    this.keys[6][2] = false;
-
-    if (this.keys[0][2] == "Aansluiting") {
-      this.keys[4][2] = "2";
-      this.keys[7][2] = "differentieel";
-      this.keys[8][2] = "40";
-      this.keys[9][2] = "2x16";
-      this.keys[17][2] = "";
-    } else {
-      this.keys[4][2] = "1";
-      this.keys[7][2] = "automatisch";
-      this.keys[8][2] = "20";
-      this.keys[9][2] = "XVB 3G2,5";
-    };
-
-    this.keys[11][2] = "300"; //Differentieel
-
-    let parent = this.getParent();
-    if (parent == null) {
-      this.keys[12][2] = true;
-    } else {
-      switch (parent.getKey("type")) { //Kabel_aanwezig
-        case "Splitsing":
-          this.keys[7][2] = "geen"; //geen zekering per default na splitsing
-          this.keys[12][2] = false; //geen kabel per default na splitsing
-          break;
-        case "Domotica":
-          this.keys[7][2] = "geen"; //geen zekering per default na domotica
-          break;
-        default:
-          this.keys[7][2] = "automatisch"; //wel een zekering na bord
-          this.keys[12][2] = true; //wel een kabel na bord
-          break;
-      }
-    };
-
-    this.keys[13][2] = "1";
-    this.keys[14][2] = "230V/24V";
-    this.keys[15][2] = "";
-
-    //-- Set each of the optional booleans to false --
-    this.keys[19][2] = false;
-    this.keys[20][2] = false;
-    this.keys[21][2] = false;
-    this.keys[25][2] = false;
-    this.keys[26][2] = false;
-
-    //-- Empty the strings
-    this.keys[22][2] = "";
-    this.keys[23][2] = "";
-    this.keys[24][2] = "";
-
-    switch (this.keys[0][2]) { //Special cases
-      case "Kring":
-        this.keys[4][2] = 2;
-        this.keys[10][2] = "---";
-        this.keys[16][2] = "N/A";
-        this.keys[17][2] = "";
-        this.keys[18][2] = "";
-        break;
-      case "Aansluiting":
-        this.keys[23][2] = "";
-      case "Splitsing":
-        //this.keys[10][2] = "";
-        break;
-      case "Domotica":
-        this.keys[15][2] = "Domotica";
-        break;
-      case "Domotica gestuurde verbruiker":
-        this.keys[19][2] = true;
-        this.keys[20][2] = true;
-        this.keys[21][2] = true;
-      case "Vrije ruimte":
-        this.keys[22][2] = 25;
-        break;
-      default:
-        break;
-    };
-  }
+  resetKeys() {} // Implemented in the derived classes
 
   //-- Algorithm to manually set a key, but most of the time, the keys-array is updated directly
   //   Note that getKey is defined in List_Item --
@@ -404,45 +321,7 @@ class Electro_Item extends List_Item {
   //-- Display the element in the editing grid at the left of the screen in case the
   //   element is or will become a child of Parent --
 
-  toHTML(mode: string, Parent?: List_Item) {
-    let output = this.toHTMLHeader(mode, Parent);
-
-    switch (this.keys[0][2]) {
-      case "Aansluiting":
-        output += "&nbsp;Naam: " + this.stringToHTML(23,5) + "<br>";
-        if (typeof Parent != 'undefined') output += "Nr: " + this.stringToHTML(10,5) + ", ";
-        output += "Zekering: " + this.selectToHTML(7,["automatisch","differentieel","differentieelautomaat","smelt","geen","---","schakelaar","schemer"]) +
-                                       this.selectToHTML(4,["2","3","4"]) +
-                                       this.stringToHTML(8,2) + "A";
-        if (this.getKey("zekering")=="differentieel") {
-          output += ", \u0394 " + this.stringToHTML(11,3) + "mA";
-          output += ", Type:" + this.selectToHTML(17,["","A","B"]);
-          output += ", Kortsluitvermogen: " + this.stringToHTML(22,3) + "kA";
-          output += ", Selectief: " + this.checkboxToHTML(20);
-        }
-        if (this.getKey("zekering")=="differentieelautomaat") {
-          output += ", \u0394 " + this.stringToHTML(11,3) + "mA";
-          output += ", Curve:" + this.selectToHTML(18,["","B","C","D"]);
-          output += ", Type:" + this.selectToHTML(17,["","A","B"]);
-          output += ", Kortsluitvermogen: " + this.stringToHTML(22,3) + "kA";
-          output += ", Selectief: " + this.checkboxToHTML(20);
-        }
-        if (this.getKey("zekering")=="automatisch") {
-          output += ", Curve:" + this.selectToHTML(17,["","B","C","D"]);
-          output += ", Kortsluitvermogen: " + this.stringToHTML(22,3) + "kA";
-        }
-        output += ", Kabeltype na teller: " + this.stringToHTML(9,10);
-        output += ", Kabeltype v&oacute;&oacute;r teller: " + this.stringToHTML(24,10);
-        output += ", Adres/tekst: " + this.stringToHTML(15,5);
-        break;
-      default:
-        output += "&nbsp;Nr: " + this.stringToHTML(10,5);
-        output += ", Adres/tekst: " + this.stringToHTML(15,5);
-        break;
-    }
-    //output += "id: " + this.id + " parent: " + this.parent;
-    return(output);
-  }
+  toHTML(mode: string, Parent?: List_Item) { return(this.toHTMLHeader(mode, Parent)); } // Implemented in the derived classes
 
   //-- Add the addressline below --
 
@@ -457,7 +336,5 @@ class Electro_Item extends List_Item {
 
   //-- Make the SVG for the entire electro item --
 
-  toSVG(): SVGelement { //Placeholder for derived classes
-    return(new SVGelement());
-  }
+  toSVG(): SVGelement { return(new SVGelement()); } //Placeholder for derived classes
 }
