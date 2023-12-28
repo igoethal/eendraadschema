@@ -21,7 +21,7 @@ function svgTextWidth(input:String, fontsize:Number = 10, options:String = '') {
     document.getElementById("configsection").appendChild(div);
     const width = (div.children[0].children[0] as SVGGraphicsElement).getBBox().width;
     document.getElementById("configsection").removeChild(div);
-    return width;
+    return(Math.ceil(width));
 }
 
 function flattenSVG(SVGstruct,shiftx,shifty,node) {

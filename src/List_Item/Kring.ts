@@ -89,7 +89,7 @@ class Kring extends Electro_Item {
                 output += ", \u0394 " + this.stringToHTML(11,3) + "mA"
                        +  ", Curve:" + this.selectToHTML(18,["","B","C","D"])
                        +  ", Type:" + this.selectToHTML(17,["","A","B"])
-                       +  ", Kortsluitvermogen: " + this.stringToHTML(22,3) + "kA";
+                       +  ", Kortsluitvermogen: " + this.stringToHTML(22,3) + "kA"
                        +  ", Selectief: " + this.checkboxToHTML(20);
                 break;
 

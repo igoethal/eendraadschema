@@ -25,7 +25,7 @@ class Electro_Item extends List_Item {
     this.keys.push(["commentaar","STRING",""]); //15, extra tekstveld
     this.keys.push(["select1","SELECT","standaard"]); //16, algemeen veld
       //Indien lichtpunt, select1 is het type van licht (standaard, TL, ...)
-      //Indien drukknop, select1 kan "standaard", "dimmer" or "rolluik" zijn
+      //Indien drukknop, select1 kan "standaard", "dimmer" of "rolluik" zijn
       //Indien vrije tekst, select1 kan "verbruiker" of "zonder kader" zijn
       //Indien ketel, type is het soort verwarming
       //Indien stopcontact, select1 is het aantal fasen
@@ -64,6 +64,7 @@ class Electro_Item extends List_Item {
       //Indien vrije tekst of verbruiker, het adres-veld (want reeds gebruikt voor de tekst zelf)
       //Indien aansluiting, hier kan ook een extra naam voor de aansluiting staan
     this.keys.push(["string3","STRING",""]); //24, algemeen veld
+      //Indien aansluiting, kabeltype vóór de teller
     this.keys.push(["bool4","BOOLEAN",false]); //25, algemeen veld
       //Indien schakelaar, indicatie trekschakelaar of niet
       //Indien stopcontact, bool4 is de selector voor nulgeleider of niet

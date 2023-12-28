@@ -59,7 +59,7 @@ function svgTextWidth(input, fontsize, options) {
     document.getElementById("configsection").appendChild(div);
     var width = div.children[0].children[0].getBBox().width;
     document.getElementById("configsection").removeChild(div);
-    return width;
+    return (Math.ceil(width));
 }
 function flattenSVG(SVGstruct, shiftx, shifty, node) {
     var str = "";
@@ -372,7 +372,7 @@ var Electro_Item = /** @class */ (function (_super) {
         _this.keys.push(["commentaar", "STRING", ""]); //15, extra tekstveld
         _this.keys.push(["select1", "SELECT", "standaard"]); //16, algemeen veld
         //Indien lichtpunt, select1 is het type van licht (standaard, TL, ...)
-        //Indien drukknop, select1 kan "standaard", "dimmer" or "rolluik" zijn
+        //Indien drukknop, select1 kan "standaard", "dimmer" of "rolluik" zijn
         //Indien vrije tekst, select1 kan "verbruiker" of "zonder kader" zijn
         //Indien ketel, type is het soort verwarming
         //Indien stopcontact, select1 is het aantal fasen
@@ -411,6 +411,7 @@ var Electro_Item = /** @class */ (function (_super) {
         //Indien vrije tekst of verbruiker, het adres-veld (want reeds gebruikt voor de tekst zelf)
         //Indien aansluiting, hier kan ook een extra naam voor de aansluiting staan
         _this.keys.push(["string3", "STRING", ""]); //24, algemeen veld
+        //Indien aansluiting, kabeltype vóór de teller
         _this.keys.push(["bool4", "BOOLEAN", false]); //25, algemeen veld
         //Indien schakelaar, indicatie trekschakelaar of niet
         //Indien stopcontact, bool4 is de selector voor nulgeleider of niet
@@ -1301,6 +1302,260 @@ var Lichtcircuit = /** @class */ (function (_super) {
     };
     return Lichtcircuit;
 }(Schakelaars));
+var Aansluiting = /** @class */ (function (_super) {
+    __extends(Aansluiting, _super);
+    function Aansluiting(mylist) {
+        return _super.call(this, mylist) || this;
+    }
+    Aansluiting.prototype.resetKeys = function () {
+        this.clearKeys();
+        this.keys[0][2] = "Aansluiting"; // This is rather a formality as we should already have this at this stage
+        this.keys[4][2] = "2"; // Per default 2-polig
+        this.keys[7][2] = "differentieel"; // Per default een differentieel
+        this.keys[8][2] = "40"; // Per default 40A
+        this.keys[9][2] = "2x16"; // Default kabeltype voor een aansluiting
+        this.keys[11][2] = "300"; // Differentieel per default 300 mA
+        this.keys[15][2] = ""; // Per default geen adres/tekst
+        this.keys[17][2] = ""; // Per default geen type voor een aansluiting
+        this.keys[18][2] = ""; // Curve differentieelautomaat per default niet gegeven
+        this.keys[20][2] = false; // Per default niet selectief
+        this.keys[22][2] = ""; // Per default geen kortsluitvermogen voor een aansluiting
+        this.keys[23][2] = ""; // Per default geen naam
+        this.keys[24][2] = ""; // Per default geen kabeltype vóór de aansluiting
+    };
+    Aansluiting.prototype.overrideKeys = function () {
+    };
+    Aansluiting.prototype.toHTML = function (mode, Parent) {
+        this.overrideKeys();
+        var output = this.toHTMLHeader(mode, Parent);
+        output += "&nbsp;Naam: " + this.stringToHTML(23, 5) + "<br>";
+        if (this.getParent() != null)
+            output += "Nr: " + this.stringToHTML(10, 5) + ", ";
+        output += "Zekering: " + this.selectToHTML(7, ["automatisch", "differentieel", "differentieelautomaat", "smelt", "geen", "---", "schakelaar", "schemer"])
+            + this.selectToHTML(4, ["2", "3", "4"])
+            + this.stringToHTML(8, 2) + "A";
+        switch (this.keys[7][2]) {
+            case "differentieel":
+                output += ", \u0394 " + this.stringToHTML(11, 3) + "mA"
+                    + ", Type:" + this.selectToHTML(17, ["", "A", "B"])
+                    + ", Kortsluitvermogen: " + this.stringToHTML(22, 3) + "kA"
+                    + ", Selectief: " + this.checkboxToHTML(20);
+                break;
+            case "automatisch":
+                output += ", Curve:" + this.selectToHTML(17, ["", "B", "C", "D"])
+                    + ", Kortsluitvermogen: " + this.stringToHTML(22, 3) + "kA";
+                break;
+            case "differentieelautomaat":
+                output += ", \u0394 " + this.stringToHTML(11, 3) + "mA"
+                    + ", Curve:" + this.selectToHTML(18, ["", "B", "C", "D"])
+                    + ", Type:" + this.selectToHTML(17, ["", "A", "B"])
+                    + ", Kortsluitvermogen: " + this.stringToHTML(22, 3) + "kA"
+                    + ", Selectief: " + this.checkboxToHTML(20);
+                break;
+        }
+        output += ", Kabeltype na teller: " + this.stringToHTML(9, 10)
+            + ", Kabeltype v&oacute;&oacute;r teller: " + this.stringToHTML(24, 10)
+            + ", Adres/tekst: " + this.stringToHTML(15, 5);
+        return (output);
+    };
+    Aansluiting.prototype.toSVG = function () {
+        var mySVG = new SVGelement();
+        // Indien er een kabeltype vóór de teller is schuiven we alles op
+        var extrashift = 0;
+        if (this.keys[24][2] != "")
+            extrashift += 50;
+        // get image of the entire stack, make sure it is shifted to the right sufficiently so-that the counter can be added below
+        mySVG = this.sourcelist.toSVG(this.id, "vertical", 150 + extrashift); //shift 150 to the right
+        // Lijntje met hoogte 20 plaatsen net boven differentieel of automaat
+        mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + mySVG.yup + '" y2="' + (mySVG.yup + 20) + '" stroke="black" />';
+        mySVG.yup += 20;
+        // Zekering, differentieel, of ander symbool onderaan plaatsen
+        var numlines = 1; // Hier houden we het aantal lijnen tekst bij 
+        switch (this.keys[7][2]) {
+            case "automatisch":
+                numlines = 1; // Hier houden we het aantal lijnen tekst bij
+                mySVG.yup += 30; // Hoeveel ruimte moeten we onderaan voorzien voor de zekering
+                // Basiscode voor het amperage        
+                mySVG.data += '<use xlink:href="#zekering_automatisch" x=\"' + mySVG.xleft + '" y="' + mySVG.yup + '" />'
+                    + "<text x=\"" + (mySVG.xleft + 15) + "\" y=\"" + (mySVG.yup - 10) + "\""
+                    + " transform=\"rotate(-90 " + (mySVG.xleft + 15) + "," + (mySVG.yup - 10) + ")"
+                    + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
+                    + htmlspecialchars(this.keys[4][2] + "P - " + this.keys[8][2] + "A") + "</text>";
+                // Code om de curve toe te voegen
+                if ((this.keys[17][2] == 'B') || (this.keys[17][2] == 'C') || (this.keys[17][2] == 'D')) {
+                    ++numlines;
+                    mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
+                        + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
+                        + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
+                        + htmlspecialchars("Curve " + this.keys[17][2]) + "</text>";
+                }
+                // Code om kortsluitvermogen toe te voegen
+                if ((this.keys[22][2] != '')) {
+                    ++numlines;
+                    mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
+                        + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
+                        + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
+                        + htmlspecialchars("" + this.keys[22][2]) + "kA</text>";
+                }
+                // Genoeg plaats voorzien aan de rechterkant en eindigen
+                mySVG.xright = Math.max(mySVG.xright, 20 + 11 * (numlines - 1));
+                break;
+            case "differentieel":
+                // Code als differentieel selectief is
+                if (this.keys[20][2]) {
+                    mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + mySVG.yup + '" y2="' + (mySVG.yup + 30) + '" stroke="black" />'
+                        + '<rect x="' + (mySVG.xleft + 7) + '" y="' + (mySVG.yup) + '" width="16" height="16" stroke="black" fill="white" />'
+                        + "<text x=\"" + (mySVG.xleft + 19) + "\" y=\"" + (mySVG.yup + 8) + "\"" + " transform=\"rotate(-90 " + (mySVG.xleft + 19) + "," + (mySVG.yup + 8) + ")"
+                        + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" + "S" + "</text>";
+                    mySVG.yup += 23;
+                }
+                numlines = 2; // Hier houden we het aantal lijnen tekst bij
+                mySVG.yup += 30; // Hoeveel ruimte moeten we onderaan voorzien voor de zekering
+                // Basiscode voor het amperage en de sluitstroom       
+                mySVG.data += '<use xlink:href="#zekering_automatisch" x=\"' + mySVG.xleft + '" y="' + mySVG.yup + '" />'
+                    + "<text x=\"" + (mySVG.xleft + 15) + "\" y=\"" + (mySVG.yup - 10) + "\""
+                    + " transform=\"rotate(-90 " + (mySVG.xleft + 15) + "," + (mySVG.yup - 10) + ")"
+                    + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
+                    + "\u0394" + htmlspecialchars(this.keys[11][2] + "mA") + "</text>"
+                    + "<text x=\"" + (mySVG.xleft + 26) + "\" y=\"" + (mySVG.yup - 10) + "\""
+                    + " transform=\"rotate(-90 " + (mySVG.xleft + 26) + "," + (mySVG.yup - 10) + ")"
+                    + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
+                    + htmlspecialchars(this.keys[4][2] + "P - " + this.keys[8][2] + "A") + "</text>";
+                // Code om het type toe te voegen
+                if ((this.keys[17][2] == 'A') || (this.keys[17][2] == 'B')) {
+                    ++numlines;
+                    mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
+                        + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
+                        + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
+                        + htmlspecialchars("Type " + this.keys[17][2]) + "</text>";
+                }
+                // Code om kortsluitvermogen toe te voegen
+                if ((this.keys[22][2] != '')) {
+                    ++numlines;
+                    mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
+                        + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
+                        + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
+                        + htmlspecialchars("" + this.keys[22][2]) + "kA</text>";
+                }
+                // genoeg plaats voorzien aan de rechterkant en eindigen
+                mySVG.xright = Math.max(mySVG.xright, 20 + 11 * (numlines - 1));
+                break;
+            case "differentieelautomaat":
+                // Code als differentieel selectief is
+                if (this.keys[20][2]) {
+                    mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + mySVG.yup + '" y2="' + (mySVG.yup + 30) + '" stroke="black" />'
+                        + '<rect x="' + (mySVG.xleft + 7) + '" y="' + (mySVG.yup) + '" width="16" height="16" stroke="black" fill="white" />'
+                        + "<text x=\"" + (mySVG.xleft + 19) + "\" y=\"" + (mySVG.yup + 8) + "\"" + " transform=\"rotate(-90 " + (mySVG.xleft + 19) + "," + (mySVG.yup + 8) + ")"
+                        + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" + "S" + "</text>";
+                    mySVG.yup += 23;
+                }
+                numlines = 2; // Hier houden we het aantal lijnen tekst bij
+                mySVG.yup += 30; // Hoeveel ruimte moeten we onderaan voorzien voor de zekering
+                // Basiscode voor het amperage        
+                mySVG.data += '<use xlink:href="#zekering_automatisch" x=\"' + mySVG.xleft + '" y="' + mySVG.yup + '" />'
+                    + "<text x=\"" + (mySVG.xleft + 15) + "\" y=\"" + (mySVG.yup - 10) + "\""
+                    + " transform=\"rotate(-90 " + (mySVG.xleft + 15) + "," + (mySVG.yup - 10) + ")"
+                    + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
+                    + "\u0394" + htmlspecialchars(this.keys[11][2] + "mA") + "</text>"
+                    + "<text x=\"" + (mySVG.xleft + 26) + "\" y=\"" + (mySVG.yup - 10) + "\""
+                    + " transform=\"rotate(-90 " + (mySVG.xleft + 26) + "," + (mySVG.yup - 10) + ")"
+                    + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
+                    + htmlspecialchars(this.keys[4][2] + "P - " + this.keys[8][2] + "A") + "</text>";
+                // Code om de curve toe te voegen
+                if ((this.keys[18][2] == 'B') || (this.keys[18][2] == 'C') || (this.keys[18][2] == 'D')) {
+                    ++numlines;
+                    mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
+                        + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
+                        + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
+                        + htmlspecialchars("Curve " + this.keys[18][2]) + "</text>";
+                }
+                // Code om het type toe te voegen
+                if ((this.keys[17][2] == 'A') || (this.keys[17][2] == 'B')) {
+                    ++numlines;
+                    mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
+                        + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
+                        + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
+                        + htmlspecialchars("Type " + this.keys[17][2]) + "</text>";
+                }
+                // Code om kortsluitvermogen toe te voegen
+                if ((this.keys[22][2] != '')) {
+                    ++numlines;
+                    mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
+                        + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
+                        + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
+                        + htmlspecialchars("" + this.keys[22][2]) + "kA</text>";
+                }
+                // genoeg plaats voorzien aan de rechterkant en eindigen
+                mySVG.xright = Math.max(mySVG.xright, 20 + 11 * (numlines - 1));
+                break;
+            case "schakelaar":
+                mySVG.yup += 30; // Hoeveel ruimte moeten we onderaan voorzien voor de zekering
+                mySVG.data += '<use xlink:href="#zekering_empty" x=\"' + mySVG.xleft + '" y="' + mySVG.yup + '" />'
+                    + "<text x=\"" + (mySVG.xleft + 15) + "\" y=\"" + (mySVG.yup - 10) + "\""
+                    + " transform=\"rotate(-90 " + (mySVG.xleft + 15) + "," + (mySVG.yup - 10) + ")"
+                    + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
+                    + htmlspecialchars(this.keys[4][2] + "P - " + this.keys[8][2] + "A") + "</text>";
+                break;
+            case "schemer":
+                mySVG.yup += 30; // Hoeveel ruimte moeten we onderaan voorzien voor de zekering
+                mySVG.data += '<use xlink:href="#zekering_empty" x=\"' + mySVG.xleft + '" y="' + mySVG.yup + '" />'
+                    + "<text x=\"" + (mySVG.xleft + 15) + "\" y=\"" + (mySVG.yup - 10) + "\""
+                    + " transform=\"rotate(-90 " + (mySVG.xleft + 15) + "," + (mySVG.yup - 10) + ")"
+                    + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
+                    + htmlspecialchars(this.keys[4][2] + "P - " + this.keys[8][2] + "A") + "</text>"
+                    + '<use xlink:href="#arrow" x=\"' + (mySVG.xleft - 18) + '" y="' + (mySVG.yup - 15) + '" />'
+                    + '<use xlink:href="#arrow" x=\"' + (mySVG.xleft - 18) + '" y="' + (mySVG.yup - 12) + '" />';
+                break;
+            case "smelt":
+                mySVG.yup += 30; // Hoeveel ruimte moeten we onderaan voorzien voor de zekering
+                mySVG.data += '<use xlink:href="#zekering_smelt" x=\"' + mySVG.xleft + '" y="' + mySVG.yup + '" />'
+                    + "<text x=\"" + (mySVG.xleft + 15) + "\" y=\"" + (mySVG.yup - 10) + "\""
+                    + " transform=\"rotate(-90 " + (mySVG.xleft + 15) + "," + (mySVG.yup - 10) + ")"
+                    + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
+                    + htmlspecialchars(this.keys[4][2] + "P - " + this.keys[8][2] + "A") + "</text>";
+                break;
+            case "geen":
+                mySVG.yup += 0;
+                break;
+        }
+        // Leiding helemaal links onderaan vóór de teller
+        mySVG.data += '<line x1="1" ' + 'y1="' + (mySVG.yup + 25) + '" x2="' + (21 + extrashift) + '" ' + 'y2="' + (mySVG.yup + 25) + '" stroke="black"></line>';
+        // Kabeltype en tekst links onderaan vóór de teller
+        if (this.keys[24][2] != "") {
+            mySVG.data += '<text x="55" y="' + (mySVG.yup + 40)
+                + '" style="text-anchor:end" font-family="Arial, Helvetica, sans-serif" font-size="10">'
+                + htmlspecialchars(this.keys[24][2]) + '</text>';
+        }
+        // De teller
+        mySVG.data += '<use xlink:href="#elektriciteitsmeter" x="' + (21 + extrashift) + '" y="' + (mySVG.yup + 25) + '"></use>';
+        // Leiding rechts onderaan na de teller
+        mySVG.data += '<line x1="' + (61 + extrashift) + '" ' + 'y1="' + (mySVG.yup + 25) + '" x2="' + (mySVG.xleft) + '" ' + 'y2="' + (mySVG.yup + 25) + '" stroke="black"></line>'
+            + '<line x1="' + (mySVG.xleft) + '" y1="' + (mySVG.yup) + '" x2="' + (mySVG.xleft) + '" ' + 'y2="' + (mySVG.yup + 25) + '" stroke="black"></line>';
+        // Kabeltype en tekst rechts onderaan na de teller
+        mySVG.data += '<text x="' + (85 + extrashift) + '" y="' + (mySVG.yup + 40)
+            + '" style="text-anchor:left" font-family="Arial, Helvetica, sans-serif" font-size="10">'
+            + htmlspecialchars(this.keys[9][2]) + '</text>';
+        // 25 extra pixels voorzien onderaan zodat de teller nooit in de tekening daaronder loopt
+        mySVG.yup += 25;
+        mySVG.ydown = 25;
+        // Indien adres niet leeg is, plaats het onderaan
+        if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
+            mySVG.data += '<text x="' + (41 + extrashift) + '" y="' + (mySVG.yup + mySVG.ydown + 10)
+                + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">'
+                + htmlspecialchars(this.keys[15][2]) + '</text>';
+            mySVG.ydown += 15;
+        }
+        // Naam onderaan zetten (links-onder)
+        mySVG.data += '<text x="' + (mySVG.xleft + (-6)) + '" ' + 'y="' + (mySVG.yup - 10) + '" '
+            + 'style="text-anchor:end" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="12"' + '>'
+            + htmlspecialchars(this.keys[23][2]) + '</text>';
+        // rework xleft and xright to ensure the entire structure is always at the right of a potential parent kring
+        mySVG.xright = mySVG.xright + mySVG.xleft - 1;
+        mySVG.xleft = 1;
+        return (mySVG);
+    };
+    return Aansluiting;
+}(Electro_Item));
 var Aansluitpunt = /** @class */ (function (_super) {
     __extends(Aansluitpunt, _super);
     function Aansluitpunt(mylist) {
@@ -2174,8 +2429,8 @@ var Kring = /** @class */ (function (_super) {
                 output += ", \u0394 " + this.stringToHTML(11, 3) + "mA"
                     + ", Curve:" + this.selectToHTML(18, ["", "B", "C", "D"])
                     + ", Type:" + this.selectToHTML(17, ["", "A", "B"])
-                    + ", Kortsluitvermogen: " + this.stringToHTML(22, 3) + "kA";
-                +", Selectief: " + this.checkboxToHTML(20);
+                    + ", Kortsluitvermogen: " + this.stringToHTML(22, 3) + "kA"
+                    + ", Selectief: " + this.checkboxToHTML(20);
                 break;
         }
         // Eigenschappen van de kabel
@@ -3815,6 +4070,9 @@ var Hierarchical_List = /** @class */ (function () {
         //Create the object
         var tempval;
         switch (electroType) {
+            case 'Aansluiting':
+                tempval = new Aansluiting(structure);
+                break;
             case 'Aansluitpunt':
             case 'Leeg':
                 tempval = new Aansluitpunt(structure);
@@ -4219,38 +4477,14 @@ var Hierarchical_List = /** @class */ (function () {
     };
     //-----------------------------------------------------
     Hierarchical_List.prototype.toSVG = function (myParent, stack, minxleft, includeparent) {
-        //--- First read all underlying elements in an Array called inSVG ---
         if (minxleft === void 0) { minxleft = 0; }
         if (includeparent === void 0) { includeparent = false; }
+        // Eerst creëren we een array van SVGelements met alle kinderen van myParent en eventueel myParent zelf
         var inSVG = new Array(); //Results from nested calls will be added here
         var elementCounter = 0;
-        var lastChildOrdinal = 0;
-        if ((myParent != 0) && ((this.data[this.getOrdinalById(myParent)]).getKey("type") == "Meerdere verbruikers")) {
-            for (var i = 0; i < this.length; i++) {
-                //empty tekst at the end does not count as a valid last child of meerdere verbruikers (zo vermijden we een streepje op het einde van het stopcontact)
-                if (this.active[i] && (this.data[i].keys[16][2] != "zonder kader") && (this.data[i].parent == myParent))
-                    lastChildOrdinal = i;
-            }
-        }
-        else if ((myParent != 0) && ((this.data[this.getOrdinalById(myParent)]).getKey("type") == "Kring")) {
-            for (var i = 0; i < this.length; i++) {
-                //Hier is vrije tekst wel effectieve verbruiker
-                if (this.active[i] && (this.data[i].parent == myParent))
-                    lastChildOrdinal = i;
-            }
-        }
-        else { //if not a child of meerdere verbruikers, we also allow the parent to be the lastChild
-            for (var i = 0; i < this.length; i++) {
-                //empty tekst at the end does not count as a valid last child of meerdere verbruikers (zo vermijden we een streepje op het einde van het stopcontact)
-                if (this.active[i] && (this.data[i].keys[16][2] != "zonder kader") && (this.data[i].parent == myParent))
-                    lastChildOrdinal = i;
-                if (this.active[i] && (this.data[i].keys[16][2] != "zonder kader") && (includeparent == true) && (this.id[i] == myParent))
-                    lastChildOrdinal = i;
-            }
-        }
         for (var i = 0; i < this.length; i++) {
             if (this.active[i] && ((this.data[i].parent == myParent) || ((includeparent == true) && (this.id[i] == myParent)))) {
-                switch (this.data[i].getKey("type")) {
+                switch (this.data[i].keys[0][2]) {
                     case "":
                         inSVG[elementCounter] = new SVGelement();
                         break;
@@ -4279,394 +4513,33 @@ var Hierarchical_List = /** @class */ (function () {
                         inSVG[elementCounter] = this.data[i].toSVG(); //Maak de tekening
                         break;
                     case "Aansluiting":
-                        var extrashift = 0;
-                        if (this.data[i].keys[24][2] != "") {
-                            extrashift += 50;
-                        }
-                        //get image of the entire stack, make sure it is shifted to the right sufficiently so-that the counter can be added below
-                        inSVG[elementCounter] = this.toSVG(this.id[i], "vertical", 150 + extrashift); //shift 100 to the right
-                        //add the fuse below
-                        inSVG[elementCounter].data += '<line x1="' + inSVG[elementCounter].xleft +
-                            '" x2="' + inSVG[elementCounter].xleft +
-                            '" y1="' + inSVG[elementCounter].yup +
-                            '" y2="' + (inSVG[elementCounter].yup + 20) + '" stroke="black" />';
-                        inSVG[elementCounter].yup += 20;
-                        switch (this.data[i].getKey("zekering")) {
-                            case "automatisch":
-                                //Basiscode voor het amperage
-                                var numlines = 1;
-                                inSVG[elementCounter].yup += 30;
-                                inSVG[elementCounter].data +=
-                                    '<use xlink:href="#zekering_automatisch" x=\"' + inSVG[elementCounter].xleft +
-                                        '" y="' + inSVG[elementCounter].yup + '" />';
-                                inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 15) +
-                                    "\" y=\"" + (inSVG[elementCounter].yup - 10) +
-                                    "\"" +
-                                    " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 15) +
-                                    "," + (inSVG[elementCounter].yup - 10) +
-                                    ")" +
-                                    "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                    htmlspecialchars(this.data[i].getKey("aantal") + "P - " + this.data[i].getKey("amperage") + "A") + "</text>";
-                                //Code om de curve toe te voegen
-                                if ((this.data[i].keys[17][2] == 'B') || (this.data[i].keys[17][2] == 'C') || (this.data[i].keys[17][2] == 'D')) {
-                                    numlines = numlines + 1;
-                                    inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
-                                        "\" y=\"" + (inSVG[elementCounter].yup - 10) +
-                                        "\"" +
-                                        " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
-                                        "," + (inSVG[elementCounter].yup - 10) +
-                                        ")" +
-                                        "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                        htmlspecialchars("Curve " + this.data[i].keys[17][2]) + "</text>";
-                                }
-                                //Code om kortsluitvermogen toe te voegen
-                                if ((this.data[i].keys[22][2] != '')) {
-                                    numlines = numlines + 1;
-                                    inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
-                                        "\" y=\"" + (inSVG[elementCounter].yup - 10) +
-                                        "\"" +
-                                        " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
-                                        "," + (inSVG[elementCounter].yup - 10) +
-                                        ")" +
-                                        "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                        htmlspecialchars("" + this.data[i].keys[22][2]) + "kA</text>";
-                                }
-                                //genoeg plaats voorzien aan de rechterkant en eindigen
-                                inSVG[elementCounter].xright = Math.max(inSVG[elementCounter].xright, 20 + 11 * (numlines - 1));
-                                break;
-                            case "differentieel":
-                                //Code als differentieel selectief is
-                                if (this.data[i].keys[20][2]) {
-                                    inSVG[elementCounter].data += '<line x1="' + inSVG[elementCounter].xleft +
-                                        '" x2="' + inSVG[elementCounter].xleft +
-                                        '" y1="' + inSVG[elementCounter].yup +
-                                        '" y2="' + (inSVG[elementCounter].yup + 30) + '" stroke="black" />';
-                                    inSVG[elementCounter].data += '<rect x="' + (inSVG[elementCounter].xleft + 7) +
-                                        '" y="' + (inSVG[elementCounter].yup) +
-                                        '" width="16" height="16" stroke="black" fill="white" />';
-                                    inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 19) +
-                                        "\" y=\"" + (inSVG[elementCounter].yup + 8) +
-                                        "\"" +
-                                        " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 19) +
-                                        "," + (inSVG[elementCounter].yup + 8) +
-                                        ")" +
-                                        "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                        "S" + "</text>";
-                                    inSVG[elementCounter].yup += 23;
-                                }
-                                //Basiscode voor het amperage en de sluitstroom
-                                var numlines = 2;
-                                inSVG[elementCounter].yup += 30;
-                                inSVG[elementCounter].data +=
-                                    '<use xlink:href="#zekering_automatisch" x=\"' + inSVG[elementCounter].xleft +
-                                        '" y="' + inSVG[elementCounter].yup + '" />';
-                                inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 15) +
-                                    "\" y=\"" + (inSVG[elementCounter].yup - 10) +
-                                    "\"" +
-                                    " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 15) +
-                                    "," + (inSVG[elementCounter].yup - 10) +
-                                    ")" +
-                                    "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                    "\u0394" + htmlspecialchars(this.data[i].getKey("differentieel_waarde") + "mA") + "</text>";
-                                inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 26) +
-                                    "\" y=\"" + (inSVG[elementCounter].yup - 10) +
-                                    "\"" +
-                                    " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 26) +
-                                    "," + (inSVG[elementCounter].yup - 10) +
-                                    ")" +
-                                    "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                    htmlspecialchars(this.data[i].getKey("aantal") + "P - " + this.data[i].getKey("amperage") + "A") + "</text>";
-                                //Code om het type toe te voegen
-                                if ((this.data[i].keys[17][2] == 'A') || (this.data[i].keys[17][2] == 'B')) {
-                                    numlines = numlines + 1;
-                                    inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
-                                        "\" y=\"" + (inSVG[elementCounter].yup - 10) +
-                                        "\"" +
-                                        " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
-                                        "," + (inSVG[elementCounter].yup - 10) +
-                                        ")" +
-                                        "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                        htmlspecialchars("Type " + this.data[i].keys[17][2]) + "</text>";
-                                }
-                                //Code om kortsluitvermogen toe te voegen
-                                if ((this.data[i].keys[22][2] != '')) {
-                                    numlines = numlines + 1;
-                                    inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
-                                        "\" y=\"" + (inSVG[elementCounter].yup - 10) +
-                                        "\"" +
-                                        " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
-                                        "," + (inSVG[elementCounter].yup - 10) +
-                                        ")" +
-                                        "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                        htmlspecialchars("" + this.data[i].keys[22][2]) + "kA</text>";
-                                }
-                                //genoeg plaats voorzien aan de rechterkant en eindigen
-                                inSVG[elementCounter].xright = Math.max(inSVG[elementCounter].xright, 20 + 11 * (numlines - 1));
-                                break;
-                            case "differentieelautomaat":
-                                //Code als differentieel selectief is
-                                if (this.data[i].keys[20][2]) {
-                                    inSVG[elementCounter].data += '<line x1="' + inSVG[elementCounter].xleft +
-                                        '" x2="' + inSVG[elementCounter].xleft +
-                                        '" y1="' + inSVG[elementCounter].yup +
-                                        '" y2="' + (inSVG[elementCounter].yup + 30) + '" stroke="black" />';
-                                    inSVG[elementCounter].data += '<rect x="' + (inSVG[elementCounter].xleft + 7) +
-                                        '" y="' + (inSVG[elementCounter].yup) +
-                                        '" width="16" height="16" stroke="black" fill="white" />';
-                                    inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 19) +
-                                        "\" y=\"" + (inSVG[elementCounter].yup + 8) +
-                                        "\"" +
-                                        " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 19) +
-                                        "," + (inSVG[elementCounter].yup + 8) +
-                                        ")" +
-                                        "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                        "S" + "</text>";
-                                    inSVG[elementCounter].yup += 23;
-                                }
-                                //Basiscode voor het amperage en de sluitstroom
-                                var numlines = 2;
-                                inSVG[elementCounter].yup += 30;
-                                inSVG[elementCounter].data +=
-                                    '<use xlink:href="#zekering_automatisch" x=\"' + inSVG[elementCounter].xleft +
-                                        '" y="' + inSVG[elementCounter].yup + '" />';
-                                inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 15) +
-                                    "\" y=\"" + (inSVG[elementCounter].yup - 10) +
-                                    "\"" +
-                                    " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 15) +
-                                    "," + (inSVG[elementCounter].yup - 10) +
-                                    ")" +
-                                    "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                    "\u0394" + htmlspecialchars(this.data[i].getKey("differentieel_waarde") + "mA") + "</text>";
-                                inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 26) +
-                                    "\" y=\"" + (inSVG[elementCounter].yup - 10) +
-                                    "\"" +
-                                    " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 26) +
-                                    "," + (inSVG[elementCounter].yup - 10) +
-                                    ")" +
-                                    "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                    htmlspecialchars(this.data[i].getKey("aantal") + "P - " + this.data[i].getKey("amperage") + "A") + "</text>";
-                                //Code om de curve toe te voegen
-                                if ((this.data[i].keys[18][2] == 'B') || (this.data[i].keys[18][2] == 'C') || (this.data[i].keys[18][2] == 'D')) {
-                                    numlines = numlines + 1;
-                                    inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
-                                        "\" y=\"" + (inSVG[elementCounter].yup - 10) +
-                                        "\"" +
-                                        " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
-                                        "," + (inSVG[elementCounter].yup - 10) +
-                                        ")" +
-                                        "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                        htmlspecialchars("Curve " + this.data[i].keys[18][2]) + "</text>";
-                                }
-                                //Code om het type toe te voegen
-                                if ((this.data[i].keys[17][2] == 'A') || (this.data[i].keys[17][2] == 'B')) {
-                                    numlines = numlines + 1;
-                                    inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
-                                        "\" y=\"" + (inSVG[elementCounter].yup - 10) +
-                                        "\"" +
-                                        " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
-                                        "," + (inSVG[elementCounter].yup - 10) +
-                                        ")" +
-                                        "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                        htmlspecialchars("Type " + this.data[i].keys[17][2]) + "</text>";
-                                }
-                                //Code om kortsluitvermogen toe te voegen
-                                if ((this.data[i].keys[22][2] != '')) {
-                                    numlines = numlines + 1;
-                                    inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
-                                        "\" y=\"" + (inSVG[elementCounter].yup - 10) +
-                                        "\"" +
-                                        " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 15 + 11 * (numlines - 1)) +
-                                        "," + (inSVG[elementCounter].yup - 10) +
-                                        ")" +
-                                        "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                        htmlspecialchars("" + this.data[i].keys[22][2]) + "kA</text>";
-                                }
-                                //genoeg plaats voorzien aan de rechterkant en eindigen
-                                inSVG[elementCounter].xright = Math.max(inSVG[elementCounter].xright, 20 + 11 * (numlines - 1));
-                                break;
-                            case "schakelaar":
-                                inSVG[elementCounter].yup += 30;
-                                inSVG[elementCounter].data +=
-                                    '<use xlink:href="#zekering_empty" x=\"' + inSVG[elementCounter].xleft +
-                                        '" y="' + inSVG[elementCounter].yup + '" />';
-                                inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 15) +
-                                    "\" y=\"" + (inSVG[elementCounter].yup - 10) +
-                                    "\"" +
-                                    " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 15) +
-                                    "," + (inSVG[elementCounter].yup - 10) +
-                                    ")" +
-                                    "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                    htmlspecialchars(this.data[i].getKey("aantal") + "P - " + this.data[i].getKey("amperage") + "A") + "</text>";
-                                break;
-                            case "schemer":
-                                inSVG[elementCounter].yup += 30;
-                                inSVG[elementCounter].data +=
-                                    '<use xlink:href="#zekering_empty" x=\"' + inSVG[elementCounter].xleft +
-                                        '" y="' + inSVG[elementCounter].yup + '" />';
-                                inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 15) +
-                                    "\" y=\"" + (inSVG[elementCounter].yup - 10) +
-                                    "\"" +
-                                    " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 15) +
-                                    "," + (inSVG[elementCounter].yup - 10) +
-                                    ")" +
-                                    "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                    htmlspecialchars(this.data[i].getKey("aantal") + "P - " + this.data[i].getKey("amperage") + "A") + "</text>";
-                                inSVG[elementCounter].data +=
-                                    '<use xlink:href="#arrow" x=\"' + (inSVG[elementCounter].xleft - 18) +
-                                        '" y="' + (inSVG[elementCounter].yup - 15) + '" />';
-                                inSVG[elementCounter].data +=
-                                    '<use xlink:href="#arrow" x=\"' + (inSVG[elementCounter].xleft - 18) +
-                                        '" y="' + (inSVG[elementCounter].yup - 12) + '" />';
-                                break;
-                            case "smelt":
-                                inSVG[elementCounter].yup += 30;
-                                inSVG[elementCounter].data +=
-                                    '<use xlink:href="#zekering_smelt" x=\"' + inSVG[elementCounter].xleft +
-                                        '" y="' + inSVG[elementCounter].yup + '" />';
-                                inSVG[elementCounter].data += "<text x=\"" + (inSVG[elementCounter].xleft + 15) +
-                                    "\" y=\"" + (inSVG[elementCounter].yup - 10) +
-                                    "\"" +
-                                    " transform=\"rotate(-90 " + (inSVG[elementCounter].xleft + 15) +
-                                    "," + (inSVG[elementCounter].yup - 10) +
-                                    ")" +
-                                    "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" +
-                                    htmlspecialchars(this.data[i].getKey("aantal") + "P - " + this.data[i].getKey("amperage") + "A") + "</text>";
-                                break;
-                            case "geen":
-                                inSVG[elementCounter].yup += 0;
-                                break;
-                        }
-                        //draw the counter
-                        inSVG[elementCounter].data += '<line x1="1" ' +
-                            'y1="' + (inSVG[elementCounter].yup + 25) +
-                            '" x2="' + (21 + extrashift) + '" ' +
-                            'y2="' + (inSVG[elementCounter].yup + 25) + '" stroke="black"></line>';
-                        //draw outgoing connecting lines
-                        inSVG[elementCounter].data += '<line x1="' + (61 + extrashift) + '" ' +
-                            'y1="' + (inSVG[elementCounter].yup + 25) +
-                            '" x2="' + (inSVG[elementCounter].xleft) + '" ' +
-                            'y2="' + (inSVG[elementCounter].yup + 25) + '" stroke="black"></line>';
-                        inSVG[elementCounter].data += '<line x1="' + (inSVG[elementCounter].xleft) +
-                            '" y1="' + (inSVG[elementCounter].yup) +
-                            '" x2="' + (inSVG[elementCounter].xleft) + '" ' +
-                            'y2="' + (inSVG[elementCounter].yup + 25) + '" stroke="black"></line>';
-                        //Draw the counter
-                        inSVG[elementCounter].data += '<use xlink:href="#elektriciteitsmeter" x="' + (21 + extrashift) + '" y="' + (inSVG[elementCounter].yup + 25) + '"></use>';
-                        //set kabel type Text
-                        inSVG[elementCounter].data += '<text x="' + (85 + extrashift) + '" y="' + (inSVG[elementCounter].yup + 40) +
-                            '" style="text-anchor:left" font-family="Arial, Helvetica, sans-serif" font-size="10">' +
-                            htmlspecialchars(this.data[i].getKey("kabel")) + '</text>';
-                        if (this.data[i].keys[24][2] != "") {
-                            inSVG[elementCounter].data += '<text x="55" y="' + (inSVG[elementCounter].yup + 40) +
-                                '" style="text-anchor:end" font-family="Arial, Helvetica, sans-serif" font-size="10">' +
-                                htmlspecialchars(this.data[i].keys[24][2]) + '</text>';
-                        }
-                        //inSVG[elementCounter].xleft = Math.max(inSVG[elementCounter].xleft,60);
-                        //inSVG[elementCounter].xright = Math.max(inSVG[elementCounter].xright,10);
-                        //Foresee sufficient room below for the counter
-                        inSVG[elementCounter].yup += 25;
-                        inSVG[elementCounter].ydown = 25;
-                        //If adres is not empty, put it below
-                        if (!(/^\s*$/.test(this.data[i].keys[15][2]))) { //check if adres contains only white space
-                            inSVG[elementCounter].data += '<text x="' + (41 + extrashift) + '" y="' + (inSVG[elementCounter].yup + inSVG[elementCounter].ydown + 10) + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.data[i].keys[15][2]) + '</text>';
-                            inSVG[elementCounter].ydown += 15;
-                        }
-                        //--Naam onderaan zetten (links-onder)--
-                        inSVG[elementCounter].data +=
-                            '<text x="' + (inSVG[elementCounter].xleft + (-6)) + '" '
-                                + 'y="' + (inSVG[elementCounter].yup - 10) + '" '
-                                //+ 'transform="rotate(-90 ' + (inSVG[elementCounter].xleft-6) + ',' + (inSVG[elementCounter].yup+3) + ')" '
-                                + 'style="text-anchor:end" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="12"'
-                                + '>'
-                                + htmlspecialchars(this.data[i].keys[23][2])
-                                + '</text>';
-                        //rework xleft and xright to ensure the entire structure is always at the right of a potential parent kring
-                        var width = inSVG[elementCounter].xleft + inSVG[elementCounter].xright;
-                        inSVG[elementCounter].xleft = 1;
-                        inSVG[elementCounter].xright = width - 1;
-                        //If direct child of a Kring, put a vertical pipe and "nr" at the left
-                        if (myParent != 0) {
-                            if ((this.data[this.getOrdinalById(myParent)]).getKey("type") == "Kring") {
-                                var y1, y2;
-                                if (i !== lastChildOrdinal) {
-                                    y1 = 0;
-                                    y2 = inSVG[elementCounter].yup + inSVG[elementCounter].ydown;
-                                }
-                                else {
-                                    y1 = inSVG[elementCounter].yup;
-                                    y2 = inSVG[elementCounter].yup + inSVG[elementCounter].ydown;
-                                }
-                                inSVG[elementCounter].data = inSVG[elementCounter].data +
-                                    '<line x1="' + inSVG[elementCounter].xleft +
-                                    '" x2="' + inSVG[elementCounter].xleft +
-                                    '" y1="' + y1 + '" y2="' + y2 + '" stroke="black" />';
-                                inSVG[elementCounter].data +=
-                                    '<text x="' + (inSVG[elementCounter].xleft + 9) + '" y="' + (inSVG[elementCounter].yup - 5) + '" ' +
-                                        'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' +
-                                        htmlspecialchars(this.data[i].getKey("naam")) + '</text>';
-                            }
-                            ;
-                        }
-                        ;
+                        inSVG[elementCounter] = this.data[i].toSVG(); //Maak de tekening
+                        this.tekenVerticaleLijnIndienKindVanKring(this.data[i], inSVG[elementCounter]);
                         break;
                     default:
-                        var x = this.data[this.getOrdinalById(myParent)].getKey("type");
-                        //get image of all lowest level elements
-                        if ((this.data[this.getOrdinalById(myParent)]).getKey("type") == "Meerdere verbruikers") {
+                        if ((this.data[this.getOrdinalById(myParent)]).keys[0][2] == "Meerdere verbruikers")
                             inSVG[elementCounter] = this.data[i].toSVG();
-                        }
-                        else if (stack == "vertical") {
+                        else if (stack == "vertical")
                             inSVG[elementCounter] = this.toSVG(this.id[i], "horizontal", 0, true); //if we are still in vertical mode, switch to horizontal and take childs with us
-                        }
                         else { //we are in horizontal mode and can start drawing
-                            //First get the image itself
-                            //if ((this.data[this.getOrdinalById(myParent)]).getKey("type") == "Meerdere verbruikers") {
-                            //the following function takes true as an argument if there is still an element following in a horizontal chain.
-                            //This is the case if the element is not last and/or not followed by empty tekst without border
-                            if (this.id[i] == myParent) {
+                            if (this.id[i] == myParent) { // Element is de parent en tekent zichzelf
                                 inSVG[elementCounter] = this.data[i].toSVG();
                             }
-                            else {
+                            else { // Element is niet de parent, we tekenen het element en al zijn kinderen
                                 inSVG[elementCounter] = this.toSVG(this.id[i], "horizontal", 0, true); //if we are still in vertical mode, switch to horizontal and take childs with us
                             }
-                            //} else {
-                            //  inSVG[elementCounter] = this.data[i].toSVG(false);
-                            //}
                         }
-                        //If direct child of a Kring, put a vertical pipe and "nr" at the left
-                        if ((this.data[this.getOrdinalById(myParent)]).getKey("type") == "Kring") {
-                            var y1, y2;
-                            if (i !== lastChildOrdinal) {
-                                y1 = 0;
-                                y2 = inSVG[elementCounter].yup + inSVG[elementCounter].ydown;
-                            }
-                            else {
-                                y1 = inSVG[elementCounter].yup;
-                                y2 = inSVG[elementCounter].yup + inSVG[elementCounter].ydown;
-                            }
-                            inSVG[elementCounter].data = inSVG[elementCounter].data +
-                                '<line x1="' + inSVG[elementCounter].xleft +
-                                '" x2="' + inSVG[elementCounter].xleft +
-                                '" y1="' + y1 + '" y2="' + y2 + '" stroke="black" />';
-                            inSVG[elementCounter].data +=
-                                '<text x="' + (inSVG[elementCounter].xleft + 9) + '" y="' + (inSVG[elementCounter].yup - 5) + '" ' +
-                                    'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' +
-                                    htmlspecialchars(this.data[i].getKey("naam")) + '</text>';
-                            //--See if we can add childs to the left --
-                            //elementCounter++
-                            //inSVG[elementCounter] = this.toSVG(this.id[i],"horizontal");
-                        }
-                        ;
+                        this.tekenVerticaleLijnIndienKindVanKring(this.data[i], inSVG[elementCounter]);
+                        break;
                 }
                 elementCounter++;
-                //outSVG.xleft = Math.max(outSVG.xleft,inSVG[elementCounter].xleft);
             }
         }
-        //--- If there are no elements, make at least an empty one to avoid problems here below ---
+        // If there are no elements, make at least an empty one to avoid problems here below ---
         if (elementCounter == 0) {
             inSVG[0] = new SVGelement();
         }
-        //--- Now create the output element ---
+        // Now create the output element ---
         var outSVG = new SVGelement;
         outSVG.xleft = 0;
         outSVG.xright = 0;
@@ -4679,14 +4552,14 @@ var Hierarchical_List = /** @class */ (function () {
             case "horizontal":
                 var max_yup = 0; //What is the maximal distance above the horizontal line?
                 var max_ydown = 0; //What is the maximal distance below the horizontal line?
-                //analyse the size of the structure. Build horizontally
-                for (var i = 0; i < elementCounter; i++) {
-                    width = width + inSVG[i].xleft + inSVG[i].xright;
-                    max_yup = Math.max(max_yup, inSVG[i].yup);
-                    max_ydown = Math.max(max_ydown, inSVG[i].ydown);
+                // analyse the size of the structure. Build horizontally
+                for (var i_1 = 0; i_1 < elementCounter; i_1++) {
+                    width = width + inSVG[i_1].xleft + inSVG[i_1].xright;
+                    max_yup = Math.max(max_yup, inSVG[i_1].yup);
+                    max_ydown = Math.max(max_ydown, inSVG[i_1].ydown);
                 }
                 height = max_yup + max_ydown;
-                //decide on the output structure
+                // decide on the output structure
                 if (elementCounter > 0) {
                     outSVG.xleft = inSVG[0].xleft; //Leave space of the first element at the left
                     outSVG.xright = width - outSVG.xleft;
@@ -4700,7 +4573,7 @@ var Hierarchical_List = /** @class */ (function () {
                 ;
                 outSVG.yup = max_yup;
                 outSVG.ydown = max_ydown;
-                //--Create the output data--
+                // Create the output data
                 var xpos = 0;
                 for (var i = 0; i < elementCounter; i++) {
                     outSVG.data += '<svg x="' + xpos + '" y="' + (max_yup - inSVG[i].yup) + '">';
@@ -4712,20 +4585,20 @@ var Hierarchical_List = /** @class */ (function () {
             case "vertical":
                 var max_xleft = 0; //What is the maximal distance left of the vertical line?
                 var max_xright = 0; //What is the maximal distance right of the vertical line?
-                //analyse the size of the structure. Build vertically
-                for (var i = 0; i < elementCounter; i++) {
-                    height = height + inSVG[i].yup + inSVG[i].ydown;
-                    max_xleft = Math.max(max_xleft, inSVG[i].xleft);
-                    max_xright = Math.max(max_xright, inSVG[i].xright);
+                // analyse the size of the structure. Build vertically
+                for (var i_2 = 0; i_2 < elementCounter; i_2++) {
+                    height = height + inSVG[i_2].yup + inSVG[i_2].ydown;
+                    max_xleft = Math.max(max_xleft, inSVG[i_2].xleft);
+                    max_xright = Math.max(max_xright, inSVG[i_2].xright);
                 }
                 max_xleft = Math.max(minxleft, max_xleft);
                 width = max_xleft + max_xright;
-                //decide on the output structure
+                // decide on the output structure
                 outSVG.yup = height; //As a general rule, there is no ydown, but to be confirmed
                 outSVG.ydown = 0;
                 outSVG.xleft = Math.max(max_xleft, 35); // foresee at least 35 for text at the left
                 outSVG.xright = Math.max(max_xright, 25); // foresee at least 25 at the right
-                //create the output data
+                // create the output data
                 var ypos = 0;
                 for (var i = elementCounter - 1; i >= 0; i--) {
                     outSVG.data += '<svg x="' + (outSVG.xleft - inSVG[i].xleft) + '" y="' + ypos + '">';
@@ -5460,13 +5333,14 @@ function import_to_structure(mystring, redraw) {
     if (version < 2) {
         for (var i = 0; i < mystructure.length; i++) {
             // Breedte van Vrije tekst velden zonder kader met 30 verhogen sinds 16/12/2023
-            if ((structure.data[i].keys[0][2] === "Vrije tekst") && (structure.data[i].keys[16][2] != "verbruiker"))
+            if ((structure.data[i].keys[0][2] === "Vrije tekst") && (structure.data[i].keys[16][2] != "verbruiker")) {
                 if (Number(structure.data[i].keys[22][2]) > 0)
                     structure.data[i].keys[22][2] = String(Number(structure.data[i].keys[22][2]) + 30);
                 else
                     structure.data[i].keys[18][2] = "automatisch";
-            if (structure.data[i].keys[16][2] != "zonder kader")
-                structure.data[i].keys[16][2] = "verbruiker";
+                if (structure.data[i].keys[16][2] != "zonder kader")
+                    structure.data[i].keys[16][2] = "verbruiker";
+            }
         }
     }
     //As we re-read the structure and it might be shorter then it once was (due to deletions) but we might still have the old high ID's, always take over the curid from the file
