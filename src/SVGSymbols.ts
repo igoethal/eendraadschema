@@ -204,8 +204,8 @@ static outputSVGSymbols() {
       <line x1="20" y1="-15" x2="20" y2="15"  stroke="black" stroke-width="2" />
     </g>
     <g id="stopcontact_kinderveilig">
-      <line x1="35" y1="-20" x2="35" y2="-15"  stroke="black" stroke-width="2" />
-      <line x1="35" y1="20" x2="35" y2="15"  stroke="black" stroke-width="2" />
+      <line x1="35" y1="-20" x2="35" y2="-14.1"  stroke="black" stroke-width="2" />
+      <line x1="35" y1="20" x2="35" y2="14.1"  stroke="black" stroke-width="2" />
     </g>
     <g id="bel">
       <path d="M20 0 A15 15 0 0 1 0 15" stroke="black" fill="none" stroke-width="2" />
