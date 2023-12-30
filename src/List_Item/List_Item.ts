@@ -19,7 +19,7 @@ class List_Item {
     resetKeys() {
     }
 
-    getMaxNumChilds(Parent?: List_Item) : number {
+    getMaxNumChilds() : number {
       return(2^24);
     }
 
@@ -152,7 +152,7 @@ class List_Item {
       return(output);
     }
 
-    toHTML(mode: string, Parent?: List_Item) {
+    toHTML(mode: string) {
       return("toHTML() function not defined for base class List_Item. Extend class first.");
     }
 

@@ -76,49 +76,12 @@ class Electro_Item extends List_Item {
     this.updateConsumers();
   }
 
-  //-- When called, this one ensures we cannot have a child that doesn't align with its parent --
+  getParent(): Electro_Item { // Function that returns an Electro_Item and not a List_Item
+    return(super.getParent() as Electro_Item);
+  }
 
-  getConsumers() {
-    var Parent = this.getParent();
-
-    var consumers = [];
-    if (Parent == null) {
-      consumers = ["", "Kring", "Aansluiting"];
-    } else {
-      switch (Parent.keys[0][2]) {
-        case "Bord": {
-          consumers = ["", "Kring", "Vrije ruimte"];
-          break;
-        }
-        case "Splitsing":
-        case "Domotica": {
-          consumers = ["", "Kring"];
-          break;
-        }
-        case "Kring": {
-          consumers = ["", "Aansluiting", "Bord", "Domotica", "Domotica gestuurde verbruiker", "Kring", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
-          break;
-        }
-        case "Meerdere verbruikers": {
-          consumers = ["", "Domotica", "Domotica gestuurde verbruiker", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
-          break;
-        }
-        case "Domotica gestuurde verbruiker": {
-          consumers = ["", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
-          break;
-        }
-        case "Aansluiting": {
-          consumers = ["", "Bord", "Kring", "Splitsing"];
-          break;
-        }
-        default: {
-          consumers = ["", "Aansluiting", "Domotica", "Domotica gestuurde verbruiker", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
-          break;
-        }
-      }
-    }
-
-    return consumers;
+  allowedChilds() : Array<string> { // returns an array with the type-names of allowed childs
+    return ["", "Aansluiting", "Domotica", "Domotica gestuurde verbruiker", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
   }
 
   //-- Make the current item a copy of source_item --
@@ -179,151 +142,72 @@ class Electro_Item extends List_Item {
     }
   }
 
-  //-- Returns true if the Electro_Item can have childs in case it is or
-  //   will become a child of Parent --
+  // -- Returns the maximum number of childs the Electro_Item can have --
 
-  checkInsertChild(Parent?: List_Item) { //Checks if the insert after button should be displayed or not
-    var allow = false;
-    switch (this.keys[0][2]) {
-      case "Aansluiting":
-      case "Bord":
-      case "Kring":
-      case "Domotica":
-      case "Domotica gestuurde verbruiker":
-      case "Splitsing":
-        allow = true;
-        break;
-      case "Bel":
-      case "Lichtcircuit":
-        allow = false;
-        break;
-      default:
-        if (typeof Parent == 'undefined') {
-          allow = true;
-        } else {
-          switch(Parent.keys[0][2]) {
-            case "Aansluiting":
-            case "Bord":
-            case "Domotica":
-            case "Splitsing":
-            case "Meerdere verbruikers":
-              allow = false;
-              break;
-            default:
-              allow = true;
-              break;
-          }
-        }
-    }
-    return(allow);
+  getMaxNumChilds(): number {
+    let parent: Electro_Item = this.getParent();
+    if (parent == null) return 256; //This should never happen, all allowed childs of null have their own implementations of getMaxNumChilds() and will never call this.
+    switch (parent.keys[0][2]) {
+      case "Meerdere verbruikers": return 0;  break;  // Childs of "Meerdere verbruikers" cannot have childs
+      default:                     return 1;  break;  // By default, most element can have 1 child unless overwritten by derived classes
+    } 
   }
 
-  //-- returns the maximum number of childs the current Electro_Item can have in case
-  //   it is or will become a child of Parent --
+  //-- Returns true if the Electro_Item can take an extra childs --
 
-  getMaxNumChilds(Parent?: List_Item) {
-    var maxchilds = 0;
-    switch (this.keys[0][2]) {
-      case "Aansluiting":
-      case "Bord":
-      case "Kring":
-      case "Domotica":
-      case "Splitsing":
-      case "Meerdere verbruikers":
-        maxchilds = 256;
-        break;  
-
-      case "Domotica gestuurde verbruiker":
-        maxchilds = 1;
-        break;  
-      
-      case "Bel": 
-      case "Lichtcircuit":
-      case "Vrije ruimte":
-        maxchilds = 0;
-        break;
-
-      default:
-        if (typeof Parent == 'undefined') {
-          maxchilds = 256;
-        } else {
-          switch(Parent.keys[0][2]) {
-            case "Aansluiting":
-            case "Bord":
-            case "Domotica":
-            case "Splitsing":
-            case "Meerdere verbruikers":
-              maxchilds = 0;
-              break;
-            default:
-              maxchilds = 1;
-              break;
-          }
-        }
-    }
-    return(maxchilds);
+  checkInsertChild() { //Checks if the insert after button should be displayed or not
+    return(this.getMaxNumChilds() > this.getNumChilds());
   }
 
-  //-- Checks if the insert after button should be displayed or not in case the
-  //   element is or will become a child of Parent --
+  //-- Returns true if the parent can take an extra child --
 
-  checkInsertAfter(Parent?: List_Item) {
-    var allow = false;
-    if (typeof Parent == 'undefined') {
-      allow = true;
-    } else {
-      //alert(Parent.keys[0][2]);
-      switch(Parent.keys[0][2]) {
-        case "Aansluiting":
-        case "Bord":
-        case "Kring":
-        case "Domotica":
-        case "Splitsing":
-        case "Meerdere verbruikers":
-          allow = true;
-          break;
-        default:
-          allow = false;
-          break;
-      }
-    }
-    return(allow);
+  checkInsertSibling() {
+    let parent: Electro_Item = this.getParent();
+    if (parent == null) return true;
+    else return(parent.getMaxNumChilds() > parent.getNumChilds());
   }
 
-  toHTMLHeader(mode: string, Parent?: List_Item) {
+  //-- Displays the navigation buttons for the Electro_Item, i.e. the green and blue arrows, and the selection of the Type (Bord, Kring, ...) --
+
+  toHTMLHeader(mode: string) {
     let output:string = "";
-
+    
     if (mode=="move") {
       output += "<b>ID: "+this.id+"</b>, ";
       output += 'Moeder: <input id="id_parent_change_' + this.id + '" type="text" size="2" value="' + this.parent + '" onchange="HL_changeparent(' + this.id + ')"> ';
       output += " <button style=\"background-color:lightblue;\" onclick=\"HLMoveUp(" + this.id +")\">&#9650;</button>";
       output += " <button style=\"background-color:lightblue;\" onclick=\"HLMoveDown(" + this.id +")\">&#9660;</button>";
-      if (this.checkInsertAfter(Parent)) {
+      if (this.checkInsertSibling()) {
         output += " <button style=\"background-color:lightblue;\" onclick=\"HLClone(" + this.id +")\">Clone</button>";
       }
     } else {
-      if (this.checkInsertAfter(Parent)) {
+      if (this.checkInsertSibling()) {
         output += " <button style=\"background-color:green;\" onclick=\"HLInsertBefore(" + this.id +")\">&#9650;</button>";
         output += " <button style=\"background-color:green;\" onclick=\"HLInsertAfter(" + this.id +")\">&#9660;</button>";
       }
-      if (this.checkInsertChild(Parent)) {
+      if (this.checkInsertSibling()) {
         output += " <button style=\"background-color:green;\" onclick=\"HLInsertChild(" + this.id +")\">&#9654;</button>";
       }
     };
     output += " <button style=\"background-color:red;\" onclick=\"HLDelete(" + this.id +")\">&#9851;</button>";
     output += "&nbsp;"
 
-    output += this.selectToHTML(0, this.getConsumers());
+    let parent:Electro_Item = this.getParent();
+    let consumerArray;
+    
+    if (parent == null) consumerArray = ["", "Kring", "Aansluiting"];
+    else consumerArray = this.getParent().allowedChilds()
+
+    output += this.selectToHTML(0, consumerArray);
 
     return(output);
   }
 
-  //-- Display the element in the editing grid at the left of the screen in case the
-  //   element is or will become a child of Parent --
+  //-- This one will get called if the type of the Electro_Item has not yet been chosen --
 
-  toHTML(mode: string, Parent?: List_Item) { return(this.toHTMLHeader(mode, Parent)); } // Implemented in the derived classes
+  toHTML(mode: string) { return(this.toHTMLHeader(mode)); } // Implemented in the derived classes
 
-  //-- Add the addressline below --
+  //-- Code to add the addressline below when drawing SVG. This is called by most derived classes --
 
   addAddress(mySVG: SVGelement, starty:number = 60, godown:number = 15, shiftx:number = 0, key:number=15): String {
     let returnstr:string = "";
@@ -334,7 +218,7 @@ class Electro_Item extends List_Item {
     return returnstr;
   }
 
-  //-- Make the SVG for the entire electro item --
+  //-- Make the SVG for the electro item, placeholder for derived classes --
 
   toSVG(): SVGelement { return(new SVGelement()); } //Placeholder for derived classes
 }

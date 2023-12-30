@@ -14,8 +14,16 @@ class Domotica_gestuurde_verbruiker extends Electro_Item {
         this.keys[26][2] = false;
     }
 
-    toHTML(mode: string, Parent?: List_Item) {
-        let output = this.toHTMLHeader(mode, Parent);
+    allowedChilds() : Array<string> { // returns an array with the type-names of allowed childs
+        return ["", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
+    }
+
+    getMaxNumChilds(): number {
+        return 1;
+    }
+
+    toHTML(mode: string) {
+        let output = this.toHTMLHeader(mode);
 
         output += "&nbsp;Nr: " + this.stringToHTML(10,5)
                +  ", Draadloos: " + this.checkboxToHTML(19)

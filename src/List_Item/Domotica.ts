@@ -9,8 +9,16 @@ class Domotica extends Electro_Item {
         this.keys[23][2] = "";             // Set Adres/tekst to "" when the item is cleared
     }
 
-    toHTML(mode: string, Parent?: List_Item) {
-        let output = this.toHTMLHeader(mode, Parent);
+    allowedChilds() : Array<string> { // returns an array with the type-names of allowed childs
+        return ["", "Kring"];
+    }
+
+    getMaxNumChilds(): number {
+        return 256;
+    }
+
+    toHTML(mode: string) {
+        let output = this.toHTMLHeader(mode);
 
         output += "&nbsp;Nr: " + this.stringToHTML(10,5)
                +  ", Tekst (nieuwe lijn = \"|\"): " + this.stringToHTML(15,30)

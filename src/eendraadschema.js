@@ -207,7 +207,7 @@ var List_Item = /** @class */ (function () {
     }
     List_Item.prototype.resetKeys = function () {
     };
-    List_Item.prototype.getMaxNumChilds = function (Parent) {
+    List_Item.prototype.getMaxNumChilds = function () {
         return (2 ^ 24);
     };
     List_Item.prototype.getNumChilds = function () {
@@ -335,7 +335,7 @@ var List_Item = /** @class */ (function () {
         output += "</select>";
         return (output);
     };
-    List_Item.prototype.toHTML = function (mode, Parent) {
+    List_Item.prototype.toHTML = function (mode) {
         return ("toHTML() function not defined for base class List_Item. Extend class first.");
     };
     List_Item.prototype.toSVG = function () {
@@ -422,47 +422,11 @@ var Electro_Item = /** @class */ (function (_super) {
         _this.updateConsumers();
         return _this;
     }
-    //-- When called, this one ensures we cannot have a child that doesn't align with its parent --
-    Electro_Item.prototype.getConsumers = function () {
-        var Parent = this.getParent();
-        var consumers = [];
-        if (Parent == null) {
-            consumers = ["", "Kring", "Aansluiting"];
-        }
-        else {
-            switch (Parent.keys[0][2]) {
-                case "Bord": {
-                    consumers = ["", "Kring", "Vrije ruimte"];
-                    break;
-                }
-                case "Splitsing":
-                case "Domotica": {
-                    consumers = ["", "Kring"];
-                    break;
-                }
-                case "Kring": {
-                    consumers = ["", "Aansluiting", "Bord", "Domotica", "Domotica gestuurde verbruiker", "Kring", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
-                    break;
-                }
-                case "Meerdere verbruikers": {
-                    consumers = ["", "Domotica", "Domotica gestuurde verbruiker", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
-                    break;
-                }
-                case "Domotica gestuurde verbruiker": {
-                    consumers = ["", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
-                    break;
-                }
-                case "Aansluiting": {
-                    consumers = ["", "Bord", "Kring", "Splitsing"];
-                    break;
-                }
-                default: {
-                    consumers = ["", "Aansluiting", "Domotica", "Domotica gestuurde verbruiker", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
-                    break;
-                }
-            }
-        }
-        return consumers;
+    Electro_Item.prototype.getParent = function () {
+        return _super.prototype.getParent.call(this);
+    };
+    Electro_Item.prototype.allowedChilds = function () {
+        return ["", "Aansluiting", "Domotica", "Domotica gestuurde verbruiker", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
     };
     //-- Make the current item a copy of source_item --
     Electro_Item.prototype.clone = function (source_item) {
@@ -515,140 +479,68 @@ var Electro_Item = /** @class */ (function (_super) {
                 break;
         }
     };
-    //-- Returns true if the Electro_Item can have childs in case it is or
-    //   will become a child of Parent --
-    Electro_Item.prototype.checkInsertChild = function (Parent) {
-        var allow = false;
-        switch (this.keys[0][2]) {
-            case "Aansluiting":
-            case "Bord":
-            case "Kring":
-            case "Domotica":
-            case "Domotica gestuurde verbruiker":
-            case "Splitsing":
-                allow = true;
-                break;
-            case "Bel":
-            case "Lichtcircuit":
-                allow = false;
-                break;
-            default:
-                if (typeof Parent == 'undefined') {
-                    allow = true;
-                }
-                else {
-                    switch (Parent.keys[0][2]) {
-                        case "Aansluiting":
-                        case "Bord":
-                        case "Domotica":
-                        case "Splitsing":
-                        case "Meerdere verbruikers":
-                            allow = false;
-                            break;
-                        default:
-                            allow = true;
-                            break;
-                    }
-                }
-        }
-        return (allow);
-    };
-    //-- returns the maximum number of childs the current Electro_Item can have in case
-    //   it is or will become a child of Parent --
-    Electro_Item.prototype.getMaxNumChilds = function (Parent) {
-        var maxchilds = 0;
-        switch (this.keys[0][2]) {
-            case "Aansluiting":
-            case "Bord":
-            case "Kring":
-            case "Domotica":
-            case "Splitsing":
+    // -- Returns the maximum number of childs the Electro_Item can have --
+    Electro_Item.prototype.getMaxNumChilds = function () {
+        var parent = this.getParent();
+        if (parent == null)
+            return 256; //This should never happen, all allowed childs of null have their own implementations of getMaxNumChilds() and will never call this.
+        switch (parent.keys[0][2]) {
             case "Meerdere verbruikers":
-                maxchilds = 256;
-                break;
-            case "Domotica gestuurde verbruiker":
-                maxchilds = 1;
-                break;
-            case "Bel":
-            case "Lichtcircuit":
-            case "Vrije ruimte":
-                maxchilds = 0;
-                break;
+                return 0;
+                break; // Childs of "Meerdere verbruikers" cannot have childs
             default:
-                if (typeof Parent == 'undefined') {
-                    maxchilds = 256;
-                }
-                else {
-                    switch (Parent.keys[0][2]) {
-                        case "Aansluiting":
-                        case "Bord":
-                        case "Domotica":
-                        case "Splitsing":
-                        case "Meerdere verbruikers":
-                            maxchilds = 0;
-                            break;
-                        default:
-                            maxchilds = 1;
-                            break;
-                    }
-                }
+                return 1;
+                break; // By default, most element can have 1 child unless overwritten by derived classes
         }
-        return (maxchilds);
     };
-    //-- Checks if the insert after button should be displayed or not in case the
-    //   element is or will become a child of Parent --
-    Electro_Item.prototype.checkInsertAfter = function (Parent) {
-        var allow = false;
-        if (typeof Parent == 'undefined') {
-            allow = true;
-        }
-        else {
-            //alert(Parent.keys[0][2]);
-            switch (Parent.keys[0][2]) {
-                case "Aansluiting":
-                case "Bord":
-                case "Kring":
-                case "Domotica":
-                case "Splitsing":
-                case "Meerdere verbruikers":
-                    allow = true;
-                    break;
-                default:
-                    allow = false;
-                    break;
-            }
-        }
-        return (allow);
+    //-- Returns true if the Electro_Item can take an extra childs --
+    Electro_Item.prototype.checkInsertChild = function () {
+        return (this.getMaxNumChilds() > this.getNumChilds());
     };
-    Electro_Item.prototype.toHTMLHeader = function (mode, Parent) {
+    //-- Returns true if the parent can take an extra child --
+    Electro_Item.prototype.checkInsertSibling = function () {
+        var parent = this.getParent();
+        if (parent == null)
+            return true;
+        else
+            return (parent.getMaxNumChilds() > parent.getNumChilds());
+    };
+    //-- Displays the navigation buttons for the Electro_Item, i.e. the green and blue arrows, and the selection of the Type (Bord, Kring, ...) --
+    Electro_Item.prototype.toHTMLHeader = function (mode) {
         var output = "";
         if (mode == "move") {
             output += "<b>ID: " + this.id + "</b>, ";
             output += 'Moeder: <input id="id_parent_change_' + this.id + '" type="text" size="2" value="' + this.parent + '" onchange="HL_changeparent(' + this.id + ')"> ';
             output += " <button style=\"background-color:lightblue;\" onclick=\"HLMoveUp(" + this.id + ")\">&#9650;</button>";
             output += " <button style=\"background-color:lightblue;\" onclick=\"HLMoveDown(" + this.id + ")\">&#9660;</button>";
-            if (this.checkInsertAfter(Parent)) {
+            if (this.checkInsertSibling()) {
                 output += " <button style=\"background-color:lightblue;\" onclick=\"HLClone(" + this.id + ")\">Clone</button>";
             }
         }
         else {
-            if (this.checkInsertAfter(Parent)) {
+            if (this.checkInsertSibling()) {
                 output += " <button style=\"background-color:green;\" onclick=\"HLInsertBefore(" + this.id + ")\">&#9650;</button>";
                 output += " <button style=\"background-color:green;\" onclick=\"HLInsertAfter(" + this.id + ")\">&#9660;</button>";
             }
-            if (this.checkInsertChild(Parent)) {
+            if (this.checkInsertSibling()) {
                 output += " <button style=\"background-color:green;\" onclick=\"HLInsertChild(" + this.id + ")\">&#9654;</button>";
             }
         }
         ;
         output += " <button style=\"background-color:red;\" onclick=\"HLDelete(" + this.id + ")\">&#9851;</button>";
         output += "&nbsp;";
-        output += this.selectToHTML(0, this.getConsumers());
+        var parent = this.getParent();
+        var consumerArray;
+        if (parent == null)
+            consumerArray = ["", "Kring", "Aansluiting"];
+        else
+            consumerArray = this.getParent().allowedChilds();
+        output += this.selectToHTML(0, consumerArray);
         return (output);
     };
     //-- Display the element in the editing grid at the left of the screen in case the
     //   element is or will become a child of Parent --
-    Electro_Item.prototype.toHTML = function (mode, Parent) { return (this.toHTMLHeader(mode, Parent)); }; // Implemented in the derived classes
+    Electro_Item.prototype.toHTML = function (mode) { return (this.toHTMLHeader(mode)); }; // Implemented in the derived classes
     //-- Add the addressline below --
     Electro_Item.prototype.addAddress = function (mySVG, starty, godown, shiftx, key) {
         if (starty === void 0) { starty = 60; }
@@ -966,9 +858,9 @@ var Schakelaars = /** @class */ (function (_super) {
         if (!this.kanTrekschakelaarHebben)
             this.keys[25][2] = false;
     };
-    Schakelaars.prototype.toHTML = function (mode, Parent) {
+    Schakelaars.prototype.toHTML = function (mode) {
         this.overrideKeys();
-        var output = this.toHTMLHeader(mode, Parent);
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
         output += ", " + this.selectToHTML(5, ["enkelpolig", "dubbelpolig", "driepolig", "dubbelaansteking", "wissel_enkel", "wissel_dubbel", "kruis_enkel", "---", "schakelaar", "dimschakelaar", "dimschakelaar wissel", "bewegingsschakelaar", "schemerschakelaar", "---", "teleruptor", "relais", "dimmer", "tijdschakelaar", "minuterie", "thermostaat", "rolluikschakelaar"]);
         if (this.kanHalfwaterdichtZijn())
@@ -1102,9 +994,9 @@ var Lichtcircuit = /** @class */ (function (_super) {
         this.keys[0][2] = "Lichtcircuit"; // This is rather a formality as we should already have this at this stage
         this.keys[13][2] = "1"; // Per default 1 lichtpunt
     };
-    Lichtcircuit.prototype.toHTML = function (mode, Parent) {
+    Lichtcircuit.prototype.toHTML = function (mode) {
         this.overrideKeys();
-        var output = this.toHTMLHeader(mode, Parent);
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
         output += ", " + this.selectToHTML(5, ["enkelpolig", "dubbelpolig", "driepolig", "dubbelaansteking", "wissel_enkel", "wissel_dubbel", "kruis_enkel", "---", "schakelaar", "dimschakelaar", "dimschakelaar wissel", "bewegingsschakelaar", "schemerschakelaar", "---", "teleruptor", "relais", "dimmer", "tijdschakelaar", "minuterie", "thermostaat", "rolluikschakelaar"]);
         if (this.kanHalfwaterdichtZijn())
@@ -1202,13 +1094,22 @@ var Aansluiting = /** @class */ (function (_super) {
         this.keys[23][2] = ""; // Per default geen naam
         this.keys[24][2] = ""; // Per default geen kabeltype vóór de aansluiting
     };
+    Aansluiting.prototype.allowedChilds = function () {
+        return ["", "Bord", "Kring", "Splitsing"];
+    };
+    Aansluiting.prototype.getMaxNumChilds = function () {
+        return 256;
+        // Dit kan vreemd lijken omdat in principe een aansluiting maar 1 kind heeft.
+        // Echter, in het verleden was 256 wel toegelaten en het is niet uit te sluiten dat gebruikers meerdere kringen onder een aansluiting gehangen hebben
+        // om deze kringen verticaal te kunnen stapelen. Om het programma backward compatibel te houden behouden we dus 256 tot grandfathering code kan worden ontwikkeld
+    };
     Aansluiting.prototype.overrideKeys = function () {
         if ((this.keys[4][2] < 1) || (this.keys[4][2] > 4))
             this.keys[4][2] = "2"; //Test dat aantal polen bestaat
     };
-    Aansluiting.prototype.toHTML = function (mode, Parent) {
+    Aansluiting.prototype.toHTML = function (mode) {
         this.overrideKeys();
-        var output = this.toHTMLHeader(mode, Parent);
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Naam: " + this.stringToHTML(23, 5) + "<br>";
         if (this.getParent() != null)
             output += "Nr: " + this.stringToHTML(10, 5) + ", ";
@@ -1447,8 +1348,8 @@ var Aansluitpunt = /** @class */ (function (_super) {
         this.keys[0][2] = "Aansluitpunt"; // This is rather a formality as we should already have this at this stage
         this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
     };
-    Aansluitpunt.prototype.toHTML = function (mode, Parent) {
-        var output = this.toHTMLHeader(mode, Parent);
+    Aansluitpunt.prototype.toHTML = function (mode) {
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
@@ -1477,8 +1378,8 @@ var Aftakdoos = /** @class */ (function (_super) {
         this.keys[0][2] = "Aftakdoos"; // This is rather a formality as we should already have this at this stage
         this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
     };
-    Aftakdoos.prototype.toHTML = function (mode, Parent) {
-        var output = this.toHTMLHeader(mode, Parent);
+    Aftakdoos.prototype.toHTML = function (mode) {
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
@@ -1507,8 +1408,8 @@ var Batterij = /** @class */ (function (_super) {
         this.keys[0][2] = "Batterij"; // This is rather a formality as we should already have this at this stage
         this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
     };
-    Batterij.prototype.toHTML = function (mode, Parent) {
-        var output = this.toHTMLHeader(mode, Parent);
+    Batterij.prototype.toHTML = function (mode) {
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
@@ -1538,8 +1439,8 @@ var Bel = /** @class */ (function (_super) {
         this.keys[0][2] = "Bel"; // This is rather a formality as we should already have this at this stage
         this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
     };
-    Bel.prototype.toHTML = function (mode, Parent) {
-        var output = this.toHTMLHeader(mode, Parent);
+    Bel.prototype.toHTML = function (mode) {
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
@@ -1570,8 +1471,8 @@ var Boiler = /** @class */ (function (_super) {
         this.keys[3][2] = false; // Per default geen accumulatie
         this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
     };
-    Boiler.prototype.toHTML = function (mode, Parent) {
-        var output = this.toHTMLHeader(mode, Parent);
+    Boiler.prototype.toHTML = function (mode) {
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Nr: " + this.stringToHTML(10, 5) + ", ";
         output += "Accumulatie: " + this.checkboxToHTML(3);
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
@@ -1611,8 +1512,14 @@ var Bord = /** @class */ (function (_super) {
         this.keys[10][2] = ""; // Bord heeft initieel geen naam
         this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
     };
-    Bord.prototype.toHTML = function (mode, Parent) {
-        var output = this.toHTMLHeader(mode, Parent);
+    Bord.prototype.allowedChilds = function () {
+        return ["", "Kring", "Vrije ruimte"];
+    };
+    Bord.prototype.getMaxNumChilds = function () {
+        return 256;
+    };
+    Bord.prototype.toHTML = function (mode) {
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Naam: " + this.stringToHTML(10, 5) + ", "
             + "Geaard: " + this.checkboxToHTML(1);
         return (output);
@@ -1669,8 +1576,8 @@ var Diepvriezer = /** @class */ (function (_super) {
         this.keys[0][2] = "Diepvriezer"; // This is rather a formality as we should already have this at this stage
         this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
     };
-    Diepvriezer.prototype.toHTML = function (mode, Parent) {
-        var output = this.toHTMLHeader(mode, Parent);
+    Diepvriezer.prototype.toHTML = function (mode) {
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
@@ -1706,8 +1613,14 @@ var Domotica_gestuurde_verbruiker = /** @class */ (function (_super) {
         this.keys[25][2] = false;
         this.keys[26][2] = false;
     };
-    Domotica_gestuurde_verbruiker.prototype.toHTML = function (mode, Parent) {
-        var output = this.toHTMLHeader(mode, Parent);
+    Domotica_gestuurde_verbruiker.prototype.allowedChilds = function () {
+        return ["", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
+    };
+    Domotica_gestuurde_verbruiker.prototype.getMaxNumChilds = function () {
+        return 1;
+    };
+    Domotica_gestuurde_verbruiker.prototype.toHTML = function (mode) {
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Nr: " + this.stringToHTML(10, 5)
             + ", Draadloos: " + this.checkboxToHTML(19)
             + ", Lokale Drukknop: " + this.checkboxToHTML(20)
@@ -1801,8 +1714,14 @@ var Domotica = /** @class */ (function (_super) {
         this.keys[15][2] = "Domotica"; // Set Tekst to "Domotica" when the item is cleared
         this.keys[23][2] = ""; // Set Adres/tekst to "" when the item is cleared
     };
-    Domotica.prototype.toHTML = function (mode, Parent) {
-        var output = this.toHTMLHeader(mode, Parent);
+    Domotica.prototype.allowedChilds = function () {
+        return ["", "Kring"];
+    };
+    Domotica.prototype.getMaxNumChilds = function () {
+        return 256;
+    };
+    Domotica.prototype.toHTML = function (mode) {
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Nr: " + this.stringToHTML(10, 5)
             + ", Tekst (nieuwe lijn = \"|\"): " + this.stringToHTML(15, 30)
             + ", Adres/tekst: " + this.stringToHTML(23, 5);
@@ -1860,8 +1779,8 @@ var Droogkast = /** @class */ (function (_super) {
         this.keys[0][2] = "Droogkast"; // This is rather a formality as we should already have this at this stage
         this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
     };
-    Droogkast.prototype.toHTML = function (mode, Parent) {
-        var output = this.toHTMLHeader(mode, Parent);
+    Droogkast.prototype.toHTML = function (mode) {
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
@@ -1896,8 +1815,8 @@ var Drukknop = /** @class */ (function (_super) {
         this.keys[20][2] = false; // Per default niet halfwaterdicht
         this.keys[21][2] = false; // Per default geen verklikkerslampje
     };
-    Drukknop.prototype.toHTML = function (mode, Parent) {
-        var output = this.toHTMLHeader(mode, Parent);
+    Drukknop.prototype.toHTML = function (mode) {
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Nr: " + this.stringToHTML(10, 5)
             + ", Type: " + this.selectToHTML(16, ["standaard", "dimmer", "rolluik"])
             + ", Verklikkerlampje: " + this.checkboxToHTML(21)
@@ -1980,8 +1899,8 @@ var Elektriciteitsmeter = /** @class */ (function (_super) {
         this.keys[0][2] = "Elektriciteitsmeter"; // This is rather a formality as we should already have this at this stage
         this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
     };
-    Elektriciteitsmeter.prototype.toHTML = function (mode, Parent) {
-        var output = this.toHTMLHeader(mode, Parent);
+    Elektriciteitsmeter.prototype.toHTML = function (mode) {
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
@@ -2011,8 +1930,8 @@ var Elektrische_oven = /** @class */ (function (_super) {
         this.keys[0][2] = "Elektrische oven"; // This is rather a formality as we should already have this at this stage
         this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
     };
-    Elektrische_oven.prototype.toHTML = function (mode, Parent) {
-        var output = this.toHTMLHeader(mode, Parent);
+    Elektrische_oven.prototype.toHTML = function (mode) {
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
@@ -2042,8 +1961,8 @@ var EV_lader = /** @class */ (function (_super) {
         this.keys[0][2] = "EV lader"; // This is rather a formality as we should already have this at this stage
         this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
     };
-    EV_lader.prototype.toHTML = function (mode, Parent) {
-        var output = this.toHTMLHeader(mode, Parent);
+    EV_lader.prototype.toHTML = function (mode) {
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
@@ -2074,8 +1993,8 @@ var Ketel = /** @class */ (function (_super) {
         this.keys[4][2] = "1"; // Per default 1 ketel
         this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
     };
-    Ketel.prototype.toHTML = function (mode, Parent) {
-        var output = this.toHTMLHeader(mode, Parent);
+    Ketel.prototype.toHTML = function (mode) {
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
         output += ", Type: " + this.selectToHTML(16, ["", "Met boiler", "Met tapspiraal", "Warmtekrachtkoppeling", "Warmtewisselaar"]);
         output += ", Energiebron: " + this.selectToHTML(17, ["", "Elektriciteit", "Gas (atmosferisch)", "Gas (ventilator)", "Vaste brandstof", "Vloeibare brandstof"]);
@@ -2174,8 +2093,8 @@ var Koelkast = /** @class */ (function (_super) {
         this.keys[0][2] = "Koelkast"; // This is rather a formality as we should already have this at this stage
         this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
     };
-    Koelkast.prototype.toHTML = function (mode, Parent) {
-        var output = this.toHTMLHeader(mode, Parent);
+    Koelkast.prototype.toHTML = function (mode) {
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
@@ -2205,8 +2124,8 @@ var Kookfornuis = /** @class */ (function (_super) {
         this.keys[0][2] = "Kookfornuis"; // This is rather a formality as we should already have this at this stage
         this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
     };
-    Kookfornuis.prototype.toHTML = function (mode, Parent) {
-        var output = this.toHTMLHeader(mode, Parent);
+    Kookfornuis.prototype.toHTML = function (mode) {
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
@@ -2281,15 +2200,21 @@ var Kring = /** @class */ (function (_super) {
                     break;
             }
     };
+    Kring.prototype.allowedChilds = function () {
+        return ["", "Aansluiting", "Bord", "Domotica", "Domotica gestuurde verbruiker", "Kring", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
+    };
+    Kring.prototype.getMaxNumChilds = function () {
+        return 256;
+    };
     Kring.prototype.overrideKeys = function () {
         if ((this.keys[4][2] < 1) || (this.keys[4][2] > 4))
             this.keys[4][2] = "2"; //Test dat aantal polen bestaat
         if (this.keys[16][2] == "Luchtleiding")
             this.keys[19][2] = false; //Indien luchtleiding nooit een buis tekenen
     };
-    Kring.prototype.toHTML = function (mode, Parent) {
+    Kring.prototype.toHTML = function (mode) {
         this.overrideKeys();
-        var output = this.toHTMLHeader(mode, Parent);
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Naam: " + this.stringToHTML(10, 5) + "<br>"
             + "Zekering: " + this.selectToHTML(7, ["automatisch", "differentieel", "differentieelautomaat", "smelt", "geen", "---", "schakelaar", "relais", "schemer", "overspanningsbeveiliging"]);
         // Aantal polen en Ampérage
@@ -2583,8 +2508,8 @@ var Lichtpunt = /** @class */ (function (_super) {
         this.keys[20][2] = false; // Per default niet halfwaterdicht
         this.keys[21][2] = false; // Per default geen ingebouwde schakelaar
     };
-    Lichtpunt.prototype.toHTML = function (mode, Parent) {
-        var output = this.toHTMLHeader(mode, Parent);
+    Lichtpunt.prototype.toHTML = function (mode) {
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Nr: " + this.stringToHTML(10, 5) + ", "
             + "Type: " + this.selectToHTML(16, ["standaard", "TL", "spot", "led" /*, "Spot", "Led", "Signalisatielamp" */]) + ", ";
         if (this.keys[16][2] == "TL") {
@@ -2804,8 +2729,14 @@ var Meerdere_verbruikers = /** @class */ (function (_super) {
         this.keys[0][2] = "Meerdere verbruikers"; // This is rather a formality as we should already have this at this stage
         this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
     };
-    Meerdere_verbruikers.prototype.toHTML = function (mode, Parent) {
-        var output = this.toHTMLHeader(mode, Parent);
+    Meerdere_verbruikers.prototype.allowedChilds = function () {
+        return ["", "Domotica", "Domotica gestuurde verbruiker", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
+    };
+    Meerdere_verbruikers.prototype.getMaxNumChilds = function () {
+        return 256;
+    };
+    Meerdere_verbruikers.prototype.toHTML = function (mode) {
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Nr: " + this.stringToHTML(10, 5)
             + ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
@@ -2838,8 +2769,8 @@ var Microgolfoven = /** @class */ (function (_super) {
         this.keys[0][2] = "Microgolfoven"; // This is rather a formality as we should already have this at this stage
         this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
     };
-    Microgolfoven.prototype.toHTML = function (mode, Parent) {
-        var output = this.toHTMLHeader(mode, Parent);
+    Microgolfoven.prototype.toHTML = function (mode) {
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
@@ -2869,8 +2800,8 @@ var Motor = /** @class */ (function (_super) {
         this.keys[0][2] = "Motor"; // This is rather a formality as we should already have this at this stage
         this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
     };
-    Motor.prototype.toHTML = function (mode, Parent) {
-        var output = this.toHTMLHeader(mode, Parent);
+    Motor.prototype.toHTML = function (mode) {
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
@@ -2900,8 +2831,8 @@ var Omvormer = /** @class */ (function (_super) {
         this.keys[0][2] = "Omvormer"; // This is rather a formality as we should already have this at this stage
         this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
     };
-    Omvormer.prototype.toHTML = function (mode, Parent) {
-        var output = this.toHTMLHeader(mode, Parent);
+    Omvormer.prototype.toHTML = function (mode) {
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
@@ -2931,8 +2862,8 @@ var Overspanningsbeveiliging = /** @class */ (function (_super) {
         this.keys[0][2] = "Overspanningsbeveiliging"; // This is rather a formality as we should already have this at this stage
         this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
     };
-    Overspanningsbeveiliging.prototype.toHTML = function (mode, Parent) {
-        var output = this.toHTMLHeader(mode, Parent);
+    Overspanningsbeveiliging.prototype.toHTML = function (mode) {
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
@@ -2962,8 +2893,14 @@ var Splitsing = /** @class */ (function (_super) {
         this.keys[0][2] = "Splitsing"; // This is rather a formality as we should already have this at this stage
         this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
     };
+    Splitsing.prototype.allowedChilds = function () {
+        return ["", "Kring"];
+    };
+    Splitsing.prototype.getMaxNumChilds = function () {
+        return 256;
+    };
     Splitsing.prototype.toHTML = function (mode, Parent) {
-        var output = this.toHTMLHeader(mode, Parent);
+        var output = this.toHTMLHeader(mode);
         return (output);
     };
     Splitsing.prototype.toSVG = function () {
@@ -3002,8 +2939,8 @@ var Stoomoven = /** @class */ (function (_super) {
         this.keys[0][2] = "Stoomoven"; // This is rather a formality as we should already have this at this stage
         this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
     };
-    Stoomoven.prototype.toHTML = function (mode, Parent) {
-        var output = this.toHTMLHeader(mode, Parent);
+    Stoomoven.prototype.toHTML = function (mode) {
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
@@ -3042,8 +2979,8 @@ var Stopcontact = /** @class */ (function (_super) {
         this.keys[25][2] = false; // Indien meerfasig, per default niet met nul
         this.keys[26][2] = false; // Per default niet in verdeelbord
     };
-    Stopcontact.prototype.toHTML = function (mode, Parent) {
-        var output = this.toHTMLHeader(mode, Parent);
+    Stopcontact.prototype.toHTML = function (mode) {
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Nr: " + this.stringToHTML(10, 5) + ", "
             + "Geaard: " + this.checkboxToHTML(1) + ", "
             + "Kinderveiligheid: " + this.checkboxToHTML(2) + " "
@@ -3145,8 +3082,8 @@ var Transformator = /** @class */ (function (_super) {
         this.keys[14][2] = "230V/24V"; // Per default 24V
         this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
     };
-    Transformator.prototype.toHTML = function (mode, Parent) {
-        var output = this.toHTMLHeader(mode, Parent);
+    Transformator.prototype.toHTML = function (mode) {
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Nr: " + this.stringToHTML(10, 5)
             + ", Voltage: " + this.stringToHTML(14, 8)
             + ", Adres/tekst: " + this.stringToHTML(15, 5);
@@ -3179,8 +3116,8 @@ var USB_lader = /** @class */ (function (_super) {
         this.keys[4][2] = "1"; // Per default 1 lader
         this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
     };
-    USB_lader.prototype.toHTML = function (mode, Parent) {
-        var output = this.toHTMLHeader(mode, Parent);
+    USB_lader.prototype.toHTML = function (mode) {
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
         output += ", Aantal: " + this.selectToHTML(4, ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]);
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
@@ -3217,8 +3154,8 @@ var Vaatwasmachine = /** @class */ (function (_super) {
         this.keys[0][2] = "Vaatwasmachine"; // This is rather a formality as we should already have this at this stage
         this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
     };
-    Vaatwasmachine.prototype.toHTML = function (mode, Parent) {
-        var output = this.toHTMLHeader(mode, Parent);
+    Vaatwasmachine.prototype.toHTML = function (mode) {
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
@@ -3248,8 +3185,8 @@ var Ventilator = /** @class */ (function (_super) {
         this.keys[0][2] = "Ventilator"; // This is rather a formality as we should already have this at this stage
         this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
     };
-    Ventilator.prototype.toHTML = function (mode, Parent) {
-        var output = this.toHTMLHeader(mode, Parent);
+    Ventilator.prototype.toHTML = function (mode) {
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
@@ -3290,8 +3227,8 @@ var Verbruiker = /** @class */ (function (_super) {
         }
         this.adjustTextWidthIfAuto();
     };
-    Verbruiker.prototype.toHTML = function (mode, Parent) {
-        var output = this.toHTMLHeader(mode, Parent);
+    Verbruiker.prototype.toHTML = function (mode) {
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Nr: " + this.stringToHTML(10, 5)
             + ", Tekst (nieuwe lijn = \"|\"): " + this.stringToHTML(15, 30)
             + ", Breedte: " + this.selectToHTML(18, ["automatisch", "handmatig"]);
@@ -3371,8 +3308,8 @@ var Verlenging = /** @class */ (function (_super) {
         this.keys[0][2] = "Verlenging"; // This is rather a formality as we should already have this at this stage
         this.keys[22][2] = "40"; // This is rather a formality as we should already have this at this stage
     };
-    Verlenging.prototype.toHTML = function (mode, Parent) {
-        var output = this.toHTMLHeader(mode, Parent);
+    Verlenging.prototype.toHTML = function (mode) {
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Nr: " + this.stringToHTML(10, 5)
             + ", Breedte: " + this.stringToHTML(22, 3)
             + ", Adres/tekst: " + this.stringToHTML(23, 5);
@@ -3420,9 +3357,9 @@ var Verwarmingstoestel = /** @class */ (function (_super) {
         if (!this.keys[3][2])
             this.keys[6][2] = false; //Indien geen accumulatie kan er ook geen ventilator zijn
     };
-    Verwarmingstoestel.prototype.toHTML = function (mode, Parent) {
+    Verwarmingstoestel.prototype.toHTML = function (mode) {
         this.overrideKeys;
-        var output = this.toHTMLHeader(mode, Parent);
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Nr: " + this.stringToHTML(10, 5)
             + ", Accumulatie: " + this.checkboxToHTML(3)
             + (this.keys[3][2] ? ", Ventilator: " + this.checkboxToHTML(6) : "")
@@ -3469,10 +3406,13 @@ var Vrije_ruimte = /** @class */ (function (_super) {
         this.keys[0][2] = "Vrije ruimte"; // This is rather a formality as we should already have this at this stage
         this.keys[22][2] = 25; // Default breedte van de vrije ruimte
     };
-    Vrije_ruimte.prototype.toHTML = function (mode, Parent) {
-        var output = this.toHTMLHeader(mode, Parent);
+    Vrije_ruimte.prototype.toHTML = function (mode) {
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Breedte: " + this.stringToHTML(22, 3);
         return (output);
+    };
+    Vrije_ruimte.prototype.getMaxNumChilds = function () {
+        return 0;
     };
     Vrije_ruimte.prototype.toSVG = function () {
         var mySVG = new SVGelement();
@@ -3519,9 +3459,9 @@ var Vrije_tekst = /** @class */ (function (_super) {
         }
         this.adjustTextWidthIfAuto();
     };
-    Vrije_tekst.prototype.toHTML = function (mode, Parent) {
+    Vrije_tekst.prototype.toHTML = function (mode) {
         this.overrideKeys();
-        var output = this.toHTMLHeader(mode, Parent);
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Nr: " + this.stringToHTML(10, 5)
             + ", Tekst (nieuwe lijn = \"|\"): " + this.stringToHTML(15, 30)
             + ", Breedte: " + this.selectToHTML(18, ["automatisch", "handmatig"]);
@@ -3621,8 +3561,8 @@ var Warmtepomp = /** @class */ (function (_super) {
         this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
         this.keys[18][2] = "Koelend"; // Per default koelend
     };
-    Warmtepomp.prototype.toHTML = function (mode, Parent) {
-        var output = this.toHTMLHeader(mode, Parent);
+    Warmtepomp.prototype.toHTML = function (mode) {
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Nr: " + this.stringToHTML(10, 5)
             + ", Warmte functie: " + this.selectToHTML(18, ["", "Koelend", "Verwarmend", "Verwarmend en koelend"])
             + ", Aantal: " + this.selectToHTML(4, ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"])
@@ -3685,8 +3625,8 @@ var Wasmachine = /** @class */ (function (_super) {
         this.keys[0][2] = "Wasmachine"; // This is rather a formality as we should already have this at this stage
         this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
     };
-    Wasmachine.prototype.toHTML = function (mode, Parent) {
-        var output = this.toHTMLHeader(mode, Parent);
+    Wasmachine.prototype.toHTML = function (mode) {
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
         output += ", Adres/tekst: " + this.stringToHTML(15, 5);
         return (output);
@@ -3717,8 +3657,8 @@ var Zeldzame_symbolen = /** @class */ (function (_super) {
         this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
         this.keys[16][2] = ""; // Per default, geen symbool
     };
-    Zeldzame_symbolen.prototype.toHTML = function (mode, Parent) {
-        var output = this.toHTMLHeader(mode, Parent);
+    Zeldzame_symbolen.prototype.toHTML = function (mode) {
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Nr: " + this.stringToHTML(10, 5)
             + ", Symbool: " + this.selectToHTML(16, ["", "deurslot"])
             + ", Adres/tekst: " + this.stringToHTML(15, 5);
@@ -3757,8 +3697,8 @@ var Zonnepaneel = /** @class */ (function (_super) {
         this.keys[4][2] = "1"; // Per default 1 zonnepaneel
         this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
     };
-    Zonnepaneel.prototype.toHTML = function (mode, Parent) {
-        var output = this.toHTMLHeader(mode, Parent);
+    Zonnepaneel.prototype.toHTML = function (mode) {
+        var output = this.toHTMLHeader(mode);
         output += "&nbsp;Nr: " + this.stringToHTML(10, 5) + ", "
             + " Aantal: " + this.selectToHTML(4, ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20",
             "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40"])
@@ -3943,9 +3883,9 @@ var Hierarchical_List = /** @class */ (function () {
     //-----------------------------------------------------
     Hierarchical_List.prototype.getMaxNumChilds = function (parent_id) {
         var newparentitem = this.data[this.getOrdinalById(parent_id)];
-        var newparentofparentid = this.data[this.getOrdinalById(parent_id)].parent;
-        var newparentofparentitem = this.data[this.getOrdinalById(newparentofparentid)];
-        var returnval = newparentitem.getMaxNumChilds(newparentofparentitem);
+        //var newparentofparentid = this.data[this.getOrdinalById(parent_id)].parent;
+        //var newparentofparentitem = this.data[this.getOrdinalById(newparentofparentid)];
+        var returnval = this.data[this.getOrdinalById(parent_id)].getMaxNumChilds();
         return (returnval);
     };
     Hierarchical_List.prototype.createItem = function (electroType) {
@@ -4331,23 +4271,13 @@ var Hierarchical_List = /** @class */ (function () {
             if (this.active[i] && (this.data[i].parent == myParent)) {
                 numberDrawn++;
                 if (this.data[i].collapsed) {
-                    output += '<table class="html_edit_table"><tr><td bgcolor="#8AB2E4" onclick="HLCollapseExpand(' + this.data[i].id + ')" valign= "top">&#x229E;</td><td width="100%">';
+                    output += '<table class="html_edit_table"><tr><td bgcolor="#8AB2E4" onclick="HLCollapseExpand(' + this.data[i].id + ')" valign= "top">&#x229E;</td><td width="100%">'
+                        + this.data[i].toHTML(structure.mode) + "<br>";
                 }
                 else {
-                    output += '<table class="html_edit_table"><tr><td bgcolor="#C0C0C0" onclick="HLCollapseExpand(' + this.data[i].id + ')" valign= "top">&#x229F;</td><td width="100%">';
-                }
-                switch (myParent) {
-                    case 0: {
-                        output += this.data[i].toHTML(structure.mode) + "<br>";
-                        break;
-                    }
-                    default: {
-                        output += this.data[i].toHTML(structure.mode, this.data[this.getOrdinalById(myParent)]) + "<br>";
-                        break;
-                    }
-                }
-                if (!this.data[i].collapsed) {
-                    output += this.toHTML(this.id[i]);
+                    output += '<table class="html_edit_table"><tr><td bgcolor="#C0C0C0" onclick="HLCollapseExpand(' + this.data[i].id + ')" valign= "top">&#x229F;</td><td width="100%">'
+                        + this.data[i].toHTML(structure.mode) + "<br>"
+                        + this.toHTML(this.id[i]);
                 }
                 output += "</td></tr></table>";
             }

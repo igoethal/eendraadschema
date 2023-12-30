@@ -10,9 +10,9 @@ class Lichtcircuit extends Schakelaars {
         this.keys[13][2] = "1";           // Per default 1 lichtpunt
     }
 
-    toHTML(mode: string, Parent?: List_Item) {
+    toHTML(mode: string) {
         this.overrideKeys();
-        let output = this.toHTMLHeader(mode, Parent);
+        let output = this.toHTMLHeader(mode);
 
         output += "&nbsp;Nr: " + this.stringToHTML(10,5);
         output += ", " + this.selectToHTML(5,["enkelpolig", "dubbelpolig", "driepolig", "dubbelaansteking", "wissel_enkel", "wissel_dubbel", "kruis_enkel", "---", "schakelaar", "dimschakelaar", "dimschakelaar wissel", "bewegingsschakelaar", "schemerschakelaar", "---", "teleruptor", "relais", "dimmer", "tijdschakelaar", "minuterie", "thermostaat", "rolluikschakelaar"]);

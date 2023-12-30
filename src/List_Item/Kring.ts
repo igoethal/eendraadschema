@@ -52,14 +52,22 @@ class Kring extends Electro_Item {
         }
     }
 
+    allowedChilds() : Array<string> { // returns an array with the type-names of allowed childs
+        return ["", "Aansluiting", "Bord", "Domotica", "Domotica gestuurde verbruiker", "Kring", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
+    }
+
+    getMaxNumChilds(): number {
+        return 256;
+    }
+
     overrideKeys() {
         if ( ( (this.keys[4][2] as number) < 1 ) || ( (this.keys[4][2] as number) > 4 ) ) this.keys[4][2] = "2"; //Test dat aantal polen bestaat
         if (this.keys[16][2] == "Luchtleiding") this.keys[19][2] = false; //Indien luchtleiding nooit een buis tekenen
     }
 
-    toHTML(mode: string, Parent?: List_Item) {
+    toHTML(mode: string) {
         this.overrideKeys();
-        let output = this.toHTMLHeader(mode, Parent);
+        let output = this.toHTMLHeader(mode);
 
         output += "&nbsp;Naam: " + this.stringToHTML(10,5) + "<br>"
                +  "Zekering: " + this.selectToHTML(7,["automatisch","differentieel","differentieelautomaat","smelt","geen","---","schakelaar","relais","schemer","overspanningsbeveiliging"]);

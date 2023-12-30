@@ -21,9 +21,9 @@ class Vrije_tekst extends Electro_Item {
         this.adjustTextWidthIfAuto();
     }
 
-    toHTML(mode: string, Parent?: List_Item) {
+    toHTML(mode: string) {
         this.overrideKeys();
-        let output = this.toHTMLHeader(mode, Parent);
+        let output = this.toHTMLHeader(mode);
 
         output += "&nbsp;Nr: " + this.stringToHTML(10,5)
                +  ", Tekst (nieuwe lijn = \"|\"): " + this.stringToHTML(15,30)

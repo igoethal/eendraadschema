@@ -10,8 +10,16 @@ class Bord extends Electro_Item {
         this.keys[15][2] = "";         // Set Adres/tekst to "" when the item is cleared
     }
 
-    toHTML(mode: string, Parent?: List_Item) {
-        let output = this.toHTMLHeader(mode, Parent);
+    allowedChilds() : Array<string> { // returns an array with the type-names of allowed childs
+        return ["", "Kring", "Vrije ruimte"];
+    }
+
+    getMaxNumChilds(): number {
+        return 256;
+    }
+
+    toHTML(mode: string) {
+        let output = this.toHTMLHeader(mode);
 
         output += "&nbsp;Naam: " + this.stringToHTML(10,5) + ", "
                +  "Geaard: " + this.checkboxToHTML(1);

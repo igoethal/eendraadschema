@@ -156,10 +156,10 @@ class Hierarchical_List {
 
   getMaxNumChilds(parent_id: number) : number {
     var newparentitem = this.data[this.getOrdinalById(parent_id)];
-    var newparentofparentid = this.data[this.getOrdinalById(parent_id)].parent;
-    var newparentofparentitem = this.data[this.getOrdinalById(newparentofparentid)];
+    //var newparentofparentid = this.data[this.getOrdinalById(parent_id)].parent;
+    //var newparentofparentitem = this.data[this.getOrdinalById(newparentofparentid)];
 
-    var returnval:number = newparentitem.getMaxNumChilds(newparentofparentitem);
+    var returnval:number = this.data[this.getOrdinalById(parent_id)].getMaxNumChilds();
 
     return(returnval);
   }
@@ -504,19 +504,11 @@ class Hierarchical_List {
         numberDrawn++;
         if (this.data[i].collapsed) {
           output += '<table class="html_edit_table"><tr><td bgcolor="#8AB2E4" onclick="HLCollapseExpand(' + this.data[i].id + ')" valign= "top">&#x229E;</td><td width="100%">'
+                 +  this.data[i].toHTML(structure.mode) + "<br>"; 
         } else {
           output += '<table class="html_edit_table"><tr><td bgcolor="#C0C0C0" onclick="HLCollapseExpand(' + this.data[i].id + ')" valign= "top">&#x229F;</td><td width="100%">'
-        }
-        switch(myParent) {
-          case 0: {
-            output += this.data[i].toHTML(structure.mode) + "<br>";
-            break; }
-          default: {
-            output += this.data[i].toHTML(structure.mode,this.data[this.getOrdinalById(myParent)]) + "<br>";
-            break; }
-        }
-        if (!this.data[i].collapsed) {
-          output += this.toHTML(this.id[i]);
+                 +  this.data[i].toHTML(structure.mode) + "<br>"
+                 +  this.toHTML(this.id[i]);
         }
         output += "</td></tr></table>"
       }

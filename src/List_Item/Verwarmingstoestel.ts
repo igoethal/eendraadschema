@@ -14,9 +14,9 @@ class Verwarmingstoestel extends Electro_Item {
         if (!this.keys[3][2]) this.keys[6][2] = false; //Indien geen accumulatie kan er ook geen ventilator zijn
     }
 
-    toHTML(mode: string, Parent?: List_Item) {
+    toHTML(mode: string) {
         this.overrideKeys;
-        let output = this.toHTMLHeader(mode, Parent);
+        let output = this.toHTMLHeader(mode);
 
         output += "&nbsp;Nr: " + this.stringToHTML(10,5)
                +  ", Accumulatie: " + this.checkboxToHTML(3)

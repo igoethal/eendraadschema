@@ -9,8 +9,8 @@ class Zeldzame_symbolen extends Electro_Item {
         this.keys[16][2] = "";                 // Per default, geen symbool
     }
 
-    toHTML(mode: string, Parent?: List_Item) {
-        let output = this.toHTMLHeader(mode, Parent);
+    toHTML(mode: string) {
+        let output = this.toHTMLHeader(mode);
 
         output += "&nbsp;Nr: " + this.stringToHTML(10,5)
                +  ", Symbool: " + this.selectToHTML(16,["","deurslot"])

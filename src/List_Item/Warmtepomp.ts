@@ -10,8 +10,8 @@ class Warmtepomp extends Electro_Item {
         this.keys[18][2] = "Koelend";         // Per default koelend
     }
 
-    toHTML(mode: string, Parent?: List_Item) {
-        let output = this.toHTMLHeader(mode, Parent);
+    toHTML(mode: string) {
+        let output = this.toHTMLHeader(mode);
 
         output += "&nbsp;Nr: " + this.stringToHTML(10,5)
                +  ", Warmte functie: " + this.selectToHTML(18,["", "Koelend", "Verwarmend", "Verwarmend en koelend"])

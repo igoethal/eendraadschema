@@ -8,8 +8,16 @@ class Splitsing extends Electro_Item {
         this.keys[15][2] = "";         // Set Adres/tekst to "" when the item is cleared
     }
 
+    allowedChilds() : Array<string> { // returns an array with the type-names of allowed childs
+        return ["", "Kring"];
+    }
+
+    getMaxNumChilds(): number {
+        return 256;
+    }
+
     toHTML(mode: string, Parent?: List_Item) {
-        let output = this.toHTMLHeader(mode, Parent);
+        let output = this.toHTMLHeader(mode);
 
         return(output);
     }

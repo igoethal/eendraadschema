@@ -19,13 +19,24 @@ class Aansluiting extends Electro_Item {
         this.keys[24][2] = "";             // Per default geen kabeltype vóór de aansluiting
     }
 
+    allowedChilds() : Array<string> { // returns an array with the type-names of allowed childs
+        return ["", "Bord", "Kring", "Splitsing"];
+    }
+
+    getMaxNumChilds(): number {
+        return 256;
+        // Dit kan vreemd lijken omdat in principe een aansluiting maar 1 kind heeft.
+        // Echter, in het verleden was 256 wel toegelaten en het is niet uit te sluiten dat gebruikers meerdere kringen onder een aansluiting gehangen hebben
+        // om deze kringen verticaal te kunnen stapelen. Om het programma backward compatibel te houden behouden we dus 256 tot grandfathering code kan worden ontwikkeld
+    }
+
     overrideKeys() {
         if ( ( (this.keys[4][2] as number) < 1 ) || ( (this.keys[4][2] as number) > 4 ) ) this.keys[4][2] = "2"; //Test dat aantal polen bestaat
     }
 
-    toHTML(mode: string, Parent?: List_Item) {
+    toHTML(mode: string) {
         this.overrideKeys();
-        let output = this.toHTMLHeader(mode, Parent);
+        let output = this.toHTMLHeader(mode);
 
         output += "&nbsp;Naam: " + this.stringToHTML(23,5) + "<br>";
 

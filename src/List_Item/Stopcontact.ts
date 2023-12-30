@@ -17,8 +17,8 @@ class Stopcontact extends Electro_Item {
         this.keys[26][2] = false;  // Per default niet in verdeelbord
     }
 
-    toHTML(mode: string, Parent?: List_Item) {
-        let output = this.toHTMLHeader(mode, Parent);
+    toHTML(mode: string) {
+        let output = this.toHTMLHeader(mode);
 
         output += "&nbsp;Nr: " + this.stringToHTML(10,5) + ", "
                +  "Geaard: " + this.checkboxToHTML(1) + ", "
