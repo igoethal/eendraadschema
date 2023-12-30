@@ -214,18 +214,17 @@ var List_Item = /** @class */ (function () {
         var numChilds = 0;
         if (this.sourcelist != null) {
             for (var i = 0; i < this.sourcelist.data.length; ++i) {
-                if (this.sourcelist.data[i].parent === this.id)
+                if ((this.sourcelist.data[i].parent === this.id) && (this.sourcelist.active[i]))
                     numChilds++;
             }
         }
         return (numChilds);
     };
-    List_Item.prototype.getNumActiveChilds = function () {
+    List_Item.prototype.getNumChildsWithKnownType = function () {
         var numChilds = 0;
         if (this.sourcelist != null) {
             for (var i = 0; i < this.sourcelist.data.length; ++i) {
-                if ((this.sourcelist.data[i].parent === this.id) &&
-                    (this.sourcelist.active[i]) && (this.sourcelist.data[i].keys[0][2] != ""))
+                if ((this.sourcelist.data[i].parent === this.id) && (this.sourcelist.active[i]) && (this.sourcelist.data[i].keys[0][2] != ""))
                     numChilds++;
             }
         }
@@ -240,8 +239,8 @@ var List_Item = /** @class */ (function () {
             return (false);
         }
     };
-    List_Item.prototype.heeftActiefKind = function () {
-        return (this.getNumActiveChilds() > 0);
+    List_Item.prototype.heeftKindMetGekendType = function () {
+        return (this.getNumChildsWithKnownType() > 0);
     };
     List_Item.prototype.heeftVerbruikerAlsKind = function () {
         var parent = this.getParent();
@@ -270,20 +269,6 @@ var List_Item = /** @class */ (function () {
         }
         return false;
     };
-    List_Item.prototype.setKey = function (key, setvalue) {
-        for (var i = 0; i < this.keys.length; i++) {
-            if (this.keys[i][0] == key) {
-                this.keys[i][2] = setvalue;
-            }
-        }
-    };
-    List_Item.prototype.getKey = function (key) {
-        for (var i = 0; i < this.keys.length; i++) {
-            if (this.keys[i][0] == key) {
-                return (this.keys[i][2]);
-            }
-        }
-    };
     List_Item.prototype.getParent = function () {
         if ((this.sourcelist != null) && (this.parent != 0)) {
             return this.sourcelist.data[this.sourcelist.getOrdinalById(this.parent)];
@@ -300,23 +285,22 @@ var List_Item = /** @class */ (function () {
             default:
                 sizestr = ' size="' + size + '" ';
         }
-        output += "<input type=\"text\"" + sizestr + " id=\"" + "HL_edit_" + this.id + "_" + this.keys[keyid][0] +
-            "\" onchange=HLUpdate(" + this.id + ",\"" + this.keys[keyid][0] + "\",\"" +
-            this.keys[keyid][1] + "\",\"" + "HL_edit_" + this.id + "_" + this.keys[keyid][0] +
-            "\") value=\"" + this.keys[keyid][2] + "\">";
+        output = '<input type="text"' + sizestr + ' id="' + 'HL_edit_' + this.id + '_' + keyid + '" '
+            + 'onchange=HLUpdate(' + this.id + ',' + keyid + ',"STRING","' + 'HL_edit_' + this.id + '_' + keyid + '") value="' + this.keys[keyid][2] + '">';
         return (output);
     };
     List_Item.prototype.checkboxToHTML = function (keyid) {
-        var output = "";
-        output += "<input type=\"checkbox\" id=\"" + "HL_edit_" + this.id + "_" + this.keys[keyid][0] + "\" onchange=HLUpdate(" + this.id + ",\"" + this.keys[keyid][0] + "\",\"" + this.keys[keyid][1] + "\",\"" + "HL_edit_" + this.id + "_" + this.keys[keyid][0] + "\")" + (this.keys[keyid][2] ? ' checked' : '') + ">";
+        var output;
+        output = '<input type="checkbox" id="' + 'HL_edit_' + this.id + '_' + keyid + '" '
+            + 'onchange=HLUpdate(' + this.id + ',' + keyid + ',"BOOLEAN","' + 'HL_edit_' + this.id + '_' + keyid + '")'
+            + (this.keys[keyid][2] ? ' checked' : '') + '>';
         return (output);
     };
     List_Item.prototype.selectToHTML = function (keyid, items) {
-        var myId = "HL_edit_" + this.id + "_" + this.keys[keyid][0];
-        var myType = this.keys[keyid][1];
+        var myId = "HL_edit_" + this.id + "_" + keyid;
         var output = "";
         var options = "";
-        output += "<select id=\"" + myId + "\" onchange=HLUpdate(" + this.id + ",\"" + this.keys[keyid][0] + "\",\"" + this.keys[keyid][1] + "\",\"" + myId + "\")>";
+        output = '<select id="' + myId + '" onchange=HLUpdate(' + this.id + ',' + keyid + ',"SELECT","' + myId + '")>';
         for (var i = 0; i < items.length; i++) {
             options = "";
             if (this.keys[keyid][2] == items[i]) {
@@ -342,8 +326,6 @@ var List_Item = /** @class */ (function () {
         var mySVG = new SVGelement();
         return (mySVG);
     };
-    List_Item.prototype.updateConsumers = function () {
-    }; //Empty container class --> only in extended functions
     return List_Item;
 }());
 var Electro_Item = /** @class */ (function (_super) {
@@ -352,76 +334,81 @@ var Electro_Item = /** @class */ (function (_super) {
     //   elements are acceptable (e.g. not all parent can have all possible childs) --
     function Electro_Item(mylist) {
         var _this = _super.call(this, mylist) || this;
-        _this.keys.push(["type", "SELECT", ""]); //0
-        _this.keys.push(["geaard", "BOOLEAN", true]); //1
-        _this.keys.push(["kinderveiligheid", "BOOLEAN", true]); //2
-        _this.keys.push(["accumulatie", "BOOLEAN", false]); //3
-        _this.keys.push(["aantal", "SELECT", "1"]); //4
-        _this.keys.push(["lichtkring_poligheid", "SELECT", "enkelpolig"]); //5
-        //Ook gebruikt voor schakelaar (type schakelaar)
-        //Ook gebruikt voor externe sturing Domotica gestuurde verbruiker (type sturing)
-        _this.keys.push(["ventilator", "BOOLEAN", false]); //6
-        _this.keys.push(["zekering", "SELECT", "automatisch"]); //7
-        _this.keys.push(["amperage", "STRING", "20"]); //8
-        _this.keys.push(["kabel", "STRING", "XVB 3G2,5"]); //9
-        _this.keys.push(["naam", "STRING", ""]); //10
-        _this.keys.push(["differentieel_waarde", "STRING", "300"]); //11
-        _this.keys.push(["kabel_aanwezig", "BOOLEAN", true]); //12, In eerste plaats om aan te geven of er een kabel achter een zekering zit.
-        _this.keys.push(["aantal2", "SELECT", "1"]); //13, a.o. gebruikt voor aantal lampen of aantal knoppen op drukknop_armatuur
-        _this.keys.push(["voltage", "STRING", "230V/24V"]); //14, a.o. gebruikt voor aantal lampen
-        _this.keys.push(["commentaar", "STRING", ""]); //15, extra tekstveld
-        _this.keys.push(["select1", "SELECT", "standaard"]); //16, algemeen veld
-        //Indien lichtpunt, select1 is het type van licht (standaard, TL, ...)
-        //Indien drukknop, select1 kan "standaard", "dimmer" of "rolluik" zijn
-        //Indien vrije tekst, select1 kan "verbruiker" of "zonder kader" zijn
-        //Indien ketel, type is het soort verwarming
-        //Indien stopcontact, select1 is het aantal fasen
-        _this.keys.push(["select2", "SELECT", "standaard"]); //17, algemeen veld
-        //Indien lichtpunt, select2 is de selector voor het type noodverlichting (indien aanwezig)
-        //Indien vrije tekst of verbruiker, kan "links", "centreer", "rechts" zijn
-        //Indien differentieel of differentieelautomaat (in kring of aansluiting), kan type "", "A", of "B" zijn
-        //Indien automaat (in kring of aansluiting), kan curve "", "A", "B", of "C" zijn
-        _this.keys.push(["select3", "SELECT", "standaard"]); //18, algemeen veld
-        //Indien differentieelautomaat (in kring of aansluiting), kan curve "", "A", "B", of "C" zijn.  Veld 17 is dan het Type.
-        //Indien vrije tekst kan je hier kiezen tussen automatisch of handmatige breedte
-        _this.keys.push(["bool1", "BOOLEAN", false]); //19, algemeen veld
-        //Indien lichtpunt, bool1 is de selector voor wandverlichting of niet
-        //Indien drukknop, bool1 is de selector voor afgeschermd of niet
-        //Indien schakelaar/lichtcircuit, bool1 is de selector voor signalisatielamp of niet
-        //Indien vrije tekst of verbruiker, bool1 is de selector voor vet
-        //Indien stopcontact, bool1 is de selector voor ingebouwde schakelaar
-        //Indien domotica gestuurde verbruiker, bool1 is de selector voor draadloos
-        _this.keys.push(["bool2", "BOOLEAN", false]); //20, algemeen veld
-        //Indien lichtpunt, schakelaar, drukknop of stopcontact, bool2 is de selector voor halfwaterdicht of niet
-        //Indien vrije tekst of verbruiker, bool2 is de selector voor schuin
-        //Indien ketel, bool2 is de selector voor energiebron
-        //Indien kring, bool2 is de selector voor selectieve differentieel
-        //Indien stopcontact, bool2 is de selector voor halfwaterdicht
-        //Indien domotica gestuurde verbruiker, bool2 is de selector voor drukknop
-        _this.keys.push(["bool3", "BOOLEAN", false]); //21, algemeen veld
-        //Indien lichtpunt, bool3 is de selector voor ingebouwde schakelaar of niet
-        //Indien schakelaar of drukknop, bool3 is de selector voor verklikkerlamp of niet
-        //Indien ******, bool3 is de selector voor warmtefunctie
-        //Indien stopcontact, bool3 is de selector voor meerfasig
-        //Indien domotica gestuurde verbruiker, bool3 is de selector voor geprogrammeerd
-        _this.keys.push(["string1", "STRING", ""]); //22, algemeen veld
-        //Indien vrije tekst of verbruiker, breedte van het veld
-        //Indien vrije ruimte, breede van de ruimte
-        _this.keys.push(["string2", "STRING", ""]); //23, algemeen veld
-        //Indien vrije tekst of verbruiker, het adres-veld (want reeds gebruikt voor de tekst zelf)
-        //Indien aansluiting, hier kan ook een extra naam voor de aansluiting staan
-        _this.keys.push(["string3", "STRING", ""]); //24, algemeen veld
-        //Indien aansluiting, kabeltype vóór de teller
-        _this.keys.push(["bool4", "BOOLEAN", false]); //25, algemeen veld
-        //Indien schakelaar, indicatie trekschakelaar of niet
-        //Indien stopcontact, bool4 is de selector voor nulgeleider of niet
-        //Indien domotica gestuurde verbruiker, bool4 is de selector voor detectie
-        _this.keys.push(["bool5", "BOOLEAN", false]); //26, algemeen veld
-        //Indien domotica gestuurde verbruiker, bool5 is de selector voor uitbreiding van de sturing met drukknop
-        //Indien stopcontact, geeft aan dat deze in een verdeelbord zit
-        _this.updateConsumers();
+        _this.keys.length = 27;
+        for (var i = 0; i < 27; i++)
+            _this.keys[i] = ["", "", ""];
         return _this;
     }
+    //-- When a new element is created, we will call resetKeys to set the keys to their default values --
+    Electro_Item.prototype.resetKeys = function () {
+        /*this.keys.push(["type","SELECT",""]); //0
+        this.keys.push(["geaard","BOOLEAN",true]); //1
+        this.keys.push(["kinderveiligheid","BOOLEAN",true]); //2
+        this.keys.push(["accumulatie","BOOLEAN",false]); //3
+        this.keys.push(["aantal","SELECT","1"]); //4
+        this.keys.push(["lichtkring_poligheid","SELECT","enkelpolig"]); //5
+          //Ook gebruikt voor schakelaar (type schakelaar)
+          //Ook gebruikt voor externe sturing Domotica gestuurde verbruiker (type sturing)
+        this.keys.push(["ventilator","BOOLEAN",false]); //6
+        this.keys.push(["zekering","SELECT","automatisch"]); //7
+        this.keys.push(["amperage","STRING","20"]); //8
+        this.keys.push(["kabel","STRING","XVB 3G2,5"]); //9
+        this.keys.push(["naam","STRING",""]); //10
+        this.keys.push(["differentieel_waarde","STRING","300"]); //11
+        this.keys.push(["kabel_aanwezig","BOOLEAN",true]); //12, In eerste plaats om aan te geven of er een kabel achter een zekering zit.
+        this.keys.push(["aantal2","SELECT","1"]); //13, a.o. gebruikt voor aantal lampen of aantal knoppen op drukknop_armatuur
+        this.keys.push(["voltage","STRING","230V/24V"]); //14, a.o. gebruikt voor aantal lampen
+        this.keys.push(["commentaar","STRING",""]); //15, extra tekstveld
+        this.keys.push(["select1","SELECT","standaard"]); //16, algemeen veld
+          //Indien lichtpunt, select1 is het type van licht (standaard, TL, ...)
+          //Indien drukknop, select1 kan "standaard", "dimmer" of "rolluik" zijn
+          //Indien vrije tekst, select1 kan "verbruiker" of "zonder kader" zijn
+          //Indien ketel, type is het soort verwarming
+          //Indien stopcontact, select1 is het aantal fasen
+        this.keys.push(["select2","SELECT","standaard"]); //17, algemeen veld
+          //Indien lichtpunt, select2 is de selector voor het type noodverlichting (indien aanwezig)
+          //Indien vrije tekst of verbruiker, kan "links", "centreer", "rechts" zijn
+          //Indien differentieel of differentieelautomaat (in kring of aansluiting), kan type "", "A", of "B" zijn
+          //Indien automaat (in kring of aansluiting), kan curve "", "A", "B", of "C" zijn
+        this.keys.push(["select3","SELECT","standaard"]); //18, algemeen veld
+          //Indien differentieelautomaat (in kring of aansluiting), kan curve "", "A", "B", of "C" zijn.  Veld 17 is dan het Type.
+          //Indien vrije tekst kan je hier kiezen tussen automatisch of handmatige breedte
+        this.keys.push(["bool1","BOOLEAN",false]); //19, algemeen veld
+          //Indien lichtpunt, bool1 is de selector voor wandverlichting of niet
+          //Indien drukknop, bool1 is de selector voor afgeschermd of niet
+          //Indien schakelaar/lichtcircuit, bool1 is de selector voor signalisatielamp of niet
+          //Indien vrije tekst of verbruiker, bool1 is de selector voor vet
+          //Indien stopcontact, bool1 is de selector voor ingebouwde schakelaar
+          //Indien domotica gestuurde verbruiker, bool1 is de selector voor draadloos
+        this.keys.push(["bool2","BOOLEAN",false]); //20, algemeen veld
+          //Indien lichtpunt, schakelaar, drukknop of stopcontact, bool2 is de selector voor halfwaterdicht of niet
+          //Indien vrije tekst of verbruiker, bool2 is de selector voor schuin
+          //Indien ketel, bool2 is de selector voor energiebron
+          //Indien kring, bool2 is de selector voor selectieve differentieel
+          //Indien stopcontact, bool2 is de selector voor halfwaterdicht
+          //Indien domotica gestuurde verbruiker, bool2 is de selector voor drukknop
+        this.keys.push(["bool3","BOOLEAN",false]); //21, algemeen veld
+          //Indien lichtpunt, bool3 is de selector voor ingebouwde schakelaar of niet
+          //Indien schakelaar of drukknop, bool3 is de selector voor verklikkerlamp of niet
+          //Indien ******, bool3 is de selector voor warmtefunctie
+          //Indien stopcontact, bool3 is de selector voor meerfasig
+          //Indien domotica gestuurde verbruiker, bool3 is de selector voor geprogrammeerd
+        this.keys.push(["string1","STRING",""]); //22, algemeen veld
+          //Indien vrije tekst of verbruiker, breedte van het veld
+          //Indien vrije ruimte, breede van de ruimte
+        this.keys.push(["string2","STRING",""]); //23, algemeen veld
+          //Indien vrije tekst of verbruiker, het adres-veld (want reeds gebruikt voor de tekst zelf)
+          //Indien aansluiting, hier kan ook een extra naam voor de aansluiting staan
+        this.keys.push(["string3","STRING",""]); //24, algemeen veld
+          //Indien aansluiting, kabeltype vóór de teller
+        this.keys.push(["bool4","BOOLEAN",false]); //25, algemeen veld
+          //Indien schakelaar, indicatie trekschakelaar of niet
+          //Indien stopcontact, bool4 is de selector voor nulgeleider of niet
+          //Indien domotica gestuurde verbruiker, bool4 is de selector voor detectie
+        this.keys.push(["bool5","BOOLEAN",false]); //26, algemeen veld
+          //Indien domotica gestuurde verbruiker, bool5 is de selector voor uitbreiding van de sturing met drukknop
+          //Indien stopcontact, geeft aan dat deze in een verdeelbord zit*/
+    };
     Electro_Item.prototype.getParent = function () {
         return _super.prototype.getParent.call(this);
     };
@@ -447,37 +434,6 @@ var Electro_Item = /** @class */ (function (_super) {
             this.keys[i][2] = "";
         for (var i = 11; i < this.keys.length; i++)
             this.keys[i][2] = "";
-    };
-    //-- When a new element is created, we will call resetKeys to set the keys to their default values --
-    Electro_Item.prototype.resetKeys = function () { }; // Implemented in the derived classes
-    //-- Algorithm to manually set a key, but most of the time, the keys-array is updated directly
-    //   Note that getKey is defined in List_Item --
-    Electro_Item.prototype.setKey = function (key, setvalue) {
-        _super.prototype.setKey.call(this, key, setvalue);
-        //If type of component changed, reset everything
-        if (key == "type") {
-            this.resetKeys();
-        }
-        //Some validation on the input. Do properties still make sense after update
-        switch (this.keys[0][2]) {
-            case "Lichtcircuit":
-                if (this.getKey("lichtkring_poligheid") == "dubbelpolig") {
-                    if (this.getKey("aantal") > 2) {
-                        this.setKey("aantal", "2");
-                    }
-                }
-                break;
-            case "Verwarmingstoestel":
-                if ((this.getKey("accumulatie") == false) && (this.getKey("ventilator") == true)) {
-                    this.setKey("ventilator", false);
-                }
-                break;
-            case "Kring":
-                if ((this.getKey("aantal") < 1) || (this.getKey("aantal") > 4)) {
-                    this.setKey("aantal", "2");
-                }
-                break;
-        }
     };
     // -- Returns the maximum number of childs the Electro_Item can have --
     Electro_Item.prototype.getMaxNumChilds = function () {
@@ -522,7 +478,7 @@ var Electro_Item = /** @class */ (function (_super) {
                 output += " <button style=\"background-color:green;\" onclick=\"HLInsertBefore(" + this.id + ")\">&#9650;</button>";
                 output += " <button style=\"background-color:green;\" onclick=\"HLInsertAfter(" + this.id + ")\">&#9660;</button>";
             }
-            if (this.checkInsertSibling()) {
+            if (this.checkInsertChild()) {
                 output += " <button style=\"background-color:green;\" onclick=\"HLInsertChild(" + this.id + ")\">&#9654;</button>";
             }
         }
@@ -538,10 +494,9 @@ var Electro_Item = /** @class */ (function (_super) {
         output += this.selectToHTML(0, consumerArray);
         return (output);
     };
-    //-- Display the element in the editing grid at the left of the screen in case the
-    //   element is or will become a child of Parent --
+    //-- This one will get called if the type of the Electro_Item has not yet been chosen --
     Electro_Item.prototype.toHTML = function (mode) { return (this.toHTMLHeader(mode)); }; // Implemented in the derived classes
-    //-- Add the addressline below --
+    //-- Code to add the addressline below when drawing SVG. This is called by most derived classes --
     Electro_Item.prototype.addAddress = function (mySVG, starty, godown, shiftx, key) {
         if (starty === void 0) { starty = 60; }
         if (godown === void 0) { godown = 15; }
@@ -554,7 +509,7 @@ var Electro_Item = /** @class */ (function (_super) {
         }
         return returnstr;
     };
-    //-- Make the SVG for the entire electro item --
+    //-- Make the SVG for the electro item, placeholder for derived classes --
     Electro_Item.prototype.toSVG = function () { return (new SVGelement()); }; //Placeholder for derived classes
     return Electro_Item;
 }(List_Item));
@@ -806,6 +761,7 @@ var Schakelaars = /** @class */ (function (_super) {
     __extends(Schakelaars, _super);
     function Schakelaars(mylist) {
         var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
         _this.tekenKeten = [];
         return _this;
     }
@@ -987,7 +943,9 @@ var Schakelaars = /** @class */ (function (_super) {
 var Lichtcircuit = /** @class */ (function (_super) {
     __extends(Lichtcircuit, _super);
     function Lichtcircuit(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     Lichtcircuit.prototype.resetKeys = function () {
         _super.prototype.resetKeys.call(this); //Schakelaars
@@ -1076,7 +1034,9 @@ var Lichtcircuit = /** @class */ (function (_super) {
 var Aansluiting = /** @class */ (function (_super) {
     __extends(Aansluiting, _super);
     function Aansluiting(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     Aansluiting.prototype.resetKeys = function () {
         this.clearKeys();
@@ -1101,7 +1061,8 @@ var Aansluiting = /** @class */ (function (_super) {
         return 256;
         // Dit kan vreemd lijken omdat in principe een aansluiting maar 1 kind heeft.
         // Echter, in het verleden was 256 wel toegelaten en het is niet uit te sluiten dat gebruikers meerdere kringen onder een aansluiting gehangen hebben
-        // om deze kringen verticaal te kunnen stapelen. Om het programma backward compatibel te houden behouden we dus 256 tot grandfathering code kan worden ontwikkeld
+        // om deze kringen verticaal te kunnen stapelen. Om het programma backward compatibel te houden behouden we dus 256 tot grandfathering code kan worden ontwikkeld.
+        // Ook laat dit toe om tijdelijk een elementje onder aansluiting te hangen alvorens het met move elders onder te brengen
     };
     Aansluiting.prototype.overrideKeys = function () {
         if ((this.keys[4][2] < 1) || (this.keys[4][2] > 4))
@@ -1341,7 +1302,9 @@ var Aansluiting = /** @class */ (function (_super) {
 var Aansluitpunt = /** @class */ (function (_super) {
     __extends(Aansluitpunt, _super);
     function Aansluitpunt(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     Aansluitpunt.prototype.resetKeys = function () {
         this.clearKeys();
@@ -1371,7 +1334,9 @@ var Aansluitpunt = /** @class */ (function (_super) {
 var Aftakdoos = /** @class */ (function (_super) {
     __extends(Aftakdoos, _super);
     function Aftakdoos(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     Aftakdoos.prototype.resetKeys = function () {
         this.clearKeys();
@@ -1401,7 +1366,9 @@ var Aftakdoos = /** @class */ (function (_super) {
 var Batterij = /** @class */ (function (_super) {
     __extends(Batterij, _super);
     function Batterij(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     Batterij.prototype.resetKeys = function () {
         this.clearKeys();
@@ -1432,7 +1399,9 @@ var Batterij = /** @class */ (function (_super) {
 var Bel = /** @class */ (function (_super) {
     __extends(Bel, _super);
     function Bel(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     Bel.prototype.resetKeys = function () {
         this.clearKeys();
@@ -1463,7 +1432,9 @@ var Bel = /** @class */ (function (_super) {
 var Boiler = /** @class */ (function (_super) {
     __extends(Boiler, _super);
     function Boiler(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     Boiler.prototype.resetKeys = function () {
         this.clearKeys();
@@ -1503,7 +1474,9 @@ var Boiler = /** @class */ (function (_super) {
 var Bord = /** @class */ (function (_super) {
     __extends(Bord, _super);
     function Bord(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     Bord.prototype.resetKeys = function () {
         this.clearKeys();
@@ -1569,7 +1542,9 @@ var Bord = /** @class */ (function (_super) {
 var Diepvriezer = /** @class */ (function (_super) {
     __extends(Diepvriezer, _super);
     function Diepvriezer(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     Diepvriezer.prototype.resetKeys = function () {
         this.clearKeys();
@@ -1600,7 +1575,9 @@ var Diepvriezer = /** @class */ (function (_super) {
 var Domotica_gestuurde_verbruiker = /** @class */ (function (_super) {
     __extends(Domotica_gestuurde_verbruiker, _super);
     function Domotica_gestuurde_verbruiker(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     Domotica_gestuurde_verbruiker.prototype.resetKeys = function () {
         this.clearKeys();
@@ -1706,7 +1683,9 @@ var Domotica_gestuurde_verbruiker = /** @class */ (function (_super) {
 var Domotica = /** @class */ (function (_super) {
     __extends(Domotica, _super);
     function Domotica(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     Domotica.prototype.resetKeys = function () {
         this.clearKeys();
@@ -1772,7 +1751,9 @@ var Domotica = /** @class */ (function (_super) {
 var Droogkast = /** @class */ (function (_super) {
     __extends(Droogkast, _super);
     function Droogkast(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     Droogkast.prototype.resetKeys = function () {
         this.clearKeys();
@@ -1802,7 +1783,9 @@ var Droogkast = /** @class */ (function (_super) {
 var Drukknop = /** @class */ (function (_super) {
     __extends(Drukknop, _super);
     function Drukknop(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     Drukknop.prototype.resetKeys = function () {
         this.clearKeys();
@@ -1892,7 +1875,9 @@ var Drukknop = /** @class */ (function (_super) {
 var Elektriciteitsmeter = /** @class */ (function (_super) {
     __extends(Elektriciteitsmeter, _super);
     function Elektriciteitsmeter(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     Elektriciteitsmeter.prototype.resetKeys = function () {
         this.clearKeys();
@@ -1923,7 +1908,9 @@ var Elektriciteitsmeter = /** @class */ (function (_super) {
 var Elektrische_oven = /** @class */ (function (_super) {
     __extends(Elektrische_oven, _super);
     function Elektrische_oven(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     Elektrische_oven.prototype.resetKeys = function () {
         this.clearKeys();
@@ -1954,7 +1941,9 @@ var Elektrische_oven = /** @class */ (function (_super) {
 var EV_lader = /** @class */ (function (_super) {
     __extends(EV_lader, _super);
     function EV_lader(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     EV_lader.prototype.resetKeys = function () {
         this.clearKeys();
@@ -1985,7 +1974,9 @@ var EV_lader = /** @class */ (function (_super) {
 var Ketel = /** @class */ (function (_super) {
     __extends(Ketel, _super);
     function Ketel(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     Ketel.prototype.resetKeys = function () {
         this.clearKeys();
@@ -2086,7 +2077,9 @@ var Ketel = /** @class */ (function (_super) {
 var Koelkast = /** @class */ (function (_super) {
     __extends(Koelkast, _super);
     function Koelkast(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     Koelkast.prototype.resetKeys = function () {
         this.clearKeys();
@@ -2117,7 +2110,9 @@ var Koelkast = /** @class */ (function (_super) {
 var Kookfornuis = /** @class */ (function (_super) {
     __extends(Kookfornuis, _super);
     function Kookfornuis(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     Kookfornuis.prototype.resetKeys = function () {
         this.clearKeys();
@@ -2148,7 +2143,9 @@ var Kookfornuis = /** @class */ (function (_super) {
 var Kring = /** @class */ (function (_super) {
     __extends(Kring, _super);
     function Kring(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     Kring.prototype.resetKeys = function () {
         this.clearKeys();
@@ -2495,7 +2492,9 @@ var Kring = /** @class */ (function (_super) {
 var Lichtpunt = /** @class */ (function (_super) {
     __extends(Lichtpunt, _super);
     function Lichtpunt(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     Lichtpunt.prototype.resetKeys = function () {
         this.clearKeys();
@@ -2722,7 +2721,9 @@ var Lichtpunt = /** @class */ (function (_super) {
 var Meerdere_verbruikers = /** @class */ (function (_super) {
     __extends(Meerdere_verbruikers, _super);
     function Meerdere_verbruikers(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     Meerdere_verbruikers.prototype.resetKeys = function () {
         this.clearKeys();
@@ -2750,7 +2751,7 @@ var Meerdere_verbruikers = /** @class */ (function (_super) {
         mySVG.yup = Math.max(mySVG.yup, 25);
         mySVG.xleft = Math.max(mySVG.xleft, 1);
         // Plaats adres onderaan indien niet leeg en indien er actieve kinderen zijn
-        if ((!(/^\s*$/.test(this.keys[15][2]))) && (this.heeftActiefKind())) { // Controleer of adres leeg is
+        if ((!(/^\s*$/.test(this.keys[15][2]))) && (this.heeftKindMetGekendType())) { // Controleer of adres leeg is
             mySVG.data += '<text x="' + ((mySVG.xright - 20) / 2 + 21) + '" y="' + (mySVG.yup + mySVG.ydown + 10)
                 + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
             mySVG.ydown += 15;
@@ -2762,7 +2763,9 @@ var Meerdere_verbruikers = /** @class */ (function (_super) {
 var Microgolfoven = /** @class */ (function (_super) {
     __extends(Microgolfoven, _super);
     function Microgolfoven(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     Microgolfoven.prototype.resetKeys = function () {
         this.clearKeys();
@@ -2793,7 +2796,9 @@ var Microgolfoven = /** @class */ (function (_super) {
 var Motor = /** @class */ (function (_super) {
     __extends(Motor, _super);
     function Motor(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     Motor.prototype.resetKeys = function () {
         this.clearKeys();
@@ -2824,7 +2829,9 @@ var Motor = /** @class */ (function (_super) {
 var Omvormer = /** @class */ (function (_super) {
     __extends(Omvormer, _super);
     function Omvormer(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     Omvormer.prototype.resetKeys = function () {
         this.clearKeys();
@@ -2855,7 +2862,9 @@ var Omvormer = /** @class */ (function (_super) {
 var Overspanningsbeveiliging = /** @class */ (function (_super) {
     __extends(Overspanningsbeveiliging, _super);
     function Overspanningsbeveiliging(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     Overspanningsbeveiliging.prototype.resetKeys = function () {
         this.clearKeys();
@@ -2886,7 +2895,9 @@ var Overspanningsbeveiliging = /** @class */ (function (_super) {
 var Splitsing = /** @class */ (function (_super) {
     __extends(Splitsing, _super);
     function Splitsing(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     Splitsing.prototype.resetKeys = function () {
         this.clearKeys();
@@ -2932,7 +2943,9 @@ var Splitsing = /** @class */ (function (_super) {
 var Stoomoven = /** @class */ (function (_super) {
     __extends(Stoomoven, _super);
     function Stoomoven(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     Stoomoven.prototype.resetKeys = function () {
         this.clearKeys();
@@ -2963,7 +2976,9 @@ var Stoomoven = /** @class */ (function (_super) {
 var Stopcontact = /** @class */ (function (_super) {
     __extends(Stopcontact, _super);
     function Stopcontact(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     Stopcontact.prototype.resetKeys = function () {
         this.clearKeys();
@@ -3074,7 +3089,9 @@ var Stopcontact = /** @class */ (function (_super) {
 var Transformator = /** @class */ (function (_super) {
     __extends(Transformator, _super);
     function Transformator(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     Transformator.prototype.resetKeys = function () {
         this.clearKeys();
@@ -3108,7 +3125,9 @@ var Transformator = /** @class */ (function (_super) {
 var USB_lader = /** @class */ (function (_super) {
     __extends(USB_lader, _super);
     function USB_lader(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     USB_lader.prototype.resetKeys = function () {
         this.clearKeys();
@@ -3147,7 +3166,9 @@ var USB_lader = /** @class */ (function (_super) {
 var Vaatwasmachine = /** @class */ (function (_super) {
     __extends(Vaatwasmachine, _super);
     function Vaatwasmachine(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     Vaatwasmachine.prototype.resetKeys = function () {
         this.clearKeys();
@@ -3178,7 +3199,9 @@ var Vaatwasmachine = /** @class */ (function (_super) {
 var Ventilator = /** @class */ (function (_super) {
     __extends(Ventilator, _super);
     function Ventilator(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     Ventilator.prototype.resetKeys = function () {
         this.clearKeys();
@@ -3209,7 +3232,9 @@ var Ventilator = /** @class */ (function (_super) {
 var Verbruiker = /** @class */ (function (_super) {
     __extends(Verbruiker, _super);
     function Verbruiker(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     Verbruiker.prototype.resetKeys = function () {
         this.clearKeys();
@@ -3301,7 +3326,9 @@ var Verbruiker = /** @class */ (function (_super) {
 var Verlenging = /** @class */ (function (_super) {
     __extends(Verlenging, _super);
     function Verlenging(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     Verlenging.prototype.resetKeys = function () {
         this.clearKeys();
@@ -3344,7 +3371,9 @@ var Verlenging = /** @class */ (function (_super) {
 var Verwarmingstoestel = /** @class */ (function (_super) {
     __extends(Verwarmingstoestel, _super);
     function Verwarmingstoestel(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     Verwarmingstoestel.prototype.resetKeys = function () {
         this.clearKeys();
@@ -3399,7 +3428,9 @@ var Verwarmingstoestel = /** @class */ (function (_super) {
 var Vrije_ruimte = /** @class */ (function (_super) {
     __extends(Vrije_ruimte, _super);
     function Vrije_ruimte(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     Vrije_ruimte.prototype.resetKeys = function () {
         this.clearKeys();
@@ -3434,7 +3465,9 @@ var Vrije_ruimte = /** @class */ (function (_super) {
 var Vrije_tekst = /** @class */ (function (_super) {
     __extends(Vrije_tekst, _super);
     function Vrije_tekst(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     Vrije_tekst.prototype.resetKeys = function () {
         this.clearKeys();
@@ -3552,7 +3585,9 @@ var Vrije_tekst = /** @class */ (function (_super) {
 var Warmtepomp = /** @class */ (function (_super) {
     __extends(Warmtepomp, _super);
     function Warmtepomp(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     Warmtepomp.prototype.resetKeys = function () {
         this.clearKeys();
@@ -3618,7 +3653,9 @@ var Warmtepomp = /** @class */ (function (_super) {
 var Wasmachine = /** @class */ (function (_super) {
     __extends(Wasmachine, _super);
     function Wasmachine(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     Wasmachine.prototype.resetKeys = function () {
         this.clearKeys();
@@ -3649,7 +3686,9 @@ var Wasmachine = /** @class */ (function (_super) {
 var Zeldzame_symbolen = /** @class */ (function (_super) {
     __extends(Zeldzame_symbolen, _super);
     function Zeldzame_symbolen(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     Zeldzame_symbolen.prototype.resetKeys = function () {
         this.clearKeys();
@@ -3689,7 +3728,9 @@ var Zeldzame_symbolen = /** @class */ (function (_super) {
 var Zonnepaneel = /** @class */ (function (_super) {
     __extends(Zonnepaneel, _super);
     function Zonnepaneel(mylist) {
-        return _super.call(this, mylist) || this;
+        var _this = _super.call(this, mylist) || this;
+        _this.resetKeys();
+        return _this;
     }
     Zonnepaneel.prototype.resetKeys = function () {
         this.clearKeys();
@@ -4199,12 +4240,10 @@ var Hierarchical_List = /** @class */ (function () {
     };
     //-----------------------------------------------------
     Hierarchical_List.prototype.adjustTypeByOrdinal = function (ordinal, electroType, resetkeys) {
-        //this.data[ordinal].keys[0][2] = electroType; //We call setKey to ensure that also resetKeys is called in the Electro_Item
         var tempval = this.createItem(electroType);
         Object.assign(tempval, this.data[ordinal]);
         tempval.keys[0][2] = electroType; //We need to do this again as we overwrote it with assign
-        if (resetkeys)
-            tempval.resetKeys();
+        //if (resetkeys) tempval.resetKeys();   This serves no purpose as resetKeys has become part of the constructor.
         this.data[ordinal] = tempval;
     };
     //-----------------------------------------------------
@@ -4689,21 +4728,21 @@ function HLUpdate(my_id, key, type, docId) {
     switch (type) {
         case "SELECT":
             var setvalueselect = document.getElementById(docId).value;
-            if (key == "type") {
+            if (key == 0) { // Type changed
                 structure.adjustTypeById(my_id, setvalueselect, true);
             }
             else {
-                structure.data[structure.getOrdinalById(my_id)].setKey(key, setvalueselect);
+                structure.data[structure.getOrdinalById(my_id)].keys[key][2] = setvalueselect;
             }
             HLRedrawTreeHTML();
             break;
         case "STRING":
             var setvaluestr = document.getElementById(docId).value;
-            structure.data[structure.getOrdinalById(my_id)].setKey(key, setvaluestr);
+            structure.data[structure.getOrdinalById(my_id)].keys[key][2] = setvaluestr;
             break;
         case "BOOLEAN":
             var setvaluebool = document.getElementById(docId).checked;
-            structure.data[structure.getOrdinalById(my_id)].setKey(key, setvaluebool);
+            structure.data[structure.getOrdinalById(my_id)].keys[key][2] = setvaluebool;
             HLRedrawTreeHTML();
             break;
     }
@@ -4842,34 +4881,34 @@ function buildNewStructure(structure) {
     //Eerst het hoofddifferentieel maken
     var itemCounter = 0;
     structure.addItem("Aansluiting");
-    structure.data[0].setKey("type", "Aansluiting");
-    structure.data[0].setKey("naam", "");
-    structure.data[0].setKey("zekering", "differentieel");
-    structure.data[0].setKey("aantal", CONF_aantal_fazen_droog);
-    structure.data[0].setKey("amperage", CONF_hoofdzekering);
-    structure.data[0].setKey("kabel", CONF_aantal_fazen_droog + "x16");
-    structure.data[0].setKey("kabel_aanwezig", false);
-    structure.data[0].setKey("differentieel_waarde", CONF_differentieel_droog);
+    structure.data[0].keys[0][2] = "Aansluiting";
+    structure.data[0].keys[10][2] = ""; //Naam
+    structure.data[0].keys[7][2] = "differentieel"; // Zekering
+    structure.data[0].keys[4][2] = CONF_aantal_fazen_droog; // Aantal
+    structure.data[0].keys[8][2] = CONF_hoofdzekering; // Amperage
+    structure.data[0].keys[9][2] = CONF_aantal_fazen_droog + "x16"; // Kabel
+    structure.data[0].keys[12][2] = false; // Kabel aanwezig
+    structure.data[0].keys[11][2] = CONF_differentieel_droog; // Differentieel waarde
     itemCounter++;
     //Dan het hoofdbord maken
     structure.insertChildAfterId(new Bord(structure), itemCounter);
-    structure.data[itemCounter].setKey("type", "Bord");
+    structure.data[itemCounter].keys[0][2] = "Bord";
     itemCounter++;
     var droogBordCounter = itemCounter;
     //Nat bord voorzien
     structure.insertChildAfterId(new Kring(structure), itemCounter);
-    structure.data[itemCounter].setKey("type", "Kring");
-    structure.data[itemCounter].setKey("naam", "");
-    structure.data[itemCounter].setKey("zekering", "differentieel");
-    structure.data[itemCounter].setKey("aantal", CONF_aantal_fazen_nat);
-    structure.data[itemCounter].setKey("amperage", CONF_hoofdzekering);
-    structure.data[itemCounter].setKey("kabel", "");
-    structure.data[itemCounter].setKey("kabel_aanwezig", false);
-    structure.data[itemCounter].setKey("differentieel_waarde", CONF_differentieel_nat);
+    structure.data[itemCounter].keys[0][2] = "Kring";
+    structure.data[itemCounter].keys[10][2] = "";
+    structure.data[itemCounter].keys[7][2] = "differentieel";
+    structure.data[itemCounter].keys[4][2] = CONF_aantal_fazen_nat;
+    structure.data[itemCounter].keys[8][2] = CONF_hoofdzekering;
+    structure.data[itemCounter].keys[9][2] = "";
+    structure.data[itemCounter].keys[12][2] = false;
+    structure.data[itemCounter].keys[11][2] = CONF_differentieel_nat;
     itemCounter++;
     structure.insertChildAfterId(new Bord(structure), itemCounter);
-    structure.data[itemCounter].setKey("type", "Bord");
-    structure.data[itemCounter].setKey("geaard", false);
+    structure.data[itemCounter].keys[0][2] = "Bord";
+    structure.data[itemCounter].keys[1][2] = false; // Geaard
     itemCounter++;
 }
 function reset_all() {
@@ -5252,5 +5291,5 @@ var CONF_differentieel_droog = 300;
 var CONF_differentieel_nat = 30;
 var CONF_upload_OK = "ask"; //can be "ask", "yes", "no"; //before uploading, we ask
 var structure;
-import_to_structure(EXAMPLE_DEFAULT, false); //Just in case the user doesn't select a scheme and goes to drawing immediately, there should be something there
+//import_to_structure(EXAMPLE_DEFAULT,false); //Just in case the user doesn't select a scheme and goes to drawing immediately, there should be something there
 restart_all();

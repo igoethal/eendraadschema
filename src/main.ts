@@ -54,24 +54,24 @@ function HLInsertChild(my_id: number) {
   //No need to call HLRedrawTree as HLCollapseExpand already does that
 }
 
-function HLUpdate(my_id: number, key: string, type: string, docId: string) {
+function HLUpdate(my_id: number, key: number, type: string, docId: string) {
   switch (type) {
     case "SELECT":
       var setvalueselect: string = (document.getElementById(docId) as HTMLInputElement).value;
-      if (key == "type") {
+      if (key == 0) { // Type changed
         structure.adjustTypeById(my_id, setvalueselect, true);
       } else {
-        structure.data[structure.getOrdinalById(my_id)].setKey(key,setvalueselect);
+        structure.data[structure.getOrdinalById(my_id)].keys[key][2] = setvalueselect;
       }
       HLRedrawTreeHTML();
       break;
     case "STRING":
       var setvaluestr: string = (document.getElementById(docId) as HTMLInputElement).value;
-      structure.data[structure.getOrdinalById(my_id)].setKey(key,setvaluestr);
+      structure.data[structure.getOrdinalById(my_id)].keys[key][2] = setvaluestr;
       break;
     case "BOOLEAN":
       var setvaluebool: boolean = (document.getElementById(docId) as HTMLInputElement).checked;
-      structure.data[structure.getOrdinalById(my_id)].setKey(key,setvaluebool);
+      structure.data[structure.getOrdinalById(my_id)].keys[key][2] = setvaluebool;
       HLRedrawTreeHTML();
       break;
   }
@@ -230,36 +230,36 @@ function buildNewStructure(structure: Hierarchical_List) {
   //Eerst het hoofddifferentieel maken
   let itemCounter:number = 0;
   structure.addItem("Aansluiting");
-  structure.data[0].setKey("type","Aansluiting");
-  structure.data[0].setKey("naam","");
-  structure.data[0].setKey("zekering","differentieel");
-  structure.data[0].setKey("aantal",CONF_aantal_fazen_droog);
-  structure.data[0].setKey("amperage",CONF_hoofdzekering);
-  structure.data[0].setKey("kabel",CONF_aantal_fazen_droog+"x16");
-  structure.data[0].setKey("kabel_aanwezig",false);
-  structure.data[0].setKey("differentieel_waarde",CONF_differentieel_droog);
+  structure.data[0].keys[0][2]  = "Aansluiting";
+  structure.data[0].keys[10][2] = ""; //Naam
+  structure.data[0].keys[7][2]  = "differentieel"; // Zekering
+  structure.data[0].keys[4][2]  = CONF_aantal_fazen_droog; // Aantal
+  structure.data[0].keys[8][2]  = CONF_hoofdzekering; // Amperage
+  structure.data[0].keys[9][2]  = CONF_aantal_fazen_droog+"x16"; // Kabel
+  structure.data[0].keys[12][2] = false; // Kabel aanwezig
+  structure.data[0].keys[11][2] = CONF_differentieel_droog; // Differentieel waarde
   itemCounter++;
 
   //Dan het hoofdbord maken
   structure.insertChildAfterId(new Bord(structure),itemCounter);
-  structure.data[itemCounter].setKey("type","Bord");
+  structure.data[itemCounter].keys[0][2] = "Bord";
   itemCounter++;
   let droogBordCounter:number = itemCounter;
 
   //Nat bord voorzien
   structure.insertChildAfterId(new Kring(structure),itemCounter);
-  structure.data[itemCounter].setKey("type","Kring");
-  structure.data[itemCounter].setKey("naam","");
-  structure.data[itemCounter].setKey("zekering","differentieel");
-  structure.data[itemCounter].setKey("aantal",CONF_aantal_fazen_nat);
-  structure.data[itemCounter].setKey("amperage",CONF_hoofdzekering);
-  structure.data[itemCounter].setKey("kabel","");
-  structure.data[itemCounter].setKey("kabel_aanwezig",false);
-  structure.data[itemCounter].setKey("differentieel_waarde",CONF_differentieel_nat);
+  structure.data[itemCounter].keys[0][2]  = "Kring";
+  structure.data[itemCounter].keys[10][2] = "";
+  structure.data[itemCounter].keys[7][2]  = "differentieel";
+  structure.data[itemCounter].keys[4][2]  = CONF_aantal_fazen_nat;
+  structure.data[itemCounter].keys[8][2]  = CONF_hoofdzekering;
+  structure.data[itemCounter].keys[9][2]  = "";
+  structure.data[itemCounter].keys[12][2] = false;
+  structure.data[itemCounter].keys[11][2] = CONF_differentieel_nat;
   itemCounter++;
   structure.insertChildAfterId(new Bord(structure),itemCounter);
-  structure.data[itemCounter].setKey("type","Bord");
-  structure.data[itemCounter].setKey("geaard",false);
+  structure.data[itemCounter].keys[0][2] = "Bord";
+  structure.data[itemCounter].keys[1][2] = false; // Geaard
   itemCounter++;
 }
 

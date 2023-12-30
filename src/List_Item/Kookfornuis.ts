@@ -1,6 +1,9 @@
 class Kookfornuis extends Electro_Item {
     
-    constructor(mylist: Hierarchical_List) { super(mylist); }
+    constructor(mylist: Hierarchical_List) { 
+        super(mylist); 
+        this.resetKeys();
+    }
 
     resetKeys() {
         this.clearKeys();

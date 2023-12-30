@@ -27,18 +27,17 @@ class List_Item {
         var numChilds = 0;
         if (this.sourcelist != null) {
             for (let i=0; i<this.sourcelist.data.length; ++i) {
-                if (this.sourcelist.data[i].parent === this.id) numChilds++;
+                if ((this.sourcelist.data[i].parent === this.id) && (this.sourcelist.active[i])) numChilds++;
             }  
         }
         return(numChilds);
     }
 
-    getNumActiveChilds() : number {
+    getNumChildsWithKnownType() : number {
       var numChilds = 0;
       if (this.sourcelist != null) {
           for (let i=0; i<this.sourcelist.data.length; ++i) {
-              if ( (this.sourcelist.data[i].parent === this.id) && 
-                   (this.sourcelist.active[i]) && (this.sourcelist.data[i].keys[0][2] != "") ) numChilds++;
+              if ( (this.sourcelist.data[i].parent === this.id) && (this.sourcelist.active[i]) && (this.sourcelist.data[i].keys[0][2] != "") ) numChilds++;
           }  
       }
       return(numChilds);
@@ -47,15 +46,14 @@ class List_Item {
     isActief() : Boolean {
       if (this.sourcelist != null) {
         let ordinal = this.sourcelist.getOrdinalById(this.id);
-        return(this.sourcelist.active[ordinal]);
-        
+        return(this.sourcelist.active[ordinal]);   
       } else {
         return(false);
       }
     }
 
-    heeftActiefKind() : boolean {
-      return(this.getNumActiveChilds() > 0);
+    heeftKindMetGekendType() : boolean {
+      return(this.getNumChildsWithKnownType() > 0);
     }
 
     heeftVerbruikerAlsKind() : boolean {
@@ -82,22 +80,6 @@ class List_Item {
       return false;
     }
 
-    setKey(key: string, setvalue: any) {
-      for (var i: number = 0; i<this.keys.length; i++) {
-        if (this.keys[i][0]==key) {
-          this.keys[i][2] = setvalue;
-        }
-      }
-    }
-
-    getKey(key: string) {
-      for (var i: number = 0; i<this.keys.length; i++) {
-        if (this.keys[i][0]==key) {
-          return(this.keys[i][2]);
-        }
-      }
-    }
-
     getParent() {
       if ((this.sourcelist != null) && (this.parent != 0)) {
         return this.sourcelist.data[this.sourcelist.getOrdinalById(this.parent)];
@@ -114,26 +96,27 @@ class List_Item {
         default:
           sizestr = ' size="'+size+'" ';
       }
-      output += "<input type=\"text\""+sizestr+" id=\"" + "HL_edit_"+this.id+"_"+this.keys[keyid][0] +
-                "\" onchange=HLUpdate("+this.id+",\""+this.keys[keyid][0]+"\",\""+
-                this.keys[keyid][1]+"\",\""+"HL_edit_"+this.id+"_"+this.keys[keyid][0]+
-                "\") value=\"" + this.keys[keyid][2] + "\">";
+      output = '<input type="text"' + sizestr + ' id="' + 'HL_edit_' + this.id + '_' + keyid +  '" ' 
+             + 'onchange=HLUpdate(' + this.id + ',' + keyid + ',"STRING","' + 'HL_edit_' + this.id + '_' + keyid + '") value="' + this.keys[keyid][2] + '">';
+
       return(output);
     }
 
     checkboxToHTML(keyid: number) {
-      let output:string = "";
-      output += "<input type=\"checkbox\" id=\"" + "HL_edit_"+this.id+"_"+this.keys[keyid][0] + "\" onchange=HLUpdate("+this.id+",\""+this.keys[keyid][0]+"\",\""+this.keys[keyid][1]+"\",\""+"HL_edit_"+this.id+"_"+this.keys[keyid][0]+"\")"+(this.keys[keyid][2] ? ' checked' : '')+">";
+      let output:string;    
+      output = '<input type="checkbox" id="' + 'HL_edit_' + this.id + '_' + keyid + '" '
+             + 'onchange=HLUpdate(' + this.id + ',' + keyid + ',"BOOLEAN","' + 'HL_edit_' + this.id + '_' + keyid + '")' 
+             + (this.keys[keyid][2] ? ' checked' : '') + '>';
+
       return(output);
     }
 
     selectToHTML(keyid: number, items: Array<String>) {
-      var myId = "HL_edit_"+this.id+"_"+this.keys[keyid][0];
-      var myType = this.keys[keyid][1];
+      var myId = "HL_edit_"+this.id+"_"+keyid;
       var output: String = "";
       var options: string = "";
 
-      output += "<select id=\""+myId+"\" onchange=HLUpdate("+this.id+",\""+this.keys[keyid][0]+"\",\""+this.keys[keyid][1]+"\",\""+myId+"\")>";
+      output = '<select id="' + myId + '" onchange=HLUpdate(' + this.id + ',' + keyid + ',"SELECT","' + myId + '")>';
       for (var i:number=0; i<items.length; i++) {
         options = "";
         if (this.keys[keyid][2]==items[i]) { options += " selected"; }
@@ -160,7 +143,4 @@ class List_Item {
       let mySVG:SVGelement = new SVGelement();
       return(mySVG);
     }
-
-    updateConsumers() {
-    } //Empty container class --> only in extended functions
 }

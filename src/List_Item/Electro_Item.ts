@@ -3,9 +3,19 @@ class Electro_Item extends List_Item {
   //-- Constructor, can be invoked with the List_Item of the parent to know better what kind of
   //   elements are acceptable (e.g. not all parent can have all possible childs) --
 
-  constructor(mylist: Hierarchical_List) {
+  constructor(mylist: Hierarchical_List) { // This is legacy but we will live with it for now until we completely removed the key-concept
     super(mylist);
-    this.keys.push(["type","SELECT",""]); //0
+    this.keys.length = 27;
+    for (let i=0; i<27; i++) this.keys[i] = ["","",""];
+  }
+
+    //-- When a new element is created, we will call resetKeys to set the keys to their default values --
+
+  resetKeys() {
+
+
+
+    /*this.keys.push(["type","SELECT",""]); //0
     this.keys.push(["geaard","BOOLEAN",true]); //1
     this.keys.push(["kinderveiligheid","BOOLEAN",true]); //2
     this.keys.push(["accumulatie","BOOLEAN",false]); //3
@@ -71,9 +81,7 @@ class Electro_Item extends List_Item {
       //Indien domotica gestuurde verbruiker, bool4 is de selector voor detectie
     this.keys.push(["bool5","BOOLEAN",false]); //26, algemeen veld
       //Indien domotica gestuurde verbruiker, bool5 is de selector voor uitbreiding van de sturing met drukknop
-      //Indien stopcontact, geeft aan dat deze in een verdeelbord zit
-
-    this.updateConsumers();
+      //Indien stopcontact, geeft aan dat deze in een verdeelbord zit*/
   }
 
   getParent(): Electro_Item { // Function that returns an Electro_Item and not a List_Item
@@ -105,41 +113,6 @@ class Electro_Item extends List_Item {
     //Whipe most keys; note how we don't reset keys[10][2] as usually we don't want the number to change
     for (let i = 1; i < 10; i++) this.keys[i][2] = "";
     for (let i = 11; i < this.keys.length; i++) this.keys[i][2] = "";  
-  }
-
-  //-- When a new element is created, we will call resetKeys to set the keys to their default values --
-
-  resetKeys() {} // Implemented in the derived classes
-
-  //-- Algorithm to manually set a key, but most of the time, the keys-array is updated directly
-  //   Note that getKey is defined in List_Item --
-
-  setKey(key: string, setvalue: any) {
-    super.setKey(key, setvalue);
-    //If type of component changed, reset everything
-    if (key=="type") {
-      this.resetKeys();
-    }
-    //Some validation on the input. Do properties still make sense after update
-    switch (this.keys[0][2]) {
-      case "Lichtcircuit":
-        if (this.getKey("lichtkring_poligheid") == "dubbelpolig") {
-          if ((this.getKey("aantal") as number) > 2) {
-            this.setKey("aantal","2");
-          }
-        }
-        break;
-      case "Verwarmingstoestel":
-        if ( (this.getKey("accumulatie") == false) && (this.getKey("ventilator") == true) ) {
-          this.setKey("ventilator",false);
-        }
-        break;
-      case "Kring":
-        if ( ( (this.getKey("aantal") as number) < 1 ) || ( (this.getKey("aantal") as number) > 4 ) ) {
-          this.setKey("aantal","2");
-        }
-        break;
-    }
   }
 
   // -- Returns the maximum number of childs the Electro_Item can have --
@@ -185,7 +158,7 @@ class Electro_Item extends List_Item {
         output += " <button style=\"background-color:green;\" onclick=\"HLInsertBefore(" + this.id +")\">&#9650;</button>";
         output += " <button style=\"background-color:green;\" onclick=\"HLInsertAfter(" + this.id +")\">&#9660;</button>";
       }
-      if (this.checkInsertSibling()) {
+      if (this.checkInsertChild()) {
         output += " <button style=\"background-color:green;\" onclick=\"HLInsertChild(" + this.id +")\">&#9654;</button>";
       }
     };

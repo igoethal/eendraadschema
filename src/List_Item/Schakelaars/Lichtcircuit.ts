@@ -1,7 +1,8 @@
 class Lichtcircuit extends Schakelaars {
     
     constructor(mylist: Hierarchical_List) { 
-        super(mylist); //Schakelaars
+        super(mylist); 
+        this.resetKeys();
     }
 
     resetKeys() {

@@ -1,6 +1,9 @@
 class Aansluiting extends Electro_Item {
     
-    constructor(mylist: Hierarchical_List) { super(mylist); }
+    constructor(mylist: Hierarchical_List) { 
+        super(mylist); 
+        this.resetKeys();
+    }
 
     resetKeys() {
         this.clearKeys();
@@ -27,7 +30,8 @@ class Aansluiting extends Electro_Item {
         return 256;
         // Dit kan vreemd lijken omdat in principe een aansluiting maar 1 kind heeft.
         // Echter, in het verleden was 256 wel toegelaten en het is niet uit te sluiten dat gebruikers meerdere kringen onder een aansluiting gehangen hebben
-        // om deze kringen verticaal te kunnen stapelen. Om het programma backward compatibel te houden behouden we dus 256 tot grandfathering code kan worden ontwikkeld
+        // om deze kringen verticaal te kunnen stapelen. Om het programma backward compatibel te houden behouden we dus 256 tot grandfathering code kan worden ontwikkeld.
+        // Ook laat dit toe om tijdelijk een elementje onder aansluiting te hangen alvorens het met move elders onder te brengen
     }
 
     overrideKeys() {

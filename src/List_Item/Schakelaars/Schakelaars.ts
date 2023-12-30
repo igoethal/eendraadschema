@@ -3,7 +3,8 @@ class Schakelaars extends Electro_Item {
     tekenKeten: Array<Schakelaar>; // Een lijst van elementen die we willen tekenen
     
     constructor(mylist: Hierarchical_List) { 
-        super(mylist); 
+        super(mylist);
+        this.resetKeys();
         this.tekenKeten = [];
     }
 
