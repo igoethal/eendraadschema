@@ -419,21 +419,21 @@ class Hierarchical_List {
 
   //-----------------------------------------------------
 
-  adjustTypeByOrdinal(ordinal: number, electroType : string, resetkeys? : boolean) {
+  adjustTypeByOrdinal(ordinal: number, electroType : string) {
     let tempval = this.createItem(electroType);
 
     (<any> Object).assign(tempval,this.data[ordinal]);
     tempval.keys[0][2] = electroType; //We need to do this again as we overwrote it with assign
-    //if (resetkeys) tempval.resetKeys();   This serves no purpose as resetKeys has become part of the constructor.
+    tempval.resetKeys();   //Already part of createItem but we need to run this again as the assign operation overwrote everything
 
     this.data[ordinal] = tempval;
   }
 
   //-----------------------------------------------------
 
-  adjustTypeById(my_id: number, electroType : string, resetkeys? : boolean) {
+  adjustTypeById(my_id: number, electroType : string) {
     let ordinal = structure.getOrdinalById(my_id);
-    this.adjustTypeByOrdinal(ordinal, electroType, resetkeys);
+    this.adjustTypeByOrdinal(ordinal, electroType);
   }
 
   //-----------------------------------------------------

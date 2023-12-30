@@ -59,7 +59,7 @@ function HLUpdate(my_id: number, key: number, type: string, docId: string) {
     case "SELECT":
       var setvalueselect: string = (document.getElementById(docId) as HTMLInputElement).value;
       if (key == 0) { // Type changed
-        structure.adjustTypeById(my_id, setvalueselect, true);
+        structure.adjustTypeById(my_id, setvalueselect);
       } else {
         structure.data[structure.getOrdinalById(my_id)].keys[key][2] = setvalueselect;
       }

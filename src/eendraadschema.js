@@ -4239,17 +4239,17 @@ var Hierarchical_List = /** @class */ (function () {
         this.reSort();
     };
     //-----------------------------------------------------
-    Hierarchical_List.prototype.adjustTypeByOrdinal = function (ordinal, electroType, resetkeys) {
+    Hierarchical_List.prototype.adjustTypeByOrdinal = function (ordinal, electroType) {
         var tempval = this.createItem(electroType);
         Object.assign(tempval, this.data[ordinal]);
         tempval.keys[0][2] = electroType; //We need to do this again as we overwrote it with assign
-        //if (resetkeys) tempval.resetKeys();   This serves no purpose as resetKeys has become part of the constructor.
+        tempval.resetKeys(); //Already part of createItem but we need to run this again as the assign operation overwrote everything
         this.data[ordinal] = tempval;
     };
     //-----------------------------------------------------
-    Hierarchical_List.prototype.adjustTypeById = function (my_id, electroType, resetkeys) {
+    Hierarchical_List.prototype.adjustTypeById = function (my_id, electroType) {
         var ordinal = structure.getOrdinalById(my_id);
-        this.adjustTypeByOrdinal(ordinal, electroType, resetkeys);
+        this.adjustTypeByOrdinal(ordinal, electroType);
     };
     //-----------------------------------------------------
     Hierarchical_List.prototype.tekenVerticaleLijnIndienKindVanKring = function (item, mySVG) {
@@ -4729,7 +4729,7 @@ function HLUpdate(my_id, key, type, docId) {
         case "SELECT":
             var setvalueselect = document.getElementById(docId).value;
             if (key == 0) { // Type changed
-                structure.adjustTypeById(my_id, setvalueselect, true);
+                structure.adjustTypeById(my_id, setvalueselect);
             }
             else {
                 structure.data[structure.getOrdinalById(my_id)].keys[key][2] = setvalueselect;
