@@ -5291,5 +5291,5 @@ var CONF_differentieel_droog = 300;
 var CONF_differentieel_nat = 30;
 var CONF_upload_OK = "ask"; //can be "ask", "yes", "no"; //before uploading, we ask
 var structure;
-//import_to_structure(EXAMPLE_DEFAULT,false); //Just in case the user doesn't select a scheme and goes to drawing immediately, there should be something there
+import_to_structure(EXAMPLE_DEFAULT, false); //Just in case the user doesn't select a scheme and goes to drawing immediately, there should be something there
 restart_all();
