@@ -659,7 +659,7 @@ function import_to_structure(mystring: string, redraw = true) {
   if (version < 2) { // Versies < 2 gebruikten enkel keys en geen props dus de code hieronder met keys zal altijd werken
     for (var i = 0; i < mystructure.length; i++) {
       // Breedte van Vrije tekst velden zonder kader met 30 verhogen sinds 16/12/2023
-      if ( (structure.data[i].keys[0][2] === "Vrije tekst") && (structure.data[i].keys[16][2] != "verbruiker") ) {
+      if ( ((structure.data[i] as Electro_Item).getType() === "Vrije tekst") && (structure.data[i].keys[16][2] != "verbruiker") ) {
         if (Number(structure.data[i].keys[22][2])>0) structure.data[i].keys[22][2] = String(Number(structure.data[i].keys[22][2]) + 30);
           else structure.data[i].keys[18][2] = "automatisch";
         if (structure.data[i].keys[16][2] != "zonder kader") structure.data[i].keys[16][2] = "verbruiker";

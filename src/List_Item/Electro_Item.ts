@@ -88,6 +88,14 @@ class Electro_Item extends List_Item {
       //Indien stopcontact, geeft aan dat deze in een verdeelbord zit*/
   }
 
+  getLegacyKey(keyid: number) {
+    if ( (typeof(this.keys) != 'undefined') && (this.keys.length>keyid) ) {
+      return this.keys[keyid][2];
+    } else {
+      return null;
+    }
+  }
+  
   getParent(): Electro_Item { // Function that returns an Electro_Item and not a List_Item
     return(super.getParent() as Electro_Item);
   }
@@ -111,7 +119,7 @@ class Electro_Item extends List_Item {
   }
 
   isVrijeTekstZonderKader(item: Electro_Item) : boolean {
-    return ((item.getType() == "Vrije tekst") && (item.keys[16][2] == "Zonder kader"));
+    return ((item.getType() == "Vrije tekst") && (item.keys[16][2] == "zonder kader"));
   }
 
   heeftVerbruikerAlsKind() : boolean {
