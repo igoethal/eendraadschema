@@ -213,7 +213,7 @@ class Hierarchical_List {
       case 'Zonnepaneel': tempval = new Zonnepaneel(structure); break;
       default: tempval = new Electro_Item(structure);
     }
-    tempval.keys[0][2] = electroType;
+    //tempval.keys[0][2] = electroType; //Zou niet meer nodig moeten zijn aangezien dit reeds in de constructors zit
 
     //First set the correct identifyer
     tempval.id = this.curid;
@@ -375,7 +375,7 @@ class Hierarchical_List {
     }
     let parentOrdinal = this.getOrdinalById(parent_id);
 
-    let my_item = this.createItem(this.data[currentOrdinal].keys[0][2]);
+    let my_item = this.createItem((this.data[currentOrdinal] as Electro_Item).getType());
     my_item.clone(this.data[currentOrdinal]);
     //var original_length = this.length;
 
@@ -423,7 +423,10 @@ class Hierarchical_List {
     let tempval = this.createItem(electroType);
 
     (<any> Object).assign(tempval,this.data[ordinal]);
-    tempval.keys[0][2] = electroType; //We need to do this again as we overwrote it with assign
+    if (typeof(tempval.keys) != 'undefined') 
+      tempval.keys[0][2] = electroType; //We need to do this again as we overwrote it with assign
+    else
+      tempval.props.type = electroType; //We need to do this again as we overwrote it with assign
     tempval.resetKeys();   //Already part of createItem but we need to run this again as the assign operation overwrote everything
 
     this.data[ordinal] = tempval;
@@ -467,10 +470,12 @@ class Hierarchical_List {
               mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + y1 + '" y2="' + y2 + '" stroke="black" />'
 
               // Plaats het nummer van het item naast de lijn
+              let displaynr:string;
+              if (typeof(item.keys) != 'undefined') displaynr = item.keys[10][2]; else displaynr = item.props.nr;
               mySVG.data +=
                 '<text x="' + (mySVG.xleft+9) + '" y="' + (mySVG.yup - 5) + '" ' +
                 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' +
-                htmlspecialchars(item.keys[10][2])+'</text>';
+                htmlspecialchars(displaynr)+'</text>';
             }
       };
   };
@@ -527,7 +532,9 @@ class Hierarchical_List {
 
     for (var i = 0; i<this.length; i++) {
       if (this.active[i] && ( (this.data[i].parent == myParent) || ( (includeparent==true) && (this.id[i] == myParent) ) ) ) {
-        switch (this.data[i].keys[0][2]) {
+        let mytype:string = (this.data[i] as Electro_Item).getType();
+        if (typeof(this.data[i].keys) != 'undefined') mytype = this.data[i].keys[0][2]; else mytype = this.data[i].props.type;
+        switch (mytype) {
 
           case "":
             inSVG[elementCounter] = new SVGelement();
@@ -570,7 +577,7 @@ class Hierarchical_List {
             break;   
 
           default:
-            if ((this.data[this.getOrdinalById(myParent)]).keys[0][2] == "Meerdere verbruikers")
+            if ((this.data[this.getOrdinalById(myParent)] as Electro_Item).getType() == "Meerdere verbruikers")
               inSVG[elementCounter] = this.data[i].toSVG();
             else if (stack == "vertical") 
               inSVG[elementCounter] = this.toSVG(this.id[i],"horizontal",0,true); //if we are still in vertical mode, switch to horizontal and take childs with us

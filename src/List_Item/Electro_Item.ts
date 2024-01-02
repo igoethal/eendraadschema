@@ -9,9 +9,13 @@ class Electro_Item extends List_Item {
     for (let i=0; i<27; i++) this.keys[i] = ["","",""];
   }
 
+  convertLegacyKeys(mykeys: Array<[string,string,any]>) {
+    // Do nothing if not defined in derived class
+  }
+
     //-- When a new element is created, we will call resetKeys to set the keys to their default values --
 
-  resetKeys() {
+    resetKeys() {
 
 
 
@@ -92,27 +96,107 @@ class Electro_Item extends List_Item {
     return ["", "Aansluiting", "Domotica", "Domotica gestuurde verbruiker", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
   }
 
+  getNumChildsWithKnownType() : number {
+    var numChilds = 0;
+    if (this.sourcelist != null) {
+        for (let i=0; i<this.sourcelist.data.length; ++i) {
+            if ( (this.sourcelist.data[i].parent === this.id) && (this.sourcelist.active[i]) && ((this.sourcelist.data[i] as Electro_Item).getType() != "") ) numChilds++;
+        }  
+    }
+    return(numChilds);
+  }
+
+  heeftKindMetGekendType() : boolean {
+    return(this.getNumChildsWithKnownType() > 0);
+  }
+
+  isVrijeTekstZonderKader(item: Electro_Item) : boolean {
+    return ((item.getType() == "Vrije tekst") && (item.keys[16][2] == "Zonder kader"));
+  }
+
+  heeftVerbruikerAlsKind() : boolean {
+    let parent = this.getParent();
+
+    if ( (parent != null) && (parent.keys[0][2] == "Meerdere verbruikers") ) {
+        let myOrdinal = this.sourcelist.getOrdinalById(this.id);
+        let lastOrdinal = 0;
+        for (let i = 0; i<this.sourcelist.data.length; ++i) {
+            //empty tekst at the end does not count as a valid last child of meerdere verbruikers (zo vermijden we een streepje op het einde van het stopcontact)
+            if (this.sourcelist.active[i] && !(this.isVrijeTekstZonderKader(this.sourcelist.data[i] as Electro_Item)) && (this.sourcelist.data[i].parent == this.parent)) lastOrdinal = i;
+        }
+        if (lastOrdinal > myOrdinal) return true; else return false; 
+    } else {
+        if (this.sourcelist != null) {
+            for (let i=0; i<this.sourcelist.data.length; ++i) {
+                if ( (this.sourcelist.data[i].parent === this.id) && 
+                     (this.sourcelist.active[i]) && !(this.isVrijeTekstZonderKader(this.sourcelist.data[i] as Electro_Item)) && 
+                     ((this.sourcelist.data[i] as Electro_Item).getType() != "") ) return true;
+            }  
+        }
+    }  
+
+  return false;
+}
+
   //-- Make the current item a copy of source_item --
 
   clone(source_item: List_Item) {
+
+    function deepClone (obj) {
+      var _out = new obj.constructor;
+  
+      var getType = function (n) {
+          return Object.prototype.toString.call(n).slice(8, -1);
+      }
+  
+      for (var _key in obj) {
+          if (obj.hasOwnProperty(_key)) {
+              _out[_key] = getType(obj[_key]) === 'Object' || getType(obj[_key]) === 'Array' ? deepClone(obj[_key]) : obj[_key];
+          }
+      }
+      return _out;
+    }
+
     this.parent = source_item.parent;
     this.indent = source_item.indent;
     this.collapsed = source_item.collapsed;
     this.sourcelist = source_item.sourcelist;
     
-    for (var i = 0; i<this.keys.length; i++) {
-      for (var j=0; j<3; j++) {
-        this.keys[i][j] = source_item.keys[i][j];
+    if (typeof(this.keys) != 'undefined') {
+      for (var i = 0; i<this.keys.length; i++) {
+        for (var j=0; j<3; j++) {
+          this.keys[i][j] = source_item.keys[i][j];
+        }
       }
     }
+    
+    if (typeof(this.props) != 'undefined') {
+      this.props = deepClone((source_item as Electro_Item).props);
+    }  
+  }
+
+  getType() : string {
+    if ( typeof(this.keys) != 'undefined' ) return this.keys[0][2]; else return this.props.type;
   }
 
   //-- Clear all keys --
 
   clearKeys() {
+    //Code voor de oude keys
     //Whipe most keys; note how we don't reset keys[10][2] as usually we don't want the number to change
-    for (let i = 1; i < 10; i++) this.keys[i][2] = "";
-    for (let i = 11; i < this.keys.length; i++) this.keys[i][2] = "";  
+    if (typeof(this.keys) != 'undefined') {
+      for (let i = 1; i < 10; i++) this.keys[i][2] = "";
+      for (let i = 11; i < this.keys.length; i++) this.keys[i][2] = "";
+    }
+
+    //Code voor de nieuwe props
+    //We laten het nr ongemoeid
+    if (typeof(this.props) != 'undefined') {
+      let oldnr: string;
+      if (typeof(this.props.nr) != 'undefined') oldnr = this.props.nr; else oldnr = "";
+      this.props = {};
+      this.props.nr = oldnr;
+    }
   }
 
   // -- Returns the maximum number of childs the Electro_Item can have --
@@ -171,7 +255,7 @@ class Electro_Item extends List_Item {
     if (parent == null) consumerArray = ["", "Kring", "Aansluiting"];
     else consumerArray = this.getParent().allowedChilds()
 
-    output += this.selectToHTML(0, consumerArray);
+    if (typeof(this.keys) != 'undefined') output += this.selectToHTML(0, consumerArray); else output += this.selectPropToHTML('type', consumerArray);
 
     return(output);
   }
@@ -183,9 +267,18 @@ class Electro_Item extends List_Item {
   //-- Code to add the addressline below when drawing SVG. This is called by most derived classes --
 
   addAddress(mySVG: SVGelement, starty:number = 60, godown:number = 15, shiftx:number = 0, key:number=15): String {
-    let returnstr:string = "";
+    let returnstr:string;
     if (!(/^\s*$/.test(this.keys[key][2]))) { //check if adres contains only white space
       returnstr = '<text x="' + ((mySVG.xright-20)/2 + 21 + shiftx) + '" y="' + starty + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[key][2]) + '</text>';
+      mySVG.ydown = mySVG.ydown + godown;
+    }
+    return returnstr;
+  }
+
+  addPropAddress(mySVG: SVGelement, starty:number = 60, godown:number = 15, shiftx:number = 0): String {
+    let returnstr:string;
+    if (!(/^\s*$/.test(this.props.adres))) { //check if adres contains only white space
+      returnstr = '<text x="' + ((mySVG.xright-20)/2 + 21 + shiftx) + '" y="' + starty + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.props.adres) + '</text>';
       mySVG.ydown = mySVG.ydown + godown;
     }
     return returnstr;

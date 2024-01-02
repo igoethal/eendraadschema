@@ -6,6 +6,7 @@ class List_Item {
     sourcelist: Hierarchical_List; //reference to the hierarchical list that the list-item is a member of
 
     keys: Array<[string,string,any]>;
+    props: any; // We willen deze gebruiken als een Object waar vrij zaken aan toegevoegd kunnen worden
 
     constructor(mylist: Hierarchical_List) {
         this.id = 0; //undefined
@@ -13,6 +14,7 @@ class List_Item {
         this.indent = 0; //at root note, no parent
         this.collapsed = false; //at the start, nothingh is collapsed
         this.keys = new Array<[string,string,any]>();
+        this.props = {};
         this.sourcelist = mylist;
     }
 
@@ -33,16 +35,6 @@ class List_Item {
         return(numChilds);
     }
 
-    getNumChildsWithKnownType() : number {
-      var numChilds = 0;
-      if (this.sourcelist != null) {
-          for (let i=0; i<this.sourcelist.data.length; ++i) {
-              if ( (this.sourcelist.data[i].parent === this.id) && (this.sourcelist.active[i]) && (this.sourcelist.data[i].keys[0][2] != "") ) numChilds++;
-          }  
-      }
-      return(numChilds);
-    }
-
     isActief() : Boolean {
       if (this.sourcelist != null) {
         let ordinal = this.sourcelist.getOrdinalById(this.id);
@@ -50,34 +42,6 @@ class List_Item {
       } else {
         return(false);
       }
-    }
-
-    heeftKindMetGekendType() : boolean {
-      return(this.getNumChildsWithKnownType() > 0);
-    }
-
-    heeftVerbruikerAlsKind() : boolean {
-        let parent = this.getParent();
-
-        if ( (parent != null) && (parent.keys[0][2] == "Meerdere verbruikers") ) {
-            let myOrdinal = this.sourcelist.getOrdinalById(this.id);
-            let lastOrdinal = 0;
-            for (let i = 0; i<this.sourcelist.data.length; ++i) {
-                //empty tekst at the end does not count as a valid last child of meerdere verbruikers (zo vermijden we een streepje op het einde van het stopcontact)
-                if (this.sourcelist.active[i] && (this.sourcelist.data[i].keys[16][2] != "zonder kader") && (this.sourcelist.data[i].parent == this.parent)) lastOrdinal = i;
-            }
-            if (lastOrdinal > myOrdinal) return true; else return false; 
-        } else {
-            if (this.sourcelist != null) {
-                for (let i=0; i<this.sourcelist.data.length; ++i) {
-                    if ( (this.sourcelist.data[i].parent === this.id) && 
-                         (this.sourcelist.active[i]) && (this.sourcelist.data[i].keys[16][2] != "zonder kader") && 
-                         (this.sourcelist.data[i].keys[0][2] != "") ) return true;
-                }  
-            }
-        }  
-
-      return false;
     }
 
     getParent() {
@@ -102,11 +66,30 @@ class List_Item {
       return(output);
     }
 
+    stringPropToHTML(item: string, size?: number) {
+      let output:string = "";
+      let sizestr:string = "";
+      if (size!=null) sizestr = ' size="'+size+'" ';
+      output = '<input type="text"' + sizestr + ' id="' + 'HL_edit_' + this.id + '_' + item +  '" ' 
+             + 'onchange=HLPropUpdate(' + this.id + ',"' + item + '","STRING","' + 'HL_edit_' + this.id + '_' + item + '") value="' + this.props[item] + '">';
+
+      return(output);
+    }
+
     checkboxToHTML(keyid: number) {
       let output:string;    
       output = '<input type="checkbox" id="' + 'HL_edit_' + this.id + '_' + keyid + '" '
              + 'onchange=HLUpdate(' + this.id + ',' + keyid + ',"BOOLEAN","' + 'HL_edit_' + this.id + '_' + keyid + '")' 
              + (this.keys[keyid][2] ? ' checked' : '') + '>';
+
+      return(output);
+    }
+
+    checkboxPropToHTML(item: string) {
+      let output:string;    
+      output = '<input type="checkbox" id="' + 'HL_edit_' + this.id + '_' + item + '" '
+             + 'onchange=HLPropUpdate(' + this.id + ',"' + item + '","BOOLEAN","' + 'HL_edit_' + this.id + '_' + item + '")' 
+             + (this.props[item] ? ' checked' : '') + '>';
 
       return(output);
     }
@@ -134,6 +117,30 @@ class List_Item {
 
       return(output);
     }
+
+    selectPropToHTML(item: string, items: Array<String>) {
+      var myId = "HL_edit_"+this.id+"_"+item;
+      var output: string = "";
+      var options: string = "";
+
+      output = '<select id="' + myId + '" onchange=HLPropUpdate(' + this.id + ',"' + item + '","SELECT","' + myId + '")>';
+      for (var i:number=0; i<items.length; i++) {
+        options = "";
+        if (this.props[item]==items[i]) { options += " selected"; }
+        if (items[i] == "---") {
+          options += " disabled";
+          items[i] = "---------------------------";
+        }
+        if (items[i] == "-") {
+          options += " disabled";
+          items[i] = "---";
+        }
+        output += '<option value="' + items[i] + '" ' + options + '>' + items[i] + '</option>';
+      }
+      output += "</select>"
+
+      return(output);
+    }    
 
     toHTML(mode: string) {
       return("toHTML() function not defined for base class List_Item. Extend class first.");

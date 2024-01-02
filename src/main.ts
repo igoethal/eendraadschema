@@ -78,6 +78,30 @@ function HLUpdate(my_id: number, key: number, type: string, docId: string) {
   HLRedrawTreeSVG();
 }
 
+function HLPropUpdate(my_id: number, item: string, type: string, docId: string) {
+  switch (type) {
+    case "SELECT":
+      var setvalueselect: string = (document.getElementById(docId) as HTMLInputElement).value;
+      if (item == "type") { // Type changed
+        structure.adjustTypeById(my_id, setvalueselect);
+      } else {
+        structure.data[structure.getOrdinalById(my_id)].props[item] = setvalueselect;
+      }
+      HLRedrawTreeHTML();
+      break;
+    case "STRING":
+      var setvaluestr: string = (document.getElementById(docId) as HTMLInputElement).value;
+      structure.data[structure.getOrdinalById(my_id)].props[item] = setvaluestr;
+      break;
+    case "BOOLEAN":
+      var setvaluebool: boolean = (document.getElementById(docId) as HTMLInputElement).checked;
+      structure.data[structure.getOrdinalById(my_id)].props[item] = setvaluebool;
+      HLRedrawTreeHTML();
+      break;
+  }
+  HLRedrawTreeSVG();
+}
+
 function HL_editmode() {
   structure.mode = (document.getElementById("edit_mode") as HTMLInputElement).value;
   HLRedrawTreeHTML();
@@ -606,22 +630,33 @@ function import_to_structure(mystring: string, redraw = true) {
   }
 
   for (var i = 0; i < mystructure.length; i++) {
-    structure.addItem(mystructure.data[i].keys[0][2]);
+    let typestr:string;
+    if (typeof(mystructure.data[i].keys) != 'undefined') typestr = mystructure.data[i].keys[0][2]; else typestr = mystructure.data[i].props.type;
+    structure.addItem(typestr);
     structure.data[i].parent = mystructure.data[i].parent;
 
     structure.active[i] = mystructure.active[i];
     structure.id[i] = mystructure.id[i];
 
-    for (var j = 0; j < mystructure.data[i].keys.length; j++) {
-      structure.data[i].keys[j] = mystructure.data[i].keys[j];
+    // Importeer eigenschappen van elk Electro_Item, zowel legacy (lijst van keys) als nieuwe methode met lijst van properties
+    if (typeof(mystructure.data[i].keys) != 'undefined') { //old key based system
+      if (typeof(structure.data[i].keys) != 'undefined') {
+        for (var j = 0; j < mystructure.data[i].keys.length; j++) {
+          structure.data[i].keys[j] = mystructure.data[i].keys[j];
+        }
+      }  
+      (structure.data[i] as Electro_Item).convertLegacyKeys(mystructure.data[i].keys);
+    } else {
+      structure.data[i].props = Object.assign(mystructure.data[i].props);
     }
+
     structure.data[i].id = mystructure.data[i].id;
     structure.data[i].indent = mystructure.data[i].indent;
     structure.data[i].collapsed = mystructure.data[i].collapsed;
   }
 
   // Make some corrections if it is an old version
-  if (version < 2) {
+  if (version < 2) { // Versies < 2 gebruikten enkel keys en geen props dus de code hieronder met keys zal altijd werken
     for (var i = 0; i < mystructure.length; i++) {
       // Breedte van Vrije tekst velden zonder kader met 30 verhogen sinds 16/12/2023
       if ( (structure.data[i].keys[0][2] === "Vrije tekst") && (structure.data[i].keys[16][2] != "verbruiker") ) {

@@ -5,19 +5,26 @@ class Boiler extends Electro_Item {
         this.resetKeys();
     }
 
+    convertLegacyKeys(mykeys: Array<[string,string,any]>) {
+        this.props.type             = mykeys[0][2];
+        this.props.heeftAccumulatie = mykeys[3][2];
+        this.props.adres            = mykeys[15][2];
+    }
+
     resetKeys() {
         this.clearKeys();
-        this.keys[0][2] = "Boiler"; // This is rather a formality as we should already have this at this stage
-        this.keys[3][2] = false;    // Per default geen accumulatie
-        this.keys[15][2] = "";      // Set Adres/tekst to "" when the item is cleared
+        this.props.type                = "Boiler"; 
+        this.props.heeftAccumulatie    = false;  
+        this.props.adres               = "";
+        delete this.keys; 
     }
 
     toHTML(mode: string) {
         let output = this.toHTMLHeader(mode);
 
-        output += "&nbsp;Nr: " + this.stringToHTML(10,5) + ", ";
-        output += "Accumulatie: " + this.checkboxToHTML(3);
-        output += ", Adres/tekst: " + this.stringToHTML(15,5);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr',5) + ", ";
+        output += "Accumulatie: " + this.checkboxPropToHTML('heeftAccumulatie');
+        output += ", Adres/tekst: " + this.stringPropToHTML('adres',5);
 
         return(output);
     }
@@ -32,7 +39,7 @@ class Boiler extends Electro_Item {
         mySVG.ydown = 25;
 
         mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-        switch (this.keys[3][2]) { //accumulatie
+        switch (this.props.heeftAccumulatie) { //accumulatie
             case false:
                 mySVG.data += '<use xlink:href="#boiler" x="21" y="25"></use>';
                 break;
@@ -41,7 +48,7 @@ class Boiler extends Electro_Item {
                 break;
           }
 
-        mySVG.data += this.addAddress(mySVG,60,15);
+        mySVG.data += this.addPropAddress(mySVG,60);
         mySVG.data += "\n";
 
         return(mySVG);

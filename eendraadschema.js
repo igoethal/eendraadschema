@@ -203,6 +203,7 @@ var List_Item = /** @class */ (function () {
         this.indent = 0; //at root note, no parent
         this.collapsed = false; //at the start, nothingh is collapsed
         this.keys = new Array();
+        this.props = {};
         this.sourcelist = mylist;
     }
     List_Item.prototype.resetKeys = function () {
@@ -220,16 +221,6 @@ var List_Item = /** @class */ (function () {
         }
         return (numChilds);
     };
-    List_Item.prototype.getNumChildsWithKnownType = function () {
-        var numChilds = 0;
-        if (this.sourcelist != null) {
-            for (var i = 0; i < this.sourcelist.data.length; ++i) {
-                if ((this.sourcelist.data[i].parent === this.id) && (this.sourcelist.active[i]) && (this.sourcelist.data[i].keys[0][2] != ""))
-                    numChilds++;
-            }
-        }
-        return (numChilds);
-    };
     List_Item.prototype.isActief = function () {
         if (this.sourcelist != null) {
             var ordinal = this.sourcelist.getOrdinalById(this.id);
@@ -238,36 +229,6 @@ var List_Item = /** @class */ (function () {
         else {
             return (false);
         }
-    };
-    List_Item.prototype.heeftKindMetGekendType = function () {
-        return (this.getNumChildsWithKnownType() > 0);
-    };
-    List_Item.prototype.heeftVerbruikerAlsKind = function () {
-        var parent = this.getParent();
-        if ((parent != null) && (parent.keys[0][2] == "Meerdere verbruikers")) {
-            var myOrdinal = this.sourcelist.getOrdinalById(this.id);
-            var lastOrdinal = 0;
-            for (var i = 0; i < this.sourcelist.data.length; ++i) {
-                //empty tekst at the end does not count as a valid last child of meerdere verbruikers (zo vermijden we een streepje op het einde van het stopcontact)
-                if (this.sourcelist.active[i] && (this.sourcelist.data[i].keys[16][2] != "zonder kader") && (this.sourcelist.data[i].parent == this.parent))
-                    lastOrdinal = i;
-            }
-            if (lastOrdinal > myOrdinal)
-                return true;
-            else
-                return false;
-        }
-        else {
-            if (this.sourcelist != null) {
-                for (var i = 0; i < this.sourcelist.data.length; ++i) {
-                    if ((this.sourcelist.data[i].parent === this.id) &&
-                        (this.sourcelist.active[i]) && (this.sourcelist.data[i].keys[16][2] != "zonder kader") &&
-                        (this.sourcelist.data[i].keys[0][2] != ""))
-                        return true;
-                }
-            }
-        }
-        return false;
     };
     List_Item.prototype.getParent = function () {
         if ((this.sourcelist != null) && (this.parent != 0)) {
@@ -289,11 +250,27 @@ var List_Item = /** @class */ (function () {
             + 'onchange=HLUpdate(' + this.id + ',' + keyid + ',"STRING","' + 'HL_edit_' + this.id + '_' + keyid + '") value="' + this.keys[keyid][2] + '">';
         return (output);
     };
+    List_Item.prototype.stringPropToHTML = function (item, size) {
+        var output = "";
+        var sizestr = "";
+        if (size != null)
+            sizestr = ' size="' + size + '" ';
+        output = '<input type="text"' + sizestr + ' id="' + 'HL_edit_' + this.id + '_' + item + '" '
+            + 'onchange=HLPropUpdate(' + this.id + ',"' + item + '","STRING","' + 'HL_edit_' + this.id + '_' + item + '") value="' + this.props[item] + '">';
+        return (output);
+    };
     List_Item.prototype.checkboxToHTML = function (keyid) {
         var output;
         output = '<input type="checkbox" id="' + 'HL_edit_' + this.id + '_' + keyid + '" '
             + 'onchange=HLUpdate(' + this.id + ',' + keyid + ',"BOOLEAN","' + 'HL_edit_' + this.id + '_' + keyid + '")'
             + (this.keys[keyid][2] ? ' checked' : '') + '>';
+        return (output);
+    };
+    List_Item.prototype.checkboxPropToHTML = function (item) {
+        var output;
+        output = '<input type="checkbox" id="' + 'HL_edit_' + this.id + '_' + item + '" '
+            + 'onchange=HLPropUpdate(' + this.id + ',"' + item + '","BOOLEAN","' + 'HL_edit_' + this.id + '_' + item + '")'
+            + (this.props[item] ? ' checked' : '') + '>';
         return (output);
     };
     List_Item.prototype.selectToHTML = function (keyid, items) {
@@ -304,6 +281,29 @@ var List_Item = /** @class */ (function () {
         for (var i = 0; i < items.length; i++) {
             options = "";
             if (this.keys[keyid][2] == items[i]) {
+                options += " selected";
+            }
+            if (items[i] == "---") {
+                options += " disabled";
+                items[i] = "---------------------------";
+            }
+            if (items[i] == "-") {
+                options += " disabled";
+                items[i] = "---";
+            }
+            output += '<option value="' + items[i] + '" ' + options + '>' + items[i] + '</option>';
+        }
+        output += "</select>";
+        return (output);
+    };
+    List_Item.prototype.selectPropToHTML = function (item, items) {
+        var myId = "HL_edit_" + this.id + "_" + item;
+        var output = "";
+        var options = "";
+        output = '<select id="' + myId + '" onchange=HLPropUpdate(' + this.id + ',"' + item + '","SELECT","' + myId + '")>';
+        for (var i = 0; i < items.length; i++) {
+            options = "";
+            if (this.props[item] == items[i]) {
                 options += " selected";
             }
             if (items[i] == "---") {
@@ -339,6 +339,9 @@ var Electro_Item = /** @class */ (function (_super) {
             _this.keys[i] = ["", "", ""];
         return _this;
     }
+    Electro_Item.prototype.convertLegacyKeys = function (mykeys) {
+        // Do nothing if not defined in derived class
+    };
     //-- When a new element is created, we will call resetKeys to set the keys to their default values --
     Electro_Item.prototype.resetKeys = function () {
         /*this.keys.push(["type","SELECT",""]); //0
@@ -415,25 +418,105 @@ var Electro_Item = /** @class */ (function (_super) {
     Electro_Item.prototype.allowedChilds = function () {
         return ["", "Aansluiting", "Domotica", "Domotica gestuurde verbruiker", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
     };
+    Electro_Item.prototype.getNumChildsWithKnownType = function () {
+        var numChilds = 0;
+        if (this.sourcelist != null) {
+            for (var i = 0; i < this.sourcelist.data.length; ++i) {
+                if ((this.sourcelist.data[i].parent === this.id) && (this.sourcelist.active[i]) && (this.sourcelist.data[i].getType() != ""))
+                    numChilds++;
+            }
+        }
+        return (numChilds);
+    };
+    Electro_Item.prototype.heeftKindMetGekendType = function () {
+        return (this.getNumChildsWithKnownType() > 0);
+    };
+    Electro_Item.prototype.isVrijeTekstZonderKader = function (item) {
+        return ((item.getType() == "Vrije tekst") && (item.keys[16][2] == "Zonder kader"));
+    };
+    Electro_Item.prototype.heeftVerbruikerAlsKind = function () {
+        var parent = this.getParent();
+        if ((parent != null) && (parent.keys[0][2] == "Meerdere verbruikers")) {
+            var myOrdinal = this.sourcelist.getOrdinalById(this.id);
+            var lastOrdinal = 0;
+            for (var i = 0; i < this.sourcelist.data.length; ++i) {
+                //empty tekst at the end does not count as a valid last child of meerdere verbruikers (zo vermijden we een streepje op het einde van het stopcontact)
+                if (this.sourcelist.active[i] && !(this.isVrijeTekstZonderKader(this.sourcelist.data[i])) && (this.sourcelist.data[i].parent == this.parent))
+                    lastOrdinal = i;
+            }
+            if (lastOrdinal > myOrdinal)
+                return true;
+            else
+                return false;
+        }
+        else {
+            if (this.sourcelist != null) {
+                for (var i = 0; i < this.sourcelist.data.length; ++i) {
+                    if ((this.sourcelist.data[i].parent === this.id) &&
+                        (this.sourcelist.active[i]) && !(this.isVrijeTekstZonderKader(this.sourcelist.data[i])) &&
+                        (this.sourcelist.data[i].getType() != ""))
+                        return true;
+                }
+            }
+        }
+        return false;
+    };
     //-- Make the current item a copy of source_item --
     Electro_Item.prototype.clone = function (source_item) {
+        function deepClone(obj) {
+            var _out = new obj.constructor;
+            var getType = function (n) {
+                return Object.prototype.toString.call(n).slice(8, -1);
+            };
+            for (var _key in obj) {
+                if (obj.hasOwnProperty(_key)) {
+                    _out[_key] = getType(obj[_key]) === 'Object' || getType(obj[_key]) === 'Array' ? deepClone(obj[_key]) : obj[_key];
+                }
+            }
+            return _out;
+        }
         this.parent = source_item.parent;
         this.indent = source_item.indent;
         this.collapsed = source_item.collapsed;
         this.sourcelist = source_item.sourcelist;
-        for (var i = 0; i < this.keys.length; i++) {
-            for (var j = 0; j < 3; j++) {
-                this.keys[i][j] = source_item.keys[i][j];
+        if (typeof (this.keys) != 'undefined') {
+            for (var i = 0; i < this.keys.length; i++) {
+                for (var j = 0; j < 3; j++) {
+                    this.keys[i][j] = source_item.keys[i][j];
+                }
             }
         }
+        if (typeof (this.props) != 'undefined') {
+            this.props = deepClone(source_item.props);
+        }
+    };
+    Electro_Item.prototype.getType = function () {
+        if (typeof (this.keys) != 'undefined')
+            return this.keys[0][2];
+        else
+            return this.props.type;
     };
     //-- Clear all keys --
     Electro_Item.prototype.clearKeys = function () {
+        //Code voor de oude keys
         //Whipe most keys; note how we don't reset keys[10][2] as usually we don't want the number to change
-        for (var i = 1; i < 10; i++)
-            this.keys[i][2] = "";
-        for (var i = 11; i < this.keys.length; i++)
-            this.keys[i][2] = "";
+        if (typeof (this.keys) != 'undefined') {
+            for (var i = 1; i < 10; i++)
+                this.keys[i][2] = "";
+            for (var i = 11; i < this.keys.length; i++)
+                this.keys[i][2] = "";
+        }
+        //Code voor de nieuwe props
+        //We laten het nr ongemoeid
+        if (typeof (this.props) != 'undefined') {
+            var oldnr = void 0;
+            if (typeof (this.props.nr) != 'undefined')
+                oldnr = this.props.nr;
+            else
+                oldnr = "";
+            this.props = {};
+            this.props.nr = oldnr;
+        }
     };
     // -- Returns the maximum number of childs the Electro_Item can have --
     Electro_Item.prototype.getMaxNumChilds = function () {
@@ -491,7 +574,10 @@ var Electro_Item = /** @class */ (function (_super) {
             consumerArray = ["", "Kring", "Aansluiting"];
         else
             consumerArray = this.getParent().allowedChilds();
-        output += this.selectToHTML(0, consumerArray);
+        if (typeof (this.keys) != 'undefined')
+            output += this.selectToHTML(0, consumerArray);
+        else
+            output += this.selectPropToHTML('type', consumerArray);
         return (output);
     };
     //-- This one will get called if the type of the Electro_Item has not yet been chosen --
@@ -502,9 +588,20 @@ var Electro_Item = /** @class */ (function (_super) {
         if (godown === void 0) { godown = 15; }
         if (shiftx === void 0) { shiftx = 0; }
         if (key === void 0) { key = 15; }
-        var returnstr = "";
+        var returnstr;
         if (!(/^\s*$/.test(this.keys[key][2]))) { //check if adres contains only white space
             returnstr = '<text x="' + ((mySVG.xright - 20) / 2 + 21 + shiftx) + '" y="' + starty + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[key][2]) + '</text>';
+            mySVG.ydown = mySVG.ydown + godown;
+        }
+        return returnstr;
+    };
+    Electro_Item.prototype.addPropAddress = function (mySVG, starty, godown, shiftx) {
+        if (starty === void 0) { starty = 60; }
+        if (godown === void 0) { godown = 15; }
+        if (shiftx === void 0) { shiftx = 0; }
+        var returnstr;
+        if (!(/^\s*$/.test(this.props.adres))) { //check if adres contains only white space
+            returnstr = '<text x="' + ((mySVG.xright - 20) / 2 + 21 + shiftx) + '" y="' + starty + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.props.adres) + '</text>';
             mySVG.ydown = mySVG.ydown + godown;
         }
         return returnstr;
@@ -1403,15 +1500,20 @@ var Bel = /** @class */ (function (_super) {
         _this.resetKeys();
         return _this;
     }
+    Bel.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = mykeys[0][2];
+        this.props.adres = mykeys[15][2];
+    };
     Bel.prototype.resetKeys = function () {
         this.clearKeys();
-        this.keys[0][2] = "Bel"; // This is rather a formality as we should already have this at this stage
-        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+        this.props.type = "Bel";
+        this.props.adres = "";
+        delete this.keys;
     };
     Bel.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
-        output += ", Adres/tekst: " + this.stringToHTML(15, 5);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
+        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Bel.prototype.toSVG = function () {
@@ -1423,7 +1525,7 @@ var Bel = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
             + '<use xlink:href="#bel" x="21" y="25"></use>';
-        mySVG.data += this.addAddress(mySVG, 60, 15);
+        mySVG.data += this.addPropAddress(mySVG, 60, 15);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -1436,17 +1538,23 @@ var Boiler = /** @class */ (function (_super) {
         _this.resetKeys();
         return _this;
     }
+    Boiler.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = mykeys[0][2];
+        this.props.heeftAccumulatie = mykeys[3][2];
+        this.props.adres = mykeys[15][2];
+    };
     Boiler.prototype.resetKeys = function () {
         this.clearKeys();
-        this.keys[0][2] = "Boiler"; // This is rather a formality as we should already have this at this stage
-        this.keys[3][2] = false; // Per default geen accumulatie
-        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+        this.props.type = "Boiler";
+        this.props.heeftAccumulatie = false;
+        this.props.adres = "";
+        delete this.keys;
     };
     Boiler.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringToHTML(10, 5) + ", ";
-        output += "Accumulatie: " + this.checkboxToHTML(3);
-        output += ", Adres/tekst: " + this.stringToHTML(15, 5);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5) + ", ";
+        output += "Accumulatie: " + this.checkboxPropToHTML('heeftAccumulatie');
+        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Boiler.prototype.toSVG = function () {
@@ -1457,7 +1565,7 @@ var Boiler = /** @class */ (function (_super) {
         mySVG.yup = 25;
         mySVG.ydown = 25;
         mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-        switch (this.keys[3][2]) { //accumulatie
+        switch (this.props.heeftAccumulatie) { //accumulatie
             case false:
                 mySVG.data += '<use xlink:href="#boiler" x="21" y="25"></use>';
                 break;
@@ -1465,7 +1573,7 @@ var Boiler = /** @class */ (function (_super) {
                 mySVG.data += '<use xlink:href="#boiler_accu" x="21" y="25"></use>';
                 break;
         }
-        mySVG.data += this.addAddress(mySVG, 60, 15);
+        mySVG.data += this.addPropAddress(mySVG, 60);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -4065,7 +4173,7 @@ var Hierarchical_List = /** @class */ (function () {
                 break;
             default: tempval = new Electro_Item(structure);
         }
-        tempval.keys[0][2] = electroType;
+        //tempval.keys[0][2] = electroType; //Zou niet meer nodig moeten zijn aangezien dit reeds in de constructors zit
         //First set the correct identifyer
         tempval.id = this.curid;
         tempval.parent = 0;
@@ -4197,7 +4305,7 @@ var Hierarchical_List = /** @class */ (function () {
             parent_id = this.data[currentOrdinal].parent;
         }
         var parentOrdinal = this.getOrdinalById(parent_id);
-        var my_item = this.createItem(this.data[currentOrdinal].keys[0][2]);
+        var my_item = this.createItem(this.data[currentOrdinal].getType());
         my_item.clone(this.data[currentOrdinal]);
         //var original_length = this.length;
         //-- Now add the clone to the structure
@@ -4242,7 +4350,10 @@ var Hierarchical_List = /** @class */ (function () {
     Hierarchical_List.prototype.adjustTypeByOrdinal = function (ordinal, electroType) {
         var tempval = this.createItem(electroType);
         Object.assign(tempval, this.data[ordinal]);
-        tempval.keys[0][2] = electroType; //We need to do this again as we overwrote it with assign
+        if (typeof (tempval.keys) != 'undefined')
+            tempval.keys[0][2] = electroType; //We need to do this again as we overwrote it with assign
+        else
+            tempval.props.type = electroType; //We need to do this again as we overwrote it with assign
         tempval.resetKeys(); //Already part of createItem but we need to run this again as the assign operation overwrote everything
         this.data[ordinal] = tempval;
     };
@@ -4277,10 +4388,15 @@ var Hierarchical_List = /** @class */ (function () {
                 // Teken de lijn
                 mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + y1 + '" y2="' + y2 + '" stroke="black" />';
                 // Plaats het nummer van het item naast de lijn
+                var displaynr = void 0;
+                if (typeof (item.keys) != 'undefined')
+                    displaynr = item.keys[10][2];
+                else
+                    displaynr = item.props.nr;
                 mySVG.data +=
                     '<text x="' + (mySVG.xleft + 9) + '" y="' + (mySVG.yup - 5) + '" ' +
                         'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' +
-                        htmlspecialchars(item.keys[10][2]) + '</text>';
+                        htmlspecialchars(displaynr) + '</text>';
             }
         }
         ;
@@ -4335,7 +4451,12 @@ var Hierarchical_List = /** @class */ (function () {
         var elementCounter = 0;
         for (var i = 0; i < this.length; i++) {
             if (this.active[i] && ((this.data[i].parent == myParent) || ((includeparent == true) && (this.id[i] == myParent)))) {
-                switch (this.data[i].keys[0][2]) {
+                var mytype = this.data[i].getType();
+                if (typeof (this.data[i].keys) != 'undefined')
+                    mytype = this.data[i].keys[0][2];
+                else
+                    mytype = this.data[i].props.type;
+                switch (mytype) {
                     case "":
                         inSVG[elementCounter] = new SVGelement();
                         break;
@@ -4368,7 +4489,7 @@ var Hierarchical_List = /** @class */ (function () {
                         this.tekenVerticaleLijnIndienKindVanKring(this.data[i], inSVG[elementCounter]);
                         break;
                     default:
-                        if ((this.data[this.getOrdinalById(myParent)]).keys[0][2] == "Meerdere verbruikers")
+                        if (this.data[this.getOrdinalById(myParent)].getType() == "Meerdere verbruikers")
                             inSVG[elementCounter] = this.data[i].toSVG();
                         else if (stack == "vertical")
                             inSVG[elementCounter] = this.toSVG(this.id[i], "horizontal", 0, true); //if we are still in vertical mode, switch to horizontal and take childs with us
@@ -4743,6 +4864,30 @@ function HLUpdate(my_id, key, type, docId) {
         case "BOOLEAN":
             var setvaluebool = document.getElementById(docId).checked;
             structure.data[structure.getOrdinalById(my_id)].keys[key][2] = setvaluebool;
+            HLRedrawTreeHTML();
+            break;
+    }
+    HLRedrawTreeSVG();
+}
+function HLPropUpdate(my_id, item, type, docId) {
+    switch (type) {
+        case "SELECT":
+            var setvalueselect = document.getElementById(docId).value;
+            if (item == "type") { // Type changed
+                structure.adjustTypeById(my_id, setvalueselect);
+            }
+            else {
+                structure.data[structure.getOrdinalById(my_id)].props[item] = setvalueselect;
+            }
+            HLRedrawTreeHTML();
+            break;
+        case "STRING":
+            var setvaluestr = document.getElementById(docId).value;
+            structure.data[structure.getOrdinalById(my_id)].props[item] = setvaluestr;
+            break;
+        case "BOOLEAN":
+            var setvaluebool = document.getElementById(docId).checked;
+            structure.data[structure.getOrdinalById(my_id)].props[item] = setvaluebool;
             HLRedrawTreeHTML();
             break;
     }
@@ -5169,19 +5314,33 @@ function import_to_structure(mystring, redraw) {
         }
     }
     for (var i = 0; i < mystructure.length; i++) {
-        structure.addItem(mystructure.data[i].keys[0][2]);
+        var typestr = void 0;
+        if (typeof (mystructure.data[i].keys) != 'undefined')
+            typestr = mystructure.data[i].keys[0][2];
+        else
+            typestr = mystructure.data[i].props.type;
+        structure.addItem(typestr);
         structure.data[i].parent = mystructure.data[i].parent;
         structure.active[i] = mystructure.active[i];
         structure.id[i] = mystructure.id[i];
-        for (var j = 0; j < mystructure.data[i].keys.length; j++) {
-            structure.data[i].keys[j] = mystructure.data[i].keys[j];
+        // Importeer eigenschappen van elk Electro_Item, zowel legacy (lijst van keys) als nieuwe methode met lijst van properties
+        if (typeof (mystructure.data[i].keys) != 'undefined') { //old key based system
+            if (typeof (structure.data[i].keys) != 'undefined') {
+                for (var j = 0; j < mystructure.data[i].keys.length; j++) {
+                    structure.data[i].keys[j] = mystructure.data[i].keys[j];
+                }
+            }
+            structure.data[i].convertLegacyKeys(mystructure.data[i].keys);
+        }
+        else {
+            structure.data[i].props = Object.assign(mystructure.data[i].props);
         }
         structure.data[i].id = mystructure.data[i].id;
         structure.data[i].indent = mystructure.data[i].indent;
         structure.data[i].collapsed = mystructure.data[i].collapsed;
     }
     // Make some corrections if it is an old version
-    if (version < 2) {
+    if (version < 2) { // Versies < 2 gebruikten enkel keys en geen props dus de code hieronder met keys zal altijd werken
         for (var i = 0; i < mystructure.length; i++) {
             // Breedte van Vrije tekst velden zonder kader met 30 verhogen sinds 16/12/2023
             if ((structure.data[i].keys[0][2] === "Vrije tekst") && (structure.data[i].keys[16][2] != "verbruiker")) {
