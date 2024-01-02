@@ -70,8 +70,8 @@ class Vrije_tekst extends Electro_Item {
         var extraplace = 15 * Math.max(strlines.length-2,0);
         var shiftx;
         if (this.keys[16][2] === "zonder kader") {
-            if (this.getParent().keys[0][2] === "Kring") shiftx = 10;
-            else if (this.getParent().keys[0][2] === "Stopcontact") shiftx = 0;
+            if ((this.getParent() as Electro_Item).getType() === "Kring") shiftx = 10;
+            else if ((this.getParent() as Electro_Item).getType() === "Stopcontact") shiftx = 0;
             else shiftx = 5;
         } else shiftx = 20;
 

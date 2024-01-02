@@ -436,7 +436,7 @@ var Electro_Item = /** @class */ (function (_super) {
     };
     Electro_Item.prototype.heeftVerbruikerAlsKind = function () {
         var parent = this.getParent();
-        if ((parent != null) && (parent.keys[0][2] == "Meerdere verbruikers")) {
+        if ((parent != null) && (parent.getType() == "Meerdere verbruikers")) {
             var myOrdinal = this.sourcelist.getOrdinalById(this.id);
             var lastOrdinal = 0;
             for (var i = 0; i < this.sourcelist.data.length; ++i) {
@@ -523,7 +523,7 @@ var Electro_Item = /** @class */ (function (_super) {
         var parent = this.getParent();
         if (parent == null)
             return 256; //This should never happen, all allowed childs of null have their own implementations of getMaxNumChilds() and will never call this.
-        switch (parent.keys[0][2]) {
+        switch (parent.getType()) {
             case "Meerdere verbruikers":
                 return 0;
                 break; // Childs of "Meerdere verbruikers" cannot have childs
@@ -2327,7 +2327,7 @@ var Kring = /** @class */ (function (_super) {
             this.keys[10][2] = ""; // We geven de kring geen naam als er geen parent is
         }
         else
-            switch (parent.keys[0][2]) { // Selecteren op basis van parent
+            switch (parent.getType()) { // Selecteren op basis van parent
                 case "Bord":
                     this.keys[7][2] = "automatisch"; // Wel een zekering na bord
                     this.keys[10][2] = "---"; // We zetten iets als default dat gebruikers niet vergeten een naam aan de kring te geven na een bord
@@ -3726,9 +3726,9 @@ var Vrije_tekst = /** @class */ (function (_super) {
         var extraplace = 15 * Math.max(strlines.length - 2, 0);
         var shiftx;
         if (this.keys[16][2] === "zonder kader") {
-            if (this.getParent().keys[0][2] === "Kring")
+            if (this.getParent().getType() === "Kring")
                 shiftx = 10;
-            else if (this.getParent().keys[0][2] === "Stopcontact")
+            else if (this.getParent().getType() === "Stopcontact")
                 shiftx = 0;
             else
                 shiftx = 5;
@@ -4457,7 +4457,7 @@ var Hierarchical_List = /** @class */ (function () {
         // Eerst checken of het wel degelijk een kind van een kring is
         var parent = item.getParent();
         if (parent != null) {
-            if (parent.keys[0][2] == "Kring") {
+            if (parent.getType() == "Kring") {
                 // Bepaal hoogte van de lijn. Idien dit het laatste element van de kring is is het een halve lijn,
                 // zoniet een hele lijn
                 var y1 = void 0, y2 = void 0;

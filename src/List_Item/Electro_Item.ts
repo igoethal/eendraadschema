@@ -117,7 +117,7 @@ class Electro_Item extends List_Item {
   heeftVerbruikerAlsKind() : boolean {
     let parent = this.getParent();
 
-    if ( (parent != null) && (parent.keys[0][2] == "Meerdere verbruikers") ) {
+    if ( (parent != null) && ((parent as Electro_Item).getType() == "Meerdere verbruikers") ) {
         let myOrdinal = this.sourcelist.getOrdinalById(this.id);
         let lastOrdinal = 0;
         for (let i = 0; i<this.sourcelist.data.length; ++i) {
@@ -204,7 +204,7 @@ class Electro_Item extends List_Item {
   getMaxNumChilds(): number {
     let parent: Electro_Item = this.getParent();
     if (parent == null) return 256; //This should never happen, all allowed childs of null have their own implementations of getMaxNumChilds() and will never call this.
-    switch (parent.keys[0][2]) {
+    switch ((parent as Electro_Item).getType()) {
       case "Meerdere verbruikers": return 0;  break;  // Childs of "Meerdere verbruikers" cannot have childs
       default:                     return 1;  break;  // By default, most element can have 1 child unless overwritten by derived classes
     } 

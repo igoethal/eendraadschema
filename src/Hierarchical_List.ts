@@ -420,7 +420,7 @@ class Hierarchical_List {
   //-----------------------------------------------------
 
   adjustTypeByOrdinal(ordinal: number, electroType : string) {
-    let tempval = this.createItem(electroType);
+    let tempval:Electro_Item = this.createItem(electroType);
 
     (<any> Object).assign(tempval,this.data[ordinal]);
     if (typeof(tempval.keys) != 'undefined') 
@@ -446,7 +446,7 @@ class Hierarchical_List {
       // Eerst checken of het wel degelijk een kind van een kring is
       let parent:Electro_Item = (item.getParent() as Electro_Item);
       if (parent != null) {
-          if (parent.keys[0][2] == "Kring") {
+          if (parent.getType() == "Kring") {
 
               // Bepaal hoogte van de lijn. Idien dit het laatste element van de kring is is het een halve lijn,
               // zoniet een hele lijn

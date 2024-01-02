@@ -26,7 +26,7 @@ class Kring extends Electro_Item {
         if (parent == null) {
             this.keys[12][2] = true; // Kabel aanwezig
             this.keys[10][2] = "";   // We geven de kring geen naam als er geen parent is
-        } else switch (parent.keys[0][2]) { // Selecteren op basis van parent
+        } else switch ((parent as Electro_Item).getType()) { // Selecteren op basis van parent
             case "Bord":
                 this.keys[7][2] = "automatisch"; // Wel een zekering na bord
                 this.keys[10][2] = "---";        // We zetten iets als default dat gebruikers niet vergeten een naam aan de kring te geven na een bord
