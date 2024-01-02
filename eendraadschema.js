@@ -1403,15 +1403,20 @@ var Aansluitpunt = /** @class */ (function (_super) {
         _this.resetKeys();
         return _this;
     }
+    Aansluitpunt.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = mykeys[0][2];
+        this.props.adres = mykeys[15][2];
+    };
     Aansluitpunt.prototype.resetKeys = function () {
         this.clearKeys();
-        this.keys[0][2] = "Aansluitpunt"; // This is rather a formality as we should already have this at this stage
-        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+        this.props.type = "Aansluitpunt";
+        this.props.adres = "";
+        delete this.keys;
     };
     Aansluitpunt.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
-        output += ", Adres/tekst: " + this.stringToHTML(15, 5);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
+        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Aansluitpunt.prototype.toSVG = function () {
@@ -1422,7 +1427,7 @@ var Aansluitpunt = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
             + '<use xlink:href="#aansluitpunt" x="21" y="25"></use>';
-        mySVG.data += this.addAddress(mySVG, 45, 0);
+        mySVG.data += this.addPropAddress(mySVG, 45, 0);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -1435,15 +1440,20 @@ var Aftakdoos = /** @class */ (function (_super) {
         _this.resetKeys();
         return _this;
     }
+    Aftakdoos.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = mykeys[0][2];
+        this.props.adres = mykeys[15][2];
+    };
     Aftakdoos.prototype.resetKeys = function () {
         this.clearKeys();
-        this.keys[0][2] = "Aftakdoos"; // This is rather a formality as we should already have this at this stage
-        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+        this.props.type = "Aftakdoos";
+        this.props.adres = "";
+        delete this.keys;
     };
     Aftakdoos.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
-        output += ", Adres/tekst: " + this.stringToHTML(15, 5);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
+        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Aftakdoos.prototype.toSVG = function () {
@@ -1454,7 +1464,7 @@ var Aftakdoos = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
             + '<use xlink:href="#aftakdoos" x="21" y="25"></use>';
-        mySVG.data += this.addAddress(mySVG, 55, 10);
+        mySVG.data += this.addPropAddress(mySVG, 55, 10);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -1467,15 +1477,20 @@ var Batterij = /** @class */ (function (_super) {
         _this.resetKeys();
         return _this;
     }
+    Batterij.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = mykeys[0][2];
+        this.props.adres = mykeys[15][2];
+    };
     Batterij.prototype.resetKeys = function () {
         this.clearKeys();
-        this.keys[0][2] = "Batterij"; // This is rather a formality as we should already have this at this stage
-        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+        this.props.type = "Batterij";
+        this.props.adres = "";
+        delete this.keys;
     };
     Batterij.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
-        output += ", Adres/tekst: " + this.stringToHTML(15, 5);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
+        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Batterij.prototype.toSVG = function () {
@@ -1487,7 +1502,7 @@ var Batterij = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
             + '<use xlink:href="#batterij" x="21" y="25"></use>';
-        mySVG.data += this.addAddress(mySVG, 55, 10);
+        mySVG.data += this.addPropAddress(mySVG, 55, 10);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -1654,15 +1669,20 @@ var Diepvriezer = /** @class */ (function (_super) {
         _this.resetKeys();
         return _this;
     }
+    Diepvriezer.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = mykeys[0][2];
+        this.props.adres = mykeys[15][2];
+    };
     Diepvriezer.prototype.resetKeys = function () {
         this.clearKeys();
-        this.keys[0][2] = "Diepvriezer"; // This is rather a formality as we should already have this at this stage
-        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+        this.props.type = "Diepvriezer";
+        this.props.adres = "";
+        delete this.keys;
     };
     Diepvriezer.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
-        output += ", Adres/tekst: " + this.stringToHTML(15, 5);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
+        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Diepvriezer.prototype.toSVG = function () {
@@ -1674,7 +1694,7 @@ var Diepvriezer = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
             + '<use xlink:href="#diepvriezer" x="21" y="25"></use>';
-        mySVG.data += this.addAddress(mySVG, 60, 15);
+        mySVG.data += this.addPropAddress(mySVG, 60, 15);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -1863,15 +1883,20 @@ var Droogkast = /** @class */ (function (_super) {
         _this.resetKeys();
         return _this;
     }
+    Droogkast.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = mykeys[0][2];
+        this.props.adres = mykeys[15][2];
+    };
     Droogkast.prototype.resetKeys = function () {
         this.clearKeys();
-        this.keys[0][2] = "Droogkast"; // This is rather a formality as we should already have this at this stage
-        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+        this.props.type = "Droogkast";
+        this.props.adres = "";
+        delete this.keys;
     };
     Droogkast.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
-        output += ", Adres/tekst: " + this.stringToHTML(15, 5);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
+        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Droogkast.prototype.toSVG = function () {
@@ -1882,7 +1907,7 @@ var Droogkast = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
             + '<use xlink:href="#droogkast" x="21" y="25"></use>';
-        mySVG.data += this.addAddress(mySVG, 60, 15);
+        mySVG.data += this.addPropAddress(mySVG, 60, 15);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -1987,15 +2012,20 @@ var Elektriciteitsmeter = /** @class */ (function (_super) {
         _this.resetKeys();
         return _this;
     }
+    Elektriciteitsmeter.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = mykeys[0][2];
+        this.props.adres = mykeys[15][2];
+    };
     Elektriciteitsmeter.prototype.resetKeys = function () {
         this.clearKeys();
-        this.keys[0][2] = "Elektriciteitsmeter"; // This is rather a formality as we should already have this at this stage
-        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+        this.props.type = "Elektriciteitsmeter";
+        this.props.adres = "";
+        delete this.keys;
     };
     Elektriciteitsmeter.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
-        output += ", Adres/tekst: " + this.stringToHTML(15, 5);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
+        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Elektriciteitsmeter.prototype.toSVG = function () {
@@ -2007,7 +2037,7 @@ var Elektriciteitsmeter = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
             + '<use xlink:href="#elektriciteitsmeter" x="21" y="25"></use>';
-        mySVG.data += this.addAddress(mySVG, 60, 15);
+        mySVG.data += this.addPropAddress(mySVG, 60, 15);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -2020,15 +2050,20 @@ var Elektrische_oven = /** @class */ (function (_super) {
         _this.resetKeys();
         return _this;
     }
+    Elektrische_oven.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = mykeys[0][2];
+        this.props.adres = mykeys[15][2];
+    };
     Elektrische_oven.prototype.resetKeys = function () {
         this.clearKeys();
-        this.keys[0][2] = "Elektrische oven"; // This is rather a formality as we should already have this at this stage
-        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+        this.props.type = "Elektrische oven";
+        this.props.adres = "";
+        delete this.keys;
     };
     Elektrische_oven.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
-        output += ", Adres/tekst: " + this.stringToHTML(15, 5);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
+        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Elektrische_oven.prototype.toSVG = function () {
@@ -2040,7 +2075,7 @@ var Elektrische_oven = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
             + '<use xlink:href="#oven" x="21" y="25"></use>';
-        mySVG.data += this.addAddress(mySVG, 60, 15);
+        mySVG.data += this.addPropAddress(mySVG, 60, 15);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -2053,15 +2088,20 @@ var EV_lader = /** @class */ (function (_super) {
         _this.resetKeys();
         return _this;
     }
+    EV_lader.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = mykeys[0][2];
+        this.props.adres = mykeys[15][2];
+    };
     EV_lader.prototype.resetKeys = function () {
         this.clearKeys();
-        this.keys[0][2] = "EV lader"; // This is rather a formality as we should already have this at this stage
-        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+        this.props.type = "EV lader";
+        this.props.adres = "";
+        delete this.keys;
     };
     EV_lader.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
-        output += ", Adres/tekst: " + this.stringToHTML(15, 5);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
+        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     EV_lader.prototype.toSVG = function () {
@@ -2073,7 +2113,7 @@ var EV_lader = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
             + '<use xlink:href="#EVlader" x="21" y="25"></use>';
-        mySVG.data += this.addAddress(mySVG, 60, 15);
+        mySVG.data += this.addPropAddress(mySVG, 60, 15);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -2189,15 +2229,20 @@ var Koelkast = /** @class */ (function (_super) {
         _this.resetKeys();
         return _this;
     }
+    Koelkast.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = mykeys[0][2];
+        this.props.adres = mykeys[15][2];
+    };
     Koelkast.prototype.resetKeys = function () {
         this.clearKeys();
-        this.keys[0][2] = "Koelkast"; // This is rather a formality as we should already have this at this stage
-        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+        this.props.type = "Koelkast";
+        this.props.adres = "";
+        delete this.keys;
     };
     Koelkast.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
-        output += ", Adres/tekst: " + this.stringToHTML(15, 5);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
+        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Koelkast.prototype.toSVG = function () {
@@ -2209,7 +2254,7 @@ var Koelkast = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
             + '<use xlink:href="#koelkast" x="21" y="25"></use>';
-        mySVG.data += this.addAddress(mySVG, 60, 15);
+        mySVG.data += this.addPropAddress(mySVG, 60, 15);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -2222,15 +2267,20 @@ var Kookfornuis = /** @class */ (function (_super) {
         _this.resetKeys();
         return _this;
     }
+    Kookfornuis.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = mykeys[0][2];
+        this.props.adres = mykeys[15][2];
+    };
     Kookfornuis.prototype.resetKeys = function () {
         this.clearKeys();
-        this.keys[0][2] = "Kookfornuis"; // This is rather a formality as we should already have this at this stage
-        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+        this.props.type = "Kookfornuis";
+        this.props.adres = "";
+        delete this.keys;
     };
     Kookfornuis.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
-        output += ", Adres/tekst: " + this.stringToHTML(15, 5);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
+        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Kookfornuis.prototype.toSVG = function () {
@@ -2242,7 +2292,7 @@ var Kookfornuis = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
             + '<use xlink:href="#kookfornuis" x="21" y="25"></use>';
-        mySVG.data += this.addAddress(mySVG, 60, 15);
+        mySVG.data += this.addPropAddress(mySVG, 60, 15);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -2875,15 +2925,20 @@ var Microgolfoven = /** @class */ (function (_super) {
         _this.resetKeys();
         return _this;
     }
+    Microgolfoven.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = mykeys[0][2];
+        this.props.adres = mykeys[15][2];
+    };
     Microgolfoven.prototype.resetKeys = function () {
         this.clearKeys();
-        this.keys[0][2] = "Microgolfoven"; // This is rather a formality as we should already have this at this stage
-        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+        this.props.type = "Microgolfoven";
+        this.props.adres = "";
+        delete this.keys;
     };
     Microgolfoven.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
-        output += ", Adres/tekst: " + this.stringToHTML(15, 5);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
+        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Microgolfoven.prototype.toSVG = function () {
@@ -2895,7 +2950,7 @@ var Microgolfoven = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
             + '<use xlink:href="#microgolf" x="21" y="25"></use>';
-        mySVG.data += this.addAddress(mySVG, 60, 15);
+        mySVG.data += this.addPropAddress(mySVG, 60, 15);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -2908,15 +2963,20 @@ var Motor = /** @class */ (function (_super) {
         _this.resetKeys();
         return _this;
     }
+    Motor.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = mykeys[0][2];
+        this.props.adres = mykeys[15][2];
+    };
     Motor.prototype.resetKeys = function () {
         this.clearKeys();
-        this.keys[0][2] = "Motor"; // This is rather a formality as we should already have this at this stage
-        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+        this.props.type = "Motor";
+        this.props.adres = "";
+        delete this.keys;
     };
     Motor.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
-        output += ", Adres/tekst: " + this.stringToHTML(15, 5);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
+        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Motor.prototype.toSVG = function () {
@@ -2928,7 +2988,7 @@ var Motor = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
             + '<use xlink:href="#motor" x="21" y="25"></use>';
-        mySVG.data += this.addAddress(mySVG, 60, 15);
+        mySVG.data += this.addPropAddress(mySVG, 60, 15);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -2941,15 +3001,20 @@ var Omvormer = /** @class */ (function (_super) {
         _this.resetKeys();
         return _this;
     }
+    Omvormer.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = mykeys[0][2];
+        this.props.adres = mykeys[15][2];
+    };
     Omvormer.prototype.resetKeys = function () {
         this.clearKeys();
-        this.keys[0][2] = "Omvormer"; // This is rather a formality as we should already have this at this stage
-        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+        this.props.type = "Omvormer";
+        this.props.adres = "";
+        delete this.keys;
     };
     Omvormer.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
-        output += ", Adres/tekst: " + this.stringToHTML(15, 5);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
+        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Omvormer.prototype.toSVG = function () {
@@ -2961,7 +3026,7 @@ var Omvormer = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
             + '<use xlink:href="#omvormer" x="21" y="25"></use>';
-        mySVG.data += this.addAddress(mySVG, 60, 15);
+        mySVG.data += this.addPropAddress(mySVG, 60, 15);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -2974,15 +3039,20 @@ var Overspanningsbeveiliging = /** @class */ (function (_super) {
         _this.resetKeys();
         return _this;
     }
+    Overspanningsbeveiliging.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = mykeys[0][2];
+        this.props.adres = mykeys[15][2];
+    };
     Overspanningsbeveiliging.prototype.resetKeys = function () {
         this.clearKeys();
-        this.keys[0][2] = "Overspanningsbeveiliging"; // This is rather a formality as we should already have this at this stage
-        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+        this.props.type = "Overspanningsbeveiliging";
+        this.props.adres = "";
+        delete this.keys;
     };
     Overspanningsbeveiliging.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
-        output += ", Adres/tekst: " + this.stringToHTML(15, 5);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
+        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Overspanningsbeveiliging.prototype.toSVG = function () {
@@ -2994,7 +3064,7 @@ var Overspanningsbeveiliging = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
             + '<use xlink:href="#overspanningsbeveiliging" x="21" y="25"></use>';
-        mySVG.data += this.addAddress(mySVG, 55, 10);
+        mySVG.data += this.addPropAddress(mySVG, 55, 10);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -3055,15 +3125,20 @@ var Stoomoven = /** @class */ (function (_super) {
         _this.resetKeys();
         return _this;
     }
+    Stoomoven.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = mykeys[0][2];
+        this.props.adres = mykeys[15][2];
+    };
     Stoomoven.prototype.resetKeys = function () {
         this.clearKeys();
-        this.keys[0][2] = "Stoomoven"; // This is rather a formality as we should already have this at this stage
-        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+        this.props.type = "Stoomoven";
+        this.props.adres = "";
+        delete this.keys;
     };
     Stoomoven.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
-        output += ", Adres/tekst: " + this.stringToHTML(15, 5);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
+        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Stoomoven.prototype.toSVG = function () {
@@ -3075,7 +3150,7 @@ var Stoomoven = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
             + '<use xlink:href="#stoomoven" x="21" y="25"></use>';
-        mySVG.data += this.addAddress(mySVG, 60, 15);
+        mySVG.data += this.addPropAddress(mySVG, 60, 15);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -3278,15 +3353,20 @@ var Vaatwasmachine = /** @class */ (function (_super) {
         _this.resetKeys();
         return _this;
     }
+    Vaatwasmachine.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = mykeys[0][2];
+        this.props.adres = mykeys[15][2];
+    };
     Vaatwasmachine.prototype.resetKeys = function () {
         this.clearKeys();
-        this.keys[0][2] = "Vaatwasmachine"; // This is rather a formality as we should already have this at this stage
-        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+        this.props.type = "Vaatwasmachine";
+        this.props.adres = "";
+        delete this.keys;
     };
     Vaatwasmachine.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
-        output += ", Adres/tekst: " + this.stringToHTML(15, 5);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
+        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Vaatwasmachine.prototype.toSVG = function () {
@@ -3298,7 +3378,7 @@ var Vaatwasmachine = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
             + '<use xlink:href="#vaatwasmachine" x="21" y="25"></use>';
-        mySVG.data += this.addAddress(mySVG, 60, 15);
+        mySVG.data += this.addPropAddress(mySVG, 60, 15);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -3311,15 +3391,20 @@ var Ventilator = /** @class */ (function (_super) {
         _this.resetKeys();
         return _this;
     }
+    Ventilator.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = mykeys[0][2];
+        this.props.adres = mykeys[15][2];
+    };
     Ventilator.prototype.resetKeys = function () {
         this.clearKeys();
-        this.keys[0][2] = "Ventilator"; // This is rather a formality as we should already have this at this stage
-        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+        this.props.type = "Ventilator";
+        this.props.adres = "";
+        delete this.keys;
     };
     Ventilator.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
-        output += ", Adres/tekst: " + this.stringToHTML(15, 5);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
+        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Ventilator.prototype.toSVG = function () {
@@ -3331,7 +3416,7 @@ var Ventilator = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
             + '<use xlink:href="#ventilator" x="21" y="25"></use>';
-        mySVG.data += this.addAddress(mySVG, 55, 10);
+        mySVG.data += this.addPropAddress(mySVG, 55, 10);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -3765,15 +3850,20 @@ var Wasmachine = /** @class */ (function (_super) {
         _this.resetKeys();
         return _this;
     }
+    Wasmachine.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = mykeys[0][2];
+        this.props.adres = mykeys[15][2];
+    };
     Wasmachine.prototype.resetKeys = function () {
         this.clearKeys();
-        this.keys[0][2] = "Wasmachine"; // This is rather a formality as we should already have this at this stage
-        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+        this.props.type = "Wasmachine";
+        this.props.adres = "";
+        delete this.keys;
     };
     Wasmachine.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
-        output += ", Adres/tekst: " + this.stringToHTML(15, 5);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
+        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Wasmachine.prototype.toSVG = function () {
@@ -3785,7 +3875,7 @@ var Wasmachine = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
             + '<use xlink:href="#wasmachine" x="21" y="25"></use>';
-        mySVG.data += this.addAddress(mySVG, 60, 15);
+        mySVG.data += this.addPropAddress(mySVG, 60, 15);
         mySVG.data += "\n";
         return (mySVG);
     };
