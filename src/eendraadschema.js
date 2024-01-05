@@ -1,7 +1,7 @@
 //=========================================================================//
 //
 //  Eendraadschema tekenen (https://eendraadschema.goethals-jacobs.be/)
-//  Copyright (C) 2019  Ivan Goethals
+//  Copyright (C) 2019-2023 Ivan Goethals
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -15,11 +15,6 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-//
-//-------------------------------------------------------------------------//
-//
-//  Want to contribute?, use the contact-form on the website mentioned
-//  above.
 //
 //=========================================================================//
 
@@ -38,6 +33,18 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+function deepClone(obj) {
+    var _out = new obj.constructor;
+    var getType = function (n) {
+        return Object.prototype.toString.call(n).slice(8, -1);
+    };
+    for (var _key in obj) {
+        if (obj.hasOwnProperty(_key)) {
+            _out[_key] = getType(obj[_key]) === 'Object' || getType(obj[_key]) === 'Array' ? deepClone(obj[_key]) : obj[_key];
+        }
+    }
+    return _out;
+}
 function contains(a, obj) {
     for (var i = 0; i < a.length; i++) {
         if (a[i] === obj) {
@@ -79,7 +86,6 @@ function flattenSVG(SVGstruct, shiftx, shifty, node) {
             str = str.concat(flattenSVG(SVGstruct.children[i], shiftx, shifty, node + 1), "\n");
         }
         if (node <= 0) {
-            //---output[0] = outstruct;
             if (outstruct.attributes.getNamedItem("width")) { // make SVG a 0,0 element
                 str = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" transform="scale(1,1)" width="' + (outstruct.attributes.getNamedItem("width").nodeValue) +
                     '" height="' + (outstruct.attributes.getNamedItem("height").nodeValue) + '">' + str + '</svg>';
@@ -157,16 +163,15 @@ function flattenSVGfromString(xmlstr) {
     var str = "";
     var parser = new DOMParser();
     var xmlDoc = parser.parseFromString(xmlstr, "text/xml"); //important to use "text/xml"
-    //str = flattenSVG(xmlDoc.children[0],0,0,0);
     str = flattenSVG(xmlDoc.childNodes[0], 0, 0, 0);
     return str;
 }
 function htmlspecialchars(my_input) {
-    var str;
-    if (isNaN(my_input))
-        str = my_input;
+    var returnstr;
+    if (typeof (my_input) == 'undefined')
+        returnstr = "";
     else
-        str = my_input.toString();
+        returnstr = my_input.toString();
     var map = {
         '&': '&amp;',
         '<': '&lt;',
@@ -174,7 +179,7 @@ function htmlspecialchars(my_input) {
         '"': '&quot;',
         "'": '&#039;'
     };
-    return str.replace(/[&<>"']/g, function (m) { return map[m]; });
+    return returnstr.replace(/[&<>"']/g, function (m) { return map[m]; });
 }
 function browser_ie_detected() {
     var ua = window.navigator.userAgent;
@@ -197,59 +202,40 @@ var SVGelement = /** @class */ (function () {
     return SVGelement;
 }());
 var List_Item = /** @class */ (function () {
+    // -- Constructor --
     function List_Item(mylist) {
         this.id = 0; //undefined
         this.parent = 0; //no parent
         this.indent = 0; //at root note, no parent
         this.collapsed = false; //at the start, nothingh is collapsed
-        this.keys = new Array();
-        this.props = {};
+        this.props = {}; // Lege properties
         this.sourcelist = mylist;
     }
-    List_Item.prototype.resetKeys = function () {
-    };
+    // -- Initialisatie van properties --
+    List_Item.prototype.resetProps = function () { this.props = {}; };
+    // -- Default maximum aantal kinderen ==
     List_Item.prototype.getMaxNumChilds = function () {
-        return (2 ^ 24);
+        return (2 ^ 16);
     };
+    // -- Tel aantal kinderen --
     List_Item.prototype.getNumChilds = function () {
         var numChilds = 0;
-        if (this.sourcelist != null) {
-            for (var i = 0; i < this.sourcelist.data.length; ++i) {
-                if ((this.sourcelist.data[i].parent === this.id) && (this.sourcelist.active[i]))
-                    numChilds++;
-            }
+        for (var i = 0; i < this.sourcelist.data.length; ++i) {
+            if ((this.sourcelist.data[i].parent === this.id) && (this.sourcelist.active[i]))
+                numChilds++;
         }
         return (numChilds);
     };
+    // -- Check of het item actief is --
     List_Item.prototype.isActief = function () {
-        if (this.sourcelist != null) {
-            var ordinal = this.sourcelist.getOrdinalById(this.id);
-            return (this.sourcelist.active[ordinal]);
-        }
-        else {
-            return (false);
-        }
+        var ordinal = this.sourcelist.getOrdinalById(this.id);
+        return (this.sourcelist.active[ordinal]);
     };
+    // -- Retourneer ouder-item --
     List_Item.prototype.getParent = function () {
-        if ((this.sourcelist != null) && (this.parent != 0)) {
-            return this.sourcelist.data[this.sourcelist.getOrdinalById(this.parent)];
-        }
-        else {
-            return null;
-        }
+        return this.sourcelist.data[this.sourcelist.getOrdinalById(this.parent)];
     };
-    List_Item.prototype.stringToHTML = function (keyid, size) {
-        var output = "";
-        var sizestr = "";
-        switch (size) {
-            case null: break;
-            default:
-                sizestr = ' size="' + size + '" ';
-        }
-        output = '<input type="text"' + sizestr + ' id="' + 'HL_edit_' + this.id + '_' + keyid + '" '
-            + 'onchange=HLUpdate(' + this.id + ',' + keyid + ',"STRING","' + 'HL_edit_' + this.id + '_' + keyid + '") value="' + this.keys[keyid][2] + '">';
-        return (output);
-    };
+    // -- Editeren van een string --
     List_Item.prototype.stringPropToHTML = function (item, size) {
         var output = "";
         var sizestr = "";
@@ -259,13 +245,7 @@ var List_Item = /** @class */ (function () {
             + 'onchange=HLPropUpdate(' + this.id + ',"' + item + '","STRING","' + 'HL_edit_' + this.id + '_' + item + '") value="' + this.props[item] + '">';
         return (output);
     };
-    List_Item.prototype.checkboxToHTML = function (keyid) {
-        var output;
-        output = '<input type="checkbox" id="' + 'HL_edit_' + this.id + '_' + keyid + '" '
-            + 'onchange=HLUpdate(' + this.id + ',' + keyid + ',"BOOLEAN","' + 'HL_edit_' + this.id + '_' + keyid + '")'
-            + (this.keys[keyid][2] ? ' checked' : '') + '>';
-        return (output);
-    };
+    // -- Editeren van een checkbox --
     List_Item.prototype.checkboxPropToHTML = function (item) {
         var output;
         output = '<input type="checkbox" id="' + 'HL_edit_' + this.id + '_' + item + '" '
@@ -273,29 +253,7 @@ var List_Item = /** @class */ (function () {
             + (this.props[item] ? ' checked' : '') + '>';
         return (output);
     };
-    List_Item.prototype.selectToHTML = function (keyid, items) {
-        var myId = "HL_edit_" + this.id + "_" + keyid;
-        var output = "";
-        var options = "";
-        output = '<select id="' + myId + '" onchange=HLUpdate(' + this.id + ',' + keyid + ',"SELECT","' + myId + '")>';
-        for (var i = 0; i < items.length; i++) {
-            options = "";
-            if (this.keys[keyid][2] == items[i]) {
-                options += " selected";
-            }
-            if (items[i] == "---") {
-                options += " disabled";
-                items[i] = "---------------------------";
-            }
-            if (items[i] == "-") {
-                options += " disabled";
-                items[i] = "---";
-            }
-            output += '<option value="' + items[i] + '" ' + options + '>' + items[i] + '</option>';
-        }
-        output += "</select>";
-        return (output);
-    };
+    // -- Editeren van een select box --
     List_Item.prototype.selectPropToHTML = function (item, items) {
         var myId = "HL_edit_" + this.id + "_" + item;
         var output = "";
@@ -319,6 +277,7 @@ var List_Item = /** @class */ (function () {
         output += "</select>";
         return (output);
     };
+    // -- Genereer HTML code voor de boom-editor --
     List_Item.prototype.toHTML = function (mode) {
         return ("toHTML() function not defined for base class List_Item. Extend class first.");
     };
@@ -330,126 +289,67 @@ var List_Item = /** @class */ (function () {
 }());
 var Electro_Item = /** @class */ (function (_super) {
     __extends(Electro_Item, _super);
-    //-- Constructor, can be invoked with the List_Item of the parent to know better what kind of
-    //   elements are acceptable (e.g. not all parent can have all possible childs) --
     function Electro_Item(mylist) {
         var _this = _super.call(this, mylist) || this;
-        _this.keys.length = 27;
-        for (var i = 0; i < 27; i++)
-            _this.keys[i] = ["", "", ""];
+        _this.resetProps(); // In Javascript, this calls the derived classes
         return _this;
     }
-    Electro_Item.prototype.convertLegacyKeys = function (mykeys) {
-        // Do nothing if not defined in derived class
-    };
-    //-- When a new element is created, we will call resetKeys to set the keys to their default values --
-    Electro_Item.prototype.resetKeys = function () {
-        /*this.keys.push(["type","SELECT",""]); //0
-        this.keys.push(["geaard","BOOLEAN",true]); //1
-        this.keys.push(["kinderveiligheid","BOOLEAN",true]); //2
-        this.keys.push(["accumulatie","BOOLEAN",false]); //3
-        this.keys.push(["aantal","SELECT","1"]); //4
-        this.keys.push(["lichtkring_poligheid","SELECT","enkelpolig"]); //5
-          //Ook gebruikt voor schakelaar (type schakelaar)
-          //Ook gebruikt voor externe sturing Domotica gestuurde verbruiker (type sturing)
-        this.keys.push(["ventilator","BOOLEAN",false]); //6
-        this.keys.push(["zekering","SELECT","automatisch"]); //7
-        this.keys.push(["amperage","STRING","20"]); //8
-        this.keys.push(["kabel","STRING","XVB 3G2,5"]); //9
-        this.keys.push(["naam","STRING",""]); //10
-        this.keys.push(["differentieel_waarde","STRING","300"]); //11
-        this.keys.push(["kabel_aanwezig","BOOLEAN",true]); //12, In eerste plaats om aan te geven of er een kabel achter een zekering zit.
-        this.keys.push(["aantal2","SELECT","1"]); //13, a.o. gebruikt voor aantal lampen of aantal knoppen op drukknop_armatuur
-        this.keys.push(["voltage","STRING","230V/24V"]); //14, a.o. gebruikt voor aantal lampen
-        this.keys.push(["commentaar","STRING",""]); //15, extra tekstveld
-        this.keys.push(["select1","SELECT","standaard"]); //16, algemeen veld
-          //Indien lichtpunt, select1 is het type van licht (standaard, TL, ...)
-          //Indien drukknop, select1 kan "standaard", "dimmer" of "rolluik" zijn
-          //Indien vrije tekst, select1 kan "verbruiker" of "zonder kader" zijn
-          //Indien ketel, type is het soort verwarming
-          //Indien stopcontact, select1 is het aantal fasen
-        this.keys.push(["select2","SELECT","standaard"]); //17, algemeen veld
-          //Indien lichtpunt, select2 is de selector voor het type noodverlichting (indien aanwezig)
-          //Indien vrije tekst of verbruiker, kan "links", "centreer", "rechts" zijn
-          //Indien differentieel of differentieelautomaat (in kring of aansluiting), kan type "", "A", of "B" zijn
-          //Indien automaat (in kring of aansluiting), kan curve "", "A", "B", of "C" zijn
-        this.keys.push(["select3","SELECT","standaard"]); //18, algemeen veld
-          //Indien differentieelautomaat (in kring of aansluiting), kan curve "", "A", "B", of "C" zijn.  Veld 17 is dan het Type.
-          //Indien vrije tekst kan je hier kiezen tussen automatisch of handmatige breedte
-        this.keys.push(["bool1","BOOLEAN",false]); //19, algemeen veld
-          //Indien lichtpunt, bool1 is de selector voor wandverlichting of niet
-          //Indien drukknop, bool1 is de selector voor afgeschermd of niet
-          //Indien schakelaar/lichtcircuit, bool1 is de selector voor signalisatielamp of niet
-          //Indien vrije tekst of verbruiker, bool1 is de selector voor vet
-          //Indien stopcontact, bool1 is de selector voor ingebouwde schakelaar
-          //Indien domotica gestuurde verbruiker, bool1 is de selector voor draadloos
-        this.keys.push(["bool2","BOOLEAN",false]); //20, algemeen veld
-          //Indien lichtpunt, schakelaar, drukknop of stopcontact, bool2 is de selector voor halfwaterdicht of niet
-          //Indien vrije tekst of verbruiker, bool2 is de selector voor schuin
-          //Indien ketel, bool2 is de selector voor energiebron
-          //Indien kring, bool2 is de selector voor selectieve differentieel
-          //Indien stopcontact, bool2 is de selector voor halfwaterdicht
-          //Indien domotica gestuurde verbruiker, bool2 is de selector voor drukknop
-        this.keys.push(["bool3","BOOLEAN",false]); //21, algemeen veld
-          //Indien lichtpunt, bool3 is de selector voor ingebouwde schakelaar of niet
-          //Indien schakelaar of drukknop, bool3 is de selector voor verklikkerlamp of niet
-          //Indien ******, bool3 is de selector voor warmtefunctie
-          //Indien stopcontact, bool3 is de selector voor meerfasig
-          //Indien domotica gestuurde verbruiker, bool3 is de selector voor geprogrammeerd
-        this.keys.push(["string1","STRING",""]); //22, algemeen veld
-          //Indien vrije tekst of verbruiker, breedte van het veld
-          //Indien vrije ruimte, breede van de ruimte
-        this.keys.push(["string2","STRING",""]); //23, algemeen veld
-          //Indien vrije tekst of verbruiker, het adres-veld (want reeds gebruikt voor de tekst zelf)
-          //Indien aansluiting, hier kan ook een extra naam voor de aansluiting staan
-        this.keys.push(["string3","STRING",""]); //24, algemeen veld
-          //Indien aansluiting, kabeltype vóór de teller
-        this.keys.push(["bool4","BOOLEAN",false]); //25, algemeen veld
-          //Indien schakelaar, indicatie trekschakelaar of niet
-          //Indien stopcontact, bool4 is de selector voor nulgeleider of niet
-          //Indien domotica gestuurde verbruiker, bool4 is de selector voor detectie
-        this.keys.push(["bool5","BOOLEAN",false]); //26, algemeen veld
-          //Indien domotica gestuurde verbruiker, bool5 is de selector voor uitbreiding van de sturing met drukknop
-          //Indien stopcontact, geeft aan dat deze in een verdeelbord zit*/
-    };
-    Electro_Item.prototype.getLegacyKey = function (keyid) {
-        if ((typeof (this.keys) != 'undefined') && (this.keys.length > keyid)) {
-            return this.keys[keyid][2];
+    // -- Lees oude legacy keys (enkel voor EDS versies 001 en 002) --
+    Electro_Item.prototype.getLegacyKey = function (mykeys, keyid) {
+        if ((typeof (mykeys) != 'undefined') && (mykeys.length > keyid)) {
+            return mykeys[keyid][2];
         }
         else {
             return null;
         }
     };
+    // -- Converteer oud key-based systeem (EDS versies 1 en 2) --
+    Electro_Item.prototype.convertLegacyKeys = function (mykeys) { }; // Do nothing if not defined in derived class
+    // -- Na creatie van een item, zet alle props op default waarden --
+    Electro_Item.prototype.resetProps = function () { _super.prototype.resetProps.call(this); }; // overriden in each derived class
+    // -- Zoek vader van het Electro_Item --
     Electro_Item.prototype.getParent = function () {
         return _super.prototype.getParent.call(this);
     };
+    // -- Lijst met toegestande kinderen van het Electro_item --
     Electro_Item.prototype.allowedChilds = function () {
         return ["", "Aansluiting", "Domotica", "Domotica gestuurde verbruiker", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
     };
+    // -- Aantal actieve kinderen van het Electro_item --
     Electro_Item.prototype.getNumChildsWithKnownType = function () {
         var numChilds = 0;
         if (this.sourcelist != null) {
             for (var i = 0; i < this.sourcelist.data.length; ++i) {
-                if ((this.sourcelist.data[i].parent === this.id) && (this.sourcelist.active[i]) && (this.sourcelist.data[i].getType() != ""))
+                if ((this.sourcelist.data[i].parent === this.id) && (this.sourcelist.active[i])
+                    && (this.sourcelist.data[i].getType() != ""))
                     numChilds++;
             }
         }
         return (numChilds);
     };
+    // -- Check of Electro_item een kind heeft --
     Electro_Item.prototype.heeftKindMetGekendType = function () {
         return (this.getNumChildsWithKnownType() > 0);
     };
-    Electro_Item.prototype.isVrijeTekstZonderKader = function (item) {
-        return ((item.getType() == "Vrije tekst") && (item.keys[16][2] == "zonder kader"));
+    // -- Check of [item] een vrije tekst zonder kader is --
+    Electro_Item.prototype.isVrijeTekstZonderKader = function () {
+        if (this.getType() == "Vrije tekst") {
+            if (this.props.vrije_tekst_type == "zonder kader")
+                return true;
+            else
+                return false;
+        }
+        else
+            return false;
     };
+    // -- Check of er een streepje moet geplaatst worden achter bepaalde elementen zoals een stopcontact of lichtpunt --
     Electro_Item.prototype.heeftVerbruikerAlsKind = function () {
         var parent = this.getParent();
         if ((parent != null) && (parent.getType() == "Meerdere verbruikers")) {
             var myOrdinal = this.sourcelist.getOrdinalById(this.id);
             var lastOrdinal = 0;
             for (var i = 0; i < this.sourcelist.data.length; ++i) {
-                //empty tekst at the end does not count as a valid last child of meerdere verbruikers (zo vermijden we een streepje op het einde van het stopcontact)
-                if (this.sourcelist.active[i] && !(this.isVrijeTekstZonderKader(this.sourcelist.data[i])) && (this.sourcelist.data[i].parent == this.parent))
+                if (this.sourcelist.active[i] && !(this.sourcelist.data[i].isVrijeTekstZonderKader()) && (this.sourcelist.data[i].parent == this.parent))
                     lastOrdinal = i;
             }
             if (lastOrdinal > myOrdinal)
@@ -461,70 +361,33 @@ var Electro_Item = /** @class */ (function (_super) {
             if (this.sourcelist != null) {
                 for (var i = 0; i < this.sourcelist.data.length; ++i) {
                     if ((this.sourcelist.data[i].parent === this.id) &&
-                        (this.sourcelist.active[i]) && !(this.isVrijeTekstZonderKader(this.sourcelist.data[i])) &&
-                        (this.sourcelist.data[i].getType() != ""))
+                        (this.sourcelist.active[i]) && !(this.sourcelist.data[i].isVrijeTekstZonderKader()) &&
+                        (this.sourcelist.data[i].getType() != "") && (this.sourcelist.data[i].getType() != null))
                         return true;
                 }
             }
         }
         return false;
     };
-    //-- Make the current item a copy of source_item --
+    // -- Maak het huidige Electro_item een copy van source_item --
     Electro_Item.prototype.clone = function (source_item) {
-        function deepClone(obj) {
-            var _out = new obj.constructor;
-            var getType = function (n) {
-                return Object.prototype.toString.call(n).slice(8, -1);
-            };
-            for (var _key in obj) {
-                if (obj.hasOwnProperty(_key)) {
-                    _out[_key] = getType(obj[_key]) === 'Object' || getType(obj[_key]) === 'Array' ? deepClone(obj[_key]) : obj[_key];
-                }
-            }
-            return _out;
-        }
         this.parent = source_item.parent;
         this.indent = source_item.indent;
         this.collapsed = source_item.collapsed;
         this.sourcelist = source_item.sourcelist;
-        if (typeof (this.keys) != 'undefined') {
-            for (var i = 0; i < this.keys.length; i++) {
-                for (var j = 0; j < 3; j++) {
-                    this.keys[i][j] = source_item.keys[i][j];
-                }
-            }
-        }
-        if (typeof (this.props) != 'undefined') {
-            this.props = deepClone(source_item.props);
-        }
+        this.props = deepClone(source_item.props);
     };
-    Electro_Item.prototype.getType = function () {
-        if (typeof (this.keys) != 'undefined')
-            return this.keys[0][2];
+    // -- Type van het Electro_item teruggeven --
+    Electro_Item.prototype.getType = function () { return this.props.type; };
+    //-- Clear all keys, met uitzondering van nr indien er een nummer is --
+    Electro_Item.prototype.clearProps = function () {
+        var oldnr;
+        if (typeof (this.props.nr) != 'undefined')
+            oldnr = this.props.nr;
         else
-            return this.props.type;
-    };
-    //-- Clear all keys --
-    Electro_Item.prototype.clearKeys = function () {
-        //Code voor de oude keys
-        //Whipe most keys; note how we don't reset keys[10][2] as usually we don't want the number to change
-        if (typeof (this.keys) != 'undefined') {
-            for (var i = 1; i < 10; i++)
-                this.keys[i][2] = "";
-            for (var i = 11; i < this.keys.length; i++)
-                this.keys[i][2] = "";
-        }
-        //Code voor de nieuwe props
-        //We laten het nr ongemoeid
-        if (typeof (this.props) != 'undefined') {
-            var oldnr = void 0;
-            if (typeof (this.props.nr) != 'undefined')
-                oldnr = this.props.nr;
-            else
-                oldnr = "";
-            this.props = {};
-            this.props.nr = oldnr;
-        }
+            oldnr = "";
+        this.props = {};
+        this.props.nr = oldnr;
     };
     // -- Returns the maximum number of childs the Electro_Item can have --
     Electro_Item.prototype.getMaxNumChilds = function () {
@@ -540,11 +403,9 @@ var Electro_Item = /** @class */ (function (_super) {
                 break; // By default, most element can have 1 child unless overwritten by derived classes
         }
     };
-    //-- Returns true if the Electro_Item can take an extra childs --
-    Electro_Item.prototype.checkInsertChild = function () {
-        return (this.getMaxNumChilds() > this.getNumChilds());
-    };
-    //-- Returns true if the parent can take an extra child --
+    // -- Returns true if the Electro_Item can take an extra childs --
+    Electro_Item.prototype.checkInsertChild = function () { return (this.getMaxNumChilds() > this.getNumChilds()); };
+    // -- Returns true if the parent can take an extra child --
     Electro_Item.prototype.checkInsertSibling = function () {
         var parent = this.getParent();
         if (parent == null)
@@ -552,7 +413,7 @@ var Electro_Item = /** @class */ (function (_super) {
         else
             return (parent.getMaxNumChilds() > parent.getNumChilds());
     };
-    //-- Displays the navigation buttons for the Electro_Item, i.e. the green and blue arrows, and the selection of the Type (Bord, Kring, ...) --
+    // -- Displays the navigation buttons for the Electro_Item, i.e. the green and blue arrows, and the selection of the Type (Bord, Kring, ...) --
     Electro_Item.prototype.toHTMLHeader = function (mode) {
         var output = "";
         if (mode == "move") {
@@ -582,28 +443,13 @@ var Electro_Item = /** @class */ (function (_super) {
             consumerArray = ["", "Kring", "Aansluiting"];
         else
             consumerArray = this.getParent().allowedChilds();
-        if (typeof (this.keys) != 'undefined')
-            output += this.selectToHTML(0, consumerArray);
-        else
-            output += this.selectPropToHTML('type', consumerArray);
+        output += this.selectPropToHTML('type', consumerArray);
         return (output);
     };
-    //-- This one will get called if the type of the Electro_Item has not yet been chosen --
+    // -- This one will get called if the type of the Electro_Item has not yet been chosen --
     Electro_Item.prototype.toHTML = function (mode) { return (this.toHTMLHeader(mode)); }; // Implemented in the derived classes
-    //-- Code to add the addressline below when drawing SVG. This is called by most derived classes --
-    Electro_Item.prototype.addAddress = function (mySVG, starty, godown, shiftx, key) {
-        if (starty === void 0) { starty = 60; }
-        if (godown === void 0) { godown = 15; }
-        if (shiftx === void 0) { shiftx = 0; }
-        if (key === void 0) { key = 15; }
-        var returnstr;
-        if (!(/^\s*$/.test(this.keys[key][2]))) { //check if adres contains only white space
-            returnstr = '<text x="' + ((mySVG.xright - 20) / 2 + 21 + shiftx) + '" y="' + starty + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[key][2]) + '</text>';
-            mySVG.ydown = mySVG.ydown + godown;
-        }
-        return returnstr;
-    };
-    Electro_Item.prototype.addPropAddress = function (mySVG, starty, godown, shiftx) {
+    // -- Code to add the addressline below when drawing SVG. This is called by most derived classes --
+    Electro_Item.prototype.addAddressToSVG = function (mySVG, starty, godown, shiftx) {
         if (starty === void 0) { starty = 60; }
         if (godown === void 0) { godown = 15; }
         if (shiftx === void 0) { shiftx = 0; }
@@ -614,7 +460,7 @@ var Electro_Item = /** @class */ (function (_super) {
         }
         return returnstr;
     };
-    //-- Make the SVG for the electro item, placeholder for derived classes --
+    // -- Make the SVG for the electro item, placeholder for derived classes --
     Electro_Item.prototype.toSVG = function () { return (new SVGelement()); }; //Placeholder for derived classes
     return Electro_Item;
 }(List_Item));
@@ -866,94 +712,104 @@ var Schakelaars = /** @class */ (function (_super) {
     __extends(Schakelaars, _super);
     function Schakelaars(mylist) {
         var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
         _this.tekenKeten = [];
         return _this;
     }
-    Schakelaars.prototype.resetKeys = function () {
-        this.clearKeys();
-        this.keys[0][2] = "Schakelaars"; // This is rather a formality as we should already have this at this stage
-        this.keys[4][2] = "1"; // Per default 1 schakelaar
-        this.keys[5][2] = "enkelpolig"; // Per default enkelpolig
-        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
-        this.keys[19][2] = false; // Per default geen signalisatielampje
-        this.keys[20][2] = false; // Per default niet halfwaterdicht
-        this.keys[21][2] = false; // Per default geen verklikkerslampje
-        this.keys[25][2] = false; // Per default geen trekschakelaar
+    Schakelaars.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.aantal_schakelaars = this.getLegacyKey(mykeys, 4);
+        this.props.type_schakelaar = this.getLegacyKey(mykeys, 5);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.adres = this.getLegacyKey(mykeys, 15);
+        this.props.heeft_signalisatielampje = this.getLegacyKey(mykeys, 19);
+        this.props.is_halfwaterdicht = this.getLegacyKey(mykeys, 20);
+        this.props.heeft_verklikkerlampje = this.getLegacyKey(mykeys, 21);
+        this.props.is_trekschakelaar = this.getLegacyKey(mykeys, 25);
+    };
+    Schakelaars.prototype.resetProps = function () {
+        this.clearProps();
+        this.props.type = "Schakelaars"; // This is rather a formality as we should already have this at this stage
+        this.props.aantal_schakelaars = "1"; // Per default 1 schakelaar
+        this.props.type_schakelaar = "enkelpolig"; // Per default enkelpolig
+        this.props.adres = ""; // Set Adres/tekst to "" when the item is cleared
+        this.props.heeft_signalisatielampje = false; // Per default geen signalisatielampje
+        this.props.is_halfwaterdicht = false; // Per default niet halfwaterdicht
+        this.props.heeft_verklikkerlampje = false; // Per default geen verklikkerslampje
+        this.props.is_trekschakelaar = false; // Per default geen trekschakelaar
     };
     Schakelaars.prototype.kanHalfwaterdichtZijn = function () {
-        return ((this.keys[5][2] == "enkelpolig") || (this.keys[5][2] == "dubbelpolig") || (this.keys[5][2] == "driepolig") || (this.keys[5][2] == "kruis_enkel") ||
-            (this.keys[5][2] == "dubbelaansteking") || (this.keys[5][2] == "wissel_enkel") || (this.keys[5][2] == "wissel_dubbel") || (this.keys[5][2] == "dubbel") ||
-            (this.keys[5][2] == "dimschakelaar") || (this.keys[5][2] == "dimschakelaar wissel") || (this.keys[5][2] == "rolluikschakelaar"));
+        return ((this.props.type_schakelaar == "enkelpolig") || (this.props.type_schakelaar == "dubbelpolig") || (this.props.type_schakelaar == "driepolig") || (this.props.type_schakelaar == "kruis_enkel") ||
+            (this.props.type_schakelaar == "dubbelaansteking") || (this.props.type_schakelaar == "wissel_enkel") || (this.props.type_schakelaar == "wissel_dubbel") || (this.props.type_schakelaar == "dubbel") ||
+            (this.props.type_schakelaar == "dimschakelaar") || (this.props.type_schakelaar == "dimschakelaar wissel") || (this.props.type_schakelaar == "rolluikschakelaar"));
     };
     Schakelaars.prototype.kanVerklikkerlampjeHebben = function () {
-        return ((this.keys[5][2] == "enkelpolig") || (this.keys[5][2] == "dubbelpolig") || (this.keys[5][2] == "driepolig") || (this.keys[5][2] == "kruis_enkel") ||
-            (this.keys[5][2] == "dubbelaansteking") || (this.keys[5][2] == "wissel_enkel") || (this.keys[5][2] == "wissel_dubbel") || (this.keys[5][2] == "dubbel") ||
-            (this.keys[5][2] == "dimschakelaar") || (this.keys[5][2] == "dimschakelaar wissel"));
+        return ((this.props.type_schakelaar == "enkelpolig") || (this.props.type_schakelaar == "dubbelpolig") || (this.props.type_schakelaar == "driepolig") || (this.props.type_schakelaar == "kruis_enkel") ||
+            (this.props.type_schakelaar == "dubbelaansteking") || (this.props.type_schakelaar == "wissel_enkel") || (this.props.type_schakelaar == "wissel_dubbel") || (this.props.type_schakelaar == "dubbel") ||
+            (this.props.type_schakelaar == "dimschakelaar") || (this.props.type_schakelaar == "dimschakelaar wissel"));
     };
     Schakelaars.prototype.kanSignalisatielampjeHebben = function () {
         return this.kanVerklikkerlampjeHebben();
     };
     Schakelaars.prototype.kanTrekschakelaarHebben = function () {
-        return ((this.keys[5][2] == "enkelpolig") || (this.keys[5][2] == "dubbelpolig") || (this.keys[5][2] == "driepolig") || (this.keys[5][2] == "kruis_enkel") ||
-            (this.keys[5][2] == "dubbelaansteking") || (this.keys[5][2] == "wissel_enkel") || (this.keys[5][2] == "wissel_dubbel") || (this.keys[5][2] == "dubbel"));
+        return ((this.props.type_schakelaar == "enkelpolig") || (this.props.type_schakelaar == "dubbelpolig") || (this.props.type_schakelaar == "driepolig") || (this.props.type_schakelaar == "kruis_enkel") ||
+            (this.props.type_schakelaar == "dubbelaansteking") || (this.props.type_schakelaar == "wissel_enkel") || (this.props.type_schakelaar == "wissel_dubbel") || (this.props.type_schakelaar == "dubbel"));
     };
     Schakelaars.prototype.overrideKeys = function () {
-        switch (this.keys[5][2]) {
+        switch (this.props.type_schakelaar) {
             case "enkelpolig":
-                this.keys[4][2] = String(Math.min(Number(this.keys[4][2]), 5));
+                this.props.aantal_schakelaars = String(Math.min(Number(this.props.aantal_schakelaars), 5));
                 break;
             case "dubbelpolig":
-                this.keys[4][2] = String(Math.min(Number(this.keys[4][2]), 2));
+                this.props.aantal_schakelaars = String(Math.min(Number(this.props.aantal_schakelaars), 2));
                 break;
             default:
-                this.keys[4][2] = "1";
+                this.props.aantal_schakelaars = "1";
                 break;
         }
         if (!this.kanHalfwaterdichtZijn)
-            this.keys[20][2] = false;
+            this.props.is_halfwaterdicht = false;
         if (!this.kanVerklikkerlampjeHebben)
-            this.keys[21][2] = false;
+            this.props.heeft_verklikkerlampje = false;
         if (!this.kanSignalisatielampjeHebben)
-            this.keys[19][2] = false;
+            this.props.heeft_signalisatielampje = false;
         if (!this.kanTrekschakelaarHebben)
-            this.keys[25][2] = false;
+            this.props.is_trekschakelaar = false;
     };
     Schakelaars.prototype.toHTML = function (mode) {
         this.overrideKeys();
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
-        output += ", " + this.selectToHTML(5, ["enkelpolig", "dubbelpolig", "driepolig", "dubbelaansteking", "wissel_enkel", "wissel_dubbel", "kruis_enkel", "---", "schakelaar", "dimschakelaar", "dimschakelaar wissel", "bewegingsschakelaar", "schemerschakelaar", "---", "teleruptor", "relais", "dimmer", "tijdschakelaar", "minuterie", "thermostaat", "rolluikschakelaar"]);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
+        output += ", " + this.selectPropToHTML('type_schakelaar', ["enkelpolig", "dubbelpolig", "driepolig", "dubbelaansteking", "wissel_enkel", "wissel_dubbel", "kruis_enkel", "---", "schakelaar", "dimschakelaar", "dimschakelaar wissel", "bewegingsschakelaar", "schemerschakelaar", "---", "teleruptor", "relais", "dimmer", "tijdschakelaar", "minuterie", "thermostaat", "rolluikschakelaar"]);
         if (this.kanHalfwaterdichtZijn())
-            output += ", Halfwaterdicht: " + this.checkboxToHTML(20);
+            output += ", Halfwaterdicht: " + this.checkboxPropToHTML('is_halfwaterdicht');
         if (this.kanVerklikkerlampjeHebben())
-            output += ", Verklikkerlampje: " + this.checkboxToHTML(21);
+            output += ", Verklikkerlampje: " + this.checkboxPropToHTML('heeft_verklikkerlampje');
         if (this.kanSignalisatielampjeHebben())
-            output += ", Signalisatielampje: " + this.checkboxToHTML(19);
+            output += ", Signalisatielampje: " + this.checkboxPropToHTML('heeft_signalisatielampje');
         if (this.kanTrekschakelaarHebben())
-            output += ", Trekschakelaar: " + this.checkboxToHTML(25);
-        switch (this.keys[5][2]) {
+            output += ", Trekschakelaar: " + this.checkboxPropToHTML('is_trekschakelaar');
+        switch (this.props.type_schakelaar) {
             case "enkelpolig":
-                output += ", Aantal schakelaars: " + this.selectToHTML(4, ["1", "2", "3", "4", "5"]);
+                output += ", Aantal schakelaars: " + this.selectPropToHTML('aantal_schakelaars', ["1", "2", "3", "4", "5"]);
                 break;
             case "dubbelpolig":
-                output += ", Aantal schakelaars: " + this.selectToHTML(4, ["1", "2"]);
+                output += ", Aantal schakelaars: " + this.selectPropToHTML('aantal_schakelaars', ["1", "2"]);
                 break;
         }
-        output += ", Adres/tekst: " + this.stringToHTML(15, 5);
+        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Schakelaars.prototype.bouwSchakelaarKeten = function () {
         this.tekenKeten = [];
-        switch (this.keys[5][2]) {
+        switch (this.props.type_schakelaar) {
             case "wissel_enkel":
-                this.tekenKeten.push(new Schakelaar("wissel_enkel", this.keys[20][2], this.keys[21][2], this.keys[19][2], this.keys[25][2]));
+                this.tekenKeten.push(new Schakelaar("wissel_enkel", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
                 break;
             case "wissel_dubbel":
-                this.tekenKeten.push(new Schakelaar("wissel_dubbel", this.keys[20][2], this.keys[21][2], this.keys[19][2], this.keys[25][2]));
+                this.tekenKeten.push(new Schakelaar("wissel_dubbel", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
                 break;
             case "kruis_enkel":
-                this.tekenKeten.push(new Schakelaar("kruis_enkel", this.keys[20][2], this.keys[21][2], this.keys[19][2], this.keys[25][2]));
+                this.tekenKeten.push(new Schakelaar("kruis_enkel", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
                 break;
             case "teleruptor":
                 this.tekenKeten.push(new Schakelaar("teleruptor"));
@@ -983,38 +839,38 @@ var Schakelaars = /** @class */ (function (_super) {
                 this.tekenKeten.push(new Schakelaar("tijdschakelaar"));
                 break;
             case "rolluikschakelaar":
-                this.tekenKeten.push(new Schakelaar("rolluikschakelaar", this.keys[20][2]));
+                this.tekenKeten.push(new Schakelaar("rolluikschakelaar", this.props.is_halfwaterdicht));
                 break;
             case "dubbelaansteking":
-                this.tekenKeten.push(new Schakelaar("dubbelaansteking", this.keys[20][2], this.keys[21][2], this.keys[19][2], this.keys[25][2]));
+                this.tekenKeten.push(new Schakelaar("dubbelaansteking", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
                 break;
             case "dimschakelaar":
-                this.tekenKeten.push(new Schakelaar("dimschakelaar", this.keys[20][2], this.keys[21][2], this.keys[19][2], false));
+                this.tekenKeten.push(new Schakelaar("dimschakelaar", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, false));
                 break;
             case "dimschakelaar wissel":
-                this.tekenKeten.push(new Schakelaar("dimschakelaar_wissel", this.keys[20][2], this.keys[21][2], this.keys[19][2], false));
+                this.tekenKeten.push(new Schakelaar("dimschakelaar_wissel", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, false));
                 break;
             case "enkelpolig":
-                if (Number(this.keys[4][2]) == 1)
-                    this.tekenKeten.push(new Schakelaar("enkel", this.keys[20][2], this.keys[21][2], this.keys[19][2], this.keys[25][2]));
-                if (Number(this.keys[4][2]) > 1) {
-                    this.tekenKeten.push(new Schakelaar("wissel_enkel", this.keys[20][2], this.keys[21][2], this.keys[19][2], this.keys[25][2]));
-                    for (var i = 2; i < Number(this.keys[4][2]); ++i) {
-                        this.tekenKeten.push(new Schakelaar("kruis_enkel", this.keys[20][2], this.keys[21][2], this.keys[19][2], this.keys[25][2]));
+                if (Number(this.props.aantal_schakelaars) == 1)
+                    this.tekenKeten.push(new Schakelaar("enkel", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
+                if (Number(this.props.aantal_schakelaars) > 1) {
+                    this.tekenKeten.push(new Schakelaar("wissel_enkel", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
+                    for (var i = 2; i < Number(this.props.aantal_schakelaars); ++i) {
+                        this.tekenKeten.push(new Schakelaar("kruis_enkel", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
                     }
-                    this.tekenKeten.push(new Schakelaar("wissel_enkel", this.keys[20][2], this.keys[21][2], this.keys[19][2], this.keys[25][2]));
+                    this.tekenKeten.push(new Schakelaar("wissel_enkel", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
                 }
                 break;
             case "dubbelpolig":
-                if (Number(this.keys[4][2]) == 1)
-                    this.tekenKeten.push(new Schakelaar("dubbel", this.keys[20][2], this.keys[21][2], this.keys[19][2], this.keys[25][2]));
-                if (Number(this.keys[4][2]) > 1) {
-                    this.tekenKeten.push(new Schakelaar("wissel_dubbel", this.keys[20][2], this.keys[21][2], this.keys[19][2], this.keys[25][2]));
-                    this.tekenKeten.push(new Schakelaar("wissel_dubbel", this.keys[20][2], this.keys[21][2], this.keys[19][2], this.keys[25][2]));
+                if (Number(this.props.aantal_schakelaars) == 1)
+                    this.tekenKeten.push(new Schakelaar("dubbel", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
+                if (Number(this.props.aantal_schakelaars) > 1) {
+                    this.tekenKeten.push(new Schakelaar("wissel_dubbel", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
+                    this.tekenKeten.push(new Schakelaar("wissel_dubbel", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
                 }
                 break;
             case "driepolig":
-                this.tekenKeten.push(new Schakelaar("driepolig", this.keys[20][2], this.keys[21][2], this.keys[19][2], this.keys[25][2]));
+                this.tekenKeten.push(new Schakelaar("driepolig", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
                 break;
         }
     };
@@ -1039,7 +895,7 @@ var Schakelaars = /** @class */ (function (_super) {
         mySVG.xright = startx - 2;
         mySVG.yup = 25;
         mySVG.ydown = 25;
-        mySVG.data += this.addAddress(mySVG, 25 + lowerbound, Math.max(0, lowerbound - 20));
+        mySVG.data += this.addAddressToSVG(mySVG, 25 + lowerbound, Math.max(0, lowerbound - 20));
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -1047,39 +903,41 @@ var Schakelaars = /** @class */ (function (_super) {
 }(Electro_Item));
 var Lichtcircuit = /** @class */ (function (_super) {
     __extends(Lichtcircuit, _super);
-    function Lichtcircuit(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function Lichtcircuit() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Lichtcircuit.prototype.resetKeys = function () {
-        _super.prototype.resetKeys.call(this); //Schakelaars
-        this.keys[0][2] = "Lichtcircuit"; // This is rather a formality as we should already have this at this stage
-        this.keys[13][2] = "1"; // Per default 1 lichtpunt
+    Lichtcircuit.prototype.resetProps = function () {
+        _super.prototype.resetProps.call(this); //Schakelaars
+        this.props.type = "Lichtcircuit"; // This is rather a formality as we should already have this at this stage
+        this.props.aantal_lichtpunten = "1"; // Per default 1 lichtpunt
+    };
+    Lichtcircuit.prototype.convertLegacyKeys = function (mykeys) {
+        _super.prototype.convertLegacyKeys.call(this, mykeys);
+        this.props.aantal_lichtpunten = this.getLegacyKey(mykeys, 13);
     };
     Lichtcircuit.prototype.toHTML = function (mode) {
         this.overrideKeys();
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
-        output += ", " + this.selectToHTML(5, ["enkelpolig", "dubbelpolig", "driepolig", "dubbelaansteking", "wissel_enkel", "wissel_dubbel", "kruis_enkel", "---", "schakelaar", "dimschakelaar", "dimschakelaar wissel", "bewegingsschakelaar", "schemerschakelaar", "---", "teleruptor", "relais", "dimmer", "tijdschakelaar", "minuterie", "thermostaat", "rolluikschakelaar"]);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
+        output += ", " + this.selectPropToHTML('type_schakelaar', ["enkelpolig", "dubbelpolig", "driepolig", "dubbelaansteking", "wissel_enkel", "wissel_dubbel", "kruis_enkel", "---", "schakelaar", "dimschakelaar", "dimschakelaar wissel", "bewegingsschakelaar", "schemerschakelaar", "---", "teleruptor", "relais", "dimmer", "tijdschakelaar", "minuterie", "thermostaat", "rolluikschakelaar"]);
         if (this.kanHalfwaterdichtZijn())
-            output += ", Halfwaterdicht: " + this.checkboxToHTML(20);
+            output += ", Halfwaterdicht: " + this.checkboxPropToHTML('is_halfwaterdicht');
         if (this.kanVerklikkerlampjeHebben())
-            output += ", Verklikkerlampje: " + this.checkboxToHTML(21);
+            output += ", Verklikkerlampje: " + this.checkboxPropToHTML('heeft_verklikkerlampje');
         if (this.kanSignalisatielampjeHebben())
-            output += ", Signalisatielampje: " + this.checkboxToHTML(19);
+            output += ", Signalisatielampje: " + this.checkboxPropToHTML('heeft_signalisatielampje');
         if (this.kanTrekschakelaarHebben())
-            output += ", Trekschakelaar: " + this.checkboxToHTML(25);
-        switch (this.keys[5][2]) {
+            output += ", Trekschakelaar: " + this.checkboxPropToHTML('is_trekschakelaar');
+        switch (this.props.type_schakelaar) {
             case "enkelpolig":
-                output += ", Aantal schakelaars: " + this.selectToHTML(4, ["1", "2", "3", "4", "5"]);
+                output += ", Aantal schakelaars: " + this.selectPropToHTML('aantal_schakelaars', ["1", "2", "3", "4", "5"]);
                 break;
             case "dubbelpolig":
-                output += ", Aantal schakelaars: " + this.selectToHTML(4, ["1", "2"]);
+                output += ", Aantal schakelaars: " + this.selectPropToHTML('aantal_schakelaars', ["1", "2"]);
                 break;
         }
-        output += ", Aantal lichtpunten: " + this.selectToHTML(13, ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]);
-        output += ", Adres/tekst: " + this.stringToHTML(15, 5);
+        output += ", Aantal lichtpunten: " + this.selectPropToHTML('aantal_lichtpunten', ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]);
+        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Lichtcircuit.prototype.toSVG = function () {
@@ -1097,20 +955,20 @@ var Lichtcircuit = /** @class */ (function (_super) {
             (_a = this.tekenKeten[i].toSVGString(startx, islast), startx = _a.endx, str = _a.str, lowerbound = _a.lowerbound);
             mySVG.data += str;
         }
-        if (this.keys[13][2] >= 1) { //1 of meerdere lampen
+        if (this.props.aantal_lichtpunten >= 1) { //1 of meerdere lampen
             // Teken de lamp
             endx = startx + 30;
             mySVG.data += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
                 + '<use xlink:href="#lamp" x="' + endx + '" y="25" />';
             // Teken aantal lampen en symbool 'h' voor halfwaterdicht
             var print_str_upper = ""; //string om bovenaan te plaatsen
-            if (this.keys[20][2]) {
+            if (this.props.is_halfwaterdicht) {
                 print_str_upper = "h";
-                if (parseInt(this.keys[13][2]) > 1)
-                    print_str_upper += ", x" + this.keys[13][2]; // Meer dan 1 lamp
+                if (parseInt(this.props.aantal_lichtpunten) > 1)
+                    print_str_upper += ", x" + this.props.aantal_lichtpunten; // Meer dan 1 lamp
             }
-            else if (parseInt(this.keys[13][2]) > 1) {
-                print_str_upper = "x" + this.keys[13][2];
+            else if (parseInt(this.props.aantal_lichtpunten) > 1) {
+                print_str_upper = "x" + this.props.aantal_lichtpunten;
             }
             if (print_str_upper != "")
                 mySVG.data += '<text x="' + endx + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' + htmlspecialchars(print_str_upper) + '</text>';
@@ -1130,7 +988,7 @@ var Lichtcircuit = /** @class */ (function (_super) {
         mySVG.xright = startx - 2;
         mySVG.yup = 25;
         mySVG.ydown = 25;
-        mySVG.data += this.addAddress(mySVG, 25 + lowerbound, Math.max(0, lowerbound - 20));
+        mySVG.data += this.addAddressToSVG(mySVG, 25 + lowerbound, Math.max(0, lowerbound - 20));
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -1138,26 +996,50 @@ var Lichtcircuit = /** @class */ (function (_super) {
 }(Schakelaars));
 var Aansluiting = /** @class */ (function (_super) {
     __extends(Aansluiting, _super);
-    function Aansluiting(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function Aansluiting() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Aansluiting.prototype.resetKeys = function () {
-        this.clearKeys();
-        this.keys[0][2] = "Aansluiting"; // This is rather a formality as we should already have this at this stage
-        this.keys[4][2] = "2"; // Per default 2-polig
-        this.keys[7][2] = "differentieel"; // Per default een differentieel
-        this.keys[8][2] = "40"; // Per default 40A
-        this.keys[9][2] = "2x16"; // Default kabeltype voor een aansluiting
-        this.keys[11][2] = "300"; // Differentieel per default 300 mA
-        this.keys[15][2] = ""; // Per default geen adres/tekst
-        this.keys[17][2] = ""; // Per default geen type voor een aansluiting
-        this.keys[18][2] = ""; // Curve differentieelautomaat per default niet gegeven
-        this.keys[20][2] = false; // Per default niet selectief
-        this.keys[22][2] = ""; // Per default geen kortsluitvermogen voor een aansluiting
-        this.keys[23][2] = ""; // Per default geen naam
-        this.keys[24][2] = ""; // Per default geen kabeltype vóór de aansluiting
+    Aansluiting.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.aantal_polen = this.getLegacyKey(mykeys, 4);
+        this.props.bescherming = this.getLegacyKey(mykeys, 7);
+        this.props.amperage = this.getLegacyKey(mykeys, 8);
+        this.props.type_kabel_na_teller = this.getLegacyKey(mykeys, 9);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.differentieel_delta_amperage = this.getLegacyKey(mykeys, 11);
+        this.props.adres = this.getLegacyKey(mykeys, 15);
+        this.props.differentieel_is_selectief = this.getLegacyKey(mykeys, 20);
+        this.props.kortsluitvermogen = this.getLegacyKey(mykeys, 22);
+        this.props.naam = this.getLegacyKey(mykeys, 23);
+        this.props.type_kabel_voor_teller = this.getLegacyKey(mykeys, 24);
+        switch (this.props.bescherming) {
+            case "differentieel":
+                this.props.type_differentieel = this.getLegacyKey(mykeys, 17);
+                break;
+            case "automatisch":
+                this.props.curve_automaat = this.getLegacyKey(mykeys, 17);
+                break;
+            case "differentieelautomaat":
+                this.props.type_differentieel = this.getLegacyKey(mykeys, 17);
+                this.props.curve_automaat = this.getLegacyKey(mykeys, 18);
+                break;
+        }
+    };
+    Aansluiting.prototype.resetProps = function () {
+        this.clearProps();
+        this.props.type = "Aansluiting";
+        this.props.aantal_polen = "2";
+        this.props.bescherming = "differentieel";
+        this.props.amperage = "40";
+        this.props.type_kabel_na_teller = "2x16";
+        this.props.differentieel_delta_amperage = "300";
+        this.props.adres = "";
+        this.props.type_differentieel = "";
+        this.props.curve_automaat = "";
+        this.props.differentieel_is_selectief = false;
+        this.props.kortsluitvermogen = "";
+        this.props.naam = "";
+        this.props.type_kabel_voor_teller = "";
     };
     Aansluiting.prototype.allowedChilds = function () {
         return ["", "Bord", "Kring", "Splitsing"];
@@ -1170,47 +1052,47 @@ var Aansluiting = /** @class */ (function (_super) {
         // Ook laat dit toe om tijdelijk een elementje onder aansluiting te hangen alvorens het met move elders onder te brengen
     };
     Aansluiting.prototype.overrideKeys = function () {
-        if ((this.keys[4][2] < 1) || (this.keys[4][2] > 4))
-            this.keys[4][2] = "2"; //Test dat aantal polen bestaat
+        if ((this.props.aantal_polen < 1) || (this.props.aantal_polen > 4))
+            this.props.aantal_polen = "2"; //Test dat aantal polen bestaat
     };
     Aansluiting.prototype.toHTML = function (mode) {
         this.overrideKeys();
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Naam: " + this.stringToHTML(23, 5) + "<br>";
+        output += "&nbsp;Naam: " + this.stringPropToHTML('naam', 5) + "<br>";
         if (this.getParent() != null)
-            output += "Nr: " + this.stringToHTML(10, 5) + ", ";
-        output += "Zekering: " + this.selectToHTML(7, ["automatisch", "differentieel", "differentieelautomaat", "smelt", "geen", "---", "schakelaar", "schemer"])
-            + this.selectToHTML(4, ["2", "3", "4"])
-            + this.stringToHTML(8, 2) + "A";
-        switch (this.keys[7][2]) {
+            output += "Nr: " + this.stringPropToHTML('nr', 5) + ", ";
+        output += "Zekering: " + this.selectPropToHTML('bescherming', ["automatisch", "differentieel", "differentieelautomaat", "smelt", "geen", "---", "schakelaar", "schemer"])
+            + this.selectPropToHTML('aantal', ["2", "3", "4"])
+            + this.stringPropToHTML('amperage', 2) + "A";
+        switch (this.props.bescherming) {
             case "differentieel":
-                output += ", \u0394 " + this.stringToHTML(11, 3) + "mA"
-                    + ", Type:" + this.selectToHTML(17, ["", "A", "B"])
-                    + ", Kortsluitvermogen: " + this.stringToHTML(22, 3) + "kA"
-                    + ", Selectief: " + this.checkboxToHTML(20);
+                output += ", \u0394 " + this.stringPropToHTML('differentieel_delta_amperage', 3) + "mA"
+                    + ", Type:" + this.selectPropToHTML('type_differentieel', ["", "A", "B"])
+                    + ", Kortsluitvermogen: " + this.stringPropToHTML('kortsluitvermogen', 3) + "kA"
+                    + ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief');
                 break;
             case "automatisch":
-                output += ", Curve:" + this.selectToHTML(17, ["", "B", "C", "D"])
-                    + ", Kortsluitvermogen: " + this.stringToHTML(22, 3) + "kA";
+                output += ", Curve:" + this.selectPropToHTML('curve_automaat', ["", "B", "C", "D"])
+                    + ", Kortsluitvermogen: " + this.stringPropToHTML('kortsluitvermogen', 3) + "kA";
                 break;
             case "differentieelautomaat":
-                output += ", \u0394 " + this.stringToHTML(11, 3) + "mA"
-                    + ", Curve:" + this.selectToHTML(18, ["", "B", "C", "D"])
-                    + ", Type:" + this.selectToHTML(17, ["", "A", "B"])
-                    + ", Kortsluitvermogen: " + this.stringToHTML(22, 3) + "kA"
-                    + ", Selectief: " + this.checkboxToHTML(20);
+                output += ", \u0394 " + this.stringPropToHTML('differentieel_delta_amperage', 3) + "mA"
+                    + ", Curve:" + this.selectPropToHTML('curve_automaat', ["", "B", "C", "D"])
+                    + ", Type:" + this.selectPropToHTML('type_differentieel', ["", "A", "B"])
+                    + ", Kortsluitvermogen: " + this.stringPropToHTML('kortsluitvermogen', 3) + "kA"
+                    + ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief');
                 break;
         }
-        output += ", Kabeltype na teller: " + this.stringToHTML(9, 10)
-            + ", Kabeltype v&oacute;&oacute;r teller: " + this.stringToHTML(24, 10)
-            + ", Adres/tekst: " + this.stringToHTML(15, 5);
+        output += ", Kabeltype na teller: " + this.stringPropToHTML('type_kabel_na_teller', 10)
+            + ", Kabeltype v&oacute;&oacute;r teller: " + this.stringPropToHTML('type_kabel_voor_teller', 10)
+            + ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Aansluiting.prototype.toSVG = function () {
         var mySVG = new SVGelement();
         // Indien er een kabeltype vóór de teller is schuiven we alles op
         var extrashift = 0;
-        if (this.keys[24][2] != "")
+        if (this.props.type_kabel_voor_teller != "")
             extrashift += 50;
         // get image of the entire stack, make sure it is shifted to the right sufficiently so-that the counter can be added below
         mySVG = this.sourcelist.toSVG(this.id, "vertical", 150 + extrashift); //shift 150 to the right
@@ -1219,7 +1101,7 @@ var Aansluiting = /** @class */ (function (_super) {
         mySVG.yup += 20;
         // Zekering, differentieel, of ander symbool onderaan plaatsen
         var numlines = 1; // Hier houden we het aantal lijnen tekst bij 
-        switch (this.keys[7][2]) {
+        switch (this.props.bescherming) {
             case "automatisch":
                 numlines = 1; // Hier houden we het aantal lijnen tekst bij
                 mySVG.yup += 30; // Hoeveel ruimte moeten we onderaan voorzien voor de zekering
@@ -1228,29 +1110,29 @@ var Aansluiting = /** @class */ (function (_super) {
                     + "<text x=\"" + (mySVG.xleft + 15) + "\" y=\"" + (mySVG.yup - 10) + "\""
                     + " transform=\"rotate(-90 " + (mySVG.xleft + 15) + "," + (mySVG.yup - 10) + ")"
                     + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
-                    + htmlspecialchars(this.keys[4][2] + "P - " + this.keys[8][2] + "A") + "</text>";
+                    + htmlspecialchars(this.props.aantal_polen + "P - " + this.props.amperage + "A") + "</text>";
                 // Code om de curve toe te voegen
-                if ((this.keys[17][2] == 'B') || (this.keys[17][2] == 'C') || (this.keys[17][2] == 'D')) {
+                if ((this.props.curve_automaat == 'B') || (this.props.curve_automaat == 'C') || (this.props.curve_automaat == 'D')) {
                     ++numlines;
                     mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
                         + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
                         + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
-                        + htmlspecialchars("Curve " + this.keys[17][2]) + "</text>";
+                        + htmlspecialchars("Curve " + this.props.curve_automaat) + "</text>";
                 }
                 // Code om kortsluitvermogen toe te voegen
-                if ((this.keys[22][2] != '')) {
+                if ((this.props.kortsluitvermogen != '')) {
                     ++numlines;
                     mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
                         + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
                         + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
-                        + htmlspecialchars("" + this.keys[22][2]) + "kA</text>";
+                        + htmlspecialchars("" + this.props.kortsluitvermogen) + "kA</text>";
                 }
                 // Genoeg plaats voorzien aan de rechterkant en eindigen
                 mySVG.xright = Math.max(mySVG.xright, 20 + 11 * (numlines - 1));
                 break;
             case "differentieel":
                 // Code als differentieel selectief is
-                if (this.keys[20][2]) {
+                if (this.props.differentieel_is_selectief) {
                     mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + mySVG.yup + '" y2="' + (mySVG.yup + 30) + '" stroke="black" />'
                         + '<rect x="' + (mySVG.xleft + 7) + '" y="' + (mySVG.yup) + '" width="16" height="16" stroke="black" fill="white" />'
                         + "<text x=\"" + (mySVG.xleft + 19) + "\" y=\"" + (mySVG.yup + 8) + "\"" + " transform=\"rotate(-90 " + (mySVG.xleft + 19) + "," + (mySVG.yup + 8) + ")"
@@ -1264,33 +1146,33 @@ var Aansluiting = /** @class */ (function (_super) {
                     + "<text x=\"" + (mySVG.xleft + 15) + "\" y=\"" + (mySVG.yup - 10) + "\""
                     + " transform=\"rotate(-90 " + (mySVG.xleft + 15) + "," + (mySVG.yup - 10) + ")"
                     + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
-                    + "\u0394" + htmlspecialchars(this.keys[11][2] + "mA") + "</text>"
+                    + "\u0394" + htmlspecialchars(this.props.differentieel_delta_amperage + "mA") + "</text>"
                     + "<text x=\"" + (mySVG.xleft + 26) + "\" y=\"" + (mySVG.yup - 10) + "\""
                     + " transform=\"rotate(-90 " + (mySVG.xleft + 26) + "," + (mySVG.yup - 10) + ")"
                     + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
-                    + htmlspecialchars(this.keys[4][2] + "P - " + this.keys[8][2] + "A") + "</text>";
+                    + htmlspecialchars(this.props.aantal_polen + "P - " + this.props.amperage + "A") + "</text>";
                 // Code om het type toe te voegen
-                if ((this.keys[17][2] == 'A') || (this.keys[17][2] == 'B')) {
+                if ((this.props.type_differentieel == 'A') || (this.props.type_differentieel == 'B')) {
                     ++numlines;
                     mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
                         + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
                         + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
-                        + htmlspecialchars("Type " + this.keys[17][2]) + "</text>";
+                        + htmlspecialchars("Type " + this.props.type_differentieel) + "</text>";
                 }
                 // Code om kortsluitvermogen toe te voegen
-                if ((this.keys[22][2] != '')) {
+                if ((this.props.kortsluitvermogen != '')) {
                     ++numlines;
                     mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
                         + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
                         + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
-                        + htmlspecialchars("" + this.keys[22][2]) + "kA</text>";
+                        + htmlspecialchars("" + this.props.kortsluitvermogen) + "kA</text>";
                 }
                 // genoeg plaats voorzien aan de rechterkant en eindigen
                 mySVG.xright = Math.max(mySVG.xright, 20 + 11 * (numlines - 1));
                 break;
             case "differentieelautomaat":
                 // Code als differentieel selectief is
-                if (this.keys[20][2]) {
+                if (this.props.differentieel_is_selectief) {
                     mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + mySVG.yup + '" y2="' + (mySVG.yup + 30) + '" stroke="black" />'
                         + '<rect x="' + (mySVG.xleft + 7) + '" y="' + (mySVG.yup) + '" width="16" height="16" stroke="black" fill="white" />'
                         + "<text x=\"" + (mySVG.xleft + 19) + "\" y=\"" + (mySVG.yup + 8) + "\"" + " transform=\"rotate(-90 " + (mySVG.xleft + 19) + "," + (mySVG.yup + 8) + ")"
@@ -1304,34 +1186,34 @@ var Aansluiting = /** @class */ (function (_super) {
                     + "<text x=\"" + (mySVG.xleft + 15) + "\" y=\"" + (mySVG.yup - 10) + "\""
                     + " transform=\"rotate(-90 " + (mySVG.xleft + 15) + "," + (mySVG.yup - 10) + ")"
                     + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
-                    + "\u0394" + htmlspecialchars(this.keys[11][2] + "mA") + "</text>"
+                    + "\u0394" + htmlspecialchars(this.props.differentieel_delta_amperage + "mA") + "</text>"
                     + "<text x=\"" + (mySVG.xleft + 26) + "\" y=\"" + (mySVG.yup - 10) + "\""
                     + " transform=\"rotate(-90 " + (mySVG.xleft + 26) + "," + (mySVG.yup - 10) + ")"
                     + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
-                    + htmlspecialchars(this.keys[4][2] + "P - " + this.keys[8][2] + "A") + "</text>";
+                    + htmlspecialchars(this.props.aantal_polen + "P - " + this.props.amperage + "A") + "</text>";
                 // Code om de curve toe te voegen
-                if ((this.keys[18][2] == 'B') || (this.keys[18][2] == 'C') || (this.keys[18][2] == 'D')) {
+                if ((this.props.curve_automaat == 'B') || (this.props.curve_automaat == 'C') || (this.props.curve_automaat == 'D')) {
                     ++numlines;
                     mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
                         + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
                         + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
-                        + htmlspecialchars("Curve " + this.keys[18][2]) + "</text>";
+                        + htmlspecialchars("Curve " + this.props.curve_automaat) + "</text>";
                 }
                 // Code om het type toe te voegen
-                if ((this.keys[17][2] == 'A') || (this.keys[17][2] == 'B')) {
+                if ((this.props.type_differentieel == 'A') || (this.props.type_differentieel == 'B')) {
                     ++numlines;
                     mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
                         + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
                         + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
-                        + htmlspecialchars("Type " + this.keys[17][2]) + "</text>";
+                        + htmlspecialchars("Type " + this.props.type_differentieel) + "</text>";
                 }
                 // Code om kortsluitvermogen toe te voegen
-                if ((this.keys[22][2] != '')) {
+                if ((this.props.kortsluitvermogen != '')) {
                     ++numlines;
                     mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
                         + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
                         + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
-                        + htmlspecialchars("" + this.keys[22][2]) + "kA</text>";
+                        + htmlspecialchars("" + this.props.kortsluitvermogen) + "kA</text>";
                 }
                 // genoeg plaats voorzien aan de rechterkant en eindigen
                 mySVG.xright = Math.max(mySVG.xright, 20 + 11 * (numlines - 1));
@@ -1342,7 +1224,7 @@ var Aansluiting = /** @class */ (function (_super) {
                     + "<text x=\"" + (mySVG.xleft + 15) + "\" y=\"" + (mySVG.yup - 10) + "\""
                     + " transform=\"rotate(-90 " + (mySVG.xleft + 15) + "," + (mySVG.yup - 10) + ")"
                     + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
-                    + htmlspecialchars(this.keys[4][2] + "P - " + this.keys[8][2] + "A") + "</text>";
+                    + htmlspecialchars(this.props.aantal_polen + "P - " + this.props.amperage + "A") + "</text>";
                 break;
             case "schemer":
                 mySVG.yup += 30; // Hoeveel ruimte moeten we onderaan voorzien voor de zekering
@@ -1350,7 +1232,7 @@ var Aansluiting = /** @class */ (function (_super) {
                     + "<text x=\"" + (mySVG.xleft + 15) + "\" y=\"" + (mySVG.yup - 10) + "\""
                     + " transform=\"rotate(-90 " + (mySVG.xleft + 15) + "," + (mySVG.yup - 10) + ")"
                     + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
-                    + htmlspecialchars(this.keys[4][2] + "P - " + this.keys[8][2] + "A") + "</text>"
+                    + htmlspecialchars(this.props.aantal_polen + "P - " + this.props.amperage + "A") + "</text>"
                     + '<use xlink:href="#arrow" x=\"' + (mySVG.xleft - 18) + '" y="' + (mySVG.yup - 15) + '" />'
                     + '<use xlink:href="#arrow" x=\"' + (mySVG.xleft - 18) + '" y="' + (mySVG.yup - 12) + '" />';
                 break;
@@ -1360,7 +1242,7 @@ var Aansluiting = /** @class */ (function (_super) {
                     + "<text x=\"" + (mySVG.xleft + 15) + "\" y=\"" + (mySVG.yup - 10) + "\""
                     + " transform=\"rotate(-90 " + (mySVG.xleft + 15) + "," + (mySVG.yup - 10) + ")"
                     + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
-                    + htmlspecialchars(this.keys[4][2] + "P - " + this.keys[8][2] + "A") + "</text>";
+                    + htmlspecialchars(this.props.aantal_polen + "P - " + this.props.amperage + "A") + "</text>";
                 break;
             case "geen":
                 mySVG.yup += 0;
@@ -1369,10 +1251,10 @@ var Aansluiting = /** @class */ (function (_super) {
         // Leiding helemaal links onderaan vóór de teller
         mySVG.data += '<line x1="1" ' + 'y1="' + (mySVG.yup + 25) + '" x2="' + (21 + extrashift) + '" ' + 'y2="' + (mySVG.yup + 25) + '" stroke="black"></line>';
         // Kabeltype en tekst links onderaan vóór de teller
-        if (this.keys[24][2] != "") {
+        if (this.props.type_kabel_voor_teller != "") {
             mySVG.data += '<text x="55" y="' + (mySVG.yup + 40)
                 + '" style="text-anchor:end" font-family="Arial, Helvetica, sans-serif" font-size="10">'
-                + htmlspecialchars(this.keys[24][2]) + '</text>';
+                + htmlspecialchars(this.props.type_kabel_voor_teller) + '</text>';
         }
         // De teller
         mySVG.data += '<use xlink:href="#elektriciteitsmeter" x="' + (21 + extrashift) + '" y="' + (mySVG.yup + 25) + '"></use>';
@@ -1382,21 +1264,21 @@ var Aansluiting = /** @class */ (function (_super) {
         // Kabeltype en tekst rechts onderaan na de teller
         mySVG.data += '<text x="' + (85 + extrashift) + '" y="' + (mySVG.yup + 40)
             + '" style="text-anchor:left" font-family="Arial, Helvetica, sans-serif" font-size="10">'
-            + htmlspecialchars(this.keys[9][2]) + '</text>';
+            + htmlspecialchars(this.props.type_kabel_na_teller) + '</text>';
         // 25 extra pixels voorzien onderaan zodat de teller nooit in de tekening daaronder loopt
         mySVG.yup += 25;
         mySVG.ydown = 25;
         // Indien adres niet leeg is, plaats het onderaan
-        if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
+        if (!(/^\s*$/.test(this.props.adres))) { //check if adres contains only white space
             mySVG.data += '<text x="' + (41 + extrashift) + '" y="' + (mySVG.yup + mySVG.ydown + 10)
                 + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">'
-                + htmlspecialchars(this.keys[15][2]) + '</text>';
+                + htmlspecialchars(this.props.adres) + '</text>';
             mySVG.ydown += 15;
         }
         // Naam onderaan zetten (links-onder)
         mySVG.data += '<text x="' + (mySVG.xleft + (-6)) + '" ' + 'y="' + (mySVG.yup - 10) + '" '
             + 'style="text-anchor:end" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="12"' + '>'
-            + htmlspecialchars(this.keys[23][2]) + '</text>';
+            + htmlspecialchars(this.props.naam) + '</text>';
         // rework xleft and xright to ensure the entire structure is always at the right of a potential parent kring
         mySVG.xright = mySVG.xright + mySVG.xleft - 1;
         mySVG.xleft = 1;
@@ -1406,20 +1288,18 @@ var Aansluiting = /** @class */ (function (_super) {
 }(Electro_Item));
 var Aansluitpunt = /** @class */ (function (_super) {
     __extends(Aansluitpunt, _super);
-    function Aansluitpunt(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function Aansluitpunt() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     Aansluitpunt.prototype.convertLegacyKeys = function (mykeys) {
-        this.props.type = mykeys[0][2];
-        this.props.adres = mykeys[15][2];
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.adres = this.getLegacyKey(mykeys, 15);
     };
-    Aansluitpunt.prototype.resetKeys = function () {
-        this.clearKeys();
+    Aansluitpunt.prototype.resetProps = function () {
+        this.clearProps();
         this.props.type = "Aansluitpunt";
         this.props.adres = "";
-        delete this.keys;
     };
     Aansluitpunt.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
@@ -1435,7 +1315,7 @@ var Aansluitpunt = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
             + '<use xlink:href="#aansluitpunt" x="21" y="25"></use>';
-        mySVG.data += this.addPropAddress(mySVG, 45, 0);
+        mySVG.data += this.addAddressToSVG(mySVG, 45, 0);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -1443,20 +1323,18 @@ var Aansluitpunt = /** @class */ (function (_super) {
 }(Electro_Item));
 var Aftakdoos = /** @class */ (function (_super) {
     __extends(Aftakdoos, _super);
-    function Aftakdoos(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function Aftakdoos() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     Aftakdoos.prototype.convertLegacyKeys = function (mykeys) {
-        this.props.type = mykeys[0][2];
-        this.props.adres = mykeys[15][2];
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.adres = this.getLegacyKey(mykeys, 15);
     };
-    Aftakdoos.prototype.resetKeys = function () {
-        this.clearKeys();
+    Aftakdoos.prototype.resetProps = function () {
+        this.clearProps();
         this.props.type = "Aftakdoos";
         this.props.adres = "";
-        delete this.keys;
     };
     Aftakdoos.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
@@ -1472,7 +1350,7 @@ var Aftakdoos = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
             + '<use xlink:href="#aftakdoos" x="21" y="25"></use>';
-        mySVG.data += this.addPropAddress(mySVG, 55, 10);
+        mySVG.data += this.addAddressToSVG(mySVG, 55, 10);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -1480,20 +1358,18 @@ var Aftakdoos = /** @class */ (function (_super) {
 }(Electro_Item));
 var Batterij = /** @class */ (function (_super) {
     __extends(Batterij, _super);
-    function Batterij(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function Batterij() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     Batterij.prototype.convertLegacyKeys = function (mykeys) {
-        this.props.type = mykeys[0][2];
-        this.props.adres = mykeys[15][2];
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.adres = this.getLegacyKey(mykeys, 15);
     };
-    Batterij.prototype.resetKeys = function () {
-        this.clearKeys();
+    Batterij.prototype.resetProps = function () {
+        this.clearProps();
         this.props.type = "Batterij";
         this.props.adres = "";
-        delete this.keys;
     };
     Batterij.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
@@ -1510,7 +1386,7 @@ var Batterij = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
             + '<use xlink:href="#batterij" x="21" y="25"></use>';
-        mySVG.data += this.addPropAddress(mySVG, 55, 10);
+        mySVG.data += this.addAddressToSVG(mySVG, 55, 10);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -1518,20 +1394,18 @@ var Batterij = /** @class */ (function (_super) {
 }(Electro_Item));
 var Bel = /** @class */ (function (_super) {
     __extends(Bel, _super);
-    function Bel(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function Bel() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     Bel.prototype.convertLegacyKeys = function (mykeys) {
-        this.props.type = mykeys[0][2];
-        this.props.adres = mykeys[15][2];
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.adres = this.getLegacyKey(mykeys, 15);
     };
-    Bel.prototype.resetKeys = function () {
-        this.clearKeys();
+    Bel.prototype.resetProps = function () {
+        this.clearProps();
         this.props.type = "Bel";
         this.props.adres = "";
-        delete this.keys;
     };
     Bel.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
@@ -1548,7 +1422,7 @@ var Bel = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
             + '<use xlink:href="#bel" x="21" y="25"></use>';
-        mySVG.data += this.addPropAddress(mySVG, 60, 15);
+        mySVG.data += this.addAddressToSVG(mySVG, 60, 15);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -1556,27 +1430,25 @@ var Bel = /** @class */ (function (_super) {
 }(Electro_Item));
 var Boiler = /** @class */ (function (_super) {
     __extends(Boiler, _super);
-    function Boiler(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function Boiler() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     Boiler.prototype.convertLegacyKeys = function (mykeys) {
-        this.props.type = mykeys[0][2];
-        this.props.heeftAccumulatie = mykeys[3][2];
-        this.props.adres = mykeys[15][2];
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.heeft_accumulatie = this.getLegacyKey(mykeys, 3);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.adres = this.getLegacyKey(mykeys, 15);
     };
-    Boiler.prototype.resetKeys = function () {
-        this.clearKeys();
+    Boiler.prototype.resetProps = function () {
+        this.clearProps();
         this.props.type = "Boiler";
-        this.props.heeftAccumulatie = false;
+        this.props.heeft_accumulatie = false;
         this.props.adres = "";
-        delete this.keys;
     };
     Boiler.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
         output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5) + ", ";
-        output += "Accumulatie: " + this.checkboxPropToHTML('heeftAccumulatie');
+        output += "Accumulatie: " + this.checkboxPropToHTML('heeft_accumulatie');
         output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
@@ -1588,7 +1460,7 @@ var Boiler = /** @class */ (function (_super) {
         mySVG.yup = 25;
         mySVG.ydown = 25;
         mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-        switch (this.props.heeftAccumulatie) { //accumulatie
+        switch (this.props.heeft_accumulatie) { //accumulatie
             case false:
                 mySVG.data += '<use xlink:href="#boiler" x="21" y="25"></use>';
                 break;
@@ -1596,7 +1468,7 @@ var Boiler = /** @class */ (function (_super) {
                 mySVG.data += '<use xlink:href="#boiler_accu" x="21" y="25"></use>';
                 break;
         }
-        mySVG.data += this.addPropAddress(mySVG, 60);
+        mySVG.data += this.addAddressToSVG(mySVG, 60);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -1604,17 +1476,21 @@ var Boiler = /** @class */ (function (_super) {
 }(Electro_Item));
 var Bord = /** @class */ (function (_super) {
     __extends(Bord, _super);
-    function Bord(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function Bord() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Bord.prototype.resetKeys = function () {
-        this.clearKeys();
-        this.keys[0][2] = "Bord"; // This is rather a formality as we should already have this at this stage
-        this.keys[1][2] = true; // Per default geaard
-        this.keys[10][2] = ""; // Bord heeft initieel geen naam
-        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+    Bord.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.is_geaard = this.getLegacyKey(mykeys, 1);
+        this.props.naam = this.getLegacyKey(mykeys, 10);
+        this.props.adres = this.getLegacyKey(mykeys, 15);
+    };
+    Bord.prototype.resetProps = function () {
+        this.clearProps();
+        this.props.type = "Bord";
+        this.props.is_geaard = true;
+        this.props.naam = "";
+        this.props.adres = "";
     };
     Bord.prototype.allowedChilds = function () {
         return ["", "Kring", "Vrije ruimte"];
@@ -1624,19 +1500,21 @@ var Bord = /** @class */ (function (_super) {
     };
     Bord.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Naam: " + this.stringToHTML(10, 5) + ", "
-            + "Geaard: " + this.checkboxToHTML(1);
+        output += "&nbsp;Naam: " + this.stringPropToHTML('naam', 5) + ", "
+            + "Geaard: " + this.checkboxPropToHTML('is_geaard');
         return (output);
     };
     Bord.prototype.toSVG = function () {
         var mySVG; // = new SVGelement();
         // Maak een tekening van alle kinderen
         mySVG = this.sourcelist.toSVG(this.id, "horizontal");
+        if (mySVG.yup == 0)
+            mySVG.yup = 2; // Om zeker te zijn dat de vette lijn netjes wordt getekend.
         // Voorzie 10 extra pixels rechts na de allerlaatste kring
         mySVG.xright += 10;
         // Schuif het geheel voldoende naar links om plaats te hebben voor label en eventuele aarding
-        var mintextsize = Math.max(30, svgTextWidth('&lt' + htmlspecialchars(this.keys[10][2]) + '&gt', 10, 'font-weight="bold"') + 13);
-        var minxleft = mintextsize + (this.keys[1][2] ? 70 : 0); //Indien geaard hebben we 70 meer nodig
+        var mintextsize = Math.max(30, svgTextWidth('&lt' + htmlspecialchars(this.props.naam) + '&gt', 10, 'font-weight="bold"') + 13);
+        var minxleft = mintextsize + (this.props.is_geaard ? 70 : 0); //Indien geaard hebben we 70 meer nodig
         if (mySVG.xleft <= minxleft) { // Minstens 100 pixels indien aarding
             mySVG.xright = mySVG.xleft + mySVG.xright - minxleft;
             mySVG.xleft = minxleft;
@@ -1650,12 +1528,12 @@ var Bord = /** @class */ (function (_super) {
         mySVG.data += '<line x1="4" x2="' + (mySVG.xleft + mySVG.xright - 6) +
             '" y1="' + mySVG.yup + '" y2="' + mySVG.yup + '" stroke="black" stroke-width="3" />';
         // Voeg naam van het bord toe
-        if (this.keys[10][2] !== "")
+        if (this.props.naam !== "")
             mySVG.data += '<text x="' + (5) + '" y="' + (mySVG.yup + 13) + '" '
                 + 'style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="10">&lt;'
-                + htmlspecialchars(this.keys[10][2]) + '&gt;</text>';
+                + htmlspecialchars(this.props.naam) + '&gt;</text>';
         // Teken aarding onderaan
-        if (this.keys[1][2])
+        if (this.props.is_geaard)
             mySVG.data += '<line x1="' + (mintextsize + 10) + '" y1="' + (mySVG.yup + 0) + '" x2="' + (mintextsize + 10) + '" y2="' + (mySVG.yup + 10) + '" stroke="black" />'
                 + '<line x1="' + (mintextsize + 10) + '" y1="' + (mySVG.yup + 15) + '" x2="' + (mintextsize + 10) + '" y2="' + (mySVG.yup + 25) + '" stroke="black" />'
                 + '<line x1="' + (mintextsize + 10) + '" y1="' + (mySVG.yup + 30) + '" x2="' + (mintextsize + 10) + '" y2="' + (mySVG.yup + 40) + '" stroke="black" />'
@@ -1672,20 +1550,18 @@ var Bord = /** @class */ (function (_super) {
 }(Electro_Item));
 var Diepvriezer = /** @class */ (function (_super) {
     __extends(Diepvriezer, _super);
-    function Diepvriezer(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function Diepvriezer() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     Diepvriezer.prototype.convertLegacyKeys = function (mykeys) {
-        this.props.type = mykeys[0][2];
-        this.props.adres = mykeys[15][2];
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.adres = this.getLegacyKey(mykeys, 15);
     };
-    Diepvriezer.prototype.resetKeys = function () {
-        this.clearKeys();
+    Diepvriezer.prototype.resetProps = function () {
+        this.clearProps();
         this.props.type = "Diepvriezer";
         this.props.adres = "";
-        delete this.keys;
     };
     Diepvriezer.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
@@ -1702,7 +1578,7 @@ var Diepvriezer = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
             + '<use xlink:href="#diepvriezer" x="21" y="25"></use>';
-        mySVG.data += this.addPropAddress(mySVG, 60, 15);
+        mySVG.data += this.addAddressToSVG(mySVG, 60, 15);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -1710,21 +1586,30 @@ var Diepvriezer = /** @class */ (function (_super) {
 }(Electro_Item));
 var Domotica_gestuurde_verbruiker = /** @class */ (function (_super) {
     __extends(Domotica_gestuurde_verbruiker, _super);
-    function Domotica_gestuurde_verbruiker(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function Domotica_gestuurde_verbruiker() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Domotica_gestuurde_verbruiker.prototype.resetKeys = function () {
-        this.clearKeys();
-        this.keys[0][2] = "Domotica gestuurde verbruiker"; // This is rather a formality as we should already have this at this stage
-        this.keys[5][2] = "drukknop";
-        this.keys[15][2] = "";
-        this.keys[19][2] = true;
-        this.keys[20][2] = true;
-        this.keys[21][2] = true;
-        this.keys[25][2] = false;
-        this.keys[26][2] = false;
+    Domotica_gestuurde_verbruiker.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.type_externe_sturing = this.getLegacyKey(mykeys, 5);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.adres = this.getLegacyKey(mykeys, 15);
+        this.props.is_draadloos = this.getLegacyKey(mykeys, 19);
+        this.props.heeft_lokale_drukknop = this.getLegacyKey(mykeys, 20);
+        this.props.is_geprogrammeerd = this.getLegacyKey(mykeys, 21);
+        this.props.heeft_detectie = this.getLegacyKey(mykeys, 25);
+        this.props.heeft_externe_sturing = this.getLegacyKey(mykeys, 26);
+    };
+    Domotica_gestuurde_verbruiker.prototype.resetProps = function () {
+        this.clearProps();
+        this.props.type = "Domotica gestuurde verbruiker";
+        this.props.type_externe_sturing = "drukknop";
+        this.props.adres = "";
+        this.props.is_draadloos = true;
+        this.props.heeft_lokale_drukknop = true;
+        this.props.is_geprogrammeerd = true;
+        this.props.heeft_detectie = false;
+        this.props.heeft_externe_sturing = false;
     };
     Domotica_gestuurde_verbruiker.prototype.allowedChilds = function () {
         return ["", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
@@ -1734,15 +1619,15 @@ var Domotica_gestuurde_verbruiker = /** @class */ (function (_super) {
     };
     Domotica_gestuurde_verbruiker.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringToHTML(10, 5)
-            + ", Draadloos: " + this.checkboxToHTML(19)
-            + ", Lokale Drukknop: " + this.checkboxToHTML(20)
-            + ", Geprogrammeerd: " + this.checkboxToHTML(21)
-            + ", Detectie: " + this.checkboxToHTML(25)
-            + ", Externe sturing: " + this.checkboxToHTML(26);
-        if (this.keys[26][2])
-            output += ", Externe sturing: " + this.selectToHTML(5, ["drukknop", "schakelaar"]);
-        output += ", Adres/tekst: " + this.stringToHTML(15, 5);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5)
+            + ", Draadloos: " + this.checkboxPropToHTML('is_draadloos')
+            + ", Lokale Drukknop: " + this.checkboxPropToHTML('heeft_lokale_drukknop')
+            + ", Geprogrammeerd: " + this.checkboxPropToHTML('is_geprogrammeerd')
+            + ", Detectie: " + this.checkboxPropToHTML('heeft_detectie')
+            + ", Externe sturing: " + this.checkboxPropToHTML('heeft_externe_sturing');
+        if (this.props.heeft_externe_sturing)
+            output += ", Externe sturing: " + this.selectPropToHTML('type_externe_sturing', ["drukknop", "schakelaar"]);
+        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Domotica_gestuurde_verbruiker.prototype.toSVG = function () {
@@ -1782,16 +1667,16 @@ var Domotica_gestuurde_verbruiker = /** @class */ (function (_super) {
         mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + (mySVG.xleft + 20) +
             '" y1="' + (mySVG.yup) + '" y2="' + (mySVG.yup) + '" stroke="black" />';
         // We plaatsen de symbolen bovenaan
-        if (this.keys[19][2])
+        if (this.props.is_draadloos)
             mySVG.data += '<use xlink:href="#draadloos_klein" x="22" y="15"></use>';
-        if (this.keys[20][2])
+        if (this.props.heeft_lokale_drukknop)
             mySVG.data += '<use xlink:href="#drukknop_klein" x="38" y="15"></use>';
-        if (this.keys[21][2])
+        if (this.props.is_geprogrammeerd)
             mySVG.data += '<use xlink:href="#tijdschakelaar_klein" x="54" y="15"></use>';
-        if (this.keys[25][2])
+        if (this.props.heeft_detectie)
             mySVG.data += '<use xlink:href="#detectie_klein" x="70" y="15"></use>';
-        if (this.keys[26][2]) {
-            switch (this.keys[5][2]) {
+        if (this.props.heeft_externe_sturing) {
+            switch (this.props.type_externe_sturing) {
                 case "schakelaar":
                     mySVG.data = '<svg x="' + (0) + '" y="20">' + mySVG.data + '</svg>'
                         + '<use xlink:href="#schakelaar_klein" x="78" y="18"></use>'
@@ -1806,10 +1691,10 @@ var Domotica_gestuurde_verbruiker = /** @class */ (function (_super) {
             }
         }
         //Place text below if there is any
-        if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
+        if (!(/^\s*$/.test(this.props.adres))) { //check if adres contains only white space
             mySVG.data += '<text x="' + ((mySVG.xright - 20) / 2 + 21 + 0) + '" y="' + (mySVG.ydown + mySVG.yup + 10)
                 + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">'
-                + htmlspecialchars(this.keys[15][2]) + '</text>';
+                + htmlspecialchars(this.props.adres) + '</text>';
             mySVG.ydown += 15;
         }
         return (mySVG);
@@ -1818,16 +1703,21 @@ var Domotica_gestuurde_verbruiker = /** @class */ (function (_super) {
 }(Electro_Item));
 var Domotica = /** @class */ (function (_super) {
     __extends(Domotica, _super);
-    function Domotica(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function Domotica() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Domotica.prototype.resetKeys = function () {
-        this.clearKeys();
-        this.keys[0][2] = "Domotica"; // This is rather a formality as we should already have this at this stage
-        this.keys[15][2] = "Domotica"; // Set Tekst to "Domotica" when the item is cleared
-        this.keys[23][2] = ""; // Set Adres/tekst to "" when the item is cleared
+    Domotica.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.tekst = this.getLegacyKey(mykeys, 15);
+        this.props.adres = this.getLegacyKey(mykeys, 23);
+    };
+    Domotica.prototype.resetProps = function () {
+        this.clearProps();
+        this.props.type = "Domotica";
+        this.props.tekst = "Domotica";
+        this.props.adres = "";
+        this.props.nr = "";
     };
     Domotica.prototype.allowedChilds = function () {
         return ["", "Kring"];
@@ -1837,14 +1727,14 @@ var Domotica = /** @class */ (function (_super) {
     };
     Domotica.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringToHTML(10, 5)
-            + ", Tekst (nieuwe lijn = \"|\"): " + this.stringToHTML(15, 30)
-            + ", Adres/tekst: " + this.stringToHTML(23, 5);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5)
+            + ", Tekst (nieuwe lijn = \"|\"): " + this.stringPropToHTML('tekst', 30)
+            + ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Domotica.prototype.toSVG = function () {
         var mySVG; // = new SVGelement();
-        var strlines = htmlspecialchars(this.keys[15][2]).split("|");
+        var strlines = htmlspecialchars(this.props.tekst).split("|");
         // Maak een tekening van alle kinderen
         mySVG = this.sourcelist.toSVG(this.id, "horizontal");
         // We voorzien altijd minimaal een kader van 80 en zeker genoeg voor de tekst in het Domotica-symbool
@@ -1875,9 +1765,9 @@ var Domotica = /** @class */ (function (_super) {
         mySVG.xright = mySVG.xleft + mySVG.xright - 1;
         mySVG.xleft = 1; //we leave one pixel for the bold kring-line at the left
         // Plaats adres onderaan indien niet leeg en indien er actieve kinderen zijn
-        if (!(/^\s*$/.test(this.keys[23][2]))) { // Controleer of adres leeg is
+        if (!(/^\s*$/.test(this.props.adres))) { // Controleer of adres leeg is
             mySVG.data += '<text x="' + ((mySVG.xright - 20) / 2 + 21) + '" y="' + (mySVG.yup + mySVG.ydown + 10)
-                + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[23][2]) + '</text>';
+                + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.props.adres) + '</text>';
             mySVG.ydown += 15;
         }
         return (mySVG);
@@ -1886,20 +1776,18 @@ var Domotica = /** @class */ (function (_super) {
 }(Electro_Item));
 var Droogkast = /** @class */ (function (_super) {
     __extends(Droogkast, _super);
-    function Droogkast(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function Droogkast() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     Droogkast.prototype.convertLegacyKeys = function (mykeys) {
-        this.props.type = mykeys[0][2];
-        this.props.adres = mykeys[15][2];
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.adres = this.getLegacyKey(mykeys, 15);
     };
-    Droogkast.prototype.resetKeys = function () {
-        this.clearKeys();
+    Droogkast.prototype.resetProps = function () {
+        this.clearProps();
         this.props.type = "Droogkast";
         this.props.adres = "";
-        delete this.keys;
     };
     Droogkast.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
@@ -1915,7 +1803,7 @@ var Droogkast = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
             + '<use xlink:href="#droogkast" x="21" y="25"></use>';
-        mySVG.data += this.addPropAddress(mySVG, 60, 15);
+        mySVG.data += this.addAddressToSVG(mySVG, 60, 15);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -1923,32 +1811,41 @@ var Droogkast = /** @class */ (function (_super) {
 }(Electro_Item));
 var Drukknop = /** @class */ (function (_super) {
     __extends(Drukknop, _super);
-    function Drukknop(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function Drukknop() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Drukknop.prototype.resetKeys = function () {
-        this.clearKeys();
-        this.keys[0][2] = "Drukknop"; // This is rather a formality as we should already have this at this stage
-        this.keys[4][2] = "1"; // Per default 1 armatuur
-        this.keys[13][2] = "1"; // Per default 1 knop per armatuur
-        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
-        this.keys[16][2] = "standaard"; // Per default een standaard drukknop
-        this.keys[19][2] = false; // Per default niet afgeschermd
-        this.keys[20][2] = false; // Per default niet halfwaterdicht
-        this.keys[21][2] = false; // Per default geen verklikkerslampje
+    Drukknop.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.aantal = this.getLegacyKey(mykeys, 4);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.aantal_knoppen_per_armatuur = this.getLegacyKey(mykeys, 13);
+        this.props.adres = this.getLegacyKey(mykeys, 15);
+        this.props.type_knop = this.getLegacyKey(mykeys, 16);
+        this.props.is_afgeschermd = this.getLegacyKey(mykeys, 19);
+        this.props.is_halfwaterdicht = this.getLegacyKey(mykeys, 20);
+        this.props.heeft_verklikkerlampje = this.getLegacyKey(mykeys, 21);
+    };
+    Drukknop.prototype.resetProps = function () {
+        this.clearProps();
+        this.props.type = "Drukknop";
+        this.props.aantal = "1";
+        this.props.aantal_knoppen_per_armatuur = "1";
+        this.props.adres = "";
+        this.props.type_knop = "standaard";
+        this.props.is_afgeschermd = false;
+        this.props.is_halfwaterdicht = false;
+        this.props.heeft_verklikkerlampje = false;
     };
     Drukknop.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringToHTML(10, 5)
-            + ", Type: " + this.selectToHTML(16, ["standaard", "dimmer", "rolluik"])
-            + ", Verklikkerlampje: " + this.checkboxToHTML(21)
-            + ", Halfwaterdicht: " + this.checkboxToHTML(20)
-            + ", Afgeschermd: " + this.checkboxToHTML(19)
-            + ", Aantal armaturen: " + this.selectToHTML(4, ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"])
-            + ", Aantal knoppen per armatuur: " + this.selectToHTML(13, ["1", "2", "3", "4", "5", "6", "7", "8"])
-            + ", Adres/tekst: " + this.stringToHTML(15, 5);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5)
+            + ", Type: " + this.selectPropToHTML('type_knop', ["standaard", "dimmer", "rolluik"])
+            + ", Verklikkerlampje: " + this.checkboxPropToHTML('heeft_verklikkerlampje')
+            + ", Halfwaterdicht: " + this.checkboxPropToHTML('is_halfwaterdicht')
+            + ", Afgeschermd: " + this.checkboxPropToHTML('is_afgeschermd')
+            + ", Aantal armaturen: " + this.selectPropToHTML('aantal', ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"])
+            + ", Aantal knoppen per armatuur: " + this.selectPropToHTML('aantal_knoppen_per_armatuur', ["1", "2", "3", "4", "5", "6", "7", "8"])
+            + ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Drukknop.prototype.toSVG = function () {
@@ -1957,17 +1854,17 @@ var Drukknop = /** @class */ (function (_super) {
         mySVG.xright = 43;
         mySVG.yup = 25;
         mySVG.ydown = 25;
-        var aantal_knoppen = this.keys[4][2];
+        var aantal_knoppen = this.props.aantal;
         // Teken lijn links
         mySVG.data += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
             + '<use xlink:href="#drukknop" x="21" y="25"></use>';
         // Teken verklikkerlampje indien van toepassing
-        if (this.keys[21][2]) {
+        if (this.props.heeft_verklikkerlampje) {
             mySVG.data += '<line x1="28" y1="20" x2="38" y2="30" stroke="black"></line>' // midden 33, 25, lengte 7
                 + '<line x1="28" y1="30" x2="38" y2="20" stroke="black"></line>';
         }
         // Teken afgeschermd indien van toepassing
-        if (this.keys[19][2]) {
+        if (this.props.is_afgeschermd) {
             mySVG.data += '<line x1="26" y1="10" x2="40" y2="10" stroke="black"></line>' // midden 33, 25 lengte 7
                 + '<line x1="26" y1="10" x2="26" y2="15" stroke="black"></line>'
                 + '<line x1="40" y1="10" x2="40" y2="15" stroke="black"></line>'
@@ -1976,7 +1873,7 @@ var Drukknop = /** @class */ (function (_super) {
         }
         // Plaats tekst voor "h" en/of aantal armaturen onderaan
         var printstr = "";
-        if (this.keys[20][2])
+        if (this.props.is_halfwaterdicht)
             printstr += 'h';
         if (aantal_knoppen > 1) {
             if (printstr != '') {
@@ -1987,12 +1884,12 @@ var Drukknop = /** @class */ (function (_super) {
         if (printstr != '')
             mySVG.data += '<text x="33" y="49" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' + htmlspecialchars(printstr) + '</text>';
         // Plaats tekst voor aantal knoppen
-        if (this.keys[13][2] > 1) {
-            mySVG.data += '<text x="44" y="13" style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-size="10">' + htmlspecialchars(this.keys[13][2]) + '</text>'
+        if (this.props.aantal_knoppen_per_armatuur > 1) {
+            mySVG.data += '<text x="44" y="13" style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-size="10">' + htmlspecialchars(this.props.aantal_knoppen_per_armatuur) + '</text>'
                 + '<line x1="39" y1="19" x2="44" y2="14" stroke="black" />';
         }
         // Plaats extra tekens voor rolluik of dimmer
-        switch (this.keys[16][2]) {
+        switch (this.props.type_knop) {
             case "dimmer":
                 mySVG.data += '<polygon points="18,20 18,13 28,20" fill="black" stroke="black" />';
                 break;
@@ -2004,10 +1901,10 @@ var Drukknop = /** @class */ (function (_super) {
         }
         // Plaats adres helemaal onderaan
         if (printstr != '') {
-            mySVG.data += this.addAddress(mySVG, 65, 20);
+            mySVG.data += this.addAddressToSVG(mySVG, 65, 20);
         }
         else {
-            mySVG.data += this.addAddress(mySVG, 49, 5);
+            mySVG.data += this.addAddressToSVG(mySVG, 49, 5);
         }
         return (mySVG);
     };
@@ -2015,20 +1912,18 @@ var Drukknop = /** @class */ (function (_super) {
 }(Electro_Item));
 var Elektriciteitsmeter = /** @class */ (function (_super) {
     __extends(Elektriciteitsmeter, _super);
-    function Elektriciteitsmeter(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function Elektriciteitsmeter() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     Elektriciteitsmeter.prototype.convertLegacyKeys = function (mykeys) {
-        this.props.type = mykeys[0][2];
-        this.props.adres = mykeys[15][2];
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.adres = this.getLegacyKey(mykeys, 15);
     };
-    Elektriciteitsmeter.prototype.resetKeys = function () {
-        this.clearKeys();
+    Elektriciteitsmeter.prototype.resetProps = function () {
+        this.clearProps();
         this.props.type = "Elektriciteitsmeter";
         this.props.adres = "";
-        delete this.keys;
     };
     Elektriciteitsmeter.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
@@ -2045,7 +1940,7 @@ var Elektriciteitsmeter = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
             + '<use xlink:href="#elektriciteitsmeter" x="21" y="25"></use>';
-        mySVG.data += this.addPropAddress(mySVG, 60, 15);
+        mySVG.data += this.addAddressToSVG(mySVG, 60, 15);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -2053,20 +1948,18 @@ var Elektriciteitsmeter = /** @class */ (function (_super) {
 }(Electro_Item));
 var Elektrische_oven = /** @class */ (function (_super) {
     __extends(Elektrische_oven, _super);
-    function Elektrische_oven(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function Elektrische_oven() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     Elektrische_oven.prototype.convertLegacyKeys = function (mykeys) {
-        this.props.type = mykeys[0][2];
-        this.props.adres = mykeys[15][2];
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.adres = this.getLegacyKey(mykeys, 15);
     };
-    Elektrische_oven.prototype.resetKeys = function () {
-        this.clearKeys();
+    Elektrische_oven.prototype.resetProps = function () {
+        this.clearProps();
         this.props.type = "Elektrische oven";
         this.props.adres = "";
-        delete this.keys;
     };
     Elektrische_oven.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
@@ -2083,7 +1976,7 @@ var Elektrische_oven = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
             + '<use xlink:href="#oven" x="21" y="25"></use>';
-        mySVG.data += this.addPropAddress(mySVG, 60, 15);
+        mySVG.data += this.addAddressToSVG(mySVG, 60, 15);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -2091,20 +1984,18 @@ var Elektrische_oven = /** @class */ (function (_super) {
 }(Electro_Item));
 var EV_lader = /** @class */ (function (_super) {
     __extends(EV_lader, _super);
-    function EV_lader(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function EV_lader() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     EV_lader.prototype.convertLegacyKeys = function (mykeys) {
-        this.props.type = mykeys[0][2];
-        this.props.adres = mykeys[15][2];
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.adres = this.getLegacyKey(mykeys, 15);
     };
-    EV_lader.prototype.resetKeys = function () {
-        this.clearKeys();
+    EV_lader.prototype.resetProps = function () {
+        this.clearProps();
         this.props.type = "EV lader";
         this.props.adres = "";
-        delete this.keys;
     };
     EV_lader.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
@@ -2121,7 +2012,7 @@ var EV_lader = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
             + '<use xlink:href="#EVlader" x="21" y="25"></use>';
-        mySVG.data += this.addPropAddress(mySVG, 60, 15);
+        mySVG.data += this.addAddressToSVG(mySVG, 60, 15);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -2129,34 +2020,44 @@ var EV_lader = /** @class */ (function (_super) {
 }(Electro_Item));
 var Ketel = /** @class */ (function (_super) {
     __extends(Ketel, _super);
-    function Ketel(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function Ketel() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Ketel.prototype.resetKeys = function () {
-        this.clearKeys();
-        this.keys[0][2] = "Ketel"; // This is rather a formality as we should already have this at this stage
-        this.keys[4][2] = "1"; // Per default 1 ketel
-        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+    Ketel.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.aantal = this.getLegacyKey(mykeys, 4);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.adres = this.getLegacyKey(mykeys, 15);
+        this.props.keteltype = this.getLegacyKey(mykeys, 16);
+        this.props.energiebron = this.getLegacyKey(mykeys, 17);
+        this.props.warmtefunctie = this.getLegacyKey(mykeys, 18);
+    };
+    Ketel.prototype.resetProps = function () {
+        this.clearProps();
+        this.props.type = "Ketel";
+        this.props.aantal = "1";
+        this.props.adres = "";
+        this.props.keteltype = "";
+        this.props.energiebron = "";
+        this.props.warmtefunctie = "";
     };
     Ketel.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
-        output += ", Type: " + this.selectToHTML(16, ["", "Met boiler", "Met tapspiraal", "Warmtekrachtkoppeling", "Warmtewisselaar"]);
-        output += ", Energiebron: " + this.selectToHTML(17, ["", "Elektriciteit", "Gas (atmosferisch)", "Gas (ventilator)", "Vaste brandstof", "Vloeibare brandstof"]);
-        output += ", Warmte functie: " + this.selectToHTML(18, ["", "Koelend", "Verwarmend", "Verwarmend en koelend"]);
-        output += ", Aantal: " + this.selectToHTML(4, ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"]);
-        output += ", Adres/tekst: " + this.stringToHTML(15, 5);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
+        output += ", Type: " + this.selectPropToHTML('keteltype', ["", "Met boiler", "Met tapspiraal", "Warmtekrachtkoppeling", "Warmtewisselaar"]);
+        output += ", Energiebron: " + this.selectPropToHTML('energiebron', ["", "Elektriciteit", "Gas (atmosferisch)", "Gas (ventilator)", "Vaste brandstof", "Vloeibare brandstof"]);
+        output += ", Warmte functie: " + this.selectPropToHTML('warmtefunctie', ["", "Koelend", "Verwarmend", "Verwarmend en koelend"]);
+        output += ", Aantal: " + this.selectPropToHTML('aantal', ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"]);
+        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Ketel.prototype.toSVG = function () {
         var mySVG = new SVGelement();
         // Alles naar beneden schuiven als we het aantal laders boven het symbool willen plaatsen
         var shifty = 0;
-        if (this.keys[4][2] > 1) {
+        if (this.props.aantal > 1) {
             shifty = 15;
-            mySVG.data += '<text x="41" y="12" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">x' + htmlspecialchars(this.keys[4][2]) + '</text>';
+            mySVG.data += '<text x="41" y="12" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">x' + htmlspecialchars(this.props.aantal) + '</text>';
         }
         mySVG.xleft = 1; // Links voldoende ruimte voor een eventuele kring voorzien
         mySVG.xright = 59;
@@ -2166,7 +2067,7 @@ var Ketel = /** @class */ (function (_super) {
         mySVG.data += '<line x1="1" y1="' + (shifty + 25) + '" x2="21" y2="' + (shifty + 25) + '" stroke="black"></line>'
             + '<use xlink:href="#verbruiker" x="21" y="' + (shifty + 25) + '"></use>';
         // Type ketel
-        switch (this.keys[16][2]) {
+        switch (this.props.keteltype) {
             case "Met tapspiraal":
                 mySVG.data += '<line x1="21" y1="' + (shifty + 15) + '" x2="61" y2="' + (shifty + 7) + '" stroke="black" />'
                     + '<line x1="21" y1="' + (shifty + 15) + '" x2="61" y2="' + (shifty + 23) + '" stroke="black" />';
@@ -2190,12 +2091,12 @@ var Ketel = /** @class */ (function (_super) {
         // Waar gaan we de andere symbolen plaatsen, indien slechts 1, midden onderaan, zoniet links en rechts
         var shift_symbol_energiebron = 41;
         var shift_symbol_warmtefunctie = 41;
-        if ((this.keys[17][2] != "") && (this.keys[18][2] != "")) {
+        if ((this.props.energiebron != "") && (this.props.warmtefunctie != "")) {
             var shift_symbol_energiebron = 31;
             var shift_symbol_warmtefunctie = 51;
         }
         // Plaats de symbolen onderaan
-        switch (this.keys[17][2]) {
+        switch (this.props.energiebron) {
             case "Gas (ventilator)":
                 mySVG.data += '<use xlink:href="#gas_ventilator" x="' + (shift_symbol_energiebron) + '" y="' + (shifty + 35) + '"/>';
                 break;
@@ -2212,7 +2113,7 @@ var Ketel = /** @class */ (function (_super) {
                 mySVG.data += '<circle cx="' + (shift_symbol_energiebron) + '" cy="' + (shifty + 35) + '" r="6" style="stroke:black;fill:black" />';
                 break;
         }
-        switch (this.keys[18][2]) {
+        switch (this.props.warmtefunctie) {
             case "Verwarmend":
                 mySVG.data += '<text x="' + (shift_symbol_warmtefunctie - 1) + '" y="' + (shifty + 36) + '" style="text-anchor:middle;dominant-baseline:middle" font-family="Arial, Helvetica, sans-serif" font-size="12">+</text>';
                 break;
@@ -2224,7 +2125,7 @@ var Ketel = /** @class */ (function (_super) {
                 break;
         }
         // Adres helemaal onderaan plaatsen
-        mySVG.data += this.addAddress(mySVG, 60 + shifty, 15);
+        mySVG.data += this.addAddressToSVG(mySVG, 60 + shifty, 15);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -2232,20 +2133,18 @@ var Ketel = /** @class */ (function (_super) {
 }(Electro_Item));
 var Koelkast = /** @class */ (function (_super) {
     __extends(Koelkast, _super);
-    function Koelkast(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function Koelkast() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     Koelkast.prototype.convertLegacyKeys = function (mykeys) {
-        this.props.type = mykeys[0][2];
-        this.props.adres = mykeys[15][2];
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.adres = this.getLegacyKey(mykeys, 15);
     };
-    Koelkast.prototype.resetKeys = function () {
-        this.clearKeys();
+    Koelkast.prototype.resetProps = function () {
+        this.clearProps();
         this.props.type = "Koelkast";
         this.props.adres = "";
-        delete this.keys;
     };
     Koelkast.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
@@ -2262,7 +2161,7 @@ var Koelkast = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
             + '<use xlink:href="#koelkast" x="21" y="25"></use>';
-        mySVG.data += this.addPropAddress(mySVG, 60, 15);
+        mySVG.data += this.addAddressToSVG(mySVG, 60, 15);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -2270,20 +2169,18 @@ var Koelkast = /** @class */ (function (_super) {
 }(Electro_Item));
 var Kookfornuis = /** @class */ (function (_super) {
     __extends(Kookfornuis, _super);
-    function Kookfornuis(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function Kookfornuis() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     Kookfornuis.prototype.convertLegacyKeys = function (mykeys) {
-        this.props.type = mykeys[0][2];
-        this.props.adres = mykeys[15][2];
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.adres = this.getLegacyKey(mykeys, 15);
     };
-    Kookfornuis.prototype.resetKeys = function () {
-        this.clearKeys();
+    Kookfornuis.prototype.resetProps = function () {
+        this.clearProps();
         this.props.type = "Kookfornuis";
         this.props.adres = "";
-        delete this.keys;
     };
     Kookfornuis.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
@@ -2300,7 +2197,7 @@ var Kookfornuis = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
             + '<use xlink:href="#kookfornuis" x="21" y="25"></use>';
-        mySVG.data += this.addPropAddress(mySVG, 60, 15);
+        mySVG.data += this.addAddressToSVG(mySVG, 60, 15);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -2308,58 +2205,84 @@ var Kookfornuis = /** @class */ (function (_super) {
 }(Electro_Item));
 var Kring = /** @class */ (function (_super) {
     __extends(Kring, _super);
-    function Kring(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function Kring() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Kring.prototype.resetKeys = function () {
-        this.clearKeys();
-        this.keys[0][2] = "Kring"; // This is rather a formality as we should already have this at this stage
-        this.keys[4][2] = "2"; // Per default 2-polige automaat
-        this.keys[7][2] = "automatisch"; // Per default automatische zekering
-        this.keys[8][2] = "20"; // Per deault 20 Ampère
-        this.keys[9][2] = "XVB Cca 3G2,5"; // Default type kabel
-        this.keys[11][2] = "300"; // Differentieel per default 300 mA
-        this.keys[15][2] = ""; // Tekst naast de kabel
-        this.keys[16][2] = "N/A"; // Per default, locatie kabel niet geweten
-        this.keys[17][2] = ""; // Type differentieel, Type differentieelautomaat, of Curve automaat per default niet gegeven
-        this.keys[18][2] = ""; // Curve differentieelautomaat per default niet gegeven
-        this.keys[19][2] = false; // Per default kabel niet in buis
-        this.keys[20][2] = false; // Per default niet selectief
-        this.keys[22][2] = ""; // Kortsluitvermogen per default niet gegeven
+    Kring.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.aantal_polen = this.getLegacyKey(mykeys, 4);
+        this.props.bescherming = this.getLegacyKey(mykeys, 7);
+        this.props.amperage = this.getLegacyKey(mykeys, 8);
+        this.props.type_kabel = this.getLegacyKey(mykeys, 9);
+        this.props.naam = this.getLegacyKey(mykeys, 10);
+        this.props.differentieel_delta_amperage = this.getLegacyKey(mykeys, 11);
+        this.props.kabel_is_aanwezig = this.getLegacyKey(mykeys, 12);
+        this.props.tekst = this.getLegacyKey(mykeys, 15);
+        this.props.kabel_locatie = this.getLegacyKey(mykeys, 16);
+        this.props.kabel_is_in_buis = this.getLegacyKey(mykeys, 19);
+        this.props.differentieel_is_selectief = this.getLegacyKey(mykeys, 20);
+        this.props.kortsluitvermogen = this.getLegacyKey(mykeys, 22);
+        switch (this.props.bescherming) {
+            case "differentieel":
+                this.props.type_differentieel = this.getLegacyKey(mykeys, 17);
+                break;
+            case "automatisch":
+                this.props.curve_automaat = this.getLegacyKey(mykeys, 17);
+                break;
+            case "differentieelautomaat":
+                this.props.type_differentieel = this.getLegacyKey(mykeys, 17);
+                this.props.curve_automaat = this.getLegacyKey(mykeys, 18);
+                break;
+        }
+    };
+    Kring.prototype.resetProps = function () {
+        this.clearProps();
+        this.props.type = "Kring";
+        this.props.nr = "";
+        this.props.aantal_polen = "2";
+        this.props.bescherming = "automatisch";
+        this.props.amperage = "20";
+        this.props.type_kabel = "XVB Cca 3G2,5";
+        this.props.differentieel_delta_amperage = "300";
+        this.props.tekst = "";
+        this.props.kabel_locatie = "N/A";
+        this.props.type_differentieel = "";
+        this.props.curve_automaat = "";
+        this.props.kabel_is_in_buis = false;
+        this.props.differentieel_is_selectief = false;
+        this.props.kortsluitvermogen = "";
         //Bepalen of er per default een kabel aanwezig is en of we zekeringen plaatsen
         var parent = this.getParent();
         if (parent == null) {
-            this.keys[12][2] = true; // Kabel aanwezig
-            this.keys[10][2] = ""; // We geven de kring geen naam als er geen parent is
+            this.props.kabel_is_aanwezig = true; // Kabel aanwezig
+            this.props.naam = ""; // We geven de kring geen naam als er geen parent is
         }
         else
             switch (parent.getType()) { // Selecteren op basis van parent
                 case "Bord":
-                    this.keys[7][2] = "automatisch"; // Wel een zekering na bord
-                    this.keys[10][2] = "---"; // We zetten iets als default dat gebruikers niet vergeten een naam aan de kring te geven na een bord
-                    this.keys[12][2] = true; // wel een kabel na bord
+                    this.props.bescherming = "automatisch"; // Wel een zekering na bord
+                    this.props.naam = "---"; // We zetten iets als default dat gebruikers niet vergeten een naam aan de kring te geven na een bord
+                    this.props.kabel_is_aanwezig = true; // wel een kabel na bord
                     break;
                 case "Splitsing":
-                    this.keys[7][2] = "geen"; // geen zekering per default na splitsing
-                    this.keys[10][2] = ""; // We geven de kring geen naam
-                    this.keys[12][2] = false; // geen kabel per default na splitsing
+                    this.props.bescherming = "geen"; // geen zekering per default na splitsing
+                    this.props.naam = ""; // We geven de kring geen naam
+                    this.props.kabel_is_aanwezig = false; // geen kabel per default na splitsing
                     break;
                 case "Kring":
-                    this.keys[9][2] = ""; // We geven geen kabeltype op
-                    this.keys[10][2] = ""; // We geven de kring geen naam
-                    this.keys[12][2] = true; // wel een kabel na domotica
+                    this.props.type_kabel = ""; // We geven geen kabeltype op
+                    this.props.naam = ""; // We geven de kring geen naam
+                    this.props.kabel_is_aanwezig = true; // wel een kabel na domotica
                     break;
                 case "Domotica":
-                    this.keys[7][2] = "geen"; // geen zekering per default na domotica
-                    this.keys[10][2] = ""; // We geven de kring geen naam
-                    this.keys[12][2] = true; // wel een kabel na domotica
+                    this.props.bescherming = "geen"; // geen zekering per default na domotica
+                    this.props.naam = ""; // We geven de kring geen naam
+                    this.props.kabel_is_aanwezig = true; // wel een kabel na domotica
                     break;
                 default:
-                    this.keys[7][2] = "automatisch"; // wel een zekering na bord
-                    this.keys[10][2] = ""; // We geven de kring geen naam
-                    this.keys[12][2] = true; // wel een kabel na bord
+                    this.props.bescherming = "automatisch"; // wel een zekering na bord
+                    this.props.naam = ""; // We geven de kring geen naam
+                    this.props.kabel_is_aanwezig = true; // wel een kabel na bord
                     break;
             }
     };
@@ -2370,75 +2293,75 @@ var Kring = /** @class */ (function (_super) {
         return 256;
     };
     Kring.prototype.overrideKeys = function () {
-        if ((this.keys[4][2] < 1) || (this.keys[4][2] > 4))
-            this.keys[4][2] = "2"; //Test dat aantal polen bestaat
-        if (this.keys[16][2] == "Luchtleiding")
-            this.keys[19][2] = false; //Indien luchtleiding nooit een buis tekenen
+        if ((this.props.aantal_polen < 1) || (this.props.aantal_polen > 4))
+            this.props.aantal_polen = "2"; //Test dat aantal polen bestaat
+        if (this.props.kabel_locatie == "Luchtleiding")
+            this.props.kabel_is_in_buis = false; //Indien luchtleiding nooit een buis tekenen
     };
     Kring.prototype.toHTML = function (mode) {
         this.overrideKeys();
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Naam: " + this.stringToHTML(10, 5) + "<br>"
-            + "Zekering: " + this.selectToHTML(7, ["automatisch", "differentieel", "differentieelautomaat", "smelt", "geen", "---", "schakelaar", "relais", "schemer", "overspanningsbeveiliging"]);
+        output += "&nbsp;Naam: " + this.stringPropToHTML('naam', 5) + "<br>"
+            + "Zekering: " + this.selectPropToHTML('bescherming', ["automatisch", "differentieel", "differentieelautomaat", "smelt", "geen", "---", "schakelaar", "relais", "schemer", "overspanningsbeveiliging"]);
         // Aantal polen en Ampérage
-        if ((this.keys[7][2] != "geen") && (this.keys[7][2] != "relais"))
-            output += this.selectToHTML(4, ["2", "3", "4", "-", "1"]) + this.stringToHTML(8, 2) + "A";
+        if ((this.props.bescherming != "geen") && (this.props.bescherming != "relais"))
+            output += this.selectPropToHTML('aantal', ["2", "3", "4", "-", "1"]) + this.stringPropToHTML('amperage', 2) + "A";
         // Specifieke input voor differentielen en automaten
-        switch (this.keys[7][2]) {
+        switch (this.props.bescherming) {
             case "differentieel":
-                output += ", \u0394 " + this.stringToHTML(11, 3) + "mA"
-                    + ", Type:" + this.selectToHTML(17, ["", "A", "B"])
-                    + ", Kortsluitvermogen: " + this.stringToHTML(22, 3) + "kA"
-                    + ", Selectief: " + this.checkboxToHTML(20);
+                output += ", \u0394 " + this.stringPropToHTML('differentieel_delta_amperage', 3) + "mA"
+                    + ", Type:" + this.selectPropToHTML('type_differentieel', ["", "A", "B"])
+                    + ", Kortsluitvermogen: " + this.stringPropToHTML('kortsluitvermogen', 3) + "kA"
+                    + ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief');
                 break;
             case "automatisch":
-                output += ", Curve:" + this.selectToHTML(17, ["", "B", "C", "D"])
-                    + ", Kortsluitvermogen: " + this.stringToHTML(22, 3) + "kA";
+                output += ", Curve:" + this.selectPropToHTML('curve_automaat', ["", "B", "C", "D"])
+                    + ", Kortsluitvermogen: " + this.stringPropToHTML('kortsluitvermogen', 3) + "kA";
                 break;
             case "differentieelautomaat":
-                output += ", \u0394 " + this.stringToHTML(11, 3) + "mA"
-                    + ", Curve:" + this.selectToHTML(18, ["", "B", "C", "D"])
-                    + ", Type:" + this.selectToHTML(17, ["", "A", "B"])
-                    + ", Kortsluitvermogen: " + this.stringToHTML(22, 3) + "kA"
-                    + ", Selectief: " + this.checkboxToHTML(20);
+                output += ", \u0394 " + this.stringPropToHTML('differentieel_delta_amperage', 3) + "mA"
+                    + ", Curve:" + this.selectPropToHTML('curve_automaat', ["", "B", "C", "D"])
+                    + ", Type:" + this.selectPropToHTML('type_differentieel', ["", "A", "B"])
+                    + ", Kortsluitvermogen: " + this.stringPropToHTML('kortsluitvermogen', 3) + "kA"
+                    + ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief');
                 break;
         }
         // Eigenschappen van de kabel
-        output += ", Kabel: " + this.checkboxToHTML(12);
-        if (this.keys[12][2]) { // Kabel aanwezig
-            output += ", Type: " + this.stringToHTML(9, 10)
-                + ", Plaatsing: " + this.selectToHTML(16, ["N/A", "Ondergronds", "Luchtleiding", "In wand", "Op wand"]);
-            if (this.keys[16][2] != "Luchtleiding")
-                output += ", In buis: " + this.checkboxToHTML(19);
+        output += ", Kabel: " + this.checkboxPropToHTML('kabel_is_aanwezig');
+        if (this.props.kabel_is_aanwezig) { // Kabel aanwezig
+            output += ", Type: " + this.stringPropToHTML('type_kabel', 10)
+                + ", Plaatsing: " + this.selectPropToHTML('kabel_locatie', ["N/A", "Ondergronds", "Luchtleiding", "In wand", "Op wand"]);
+            if (this.props.kabel_locatie != "Luchtleiding")
+                output += ", In buis: " + this.checkboxPropToHTML('kabel_is_in_buis');
         }
-        output += ", Tekst: " + this.stringToHTML(15, 10);
+        output += ", Tekst: " + this.stringPropToHTML('tekst', 10);
         return (output);
     };
     Kring.prototype.toSVG = function () {
         var mySVG = new SVGelement();
         // Bepalen of we de hele kring naar rechts moeten opschuiven om rekening te houden met symbooltjes qua kabel-locatie
         var cable_location_available = 0;
-        if (this.keys[12][2] /* kabel aanwezig */ && (this.keys[19][2] /* kabel in buis */ || contains(["Ondergronds", "In wand", "Op wand"], this.keys[16][2]))) {
+        if (this.props.kabel_is_aanwezig /* kabel aanwezig */ && (this.props.kabel_is_in_buis /* kabel in buis */ || contains(["Ondergronds", "In wand", "Op wand"], this.props.kabel_locatie))) {
             cable_location_available = 1;
         }
         // Alle verbruikers van de kring tekenen
         mySVG = this.sourcelist.toSVG(this.id, "vertical", 35 + 20 * cable_location_available);
         // Kabel tekenen
-        if (this.keys[12][2]) { // Kabel aanwezig
+        if (this.props.kabel_is_aanwezig) { // Kabel aanwezig
             // Kabel tekenen en naam van de kabel ernaast zetten
             mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + mySVG.yup + '" y2="' + (mySVG.yup + 100) + '" stroke="black" />'
                 + "<text x=\"" + (mySVG.xleft + 15) + "\" y=\"" + (mySVG.yup + 80) + "\""
                 + " transform=\"rotate(-90 " + (mySVG.xleft + 15) + "," + (mySVG.yup + 80) + ")"
                 + "\" style=\"text-anchor:start\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
-                + htmlspecialchars(this.keys[9][2]) + "</text>";
+                + htmlspecialchars(this.props.type_kabel) + "</text>";
             // Luchtleiding tekenen indien van toepassing
-            if (this.keys[16][2] == "Luchtleiding")
+            if (this.props.kabel_locatie == "Luchtleiding")
                 mySVG.data += '<circle cx="' + (mySVG.xleft) + '" cy="' + (mySVG.yup + 20) + '" r="4" style="stroke:black;fill:none" />';
             // Symbolen naast de kabel zetten
             if (cable_location_available) {
-                if ((this.keys[19][2]) && (this.keys[16][2] != "Luchtleiding")) // Rondje voor "in buis" tekenen
+                if ((this.props.kabel_is_in_buis) && (this.props.kabel_locatie != "Luchtleiding")) // Rondje voor "in buis" tekenen
                     mySVG.data += '<circle cx="' + (mySVG.xleft - 10) + '" cy="' + (mySVG.yup + 40) + '" r="4" style="stroke:black;fill:none" />';
-                switch (this.keys[16][2]) {
+                switch (this.props.kabel_locatie) {
                     case "Ondergronds":
                         mySVG.data += '<line x1="' + (mySVG.xleft - 13) + '" x2="' + (mySVG.xleft - 13) + '" y1="' + (mySVG.yup + 60) + '" y2="' + (mySVG.yup + 80) + '" style="stroke:black" />'
                             + '<line x1="' + (mySVG.xleft - 10) + '" x2="' + (mySVG.xleft - 10) + '" y1="' + (mySVG.yup + 62) + '" y2="' + (mySVG.yup + 78) + '" style="stroke:black" />'
@@ -2473,7 +2396,7 @@ var Kring = /** @class */ (function (_super) {
             mySVG.yup += 20;
         }
         // Selectief differentieel tekenen indien van toepassing
-        if (this.keys[20][2]) { //Differentieel is selectief
+        if (this.props.differentieel_is_selectief) { //Differentieel is selectief
             mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + mySVG.yup + '" y2="' + (mySVG.yup + 30) + '" stroke="black" />'
                 + '<rect x="' + (mySVG.xleft + 7) + '" y="' + (mySVG.yup) + '" width="16" height="16" stroke="black" fill="white" />'
                 + "<text x=\"" + (mySVG.xleft + 19) + "\" y=\"" + (mySVG.yup + 8) + "\""
@@ -2484,7 +2407,7 @@ var Kring = /** @class */ (function (_super) {
         // Zekering, differentieel, of ander symbool onderaan plaatsen
         var nameshift = -6; // Deze geeft aan hoeveel de naam naar beneden geduwd kan worden
         var numlines = 1; // Hier houden we het aantal lijnen tekst bij
-        switch (this.keys[7][2]) {
+        switch (this.props.bescherming) {
             case "automatisch":
                 numlines = 1; // Hier houden we het aantal lijnen tekst bij
                 mySVG.yup += 30; // Hoeveel ruimte moeten we onderaan voorzien voor de zekering
@@ -2493,22 +2416,22 @@ var Kring = /** @class */ (function (_super) {
                     + "<text x=\"" + (mySVG.xleft + 15) + "\" y=\"" + (mySVG.yup - 10) + "\""
                     + " transform=\"rotate(-90 " + (mySVG.xleft + 15) + "," + (mySVG.yup - 10) + ")"
                     + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
-                    + htmlspecialchars(this.keys[4][2] + "P - " + this.keys[8][2] + "A") + "</text>";
+                    + htmlspecialchars(this.props.aantal_polen + "P - " + this.props.amperage + "A") + "</text>";
                 // Code om de curve toe te voegen
-                if ((this.keys[17][2] == 'B') || (this.keys[17][2] == 'C') || (this.keys[17][2] == 'D')) {
+                if ((this.props.curve_automaat == 'B') || (this.props.curve_automaat == 'C') || (this.props.curve_automaat == 'D')) {
                     ++numlines;
                     mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
                         + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
                         + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
-                        + htmlspecialchars("Curve " + this.keys[17][2]) + "</text>";
+                        + htmlspecialchars("Curve " + this.props.curve_automaat) + "</text>";
                 }
                 // Code om kortsluitvermogen toe te voegen
-                if ((this.keys[22][2] != '')) {
+                if ((this.props.kortsluitvermogen != '')) {
                     ++numlines;
                     mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
                         + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
                         + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
-                        + htmlspecialchars("" + this.keys[22][2]) + "kA</text>";
+                        + htmlspecialchars("" + this.props.kortsluitvermogen) + "kA</text>";
                 }
                 // Genoeg plaats voorzien aan de rechterkant en eindigen
                 mySVG.xright = Math.max(mySVG.xright, 20 + 11 * (numlines - 1));
@@ -2521,26 +2444,26 @@ var Kring = /** @class */ (function (_super) {
                     + "<text x=\"" + (mySVG.xleft + 15) + "\" y=\"" + (mySVG.yup - 10) + "\""
                     + " transform=\"rotate(-90 " + (mySVG.xleft + 15) + "," + (mySVG.yup - 10) + ")"
                     + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
-                    + "\u0394" + htmlspecialchars(this.keys[11][2] + "mA") + "</text>"
+                    + "\u0394" + htmlspecialchars(this.props.differentieel_delta_amperage + "mA") + "</text>"
                     + "<text x=\"" + (mySVG.xleft + 26) + "\" y=\"" + (mySVG.yup - 10) + "\""
                     + " transform=\"rotate(-90 " + (mySVG.xleft + 26) + "," + (mySVG.yup - 10) + ")"
                     + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
-                    + htmlspecialchars(this.keys[4][2] + "P - " + this.keys[8][2] + "A") + "</text>";
+                    + htmlspecialchars(this.props.aantal_polen + "P - " + this.props.amperage + "A") + "</text>";
                 // Code om het type toe te voegen
-                if ((this.keys[17][2] == 'A') || (this.keys[17][2] == 'B')) {
+                if ((this.props.type_differentieel == 'A') || (this.props.type_differentieel == 'B')) {
                     ++numlines;
                     mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
                         + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
                         + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
-                        + htmlspecialchars("Type " + this.keys[17][2]) + "</text>";
+                        + htmlspecialchars("Type " + this.props.type_differentieel) + "</text>";
                 }
                 // Code om kortsluitvermogen toe te voegen
-                if ((this.keys[22][2] != '')) {
+                if ((this.props.kortsluitvermogen != '')) {
                     ++numlines;
                     mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
                         + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
                         + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
-                        + htmlspecialchars("" + this.keys[22][2]) + "kA</text>";
+                        + htmlspecialchars("" + this.props.kortsluitvermogen) + "kA</text>";
                 }
                 // genoeg plaats voorzien aan de rechterkant en eindigen
                 mySVG.xright = Math.max(mySVG.xright, 20 + 11 * (numlines - 1));
@@ -2553,34 +2476,34 @@ var Kring = /** @class */ (function (_super) {
                     + "<text x=\"" + (mySVG.xleft + 15) + "\" y=\"" + (mySVG.yup - 10) + "\""
                     + " transform=\"rotate(-90 " + (mySVG.xleft + 15) + "," + (mySVG.yup - 10) + ")"
                     + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
-                    + "\u0394" + htmlspecialchars(this.keys[11][2] + "mA") + "</text>"
+                    + "\u0394" + htmlspecialchars(this.props.differentieel_delta_amperage + "mA") + "</text>"
                     + "<text x=\"" + (mySVG.xleft + 26) + "\" y=\"" + (mySVG.yup - 10) + "\""
                     + " transform=\"rotate(-90 " + (mySVG.xleft + 26) + "," + (mySVG.yup - 10) + ")"
                     + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
-                    + htmlspecialchars(this.keys[4][2] + "P - " + this.keys[8][2] + "A") + "</text>";
+                    + htmlspecialchars(this.props.aantal_polen + "P - " + this.props.amperage + "A") + "</text>";
                 // Code om de curve toe te voegen
-                if ((this.keys[18][2] == 'B') || (this.keys[18][2] == 'C') || (this.keys[18][2] == 'D')) {
+                if ((this.props.curve_automaat == 'B') || (this.props.curve_automaat == 'C') || (this.props.curve_automaat == 'D')) {
                     ++numlines;
                     mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
                         + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
                         + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
-                        + htmlspecialchars("Curve " + this.keys[18][2]) + "</text>";
+                        + htmlspecialchars("Curve " + this.props.curve_automaat) + "</text>";
                 }
                 // Code om het type toe te voegen
-                if ((this.keys[17][2] == 'A') || (this.keys[17][2] == 'B')) {
+                if ((this.props.type_differentieel == 'A') || (this.props.type_differentieel == 'B')) {
                     ++numlines;
                     mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
                         + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
                         + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
-                        + htmlspecialchars("Type " + this.keys[17][2]) + "</text>";
+                        + htmlspecialchars("Type " + this.props.type_differentieel) + "</text>";
                 }
                 // Code om kortsluitvermogen toe te voegen
-                if ((this.keys[22][2] != '')) {
+                if ((this.props.kortsluitvermogen != '')) {
                     ++numlines;
                     mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
                         + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
                         + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
-                        + htmlspecialchars("" + this.keys[22][2]) + "kA</text>";
+                        + htmlspecialchars("" + this.props.kortsluitvermogen) + "kA</text>";
                 }
                 // genoeg plaats voorzien aan de rechterkant en eindigen
                 mySVG.xright = Math.max(mySVG.xright, 20 + 11 * (numlines - 1));
@@ -2591,7 +2514,7 @@ var Kring = /** @class */ (function (_super) {
                     + "<text x=\"" + (mySVG.xleft + 15) + "\" y=\"" + (mySVG.yup - 10) + "\""
                     + " transform=\"rotate(-90 " + (mySVG.xleft + 15) + "," + (mySVG.yup - 10) + ")"
                     + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
-                    + htmlspecialchars(this.keys[4][2] + "P - " + this.keys[8][2] + "A") + "</text>";
+                    + htmlspecialchars(this.props.aantal_polen + "P - " + this.props.amperage + "A") + "</text>";
                 break;
             case "overspanningsbeveiliging":
                 mySVG.yup += 30; // Hoeveel ruimte moeten we onderaan voorzien voor de zekering
@@ -2599,7 +2522,7 @@ var Kring = /** @class */ (function (_super) {
                     + "<text x=\"" + (mySVG.xleft + 20) + "\" y=\"" + (mySVG.yup - 10) + "\""
                     + " transform=\"rotate(-90 " + (mySVG.xleft + 20) + "," + (mySVG.yup - 10) + ")"
                     + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
-                    + htmlspecialchars(this.keys[4][2] + "P - " + this.keys[8][2] + "A") + "</text>";
+                    + htmlspecialchars(this.props.aantal_polen + "P - " + this.props.amperage + "A") + "</text>";
                 nameshift = -11; //
                 break;
             case "schemer":
@@ -2608,7 +2531,7 @@ var Kring = /** @class */ (function (_super) {
                     + "<text x=\"" + (mySVG.xleft + 15) + "\" y=\"" + (mySVG.yup - 10) + "\""
                     + " transform=\"rotate(-90 " + (mySVG.xleft + 15) + "," + (mySVG.yup - 10) + ")"
                     + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
-                    + htmlspecialchars(this.keys[4][2] + "P - " + this.keys[8][2] + "A") + "</text>"
+                    + htmlspecialchars(this.props.aantal_polen + "P - " + this.props.amperage + "A") + "</text>"
                     + '<use xlink:href="#arrow" x=\"' + (mySVG.xleft - 18) + '" y="' + (mySVG.yup - 15) + '" />'
                     + '<use xlink:href="#arrow" x=\"' + (mySVG.xleft - 18) + '" y="' + (mySVG.yup - 12) + '" />';
                 break;
@@ -2623,7 +2546,7 @@ var Kring = /** @class */ (function (_super) {
                     + "<text x=\"" + (mySVG.xleft + 15) + "\" y=\"" + (mySVG.yup - 10) + "\""
                     + " transform=\"rotate(-90 " + (mySVG.xleft + 15) + "," + (mySVG.yup - 10) + ")"
                     + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
-                    + htmlspecialchars(this.keys[4][2] + "P - " + this.keys[8][2] + "A") + "</text>";
+                    + htmlspecialchars(this.props.aantal_polen + "P - " + this.props.amperage + "A") + "</text>";
                 break;
             case "geen":
                 mySVG.yup += 0; // Hoeveel ruimte moeten we onderaan voorzien voor de zekering
@@ -2631,16 +2554,16 @@ var Kring = /** @class */ (function (_super) {
         }
         // Tekst naast de kring
         var tekstlocatie = mySVG.yup - 40; //Standaard staat tekst boven de zekering
-        if (this.keys[7][2] == "geen")
+        if (this.props.bescherming == "geen")
             tekstlocatie += 25; //Als er geen zekering is kan tekst naar beneden
         mySVG.data += '<text x="' + (mySVG.xleft - 6 - 20 * cable_location_available) + '" ' + 'y="' + (tekstlocatie) + '" '
             + 'transform="rotate(-90 ' + (mySVG.xleft - 6 - 20 * cable_location_available) + ',' + (tekstlocatie) + ')" '
             + 'style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="12"' + '>'
-            + htmlspecialchars(this.keys[15][2]) + '</text>';
+            + htmlspecialchars(this.props.tekst) + '</text>';
         // Naam onderaan zetten (links-onder)
         mySVG.data += '<text x="' + (mySVG.xleft + nameshift) + '" ' + 'y="' + (mySVG.yup + 3) + '" '
             + 'style="text-anchor:end" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="12"' + '>'
-            + htmlspecialchars(this.keys[10][2]) + '</text>';
+            + htmlspecialchars(this.props.naam) + '</text>';
         // Lijntje onder de zekering
         mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + mySVG.yup + '" y2="' + (mySVG.yup + 15) + '" stroke="black" />';
         mySVG.yup += 15;
@@ -2657,35 +2580,46 @@ var Kring = /** @class */ (function (_super) {
 }(Electro_Item));
 var Lichtpunt = /** @class */ (function (_super) {
     __extends(Lichtpunt, _super);
-    function Lichtpunt(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function Lichtpunt() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Lichtpunt.prototype.resetKeys = function () {
-        this.clearKeys();
-        this.keys[0][2] = "Lichtpunt"; // This is rather a formality as we should already have this at this stage
-        this.keys[4][2] = "1"; // Per default 1 Lamp
-        this.keys[13][2] = "1"; // Per default 1 buis in een TL lamp
-        this.keys[16][2] = "standaard"; // Per default standaard lamp
-        this.keys[17][2] = "Geen"; // Per default geen noodverlichting
-        this.keys[19][2] = false; // Per default geen wandlamp
-        this.keys[20][2] = false; // Per default niet halfwaterdicht
-        this.keys[21][2] = false; // Per default geen ingebouwde schakelaar
+    Lichtpunt.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.aantal = this.getLegacyKey(mykeys, 4);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.aantal_buizen_indien_TL = this.getLegacyKey(mykeys, 13);
+        this.props.adres = this.getLegacyKey(mykeys, 15);
+        this.props.type_lamp = this.getLegacyKey(mykeys, 16);
+        this.props.type_noodverlichting = this.getLegacyKey(mykeys, 17);
+        this.props.is_wandlamp = this.getLegacyKey(mykeys, 19);
+        this.props.is_halfwaterdicht = this.getLegacyKey(mykeys, 20);
+        this.props.heeft_ingebouwde_schakelaar = this.getLegacyKey(mykeys, 21);
+    };
+    Lichtpunt.prototype.resetProps = function () {
+        this.clearProps();
+        this.props.type = "Lichtpunt";
+        this.props.aantal = "1";
+        this.props.aantal_buizen_indien_TL = "1";
+        this.props.adres = "";
+        this.props.type_lamp = "standaard";
+        this.props.type_noodverlichting = "Geen";
+        this.props.is_wandlamp = false;
+        this.props.is_halfwaterdicht = false;
+        this.props.heeft_ingebouwde_schakelaar = false;
     };
     Lichtpunt.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringToHTML(10, 5) + ", "
-            + "Type: " + this.selectToHTML(16, ["standaard", "TL", "spot", "led" /*, "Spot", "Led", "Signalisatielamp" */]) + ", ";
-        if (this.keys[16][2] == "TL") {
-            output += "Aantal buizen: " + this.selectToHTML(13, ["1", "2", "3", "4"]) + ", ";
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5) + ", "
+            + "Type: " + this.selectPropToHTML('type_lamp', ["standaard", "TL", "spot", "led" /*, "Spot", "Led", "Signalisatielamp" */]) + ", ";
+        if (this.props.type_lamp == "TL") {
+            output += "Aantal buizen: " + this.selectPropToHTML('aantal_buizen_indien_TL', ["1", "2", "3", "4"]) + ", ";
         }
-        output += "Aantal lampen: " + this.selectToHTML(4, ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"]) + ", "
-            + "Wandlamp: " + this.checkboxToHTML(19) + ", "
-            + "Halfwaterdicht: " + this.checkboxToHTML(20) + ", "
-            + "Ingebouwde schakelaar: " + this.checkboxToHTML(21) + ", "
-            + "Noodverlichting: " + this.selectToHTML(17, ["Geen", "Centraal", "Decentraal"])
-            + ", Adres/tekst: " + this.stringToHTML(15, 5);
+        output += "Aantal lampen: " + this.selectPropToHTML('aantal', ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"]) + ", "
+            + "Wandlamp: " + this.checkboxPropToHTML('is_wandlamp') + ", "
+            + "Halfwaterdicht: " + this.checkboxPropToHTML('is_halfwaterdicht') + ", "
+            + "Ingebouwde schakelaar: " + this.checkboxPropToHTML('heeft_ingebouwde_schakelaar') + ", "
+            + "Noodverlichting: " + this.selectPropToHTML('type_noodverlichting', ["Geen", "Centraal", "Decentraal"])
+            + ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Lichtpunt.prototype.toSVG = function () {
@@ -2698,22 +2632,22 @@ var Lichtpunt = /** @class */ (function (_super) {
         mySVG.data = '<line x1="1" x2="30" y1="25" y2="25" stroke="black" />';
         // Indien halfwaterdicht en/of meerdere lampen, voorzie de tekst bovenaan
         var print_str_upper = "";
-        if (this.keys[20][2]) {
+        if (this.props.is_halfwaterdicht) {
             print_str_upper = "h";
-            if (parseInt(this.keys[4][2]) > 1)
-                print_str_upper += ", x" + this.keys[4][2]; //Meer dan 1 lamp
+            if (parseInt(this.props.aantal) > 1)
+                print_str_upper += ", x" + this.props.aantal; //Meer dan 1 lamp
         }
-        else if (parseInt(this.keys[4][2]) > 1)
-            print_str_upper = "x" + this.keys[4][2];
-        switch (this.keys[16][2]) {
+        else if (parseInt(this.props.aantal) > 1)
+            print_str_upper = "x" + this.props.aantal;
+        switch (this.props.type_lamp) {
             case "led":
                 // Teken led
                 mySVG.data += '<use xlink:href="#led" x="' + 30 + '" y="25" />';
                 // Teken wandlamp indien van toepassing
-                if (this.keys[19][2])
+                if (this.props.is_wandlamp)
                     mySVG.data += '<line x1="30" y1="35" x2="42" y2="35" stroke="black" />'; //Wandlamp
                 // Teken ingebouwde schakelaar indien van toepassing
-                if (this.keys[21][2]) {
+                if (this.props.heeft_ingebouwde_schakelaar) {
                     mySVG.data += '<line x1="42" y1="25" x2="45.75" y2="17.5" stroke="black" />'
                         + '<line x1="45.75" y1="17.5" x2="48.25" y2="18.75" stroke="black" />';
                 }
@@ -2727,7 +2661,7 @@ var Lichtpunt = /** @class */ (function (_super) {
                 }
                 else {
                     noodxpos = 20;
-                    if ((print_str_upper.length > 2) && ((this.keys[17][2] == "Centraal") || (this.keys[17][2] == "Decentraal")))
+                    if ((print_str_upper.length > 2) && ((this.props.type_noodverlichting == "Centraal") || (this.props.type_noodverlichting == "Decentraal")))
                         textxpos = 40;
                     else
                         textxpos = 36;
@@ -2735,7 +2669,7 @@ var Lichtpunt = /** @class */ (function (_super) {
                 ;
                 if (print_str_upper != "")
                     mySVG.data += '<text x="' + textxpos + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="7">' + htmlspecialchars(print_str_upper) + '</text>';
-                switch (this.keys[17][2]) { // Type noodverlichting
+                switch (this.props.type_noodverlichting) { // Type noodverlichting
                     case "Centraal":
                         mySVG.data += '<circle cx="' + noodxpos + '" cy="' + noodypos + '" r="2.5" style="stroke:black;fill:black" />'
                             + '<line x1="' + (noodxpos - 5.6) + '" y1="' + (noodypos - 5.6) + '" x2="' + (noodxpos + 5.6) + '" y2="' + (noodypos + 5.6) + '" style="stroke:black;fill:black" />'
@@ -2752,16 +2686,16 @@ var Lichtpunt = /** @class */ (function (_super) {
                 }
                 // Verdere uitlijning en adres onderaan   
                 mySVG.xright = 42;
-                mySVG.data += this.addAddress(mySVG, 50, 5, 2);
+                mySVG.data += this.addAddressToSVG(mySVG, 50, 5, 2);
                 break;
             case "spot":
                 // teken spot
                 mySVG.data += '<use xlink:href="#spot" x="' + 30 + '" y="25" />';
                 // Teken wandlamp indien van toepassing
-                if (this.keys[19][2])
+                if (this.props.is_wandlamp)
                     mySVG.data += '<line x1="30" y1="38" x2="46" y2="38" stroke="black" />';
                 // Teken ingebouwde schakelaar indien van toepassing
-                if (this.keys[21][2]) {
+                if (this.props.heeft_ingebouwde_schakelaar) {
                     mySVG.data += '<line x1="46" y1="25" x2="49.75" y2="17.5" stroke="black" />'
                         + '<line x1="49.75" y1="17.5" x2="52.25" y2="18.75" stroke="black" />';
                 }
@@ -2775,14 +2709,14 @@ var Lichtpunt = /** @class */ (function (_super) {
                 }
                 else {
                     noodxpos = 24;
-                    if ((print_str_upper.length > 2) && ((this.keys[17][2] == "Centraal") || (this.keys[17][2] == "Decentraal")))
+                    if ((print_str_upper.length > 2) && ((this.props.type_noodverlichting == "Centraal") || (this.props.type_noodverlichting == "Decentraal")))
                         textxpos = 44;
                     else
                         textxpos = 40;
                 }
                 if (print_str_upper != "")
                     mySVG.data += '<text x="' + textxpos + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="7">' + htmlspecialchars(print_str_upper) + '</text>';
-                switch (this.keys[17][2]) {
+                switch (this.props.type_noodverlichting) {
                     case "Centraal":
                         mySVG.data += '<circle cx="' + noodxpos + '" cy="' + noodypos + '" r="2.5" style="stroke:black;fill:black" />'
                             + '<line x1="' + (noodxpos - 5.6) + '" y1="' + (noodypos - 5.6) + '" x2="' + (noodxpos + 5.6) + '" y2="' + (noodypos + 5.6) + '" style="stroke:black;fill:black" />'
@@ -2799,11 +2733,11 @@ var Lichtpunt = /** @class */ (function (_super) {
                 }
                 // Verdere uitlijning en adres onderaan
                 mySVG.xright = 45;
-                mySVG.data += this.addAddress(mySVG, 52, 7, 4);
+                mySVG.data += this.addAddressToSVG(mySVG, 52, 7, 4);
                 break;
             case "TL":
                 // Teken TL lampen
-                var aantal_buizen = this.keys[13][2];
+                var aantal_buizen = this.props.aantal_buizen_indien_TL;
                 var starty = 25 - (aantal_buizen) * 3.5;
                 var endy = 25 + (aantal_buizen) * 3.5;
                 mySVG.data += '<line x1="30" y1="' + starty + '" x2="30" y2="' + endy + '" stroke="black" stroke-width="2" />'
@@ -2812,13 +2746,13 @@ var Lichtpunt = /** @class */ (function (_super) {
                     mySVG.data += '<line x1="30" y1="' + (starty + (i * 7) + 3.5) + '" x2="90" y2="' + (starty + (i * 7) + 3.5) + '" stroke="black" stroke-width="2" />';
                 }
                 // Teken wandlamp indien van toepassing
-                if (this.keys[19][2])
+                if (this.props.is_wandlamp)
                     mySVG.data += '<line x1="50" y1="' + (27 + (aantal_buizen * 3.5)) + '" x2="70" y2="' + (27 + (aantal_buizen * 3.5)) + '" stroke="black" />';
                 // Zet symbool halfwaterdicht en aantal lampen bovenaan
                 if (print_str_upper != "")
                     mySVG.data += '<text x="60" y="' + (25 - (aantal_buizen * 3.5)) + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' + htmlspecialchars(print_str_upper) + '</text>';
                 // Teken ingebouwde schakelaar indien van toepassing
-                if (this.keys[21][2]) {
+                if (this.props.heeft_ingebouwde_schakelaar) {
                     mySVG.data += '<line x1="77.5" y1="' + (29 - (aantal_buizen * 3.5)) + '" x2="85" y2="' + (14 - (aantal_buizen * 3.5)) + '" stroke="black" />'
                         + '<line x1="85" y1="' + (14 - (aantal_buizen * 3.5)) + '" x2="90" y2="' + (16.5 - (aantal_buizen * 3.5)) + '" stroke="black" />';
                 }
@@ -2829,7 +2763,7 @@ var Lichtpunt = /** @class */ (function (_super) {
                     noodxpos = 60;
                 else
                     noodxpos = 39;
-                switch (this.keys[17][2]) {
+                switch (this.props.type_noodverlichting) {
                     case "Centraal":
                         mySVG.data += '<circle cx="' + noodxpos + '" cy="' + noodypos + '" r="2.5" style="stroke:black;fill:black" />'
                             + '<line x1="' + (noodxpos - 5.6) + '" y1="' + (noodypos - 5.6) + '" x2="' + (noodxpos + 5.6) + '" y2="' + (noodypos + 5.6) + '" style="stroke:black;fill:black" />'
@@ -2844,10 +2778,10 @@ var Lichtpunt = /** @class */ (function (_super) {
                 }
                 // Verdere uitlijning en adres onderaan
                 mySVG.xright = 90;
-                mySVG.data += this.addAddress(mySVG, endy + 13, Math.max(mySVG.ydown, endy + 18 - 25), 2);
+                mySVG.data += this.addAddressToSVG(mySVG, endy + 13, Math.max(mySVG.ydown, endy + 18 - 25), 2);
                 break;
             default: //Normaal lichtpunt (kruisje)
-                switch (this.keys[17][2]) {
+                switch (this.props.type_noodverlichting) {
                     case "Centraal":
                         mySVG.data += '<use xlink:href="#lamp" x="' + 30 + '" y="25" />'
                             + '<circle cx="30" cy="25" r="5" style="stroke:black;fill:black" />';
@@ -2856,7 +2790,7 @@ var Lichtpunt = /** @class */ (function (_super) {
                         break;
                     case "Decentraal":
                         mySVG.data += '<use xlink:href="#noodlamp_decentraal" x="' + 30 + '" y="25" />';
-                        if (this.keys[21][2])
+                        if (this.props.heeft_ingebouwde_schakelaar)
                             mySVG.data += '<line x1="37" y1="18" x2="40" y2="15" stroke="black" stroke-width="2" />'; //Ingebouwde schakelaar
                         break;
                     default:
@@ -2869,14 +2803,14 @@ var Lichtpunt = /** @class */ (function (_super) {
                 if (print_str_upper != "")
                     mySVG.data += '<text x="30" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' + htmlspecialchars(print_str_upper) + '</text>';
                 // Teken wandlamp indien van toepassing
-                if (this.keys[19][2])
+                if (this.props.is_wandlamp)
                     mySVG.data += '<line x1="20" y1="40" x2="40" y2="40" stroke="black" />';
                 // Teken ingebouwde schakelaar indien van toepassing
-                if (this.keys[21][2])
+                if (this.props.heeft_ingebouwde_schakelaar)
                     mySVG.data += '<line x1="40" y1="15" x2="45" y2="20" stroke="black" stroke-width="2" />';
                 // Verdere uitlijning en adres onderaan
                 mySVG.xright = 39;
-                mySVG.data += this.addAddress(mySVG, 54, 10, -1);
+                mySVG.data += this.addAddressToSVG(mySVG, 54, 10, -1);
                 break;
         }
         mySVG.data += "\n";
@@ -2886,15 +2820,18 @@ var Lichtpunt = /** @class */ (function (_super) {
 }(Electro_Item));
 var Meerdere_verbruikers = /** @class */ (function (_super) {
     __extends(Meerdere_verbruikers, _super);
-    function Meerdere_verbruikers(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function Meerdere_verbruikers() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Meerdere_verbruikers.prototype.resetKeys = function () {
-        this.clearKeys();
-        this.keys[0][2] = "Meerdere verbruikers"; // This is rather a formality as we should already have this at this stage
-        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+    Meerdere_verbruikers.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.adres = this.getLegacyKey(mykeys, 15);
+    };
+    Meerdere_verbruikers.prototype.resetProps = function () {
+        this.clearProps();
+        this.props.type = "Meerdere verbruikers"; // This is rather a formality as we should already have this at this stage
+        this.props.adres = ""; // Set Adres/tekst to "" when the item is cleared
     };
     Meerdere_verbruikers.prototype.allowedChilds = function () {
         return ["", "Domotica", "Domotica gestuurde verbruiker", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
@@ -2904,8 +2841,8 @@ var Meerdere_verbruikers = /** @class */ (function (_super) {
     };
     Meerdere_verbruikers.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringToHTML(10, 5)
-            + ", Adres/tekst: " + this.stringToHTML(15, 5);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5)
+            + ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Meerdere_verbruikers.prototype.toSVG = function () {
@@ -2917,9 +2854,9 @@ var Meerdere_verbruikers = /** @class */ (function (_super) {
         mySVG.yup = Math.max(mySVG.yup, 25);
         mySVG.xleft = Math.max(mySVG.xleft, 1);
         // Plaats adres onderaan indien niet leeg en indien er actieve kinderen zijn
-        if ((!(/^\s*$/.test(this.keys[15][2]))) && (this.heeftKindMetGekendType())) { // Controleer of adres leeg is
+        if ((!(/^\s*$/.test(this.props.adres))) && (this.heeftKindMetGekendType())) { // Controleer of adres leeg is
             mySVG.data += '<text x="' + ((mySVG.xright - 20) / 2 + 21) + '" y="' + (mySVG.yup + mySVG.ydown + 10)
-                + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
+                + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.props.adres) + '</text>';
             mySVG.ydown += 15;
         }
         return (mySVG);
@@ -2928,20 +2865,18 @@ var Meerdere_verbruikers = /** @class */ (function (_super) {
 }(Electro_Item));
 var Microgolfoven = /** @class */ (function (_super) {
     __extends(Microgolfoven, _super);
-    function Microgolfoven(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function Microgolfoven() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     Microgolfoven.prototype.convertLegacyKeys = function (mykeys) {
-        this.props.type = mykeys[0][2];
-        this.props.adres = mykeys[15][2];
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.adres = this.getLegacyKey(mykeys, 15);
     };
-    Microgolfoven.prototype.resetKeys = function () {
-        this.clearKeys();
+    Microgolfoven.prototype.resetProps = function () {
+        this.clearProps();
         this.props.type = "Microgolfoven";
         this.props.adres = "";
-        delete this.keys;
     };
     Microgolfoven.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
@@ -2958,7 +2893,7 @@ var Microgolfoven = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
             + '<use xlink:href="#microgolf" x="21" y="25"></use>';
-        mySVG.data += this.addPropAddress(mySVG, 60, 15);
+        mySVG.data += this.addAddressToSVG(mySVG, 60, 15);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -2966,20 +2901,18 @@ var Microgolfoven = /** @class */ (function (_super) {
 }(Electro_Item));
 var Motor = /** @class */ (function (_super) {
     __extends(Motor, _super);
-    function Motor(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function Motor() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     Motor.prototype.convertLegacyKeys = function (mykeys) {
-        this.props.type = mykeys[0][2];
-        this.props.adres = mykeys[15][2];
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.adres = this.getLegacyKey(mykeys, 15);
     };
-    Motor.prototype.resetKeys = function () {
-        this.clearKeys();
+    Motor.prototype.resetProps = function () {
+        this.clearProps();
         this.props.type = "Motor";
         this.props.adres = "";
-        delete this.keys;
     };
     Motor.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
@@ -2996,7 +2929,7 @@ var Motor = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
             + '<use xlink:href="#motor" x="21" y="25"></use>';
-        mySVG.data += this.addPropAddress(mySVG, 60, 15);
+        mySVG.data += this.addAddressToSVG(mySVG, 60, 15);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -3004,20 +2937,18 @@ var Motor = /** @class */ (function (_super) {
 }(Electro_Item));
 var Omvormer = /** @class */ (function (_super) {
     __extends(Omvormer, _super);
-    function Omvormer(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function Omvormer() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     Omvormer.prototype.convertLegacyKeys = function (mykeys) {
-        this.props.type = mykeys[0][2];
-        this.props.adres = mykeys[15][2];
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.adres = this.getLegacyKey(mykeys, 15);
     };
-    Omvormer.prototype.resetKeys = function () {
-        this.clearKeys();
+    Omvormer.prototype.resetProps = function () {
+        this.clearProps();
         this.props.type = "Omvormer";
         this.props.adres = "";
-        delete this.keys;
     };
     Omvormer.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
@@ -3034,7 +2965,7 @@ var Omvormer = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
             + '<use xlink:href="#omvormer" x="21" y="25"></use>';
-        mySVG.data += this.addPropAddress(mySVG, 60, 15);
+        mySVG.data += this.addAddressToSVG(mySVG, 60, 15);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -3042,20 +2973,18 @@ var Omvormer = /** @class */ (function (_super) {
 }(Electro_Item));
 var Overspanningsbeveiliging = /** @class */ (function (_super) {
     __extends(Overspanningsbeveiliging, _super);
-    function Overspanningsbeveiliging(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function Overspanningsbeveiliging() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     Overspanningsbeveiliging.prototype.convertLegacyKeys = function (mykeys) {
-        this.props.type = mykeys[0][2];
-        this.props.adres = mykeys[15][2];
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.adres = this.getLegacyKey(mykeys, 15);
     };
-    Overspanningsbeveiliging.prototype.resetKeys = function () {
-        this.clearKeys();
+    Overspanningsbeveiliging.prototype.resetProps = function () {
+        this.clearProps();
         this.props.type = "Overspanningsbeveiliging";
         this.props.adres = "";
-        delete this.keys;
     };
     Overspanningsbeveiliging.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
@@ -3072,7 +3001,7 @@ var Overspanningsbeveiliging = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
             + '<use xlink:href="#overspanningsbeveiliging" x="21" y="25"></use>';
-        mySVG.data += this.addPropAddress(mySVG, 55, 10);
+        mySVG.data += this.addAddressToSVG(mySVG, 55, 10);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -3080,15 +3009,17 @@ var Overspanningsbeveiliging = /** @class */ (function (_super) {
 }(Electro_Item));
 var Splitsing = /** @class */ (function (_super) {
     __extends(Splitsing, _super);
-    function Splitsing(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function Splitsing() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Splitsing.prototype.resetKeys = function () {
-        this.clearKeys();
-        this.keys[0][2] = "Splitsing"; // This is rather a formality as we should already have this at this stage
-        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+    Splitsing.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.adres = this.getLegacyKey(mykeys, 15);
+    };
+    Splitsing.prototype.resetProps = function () {
+        this.clearProps();
+        this.props.type = "Splitsing"; // This is rather a formality as we should already have this at this stage
+        this.props.adres = ""; // Set Adres/tekst to "" when the item is cleared
     };
     Splitsing.prototype.allowedChilds = function () {
         return ["", "Kring"];
@@ -3106,7 +3037,7 @@ var Splitsing = /** @class */ (function (_super) {
         mySVG = this.sourcelist.toSVG(this.id, "horizontal");
         var parent = this.getParent();
         // Teken de lijn onderaan
-        if ((parent.keys[0][2] == "Aansluiting") || (parent.keys[0][2] == "Kring")) {
+        if ((parent.getType() == "Aansluiting") || (parent.getType() == "Kring")) {
             mySVG.data += '<line x1="' + (mySVG.xleft) + '" x2="' + (mySVG.xleft + mySVG.xrightmin)
                 + '" y1="' + mySVG.yup + '" y2="' + mySVG.yup + '" stroke="black" />';
         }
@@ -3128,20 +3059,18 @@ var Splitsing = /** @class */ (function (_super) {
 }(Electro_Item));
 var Stoomoven = /** @class */ (function (_super) {
     __extends(Stoomoven, _super);
-    function Stoomoven(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function Stoomoven() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     Stoomoven.prototype.convertLegacyKeys = function (mykeys) {
-        this.props.type = mykeys[0][2];
-        this.props.adres = mykeys[15][2];
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.adres = this.getLegacyKey(mykeys, 15);
     };
-    Stoomoven.prototype.resetKeys = function () {
-        this.clearKeys();
+    Stoomoven.prototype.resetProps = function () {
+        this.clearProps();
         this.props.type = "Stoomoven";
         this.props.adres = "";
-        delete this.keys;
     };
     Stoomoven.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
@@ -3158,7 +3087,7 @@ var Stoomoven = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
             + '<use xlink:href="#stoomoven" x="21" y="25"></use>';
-        mySVG.data += this.addPropAddress(mySVG, 60, 15);
+        mySVG.data += this.addAddressToSVG(mySVG, 60, 15);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -3166,26 +3095,25 @@ var Stoomoven = /** @class */ (function (_super) {
 }(Electro_Item));
 var Stopcontact = /** @class */ (function (_super) {
     __extends(Stopcontact, _super);
-    function Stopcontact(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function Stopcontact() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     Stopcontact.prototype.convertLegacyKeys = function (mykeys) {
-        this.props.type = this.getLegacyKey(0);
-        this.props.is_geaard = this.getLegacyKey(1);
-        this.props.is_kinderveilig = this.getLegacyKey(2);
-        this.props.aantal = this.getLegacyKey(4);
-        this.props.adres = this.getLegacyKey(15);
-        this.props.aantal_fases_indien_meerfasig = this.getLegacyKey(16);
-        this.props.heeft_ingebouwde_schakelaar = this.getLegacyKey(19);
-        this.props.is_halfwaterdicht = this.getLegacyKey(20);
-        this.props.is_meerfasig = this.getLegacyKey(21);
-        this.props.heeft_nul_indien_meerfasig = this.getLegacyKey(25);
-        this.props.in_verdeelbord = this.getLegacyKey(26);
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.is_geaard = this.getLegacyKey(mykeys, 1);
+        this.props.is_kinderveilig = this.getLegacyKey(mykeys, 2);
+        this.props.aantal = this.getLegacyKey(mykeys, 4);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.adres = this.getLegacyKey(mykeys, 15);
+        this.props.aantal_fases_indien_meerfasig = this.getLegacyKey(mykeys, 16);
+        this.props.heeft_ingebouwde_schakelaar = this.getLegacyKey(mykeys, 19);
+        this.props.is_halfwaterdicht = this.getLegacyKey(mykeys, 20);
+        this.props.is_meerfasig = this.getLegacyKey(mykeys, 21);
+        this.props.heeft_nul_indien_meerfasig = this.getLegacyKey(mykeys, 25);
+        this.props.in_verdeelbord = this.getLegacyKey(mykeys, 26);
     };
-    Stopcontact.prototype.resetKeys = function () {
-        this.clearKeys();
+    Stopcontact.prototype.resetProps = function () {
+        this.clearProps();
         this.props.type = "Stopcontact";
         this.props.is_geaard = true;
         this.props.is_kinderveilig = true;
@@ -3284,7 +3212,7 @@ var Stopcontact = /** @class */ (function (_super) {
         }
         ;
         // Adres helemaal onderaan plaatsen
-        mySVG.data += this.addPropAddress(mySVG, 60, 15);
+        mySVG.data += this.addAddressToSVG(mySVG, 60, 15);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -3292,22 +3220,26 @@ var Stopcontact = /** @class */ (function (_super) {
 }(Electro_Item));
 var Transformator = /** @class */ (function (_super) {
     __extends(Transformator, _super);
-    function Transformator(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function Transformator() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Transformator.prototype.resetKeys = function () {
-        this.clearKeys();
-        this.keys[0][2] = "Transformator"; // This is rather a formality as we should already have this at this stage
-        this.keys[14][2] = "230V/24V"; // Per default 24V
-        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+    Transformator.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.voltage = this.getLegacyKey(mykeys, 14);
+        this.props.adres = this.getLegacyKey(mykeys, 15);
+    };
+    Transformator.prototype.resetProps = function () {
+        this.clearProps();
+        this.props.type = "Transformator";
+        this.props.voltage = "230V/24V";
+        this.props.adres = "";
     };
     Transformator.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringToHTML(10, 5)
-            + ", Voltage: " + this.stringToHTML(14, 8)
-            + ", Adres/tekst: " + this.stringToHTML(15, 5);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5)
+            + ", Voltage: " + this.stringPropToHTML('voltage', 8)
+            + ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Transformator.prototype.toSVG = function () {
@@ -3319,8 +3251,8 @@ var Transformator = /** @class */ (function (_super) {
         mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
             + '<use xlink:href="#transformator" x="21" y="25"></use>'
             + '<text x="35" y="44" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' +
-            htmlspecialchars(this.keys[14][2]) + "</text>";
-        mySVG.data += this.addAddress(mySVG, 58, 15);
+            htmlspecialchars(this.props.voltage) + "</text>";
+        mySVG.data += this.addAddressToSVG(mySVG, 58, 15);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -3328,22 +3260,26 @@ var Transformator = /** @class */ (function (_super) {
 }(Electro_Item));
 var USB_lader = /** @class */ (function (_super) {
     __extends(USB_lader, _super);
-    function USB_lader(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function USB_lader() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
-    USB_lader.prototype.resetKeys = function () {
-        this.clearKeys();
-        this.keys[0][2] = "USB lader"; // This is rather a formality as we should already have this at this stage
-        this.keys[4][2] = "1"; // Per default 1 lader
-        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+    USB_lader.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.aantal = this.getLegacyKey(mykeys, 4);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.adres = this.getLegacyKey(mykeys, 15);
+    };
+    USB_lader.prototype.resetProps = function () {
+        this.clearProps();
+        this.props.type = "USB lader"; // This is rather a formality as we should already have this at this stage
+        this.props.aantal = "1"; // Per default 1 lader
+        this.props.adres = ""; // Set Adres/tekst to "" when the item is cleared
     };
     USB_lader.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringToHTML(10, 5);
-        output += ", Aantal: " + this.selectToHTML(4, ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]);
-        output += ", Adres/tekst: " + this.stringToHTML(15, 5);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
+        output += ", Aantal: " + this.selectPropToHTML('aantal', ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]);
+        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     USB_lader.prototype.toSVG = function () {
@@ -3351,9 +3287,9 @@ var USB_lader = /** @class */ (function (_super) {
         var outputstr = "";
         // Alles naar beneden schuiven als we het aantal laders boven het symbool willen plaatsen
         var shifty = 0;
-        if (this.keys[4][2] > 1) {
+        if (this.props.aantal > 1) {
             shifty = 12;
-            mySVG.data += '<text x="51" y="14" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">x' + htmlspecialchars(this.keys[4][2]) + '</text>';
+            mySVG.data += '<text x="51" y="14" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">x' + htmlspecialchars(this.props.aantal) + '</text>';
         }
         mySVG.xleft = 1; // Links voldoende ruimte voor een eventuele kring voorzien
         mySVG.xright = 79;
@@ -3361,7 +3297,7 @@ var USB_lader = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data += '<line x1="1" y1="' + (shifty + 25) + '" x2="21" y2="' + (shifty + 25) + '" stroke="black"></line>'
             + '<use xlink:href="#usblader" x="21" y="' + (shifty + 25) + '"></use>';
-        mySVG.data += this.addAddress(mySVG, 55 + shifty, 10);
+        mySVG.data += this.addAddressToSVG(mySVG, 55 + shifty, 10);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -3369,20 +3305,18 @@ var USB_lader = /** @class */ (function (_super) {
 }(Electro_Item));
 var Vaatwasmachine = /** @class */ (function (_super) {
     __extends(Vaatwasmachine, _super);
-    function Vaatwasmachine(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function Vaatwasmachine() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     Vaatwasmachine.prototype.convertLegacyKeys = function (mykeys) {
-        this.props.type = mykeys[0][2];
-        this.props.adres = mykeys[15][2];
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.adres = this.getLegacyKey(mykeys, 15);
     };
-    Vaatwasmachine.prototype.resetKeys = function () {
-        this.clearKeys();
+    Vaatwasmachine.prototype.resetProps = function () {
+        this.clearProps();
         this.props.type = "Vaatwasmachine";
         this.props.adres = "";
-        delete this.keys;
     };
     Vaatwasmachine.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
@@ -3399,7 +3333,7 @@ var Vaatwasmachine = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
             + '<use xlink:href="#vaatwasmachine" x="21" y="25"></use>';
-        mySVG.data += this.addPropAddress(mySVG, 60, 15);
+        mySVG.data += this.addAddressToSVG(mySVG, 60, 15);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -3407,20 +3341,18 @@ var Vaatwasmachine = /** @class */ (function (_super) {
 }(Electro_Item));
 var Ventilator = /** @class */ (function (_super) {
     __extends(Ventilator, _super);
-    function Ventilator(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function Ventilator() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     Ventilator.prototype.convertLegacyKeys = function (mykeys) {
-        this.props.type = mykeys[0][2];
-        this.props.adres = mykeys[15][2];
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.adres = this.getLegacyKey(mykeys, 15);
     };
-    Ventilator.prototype.resetKeys = function () {
-        this.clearKeys();
+    Ventilator.prototype.resetProps = function () {
+        this.clearProps();
         this.props.type = "Ventilator";
         this.props.adres = "";
-        delete this.keys;
     };
     Ventilator.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
@@ -3437,7 +3369,7 @@ var Ventilator = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
             + '<use xlink:href="#ventilator" x="21" y="25"></use>';
-        mySVG.data += this.addPropAddress(mySVG, 55, 10);
+        mySVG.data += this.addAddressToSVG(mySVG, 55, 10);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -3445,61 +3377,71 @@ var Ventilator = /** @class */ (function (_super) {
 }(Electro_Item));
 var Verbruiker = /** @class */ (function (_super) {
     __extends(Verbruiker, _super);
-    function Verbruiker(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function Verbruiker() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Verbruiker.prototype.resetKeys = function () {
-        this.clearKeys();
-        this.keys[0][2] = "Verbruiker"; // This is rather a formality as we should already have this at this stage
-        this.keys[15][2] = ""; // Set Tekst itself to "" when the item is cleared
-        this.keys[17][2] = "centreer"; // Per default gecentreerd
-        this.keys[18][2] = "automatisch"; // Per default automatische breedte
-        this.keys[19][2] = false; // Per default niet vet
-        this.keys[20][2] = false; // Per default niet schuin
-        this.keys[23][2] = ""; // Set Adres/tekst to "" when the item is cleared
+    Verbruiker.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.tekst = this.getLegacyKey(mykeys, 15);
+        this.props.horizontale_uitlijning = this.getLegacyKey(mykeys, 17);
+        this.props.heeft_automatische_breedte = this.getLegacyKey(mykeys, 18);
+        this.props.is_vet = this.getLegacyKey(mykeys, 19);
+        this.props.is_cursief = this.getLegacyKey(mykeys, 20);
+        this.props.breedte = this.getLegacyKey(mykeys, 22);
+        this.props.adres = this.getLegacyKey(mykeys, 23);
+    };
+    Verbruiker.prototype.resetProps = function () {
+        this.clearProps();
+        this.props.type = "Verbruiker";
+        this.props.tekst = "";
+        this.props.horizontale_uitlijning = "centreer";
+        this.props.heeft_automatische_breedte = "automatisch";
+        this.props.breedte = "";
+        this.props.is_vet = false;
+        this.props.is_cursief = false;
+        this.props.adres = "";
     };
     Verbruiker.prototype.overrideKeys = function () {
-        if (this.keys[18][2] != "automatisch") {
-            this.keys[18][2] = "handmatig";
+        if (this.props.heeft_automatische_breedte != "automatisch") {
+            this.props.heeft_automatische_breedte = "handmatig";
         }
         this.adjustTextWidthIfAuto();
     };
     Verbruiker.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringToHTML(10, 5)
-            + ", Tekst (nieuwe lijn = \"|\"): " + this.stringToHTML(15, 30)
-            + ", Breedte: " + this.selectToHTML(18, ["automatisch", "handmatig"]);
-        if (this.keys[18][2] != "automatisch")
-            output += " " + this.stringToHTML(22, 3);
-        output += ", Vet: " + this.checkboxToHTML(19)
-            + ", Schuin: " + this.checkboxToHTML(20)
-            + ", Horizontale alignering: " + this.selectToHTML(17, ["links", "centreer", "rechts"])
-            + ", Adres/tekst: " + this.stringToHTML(23, 2);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5)
+            + ", Tekst (nieuwe lijn = \"|\"): " + this.stringPropToHTML('tekst', 30)
+            + ", Breedte: " + this.selectPropToHTML('heeft_automatische_breedte', ["automatisch", "handmatig"]);
+        if (this.props.heeft_automatische_breedte != "automatisch")
+            output += " " + this.stringPropToHTML('breedte', 3);
+        output += ", Vet: " + this.checkboxPropToHTML('is_vet')
+            + ", Cursief: " + this.checkboxPropToHTML('is_cursief')
+            + ", Horizontale alignering: " + this.selectPropToHTML('horizontale_uitlijning', ["links", "centreer", "rechts"])
+            + ", Adres/tekst: " + this.stringPropToHTML('adres', 2);
         return (output);
     };
     Verbruiker.prototype.adjustTextWidthIfAuto = function () {
-        if (this.keys[18][2] === "automatisch") {
+        if (this.props.heeft_automatische_breedte === "automatisch") {
             var options = "";
-            if (this.keys[19][2])
+            if (this.props.is_vet)
                 options += ' font-weight="bold"';
-            if (this.keys[20][2])
+            if (this.props.is_cursief)
                 options += ' font-style="italic"';
-            var strlines = htmlspecialchars(this.keys[15][2]).split("|");
+            var strlines = htmlspecialchars(this.props.tekst).split("|");
             var width = 40;
             for (var i = 0; i < strlines.length; i++) {
                 width = Math.round(Math.max(width, svgTextWidth(strlines[i], 10, options) + 10));
             }
-            this.keys[22][2] = String(width);
+            this.props.breedte = String(width);
         }
     };
     Verbruiker.prototype.toSVG = function () {
         var mySVG = new SVGelement();
-        var strlines = htmlspecialchars(this.keys[15][2]).split("|");
+        var strlines = htmlspecialchars(this.props.tekst).split("|");
         // Voldoende ruimte voorzien voor alle elementen
         this.adjustTextWidthIfAuto();
-        var width = (isNaN(Number(this.keys[22][2])) || (this.keys[22][2] === "") ? 40 : Math.max(Number(this.keys[22][2]) * 1, 1));
+        var width = (isNaN(Number(this.props.breedte)) || (this.props.breedte === "") ? 40 : Math.max(Number(this.props.breedte) * 1, 1));
         // Breedte van de vrije tekst bepalen
         var extraplace = 15 * Math.max(strlines.length - 2, 0);
         mySVG.xleft = 1; // Links voldoende ruimte voor een eventuele kring voorzien
@@ -3508,13 +3450,13 @@ var Verbruiker = /** @class */ (function (_super) {
         mySVG.ydown = 25 + extraplace / 2.0; // Wordt hieronder nog aangepast als er teveel lijnen tekst zijn
         // Optionele parameters voor vet en italic uitlezen
         var options = "";
-        if (this.keys[19][2])
+        if (this.props.is_vet)
             options += ' font-weight="bold"';
-        if (this.keys[20][2])
+        if (this.props.is_cursief)
             options += ' font-style="italic"';
         // Tekst plaatsen --
         var outputstr_common;
-        switch (this.keys[17][2]) {
+        switch (this.props.horizontale_uitlijning) {
             case "links":
                 outputstr_common = '<text style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-size="10" x="' + (20 + 5) + '" ';
                 break;
@@ -3532,43 +3474,48 @@ var Verbruiker = /** @class */ (function (_super) {
         // Kader en adres tekenen --
         mySVG.data += '<line x1="1" y1="' + (25 + extraplace / 2.0) + '" x2="21" y2="' + (25 + extraplace / 2.0) + '" stroke="black" />'
             + '<rect x="21" y="5" width="' + width + '" height="' + (40 + extraplace) + '" fill="none" style="stroke:black" />'
-            + this.addAddress(mySVG, 60 + extraplace, 15, width / 2 - (mySVG.xright - 20) / 2, 23);
+            + this.addAddressToSVG(mySVG, 60 + extraplace, 15, width / 2 - (mySVG.xright - 20) / 2);
         return (mySVG);
     };
     return Verbruiker;
 }(Electro_Item));
 var Verlenging = /** @class */ (function (_super) {
     __extends(Verlenging, _super);
-    function Verlenging(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function Verlenging() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Verlenging.prototype.resetKeys = function () {
-        this.clearKeys();
-        this.keys[0][2] = "Verlenging"; // This is rather a formality as we should already have this at this stage
-        this.keys[22][2] = "40"; // This is rather a formality as we should already have this at this stage
+    Verlenging.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.breedte = this.getLegacyKey(mykeys, 22);
+        this.props.adres = this.getLegacyKey(mykeys, 23);
+    };
+    Verlenging.prototype.resetProps = function () {
+        this.clearProps();
+        this.props.type = "Verlenging";
+        this.props.breedte = "40";
+        this.props.adres = "";
     };
     Verlenging.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringToHTML(10, 5)
-            + ", Breedte: " + this.stringToHTML(22, 3)
-            + ", Adres/tekst: " + this.stringToHTML(23, 5);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5)
+            + ", Breedte: " + this.stringPropToHTML('breedte', 3)
+            + ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Verlenging.prototype.toSVG = function () {
         var mySVG = new SVGelement();
         var outputstr = "";
         var width;
-        if (isNaN(Number(this.keys[22][2]))) {
+        if (isNaN(Number(this.props.breedte))) {
             width = 40;
         }
         else {
-            if (Number(this.keys[22][2] == "")) {
+            if (Number(this.props.breedte == "")) {
                 width = 40;
             }
             else {
-                width = Math.max(Number(this.keys[22][2]) * 1, 0);
+                width = Math.max(Number(this.props.breedte) * 1, 0);
             }
         }
         mySVG.xleft = 1; // foresee at least some space for the conductor
@@ -3576,7 +3523,7 @@ var Verlenging = /** @class */ (function (_super) {
         mySVG.yup = 25;
         mySVG.ydown = 25;
         mySVG.data += '<line x1="1" y1="25" x2="' + (width + 1) + '" y2="25" stroke="black" />';
-        mySVG.data += this.addAddress(mySVG, 40, 0, width / 2 - mySVG.xright / 2 - 10, 23);
+        mySVG.data += this.addAddressToSVG(mySVG, 40, 0, width / 2 - mySVG.xright / 2 - 10);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -3584,29 +3531,34 @@ var Verlenging = /** @class */ (function (_super) {
 }(Electro_Item));
 var Verwarmingstoestel = /** @class */ (function (_super) {
     __extends(Verwarmingstoestel, _super);
-    function Verwarmingstoestel(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function Verwarmingstoestel() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Verwarmingstoestel.prototype.resetKeys = function () {
-        this.clearKeys();
-        this.keys[0][2] = "Verwarmingstoestel"; // This is rather a formality as we should already have this at this stage
-        this.keys[3][2] = false; // Per default geen accumulatie
-        this.keys[6][2] = false; // Per default geen ventilator
-        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+    Verwarmingstoestel.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.heeft_accumulatie = this.getLegacyKey(mykeys, 3);
+        this.props.heeft_ventilator = this.getLegacyKey(mykeys, 6);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.adres = this.getLegacyKey(mykeys, 15);
+    };
+    Verwarmingstoestel.prototype.resetProps = function () {
+        this.clearProps();
+        this.props.type = "Verwarmingstoestel";
+        this.props.heeft_accumulatie = false;
+        this.props.heeft_ventilator = false;
+        this.props.adres = "";
     };
     Verwarmingstoestel.prototype.overrideKeys = function () {
-        if (!this.keys[3][2])
-            this.keys[6][2] = false; //Indien geen accumulatie kan er ook geen ventilator zijn
+        if (!this.props.heeft_accumulatie)
+            this.props.heeft_ventilator = false; //Indien geen accumulatie kan er ook geen ventilator zijn
     };
     Verwarmingstoestel.prototype.toHTML = function (mode) {
         this.overrideKeys;
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringToHTML(10, 5)
-            + ", Accumulatie: " + this.checkboxToHTML(3)
-            + (this.keys[3][2] ? ", Ventilator: " + this.checkboxToHTML(6) : "")
-            + ", Adres/tekst: " + this.stringToHTML(15, 5);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5)
+            + ", Accumulatie: " + this.checkboxPropToHTML('heeft_accumulatie')
+            + (this.props.heeft_accumulatie ? ", Ventilator: " + this.checkboxPropToHTML('heeft_ventilator') : "")
+            + ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Verwarmingstoestel.prototype.toSVG = function () {
@@ -3617,12 +3569,12 @@ var Verwarmingstoestel = /** @class */ (function (_super) {
         mySVG.yup = 25;
         mySVG.ydown = 25;
         mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
-        switch (this.keys[3][2]) { //accumulatie
+        switch (this.props.heeft_accumulatie) { //accumulatie
             case false:
                 mySVG.data += '<use xlink:href="#verwarmingstoestel" x="21" y="25"></use>';
                 break;
             case true:
-                switch (this.keys[6][2]) { //ventilator
+                switch (this.props.heeft_ventilator) { //ventilator
                     case false:
                         mySVG.data += '<use xlink:href="#verwarmingstoestel_accu" x="21" y="25"></use>';
                         break;
@@ -3633,7 +3585,7 @@ var Verwarmingstoestel = /** @class */ (function (_super) {
                 }
                 break;
         }
-        mySVG.data += this.addAddress(mySVG, 55, 10);
+        mySVG.data += this.addAddressToSVG(mySVG, 55, 10);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -3641,19 +3593,22 @@ var Verwarmingstoestel = /** @class */ (function (_super) {
 }(Electro_Item));
 var Vrije_ruimte = /** @class */ (function (_super) {
     __extends(Vrije_ruimte, _super);
-    function Vrije_ruimte(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function Vrije_ruimte() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Vrije_ruimte.prototype.resetKeys = function () {
-        this.clearKeys();
-        this.keys[0][2] = "Vrije ruimte"; // This is rather a formality as we should already have this at this stage
-        this.keys[22][2] = 25; // Default breedte van de vrije ruimte
+    Vrije_ruimte.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.breedte = this.getLegacyKey(mykeys, 22);
+    };
+    Vrije_ruimte.prototype.resetProps = function () {
+        this.clearProps();
+        this.props.type = "Vrije ruimte"; // This is rather a formality as we should already have this at this stage
+        this.props.breedte = 25; // Default breedte van de vrije ruimte
     };
     Vrije_ruimte.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Breedte: " + this.stringToHTML(22, 3);
+        output += "&nbsp;Breedte: " + this.stringPropToHTML('breedte', 3);
         return (output);
     };
     Vrije_ruimte.prototype.getMaxNumChilds = function () {
@@ -3662,7 +3617,7 @@ var Vrije_ruimte = /** @class */ (function (_super) {
     Vrije_ruimte.prototype.toSVG = function () {
         var mySVG = new SVGelement();
         // Bepaal breedte van het element
-        var desiredwidth = Number(this.keys[22][2]);
+        var desiredwidth = Number(this.props.breedte);
         if (isNaN(desiredwidth)) {
             desiredwidth = 25;
         }
@@ -3678,75 +3633,86 @@ var Vrije_ruimte = /** @class */ (function (_super) {
 }(Electro_Item));
 var Vrije_tekst = /** @class */ (function (_super) {
     __extends(Vrije_tekst, _super);
-    function Vrije_tekst(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function Vrije_tekst() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Vrije_tekst.prototype.resetKeys = function () {
-        this.clearKeys();
-        this.keys[0][2] = "Vrije tekst"; // This is rather a formality as we should already have this at this stage
-        this.keys[15][2] = ""; // Set Tekst itself to "" when the item is cleared
-        this.keys[16][2] = "zonder kader"; // Per default zonder kader, gebruik symbool "Verbruiker (tekst)" voor de default met kader
-        this.keys[17][2] = "links"; // Per default gecentreerd
-        this.keys[18][2] = "automatisch"; // Per default automatische breedte
-        this.keys[19][2] = false; // Per default niet vet
-        this.keys[20][2] = false; // Per default niet schuin
-        this.keys[23][2] = ""; // Set Adres/tekst to "" when the item is cleared
+    Vrije_tekst.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.tekst = this.getLegacyKey(mykeys, 15);
+        this.props.vrije_tekst_type = this.getLegacyKey(mykeys, 16);
+        this.props.horizontale_uitlijning = this.getLegacyKey(mykeys, 17);
+        this.props.heeft_automatische_breedte = this.getLegacyKey(mykeys, 18);
+        this.props.is_vet = this.getLegacyKey(mykeys, 19);
+        this.props.is_cursief = this.getLegacyKey(mykeys, 20);
+        this.props.breedte = this.getLegacyKey(mykeys, 22);
+        this.props.adres = this.getLegacyKey(mykeys, 23);
+    };
+    Vrije_tekst.prototype.resetProps = function () {
+        this.clearProps();
+        this.props.type = "Vrije tekst";
+        this.props.tekst = "";
+        this.props.vrije_tekst_type = "zonder kader";
+        this.props.horizontale_uitlijning = "links";
+        this.props.heeft_automatische_breedte = "automatisch";
+        this.props.breedte = "";
+        this.props.is_vet = false;
+        this.props.is_cursief = false;
+        this.props.adres = "";
     };
     Vrije_tekst.prototype.overrideKeys = function () {
-        if (this.keys[16][2] != "verbruiker") {
-            this.keys[16][2] = "zonder kader";
+        if (this.props.vrije_tekst_type != "verbruiker") {
+            this.props.vrije_tekst_type = "zonder kader";
         }
-        if (this.keys[18][2] != "automatisch") {
-            this.keys[18][2] = "handmatig";
+        if (this.props.heeft_automatische_breedte != "automatisch") {
+            this.props.heeft_automatische_breedte = "handmatig";
         }
         if (this.heeftVerbruikerAlsKind()) {
-            this.keys[16][2] = "verbruiker";
+            this.props.vrije_tekst_type = "verbruiker";
         }
         this.adjustTextWidthIfAuto();
     };
     Vrije_tekst.prototype.toHTML = function (mode) {
         this.overrideKeys();
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringToHTML(10, 5)
-            + ", Tekst (nieuwe lijn = \"|\"): " + this.stringToHTML(15, 30)
-            + ", Breedte: " + this.selectToHTML(18, ["automatisch", "handmatig"]);
-        if (this.keys[18][2] != "automatisch")
-            output += " " + this.stringToHTML(22, 3);
-        output += ", Vet: " + this.checkboxToHTML(19)
-            + ", Schuin: " + this.checkboxToHTML(20)
-            + ", Horizontale alignering: " + this.selectToHTML(17, ["links", "centreer", "rechts"])
-            + ", Type: " + this.selectToHTML(16, (this.heeftVerbruikerAlsKind() ? ["verbruiker"] : ["verbruiker", "zonder kader"]));
-        if (this.keys[16][2] != "zonder kader")
-            output += ", Adres/tekst: " + this.stringToHTML(23, 5);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5)
+            + ", Tekst (nieuwe lijn = \"|\"): " + this.stringPropToHTML('tekst', 30)
+            + ", Breedte: " + this.selectPropToHTML('heeft_automatische_breedte', ["automatisch", "handmatig"]);
+        if (this.props.heeft_automatische_breedte != "automatisch")
+            output += " " + this.stringPropToHTML('breedte', 3);
+        output += ", Vet: " + this.checkboxPropToHTML('is_vet')
+            + ", Cursief: " + this.checkboxPropToHTML('is_cursief')
+            + ", Horizontale alignering: " + this.selectPropToHTML('horizontale_uitlijning', ["links", "centreer", "rechts"])
+            + ", Type: " + this.selectPropToHTML('vrije_tekst_type', (this.heeftVerbruikerAlsKind() ? ["verbruiker"] : ["verbruiker", "zonder kader"]));
+        if (this.props.vrije_tekst_type != "zonder kader")
+            output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Vrije_tekst.prototype.adjustTextWidthIfAuto = function () {
-        if (this.keys[18][2] === "automatisch") {
+        if (this.props.heeft_automatische_breedte === "automatisch") {
             var options = "";
-            if (this.keys[19][2])
+            if (this.props.is_vet)
                 options += ' font-weight="bold"';
-            if (this.keys[20][2])
+            if (this.props.is_cursief)
                 options += ' font-style="italic"';
-            var strlines = htmlspecialchars(this.keys[15][2]).split("|");
+            var strlines = htmlspecialchars(this.props.tekst).split("|");
             var width = 40;
             for (var i = 0; i < strlines.length; i++) {
                 width = Math.round(Math.max(width, svgTextWidth(strlines[i], 10, options) + 10));
             }
-            this.keys[22][2] = String(width);
+            this.props.breedte = String(width);
         }
     };
     Vrije_tekst.prototype.toSVG = function () {
         var mySVG = new SVGelement();
-        var strlines = htmlspecialchars(this.keys[15][2]).split("|");
+        var strlines = htmlspecialchars(this.props.tekst).split("|");
         // Breedte van de vrije tekst bepalen
         this.adjustTextWidthIfAuto();
-        var width = (isNaN(Number(this.keys[22][2])) || (this.keys[22][2] === "") ? 40 : Math.max(Number(this.keys[22][2]) * 1, 1));
+        var width = (isNaN(Number(this.props.breedte)) || (this.props.breedte === "") ? 40 : Math.max(Number(this.props.breedte) * 1, 1));
         // Voldoende ruimte voorzien voor alle elementen
         var extraplace = 15 * Math.max(strlines.length - 2, 0);
         var shiftx;
-        if (this.keys[16][2] === "zonder kader") {
+        if (this.props.vrije_tekst_type === "zonder kader") {
             if (this.getParent().getType() === "Kring")
                 shiftx = 10;
             else if (this.getParent().getType() === "Stopcontact")
@@ -3762,13 +3728,13 @@ var Vrije_tekst = /** @class */ (function (_super) {
         mySVG.ydown = 25 + extraplace / 2.0; // Wordt hieronder nog aangepast als er teveel lijnen tekst zijn
         // Optionele parameters voor vet en italic uitlezen
         var options = "";
-        if (this.keys[19][2])
+        if (this.props.is_vet)
             options += ' font-weight="bold"';
-        if (this.keys[20][2])
+        if (this.props.is_cursief)
             options += ' font-style="italic"';
         // Tekst plaatsen --
         var outputstr_common;
-        switch (this.keys[17][2]) {
+        switch (this.props.horizontale_uitlijning) {
             case "links":
                 outputstr_common = '<text style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-size="10" x="' + (shiftx + 5) + '" ';
                 break;
@@ -3784,12 +3750,12 @@ var Vrije_tekst = /** @class */ (function (_super) {
             mySVG.data += outputstr_common + ' y="' + dispy + '"' + options + '>' + strlines[i] + '</text>';
         }
         // Kader en adres tekenen --
-        switch (this.keys[16][2]) {
+        switch (this.props.vrije_tekst_type) {
             case "zonder kader": break;
             default: //Wegens compatibiliteit met oudere versies van de software is het ontbreken van eender welke parameter een "met kader"
                 mySVG.data += '<line x1="1" y1="' + (25 + extraplace / 2.0) + '" x2="21" y2="' + (25 + extraplace / 2.0) + '" stroke="black" />'
                     + '<rect x="21" y="5" width="' + width + '" height="' + (40 + extraplace) + '" fill="none" style="stroke:black" />'
-                    + this.addAddress(mySVG, 60 + extraplace, 15, width / 2 - (mySVG.xright - 20) / 2, 23);
+                    + this.addAddressToSVG(mySVG, 60 + extraplace, 15, width / 2 - (mySVG.xright - 20) / 2);
                 break;
         }
         return (mySVG);
@@ -3798,33 +3764,38 @@ var Vrije_tekst = /** @class */ (function (_super) {
 }(Electro_Item));
 var Warmtepomp = /** @class */ (function (_super) {
     __extends(Warmtepomp, _super);
-    function Warmtepomp(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function Warmtepomp() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Warmtepomp.prototype.resetKeys = function () {
-        this.clearKeys();
-        this.keys[0][2] = "Warmtepomp/airco"; // This is rather a formality as we should already have this at this stage
-        this.keys[4][2] = "1"; // Per default 1 warmtepomp
-        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
-        this.keys[18][2] = "Koelend"; // Per default koelend
+    Warmtepomp.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.aantal = this.getLegacyKey(mykeys, 4);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.adres = this.getLegacyKey(mykeys, 15);
+        this.props.warmtefunctie = this.getLegacyKey(mykeys, 18);
+    };
+    Warmtepomp.prototype.resetProps = function () {
+        this.clearProps();
+        this.props.type = "Warmtepomp/airco";
+        this.props.aantal = "1";
+        this.props.adres = "";
+        this.props.warmtefunctie = "Koelend";
     };
     Warmtepomp.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringToHTML(10, 5)
-            + ", Warmte functie: " + this.selectToHTML(18, ["", "Koelend", "Verwarmend", "Verwarmend en koelend"])
-            + ", Aantal: " + this.selectToHTML(4, ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"])
-            + ", Adres/tekst: " + this.stringToHTML(15, 5);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5)
+            + ", Warmte functie: " + this.selectPropToHTML('warmtefunctie', ["", "Koelend", "Verwarmend", "Verwarmend en koelend"])
+            + ", Aantal: " + this.selectPropToHTML('aantal', ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"])
+            + ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Warmtepomp.prototype.toSVG = function () {
         var mySVG = new SVGelement();
         // Alles naar beneden schuiven als we het aantal laders boven het symbool willen plaatsen
         var shifty = 0;
-        if (this.keys[4][2] > 1) {
+        if (this.props.aantal > 1) {
             shifty = 15;
-            mySVG.data += '<text x="41" y="12" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">x' + htmlspecialchars(this.keys[4][2]) + '</text>';
+            mySVG.data += '<text x="41" y="12" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">x' + htmlspecialchars(this.props.aantal) + '</text>';
         }
         mySVG.xleft = 1; // Links voldoende ruimte voor een eventuele kring voorzien
         mySVG.xright = 59;
@@ -3841,12 +3812,12 @@ var Warmtepomp = /** @class */ (function (_super) {
         //Waar gaan we de andere symbolen plaatsen, indien slechts 1, midden onderaan, zoniet links en rechts
         var shift_symbol_energiebron = 41;
         var shift_symbol_warmtefunctie = 41;
-        if (this.keys[18][2] != "") {
+        if (this.props.warmtefunctie != "") {
             var shift_symbol_energiebron = 31;
             var shift_symbol_warmtefunctie = 51;
         }
         mySVG.data += '<use xlink:href="#bliksem" x="' + (shift_symbol_energiebron) + '" y="' + (shifty + 35) + '"/>';
-        switch (this.keys[18][2]) {
+        switch (this.props.warmtefunctie) {
             case "Verwarmend":
                 mySVG.data += '<text x="' + (shift_symbol_warmtefunctie - 1) + '" y="' + (shifty + 36) + '" style="text-anchor:middle;dominant-baseline:middle" font-family="Arial, Helvetica, sans-serif" font-size="12">+</text>';
                 break;
@@ -3858,7 +3829,7 @@ var Warmtepomp = /** @class */ (function (_super) {
                 break;
         }
         // Adres helemaal onderaan plaatsen
-        mySVG.data += this.addAddress(mySVG, 60 + shifty, 15);
+        mySVG.data += this.addAddressToSVG(mySVG, 60 + shifty, 15);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -3866,20 +3837,18 @@ var Warmtepomp = /** @class */ (function (_super) {
 }(Electro_Item));
 var Wasmachine = /** @class */ (function (_super) {
     __extends(Wasmachine, _super);
-    function Wasmachine(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function Wasmachine() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     Wasmachine.prototype.convertLegacyKeys = function (mykeys) {
-        this.props.type = mykeys[0][2];
-        this.props.adres = mykeys[15][2];
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.adres = this.getLegacyKey(mykeys, 15);
     };
-    Wasmachine.prototype.resetKeys = function () {
-        this.clearKeys();
+    Wasmachine.prototype.resetProps = function () {
+        this.clearProps();
         this.props.type = "Wasmachine";
         this.props.adres = "";
-        delete this.keys;
     };
     Wasmachine.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
@@ -3896,7 +3865,7 @@ var Wasmachine = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
             + '<use xlink:href="#wasmachine" x="21" y="25"></use>';
-        mySVG.data += this.addPropAddress(mySVG, 60, 15);
+        mySVG.data += this.addAddressToSVG(mySVG, 60, 15);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -3904,22 +3873,26 @@ var Wasmachine = /** @class */ (function (_super) {
 }(Electro_Item));
 var Zeldzame_symbolen = /** @class */ (function (_super) {
     __extends(Zeldzame_symbolen, _super);
-    function Zeldzame_symbolen(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function Zeldzame_symbolen() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Zeldzame_symbolen.prototype.resetKeys = function () {
-        this.clearKeys();
-        this.keys[0][2] = "Zeldzame symbolen"; // This is rather a formality as we should already have this at this stage
-        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
-        this.keys[16][2] = ""; // Per default, geen symbool
+    Zeldzame_symbolen.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.adres = this.getLegacyKey(mykeys, 15);
+        this.props.symbool = this.getLegacyKey(mykeys, 16);
+    };
+    Zeldzame_symbolen.prototype.resetProps = function () {
+        this.clearProps();
+        this.props.type = "Zeldzame symbolen";
+        this.props.adres = "";
+        this.props.symbool = "";
     };
     Zeldzame_symbolen.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringToHTML(10, 5)
-            + ", Symbool: " + this.selectToHTML(16, ["", "deurslot"])
-            + ", Adres/tekst: " + this.stringToHTML(15, 5);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5)
+            + ", Symbool: " + this.selectPropToHTML('symbool', ["", "deurslot"])
+            + ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Zeldzame_symbolen.prototype.toSVG = function () {
@@ -3928,12 +3901,12 @@ var Zeldzame_symbolen = /** @class */ (function (_super) {
         mySVG.xright = 59;
         mySVG.yup = 25;
         mySVG.ydown = 25;
-        switch (this.keys[16][2]) {
+        switch (this.props.symbool) {
             case "deurslot":
                 mySVG.data += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
                     + '<use xlink:href="#deurslot" x="21" y="25"></use>';
                 mySVG.xright = 58;
-                mySVG.data += this.addAddress(mySVG, 55, 10, 2);
+                mySVG.data += this.addAddressToSVG(mySVG, 55, 10, 2);
                 break;
             default:
                 mySVG.data += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
@@ -3946,23 +3919,27 @@ var Zeldzame_symbolen = /** @class */ (function (_super) {
 }(Electro_Item));
 var Zonnepaneel = /** @class */ (function (_super) {
     __extends(Zonnepaneel, _super);
-    function Zonnepaneel(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetKeys();
-        return _this;
+    function Zonnepaneel() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Zonnepaneel.prototype.resetKeys = function () {
-        this.clearKeys();
-        this.keys[0][2] = "Zonnepaneel"; // This is rather a formality as we should already have this at this stage
-        this.keys[4][2] = "1"; // Per default 1 zonnepaneel
-        this.keys[15][2] = ""; // Set Adres/tekst to "" when the item is cleared
+    Zonnepaneel.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.aantal = this.getLegacyKey(mykeys, 4);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.adres = this.getLegacyKey(mykeys, 15);
+    };
+    Zonnepaneel.prototype.resetProps = function () {
+        this.clearProps();
+        this.props.type = "Zonnepaneel";
+        this.props.aantal = "1";
+        this.props.adres = "";
     };
     Zonnepaneel.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringToHTML(10, 5) + ", "
-            + " Aantal: " + this.selectToHTML(4, ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20",
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5) + ", "
+            + " Aantal: " + this.selectPropToHTML('aantal', ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20",
             "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40"])
-            + ", Adres/tekst: " + this.stringToHTML(15, 5);
+            + ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Zonnepaneel.prototype.toSVG = function () {
@@ -3973,9 +3950,9 @@ var Zonnepaneel = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data += '<line x1="1" y1="35" x2="21" y2="35" stroke="black"></line>'
             + '<use xlink:href="#zonnepaneel" x="21" y="35"></use>'
-            + '<text x="45" y="9" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' + htmlspecialchars(this.keys[4][2]) + 'x</text>';
+            + '<text x="45" y="9" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' + htmlspecialchars(this.props.aantal) + 'x</text>';
         // Adres helemaal onderaan plaatsen
-        mySVG.data += this.addAddress(mySVG, 70, 15);
+        mySVG.data += this.addAddressToSVG(mySVG, 70, 15);
         mySVG.data += "\n";
         return (mySVG);
     };
@@ -4074,7 +4051,7 @@ var SVGSymbols = /** @class */ (function () {
 
  *****************************************************************************/
 var Hierarchical_List = /** @class */ (function () {
-    //-----------------------------------------------------
+    // -- Constructor --
     function Hierarchical_List() {
         this.length = 0;
         this.data = new Array();
@@ -4086,7 +4063,7 @@ var Hierarchical_List = /** @class */ (function () {
         this.mode = "edit";
     }
     ;
-    //-----------------------------------------------------
+    // -- Definitief verwijderen van items die als inactief werden geflagged --
     Hierarchical_List.prototype.deleteInactive = function () {
         for (var i = 0; i < this.length; i++) { //Loop over all items
             while ((!this.active[i]) && (i < this.length)) {
@@ -4097,7 +4074,7 @@ var Hierarchical_List = /** @class */ (function () {
             }
         }
     };
-    //-----------------------------------------------------
+    // -- Opnieuw sorteren van de array na clone/verplaatsen van items, ouders moeten steeds vóór de kinderen in de array zitten --
     Hierarchical_List.prototype.reSort = function () {
         this.deleteInactive();
         var continue_looping = true;
@@ -4106,10 +4083,10 @@ var Hierarchical_List = /** @class */ (function () {
             for (var i = 0; i < this.length; i++) { //Loop over all items
                 if (this.active[i]) { //We only do something for active members
                     var parentOrdinal = this.getOrdinalById(this.data[i].parent);
-                    if (parentOrdinal > i) { //This shouldn't happen
+                    if (parentOrdinal > i) { //If this happens we perform a swap
                         //We will need another pass to ensure we had them all
                         continue_looping = true;
-                        //Repush data to the end
+                        //Repush mis-placed item to the end
                         this.data.push(this.data[i]);
                         this.active.push(true);
                         this.id.push(this.id[i]);
@@ -4122,34 +4099,31 @@ var Hierarchical_List = /** @class */ (function () {
         }
         this.deleteInactive();
     };
-    //-----------------------------------------------------
+    // -- Plaats in de array zoeken op basis van de id --
     Hierarchical_List.prototype.getOrdinalById = function (my_id) {
         for (var i = 0; i < this.length; i++) {
-            if (this.id[i] == my_id) {
+            if (this.id[i] == my_id)
                 return (i);
-            }
         }
+        return null;
     };
-    //-----------------------------------------------------
+    // -- Aantal actieve kinderen van id = parent_id --
     Hierarchical_List.prototype.getNumChilds = function (parent_id) {
         var returnval = 0;
         for (var i = 0; i < this.length; i++) {
-            if ((this.data[i].parent == parent_id) && (this.active[i])) {
+            if ((this.data[i].parent == parent_id) && (this.active[i]))
                 returnval++;
-            }
         }
         return (returnval);
     };
-    //-----------------------------------------------------
+    // -- Maximum aantal actieve kinderen van id = parent_id --
     Hierarchical_List.prototype.getMaxNumChilds = function (parent_id) {
-        var newparentitem = this.data[this.getOrdinalById(parent_id)];
-        //var newparentofparentid = this.data[this.getOrdinalById(parent_id)].parent;
-        //var newparentofparentitem = this.data[this.getOrdinalById(newparentofparentid)];
         var returnval = this.data[this.getOrdinalById(parent_id)].getMaxNumChilds();
         return (returnval);
     };
+    // Creëer een nieuw Electro_Item --
     Hierarchical_List.prototype.createItem = function (electroType) {
-        //Create the object
+        // First create the object
         var tempval;
         switch (electroType) {
             case 'Aansluiting':
@@ -4284,15 +4258,14 @@ var Hierarchical_List = /** @class */ (function () {
                 break;
             default: tempval = new Electro_Item(structure);
         }
-        //tempval.keys[0][2] = electroType; //Zou niet meer nodig moeten zijn aangezien dit reeds in de constructors zit
-        //First set the correct identifyer
+        // Then set the correct identifyer
         tempval.id = this.curid;
         tempval.parent = 0;
         tempval.indent = 0;
-        //Return the Object
+        // Then return the Object
         return (tempval);
     };
-    //-----------------------------------------------------
+    // -- Voeg item toe aan de Hierarchical list --
     Hierarchical_List.prototype.addItem = function (electroType) {
         //First create the item
         var tempval = this.createItem(electroType);
@@ -4306,7 +4279,7 @@ var Hierarchical_List = /** @class */ (function () {
         //Return the Object
         return (tempval);
     };
-    //-----------------------------------------------------
+    // -- Item invoegen vóór bestaand item met id = my_id en op hetzelfde niveau --
     Hierarchical_List.prototype.insertItemBeforeId = function (my_item, my_id) {
         for (var i = 0; i < this.length; i++) {
             if (this.id[i] == my_id) {
@@ -4327,7 +4300,7 @@ var Hierarchical_List = /** @class */ (function () {
         }
         this.reSort();
     };
-    //-----------------------------------------------------
+    // -- Item invoegen na bestaand item met id = my_id en op hetzelfde niveau --
     Hierarchical_List.prototype.insertItemAfterId = function (my_item, my_id) {
         for (var i = 0; i < this.length; i++) {
             if (this.id[i] == my_id) {
@@ -4349,7 +4322,7 @@ var Hierarchical_List = /** @class */ (function () {
         }
         this.reSort();
     };
-    //-----------------------------------------------------
+    // -- Item invoegen na bestaand item met id = my_id en één niveau dieper --
     Hierarchical_List.prototype.insertChildAfterId = function (my_item, my_id) {
         var numchilds = this.getNumChilds(my_id);
         var maxchilds = this.getMaxNumChilds(my_id);
@@ -4363,9 +4336,9 @@ var Hierarchical_List = /** @class */ (function () {
         }
         this.reSort();
     };
-    //-----------------------------------------------------
+    // -- Item ééntje naar boven schuiven binnen hetzelfde niveau --
     Hierarchical_List.prototype.moveUp = function (my_id) {
-        //-- First find the ordinal number of the current location and the desired location --
+        // First find the ordinal number of the current location and the desired location --
         var currentOrdinal = this.getOrdinalById(my_id);
         var newOrdinal = currentOrdinal;
         var currentparent = this.data[currentOrdinal].parent;
@@ -4375,7 +4348,7 @@ var Hierarchical_List = /** @class */ (function () {
                 break; //Leave the for loop
             }
         }
-        //Swap both items (we swap data and id, we do not need to swap active as both items are active by construction)
+        // Swap both items (we swap data and id, we do not need to swap active as both items are active by construction)
         var swapItem = new List_Item(this);
         swapItem = this.data[currentOrdinal];
         this.data[currentOrdinal] = this.data[newOrdinal];
@@ -4385,9 +4358,9 @@ var Hierarchical_List = /** @class */ (function () {
         this.id[newOrdinal] = swapID;
         this.reSort();
     };
-    //-----------------------------------------------------
+    // -- Item ééntje naar beneden schuiven binnen hetzelfde niveau --
     Hierarchical_List.prototype.moveDown = function (my_id) {
-        //-- First find the ordinal number of the current location and the desired location --
+        // First find the ordinal number of the current location and the desired location --
         var currentOrdinal = this.getOrdinalById(my_id);
         var newOrdinal = currentOrdinal;
         var currentparent = this.data[currentOrdinal].parent;
@@ -4397,7 +4370,7 @@ var Hierarchical_List = /** @class */ (function () {
                 break; //Leave the for loop
             }
         }
-        //Swap both items (we swap data and id, we do not need to swap active as both items are active by construction)
+        // Swap both items (we swap data and id, we do not need to swap active as both items are active by construction)
         var swapItem = new List_Item(this);
         swapItem = this.data[currentOrdinal];
         this.data[currentOrdinal] = this.data[newOrdinal];
@@ -4407,29 +4380,24 @@ var Hierarchical_List = /** @class */ (function () {
         this.id[newOrdinal] = swapID;
         this.reSort();
     };
-    //-----------------------------------------------------
+    // -- Item clonen --
     Hierarchical_List.prototype.clone = function (my_id, parent_id) {
-        //-- First find the ordinal number of the current location and the desired location --
+        // First find the ordinal number of the current location and the desired location
         var currentOrdinal = this.getOrdinalById(my_id);
-        //-- Then create a clone of the object and assign the correct parent_id
-        if (arguments.length < 2) {
+        // Then create a clone of the object and assign the correct parent_id
+        if (arguments.length < 2)
             parent_id = this.data[currentOrdinal].parent;
-        }
         var parentOrdinal = this.getOrdinalById(parent_id);
         var my_item = this.createItem(this.data[currentOrdinal].getType());
         my_item.clone(this.data[currentOrdinal]);
-        //var original_length = this.length;
-        //-- Now add the clone to the structure
-        //   The clone will have id this.curid-1
-        if (arguments.length < 2) {
+        // Now add the clone to the structure. The clone will have id this.curid-1
+        if (arguments.length < 2)
             this.insertItemAfterId(my_item, my_id); //Cloning the top-element, this messes up the ordinals !!
-        }
-        else {
+        else
             this.insertChildAfterId(my_item, parent_id); //Cloning childs, this messes up the ordinals !!
-        }
         var new_id = this.curid - 1;
         this.data[this.getOrdinalById(new_id)].collapsed = this.data[this.getOrdinalById(my_id)].collapsed;
-        //-- Now loop over the childs of the original and also clone those
+        // Now loop over the childs of the original and also clone those
         var toClone = new Array(); //list of id's to clone
         for (var i = 0; i < this.length; i++) {
             if (this.id[i] == my_id) {
@@ -4444,7 +4412,7 @@ var Hierarchical_List = /** @class */ (function () {
         }
         this.reSort();
     };
-    //-----------------------------------------------------
+    // -- Delete item with id = my_id --
     Hierarchical_List.prototype.deleteById = function (my_id) {
         for (var i = 0; i < this.length; i++) {
             if (this.id[i] == my_id) {
@@ -4457,23 +4425,20 @@ var Hierarchical_List = /** @class */ (function () {
         }
         this.reSort();
     };
-    //-----------------------------------------------------
+    // -- Pas type aan van item op plaats ordinal in de array -- 
     Hierarchical_List.prototype.adjustTypeByOrdinal = function (ordinal, electroType) {
         var tempval = this.createItem(electroType);
         Object.assign(tempval, this.data[ordinal]);
-        if (typeof (tempval.keys) != 'undefined')
-            tempval.keys[0][2] = electroType; //We need to do this again as we overwrote it with assign
-        else
-            tempval.props.type = electroType; //We need to do this again as we overwrote it with assign
-        tempval.resetKeys(); //Already part of createItem but we need to run this again as the assign operation overwrote everything
+        tempval.props.type = electroType; //We need to do this again as we overwrote it with assign
+        tempval.resetProps(); //Already part of createItem but we need to run this again as the assign operation overwrote everything
         this.data[ordinal] = tempval;
     };
-    //-----------------------------------------------------
+    // -- Pas type aan van item met id = my_id --
     Hierarchical_List.prototype.adjustTypeById = function (my_id, electroType) {
         var ordinal = structure.getOrdinalById(my_id);
         this.adjustTypeByOrdinal(ordinal, electroType);
     };
-    //-----------------------------------------------------
+    //-- Verticale lijn tekenen (kring links van gebruiker) --
     Hierarchical_List.prototype.tekenVerticaleLijnIndienKindVanKring = function (item, mySVG) {
         // Eerst checken of het wel degelijk een kind van een kring is
         var parent = item.getParent();
@@ -4500,10 +4465,7 @@ var Hierarchical_List = /** @class */ (function () {
                 mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + y1 + '" y2="' + y2 + '" stroke="black" />';
                 // Plaats het nummer van het item naast de lijn
                 var displaynr = void 0;
-                if (typeof (item.keys) != 'undefined')
-                    displaynr = item.keys[10][2];
-                else
-                    displaynr = item.props.nr;
+                displaynr = item.props.nr;
                 mySVG.data +=
                     '<text x="' + (mySVG.xleft + 9) + '" y="' + (mySVG.yup - 5) + '" ' +
                         'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' +
@@ -4513,11 +4475,11 @@ var Hierarchical_List = /** @class */ (function () {
         ;
     };
     ;
-    //-----------------------------------------------------
+    // -- Functie om de tree links te tekenen te starten by node met id = myParent --
     Hierarchical_List.prototype.toHTML = function (myParent) {
         var output = "";
         var numberDrawn = 0;
-        //-- bovenaan de switch van editeer-mode (teken of verplaats) --
+        // Plaats bovenaan de switch van editeer-mode (teken of verplaats) --
         if (myParent == 0) {
             switch (this.mode) {
                 case "edit":
@@ -4529,10 +4491,8 @@ var Hierarchical_List = /** @class */ (function () {
                         'Gebruik het Moeder-veld om een component elders in het schema te hangen. Kies "clone" om een dubbel te maken van een element.</i></span><br><br>';
                     break;
             }
-            //-- plaats input box voor naam van het schema bovenaan --
-            //output += 'Bestandsnaam: <span id="settings"><code>' + this.properties.filename + '</code>&nbsp;<button onclick="HL_enterSettings()">Wijzigen</button>&nbsp;<button onclick="exportjson()">Opslaan</button></span><br><br>'
         }
-        //--Teken het volledige schema in HTML--
+        // Teken het volledige schema in HTML
         for (var i = 0; i < this.length; i++) {
             if (this.active[i] && (this.data[i].parent == myParent)) {
                 numberDrawn++;
@@ -4553,20 +4513,18 @@ var Hierarchical_List = /** @class */ (function () {
         }
         return (output);
     };
-    //-----------------------------------------------------
+    // -- Functie om de tree links te tekenen te starten by node met id = myParent --
     Hierarchical_List.prototype.toSVG = function (myParent, stack, minxleft, includeparent) {
         if (minxleft === void 0) { minxleft = 0; }
         if (includeparent === void 0) { includeparent = false; }
         // Eerst creëren we een array van SVGelements met alle kinderen van myParent en eventueel myParent zelf
         var inSVG = new Array(); //Results from nested calls will be added here
         var elementCounter = 0;
+        // Dan vullen we de array door doorheen de lijst van kinderen te gaan en een tekening van elk kind op te slaan
         for (var i = 0; i < this.length; i++) {
             if (this.active[i] && ((this.data[i].parent == myParent) || ((includeparent == true) && (this.id[i] == myParent)))) {
                 var mytype = this.data[i].getType();
-                if (typeof (this.data[i].keys) != 'undefined')
-                    mytype = this.data[i].keys[0][2];
-                else
-                    mytype = this.data[i].props.type;
+                /*if (typeof(this.data[i].keys) != 'undefined') mytype = this.data[i].keys[0][2]; else*/ mytype = this.data[i].props.type;
                 switch (mytype) {
                     case "":
                         inSVG[elementCounter] = new SVGelement();
@@ -4600,7 +4558,8 @@ var Hierarchical_List = /** @class */ (function () {
                         this.tekenVerticaleLijnIndienKindVanKring(this.data[i], inSVG[elementCounter]);
                         break;
                     default:
-                        if (this.data[this.getOrdinalById(myParent)].getType() == "Meerdere verbruikers")
+                        if ((myParent != 0) &&
+                            (this.data[this.getOrdinalById(myParent)].getType() == "Meerdere verbruikers"))
                             inSVG[elementCounter] = this.data[i].toSVG();
                         else if (stack == "vertical")
                             inSVG[elementCounter] = this.toSVG(this.id[i], "horizontal", 0, true); //if we are still in vertical mode, switch to horizontal and take childs with us
@@ -4636,10 +4595,10 @@ var Hierarchical_List = /** @class */ (function () {
                 var max_yup = 0; //What is the maximal distance above the horizontal line?
                 var max_ydown = 0; //What is the maximal distance below the horizontal line?
                 // analyse the size of the structure. Build horizontally
-                for (var i_1 = 0; i_1 < elementCounter; i_1++) {
-                    width = width + inSVG[i_1].xleft + inSVG[i_1].xright;
-                    max_yup = Math.max(max_yup, inSVG[i_1].yup);
-                    max_ydown = Math.max(max_ydown, inSVG[i_1].ydown);
+                for (var i = 0; i < elementCounter; i++) {
+                    width = width + inSVG[i].xleft + inSVG[i].xright;
+                    max_yup = Math.max(max_yup, inSVG[i].yup);
+                    max_ydown = Math.max(max_ydown, inSVG[i].ydown);
                 }
                 height = max_yup + max_ydown;
                 // decide on the output structure
@@ -4669,10 +4628,10 @@ var Hierarchical_List = /** @class */ (function () {
                 var max_xleft = 0; //What is the maximal distance left of the vertical line?
                 var max_xright = 0; //What is the maximal distance right of the vertical line?
                 // analyse the size of the structure. Build vertically
-                for (var i_2 = 0; i_2 < elementCounter; i_2++) {
-                    height = height + inSVG[i_2].yup + inSVG[i_2].ydown;
-                    max_xleft = Math.max(max_xleft, inSVG[i_2].xleft);
-                    max_xright = Math.max(max_xright, inSVG[i_2].xright);
+                for (var i = 0; i < elementCounter; i++) {
+                    height = height + inSVG[i].yup + inSVG[i].ydown;
+                    max_xleft = Math.max(max_xleft, inSVG[i].xleft);
+                    max_xright = Math.max(max_xright, inSVG[i].xright);
                 }
                 max_xleft = Math.max(minxleft, max_xleft);
                 width = max_xleft + max_xright;
@@ -4857,7 +4816,7 @@ var Print_Table = /** @class */ (function () {
     };
     return Print_Table;
 }());
-var CONFIGPAGE_LEFT = "\n    <center>\n        <p><font size=\"+2\">\n          <b>Eendraadschema ontwerpen: </b>\n          Kies &eacute;&eacute;n van onderstaande voorbeelden om van te starten (u kan zelf kringen toevoegen achteraf) of\n          start van een leeg schema met voorgekozen aantal kringen (optie 3).\n        </font></p>\n      <font size=\"+1\">\n        <i>\n          <b>Tip: </b>Om de mogelijkheden van het programma te leren kennen is het vaak beter eerst een voorbeeldschema te\n          bekijken alvorens van een leeg schema te vertrekken.\n        </i>\n      </font>\n    </center><br><br>\n    <table border=\"1px\" style=\"border-collapse:collapse\" align=\"center\" width=\"100%\">\n      <tr>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Voorbeeld 1</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Voorbeeld 2</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Leeg schema</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Openen</b>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/example000.svg\" height=\"300px\"><br><br>\n          Eenvoudig schema, enkel stopcontacten en lichtpunten.\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/example001.svg\" height=\"300px\"><br><br>\n          Iets complexer schema met teleruptoren, verbruikers achter stopcontacten en gesplitste kringen.\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/gear.svg\" height=\"100px\"><br><br>\n";
+var CONFIGPAGE_LEFT = "\n    <center>\n        <p><font size=\"+2\">\n          <b>Eendraadschema ontwerpen: </b>\n          Kies &eacute;&eacute;n van onderstaande voorbeelden om van te starten (u kan zelf kringen toevoegen achteraf) of\n          start van een leeg schema (optie 3).\n        </font></p>\n      <font size=\"+1\">\n        <i>\n          <b>Tip: </b>Om de mogelijkheden van het programma te leren kennen is het vaak beter eerst een voorbeeldschema te\n          bekijken alvorens van een leeg schema te vertrekken.\n        </i>\n      </font>\n    </center><br><br>\n    <table border=\"1px\" style=\"border-collapse:collapse\" align=\"center\" width=\"100%\">\n      <tr>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Voorbeeld 1</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Voorbeeld 2</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Leeg schema</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Openen</b>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/example000.svg\" height=\"300px\"><br><br>\n          Eenvoudig schema, enkel stopcontacten en lichtpunten.\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/example001.svg\" height=\"300px\"><br><br>\n          Iets complexer schema met teleruptoren, verbruikers achter stopcontacten en gesplitste kringen.\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/gear.svg\" height=\"100px\"><br><br>\n";
 var CONFIGPAGE_RIGHT = "\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/import_icon.svg\" height=\"100px\"><br><br>\n          Open een schema dat u eerder heeft opgeslagen op uw computer (EDS-bestand). Enkel bestanden aangemaakt na 12 juli 2019 worden herkend.\n          <br><br>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"load_example(0)\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"load_example(1)\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"read_settings()\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"importclicked()\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n      </tr>\n    </table>\n  ";
 var CONFIGPRINTPAGE = "\n<div>\n</div>\n<br>\n";
 var EXAMPLE0 = "EDS0020000eJztnG1P4zgQgP9Kla/nLYkTQK1Op4MeQqvldqUr6p2EEHKTaeqNE0eJQ3kR//3GhtJ0adjjZbe51hJCxmPPjMd5Mo4dcusIyGI1dfpejzgRU8zpn906PMIK4uSsgEw5fZc4PIvmxVAKwfISsM2EiRKIk8B1if3OHHWdg0Oc4dHJ0eAUCwcsK0XFFc9i55ycOTEwVkQoOPzy5eTo4LNDVFGBliTaQHEJXPB4CnxlGxaGVVoJpjjUxcYJI2eZYqJunxqrgodTlRToxEUuF/ofW0GWgDAS0/wSB8rRiixWWrmBBLSuuoaITyagY8UBhFHC0hwKFptonP718fMxFgLXiBI2BlGvp1fenpFkjKV1wR+o1giW9F/MdBCXNPtuTfUFxmEGNzxeGUMTI1p33rsftRTqG3+p7452aDAy8lCmKTqAputNjKgEAaHy6jpLxbLIzPWiwZLRg5rAb+45llJ4K6dBS2ijxF8pKZWeOG8pcs5CQJ+OzNT7T+q1iaDR+O5TyTkOTFZFCIKXSFFWCXFH7jmjC868BWfeizg7lA/x+tmAeT8JMFYpmaJfZThtxIs24PXP6LDjH1Oyu5KxDeVrVYN1crZ2zHR+m3NGF5zRF3H2qbCZ7LlM9jxqL0hn36Htm0CtHzebzh7TmVvLZ70FaP57JbRH32xGsxltmzPafi2huU0ZTc/iVie0t3I2GLBnWDtoN2yfoEoga0LuY9aZITJNwA1eCdp8LBuT0vYsaO8E2sM+xzOgeQ2gHbYbtBEUJsLzSba0vZo2v5bX9l+7fhwqmYcSpylUdl/kVatIr93A2WXke/EWUMtbC3ijlrct4c2zvLWAN9/ytiW8uZa3FvAWWN62gze/Z3lrAW+7lrft4C3wF7wFtZPt4EXAjQr+FToKktICt4nHbn8zBUUiMSBN5N1IPa+dhEVLbZY8CFFxAUvydbK3566dPuqtPhwI7OHAS7H7/uFAE3qDdrN3yKKEpc3k2ZOB/8habaeS1t6V3LVLS3s0YJeWPwC4wALXBuDs2cC2ANd7D+BO9KUe8iKseJuJi6rxuLXItfx4YJhziB9e0LbkvQN5Xu0lr73X7lpa8N4Onl1cbgtx+5tAXJs2UOzi0gL33MEc3QTg/v9Pcy1fWlrg3gwc1rFQ8UtAhMzW/w/7hZY02mceocTrEeqSfbJH/H0SUBJ4JHCJ3yOBT/BhklJCA4JPmLjUxdzrU+ybYxDUhWJjga7eOkhRPL3/yEPKrmY80h+GcPU/hZa5YNe5vpj65nWaGErzoYhaD5zdYl6SORbuzu+0BYnc4EVeagMTLiBjKWpx4AqJEuC6bheiEuMqZxkUKBhJWWhkOgeIOJjir+Pit6EqGFMdV5exk9uJIQW8ekFXnILod37xaQfr5z+6/nj457x+WQAfUsaxz+WDsS57NPZ7JFPgWXesweEZDksI4xiPIDVVE4l/xaDwrpFFnRSU1jhVKi/7Ozuz2ayLfkXobYT3DkhZN5agpnixfPjKQjkutWaMTFgV5vgWn+1TGZmQRHhPvfsXXgCWFw==";
@@ -4873,32 +4832,33 @@ function PROP_getCookieText() {
 }
 function exportjson() {
     var filename;
-    //We use the Pako library to entropy code the data
-    //Final data reads "EDS0010000" and thereafter a 64base encoding of the deflated output from Pako
-    //filename = "eendraadschema.eds";
+    /* We use the Pako library to entropy code the data
+     * Final data reads "EDSXXX0000" with XXX a version and thereafter a 64base encoding of the deflated output from Pako
+     * filename = "eendraadschema.eds";
+     */
     filename = structure.properties.filename;
-    //Remove some unneeded data members that would only inflate the size of the output file
+    // Remove some unneeded data members that would only inflate the size of the output file
     for (var _i = 0, _a = structure.data; _i < _a.length; _i++) {
         var listitem = _a[_i];
         listitem.sourcelist = null;
     }
-    //Create the output structure in uncompressed form
+    // Create the output structure in uncompressed form
     var text = JSON.stringify(structure);
-    //Put the removed data members back
+    // Put the removed data members back
     for (var _b = 0, _c = structure.data; _b < _c.length; _b++) {
         var listitem = _c[_b];
         listitem.sourcelist = structure;
     }
-    //Compress the output structure and download to the user
+    // Compress the output structure and offer as download to the user. We are at version 003
     try {
         var decoder = new TextDecoder("utf-8");
         var encoder = new TextEncoder();
         var pako_inflated = new Uint8Array(encoder.encode(text));
         var pako_deflated = new Uint8Array(pako.deflate(pako_inflated));
-        text = "EDS0020000" + btoa(String.fromCharCode.apply(null, pako_deflated));
+        text = "EDS0030000" + btoa(String.fromCharCode.apply(null, pako_deflated));
     }
     catch (error) {
-        //We keep the non encoded text and do nothing
+        text = "TXT0030000" + text;
     }
     finally {
         download_by_blob(text, filename, 'data:text/eds;charset=utf-8');
@@ -4956,30 +4916,6 @@ function HLInsertChild(my_id) {
     HLCollapseExpand(my_id, false);
     //No need to call HLRedrawTree as HLCollapseExpand already does that
 }
-function HLUpdate(my_id, key, type, docId) {
-    switch (type) {
-        case "SELECT":
-            var setvalueselect = document.getElementById(docId).value;
-            if (key == 0) { // Type changed
-                structure.adjustTypeById(my_id, setvalueselect);
-            }
-            else {
-                structure.data[structure.getOrdinalById(my_id)].keys[key][2] = setvalueselect;
-            }
-            HLRedrawTreeHTML();
-            break;
-        case "STRING":
-            var setvaluestr = document.getElementById(docId).value;
-            structure.data[structure.getOrdinalById(my_id)].keys[key][2] = setvaluestr;
-            break;
-        case "BOOLEAN":
-            var setvaluebool = document.getElementById(docId).checked;
-            structure.data[structure.getOrdinalById(my_id)].keys[key][2] = setvaluebool;
-            HLRedrawTreeHTML();
-            break;
-    }
-    HLRedrawTreeSVG();
-}
 function HLPropUpdate(my_id, item, type, docId) {
     switch (type) {
         case "SELECT":
@@ -5009,7 +4945,7 @@ function HL_editmode() {
     HLRedrawTreeHTML();
 }
 function HL_changeparent(my_id) {
-    //-- See what the new parentid is --
+    // See what the new parentid is
     var str_newparentid = document.getElementById("id_parent_change_" + my_id).value;
     //-- Check that it is valid. It needs to be a number and the parent an active component --
     var error = 0;
@@ -5020,21 +4956,15 @@ function HL_changeparent(my_id) {
     var int_newparentid = parseInt(str_newparentid);
     if (int_newparentid != 0) {
         parentOrdinal = structure.getOrdinalById(int_newparentid);
-        if (typeof (parentOrdinal) == "undefined") {
+        if (typeof (parentOrdinal) == "undefined")
             error = 1;
-        }
-        else {
-            if ((!structure.active[parentOrdinal]) || (int_newparentid == my_id)) {
-                error = 1;
-            }
-        }
+        else if ((!structure.active[parentOrdinal]) || (int_newparentid == my_id))
+            error = 1;
     }
-    if (error == 1) {
+    if (error == 1)
         alert("Dat is geen geldig moeder-object. Probeer opnieuw.");
-    }
-    else {
+    else
         structure.data[structure.getOrdinalById(my_id)].parent = int_newparentid;
-    }
     structure.reSort();
     HLRedrawTree();
 }
@@ -5063,8 +4993,6 @@ function HLRedrawTreeHTML() {
     document.getElementById("left_col_inner").innerHTML = output;
 }
 function HLRedrawTreeSVG() {
-    //let scrolltop = document.getElementById("right_col").scrollTop;
-    //let scrollleft = document.getElementById("right_col").scrollLeft;
     var str = '<b>Tekening: </b>Ga naar het print-menu om de tekening af te printen of te exporteren als SVG vector graphics.<br><br>'
         + flattenSVGfromString(structure.toSVG(0, "horizontal").data)
         + '<h2>Legende:</h2>'
@@ -5075,12 +5003,6 @@ function HLRedrawTreeSVG() {
         + '<i><br><small>Versie: ' + CONF_builddate
         + ' (C) Ivan Goethals -- <a href="license.html" target="popup" onclick="window.open(\'license.html\',\'popup\',\'width=800,height=600\'); return false;">GPLv3</a></small></i><br><br>';
     document.getElementById("right_col_inner").innerHTML = str;
-    //document.getElementById("right_col").scrollTop = scrolltop;
-    //document.getElementById("right_col").scrollLeft = scrollleft;
-    /*document.getElementById("right_col_inner").innerHTML = '<b>Tekening: </b><button onclick=download("html")>Download als html</button>';
-      document.getElementById("right_col_inner").innerHTML += '&nbsp;<button onclick=download("svg")>Download als svg</button>';
-      document.getElementById("right_col_inner").innerHTML += '&nbsp;<input type="checkbox" id="noGroup" checked></input><small>SVG elementen niet groeperen (aanbevolen voor meeste tekenprogramma\'s)</small>';
-      document.getElementById("right_col_inner").innerHTML += '<br><small><i>Noot: De knoppen hierboven laden enkel de tekening. Wenst u het schema ook later te bewerken, gebruik dan "Opslaan" in het hoofdmenu.</i></small><br><br>';*/
 }
 function HLRedrawTree() {
     HLRedrawTreeHTML();
@@ -5110,18 +5032,16 @@ function HLChangeModeVertical() {
 }
 function HLChangeStartY() {
     var starty = parseInt(document.getElementById("id_starty").value);
-    if (isNaN(starty)) {
+    if (isNaN(starty))
         starty = 0;
-    }
     structure.print_table.setstarty(starty);
     structure.print_table.forceCorrectFigures();
     printsvg();
 }
 function HLChangeStopY() {
     var stopy = parseInt(document.getElementById("id_stopy").value);
-    if (isNaN(stopy)) {
+    if (isNaN(stopy))
         stopy = structure.print_table.getHeight();
-    }
     structure.print_table.setstopy(stopy);
     structure.print_table.forceCorrectFigures();
     printsvg();
@@ -5130,41 +5050,38 @@ function HLChangePaperSize() {
     structure.print_table.setPaperSize(document.getElementById("id_papersize").value);
 }
 function buildNewStructure(structure) {
-    //Paremeterisation of the electro board
+    // Paremeterisation of the electro board
     var aantalDrogeKringen = CONF_aantal_droge_kringen;
     var aantalNatteKringen = CONF_aantal_natte_kringen;
     ;
-    //Eerst het hoofddifferentieel maken
+    // Eerst het hoofddifferentieel maken
     var itemCounter = 0;
     structure.addItem("Aansluiting");
-    structure.data[0].keys[0][2] = "Aansluiting";
-    structure.data[0].keys[10][2] = ""; //Naam
-    structure.data[0].keys[7][2] = "differentieel"; // Zekering
-    structure.data[0].keys[4][2] = CONF_aantal_fazen_droog; // Aantal
-    structure.data[0].keys[8][2] = CONF_hoofdzekering; // Amperage
-    structure.data[0].keys[9][2] = CONF_aantal_fazen_droog + "x16"; // Kabel
-    structure.data[0].keys[12][2] = false; // Kabel aanwezig
-    structure.data[0].keys[11][2] = CONF_differentieel_droog; // Differentieel waarde
+    structure.data[0].props.type = "Aansluiting";
+    structure.data[0].props.naam = "";
+    structure.data[0].props.bescherming = "differentieel";
+    structure.data[0].props.aantal_polen = CONF_aantal_fazen_droog;
+    structure.data[0].props.amperage = CONF_hoofdzekering;
+    structure.data[0].props.type_kabel_na_teller = CONF_aantal_fazen_droog + "x16";
+    structure.data[0].props.differentieel_delta_amperage = CONF_differentieel_droog;
     itemCounter++;
-    //Dan het hoofdbord maken
+    // Dan het hoofdbord maken
     structure.insertChildAfterId(new Bord(structure), itemCounter);
-    structure.data[itemCounter].keys[0][2] = "Bord";
+    structure.data[itemCounter].props.type = "Bord";
     itemCounter++;
     var droogBordCounter = itemCounter;
-    //Nat bord voorzien
+    // Nat bord voorzien
     structure.insertChildAfterId(new Kring(structure), itemCounter);
-    structure.data[itemCounter].keys[0][2] = "Kring";
-    structure.data[itemCounter].keys[10][2] = "";
-    structure.data[itemCounter].keys[7][2] = "differentieel";
-    structure.data[itemCounter].keys[4][2] = CONF_aantal_fazen_nat;
-    structure.data[itemCounter].keys[8][2] = CONF_hoofdzekering;
-    structure.data[itemCounter].keys[9][2] = "";
-    structure.data[itemCounter].keys[12][2] = false;
-    structure.data[itemCounter].keys[11][2] = CONF_differentieel_nat;
+    structure.data[itemCounter].props.type = "Kring";
+    structure.data[itemCounter].props.bescherming = "differentieel";
+    structure.data[itemCounter].props.aantal_polen = CONF_aantal_fazen_nat;
+    structure.data[itemCounter].props.amperage = CONF_hoofdzekering;
+    structure.data[itemCounter].props.kabel_is_aanwezig = false;
+    structure.data[itemCounter].props.differentieel_delta_amperage = CONF_differentieel_nat;
     itemCounter++;
     structure.insertChildAfterId(new Bord(structure), itemCounter);
-    structure.data[itemCounter].keys[0][2] = "Bord";
-    structure.data[itemCounter].keys[1][2] = false; // Geaard
+    structure.data[itemCounter].props.type = "Bord";
+    structure.data[itemCounter].props.is_geaard = false; // Geaard
     itemCounter++;
 }
 function reset_all() {
@@ -5236,7 +5153,7 @@ function getPrintSVGWithoutAddress() {
 function renderPrintSVG() {
     document.getElementById("printarea").innerHTML = '<div id="printsvgarea">' +
         getPrintSVGWithoutAddress() +
-        '</div>'; // + '<br><br>' + renderAddress();
+        '</div>';
 }
 function changePrintParams() {
     renderPrintSVG();
@@ -5306,7 +5223,7 @@ function printsvg() {
 }
 function exportscreen() {
     var strleft = "";
-    strleft += '<table border=0><tr><td width=500 style="vertical-align:top;padding:5px">';
+    strleft += '<br><table border=0><tr><td width=500 style="vertical-align:top;padding:5px">';
     strleft += 'Bestandsnaam: <span id="settings"><code>' + structure.properties.filename + '</code><br><button onclick="HL_enterSettings()">Wijzigen</button>&nbsp;<button onclick="exportjson()">Opslaan</button></span>';
     strleft += '</td><td style="vertical-align:top;padding:5px">';
     strleft += 'U kan het schema opslaan op uw lokale harde schijf voor later gebruik. De standaard-naam is eendraadschema.eds. U kan deze wijzigen door links op "wijzigen" te klikken. ';
@@ -5315,12 +5232,11 @@ function exportscreen() {
     strleft += 'Eens opgeslagen kan het schema later opnieuw geladen worden door in het menu "openen" te kiezen en vervolgens het bestand op uw harde schijf te selecteren.<br><br>';
     strleft += '</td></tr>';
     strleft += PROP_GDPR(); //Function returns empty for GIT version, returns GDPR notice when used online.
-    '</table>';
-    //-- plaats input box voor naam van het schema bovenaan --
+    strleft += '</table>';
+    // Plaats input box voor naam van het schema bovenaan --
     strleft += '<br>';
     document.getElementById("configsection").innerHTML = strleft;
     hide2col();
-    //renderPrintSVG();
 }
 function openContactForm() {
     var strleft = PROP_Contact_Text;
@@ -5330,7 +5246,7 @@ function openContactForm() {
 function restart_all() {
     var strleft = CONFIGPAGE_LEFT;
     strleft +=
-        "\n    Hoofddifferentieel (in mA) <input id=\"differentieel_droog\" type=\"text\" size=\"5\" maxlength=\"5\" value=\"300\"><br><br>\n    Hoofdzekering (in A) <input id=\"hoofdzekering\" type=\"text\" size=\"4\" maxlength=\"4\" value=\"65\"><br><br>\n    Aantal fazen:\n    <select id=\"aantal_fazen_droog\"><option value=\"2\">2p</option><option value=\"3\">3p</option><option value=\"4\">4p (3p+n)</option></select>";
+        "\n      Hoofddifferentieel (in mA) <input id=\"differentieel_droog\" type=\"text\" size=\"5\" maxlength=\"5\" value=\"300\"><br><br>\n      Hoofdzekering (in A) <input id=\"hoofdzekering\" type=\"text\" size=\"4\" maxlength=\"4\" value=\"65\"><br><br>\n      Aantal fazen:\n      <select id=\"aantal_fazen_droog\"><option value=\"2\">2p</option><option value=\"3\">3p</option><option value=\"4\">4p (3p+n)</option></select>";
     strleft += CONFIGPAGE_RIGHT;
     strleft += PROP_getCookieText(); //Will only be displayed in the online version
     document.getElementById("configsection").innerHTML = strleft;
@@ -5361,17 +5277,27 @@ function import_to_structure(mystring, redraw) {
     if (redraw === void 0) { redraw = true; }
     var text = "";
     var version;
-    //If first 3 bytes read "EDS", it is an entropy coded file
-    //The first 3 bytes are EDS, the next 3 bytes indicate the version (currently only 001 implemented)
-    //the next 4 bytes are decimal zeroes "0000"
-    //thereafter is a base64 encoded data-structure
+    /* If first 3 bytes read "EDS", it is an entropy coded file
+    * The first 3 bytes are EDS, the next 3 bytes indicate the version
+    * The next 4 bytes are decimal zeroes "0000"
+    * thereafter is a base64 encoded data-structure
+    *
+    * If the first 3 bytes read "TXT", it is not entropy coded, nor base64
+    * The next 7 bytes are the same as above.
+    *
+    * If there is no identifier, it is treated as a version 1 TXT
+    * */
     if ((mystring.charCodeAt(0) == 69) && (mystring.charCodeAt(1) == 68) && (mystring.charCodeAt(2) == 83)) { //recognize as EDS
-        // Determine versioning
-        // < 16/12/2023: Version 1
-        //   16/12/2023: Version 2 (Vrije tekst moet 20 pixels groter gemaakt worden om nog mooi in het schema te passen)
+        /* Determine versioning
+        * < 16/12/2023: Version 1, original key based implementation
+        *   16/12/2023: Version 2, Introductie van automatische breedte voor bepaalde SVG-tekst
+        *                          Vrije tekst van Version 1 moet 30 pixels groter gemaakt worden om nog mooi in het schema te passen
+        *   XX/01/2024: Version 3, Overgang van key based implementation naar props based implementation
+        *                          functies convertLegacyKeys ingevoerd om oude files nog te lezen.
+        */
         version = Number(mystring.substring(3, 6));
         if (isNaN(version))
-            version = 1;
+            version = 1; // Hele oude files bevatten geen versie, ze proberen ze te lezen als versie 1
         mystring = atob(mystring.substring(10, mystring.length));
         var buffer = new Uint8Array(mystring.length);
         for (var i = 0; i < mystring.length; i++) {
@@ -5384,31 +5310,56 @@ function import_to_structure(mystring, redraw) {
         catch (error) { //Continue without the text decoder (old browsers)
             var inflated = pako.inflate(buffer);
             text = "";
-            for (i = 0; i < inflated.length; i++) {
+            for (var i = 0; i < inflated.length; i++) {
                 text += String.fromCharCode(inflated[i]);
             }
         }
     }
-    //If first 3 bytes do not read "EDS", the file is in the old non encoded format and can be used as is
-    else {
+    else if ((mystring.charCodeAt(0) == 84) && (mystring.charCodeAt(1) == 88) && (mystring.charCodeAt(2) == 84)) { //recognize as TXT
+        version = Number(mystring.substring(3, 6));
+        if (isNaN(version))
+            version = 3;
+        text = mystring.substring(10, mystring.length);
+    }
+    else { // Very old file without header
         text = mystring;
+        version = 1;
     }
-    var mystructure = new Hierarchical_List();
+    /* Read all data from disk in a javascript structure mystructure.
+    * Afterwards we will gradually copy elements from this one into the official structure
+    */
+    var mystructure = JSON.parse(text);
+    /* Indien versie 1 moeten we vrije tekst elementen die niet leeg zijn 30 pixels breder maken.
+    * Merk ook op dat versie 1 nog een key based systeem had met keys[0][2] het type
+    * en keys[16][2] die aangeeft of vrije tekst al dan niet een kader bevat (verbruiker) of niet (zonder kader)
+    */
+    if (version < 2) {
+        for (var i = 0; i < mystructure.length; i++) {
+            // Breedte van Vrije tekst velden zonder kader met 30 verhogen sinds 16/12/2023
+            if ((mystructure.data[i].keys[0][2] === "Vrije tekst") && (mystructure.data[i].keys[16][2] != "verbruiker")) {
+                if (Number(mystructure.data[i].keys[22][2]) > 0)
+                    mystructure.data[i].keys[22][2] = String(Number(mystructure.data[i].keys[22][2]) + 30);
+                else
+                    mystructure.data[i].keys[18][2] = "automatisch";
+                if (mystructure.data[i].keys[16][2] != "zonder kader")
+                    mystructure.data[i].keys[16][2] = "verbruiker";
+            }
+        }
+    }
+    /* We starten met het kopieren van data naar de eigenlijke structure.
+    * Ook hier houden we er rekening mee dat in oude saves mogelijk niet alle info voorhanden was
+    */
     structure = new Hierarchical_List();
-    var obj = JSON.parse(text);
-    Object.assign(mystructure, obj);
-    if (typeof mystructure.properties.filename != "undefined") {
+    // Kopieren van hoofd-eigenschappen
+    if (typeof mystructure.properties.filename != "undefined")
         structure.properties.filename = mystructure.properties.filename;
-    }
-    if (typeof mystructure.properties.owner != "undefined") {
+    if (typeof mystructure.properties.owner != "undefined")
         structure.properties.owner = mystructure.properties.owner;
-    }
-    if (typeof mystructure.properties.installer != "undefined") {
+    if (typeof mystructure.properties.installer != "undefined")
         structure.properties.installer = mystructure.properties.installer;
-    }
-    if (typeof mystructure.properties.info != "undefined") {
+    if (typeof mystructure.properties.info != "undefined")
         structure.properties.info = mystructure.properties.info;
-    }
+    // Kopieren van de paginatie voor printen
     if (typeof mystructure.print_table != "undefined") {
         structure.print_table.setHeight(mystructure.print_table.height);
         structure.print_table.setMaxWidth(mystructure.print_table.maxwidth);
@@ -5424,54 +5375,32 @@ function import_to_structure(mystring, redraw) {
             this.structure.print_table.pages[i].stop = mystructure.print_table.pages[i].stop;
         }
     }
+    /* Kopieren van de eigenschappen van elk element.
+    * Keys voor versies 1 en 2 en props voor versie 3
+    */
     for (var i = 0; i < mystructure.length; i++) {
-        var typestr = void 0;
-        if (typeof (mystructure.data[i].keys) != 'undefined')
-            typestr = mystructure.data[i].keys[0][2];
-        else
-            typestr = mystructure.data[i].props.type;
-        structure.addItem(typestr);
-        structure.data[i].parent = mystructure.data[i].parent;
-        structure.active[i] = mystructure.active[i];
-        structure.id[i] = mystructure.id[i];
-        // Importeer eigenschappen van elk Electro_Item, zowel legacy (lijst van keys) als nieuwe methode met lijst van properties
-        if (typeof (mystructure.data[i].keys) != 'undefined') { //old key based system
-            if (typeof (structure.data[i].keys) != 'undefined') {
-                for (var j = 0; j < mystructure.data[i].keys.length; j++) {
-                    structure.data[i].keys[j] = mystructure.data[i].keys[j];
-                }
-            }
+        if (version < 3) {
+            structure.addItem(mystructure.data[i].keys[0][2]);
             structure.data[i].convertLegacyKeys(mystructure.data[i].keys);
         }
         else {
-            structure.data[i].props = Object.assign(mystructure.data[i].props);
+            structure.addItem(mystructure.data[i].props.type);
+            Object.assign(structure.data[i].props, mystructure.data[i].props);
         }
+        structure.data[i].parent = mystructure.data[i].parent;
+        structure.active[i] = mystructure.active[i];
+        structure.id[i] = mystructure.id[i];
         structure.data[i].id = mystructure.data[i].id;
         structure.data[i].indent = mystructure.data[i].indent;
         structure.data[i].collapsed = mystructure.data[i].collapsed;
     }
-    // Make some corrections if it is an old version
-    if (version < 2) { // Versies < 2 gebruikten enkel keys en geen props dus de code hieronder met keys zal altijd werken
-        for (var i = 0; i < mystructure.length; i++) {
-            // Breedte van Vrije tekst velden zonder kader met 30 verhogen sinds 16/12/2023
-            if ((structure.data[i].getType() === "Vrije tekst") && (structure.data[i].keys[16][2] != "verbruiker")) {
-                if (Number(structure.data[i].keys[22][2]) > 0)
-                    structure.data[i].keys[22][2] = String(Number(structure.data[i].keys[22][2]) + 30);
-                else
-                    structure.data[i].keys[18][2] = "automatisch";
-                if (structure.data[i].keys[16][2] != "zonder kader")
-                    structure.data[i].keys[16][2] = "verbruiker";
-            }
-        }
-    }
-    //As we re-read the structure and it might be shorter then it once was (due to deletions) but we might still have the old high ID's, always take over the curid from the file
+    // As we re-read the structure and it might be shorter then it once was (due to deletions) but we might still have the old high ID's, always take over the curid from the file
     structure.curid = mystructure.curid;
-    //Sort the entire new structure
+    // Sort the entire new structure
     structure.reSort();
-    //Draw the structure
-    if (redraw == true) {
+    // Draw the structure
+    if (redraw == true)
         HLRedrawTree();
-    }
 }
 function load_example(nr) {
     switch (nr) {
@@ -5491,9 +5420,12 @@ var importjson = function (event) {
         import_to_structure(reader.result.toString());
     };
     reader.readAsText(input.files[0]);
-    //Scroll to top left for the SVG, this can only be done at the end because "right col" has to actually be visible
-    document.getElementById("right_col").scrollTop = 0;
-    document.getElementById("right_col").scrollLeft = 0;
+    // Scroll to top left for the SVG, this can only be done at the end because "right col" has to actually be visible
+    var rightelem = document.getElementById("right_col");
+    if (rightelem != null) {
+        rightelem.scrollTop = 0;
+        rightelem.scrollLeft = 0;
+    }
 };
 function importclicked() {
     document.getElementById('importfile').click();
@@ -5509,7 +5441,6 @@ function download_by_blob(text, filename, mimeType) {
     else if (URL && 'download' in element) {
         var uriContent = URL.createObjectURL(new Blob([text], { type: mimeType }));
         element.setAttribute('href', uriContent);
-        //element.setAttribute('href', mimeType + ',' + encodeURIComponent(text));
         element.setAttribute('download', filename);
         element.style.display = 'none';
         document.body.appendChild(element);
@@ -5536,20 +5467,15 @@ function download(type) {
         }
     }
     var text = structure.toSVG(0, "horizontal").data;
-    //Experimental, flatten everything
-    if (document.getElementById("noGroup").checked == true) {
+    if (document.getElementById("noGroup").checked == true)
         text = flattenSVGfromString(text);
-    }
     download_by_blob(text, filename, mimeType); //was text/plain
 }
 function read_settings() {
-    //CONF_aantal_droge_kringen = parseInt((document.getElementById("aantal_droge_kringen") as HTMLInputElement).value);
-    //CONF_aantal_natte_kringen = parseInt((document.getElementById("aantal_natte_kringen") as HTMLInputElement).value);
     CONF_aantal_fazen_droog = parseInt(document.getElementById("aantal_fazen_droog").value);
     CONF_aantal_fazen_nat = CONF_aantal_fazen_droog;
     CONF_hoofdzekering = parseInt(document.getElementById("hoofdzekering").value);
     CONF_differentieel_droog = parseInt(document.getElementById("differentieel_droog").value);
-    //CONF_differentieel_nat = parseInt((document.getElementById("differentieel_nat") as HTMLInputElement).value);
     reset_all();
 }
 var CONF_aantal_droge_kringen = 7;

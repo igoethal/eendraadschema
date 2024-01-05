@@ -1,20 +1,15 @@
 class Aansluitpunt extends Electro_Item {
-    
-    constructor(mylist: Hierarchical_List) { 
-        super(mylist); 
-        this.resetKeys();
-    }
 
     convertLegacyKeys(mykeys: Array<[string,string,any]>) {
-        this.props.type             = mykeys[0][2];
-        this.props.adres            = mykeys[15][2];
+        this.props.type             = this.getLegacyKey(mykeys,0);
+        this.props.nr               = this.getLegacyKey(mykeys,10);
+        this.props.adres            = this.getLegacyKey(mykeys,15);
     }
 
-    resetKeys() {
-        this.clearKeys();
+    resetProps() {
+        this.clearProps();
         this.props.type = "Aansluitpunt";
-        this.props.adres = "";  
-        delete this.keys; 
+        this.props.adres = "";
     } 
 
     toHTML(mode: string) {
@@ -37,7 +32,7 @@ class Aansluitpunt extends Electro_Item {
         mySVG.data += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
                    +  '<use xlink:href="#aansluitpunt" x="21" y="25"></use>';
         
-        mySVG.data += this.addPropAddress(mySVG,45,0);
+        mySVG.data += this.addAddressToSVG(mySVG,45,0);
         mySVG.data += "\n";
 
         return(mySVG);

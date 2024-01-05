@@ -1,14 +1,14 @@
 class Splitsing extends Electro_Item {
-    
-    constructor(mylist: Hierarchical_List) { 
-        super(mylist); 
-        this.resetKeys();
+
+    convertLegacyKeys(mykeys: Array<[string,string,any]>) {
+        this.props.type             = this.getLegacyKey(mykeys,0);
+        this.props.adres            = this.getLegacyKey(mykeys,15);
     }
 
-    resetKeys() {
-        this.clearKeys();
-        this.keys[0][2] = "Splitsing"; // This is rather a formality as we should already have this at this stage
-        this.keys[15][2] = "";         // Set Adres/tekst to "" when the item is cleared
+    resetProps() {
+        this.clearProps();
+        this.props.type = "Splitsing"; // This is rather a formality as we should already have this at this stage
+        this.props.adres = "";         // Set Adres/tekst to "" when the item is cleared
     }
 
     allowedChilds() : Array<string> { // returns an array with the type-names of allowed childs
@@ -34,7 +34,7 @@ class Splitsing extends Electro_Item {
         let parent = this.getParent();
         
         // Teken de lijn onderaan
-        if ( (parent.keys[0][2] == "Aansluiting") || (parent.keys[0][2] == "Kring") ) {
+        if ( (parent.getType() == "Aansluiting") || (parent.getType() == "Kring") ) {
             mySVG.data += '<line x1="' + (mySVG.xleft) + '" x2="' + (mySVG.xleft + mySVG.xrightmin)
                        +  '" y1="' + mySVG.yup + '" y2="' + mySVG.yup + '" stroke="black" />'
 

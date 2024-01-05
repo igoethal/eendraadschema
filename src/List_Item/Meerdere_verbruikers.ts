@@ -1,14 +1,15 @@
 class Meerdere_verbruikers extends Electro_Item {
-    
-    constructor(mylist: Hierarchical_List) { 
-        super(mylist); 
-        this.resetKeys();
-    }
 
-    resetKeys() {
-        this.clearKeys();
-        this.keys[0][2] = "Meerdere verbruikers"; // This is rather a formality as we should already have this at this stage
-        this.keys[15][2] = "";     // Set Adres/tekst to "" when the item is cleared
+    convertLegacyKeys(mykeys: Array<[string,string,any]>) {
+        this.props.type             = this.getLegacyKey(mykeys,0);
+        this.props.nr               = this.getLegacyKey(mykeys,10);
+        this.props.adres            = this.getLegacyKey(mykeys,15);
+    }    
+
+    resetProps() {
+        this.clearProps();
+        this.props.type = "Meerdere verbruikers"; // This is rather a formality as we should already have this at this stage
+        this.props.adres = "";     // Set Adres/tekst to "" when the item is cleared
     }
 
     allowedChilds() : Array<string> { // returns an array with the type-names of allowed childs
@@ -22,8 +23,8 @@ class Meerdere_verbruikers extends Electro_Item {
     toHTML(mode: string) {
         let output = this.toHTMLHeader(mode);
 
-        output += "&nbsp;Nr: " + this.stringToHTML(10,5)
-               +  ", Adres/tekst: " + this.stringToHTML(15,5);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr',5)
+               +  ", Adres/tekst: " + this.stringPropToHTML('adres',5);
 
         return(output);
     }
@@ -40,9 +41,9 @@ class Meerdere_verbruikers extends Electro_Item {
         mySVG.xleft = Math.max(mySVG.xleft,1);
 
         // Plaats adres onderaan indien niet leeg en indien er actieve kinderen zijn
-        if ( (!(/^\s*$/.test(this.keys[15][2]))) && (this.heeftKindMetGekendType()) ) { // Controleer of adres leeg is
+        if ( (!(/^\s*$/.test(this.props.adres))) && (this.heeftKindMetGekendType()) ) { // Controleer of adres leeg is
             mySVG.data += '<text x="' + ((mySVG.xright-20)/2 + 21) + '" y="' + (mySVG.yup+mySVG.ydown+10)
-              + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.keys[15][2]) + '</text>';
+              + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.props.adres) + '</text>';
               mySVG.ydown += 15;
         }
 

@@ -1,16 +1,18 @@
 class Bord extends Electro_Item {
-    
-    constructor(mylist: Hierarchical_List) { 
-        super(mylist); 
-        this.resetKeys();
+
+    convertLegacyKeys(mykeys: Array<[string,string,any]>) {
+        this.props.type             = this.getLegacyKey(mykeys,0);
+        this.props.is_geaard        = this.getLegacyKey(mykeys,1);
+        this.props.naam             = this.getLegacyKey(mykeys,10);
+        this.props.adres            = this.getLegacyKey(mykeys,15);
     }
 
-    resetKeys() {
-        this.clearKeys();
-        this.keys[0][2] = "Bord";      // This is rather a formality as we should already have this at this stage
-        this.keys[1][2] = true;        // Per default geaard
-        this.keys[10][2] = "";         // Bord heeft initieel geen naam
-        this.keys[15][2] = "";         // Set Adres/tekst to "" when the item is cleared
+    resetProps() {
+        this.clearProps();
+        this.props.type = "Bord";
+        this.props.is_geaard = true;
+        this.props.naam = "";
+        this.props.adres = "";
     }
 
     allowedChilds() : Array<string> { // returns an array with the type-names of allowed childs
@@ -24,8 +26,8 @@ class Bord extends Electro_Item {
     toHTML(mode: string) {
         let output = this.toHTMLHeader(mode);
 
-        output += "&nbsp;Naam: " + this.stringToHTML(10,5) + ", "
-               +  "Geaard: " + this.checkboxToHTML(1);
+        output += "&nbsp;Naam: " + this.stringPropToHTML('naam',5) + ", "
+               +  "Geaard: " + this.checkboxPropToHTML('is_geaard');
 
         return(output);
     }
@@ -35,14 +37,15 @@ class Bord extends Electro_Item {
 
         // Maak een tekening van alle kinderen
         mySVG = this.sourcelist.toSVG(this.id,"horizontal");
+        if (mySVG.yup == 0) mySVG.yup = 2; // Om zeker te zijn dat de vette lijn netjes wordt getekend.
 
         // Voorzie 10 extra pixels rechts na de allerlaatste kring
         mySVG.xright += 10;
 
         // Schuif het geheel voldoende naar links om plaats te hebben voor label en eventuele aarding
 
-        let mintextsize = Math.max(30, svgTextWidth('&lt'+htmlspecialchars(this.keys[10][2])+'&gt',10,'font-weight="bold"') + 13);
-        let minxleft = mintextsize + (this.keys[1][2] ? 70 : 0); //Indien geaard hebben we 70 meer nodig
+        let mintextsize = Math.max(30, svgTextWidth('&lt'+htmlspecialchars(this.props.naam)+'&gt',10,'font-weight="bold"') + 13);
+        let minxleft = mintextsize + (this.props.is_geaard ? 70 : 0); //Indien geaard hebben we 70 meer nodig
 
         if (mySVG.xleft <= minxleft) { // Minstens 100 pixels indien aarding
             mySVG.xright = mySVG.xleft + mySVG.xright - minxleft;
@@ -60,13 +63,13 @@ class Bord extends Electro_Item {
                       '" y1="' + mySVG.yup + '" y2="' + mySVG.yup + '" stroke="black" stroke-width="3" />'
 
         // Voeg naam van het bord toe
-        if (this.keys[10][2] !== "")
+        if (this.props.naam !== "")
             mySVG.data += '<text x="' + (5) + '" y="' + (mySVG.yup + 13) + '" ' 
                        +  'style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="10">&lt;' 
-                       +  htmlspecialchars(this.keys[10][2])+'&gt;</text>';
+                       +  htmlspecialchars(this.props.naam)+'&gt;</text>';
         
         // Teken aarding onderaan
-        if (this.keys[1][2])
+        if (this.props.is_geaard)
             mySVG.data += '<line x1="' + (mintextsize + 10) + '" y1="' + (mySVG.yup + 0) + '" x2="' + (mintextsize + 10) + '" y2="' + (mySVG.yup + 10) + '" stroke="black" />'
                        +  '<line x1="' + (mintextsize + 10) + '" y1="' + (mySVG.yup + 15) + '" x2="' + (mintextsize + 10) + '" y2="' + (mySVG.yup + 25) + '" stroke="black" />'
                        +  '<line x1="' + (mintextsize + 10) + '" y1="' + (mySVG.yup + 30) + '" x2="' + (mintextsize + 10) + '" y2="' + (mySVG.yup + 40) + '" stroke="black" />'

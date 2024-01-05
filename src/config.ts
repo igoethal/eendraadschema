@@ -3,7 +3,7 @@ var CONFIGPAGE_LEFT:string = `
         <p><font size="+2">
           <b>Eendraadschema ontwerpen: </b>
           Kies &eacute;&eacute;n van onderstaande voorbeelden om van te starten (u kan zelf kringen toevoegen achteraf) of
-          start van een leeg schema met voorgekozen aantal kringen (optie 3).
+          start van een leeg schema (optie 3).
         </font></p>
       <font size="+1">
         <i>

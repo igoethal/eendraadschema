@@ -1,35 +1,35 @@
 class Lichtcircuit extends Schakelaars {
-    
-    constructor(mylist: Hierarchical_List) { 
-        super(mylist); 
-        this.resetKeys();
+
+    resetProps() {
+        super.resetProps(); //Schakelaars
+        this.props.type = "Lichtcircuit"; // This is rather a formality as we should already have this at this stage
+        this.props.aantal_lichtpunten = "1";           // Per default 1 lichtpunt
     }
 
-    resetKeys() {
-        super.resetKeys(); //Schakelaars
-        this.keys[0][2] = "Lichtcircuit"; // This is rather a formality as we should already have this at this stage
-        this.keys[13][2] = "1";           // Per default 1 lichtpunt
-    }
+    convertLegacyKeys(mykeys: Array<[string,string,any]>) {
+        super.convertLegacyKeys(mykeys);
+        this.props.aantal_lichtpunten = this.getLegacyKey(mykeys,13);
+    } 
 
     toHTML(mode: string) {
         this.overrideKeys();
         let output = this.toHTMLHeader(mode);
 
-        output += "&nbsp;Nr: " + this.stringToHTML(10,5);
-        output += ", " + this.selectToHTML(5,["enkelpolig", "dubbelpolig", "driepolig", "dubbelaansteking", "wissel_enkel", "wissel_dubbel", "kruis_enkel", "---", "schakelaar", "dimschakelaar", "dimschakelaar wissel", "bewegingsschakelaar", "schemerschakelaar", "---", "teleruptor", "relais", "dimmer", "tijdschakelaar", "minuterie", "thermostaat", "rolluikschakelaar"]);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr',5);
+        output += ", " + this.selectPropToHTML('type_schakelaar',["enkelpolig", "dubbelpolig", "driepolig", "dubbelaansteking", "wissel_enkel", "wissel_dubbel", "kruis_enkel", "---", "schakelaar", "dimschakelaar", "dimschakelaar wissel", "bewegingsschakelaar", "schemerschakelaar", "---", "teleruptor", "relais", "dimmer", "tijdschakelaar", "minuterie", "thermostaat", "rolluikschakelaar"]);
 
-        if (this.kanHalfwaterdichtZijn())       output += ", Halfwaterdicht: " + this.checkboxToHTML(20);
-        if (this.kanVerklikkerlampjeHebben())   output += ", Verklikkerlampje: " + this.checkboxToHTML(21);
-        if (this.kanSignalisatielampjeHebben()) output += ", Signalisatielampje: " + this.checkboxToHTML(19);
-        if (this.kanTrekschakelaarHebben())     output += ", Trekschakelaar: " + this.checkboxToHTML(25);
+        if (this.kanHalfwaterdichtZijn())       output += ", Halfwaterdicht: " + this.checkboxPropToHTML('is_halfwaterdicht');
+        if (this.kanVerklikkerlampjeHebben())   output += ", Verklikkerlampje: " + this.checkboxPropToHTML('heeft_verklikkerlampje');
+        if (this.kanSignalisatielampjeHebben()) output += ", Signalisatielampje: " + this.checkboxPropToHTML('heeft_signalisatielampje');
+        if (this.kanTrekschakelaarHebben())     output += ", Trekschakelaar: " + this.checkboxPropToHTML('is_trekschakelaar');
         
-        switch (this.keys[5][2]) {
-            case "enkelpolig":  output += ", Aantal schakelaars: " + this.selectToHTML(4,["1","2","3","4","5"]); break;
-            case "dubbelpolig": output += ", Aantal schakelaars: " + this.selectToHTML(4,["1","2"]); break;
+        switch (this.props.type_schakelaar) {
+            case "enkelpolig":  output += ", Aantal schakelaars: " + this.selectPropToHTML('aantal_schakelaars',["1","2","3","4","5"]); break;
+            case "dubbelpolig": output += ", Aantal schakelaars: " + this.selectPropToHTML('aantal_schakelaars',["1","2"]); break;
         }
 
-        output += ", Aantal lichtpunten: " + this.selectToHTML(13,["0","1","2","3","4","5","6","7","8","9","10"]);
-        output += ", Adres/tekst: " + this.stringToHTML(15,5);
+        output += ", Aantal lichtpunten: " + this.selectPropToHTML('aantal_lichtpunten',["0","1","2","3","4","5","6","7","8","9","10"]);
+        output += ", Adres/tekst: " + this.stringPropToHTML('adres',5);
         return(output);
     }
 
@@ -50,7 +50,7 @@ class Lichtcircuit extends Schakelaars {
             let str:string; ( {endx: startx, str: str, lowerbound: lowerbound} = this.tekenKeten[i].toSVGString(startx,islast) ); mySVG.data += str;
         }
 
-        if (this.keys[13][2] >= 1) { //1 of meerdere lampen
+        if (this.props.aantal_lichtpunten >= 1) { //1 of meerdere lampen
             // Teken de lamp
             endx = startx + 30;
             mySVG.data += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
@@ -58,11 +58,11 @@ class Lichtcircuit extends Schakelaars {
 
             // Teken aantal lampen en symbool 'h' voor halfwaterdicht
             let print_str_upper = ""; //string om bovenaan te plaatsen
-            if (this.keys[20][2]) {
+            if (this.props.is_halfwaterdicht) {
                 print_str_upper = "h";
-                if (parseInt(this.keys[13][2]) > 1) print_str_upper += ", x" + this.keys[13][2]; // Meer dan 1 lamp
-            } else if (parseInt(this.keys[13][2]) > 1) {
-                print_str_upper = "x" + this.keys[13][2]; }
+                if (parseInt(this.props.aantal_lichtpunten) > 1) print_str_upper += ", x" + this.props.aantal_lichtpunten; // Meer dan 1 lamp
+            } else if (parseInt(this.props.aantal_lichtpunten) > 1) {
+                print_str_upper = "x" + this.props.aantal_lichtpunten; }
 
             if (print_str_upper != "") mySVG.data += '<text x="' + endx + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' + htmlspecialchars(print_str_upper) + '</text>';
 
@@ -82,7 +82,7 @@ class Lichtcircuit extends Schakelaars {
         mySVG.yup = 25;
         mySVG.ydown = 25;
 
-        mySVG.data += this.addAddress(mySVG,25+lowerbound,Math.max(0,lowerbound-20));
+        mySVG.data += this.addAddressToSVG(mySVG,25+lowerbound,Math.max(0,lowerbound-20));
         mySVG.data += "\n";
 
         return(mySVG);

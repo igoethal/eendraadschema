@@ -1,25 +1,47 @@
 class Aansluiting extends Electro_Item {
     
-    constructor(mylist: Hierarchical_List) { 
-        super(mylist); 
-        this.resetKeys();
-    }
+    convertLegacyKeys(mykeys: Array<[string,string,any]>) {
+        this.props.type                                 = this.getLegacyKey(mykeys,0);
+        this.props.aantal_polen                         = this.getLegacyKey(mykeys,4);
+        this.props.bescherming                          = this.getLegacyKey(mykeys,7);
+        this.props.amperage                             = this.getLegacyKey(mykeys,8);
+        this.props.type_kabel_na_teller                 = this.getLegacyKey(mykeys,9);
+        this.props.nr                                   = this.getLegacyKey(mykeys,10);        
+        this.props.differentieel_delta_amperage         = this.getLegacyKey(mykeys,11);
+        this.props.adres                                = this.getLegacyKey(mykeys,15);
+        this.props.differentieel_is_selectief           = this.getLegacyKey(mykeys,20);
+        this.props.kortsluitvermogen                    = this.getLegacyKey(mykeys,22);
+        this.props.naam                                 = this.getLegacyKey(mykeys,23);
+        this.props.type_kabel_voor_teller               = this.getLegacyKey(mykeys,24);
+        switch (this.props.bescherming) {
+            case "differentieel":
+                this.props.type_differentieel = this.getLegacyKey(mykeys,17);
+                break;
+            case "automatisch":
+                this.props.curve_automaat = this.getLegacyKey(mykeys,17);               
+                break;
+            case "differentieelautomaat":
+                this.props.type_differentieel = this.getLegacyKey(mykeys,17);
+                this.props.curve_automaat = this.getLegacyKey(mykeys,18);
+                break;
+        }
+    } 
 
-    resetKeys() {
-        this.clearKeys();
-        this.keys[0][2] = "Aansluiting";   // This is rather a formality as we should already have this at this stage
-        this.keys[4][2] = "2";             // Per default 2-polig
-        this.keys[7][2] = "differentieel"; // Per default een differentieel
-        this.keys[8][2] = "40";            // Per default 40A
-        this.keys[9][2] = "2x16";          // Default kabeltype voor een aansluiting
-        this.keys[11][2] = "300";          // Differentieel per default 300 mA
-        this.keys[15][2] = "";             // Per default geen adres/tekst
-        this.keys[17][2] = "";             // Per default geen type voor een aansluiting
-        this.keys[18][2] = "";             // Curve differentieelautomaat per default niet gegeven
-        this.keys[20][2] = false;          // Per default niet selectief
-        this.keys[22][2] = "";             // Per default geen kortsluitvermogen voor een aansluiting
-        this.keys[23][2] = "";             // Per default geen naam
-        this.keys[24][2] = "";             // Per default geen kabeltype vóór de aansluiting
+    resetProps() {
+        this.clearProps();
+        this.props.type = "Aansluiting";
+        this.props.aantal_polen = "2";
+        this.props.bescherming = "differentieel";
+        this.props.amperage = "40";
+        this.props.type_kabel_na_teller = "2x16";
+        this.props.differentieel_delta_amperage = "300";
+        this.props.adres = "";
+        this.props.type_differentieel = "";
+        this.props.curve_automaat = "";
+        this.props.differentieel_is_selectief = false;
+        this.props.kortsluitvermogen = "";
+        this.props.naam = "";
+        this.props.type_kabel_voor_teller = "";
     }
 
     allowedChilds() : Array<string> { // returns an array with the type-names of allowed childs
@@ -35,48 +57,48 @@ class Aansluiting extends Electro_Item {
     }
 
     overrideKeys() {
-        if ( ( (this.keys[4][2] as number) < 1 ) || ( (this.keys[4][2] as number) > 4 ) ) this.keys[4][2] = "2"; //Test dat aantal polen bestaat
+        if ( ( (this.props.aantal_polen as number) < 1 ) || ( (this.props.aantal_polen as number) > 4 ) ) this.props.aantal_polen = "2"; //Test dat aantal polen bestaat
     }
 
     toHTML(mode: string) {
         this.overrideKeys();
         let output = this.toHTMLHeader(mode);
 
-        output += "&nbsp;Naam: " + this.stringToHTML(23,5) + "<br>";
+        output += "&nbsp;Naam: " + this.stringPropToHTML('naam',5) + "<br>";
 
-        if (this.getParent() != null) output += "Nr: " + this.stringToHTML(10,5) + ", ";
+        if (this.getParent() != null) output += "Nr: " + this.stringPropToHTML('nr',5) + ", ";
         
-        output += "Zekering: " + this.selectToHTML(7,["automatisch","differentieel","differentieelautomaat","smelt","geen","---","schakelaar","schemer"]) 
-                               + this.selectToHTML(4,["2","3","4"]) 
-                               + this.stringToHTML(8,2) + "A";
+        output += "Zekering: " + this.selectPropToHTML('bescherming',["automatisch","differentieel","differentieelautomaat","smelt","geen","---","schakelaar","schemer"]) 
+                               + this.selectPropToHTML('aantal',["2","3","4"]) 
+                               + this.stringPropToHTML('amperage',2) + "A";
 
-        switch (this.keys[7][2]) {
+        switch (this.props.bescherming) {
 
             case "differentieel":
-                output += ", \u0394 " + this.stringToHTML(11,3) + "mA"
-                        +  ", Type:" + this.selectToHTML(17,["","A","B"])
-                        +  ", Kortsluitvermogen: " + this.stringToHTML(22,3) + "kA"
-                        +  ", Selectief: " + this.checkboxToHTML(20);
+                output += ", \u0394 " + this.stringPropToHTML('differentieel_delta_amperage',3) + "mA"
+                        +  ", Type:" + this.selectPropToHTML('type_differentieel',["","A","B"])
+                        +  ", Kortsluitvermogen: " + this.stringPropToHTML('kortsluitvermogen',3) + "kA"
+                        +  ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief');
                 break;
 
             case "automatisch":
-                output += ", Curve:" + this.selectToHTML(17,["","B","C","D"])
-                        +  ", Kortsluitvermogen: " + this.stringToHTML(22,3) + "kA";               
+                output += ", Curve:" + this.selectPropToHTML('curve_automaat',["","B","C","D"])
+                        +  ", Kortsluitvermogen: " + this.stringPropToHTML('kortsluitvermogen',3) + "kA";               
                 break;
 
             case "differentieelautomaat":
-                output += ", \u0394 " + this.stringToHTML(11,3) + "mA"
-                        +  ", Curve:" + this.selectToHTML(18,["","B","C","D"])
-                        +  ", Type:" + this.selectToHTML(17,["","A","B"])
-                        +  ", Kortsluitvermogen: " + this.stringToHTML(22,3) + "kA"
-                        +  ", Selectief: " + this.checkboxToHTML(20);
+                output += ", \u0394 " + this.stringPropToHTML('differentieel_delta_amperage',3) + "mA"
+                        +  ", Curve:" + this.selectPropToHTML('curve_automaat',["","B","C","D"])
+                        +  ", Type:" + this.selectPropToHTML('type_differentieel',["","A","B"])
+                        +  ", Kortsluitvermogen: " + this.stringPropToHTML('kortsluitvermogen',3) + "kA"
+                        +  ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief');
                 break;
 
         }
 
-        output += ", Kabeltype na teller: " + this.stringToHTML(9,10)
-               +  ", Kabeltype v&oacute;&oacute;r teller: " + this.stringToHTML(24,10)
-               +  ", Adres/tekst: " + this.stringToHTML(15,5);
+        output += ", Kabeltype na teller: " + this.stringPropToHTML('type_kabel_na_teller',10)
+               +  ", Kabeltype v&oacute;&oacute;r teller: " + this.stringPropToHTML('type_kabel_voor_teller',10)
+               +  ", Adres/tekst: " + this.stringPropToHTML('adres',5);
 
         return(output);
     }
@@ -86,7 +108,7 @@ class Aansluiting extends Electro_Item {
 
         // Indien er een kabeltype vóór de teller is schuiven we alles op
         let extrashift = 0;
-        if (this.keys[24][2] != "") extrashift += 50;
+        if (this.props.type_kabel_voor_teller != "") extrashift += 50;
 
         // get image of the entire stack, make sure it is shifted to the right sufficiently so-that the counter can be added below
         mySVG = this.sourcelist.toSVG(this.id, "vertical", 150 + extrashift); //shift 150 to the right
@@ -99,7 +121,7 @@ class Aansluiting extends Electro_Item {
 
         let numlines = 1;   // Hier houden we het aantal lijnen tekst bij 
 
-        switch (this.keys[7][2]) {
+        switch (this.props.bescherming) {
 
             case "automatisch":
 
@@ -111,24 +133,24 @@ class Aansluiting extends Electro_Item {
                            +  "<text x=\"" + (mySVG.xleft+15) + "\" y=\"" + (mySVG.yup-10) + "\"" 
                            +  " transform=\"rotate(-90 " + (mySVG.xleft+15) + "," + (mySVG.yup-10) + ")" 
                            +  "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" 
-                           +  htmlspecialchars(this.keys[4][2] + "P - " + this.keys[8][2] + "A") + "</text>";
+                           +  htmlspecialchars(this.props.aantal_polen + "P - " + this.props.amperage + "A") + "</text>";
 
                 // Code om de curve toe te voegen
-                if ( (this.keys[17][2]=='B') || (this.keys[17][2]=='C') || (this.keys[17][2]=='D') ) {
+                if ( (this.props.curve_automaat=='B') || (this.props.curve_automaat=='C') || (this.props.curve_automaat=='D') ) {
                     ++numlines;
                     mySVG.data += "<text x=\"" + (mySVG.xleft+15+11*(numlines-1)) + "\" y=\"" + (mySVG.yup-10) + "\"" 
                                +  " transform=\"rotate(-90 " + (mySVG.xleft+15+11*(numlines-1)) + "," + (mySVG.yup-10) + ")" 
                                +  "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" 
-                               +  htmlspecialchars("Curve " + this.keys[17][2]) + "</text>";
+                               +  htmlspecialchars("Curve " + this.props.curve_automaat) + "</text>";
                 }
 
                 // Code om kortsluitvermogen toe te voegen
-                if ( (this.keys[22][2]!='') ) {
+                if ( (this.props.kortsluitvermogen!='') ) {
                     ++numlines;
                     mySVG.data += "<text x=\"" + (mySVG.xleft+15+11*(numlines-1)) + "\" y=\"" + (mySVG.yup-10) + "\"" 
                                +  " transform=\"rotate(-90 " + (mySVG.xleft+15+11*(numlines-1)) + "," + (mySVG.yup-10) + ")" 
                                +  "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" 
-                               +  htmlspecialchars("" + this.keys[22][2]) + "kA</text>";
+                               +  htmlspecialchars("" + this.props.kortsluitvermogen) + "kA</text>";
                 }
 
                 // Genoeg plaats voorzien aan de rechterkant en eindigen
@@ -138,7 +160,7 @@ class Aansluiting extends Electro_Item {
             case "differentieel":
 
                 // Code als differentieel selectief is
-                if (this.keys[20][2]) {
+                if (this.props.differentieel_is_selectief) {
                     mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + mySVG.yup + '" y2="' + (mySVG.yup+30) + '" stroke="black" />'
                                +  '<rect x="' + (mySVG.xleft+7) + '" y="' + (mySVG.yup) + '" width="16" height="16" stroke="black" fill="white" />'
                                +  "<text x=\"" + (mySVG.xleft+19) + "\" y=\"" + (mySVG.yup+8) + "\"" + " transform=\"rotate(-90 " + (mySVG.xleft+19) + "," + (mySVG.yup+8) + ")" 
@@ -154,29 +176,29 @@ class Aansluiting extends Electro_Item {
                            +  "<text x=\"" + (mySVG.xleft+15) + "\" y=\"" + (mySVG.yup-10) + "\"" 
                            +  " transform=\"rotate(-90 " + (mySVG.xleft+15) + "," + (mySVG.yup-10) + ")" 
                            +  "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" 
-                           +  "\u0394" + htmlspecialchars(this.keys[11][2] + "mA") + "</text>"
+                           +  "\u0394" + htmlspecialchars(this.props.differentieel_delta_amperage + "mA") + "</text>"
                            +  "<text x=\"" + (mySVG.xleft+26) + "\" y=\"" + (mySVG.yup-10) + "\"" 
                            +  " transform=\"rotate(-90 " + (mySVG.xleft+26) + "," + (mySVG.yup-10) + ")" 
                            +  "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" 
-                           +  htmlspecialchars(this.keys[4][2] + "P - " + this.keys[8][2] + "A") + "</text>";
+                           +  htmlspecialchars(this.props.aantal_polen + "P - " + this.props.amperage + "A") + "</text>";
 
                 // Code om het type toe te voegen
-                if ( (this.keys[17][2]=='A') || (this.keys[17][2]=='B') ) {
+                if ( (this.props.type_differentieel=='A') || (this.props.type_differentieel=='B') ) {
                     ++numlines;
                     mySVG.data += "<text x=\"" + (mySVG.xleft+15+11*(numlines-1)) + "\" y=\"" + (mySVG.yup-10) + "\"" 
                                + " transform=\"rotate(-90 " + (mySVG.xleft+15+11*(numlines-1)) + "," + (mySVG.yup-10) + ")" 
                                + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" 
-                               + htmlspecialchars("Type " + this.keys[17][2]) + "</text>";
+                               + htmlspecialchars("Type " + this.props.type_differentieel) + "</text>";
 
                 }
 
                 // Code om kortsluitvermogen toe te voegen
-                if ( (this.keys[22][2]!='') ) {
+                if ( (this.props.kortsluitvermogen!='') ) {
                     ++numlines;
                     mySVG.data += "<text x=\"" + (mySVG.xleft+15+11*(numlines-1)) + "\" y=\"" + (mySVG.yup-10) + "\"" 
                                +  " transform=\"rotate(-90 " + (mySVG.xleft+15+11*(numlines-1)) + "," + (mySVG.yup-10) + ")" 
                                +  "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" 
-                               +  htmlspecialchars("" + this.keys[22][2]) + "kA</text>";
+                               +  htmlspecialchars("" + this.props.kortsluitvermogen) + "kA</text>";
                 }
 
                 // genoeg plaats voorzien aan de rechterkant en eindigen
@@ -186,7 +208,7 @@ class Aansluiting extends Electro_Item {
             case "differentieelautomaat":
 
                 // Code als differentieel selectief is
-                if (this.keys[20][2]) {
+                if (this.props.differentieel_is_selectief) {
                     mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + mySVG.yup + '" y2="' + (mySVG.yup+30) + '" stroke="black" />'
                                +  '<rect x="' + (mySVG.xleft+7) + '" y="' + (mySVG.yup) + '" width="16" height="16" stroke="black" fill="white" />'
                                +  "<text x=\"" + (mySVG.xleft+19) + "\" y=\"" + (mySVG.yup+8) + "\"" + " transform=\"rotate(-90 " + (mySVG.xleft+19) + "," + (mySVG.yup+8) + ")" 
@@ -202,37 +224,37 @@ class Aansluiting extends Electro_Item {
                            +  "<text x=\"" + (mySVG.xleft+15) + "\" y=\"" + (mySVG.yup-10) + "\"" 
                            +  " transform=\"rotate(-90 " + (mySVG.xleft+15) + "," + (mySVG.yup-10) + ")" 
                            +  "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" 
-                           +  "\u0394" + htmlspecialchars(this.keys[11][2] + "mA") + "</text>"
+                           +  "\u0394" + htmlspecialchars(this.props.differentieel_delta_amperage + "mA") + "</text>"
                            +  "<text x=\"" + (mySVG.xleft+26) + "\" y=\"" + (mySVG.yup-10) + "\"" 
                            +  " transform=\"rotate(-90 " + (mySVG.xleft+26) + "," + (mySVG.yup-10) + ")" 
                            +  "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" 
-                           +  htmlspecialchars(this.keys[4][2] + "P - " + this.keys[8][2] + "A") + "</text>";
+                           +  htmlspecialchars(this.props.aantal_polen + "P - " + this.props.amperage + "A") + "</text>";
 
                 // Code om de curve toe te voegen
-                if ( (this.keys[18][2]=='B') || (this.keys[18][2]=='C') || (this.keys[18][2]=='D') ) {
+                if ( (this.props.curve_automaat=='B') || (this.props.curve_automaat=='C') || (this.props.curve_automaat=='D') ) {
                     ++numlines;
                     mySVG.data += "<text x=\"" + (mySVG.xleft+15+11*(numlines-1)) + "\" y=\"" + (mySVG.yup-10) + "\"" 
                                +  " transform=\"rotate(-90 " + (mySVG.xleft+15+11*(numlines-1)) + "," + (mySVG.yup-10) + ")" 
                                +  "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" 
-                               +  htmlspecialchars("Curve " + this.keys[18][2]) + "</text>";
+                               +  htmlspecialchars("Curve " + this.props.curve_automaat) + "</text>";
                 }
 
                 // Code om het type toe te voegen
-                if ( (this.keys[17][2]=='A') || (this.keys[17][2]=='B') ) {
+                if ( (this.props.type_differentieel=='A') || (this.props.type_differentieel=='B') ) {
                     ++numlines;
                     mySVG.data += "<text x=\"" + (mySVG.xleft+15+11*(numlines-1)) + "\" y=\"" + (mySVG.yup-10) + "\"" 
                                +  " transform=\"rotate(-90 " + (mySVG.xleft+15+11*(numlines-1)) + "," + (mySVG.yup-10) + ")" 
                                +  "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" 
-                               +  htmlspecialchars("Type " + this.keys[17][2]) + "</text>";
+                               +  htmlspecialchars("Type " + this.props.type_differentieel) + "</text>";
                 }
 
                 // Code om kortsluitvermogen toe te voegen
-                if ( (this.keys[22][2]!='') ) {
+                if ( (this.props.kortsluitvermogen!='') ) {
                     ++numlines;
                     mySVG.data += "<text x=\"" + (mySVG.xleft+15+11*(numlines-1)) + "\" y=\"" + (mySVG.yup-10) + "\"" 
                                +  " transform=\"rotate(-90 " + (mySVG.xleft+15+11*(numlines-1)) + "," + (mySVG.yup-10) + ")" 
                                +  "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" 
-                               +  htmlspecialchars("" + this.keys[22][2]) + "kA</text>";
+                               +  htmlspecialchars("" + this.props.kortsluitvermogen) + "kA</text>";
                 }
 
                 // genoeg plaats voorzien aan de rechterkant en eindigen
@@ -247,7 +269,7 @@ class Aansluiting extends Electro_Item {
                         +  "<text x=\"" + (mySVG.xleft+15) + "\" y=\"" + (mySVG.yup-10) + "\"" 
                         +  " transform=\"rotate(-90 " + (mySVG.xleft+15) + "," + (mySVG.yup-10) + ")" 
                         +  "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" 
-                        +  htmlspecialchars(this.keys[4][2] + "P - " + this.keys[8][2] + "A") + "</text>";
+                        +  htmlspecialchars(this.props.aantal_polen + "P - " + this.props.amperage + "A") + "</text>";
                 break;
 
             case "schemer":
@@ -258,7 +280,7 @@ class Aansluiting extends Electro_Item {
                         +  "<text x=\"" + (mySVG.xleft+15) + "\" y=\"" + (mySVG.yup-10) + "\"" 
                         +  " transform=\"rotate(-90 " + (mySVG.xleft+15) + "," + (mySVG.yup-10) + ")" 
                         +  "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" 
-                        +  htmlspecialchars(this.keys[4][2] + "P - " + this.keys[8][2] + "A") + "</text>"
+                        +  htmlspecialchars(this.props.aantal_polen + "P - " + this.props.amperage + "A") + "</text>"
                         +  '<use xlink:href="#arrow" x=\"' + (mySVG.xleft-18) + '" y="' + (mySVG.yup-15) + '" />'
                         +  '<use xlink:href="#arrow" x=\"' + (mySVG.xleft-18) + '" y="' + (mySVG.yup-12) + '" />';
                 break;
@@ -271,7 +293,7 @@ class Aansluiting extends Electro_Item {
                         +  "<text x=\"" + (mySVG.xleft+15) + "\" y=\"" + (mySVG.yup-10) + "\"" 
                         +  " transform=\"rotate(-90 " + (mySVG.xleft+15) + "," + (mySVG.yup-10) + ")" 
                         +  "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" 
-                        +  htmlspecialchars(this.keys[4][2] + "P - " +  this.keys[8][2] + "A") + "</text>";
+                        +  htmlspecialchars(this.props.aantal_polen + "P - " +  this.props.amperage + "A") + "</text>";
                 break;
 
             case "geen":
@@ -283,10 +305,10 @@ class Aansluiting extends Electro_Item {
         mySVG.data += '<line x1="1" ' + 'y1="' + (mySVG.yup+25) + '" x2="' + (21+extrashift)  + '" '+ 'y2="' + (mySVG.yup+25) + '" stroke="black"></line>';
 
         // Kabeltype en tekst links onderaan vóór de teller
-        if (this.keys[24][2] != "") {
+        if (this.props.type_kabel_voor_teller != "") {
             mySVG.data += '<text x="55" y="' + (mySVG.yup+40) 
                        + '" style="text-anchor:end" font-family="Arial, Helvetica, sans-serif" font-size="10">' 
-                       + htmlspecialchars(this.keys[24][2]) + '</text>';
+                       + htmlspecialchars(this.props.type_kabel_voor_teller) + '</text>';
         }        
 
         // De teller
@@ -299,24 +321,24 @@ class Aansluiting extends Electro_Item {
         // Kabeltype en tekst rechts onderaan na de teller
         mySVG.data += '<text x="' + (85+extrashift) + '" y="' + (mySVG.yup+40) 
                    + '" style="text-anchor:left" font-family="Arial, Helvetica, sans-serif" font-size="10">' 
-                   + htmlspecialchars(this.keys[9][2]) + '</text>';
+                   + htmlspecialchars(this.props.type_kabel_na_teller) + '</text>';
 
         // 25 extra pixels voorzien onderaan zodat de teller nooit in de tekening daaronder loopt
         mySVG.yup += 25;
         mySVG.ydown = 25;
 
         // Indien adres niet leeg is, plaats het onderaan
-        if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
+        if (!(/^\s*$/.test(this.props.adres))) { //check if adres contains only white space
             mySVG.data += '<text x="' + (41+extrashift) + '" y="' + (mySVG.yup+mySVG.ydown+10) 
                        + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' 
-                       + htmlspecialchars(this.keys[15][2]) + '</text>';
+                       + htmlspecialchars(this.props.adres) + '</text>';
             mySVG.ydown += 15;
         }
 
         // Naam onderaan zetten (links-onder)
         mySVG.data += '<text x="' + (mySVG.xleft+(-6)) + '" ' + 'y="' + (mySVG.yup-10) + '" '
                 + 'style="text-anchor:end" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="12"'  + '>'
-                + htmlspecialchars(this.keys[23][2]) + '</text>';
+                + htmlspecialchars(this.props.naam) + '</text>';
 
         // rework xleft and xright to ensure the entire structure is always at the right of a potential parent kring
         mySVG.xright = mySVG.xright + mySVG.xleft - 1;

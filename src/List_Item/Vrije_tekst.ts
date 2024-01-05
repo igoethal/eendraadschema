@@ -1,26 +1,35 @@
 class Vrije_tekst extends Electro_Item {
-    
-    constructor(mylist: Hierarchical_List) { 
-        super(mylist); 
-        this.resetKeys();
+
+    convertLegacyKeys(mykeys: Array<[string,string,any]>) {
+        this.props.type                        = this.getLegacyKey(mykeys,0);
+        this.props.nr                          = this.getLegacyKey(mykeys,10);
+        this.props.tekst                       = this.getLegacyKey(mykeys,15);
+        this.props.vrije_tekst_type            = this.getLegacyKey(mykeys,16);
+        this.props.horizontale_uitlijning      = this.getLegacyKey(mykeys,17);
+        this.props.heeft_automatische_breedte  = this.getLegacyKey(mykeys,18);
+        this.props.is_vet                      = this.getLegacyKey(mykeys,19);
+        this.props.is_cursief                  = this.getLegacyKey(mykeys,20);
+        this.props.breedte                     = this.getLegacyKey(mykeys,22);
+        this.props.adres                       = this.getLegacyKey(mykeys,23);
     }
 
-    resetKeys() {
-        this.clearKeys();
-        this.keys[0][2] = "Vrije tekst";   // This is rather a formality as we should already have this at this stage
-        this.keys[15][2] = "";             // Set Tekst itself to "" when the item is cleared
-        this.keys[16][2] = "zonder kader"; // Per default zonder kader, gebruik symbool "Verbruiker (tekst)" voor de default met kader
-        this.keys[17][2] = "links";        // Per default gecentreerd
-        this.keys[18][2] = "automatisch";  // Per default automatische breedte
-        this.keys[19][2] = false;          // Per default niet vet
-        this.keys[20][2] = false;          // Per default niet schuin
-        this.keys[23][2] = "";             // Set Adres/tekst to "" when the item is cleared
-    }
+    resetProps() {
+        this.clearProps();
+        this.props.type = "Vrije tekst";
+        this.props.tekst = "";
+        this.props.vrije_tekst_type = "zonder kader";
+        this.props.horizontale_uitlijning = "links";
+        this.props.heeft_automatische_breedte = "automatisch";
+        this.props.breedte = "";
+        this.props.is_vet = false;
+        this.props.is_cursief = false;
+        this.props.adres = "";
+    }    
 
     overrideKeys() {
-        if (this.keys[16][2] != "verbruiker") { this.keys[16][2] = "zonder kader"; }
-        if (this.keys[18][2] != "automatisch") { this.keys[18][2] = "handmatig"; }
-        if (this.heeftVerbruikerAlsKind()) { this.keys[16][2] = "verbruiker"; }
+        if (this.props.vrije_tekst_type != "verbruiker") { this.props.vrije_tekst_type = "zonder kader"; }
+        if (this.props.heeft_automatische_breedte != "automatisch") { this.props.heeft_automatische_breedte = "handmatig"; }
+        if (this.heeftVerbruikerAlsKind()) { this.props.vrije_tekst_type = "verbruiker"; }
         this.adjustTextWidthIfAuto();
     }
 
@@ -28,48 +37,48 @@ class Vrije_tekst extends Electro_Item {
         this.overrideKeys();
         let output = this.toHTMLHeader(mode);
 
-        output += "&nbsp;Nr: " + this.stringToHTML(10,5)
-               +  ", Tekst (nieuwe lijn = \"|\"): " + this.stringToHTML(15,30)
-               +  ", Breedte: " + this.selectToHTML(18,["automatisch","handmatig"]);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr',5)
+               +  ", Tekst (nieuwe lijn = \"|\"): " + this.stringPropToHTML('tekst',30)
+               +  ", Breedte: " + this.selectPropToHTML('heeft_automatische_breedte',["automatisch","handmatig"]);
 
-        if (this.keys[18][2] != "automatisch") output += " " + this.stringToHTML(22,3);
+        if (this.props.heeft_automatische_breedte != "automatisch") output += " " + this.stringPropToHTML('breedte',3);
         
-        output += ", Vet: " + this.checkboxToHTML(19)
-               +  ", Schuin: " + this.checkboxToHTML(20)
-               +  ", Horizontale alignering: " + this.selectToHTML(17,["links","centreer","rechts"])
-               +  ", Type: " + this.selectToHTML(16,(this.heeftVerbruikerAlsKind() ? ["verbruiker"] : ["verbruiker","zonder kader"]));
+        output += ", Vet: " + this.checkboxPropToHTML('is_vet')
+               +  ", Cursief: " + this.checkboxPropToHTML('is_cursief')
+               +  ", Horizontale alignering: " + this.selectPropToHTML('horizontale_uitlijning',["links","centreer","rechts"])
+               +  ", Type: " + this.selectPropToHTML('vrije_tekst_type',(this.heeftVerbruikerAlsKind() ? ["verbruiker"] : ["verbruiker","zonder kader"]));
                
-        if (this.keys[16][2] != "zonder kader") output += ", Adres/tekst: " + this.stringToHTML(23,5);
+        if (this.props.vrije_tekst_type != "zonder kader") output += ", Adres/tekst: " + this.stringPropToHTML('adres',5);
 
         return(output);
     }
 
     adjustTextWidthIfAuto() {
-        if (this.keys[18][2] === "automatisch") {
+        if (this.props.heeft_automatische_breedte === "automatisch") {
             var options:string = "";
-            if (this.keys[19][2]) options += ' font-weight="bold"';
-            if (this.keys[20][2]) options += ' font-style="italic"';
-            var strlines = htmlspecialchars(this.keys[15][2]).split("|");
+            if (this.props.is_vet) options += ' font-weight="bold"';
+            if (this.props.is_cursief) options += ' font-style="italic"';
+            var strlines = htmlspecialchars(this.props.tekst).split("|");
             var width = 40;
             for (let i = 0; i<strlines.length; i++) {
                 width = Math.round(Math.max(width,svgTextWidth(strlines[i],10,options)+10));
             }
-            this.keys[22][2] = String(width);
+            this.props.breedte = String(width);
         }    
     }
 
     toSVG() {
         let mySVG:SVGelement = new SVGelement();
-        var strlines = htmlspecialchars(this.keys[15][2]).split("|");
+        var strlines = htmlspecialchars(this.props.tekst).split("|");
 
         // Breedte van de vrije tekst bepalen
         this.adjustTextWidthIfAuto();
-        var width = ( isNaN(Number(this.keys[22][2])) || ( this.keys[22][2] === "" )  ? 40 : Math.max(Number(this.keys[22][2])*1,1) ); 
+        var width = ( isNaN(Number(this.props.breedte)) || ( this.props.breedte === "" )  ? 40 : Math.max(Number(this.props.breedte)*1,1) ); 
 
         // Voldoende ruimte voorzien voor alle elementen
         var extraplace = 15 * Math.max(strlines.length-2,0);
         var shiftx;
-        if (this.keys[16][2] === "zonder kader") {
+        if (this.props.vrije_tekst_type === "zonder kader") {
             if ((this.getParent() as Electro_Item).getType() === "Kring") shiftx = 10;
             else if ((this.getParent() as Electro_Item).getType() === "Stopcontact") shiftx = 0;
             else shiftx = 5;
@@ -82,12 +91,12 @@ class Vrije_tekst extends Electro_Item {
 
         // Optionele parameters voor vet en italic uitlezen
         var options:string = "";
-        if (this.keys[19][2]) options += ' font-weight="bold"';
-        if (this.keys[20][2]) options += ' font-style="italic"';
+        if (this.props.is_vet) options += ' font-weight="bold"';
+        if (this.props.is_cursief) options += ' font-style="italic"';
 
         // Tekst plaatsen --
         var outputstr_common;
-        switch (this.keys[17][2]) {
+        switch (this.props.horizontale_uitlijning) {
             case "links":  outputstr_common = '<text style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-size="10" x="' + (shiftx + 5) + '" '; break;
             case "rechts": outputstr_common = '<text style="text-anchor:end" font-family="Arial, Helvetica, sans-serif" font-size="10" x="' + (shiftx + width - 4) + '" '; break;
             default:       outputstr_common = '<text style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" x="' + (shiftx + 1 + width/2) + '" '; break;
@@ -99,12 +108,12 @@ class Vrije_tekst extends Electro_Item {
         }
        
         // Kader en adres tekenen --
-        switch (this.keys[16][2]) {
+        switch (this.props.vrije_tekst_type) {
             case "zonder kader": break;
             default: //Wegens compatibiliteit met oudere versies van de software is het ontbreken van eender welke parameter een "met kader"
                 mySVG.data += '<line x1="1" y1="' + (25 + extraplace/2.0) + '" x2="21" y2="' + (25 + extraplace/2.0) + '" stroke="black" />'
                            + '<rect x="21" y="5" width="' + width + '" height="' + (40 + extraplace) + '" fill="none" style="stroke:black" />'
-                           + this.addAddress(mySVG,60+extraplace,15,width/2-(mySVG.xright-20)/2,23);
+                           + this.addAddressToSVG(mySVG,60+extraplace,15,width/2-(mySVG.xright-20)/2);
                 break;
         }
 

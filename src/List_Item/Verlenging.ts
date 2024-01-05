@@ -1,22 +1,25 @@
 class Verlenging extends Electro_Item {
-    
-    constructor(mylist: Hierarchical_List) { 
-        super(mylist); 
-        this.resetKeys();
+
+    convertLegacyKeys(mykeys: Array<[string,string,any]>) {
+        this.props.type                        = this.getLegacyKey(mykeys,0);
+        this.props.nr                          = this.getLegacyKey(mykeys,10);
+        this.props.breedte                     = this.getLegacyKey(mykeys,22);
+        this.props.adres                       = this.getLegacyKey(mykeys,23);
     }
 
-    resetKeys() {
-        this.clearKeys();
-        this.keys[0][2]  = "Verlenging"; // This is rather a formality as we should already have this at this stage
-        this.keys[22][2] = "40";         // This is rather a formality as we should already have this at this stage
+    resetProps() {
+        this.clearProps();
+        this.props.type  = "Verlenging";
+        this.props.breedte = "40";
+        this.props.adres = "";
     }
 
     toHTML(mode: string) {
         let output = this.toHTMLHeader(mode);
 
-        output += "&nbsp;Nr: " + this.stringToHTML(10,5)
-               +  ", Breedte: " + this.stringToHTML(22,3)
-               +  ", Adres/tekst: " + this.stringToHTML(23,5);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr',5)
+               +  ", Breedte: " + this.stringPropToHTML('breedte',3)
+               +  ", Adres/tekst: " + this.stringPropToHTML('adres',5);
 
         return(output);
     }
@@ -26,13 +29,13 @@ class Verlenging extends Electro_Item {
         let outputstr:string = "";
 
         var width;
-        if (isNaN(Number(this.keys[22][2]))) {
+        if (isNaN(Number(this.props.breedte))) {
             width = 40;
         } else {
-            if (Number(this.keys[22][2] == "")) {
+            if (Number(this.props.breedte == "")) {
             width = 40;
             } else {
-            width = Math.max(Number(this.keys[22][2])*1,0);
+            width = Math.max(Number(this.props.breedte)*1,0);
             }
         }
 
@@ -43,7 +46,7 @@ class Verlenging extends Electro_Item {
 
         mySVG.data += '<line x1="1" y1="25" x2="' + (width+1) + '" y2="25" stroke="black" />';
         
-        mySVG.data += this.addAddress(mySVG,40,0,width/2-mySVG.xright/2-10,23);
+        mySVG.data += this.addAddressToSVG(mySVG,40,0,width/2-mySVG.xright/2-10);
         mySVG.data += "\n";
 
         return(mySVG);

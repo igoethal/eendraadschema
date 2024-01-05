@@ -1,20 +1,21 @@
 class Vrije_ruimte extends Electro_Item {
-    
-    constructor(mylist: Hierarchical_List) { 
-        super(mylist); 
-        this.resetKeys();
+
+    convertLegacyKeys(mykeys: Array<[string,string,any]>) {
+        this.props.type                        = this.getLegacyKey(mykeys,0);
+        this.props.nr                          = this.getLegacyKey(mykeys,10);
+        this.props.breedte                     = this.getLegacyKey(mykeys,22);
     }
 
-    resetKeys() {
-        this.clearKeys();
-        this.keys[0][2] = "Vrije ruimte"; // This is rather a formality as we should already have this at this stage
-        this.keys[22][2] = 25;            // Default breedte van de vrije ruimte
+    resetProps() {
+        this.clearProps();
+        this.props.type = "Vrije ruimte"; // This is rather a formality as we should already have this at this stage
+        this.props.breedte = 25;            // Default breedte van de vrije ruimte
     }
 
     toHTML(mode: string) {
         let output = this.toHTMLHeader(mode);
 
-        output += "&nbsp;Breedte: " + this.stringToHTML(22,3);
+        output += "&nbsp;Breedte: " + this.stringPropToHTML('breedte',3);
 
         return(output);
     }
@@ -27,7 +28,7 @@ class Vrije_ruimte extends Electro_Item {
         let mySVG:SVGelement = new SVGelement();
 
         // Bepaal breedte van het element
-        let desiredwidth = Number(this.keys[22][2]);
+        let desiredwidth = Number(this.props.breedte);
         if (isNaN(desiredwidth)) { desiredwidth = 25; }  
 
         // Creëer het element en return

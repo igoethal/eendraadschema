@@ -1,7 +1,22 @@
 declare var pako: any;
 
+function deepClone (obj) {
+  var _out = new obj.constructor;
+
+  var getType = function (n) {
+      return Object.prototype.toString.call(n).slice(8, -1);
+  }
+
+  for (let _key in obj) {
+      if (obj.hasOwnProperty(_key)) {
+          _out[_key] = getType(obj[_key]) === 'Object' || getType(obj[_key]) === 'Array' ? deepClone(obj[_key]) : obj[_key];
+      }
+  }
+  return _out;
+}
+
 function contains(a, obj) {
-    for (var i = 0; i < a.length; i++) {
+    for (let i = 0; i < a.length; i++) {
         if (a[i] === obj) {
             return true;
         }
@@ -44,7 +59,6 @@ function flattenSVG(SVGstruct,shiftx,shifty,node) {
       str = str.concat(flattenSVG(SVGstruct.children[i],shiftx,shifty,node+1),"\n");
     }
     if (node <= 0) {
-      //---output[0] = outstruct;
       if (outstruct.attributes.getNamedItem("width")) { // make SVG a 0,0 element
         str = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" transform="scale(1,1)" width="' + (outstruct.attributes.getNamedItem("width").nodeValue)  +
                     '" height="' + (outstruct.attributes.getNamedItem("height").nodeValue) + '">' + str + '</svg>';
@@ -100,8 +114,8 @@ function flattenSVG(SVGstruct,shiftx,shifty,node) {
       var polystr_out = "";
       var polystr_in = outstruct.attributes.getNamedItem("points").nodeValue;
       var splitted_in = polystr_in.split(" ");
-      for (var countstr = 0; countstr < splitted_in.length; countstr++) {
-        var points_in = splitted_in[countstr].split(",");
+      for (let countstr = 0; countstr < splitted_in.length; countstr++) {
+        let points_in = splitted_in[countstr].split(",");
         polystr_out += (points_in[0]*1+shiftx) + ',' + (points_in[1]*1+shifty);
         if (countstr < splitted_in.length-1) { polystr_out += ' ' }
       }
@@ -120,15 +134,14 @@ function flattenSVGfromString(xmlstr) {
   var str:string = "";
   var parser = new DOMParser();
   var xmlDoc = parser.parseFromString(xmlstr, "text/xml"); //important to use "text/xml"
-  //str = flattenSVG(xmlDoc.children[0],0,0,0);
   str = flattenSVG(xmlDoc.childNodes[0],0,0,0);
   return str;
 }
 
 function htmlspecialchars(my_input)
 {
-    var str:string
-    if (isNaN(my_input)) str = my_input; else str=my_input.toString();
+    let returnstr:string;
+    if (typeof(my_input) == 'undefined') returnstr = ""; else returnstr=my_input.toString();
 
     var map =
     {
@@ -138,7 +151,7 @@ function htmlspecialchars(my_input)
         '"': '&quot;',
         "'": '&#039;'
     };
-    return str.replace(/[&<>"']/g, function(m) {return map[m];});
+    return returnstr.replace(/[&<>"']/g, function(m) {return map[m];});
 }
 
 function browser_ie_detected()

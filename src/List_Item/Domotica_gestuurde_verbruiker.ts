@@ -1,20 +1,27 @@
 class Domotica_gestuurde_verbruiker extends Electro_Item {
-    
-    constructor(mylist: Hierarchical_List) { 
-        super(mylist); 
-        this.resetKeys();
+
+    convertLegacyKeys(mykeys: Array<[string,string,any]>) {
+        this.props.type                   = this.getLegacyKey(mykeys,0);
+        this.props.type_externe_sturing   = this.getLegacyKey(mykeys,5);
+        this.props.nr                     = this.getLegacyKey(mykeys,10);
+        this.props.adres                  = this.getLegacyKey(mykeys,15);
+        this.props.is_draadloos           = this.getLegacyKey(mykeys,19);
+        this.props.heeft_lokale_drukknop  = this.getLegacyKey(mykeys,20);
+        this.props.is_geprogrammeerd      = this.getLegacyKey(mykeys,21);
+        this.props.heeft_detectie         = this.getLegacyKey(mykeys,25);
+        this.props.heeft_externe_sturing  = this.getLegacyKey(mykeys,26);
     }
 
-    resetKeys() {
-        this.clearKeys();
-        this.keys[0][2] = "Domotica gestuurde verbruiker"; // This is rather a formality as we should already have this at this stage
-        this.keys[5][2] = "drukknop";
-        this.keys[15][2] = "";
-        this.keys[19][2] = true;
-        this.keys[20][2] = true;
-        this.keys[21][2] = true;
-        this.keys[25][2] = false;
-        this.keys[26][2] = false;
+    resetProps() {
+        this.clearProps();
+        this.props.type = "Domotica gestuurde verbruiker";
+        this.props.type_externe_sturing = "drukknop";
+        this.props.adres = "";
+        this.props.is_draadloos = true;
+        this.props.heeft_lokale_drukknop = true;
+        this.props.is_geprogrammeerd = true;
+        this.props.heeft_detectie = false;
+        this.props.heeft_externe_sturing = false;
     }
 
     allowedChilds() : Array<string> { // returns an array with the type-names of allowed childs
@@ -28,16 +35,16 @@ class Domotica_gestuurde_verbruiker extends Electro_Item {
     toHTML(mode: string) {
         let output = this.toHTMLHeader(mode);
 
-        output += "&nbsp;Nr: " + this.stringToHTML(10,5)
-               +  ", Draadloos: " + this.checkboxToHTML(19)
-               +  ", Lokale Drukknop: " + this.checkboxToHTML(20)
-               +  ", Geprogrammeerd: " + this.checkboxToHTML(21)
-               +  ", Detectie: " + this.checkboxToHTML(25)
-               +  ", Externe sturing: " + this.checkboxToHTML(26);    
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr',5)
+               +  ", Draadloos: " + this.checkboxPropToHTML('is_draadloos')
+               +  ", Lokale Drukknop: " + this.checkboxPropToHTML('heeft_lokale_drukknop')
+               +  ", Geprogrammeerd: " + this.checkboxPropToHTML('is_geprogrammeerd')
+               +  ", Detectie: " + this.checkboxPropToHTML('heeft_detectie')
+               +  ", Externe sturing: " + this.checkboxPropToHTML('heeft_externe_sturing');    
 
-        if (this.keys[26][2]) output += ", Externe sturing: " + this.selectToHTML(5,["drukknop","schakelaar"]);
+        if (this.props.heeft_externe_sturing) output += ", Externe sturing: " + this.selectPropToHTML('type_externe_sturing',["drukknop","schakelaar"]);
 
-        output += ", Adres/tekst: " + this.stringToHTML(15,5); 
+        output += ", Adres/tekst: " + this.stringPropToHTML('adres',5); 
 
         return(output);
     }
@@ -87,13 +94,13 @@ class Domotica_gestuurde_verbruiker extends Electro_Item {
 
         // We plaatsen de symbolen bovenaan
 
-        if (this.keys[19][2]) mySVG.data += '<use xlink:href="#draadloos_klein" x="22" y="15"></use>';
-        if (this.keys[20][2]) mySVG.data += '<use xlink:href="#drukknop_klein" x="38" y="15"></use>';
-        if (this.keys[21][2]) mySVG.data += '<use xlink:href="#tijdschakelaar_klein" x="54" y="15"></use>';
-        if (this.keys[25][2]) mySVG.data += '<use xlink:href="#detectie_klein" x="70" y="15"></use>';
+        if (this.props.is_draadloos) mySVG.data += '<use xlink:href="#draadloos_klein" x="22" y="15"></use>';
+        if (this.props.heeft_lokale_drukknop) mySVG.data += '<use xlink:href="#drukknop_klein" x="38" y="15"></use>';
+        if (this.props.is_geprogrammeerd) mySVG.data += '<use xlink:href="#tijdschakelaar_klein" x="54" y="15"></use>';
+        if (this.props.heeft_detectie) mySVG.data += '<use xlink:href="#detectie_klein" x="70" y="15"></use>';
 
-        if (this.keys[26][2]) {
-            switch(this.keys[5][2]) {
+        if (this.props.heeft_externe_sturing) {
+            switch(this.props.type_externe_sturing) {
                 case "schakelaar":
                     mySVG.data = '<svg x="' + (0) + '" y="20">' + mySVG.data + '</svg>'
                                + '<use xlink:href="#schakelaar_klein" x="78" y="18"></use>'
@@ -110,10 +117,10 @@ class Domotica_gestuurde_verbruiker extends Electro_Item {
 
         //Place text below if there is any
 
-        if (!(/^\s*$/.test(this.keys[15][2]))) { //check if adres contains only white space
+        if (!(/^\s*$/.test(this.props.adres))) { //check if adres contains only white space
             mySVG.data += '<text x="' + ((mySVG.xright-20)/2 + 21 + 0) + '" y="' + (mySVG.ydown + mySVG.yup + 10) 
                        +  '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' 
-                       + htmlspecialchars(this.keys[15][2]) + '</text>';
+                       + htmlspecialchars(this.props.adres) + '</text>';
                        
             mySVG.ydown += 15;
         }  

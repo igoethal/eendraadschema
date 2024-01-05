@@ -1,27 +1,23 @@
 class Stopcontact extends Electro_Item {
-    
-    constructor(mylist: Hierarchical_List) { 
-        super(mylist); 
-        this.resetKeys();
-    }
 
     convertLegacyKeys(mykeys: Array<[string,string,any]>) {
-        this.props.type                           = this.getLegacyKey(0);
-        this.props.is_geaard                      = this.getLegacyKey(1);
-        this.props.is_kinderveilig                = this.getLegacyKey(2);
-        this.props.aantal                         = this.getLegacyKey(4);
-        this.props.adres                          = this.getLegacyKey(15);
-        this.props.aantal_fases_indien_meerfasig  = this.getLegacyKey(16);
-        this.props.heeft_ingebouwde_schakelaar    = this.getLegacyKey(19);
-        this.props.is_halfwaterdicht              = this.getLegacyKey(20);
-        this.props.is_meerfasig                   = this.getLegacyKey(21);
-        this.props.heeft_nul_indien_meerfasig     = this.getLegacyKey(25);
-        this.props.in_verdeelbord                 = this.getLegacyKey(26);
+        this.props.type                           = this.getLegacyKey(mykeys,0);
+        this.props.is_geaard                      = this.getLegacyKey(mykeys,1);
+        this.props.is_kinderveilig                = this.getLegacyKey(mykeys,2);
+        this.props.aantal                         = this.getLegacyKey(mykeys,4);
+        this.props.nr                             = this.getLegacyKey(mykeys,10);
+        this.props.adres                          = this.getLegacyKey(mykeys,15);
+        this.props.aantal_fases_indien_meerfasig  = this.getLegacyKey(mykeys,16);
+        this.props.heeft_ingebouwde_schakelaar    = this.getLegacyKey(mykeys,19);
+        this.props.is_halfwaterdicht              = this.getLegacyKey(mykeys,20);
+        this.props.is_meerfasig                   = this.getLegacyKey(mykeys,21);
+        this.props.heeft_nul_indien_meerfasig     = this.getLegacyKey(mykeys,25);
+        this.props.in_verdeelbord                 = this.getLegacyKey(mykeys,26);
     }
 
-    resetKeys() {
-        this.clearKeys();
-        this.props.type = "Stopcontact"; 
+    resetProps() {
+        this.clearProps();
+        this.props.type = "Stopcontact";
         this.props.is_geaard = true;    
         this.props.is_kinderveilig = true; 
         this.props.aantal = "1";     
@@ -129,7 +125,7 @@ class Stopcontact extends Electro_Item {
         };
        
         // Adres helemaal onderaan plaatsen
-        mySVG.data += this.addPropAddress(mySVG,60,15);
+        mySVG.data += this.addAddressToSVG(mySVG,60,15);
         mySVG.data += "\n";
 
         return(mySVG);

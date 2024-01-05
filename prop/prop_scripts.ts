@@ -23,38 +23,39 @@ function PROP_getCookieText() {
 }
 
 function exportjson() {
-  var filename:string;
+    var filename:string;
 
-  //We use the Pako library to entropy code the data
-  //Final data reads "EDS0010000" and thereafter a 64base encoding of the deflated output from Pako
-  //filename = "eendraadschema.eds";
-  filename = structure.properties.filename;
+    /* We use the Pako library to entropy code the data
+     * Final data reads "EDSXXX0000" with XXX a version and thereafter a 64base encoding of the deflated output from Pako
+     * filename = "eendraadschema.eds";
+     */
+    filename = structure.properties.filename;
 
-  //Remove some unneeded data members that would only inflate the size of the output file
-  for (var listitem of structure.data) {
-    listitem.sourcelist = null;
-  }
+    // Remove some unneeded data members that would only inflate the size of the output file
+    for (let listitem of structure.data) {
+      listitem.sourcelist = null;
+    }
 
-  //Create the output structure in uncompressed form
-  var text:string = JSON.stringify(structure);
+    // Create the output structure in uncompressed form
+    var text:string = JSON.stringify(structure);
 
-  //Put the removed data members back
-  for (var listitem of structure.data) {
-    listitem.sourcelist = structure;
-  }
+    // Put the removed data members back
+    for (let listitem of structure.data) {
+        listitem.sourcelist = structure;
+    }
 
-  //Compress the output structure and download to the user
-  try {
-    let decoder = new TextDecoder("utf-8");
-    let encoder = new TextEncoder();
-    let pako_inflated = new Uint8Array(encoder.encode(text));
-    let pako_deflated = new Uint8Array(pako.deflate(pako_inflated));
-    text = "EDS0020000" + btoa(String.fromCharCode.apply(null, pako_deflated));
-  } catch (error) {
-    //We keep the non encoded text and do nothing
-  } finally {
-    download_by_blob(text, filename, 'data:text/eds;charset=utf-8');
-  }
+    // Compress the output structure and offer as download to the user. We are at version 003
+    try {
+        let decoder = new TextDecoder("utf-8");
+        let encoder = new TextEncoder();
+        let pako_inflated = new Uint8Array(encoder.encode(text));
+        let pako_deflated = new Uint8Array(pako.deflate(pako_inflated));
+        text = "EDS0030000" + btoa(String.fromCharCode.apply(null, pako_deflated));
+    } catch (error) {
+        text = "TXT0030000" + text;
+    } finally {
+        download_by_blob(text, filename, 'data:text/eds;charset=utf-8');
+    }
 }
 
 function displayButtonPrintToPdf() {
