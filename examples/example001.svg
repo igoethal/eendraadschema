@@ -173,7 +173,7 @@
       <use xlink:href="#arrow" xmlns:xlink="http://www.w3.org/1999/xlink" x="14" y="-17" transform="rotate(90 14 -17)"></use>
       <use xlink:href="#arrow" xmlns:xlink="http://www.w3.org/1999/xlink" x="18" y="-17" transform="rotate(90 18 -17)"></use>
     </g>
-    <g id="stopcontact">
+    <g id="contactdoos">
       <path d="M20 0 A15 15 0 0 1 35 -15" stroke="black" fill="white" stroke-width="2"></path>
       <path d="M20 0 A15 15 0 0 0 35 15" stroke="black" fill="white" stroke-width="2"></path>
       <line x1="0" y1="0" x2="20" y2="0" stroke="black"></line>
@@ -184,10 +184,10 @@
       <path d="M 6  5 A 7 5 0 0 1 13  0 A 7 5 0 0 1 27  0 A 7 5 0 0 1 33  5" stroke="black" fill="none"></path>
       <path d="M 6 12 A 7 5 0 0 1 13  7 A 7 5 0 0 1 27  7 A 7 5 0 0 1 33 12" stroke="black" fill="none"></path>
     </g>
-    <g id="stopcontact_aarding">
+    <g id="contactdoos_aarding">
       <line x1="20" y1="-15" x2="20" y2="15" stroke="black" stroke-width="2"></line>
     </g>
-    <g id="stopcontact_kinderveilig">
+    <g id="contactdoos_kinderveilig">
       <line x1="35" y1="-20" x2="35" y2="-15" stroke="black" stroke-width="2"></line>
       <line x1="35" y1="20" x2="35" y2="15" stroke="black" stroke-width="2"></line>
     </g>
@@ -412,26 +412,26 @@
 <line x1="105" x2="135" y1="25" y2="25" stroke="black"></line>
 <use xlink:href="#schakelaar_dubbel" xmlns:xlink="http://www.w3.org/1999/xlink" x="135" y="25"></use>
 
-<use xlink:href="#stopcontact" xmlns:xlink="http://www.w3.org/1999/xlink" x="140" y="25"></use>
-<use xlink:href="#stopcontact_aarding" xmlns:xlink="http://www.w3.org/1999/xlink" x="140" y="25"></use>
-<use xlink:href="#stopcontact_kinderveilig" xmlns:xlink="http://www.w3.org/1999/xlink" x="140" y="25"></use>
+<use xlink:href="#contactdoos" xmlns:xlink="http://www.w3.org/1999/xlink" x="140" y="25"></use>
+<use xlink:href="#contactdoos_aarding" xmlns:xlink="http://www.w3.org/1999/xlink" x="140" y="25"></use>
+<use xlink:href="#contactdoos_kinderveilig" xmlns:xlink="http://www.w3.org/1999/xlink" x="140" y="25"></use>
 
 <line x1="105" x2="105" y1="25" y2="50" stroke="black"></line>
 <text x="114" y="20" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">4</text>
 
-<use xlink:href="#stopcontact" xmlns:xlink="http://www.w3.org/1999/xlink" x="105" y="75"></use>
-<use xlink:href="#stopcontact_aarding" xmlns:xlink="http://www.w3.org/1999/xlink" x="105" y="75"></use>
-<use xlink:href="#stopcontact_kinderveilig" xmlns:xlink="http://www.w3.org/1999/xlink" x="105" y="75"></use>
-<use xlink:href="#stopcontact" xmlns:xlink="http://www.w3.org/1999/xlink" x="125" y="75"></use>
-<use xlink:href="#stopcontact_aarding" xmlns:xlink="http://www.w3.org/1999/xlink" x="125" y="75"></use>
-<use xlink:href="#stopcontact_kinderveilig" xmlns:xlink="http://www.w3.org/1999/xlink" x="125" y="75"></use>
+<use xlink:href="#contactdoos" xmlns:xlink="http://www.w3.org/1999/xlink" x="105" y="75"></use>
+<use xlink:href="#contactdoos_aarding" xmlns:xlink="http://www.w3.org/1999/xlink" x="105" y="75"></use>
+<use xlink:href="#contactdoos_kinderveilig" xmlns:xlink="http://www.w3.org/1999/xlink" x="105" y="75"></use>
+<use xlink:href="#contactdoos" xmlns:xlink="http://www.w3.org/1999/xlink" x="125" y="75"></use>
+<use xlink:href="#contactdoos_aarding" xmlns:xlink="http://www.w3.org/1999/xlink" x="125" y="75"></use>
+<use xlink:href="#contactdoos_kinderveilig" xmlns:xlink="http://www.w3.org/1999/xlink" x="125" y="75"></use>
 
 <line x1="105" x2="105" y1="50" y2="100" stroke="black"></line>
 <text x="114" y="70" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">3</text>
 
-<use xlink:href="#stopcontact" xmlns:xlink="http://www.w3.org/1999/xlink" x="105" y="125"></use>
-<use xlink:href="#stopcontact_aarding" xmlns:xlink="http://www.w3.org/1999/xlink" x="105" y="125"></use>
-<use xlink:href="#stopcontact_kinderveilig" xmlns:xlink="http://www.w3.org/1999/xlink" x="105" y="125"></use>
+<use xlink:href="#contactdoos" xmlns:xlink="http://www.w3.org/1999/xlink" x="105" y="125"></use>
+<use xlink:href="#contactdoos_aarding" xmlns:xlink="http://www.w3.org/1999/xlink" x="105" y="125"></use>
+<use xlink:href="#contactdoos_kinderveilig" xmlns:xlink="http://www.w3.org/1999/xlink" x="105" y="125"></use>
 <line x1="125" y1="125" x2="146" y2="125" stroke="black"></line>
 
 <line x1="146" y1="125" x2="166" y2="125" stroke="black"></line>
@@ -441,9 +441,9 @@
 <line x1="105" x2="105" y1="100" y2="150" stroke="black"></line>
 <text x="114" y="120" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">2</text>
 
-<use xlink:href="#stopcontact" xmlns:xlink="http://www.w3.org/1999/xlink" x="105" y="175"></use>
-<use xlink:href="#stopcontact_aarding" xmlns:xlink="http://www.w3.org/1999/xlink" x="105" y="175"></use>
-<use xlink:href="#stopcontact_kinderveilig" xmlns:xlink="http://www.w3.org/1999/xlink" x="105" y="175"></use>
+<use xlink:href="#contactdoos" xmlns:xlink="http://www.w3.org/1999/xlink" x="105" y="175"></use>
+<use xlink:href="#contactdoos_aarding" xmlns:xlink="http://www.w3.org/1999/xlink" x="105" y="175"></use>
+<use xlink:href="#contactdoos_kinderveilig" xmlns:xlink="http://www.w3.org/1999/xlink" x="105" y="175"></use>
 
 <line x1="105" x2="105" y1="150" y2="200" stroke="black"></line>
 <text x="114" y="170" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">1</text>
@@ -453,16 +453,16 @@
 <text x="99" y="223" style="text-anchor:end" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="12"></text>
 <line x1="105" x2="105" y1="220" y2="235" stroke="black"></line>
 
-<use xlink:href="#stopcontact" xmlns:xlink="http://www.w3.org/1999/xlink" x="241" y="125"></use>
-<use xlink:href="#stopcontact_aarding" xmlns:xlink="http://www.w3.org/1999/xlink" x="241" y="125"></use>
-<use xlink:href="#stopcontact_kinderveilig" xmlns:xlink="http://www.w3.org/1999/xlink" x="241" y="125"></use>
+<use xlink:href="#contactdoos" xmlns:xlink="http://www.w3.org/1999/xlink" x="241" y="125"></use>
+<use xlink:href="#contactdoos_aarding" xmlns:xlink="http://www.w3.org/1999/xlink" x="241" y="125"></use>
+<use xlink:href="#contactdoos_kinderveilig" xmlns:xlink="http://www.w3.org/1999/xlink" x="241" y="125"></use>
 
 <line x1="241" x2="241" y1="125" y2="150" stroke="black"></line>
 <text x="250" y="120" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">6</text>
 
-<use xlink:href="#stopcontact" xmlns:xlink="http://www.w3.org/1999/xlink" x="241" y="175"></use>
-<use xlink:href="#stopcontact_aarding" xmlns:xlink="http://www.w3.org/1999/xlink" x="241" y="175"></use>
-<use xlink:href="#stopcontact_kinderveilig" xmlns:xlink="http://www.w3.org/1999/xlink" x="241" y="175"></use>
+<use xlink:href="#contactdoos" xmlns:xlink="http://www.w3.org/1999/xlink" x="241" y="175"></use>
+<use xlink:href="#contactdoos_aarding" xmlns:xlink="http://www.w3.org/1999/xlink" x="241" y="175"></use>
+<use xlink:href="#contactdoos_kinderveilig" xmlns:xlink="http://www.w3.org/1999/xlink" x="241" y="175"></use>
 
 <line x1="241" x2="241" y1="150" y2="200" stroke="black"></line>
 <text x="250" y="170" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">5</text>
@@ -566,9 +566,9 @@
 <line x1="505" x2="505" y1="110" y2="135" stroke="black"></line>
 <text x="514" y="105" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">3</text>
 
-<use xlink:href="#stopcontact" xmlns:xlink="http://www.w3.org/1999/xlink" x="505" y="160"></use>
-<use xlink:href="#stopcontact_aarding" xmlns:xlink="http://www.w3.org/1999/xlink" x="505" y="160"></use>
-<use xlink:href="#stopcontact_kinderveilig" xmlns:xlink="http://www.w3.org/1999/xlink" x="505" y="160"></use>
+<use xlink:href="#contactdoos" xmlns:xlink="http://www.w3.org/1999/xlink" x="505" y="160"></use>
+<use xlink:href="#contactdoos_aarding" xmlns:xlink="http://www.w3.org/1999/xlink" x="505" y="160"></use>
+<use xlink:href="#contactdoos_kinderveilig" xmlns:xlink="http://www.w3.org/1999/xlink" x="505" y="160"></use>
 
 <text style="text-anchor:end" font-family="Arial, Helvetica, sans-serif" font-size="10" x="601" y="163">Haardroger</text>
 
@@ -576,9 +576,9 @@
 <line x1="505" x2="505" y1="135" y2="185" stroke="black"></line>
 <text x="514" y="155" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">2</text>
 
-<use xlink:href="#stopcontact" xmlns:xlink="http://www.w3.org/1999/xlink" x="505" y="210"></use>
-<use xlink:href="#stopcontact_aarding" xmlns:xlink="http://www.w3.org/1999/xlink" x="505" y="210"></use>
-<use xlink:href="#stopcontact_kinderveilig" xmlns:xlink="http://www.w3.org/1999/xlink" x="505" y="210"></use>
+<use xlink:href="#contactdoos" xmlns:xlink="http://www.w3.org/1999/xlink" x="505" y="210"></use>
+<use xlink:href="#contactdoos_aarding" xmlns:xlink="http://www.w3.org/1999/xlink" x="505" y="210"></use>
+<use xlink:href="#contactdoos_kinderveilig" xmlns:xlink="http://www.w3.org/1999/xlink" x="505" y="210"></use>
 
 <line x1="505" x2="505" y1="185" y2="235" stroke="black"></line>
 <text x="514" y="205" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">1</text>

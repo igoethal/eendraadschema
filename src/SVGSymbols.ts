@@ -189,7 +189,7 @@ static outputSVGSymbols() {
       <use xlink:href="#arrow" x="14" y="-17" transform="rotate(90 14 -17)" />
       <use xlink:href="#arrow" x="18" y="-17" transform="rotate(90 18 -17)" />
     </g>
-    <g id="stopcontact">
+    <g id="contactdoos">
       <path d="M20 0 A15 15 0 0 1 35 -15" stroke="black" fill="white" stroke-width="2" />
       <path d="M20 0 A15 15 0 0 0 35 15" stroke="black" fill="white" stroke-width="2" />
       <line x1="0" y1="0" x2="20" y2="0" stroke="black" />
@@ -200,10 +200,10 @@ static outputSVGSymbols() {
       <path d="M 6  5 A 7 5 0 0 1 13  0 A 7 5 0 0 1 27  0 A 7 5 0 0 1 33  5" stroke="black" fill="none" />
       <path d="M 6 12 A 7 5 0 0 1 13  7 A 7 5 0 0 1 27  7 A 7 5 0 0 1 33 12" stroke="black" fill="none" />
     </g>
-    <g id="stopcontact_aarding">
+    <g id="contactdoos_aarding">
       <line x1="20" y1="-15" x2="20" y2="15"  stroke="black" stroke-width="2" />
     </g>
-    <g id="stopcontact_kinderveilig">
+    <g id="contactdoos_kinderveilig">
       <line x1="35" y1="-20" x2="35" y2="-14.1"  stroke="black" stroke-width="2" />
       <line x1="35" y1="20" x2="35" y2="14.1"  stroke="black" stroke-width="2" />
     </g>

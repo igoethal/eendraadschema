@@ -313,7 +313,7 @@ var Electro_Item = /** @class */ (function (_super) {
     };
     // -- Lijst met toegestande kinderen van het Electro_item --
     Electro_Item.prototype.allowedChilds = function () {
-        return ["", "Aansluiting", "Domotica", "Domotica gestuurde verbruiker", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
+        return ["", "Aansluiting", "Domotica", "Domotica gestuurde verbruiker", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Contactdoos", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
     };
     // -- Aantal actieve kinderen van het Electro_item --
     Electro_Item.prototype.getNumChildsWithKnownType = function () {
@@ -342,7 +342,7 @@ var Electro_Item = /** @class */ (function (_super) {
         else
             return false;
     };
-    // -- Check of er een streepje moet geplaatst worden achter bepaalde elementen zoals een stopcontact of lichtpunt --
+    // -- Check of er een streepje moet geplaatst worden achter bepaalde elementen zoals een contactdoos of lichtpunt --
     Electro_Item.prototype.heeftVerbruikerAlsKind = function () {
         var parent = this.getParent();
         if ((parent != null) && (parent.getType() == "Meerdere verbruikers")) {
@@ -711,9 +711,7 @@ var Schakelaar = /** @class */ (function () {
 var Schakelaars = /** @class */ (function (_super) {
     __extends(Schakelaars, _super);
     function Schakelaars(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.tekenKeten = [];
-        return _this;
+        return _super.call(this, mylist) || this;
     }
     Schakelaars.prototype.convertLegacyKeys = function (mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
@@ -799,98 +797,98 @@ var Schakelaars = /** @class */ (function (_super) {
         output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
-    Schakelaars.prototype.bouwSchakelaarKeten = function () {
-        this.tekenKeten = [];
+    Schakelaars.prototype.bouwSchakelaarKeten = function (tekenKeten) {
         switch (this.props.type_schakelaar) {
             case "wissel_enkel":
-                this.tekenKeten.push(new Schakelaar("wissel_enkel", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
+                tekenKeten.push(new Schakelaar("wissel_enkel", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
                 break;
             case "wissel_dubbel":
-                this.tekenKeten.push(new Schakelaar("wissel_dubbel", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
+                tekenKeten.push(new Schakelaar("wissel_dubbel", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
                 break;
             case "kruis_enkel":
-                this.tekenKeten.push(new Schakelaar("kruis_enkel", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
+                tekenKeten.push(new Schakelaar("kruis_enkel", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
                 break;
             case "teleruptor":
-                this.tekenKeten.push(new Schakelaar("teleruptor"));
+                tekenKeten.push(new Schakelaar("teleruptor"));
                 break;
             case "bewegingsschakelaar":
-                this.tekenKeten.push(new Schakelaar("bewegingsschakelaar"));
+                tekenKeten.push(new Schakelaar("bewegingsschakelaar"));
                 break;
             case "schemerschakelaar":
-                this.tekenKeten.push(new Schakelaar("schemerschakelaar"));
+                tekenKeten.push(new Schakelaar("schemerschakelaar"));
                 break;
             case "schakelaar":
-                this.tekenKeten.push(new Schakelaar("schakelaar"));
+                tekenKeten.push(new Schakelaar("schakelaar"));
                 break;
             case "dimmer":
-                this.tekenKeten.push(new Schakelaar("dimmer"));
+                tekenKeten.push(new Schakelaar("dimmer"));
                 break;
             case "relais":
-                this.tekenKeten.push(new Schakelaar("relais"));
+                tekenKeten.push(new Schakelaar("relais"));
                 break;
             case "minuterie":
-                this.tekenKeten.push(new Schakelaar("minuterie"));
+                tekenKeten.push(new Schakelaar("minuterie"));
                 break;
             case "thermostaat":
-                this.tekenKeten.push(new Schakelaar("thermostaat"));
+                tekenKeten.push(new Schakelaar("thermostaat"));
                 break;
             case "tijdschakelaar":
-                this.tekenKeten.push(new Schakelaar("tijdschakelaar"));
+                tekenKeten.push(new Schakelaar("tijdschakelaar"));
                 break;
             case "rolluikschakelaar":
-                this.tekenKeten.push(new Schakelaar("rolluikschakelaar", this.props.is_halfwaterdicht));
+                tekenKeten.push(new Schakelaar("rolluikschakelaar", this.props.is_halfwaterdicht));
                 break;
             case "dubbelaansteking":
-                this.tekenKeten.push(new Schakelaar("dubbelaansteking", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
+                tekenKeten.push(new Schakelaar("dubbelaansteking", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
                 break;
             case "dimschakelaar":
-                this.tekenKeten.push(new Schakelaar("dimschakelaar", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, false));
+                tekenKeten.push(new Schakelaar("dimschakelaar", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, false));
                 break;
             case "dimschakelaar wissel":
-                this.tekenKeten.push(new Schakelaar("dimschakelaar_wissel", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, false));
+                tekenKeten.push(new Schakelaar("dimschakelaar_wissel", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, false));
                 break;
             case "enkelpolig":
                 if (Number(this.props.aantal_schakelaars) == 1)
-                    this.tekenKeten.push(new Schakelaar("enkel", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
+                    tekenKeten.push(new Schakelaar("enkel", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
                 if (Number(this.props.aantal_schakelaars) > 1) {
-                    this.tekenKeten.push(new Schakelaar("wissel_enkel", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
+                    tekenKeten.push(new Schakelaar("wissel_enkel", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
                     for (var i = 2; i < Number(this.props.aantal_schakelaars); ++i) {
-                        this.tekenKeten.push(new Schakelaar("kruis_enkel", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
+                        tekenKeten.push(new Schakelaar("kruis_enkel", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
                     }
-                    this.tekenKeten.push(new Schakelaar("wissel_enkel", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
+                    tekenKeten.push(new Schakelaar("wissel_enkel", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
                 }
                 break;
             case "dubbelpolig":
                 if (Number(this.props.aantal_schakelaars) == 1)
-                    this.tekenKeten.push(new Schakelaar("dubbel", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
+                    tekenKeten.push(new Schakelaar("dubbel", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
                 if (Number(this.props.aantal_schakelaars) > 1) {
-                    this.tekenKeten.push(new Schakelaar("wissel_dubbel", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
-                    this.tekenKeten.push(new Schakelaar("wissel_dubbel", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
+                    tekenKeten.push(new Schakelaar("wissel_dubbel", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
+                    tekenKeten.push(new Schakelaar("wissel_dubbel", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
                 }
                 break;
             case "driepolig":
-                this.tekenKeten.push(new Schakelaar("driepolig", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
+                tekenKeten.push(new Schakelaar("driepolig", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
                 break;
         }
     };
     Schakelaars.prototype.toSVG = function () {
         var _a;
         var mySVG = new SVGelement();
+        var tekenKeten = [];
         // Eerst maken we een keten van unieke schakelaars. De aantallen worden hier vervangen door individuele elementen in een array
-        this.bouwSchakelaarKeten();
+        this.bouwSchakelaarKeten(tekenKeten);
         var lowerbound = 20; // How low does the switch go below the baseline, needed to place adres afterwards
         var startx = 1;
         var endx;
-        for (var i = 0; i < this.tekenKeten.length; i++) {
-            var islast = ((i == this.tekenKeten.length - 1) && (!this.heeftVerbruikerAlsKind()));
+        for (var i = 0; i < tekenKeten.length; i++) {
+            var islast = ((i == tekenKeten.length - 1) && (!this.heeftVerbruikerAlsKind()));
             var str = void 0;
-            (_a = this.tekenKeten[i].toSVGString(startx, islast), startx = _a.endx, str = _a.str, lowerbound = _a.lowerbound);
+            (_a = tekenKeten[i].toSVGString(startx, islast), startx = _a.endx, str = _a.str, lowerbound = _a.lowerbound);
             mySVG.data += str;
         }
         // Voor bepaalde symbolen moet wat extra ruimte rechts voorzien worden om te vermijden dat de tekening door de volgende kring loopt
         if (!this.heeftVerbruikerAlsKind())
-            startx += this.tekenKeten[this.tekenKeten.length - 1].extraPlaatsRechts();
+            startx += tekenKeten[tekenKeten.length - 1].extraPlaatsRechts();
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = startx - 2;
         mySVG.yup = 25;
@@ -943,16 +941,17 @@ var Lichtcircuit = /** @class */ (function (_super) {
     Lichtcircuit.prototype.toSVG = function () {
         var _a;
         var mySVG = new SVGelement();
+        var tekenKeten = [];
         // Eerst maken we een keten van unieke schakelaars. De aantallen worden hier vervangen door individuele elementen in een array
-        this.bouwSchakelaarKeten();
+        this.bouwSchakelaarKeten(tekenKeten);
         var lowerbound = 20; // How low does the switch go below the baseline, needed to place adres afterwards
         var startx = 1;
         var endx;
         // Teken de schakelaars
-        for (var i = 0; i < this.tekenKeten.length; i++) {
-            var islast = ((i == this.tekenKeten.length - 1) && (!this.heeftVerbruikerAlsKind()));
+        for (var i = 0; i < tekenKeten.length; i++) {
+            var islast = ((i == tekenKeten.length - 1) && (!this.heeftVerbruikerAlsKind()));
             var str = void 0;
-            (_a = this.tekenKeten[i].toSVGString(startx, islast), startx = _a.endx, str = _a.str, lowerbound = _a.lowerbound);
+            (_a = tekenKeten[i].toSVGString(startx, islast), startx = _a.endx, str = _a.str, lowerbound = _a.lowerbound);
             mySVG.data += str;
         }
         if (this.props.aantal_lichtpunten >= 1) { //1 of meerdere lampen
@@ -982,7 +981,7 @@ var Lichtcircuit = /** @class */ (function (_super) {
         else { //Geen lampen
             // Voor bepaalde symbolen moet wat extra ruimte rechts voorzien worden om te vermijden dat de tekening door de volgende kring loopt
             if (!this.heeftVerbruikerAlsKind())
-                startx += this.tekenKeten[this.tekenKeten.length - 1].extraPlaatsRechts();
+                startx += tekenKeten[tekenKeten.length - 1].extraPlaatsRechts();
         }
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = startx - 2;
@@ -1548,6 +1547,131 @@ var Bord = /** @class */ (function (_super) {
     };
     return Bord;
 }(Electro_Item));
+var Contactdoos = /** @class */ (function (_super) {
+    __extends(Contactdoos, _super);
+    function Contactdoos() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Contactdoos.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.is_geaard = this.getLegacyKey(mykeys, 1);
+        this.props.is_kinderveilig = this.getLegacyKey(mykeys, 2);
+        this.props.aantal = this.getLegacyKey(mykeys, 4);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.adres = this.getLegacyKey(mykeys, 15);
+        this.props.aantal_fases_indien_meerfasig = this.getLegacyKey(mykeys, 16);
+        this.props.heeft_ingebouwde_schakelaar = this.getLegacyKey(mykeys, 19);
+        this.props.is_halfwaterdicht = this.getLegacyKey(mykeys, 20);
+        this.props.is_meerfasig = this.getLegacyKey(mykeys, 21);
+        this.props.heeft_nul_indien_meerfasig = this.getLegacyKey(mykeys, 25);
+        this.props.in_verdeelbord = this.getLegacyKey(mykeys, 26);
+    };
+    Contactdoos.prototype.resetProps = function () {
+        this.clearProps();
+        this.props.type = "Contactdoos";
+        this.props.is_geaard = true;
+        this.props.is_kinderveilig = true;
+        this.props.aantal = "1";
+        this.props.adres = "";
+        this.props.aantal_fases_indien_meerfasig = "3";
+        this.props.heeft_ingebouwde_schakelaar = false;
+        this.props.is_halfwaterdicht = false;
+        this.props.is_meerfasig = false;
+        this.props.heeft_nul_indien_meerfasig = false;
+        this.props.in_verdeelbord = false;
+    };
+    Contactdoos.prototype.toHTML = function (mode) {
+        var output = this.toHTMLHeader(mode);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5) + ", "
+            + "Geaard: " + this.checkboxPropToHTML('is_geaard') + ", "
+            + "Kinderveiligheid: " + this.checkboxPropToHTML('is_kinderveilig') + " "
+            + "Halfwaterdicht: " + this.checkboxPropToHTML('is_halfwaterdicht') + ", "
+            + "Meerfasig: " + this.checkboxPropToHTML('is_meerfasig') + ", ";
+        if (this.props.is_meerfasig) {
+            output += "Aantal fasen: " + this.selectPropToHTML('aantal_fases_indien_meerfasig', ["1", "2", "3"]) + ", "
+                + "Met nul: " + this.checkboxPropToHTML('heeft_nul_indien_meerfasig') + ", ";
+        }
+        ;
+        output += "Ingebouwde schakelaar: " + this.checkboxPropToHTML('heeft_ingebouwde_schakelaar') + ", "
+            + "Aantal: " + this.selectPropToHTML('aantal', ["1", "2", "3", "4", "5", "6"]) + ", "
+            + "In verdeelbord: " + this.checkboxPropToHTML('in_verdeelbord')
+            + ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
+        return (output);
+    };
+    Contactdoos.prototype.toSVG = function () {
+        var mySVG = new SVGelement();
+        mySVG.xleft = 1; // Links voldoende ruimte voor een eventuele kring voorzien
+        mySVG.xright = 20; // We starten met breedte 20 (leidings links) en vullen later aan in functie van wat moet getekend worden
+        mySVG.yup = 25;
+        mySVG.ydown = 25;
+        var startx = 1; // Punt waar we aan het tekenen zijn. Schuift gaandeweg op
+        // Teken lijnen voor meerfasige contactdoos
+        if (this.props.is_meerfasig) {
+            mySVG.data += '<line x1="1" y1="25" x2="35" y2="25" stroke="black" />';
+            switch (this.props.aantal_fases_indien_meerfasig) { //faselijnen
+                case "1":
+                    mySVG.data += '<line x1="21" y1="35" x2="27" y2="15" stroke="black" />';
+                    break;
+                case "2":
+                    mySVG.data += '<line x1="16.5" y1="35" x2="22.5" y2="15" stroke="black" />'
+                        + '<line x1="22.5" y1="35" x2="28.5" y2="15" stroke="black" />';
+                    break;
+                case "3":
+                    mySVG.data += '<line x1="15" y1="35" x2="21" y2="15" stroke="black" />'
+                        + '<line x1="21" y1="35" x2="27" y2="15" stroke="black" />'
+                        + '<line x1="27" y1="35" x2="33" y2="15" stroke="black" />';
+                    break;
+                default:
+                    mySVG.data += '<line x1="21" y1="35" x2="27" y2="15" stroke="black" />';
+                    break;
+            }
+            if (this.props.heeft_nul_indien_meerfasig) { //nullijn
+                mySVG.data += '<line x1="39" y1="35" x2="45" y2="15" stroke="black" />'
+                    + '<circle cx="39" cy="35" r="2" fill="black" stroke="black" />';
+            }
+            startx += 34;
+            mySVG.xright += 34; //We schuiven alles 34 pixels op
+        }
+        // Teken ingebouwde schakelaar
+        if (this.props.heeft_ingebouwde_schakelaar) {
+            mySVG.data += '<line x1="' + (startx + 0) + '" y1="25" x2="' + (startx + 11) + '" y2="25" stroke="black" />'
+                + '<line x1="' + (startx + 30) + '" y1="25" x2="' + (startx + 20) + '" y2="5" stroke="black" />'
+                + '<line x1="' + (startx + 20) + '" y1="5" x2="' + (startx + 15) + '" y2="7.5" stroke="black" />'
+                + '<line x1="' + (startx + 22) + '" y1="9" x2="' + (startx + 17) + '" y2="11.5" stroke="black" />';
+            startx += 10;
+            mySVG.xright += 10; //We schuiven alles 10 pixels op
+        }
+        // Teken alle contactdozen, inclusief aarding en kinderveiligheid indien van toepassing
+        for (var i = 0; i < this.props.aantal; ++i) {
+            mySVG.data += '<use xlink:href="#contactdoos" x="' + startx + '" y="25"></use>';
+            if (this.props.is_geaard)
+                mySVG.data += '<use xlink:href="#contactdoos_aarding" x="' + startx + '" y="25"></use>';
+            if (this.props.is_kinderveilig)
+                mySVG.data += '<use xlink:href="#contactdoos_kinderveilig" x="' + startx + '" y="25"></use>';
+            startx += 20;
+            mySVG.xright += 20;
+        }
+        // Teken kader indien in verdeelbord
+        if (this.props.in_verdeelbord) {
+            mySVG.data += '<rect x="' + (mySVG.xright - this.props.aantal * 20 - 3 - (this.props.heeft_ingebouwde_schakelaar) * 12) + '" y="3" width="' + (this.props.aantal * 20 + 6 + (this.props.heeft_ingebouwde_schakelaar) * 12) + '" height="44" fill="none" style="stroke:black" />';
+            +'<line x1="' + (17 + (mySVG.xright - 20 + 3)) + '" y1="3" x2="' + (17 + (mySVG.xright - 20 + 3)) + '" y2="47" fill="none" style="stroke:black" />';
+        }
+        ;
+        // Teken halfwaterdicht indien van toepassing
+        if (this.props.is_halfwaterdicht)
+            mySVG.data += '<rect x="' + (22 + (this.props.heeft_ingebouwde_schakelaar) * 10 + (this.props.is_meerfasig) * 34) + '" y="0" width="6" height="8" style="fill:rgb(255,255,255)" /><text x="' + (25 + (this.props.heeft_ingebouwde_schakelaar) * 10 + (this.props.is_meerfasig) * 34) + '" y="8" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">h</text>';
+        // Indien de contactdoos een kind heeft, teken een streepje rechts
+        if (this.heeftVerbruikerAlsKind()) {
+            mySVG.data += '<line x1="' + startx + '" y1="25" x2="' + (startx + 21) + '" y2="25" stroke="black" />';
+        }
+        ;
+        // Adres helemaal onderaan plaatsen
+        mySVG.data += this.addAddressToSVG(mySVG, 60, 15);
+        mySVG.data += "\n";
+        return (mySVG);
+    };
+    return Contactdoos;
+}(Electro_Item));
 var Diepvriezer = /** @class */ (function (_super) {
     __extends(Diepvriezer, _super);
     function Diepvriezer() {
@@ -1612,7 +1736,7 @@ var Domotica_gestuurde_verbruiker = /** @class */ (function (_super) {
         this.props.heeft_externe_sturing = false;
     };
     Domotica_gestuurde_verbruiker.prototype.allowedChilds = function () {
-        return ["", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
+        return ["", "Batterij", "Bel", "Boiler", "Contactdoos", "Diepvriezer", "Droogkast", "Drukknop", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
     };
     Domotica_gestuurde_verbruiker.prototype.getMaxNumChilds = function () {
         return 1;
@@ -2287,7 +2411,7 @@ var Kring = /** @class */ (function (_super) {
             }
     };
     Kring.prototype.allowedChilds = function () {
-        return ["", "Aansluiting", "Bord", "Domotica", "Domotica gestuurde verbruiker", "Kring", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
+        return ["", "Aansluiting", "Bord", "Domotica", "Domotica gestuurde verbruiker", "Kring", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Contactdoos", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
     };
     Kring.prototype.getMaxNumChilds = function () {
         return 256;
@@ -2834,7 +2958,7 @@ var Meerdere_verbruikers = /** @class */ (function (_super) {
         this.props.adres = ""; // Set Adres/tekst to "" when the item is cleared
     };
     Meerdere_verbruikers.prototype.allowedChilds = function () {
-        return ["", "Domotica", "Domotica gestuurde verbruiker", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Microgolfoven", "Motor", "Schakelaars", "Stopcontact", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
+        return ["", "Domotica", "Domotica gestuurde verbruiker", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Contactdoos", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Microgolfoven", "Motor", "Schakelaars", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
     };
     Meerdere_verbruikers.prototype.getMaxNumChilds = function () {
         return 256;
@@ -3092,131 +3216,6 @@ var Stoomoven = /** @class */ (function (_super) {
         return (mySVG);
     };
     return Stoomoven;
-}(Electro_Item));
-var Stopcontact = /** @class */ (function (_super) {
-    __extends(Stopcontact, _super);
-    function Stopcontact() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Stopcontact.prototype.convertLegacyKeys = function (mykeys) {
-        this.props.type = this.getLegacyKey(mykeys, 0);
-        this.props.is_geaard = this.getLegacyKey(mykeys, 1);
-        this.props.is_kinderveilig = this.getLegacyKey(mykeys, 2);
-        this.props.aantal = this.getLegacyKey(mykeys, 4);
-        this.props.nr = this.getLegacyKey(mykeys, 10);
-        this.props.adres = this.getLegacyKey(mykeys, 15);
-        this.props.aantal_fases_indien_meerfasig = this.getLegacyKey(mykeys, 16);
-        this.props.heeft_ingebouwde_schakelaar = this.getLegacyKey(mykeys, 19);
-        this.props.is_halfwaterdicht = this.getLegacyKey(mykeys, 20);
-        this.props.is_meerfasig = this.getLegacyKey(mykeys, 21);
-        this.props.heeft_nul_indien_meerfasig = this.getLegacyKey(mykeys, 25);
-        this.props.in_verdeelbord = this.getLegacyKey(mykeys, 26);
-    };
-    Stopcontact.prototype.resetProps = function () {
-        this.clearProps();
-        this.props.type = "Stopcontact";
-        this.props.is_geaard = true;
-        this.props.is_kinderveilig = true;
-        this.props.aantal = "1";
-        this.props.adres = "";
-        this.props.aantal_fases_indien_meerfasig = "3";
-        this.props.heeft_ingebouwde_schakelaar = false;
-        this.props.is_halfwaterdicht = false;
-        this.props.is_meerfasig = false;
-        this.props.heeft_nul_indien_meerfasig = false;
-        this.props.in_verdeelbord = false;
-    };
-    Stopcontact.prototype.toHTML = function (mode) {
-        var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5) + ", "
-            + "Geaard: " + this.checkboxPropToHTML('is_geaard') + ", "
-            + "Kinderveiligheid: " + this.checkboxPropToHTML('is_kinderveilig') + " "
-            + "Halfwaterdicht: " + this.checkboxPropToHTML('is_halfwaterdicht') + ", "
-            + "Meerfasig: " + this.checkboxPropToHTML('is_meerfasig') + ", ";
-        if (this.props.is_meerfasig) {
-            output += "Aantal fasen: " + this.selectPropToHTML('aantal_fases_indien_meerfasig', ["1", "2", "3"]) + ", "
-                + "Met nul: " + this.checkboxPropToHTML('heeft_nul_indien_meerfasig') + ", ";
-        }
-        ;
-        output += "Ingebouwde schakelaar: " + this.checkboxPropToHTML('heeft_ingebouwde_schakelaar') + ", "
-            + "Aantal: " + this.selectPropToHTML('aantal', ["1", "2", "3", "4", "5", "6"]) + ", "
-            + "In verdeelbord: " + this.checkboxPropToHTML('in_verdeelbord')
-            + ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
-        return (output);
-    };
-    Stopcontact.prototype.toSVG = function () {
-        var mySVG = new SVGelement();
-        mySVG.xleft = 1; // Links voldoende ruimte voor een eventuele kring voorzien
-        mySVG.xright = 20; // We starten met breedte 20 (leidings links) en vullen later aan in functie van wat moet getekend worden
-        mySVG.yup = 25;
-        mySVG.ydown = 25;
-        var startx = 1; // Punt waar we aan het tekenen zijn. Schuift gaandeweg op
-        // Teken lijnen voor meerfasig stopcontact
-        if (this.props.is_meerfasig) {
-            mySVG.data += '<line x1="1" y1="25" x2="35" y2="25" stroke="black" />';
-            switch (this.props.aantal_fases_indien_meerfasig) { //faselijnen
-                case "1":
-                    mySVG.data += '<line x1="21" y1="35" x2="27" y2="15" stroke="black" />';
-                    break;
-                case "2":
-                    mySVG.data += '<line x1="16.5" y1="35" x2="22.5" y2="15" stroke="black" />'
-                        + '<line x1="22.5" y1="35" x2="28.5" y2="15" stroke="black" />';
-                    break;
-                case "3":
-                    mySVG.data += '<line x1="15" y1="35" x2="21" y2="15" stroke="black" />'
-                        + '<line x1="21" y1="35" x2="27" y2="15" stroke="black" />'
-                        + '<line x1="27" y1="35" x2="33" y2="15" stroke="black" />';
-                    break;
-                default:
-                    mySVG.data += '<line x1="21" y1="35" x2="27" y2="15" stroke="black" />';
-                    break;
-            }
-            if (this.props.heeft_nul_indien_meerfasig) { //nullijn
-                mySVG.data += '<line x1="39" y1="35" x2="45" y2="15" stroke="black" />'
-                    + '<circle cx="39" cy="35" r="2" fill="black" stroke="black" />';
-            }
-            startx += 34;
-            mySVG.xright += 34; //We schuiven alles 34 pixels op
-        }
-        // Teken ingebouwde schakelaar
-        if (this.props.heeft_ingebouwde_schakelaar) {
-            mySVG.data += '<line x1="' + (startx + 0) + '" y1="25" x2="' + (startx + 11) + '" y2="25" stroke="black" />'
-                + '<line x1="' + (startx + 30) + '" y1="25" x2="' + (startx + 20) + '" y2="5" stroke="black" />'
-                + '<line x1="' + (startx + 20) + '" y1="5" x2="' + (startx + 15) + '" y2="7.5" stroke="black" />'
-                + '<line x1="' + (startx + 22) + '" y1="9" x2="' + (startx + 17) + '" y2="11.5" stroke="black" />';
-            startx += 10;
-            mySVG.xright += 10; //We schuiven alles 10 pixels op
-        }
-        // Teken alle stopcontacten, inclusief aarding en kinderveiligheid indien van toepassing
-        for (var i = 0; i < this.props.aantal; ++i) {
-            mySVG.data += '<use xlink:href="#stopcontact" x="' + startx + '" y="25"></use>';
-            if (this.props.is_geaard)
-                mySVG.data += '<use xlink:href="#stopcontact_aarding" x="' + startx + '" y="25"></use>';
-            if (this.props.is_kinderveilig)
-                mySVG.data += '<use xlink:href="#stopcontact_kinderveilig" x="' + startx + '" y="25"></use>';
-            startx += 20;
-            mySVG.xright += 20;
-        }
-        // Teken kader indien in verdeelbord
-        if (this.props.in_verdeelbord) {
-            mySVG.data += '<rect x="' + (mySVG.xright - this.props.aantal * 20 - 3 - (this.props.heeft_ingebouwde_schakelaar) * 12) + '" y="3" width="' + (this.props.aantal * 20 + 6 + (this.props.heeft_ingebouwde_schakelaar) * 12) + '" height="44" fill="none" style="stroke:black" />';
-            +'<line x1="' + (17 + (mySVG.xright - 20 + 3)) + '" y1="3" x2="' + (17 + (mySVG.xright - 20 + 3)) + '" y2="47" fill="none" style="stroke:black" />';
-        }
-        ;
-        // Teken halfwaterdicht indien van toepassing
-        if (this.props.is_halfwaterdicht)
-            mySVG.data += '<rect x="' + (22 + (this.props.heeft_ingebouwde_schakelaar) * 10 + (this.props.is_meerfasig) * 34) + '" y="0" width="6" height="8" style="fill:rgb(255,255,255)" /><text x="' + (25 + (this.props.heeft_ingebouwde_schakelaar) * 10 + (this.props.is_meerfasig) * 34) + '" y="8" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">h</text>';
-        // Indien het stopcontact een kind heeft, teken een streepje rechts
-        if (this.heeftVerbruikerAlsKind()) {
-            mySVG.data += '<line x1="' + startx + '" y1="25" x2="' + (startx + 21) + '" y2="25" stroke="black" />';
-        }
-        ;
-        // Adres helemaal onderaan plaatsen
-        mySVG.data += this.addAddressToSVG(mySVG, 60, 15);
-        mySVG.data += "\n";
-        return (mySVG);
-    };
-    return Stopcontact;
 }(Electro_Item));
 var Transformator = /** @class */ (function (_super) {
     __extends(Transformator, _super);
@@ -3715,7 +3714,7 @@ var Vrije_tekst = /** @class */ (function (_super) {
         if (this.props.vrije_tekst_type === "zonder kader") {
             if (this.getParent().getType() === "Kring")
                 shiftx = 10;
-            else if (this.getParent().getType() === "Stopcontact")
+            else if (this.getParent().getType() === "Contactdoos")
                 shiftx = 0;
             else
                 shiftx = 5;
@@ -3977,7 +3976,7 @@ var SVGSymbols = /** @class */ (function () {
     function SVGSymbols() {
     }
     SVGSymbols.outputSVGSymbols = function () {
-        var output = "\n    <defs>\n    <pattern id=\"VerticalStripe\"\n      x=\"5\" y=\"0\" width=\"5\" height=\"10\"\n      patternUnits=\"userSpaceOnUse\" >\n      <line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"10\" stroke=\"black\" />\n    </pattern>\n    <g id=\"batterij\">\n      <rect x=\"0\" y=\"-12\" width=\"40\" height=\"27\" stroke=\"black\" fill=\"none\"/>\n      <rect x=\"5\" y=\"-15\" width=\"10\" height=\"3\" stroke=\"black\" fill=\"none\"/>\n      <rect x=\"25\" y=\"-15\" width=\"10\" height=\"3\" stroke=\"black\" fill=\"none\"/>\n      <line x1=\"8\" y1=\"-5\" x2=\"12\" y2=\"-5\" stroke=\"black\"/>\n      <line x1=\"10\" y1=\"-7\" x2=\"10\" y2=\"-3\" stroke=\"black\"/>\n      <line x1=\"28\" y1=\"-5\" x2=\"32\" y2=\"-5\" stroke=\"black\"/>\n    </g>\n    <g id=\"deurslot\">\n      <line x1=\"1\" y1=\"-15\" x2=\"31\" y2=\"-15\" stroke=\"black\"/>\n      <line x1=\"1\" y1=\"15\"  x2=\"46\" y2=\"15\" stroke=\"black\"/>\n      <line x1=\"1\" y1=\"-15\" x2=\"1\" y2=\"15\" stroke=\"black\"/>\n      <line x1=\"31\" y1=\"-15\" x2=\"46\" y2=\"15\" stroke=\"black\"/>\n      <path d=\"M 7 3 A 6 6 0 0 1 19 3 A 6 6 0 0 1 31 3\" stroke=\"black\" fill=\"none\" />\n    </g>\n    <g id=\"ster\">\n      <line x1=\"0\" y1=\"-5\" x2=\"0\" y2=\"5\" style=\"stroke:black\" />\n      <line x1=\"-4.33\" y1=\"-2.5\" x2=\"4.33\" y2=\"2.5\" style=\"stroke:black\" />\n      <line x1=\"-4.66\" y1=\"2.5\" x2=\"4.33\" y2=\"-2.5\" style=\"stroke:black\" />\n    </g>\n    <g id=\"EVlader\">\n      <rect x=\"0\" y=\"13\" width=\"40\" height=\"7\" fill=\"none\" style=\"stroke:black\" />\n      <line x1=\"0\" y1=\"0\" x2=\"7\" y2=\"0\" style=\"stroke:black\" />\n      <line x1=\"7\" y1=\"-20\" x2=\"7\" y2=\"13\" style=\"stroke:black\" />\n      <line x1=\"33\" y1=\"-20\" x2=\"33\" y2=\"13\" style=\"stroke:black\" />\n      <line x1=\"7\" y1=\"-20\" x2=\"33\" y2=\"-20\" style=\"stroke:black\" />\n      <rect x=\"10\" y=\"-17\" width=\"20\" height=\"8\" fill=\"none\" style=\"stroke:black\" />\n      <line x1=\"20\" y1=\"-6\" x2=\"20\" y2=\"10\" style=\"stroke:black\" />\n      <line x1=\"33\" y1=\"-6\" x2=\"36\" y2=\"-6\" style=\"stroke:black\" />\n      <line x1=\"36\" y1=\"-6\" x2=\"36\" y2=\"4\" style=\"stroke:black\" />\n      <line x1=\"36\" y1=\"4\" x2=\"39\" y2=\"4\" style=\"stroke:black\" />\n      <line x1=\"39\" y1=\"4\" x2=\"39\" y2=\"-15\" style=\"stroke:black\" />\n      <line x1=\"39\" y1=\"-6\" x2=\"39\" y2=\"-15\" style=\"stroke:black;stroke-width:2\" />\n      <text x=\"15\" y=\"1\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"6\">V</text>\n      <text x=\"25\" y=\"1\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"6\">E</text>\n      <text x=\"15\" y=\"9\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"6\">E</text>\n      <text x=\"25\" y=\"9\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"6\">V</text>\n    </g>\n    <g id=\"lamp\">\n      <line x1=\"-10.61\" y1=\"-10.61\" x2=\"10.61\" y2=\"10.61\" stroke=\"black\" stroke-width=\"2\" />\n      <line x1=\"-10.61\" y1=\"10.61\" x2=\"10.61\" y2=\"-10.61\" stroke=\"black\" stroke-width=\"2\" />\n    </g>\n    <g id=\"led\">\n      <line x1=\"0\" y1=\"-7\" x2=\"0\" y2=\"7\" stroke=\"black\" stroke-width=\"2\" />\n      <line x1=\"0\" y1=\"-7\" x2=\"12\" y2=\"0\" stroke=\"black\" stroke-width=\"2\" />\n      <line x1=\"0\" y1=\"7\" x2=\"12\" y2=\"0\" stroke=\"black\" stroke-width=\"2\" />\n      <line x1=\"12\" y1=\"-7\" x2=\"12\" y2=\"7\" stroke=\"black\" stroke-width=\"2\" />\n      <line x1=\"6\" y1=\"-6\" x2=\"7\" y2=\"-11\" stroke=\"black\" stroke-width=\"1\" />\n      <line x1=\"7\" y1=\"-11\" x2=\"8.11\" y2=\"-9.34\" stroke=\"black\" stroke-width=\"1\" />\n      <line x1=\"7\" y1=\"-11\" x2=\"5.34\" y2=\"-9.9\" stroke=\"black\" stroke-width=\"1\" />\n      <line x1=\"9\" y1=\"-6\" x2=\"10\" y2=\"-11\" stroke=\"black\" stroke-width=\"1\" />\n      <line x1=\"10\" y1=\"-11\" x2=\"11.11\" y2=\"-9.34\" stroke=\"black\" stroke-width=\"1\" />\n      <line x1=\"10\" y1=\"-11\" x2=\"8.34\" y2=\"-9.9\" stroke=\"black\" stroke-width=\"1\" />\n    </g>\n    <g id=\"sinus\">\n      <path d=\"M0,0 C2,-5 8,-5 10,0 S18,5 20,0\" style=\"stroke:black;fill:none\" />\n    </g>\n    <g id=\"spot\">\n      <path d=\"M0 0 A10 10 0 0 1 10 -10\" stroke=\"black\" fill=\"white\" stroke-width=\"1\" />\n      <path d=\"M0 0 A10 10 0 0 0 10 10\" stroke=\"black\" fill=\"white\" stroke-width=\"1\" />\n      <circle cx=\"10\" cy=\"0\" r=\"6\" style=\"stroke:black;fill:white\" />\n      <line x1=\"5.76\" x2=\"14.24\" y1=\"-4.24\" y2=\"4.24\" stroke=\"black\" stroke-width=\"1\" />\n      <line x1=\"5.76\" x2=\"14.24\" y1=\"4.24\" y2=\"-4.24\" stroke=\"black\" stroke-width=\"1\" />\n    </g>\n    <g id=\"noodlamp_decentraal\">\n      <rect x=\"-10.61\" y=\"-10.61\" width=\"21.22\" height=\"21.22\" fill=\"white\" stroke=\"black\" />\n      <circle cx=\"0\" cy=\"0\" r=\"5\" style=\"stroke:black;fill:black\" />\n      <line x1=\"-7\" y1=\"-7\" x2=\"7\" y2=\"7\" stroke=\"black\" stroke-width=\"2\" />\n      <line x1=\"-7\" y1=\"7\" x2=\"7\" y2=\"-7\" stroke=\"black\" stroke-width=\"2\" />\n    </g>\n    <g id=\"signalisatielamp\">\n      <circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n      <line x1=\"-3\" y1=\"-3\" x2=\"3\" y2=\"3\" stroke=\"black\" />\n      <line x1=\"-3\" y1=\"3\" x2=\"3\" y2=\"-3\" stroke=\"black\" />\n    </g>\n    <g id=\"schakelaar_enkel\">\n      <line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n      <circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n    </g>\n    <g id=\"schakelaar_klein\">\n      <line x1=\"0\" y1=\"0\" x2=\"6\" y2=\"-12\" stroke=\"black\" />\n      <line x1=\"6\" y1=\"-12\" x2=\"9\" y2=\"-10.5\" stroke=\"black\" />\n      <circle cx=\"0\" cy=\"0\" r=\"3\" fill=\"white\" stroke=\"black\" />\n    </g>\n    <g id=\"schakelaar_dubbel\">\n      <line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n      <line x1=\"8\" y1=\"-16\" x2=\"13\" y2=\"-13.5\" stroke=\"black\" />\n      <circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n    </g>\n    <g id=\"schakelaar_trippel\">\n      <line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n      <line x1=\"8\" y1=\"-16\" x2=\"13\" y2=\"-13.5\" stroke=\"black\" />\n      <line x1=\"6\" y1=\"-12\" x2=\"11\" y2=\"-9.5\" stroke=\"black\" />\n      <circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n    </g>\n    <g id=\"schakelaar_wissel_enkel\">\n      <line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n      <line x1=\"0\" y1=\"0\" x2=\"-10\" y2=\"20\" stroke=\"black\" />\n      <line x1=\"-10\" y1=\"20\" x2=\"-15\" y2=\"17.5\" stroke=\"black\" />\n      <circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n    </g>\n    <g id=\"schakelaar_rolluik\">\n      <line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n      <line x1=\"0\" y1=\"0\" x2=\"-10\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"-10\" y1=\"-20\" x2=\"-15\" y2=\"-17.5\" stroke=\"black\" />\n      <rect x=\"-8\" y=\"-8\" width=\"16\" height=\"16\" fill=\"white\" stroke=\"black\" />\n      <text x=\"0\" y=\"6\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"16\">S</text>\n    </g>\n    <g id=\"schakelaar_enkel_dim\">\n      <line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n      <circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n      <polygon points=\"-1,-8 11,-8 11,-15\" fill=\"black\" stroke=\"black\" />\n    </g>\n    <g id=\"schakelaar_wissel_dim\">\n      <line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n      <line x1=\"0\" y1=\"0\" x2=\"-10\" y2=\"20\" stroke=\"black\" />\n      <line x1=\"-10\" y1=\"20\" x2=\"-15\" y2=\"17.5\" stroke=\"black\" />\n      <circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n      <polygon points=\"-1,-8 11,-8 11,-15\" fill=\"black\" stroke=\"black\" />\n    </g>\n    <g id=\"schakelaar_kruis_enkel\">\n      <line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n      <line x1=\"0\" y1=\"0\" x2=\"-10\" y2=\"20\" stroke=\"black\" />\n      <line x1=\"-10\" y1=\"20\" x2=\"-15\" y2=\"17.5\" stroke=\"black\" />\n      <line x1=\"0\" y1=\"0\" x2=\"-10\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"-10\" y1=\"-20\" x2=\"-15\" y2=\"-17.5\" stroke=\"black\" />\n      <line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"20\" stroke=\"black\" />\n      <line x1=\"10\" y1=\"20\" x2=\"15\" y2=\"17.5\" stroke=\"black\" />\n      <circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n    </g>\n    <g id=\"schakelaar_dubbelaansteking\">\n      <line x1=\"0\" y1=\"0\" x2=\"-10\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"-10\" y1=\"-20\" x2=\"-15\" y2=\"-17.5\" stroke=\"black\" />\n      <line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n      <circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n    </g>\n    <g id=\"schakelaar_wissel_dubbel\">\n      <line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n      <line x1=\"8\" y1=\"-16\" x2=\"13\" y2=\"-13.5\" stroke=\"black\" />\n      <line x1=\"0\" y1=\"0\" x2=\"-10\" y2=\"20\" stroke=\"black\" />\n      <line x1=\"-10\" y1=\"20\" x2=\"-15\" y2=\"17.5\" stroke=\"black\" />\n      <line x1=\"-8\" y1=\"16\" x2=\"-13\" y2=\"13.5\" stroke=\"black\" />\n      <circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n    </g>\n    <g id=\"aansluitpunt\">\n      <circle cx=\"5\" cy=\"0\" r=\"5\" style=\"stroke:black;fill:none\" />\n    </g>\n    <g id=\"aftakdoos\">\n      <circle cx=\"15\" cy=\"0\" r=\"15\" style=\"stroke:black;fill:none\" />\n      <circle cx=\"15\" cy=\"0\" r=\"7.5\" style=\"stroke:black;fill:black\" />\n    </g>\n    <g id=\"bewegingsschakelaar\">\n      <rect x=\"0\" y=\"-13\" width=\"10\" height=\"26\" fill=\"none\" style=\"stroke:black\" />\n      <rect x=\"10\" y=\"-13\" width=\"30\" height=\"26\" fill=\"none\" style=\"stroke:black\" />\n      <line x1=\"10\" y1=\"13\" x2=\"40\" y2=\"-13\"  stroke=\"black\" />\n      <line x1=\"15\" y1=\"-5\" x2=\"20\" y2=\"-5\"  stroke=\"black\" />\n      <line x1=\"20\" y1=\"-10\" x2=\"20\" y2=\"-5\"  stroke=\"black\" />\n      <line x1=\"20\" y1=\"-10\" x2=\"25\" y2=\"-10\"  stroke=\"black\" />\n      <text x=\"22\" y=\"11\" style=\"text-anchor:start\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"10\">PIR</text>\n    </g>\n    <g id=\"schakelaar\">\n      <line x1=\"0\" y1=\"0\" x2=\"5\" y2=\"0\"  stroke=\"black\" />\n      <line x1=\"5\" y1=\"0\" x2=\"35\" y2=\"-10\"  stroke=\"black\" />\n      <line x1=\"35\" y1=\"0\" x2=\"40\" y2=\"0\"  stroke=\"black\" />\n    </g>\n    <g id=\"schemerschakelaar\">\n      <line x1=\"0\" y1=\"0\" x2=\"5\" y2=\"0\"  stroke=\"black\" />\n      <line x1=\"5\" y1=\"0\" x2=\"35\" y2=\"-10\"  stroke=\"black\" />\n      <line x1=\"35\" y1=\"0\" x2=\"40\" y2=\"0\"  stroke=\"black\" />\n      <use xlink:href=\"#arrow\" x=\"14\" y=\"-17\" transform=\"rotate(90 14 -17)\" />\n      <use xlink:href=\"#arrow\" x=\"18\" y=\"-17\" transform=\"rotate(90 18 -17)\" />\n    </g>\n    <g id=\"stopcontact\">\n      <path d=\"M20 0 A15 15 0 0 1 35 -15\" stroke=\"black\" fill=\"white\" stroke-width=\"2\" />\n      <path d=\"M20 0 A15 15 0 0 0 35 15\" stroke=\"black\" fill=\"white\" stroke-width=\"2\" />\n      <line x1=\"0\" y1=\"0\" x2=\"20\" y2=\"0\" stroke=\"black\" />\n    </g>\n    <g id=\"stoomoven\">\n      <rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n      <path d=\"M 6 -2 A 7 5 0 0 1 13 -7 A 7 5 0 0 1 27 -7 A 7 5 0 0 1 33 -2\" stroke=\"black\" fill=\"none\" />\n      <path d=\"M 6  5 A 7 5 0 0 1 13  0 A 7 5 0 0 1 27  0 A 7 5 0 0 1 33  5\" stroke=\"black\" fill=\"none\" />\n      <path d=\"M 6 12 A 7 5 0 0 1 13  7 A 7 5 0 0 1 27  7 A 7 5 0 0 1 33 12\" stroke=\"black\" fill=\"none\" />\n    </g>\n    <g id=\"stopcontact_aarding\">\n      <line x1=\"20\" y1=\"-15\" x2=\"20\" y2=\"15\"  stroke=\"black\" stroke-width=\"2\" />\n    </g>\n    <g id=\"stopcontact_kinderveilig\">\n      <line x1=\"35\" y1=\"-20\" x2=\"35\" y2=\"-14.1\"  stroke=\"black\" stroke-width=\"2\" />\n      <line x1=\"35\" y1=\"20\" x2=\"35\" y2=\"14.1\"  stroke=\"black\" stroke-width=\"2\" />\n    </g>\n    <g id=\"bel\">\n      <path d=\"M20 0 A15 15 0 0 1 0 15\" stroke=\"black\" fill=\"none\" stroke-width=\"2\" />\n      <path d=\"M20 0 A15 15 0 0 0 0 -15\" stroke=\"black\" fill=\"none\" stroke-width=\"2\" />\n      <line x1=\"0\" y1=\"15\" x2=\"0\" y2=\"-15\" stroke=\"black\" stroke-width=\"2\" />\n    </g>\n    <g id=\"boiler\">\n      <circle cx=\"20\" cy=\"0\" r=\"20\" style=\"stroke:black;fill:url(#VerticalStripe)\" />\n    </g>\n    <g id=\"boiler_accu\">\n      <circle cx=\"20\" cy=\"0\" r=\"20\" style=\"stroke:black;fill:none\" />\n      <circle cx=\"20\" cy=\"0\" r=\"15\" style=\"stroke:black;fill:url(#VerticalStripe)\" />\n    </g>\n    <g id=\"motor\">\n      <circle cx=\"20\" cy=\"0\" r=\"20\" style=\"stroke:black;fill:none\" />\n      <text x=\"20\" y=\"6\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"16\">M</text>\n    </g>\n    <g id=\"elektriciteitsmeter\">\n      <rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n      <line x1=\"0\" y1=\"-6\" x2=\"40\" y2=\"-6\" stroke=\"black\" stroke-width=\"1\" />\n      <text x=\"20\" y=\"10\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"12\">kWh</text>\n    </g>\n    <g id=\"diepvriezer\">\n      <rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n      <use xlink:href=\"#ster\" x=\"10\" y=\"0\" />\n      <use xlink:href=\"#ster\" x=\"20\" y=\"0\" />\n      <use xlink:href=\"#ster\" x=\"30\" y=\"0\" />\n    </g>\n    <g id=\"zonnepaneel\">\n      <rect x=\"0\" y=\"-20\" width=\"50\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n      <line x1=\"0\" y1=\"0\" x2=\"50\" y2=\"0\" stroke=\"black\" />\n      <use xlink:href=\"#arrow\" x=\"5\" y=\"-12\" transform=\"rotate(45 5 -10)\" />\n      <use xlink:href=\"#arrow\" x=\"10\" y=\"-14\" transform=\"rotate(45 10 -14)\" />\n    </g>\n    <g id=\"drukknop_klein\">\n      <circle cx=\"8\" cy=\"0\" r=\"7\" style=\"stroke:black;fill:none\" />\n      <circle cx=\"8\" cy=\"0\" r=\"4\" style=\"stroke:black;fill:none\" />\n    </g>\n    <g id=\"draadloos_klein\">\n      <path d=\"M 10 -7 A 10 10 0 0 1 10 7\" stroke=\"black\" fill=\"none\" /> \n      <path d=\"M 7 -5 A 8 8 0 0 1 7 5\" stroke=\"black\" fill=\"none\" /> \n      <path d=\"M 4 -3 A 6 6 0 0 1 4 3\" stroke=\"black\" fill=\"none\" /> \n    </g>\n    <g id=\"detectie_klein\">\n      <path d=\"M 10 -7 A 10 10 0 0 1 10 7\" stroke=\"black\" fill=\"none\" /> \n      <path d=\"M 5 -7 A 10 10 0 0 1 5 7\" stroke=\"black\" fill=\"none\" /> \n    </g>\n    <g id=\"drukknop\">\n      <circle cx=\"12\" cy=\"0\" r=\"12\" style=\"stroke:black;fill:none\" />\n      <circle cx=\"12\" cy=\"0\" r=\"7\" style=\"stroke:black;fill:none\" />\n    </g>\n    <g id=\"teleruptor\">\n      <rect x=\"0\" y=\"-13\" width=\"40\" height=\"26\" fill=\"none\" style=\"stroke:black\" />\n      <line x1=\"8\" y1=\"6\" x2=\"16\" y2=\"6\"  stroke=\"black\" />\n      <line x1=\"24\" y1=\"6\" x2=\"32\" y2=\"6\"  stroke=\"black\" />\n      <line x1=\"16\" y1=\"-6\" x2=\"16\" y2=\"6\"  stroke=\"black\" />\n      <line x1=\"24\" y1=\"-6\" x2=\"24\" y2=\"6\"  stroke=\"black\" />\n    </g>\n    <g id=\"dimmer\">\n      <rect x=\"0\" y=\"-13\" width=\"40\" height=\"26\" fill=\"none\" style=\"stroke:black\" />\n      <line x1=\"10\" y1=\"5\" x2=\"30\" y2=\"5\"  stroke=\"black\" />\n      <line x1=\"10\" y1=\"5\" x2=\"10\" y2=\"-5\"  stroke=\"black\" />\n      <line x1=\"10\" y1=\"-5\" x2=\"30\" y2=\"5\"  stroke=\"black\" />\n    </g>\n    <g id=\"relais\">\n      <rect x=\"0\" y=\"-13\" width=\"40\" height=\"26\" fill=\"none\" style=\"stroke:black\" />\n      <line x1=\"10\" y1=\"-13\" x2=\"30\" y2=\"13\"  stroke=\"black\" />\n    </g>\n    <g id=\"minuterie\">\n      <rect x=\"0\" y=\"-13\" width=\"40\" height=\"26\" fill=\"none\" style=\"stroke:black\" />\n      <text x=\"20\" y=\"6\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"16\">t</text>\n    </g>\n    <g id=\"thermostaat\">\n      <rect x=\"0\" y=\"-13\" width=\"40\" height=\"26\" fill=\"none\" style=\"stroke:black\" />\n      <circle cx=\"20\" cy=\"0\" r=\"8\" style=\"stroke:black;fill:none\" />\n      <line x1=\"12\" y1=\"0\" x2=\"28\" y2=\"0\"  stroke=\"black\" />\n    </g>\n    <g id=\"tijdschakelaar\">\n      <rect x=\"0\" y=\"-13\" width=\"40\" height=\"26\" fill=\"none\" style=\"stroke:black\" />\n      <circle cx=\"11\" cy=\"0\" r=\"8\" style=\"stroke:black;fill:none\" />\n      <line x1=\"10\" y1=\"0\"  x2=\"17\" y2=\"0\"  stroke=\"black\" />\n      <line x1=\"11\" y1=\"-6\" x2=\"11\" y2=\"1\"  stroke=\"black\" />\n      <line x1=\"21\" y1=\"0\"  x2=\"25\" y2=\"0\"  stroke=\"black\" />\n      <line x1=\"25\" y1=\"0\"  x2=\"31\" y2=\"-5\"  stroke=\"black\" />\n      <line x1=\"31\" y1=\"0\"  x2=\"36\" y2=\"0\"  stroke=\"black\" />\n    </g>\n    <g id=\"tijdschakelaar_klein\">\n      <circle cx=\"8\" cy=\"0\" r=\"7\" style=\"stroke:black;fill:none\" />\n      <line x1=\"7\" y1=\"0\"  x2=\"13\" y2=\"0\"  stroke=\"black\" />\n      <line x1=\"8\" y1=\"-5\" x2=\"8\" y2=\"1\"  stroke=\"black\" />\n    </g>\n    <g id=\"droogkast\">\n      <rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n      <circle cx=\"15\" cy=\"-7.5\" r=\"5\" style=\"stroke:black;fill:none\" />\n      <circle cx=\"25\" cy=\"-7.5\" r=\"5\" style=\"stroke:black;fill:none\" />\n      <circle cx=\"20\" cy=\"7.5\" r=\"3\" style=\"stroke:black;fill:black\" />\n    </g>\n    <g id=\"omvormer\">\n      <rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n      <line x1=\"0\" y1=\"20\" x2=\"40\" y2=\"-20\" stroke=\"black\" />\n      <use xlink:href=\"#sinus\" x=\"5\" y=\"-12\" />\"\n      <line x1=\"20\" y1=\"10\" x2=\"35\" y2=\"10\" stroke=\"black\" />\n      <line x1=\"20\" y1=\"13\" x2=\"35\" y2=\"13\" stroke=\"black\" stroke-dasharray=\"3\" />\n    </g>\n    <g id=\"overspanningsbeveiliging\">\n      <rect x=\"0\" y=\"-15\" width=\"15\" height=\"30\" fill=\"none\" style=\"stroke:black\" />\n      <line x1=\"7.5\" y1=\"-18\" x2=\"7.5\" y2=\"-5\" stroke=\"black\" />\n      <line x1=\"7.5\" y1=\"-5\" x2=\"4.5\" y2=\"-9\" stroke=\"black\" />\n      <line x1=\"7.5\" y1=\"-5\" x2=\"10.5\" y2=\"-9\" stroke=\"black\" />\n      <line x1=\"7.5\" y1=\"18\" x2=\"7.5\" y2=\"5\" stroke=\"black\" />\n      <line x1=\"7.5\" y1=\"5\" x2=\"4.5\" y2=\"9\" stroke=\"black\" />\n      <line x1=\"7.5\" y1=\"5\" x2=\"10.5\" y2=\"9\" stroke=\"black\" />\n    </g>\n    <g id=\"koelkast\">\n      <rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n      <use xlink:href=\"#ster\" x=\"20\" y=\"0\" />\"\n    </g>\n    <g id=\"kookfornuis\">\n      <rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n      <circle cx=\"10\" cy=\"10\" r=\"3\" style=\"stroke:black;fill:black\" />\n      <circle cx=\"30\" cy=\"10\" r=\"3\" style=\"stroke:black;fill:black\" />\n      <circle cx=\"30\" cy=\"-10\" r=\"3\" style=\"stroke:black;fill:black\" />\n    </g>\n    <g id=\"microgolf\">\n      <rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n      <use xlink:href=\"#sinus\" x=\"10\" y=\"-10\" />\"\n      <use xlink:href=\"#sinus\" x=\"10\" y=\"0\" />\"\n      <use xlink:href=\"#sinus\" x=\"10\" y=\"10\" />\"\n    </g>\n    <g id=\"oven\">\n      <rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n      <line x1=\"0\" y1=\"-5\" x2=\"40\" y2=\"-5\" stroke=\"black\" />\n      <circle cx=\"20\" cy=\"7.5\" r=\"3\" style=\"stroke:black;fill:black\" />\n    </g>\n    <g id=\"usblader\">\n      <rect x=\"0\" y=\"-15\" width=\"60\" height=\"30\" fill=\"none\" style=\"stroke:black\" />\n      <circle cx=\"12\" cy=\"-5\" r=\"5\" style=\"stroke:black;fill:none\" />\n      <circle cx=\"19\" cy=\"-5\" r=\"5\" style=\"stroke:black;fill:none\" />\n      <text x=\"15\" y=\"8\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"8\">AC/DC</text>\n      <text x=\"42\" y=\"4\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"11\">USB</text>\n    </g>\n    <g id=\"vaatwasmachine\">\n      <rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n      <line x1=\"0\" y1=\"-20\" x2=\"40\" y2=\"20\" style=\"stroke:black;fill:none\" />\n      <line x1=\"40\" y1=\"-20\" x2=\"0\" y2=\"20\" style=\"stroke:black;fill:none\" />\n      <circle cx=\"20\" cy=\"0\" r=\"8\" style=\"stroke:black;fill:white\" />\n    </g>\n    <g id=\"ventilator\">\n      <rect x=\"0\" y=\"-15\" width=\"30\" height=\"30\" fill=\"none\" style=\"stroke:black\" />\n      <circle cx=\"10\" cy=\"0\" r=\"5\" style=\"stroke:black;fill:none\" />\n      <circle cx=\"20\" cy=\"0\" r=\"5\" style=\"stroke:black;fill:none\" />\n    </g>\n    <g id=\"transformator\">\n      <circle cx=\"8\" cy=\"0\" r=\"8\" style=\"stroke:black;fill:none\" />\n      <circle cx=\"20\" cy=\"0\" r=\"8\" style=\"stroke:black;fill:none\" />\n    </g>\n    <g id=\"verwarmingstoestel\">\n      <rect x=\"0\" y=\"-15\" width=\"50\" height=\"30\" fill=\"url(#VerticalStripe)\" style=\"stroke:black\" />\n    </g>\n    <g id=\"verwarmingstoestel_accu\">\n      <rect x=\"0\" y=\"-15\" width=\"50\" height=\"30\" fill=\"none\" style=\"stroke:black\" />\n      <rect x=\"5\" y=\"-10\" width=\"40\" height=\"20\" fill=\"url(#VerticalStripe)\" style=\"stroke:black\" />\n    </g>\n    <g id=\"verwarmingstoestel_accu_ventilator\">\n      <rect x=\"0\" y=\"-15\" width=\"70\" height=\"30\" fill=\"none\" style=\"stroke:black\" />\n      <rect x=\"5\" y=\"-10\" width=\"35\" height=\"20\" fill=\"url(#VerticalStripe)\" style=\"stroke:black\" />\n      <circle cx=\"50\" cy=\"0\" r=\"5\" style=\"stroke:black;fill:none\" />\n      <circle cx=\"60\" cy=\"0\" r=\"5\" style=\"stroke:black;fill:none\" />\n    </g>\n    <g id=\"verbruiker\">\n      <rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n    </g>\n    <g id=\"wasmachine\">\n      <rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n      <circle cx=\"20\" cy=\"0\" r=\"3\" style=\"stroke:black;fill:black\" />\n      <circle cx=\"20\" cy=\"0\" r=\"15\" style=\"stroke:black;fill:none\" />\n    </g>\n    <g transform=\"rotate(-20)\" id=\"zekering_automatisch\">\n      <line x1=\"0\" y1=\"-30\" x2=\"0\" y2=\"0\"  stroke=\"black\" />\n      <rect x=\"-4\" y=\"-30\" width=\"4\" height=\"10\" style=\"fill:black\" />\n    </g>\n    <g id=\"zekering_smelt\">\n      <rect x=\"-4\" y=\"-30\" width=\"8\" height=\"30\" style=\"stroke:black;fill:none\" />\n      <line x1=\"0\" y1=\"-30\" x2=\"0\" y2=\"0\" stroke=\"black\" />\n    </g>\n    <g id=\"relais_kring\">\n      <rect x=\"-8\" y=\"-30\" width=\"16\" height=\"30\" style=\"stroke:black;fill:none\" />\n      <line x1=\"8\" y1=\"-22.5\" x2=\"-8\" y2=\"-7.5\" stroke=\"black\" />\n    </g>\n    <g id=\"overspanningsbeveiliging_inline\">   -> shift x -7.5  y -15\n      <rect x=\"-7.5\" y=\"-30\" width=\"15\" height=\"30\" fill=\"none\" style=\"stroke:black\" />\n      <line x1=\"0\" y1=\"-30\" x2=\"0\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"0\" y1=\"-20\" x2=\"-3\" y2=\"-24\" stroke=\"black\" />\n      <line x1=\"0\" y1=\"-20\" x2=\"3\" y2=\"-24\" stroke=\"black\" />\n      <line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-10\" stroke=\"black\" />\n      <line x1=\"0\" y1=\"-10\" x2=\"-3\" y2=\"-6\" stroke=\"black\" />\n      <line x1=\"0\" y1=\"-10\" x2=\"3\" y2=\"-6\" stroke=\"black\" />\n    </g>\n    <g transform=\"rotate(-20)\" id=\"zekering_empty\">\n      <line x1=\"0\" y1=\"-30\" x2=\"0\" y2=\"0\"  stroke=\"black\" />\n    </g>\n    <g id=\"arrow\">\n      <line x1=\"0\" y1=\"0\" x2=\"8\" y2=\"0\" stroke=\"black\" />\n      <line x1=\"8\" y1=\"0\" x2=\"5\" y2=\"-1\" stroke=\"black\" />\n      <line x1=\"8\" y1=\"0\" x2=\"5\" y2=\"1\" stroke=\"black\" />\n    </g>\n    <g id=\"gas_ventilator\">\n      <polygon points=\"-6,5.2 0,-5.2 6,5.2\" fill=\"black\" stroke=\"black\" />\n    </g>\n    <g id=\"gas_atmosferisch\">\n      <polygon points=\"-6,5.2 0,-5.2 6,5.2\" fill=\"white\" stroke=\"black\" />\n    </g>\n    <g id=\"bliksem\">\n      <line x1=\"0\" y1=\"-5.2\" x2=\"-3\" y2=\"0\" stroke=\"black\"/>\n      <line x1=\"-3\" y1=\"0\" x2=\"3\" y2=\"0\" stroke=\"black\"/>\n      <line x1=\"3\" y1=\"0\" x2=\"0\" y2=\"5.2\" stroke=\"black\"/>\n      <line x1=\"0\" y1=\"5.2\" x2=\"0\" y2=\"2.2\" stroke=\"black\"/>\n      <line x1=\"0\" y1=\"5.2\" x2=\"2.6\" y2=\"3.7\" stroke=\"black\"/>\n    </g>\n    <g id=\"moving_man\"\n       transform=\"matrix(0.0152987,0,0,0.01530866,0,0)\">\n       <path\n         d=\"M 710.7,10.1 C 904.8,5.2 908.6,261.4 730.9,278.4 637.5,287.3 566.3,181.5 603.8,90.8 623.4,43.4 668.7,12.9 711.4,10.1 c 1.1,-0.1 2.8,26.1 1.7,26.2 -31.4,2 -74.8,32.1 -89.1,74.7 -26.8,79.9 47,156.6 125.1,139.2 123.9,-27.6 114.1,-218.5 -36.3,-214 -0.7,0 -3.2,-26 -2.1,-26.1 z\"\n         id=\"path4\" stroke=\"black\" stroke-width=\"10\" />\n       <path\n         d=\"m 545.3,225.9 c -67.8,-5 -133.2,0 -199.7,0 -20.7,13.6 -115,100.7 -121.1,121.1 -5.7,19.1 6.2,31.9 12.1,40.4 60.1,18.3 96.7,-60.4 133.2,-88.8 29.6,0 59.2,0 88.8,0 -59.2,78.9 -190.7,169.9 -58.5,264.3 -27.6,31.6 -55.1,63.2 -82.7,94.8 -46.9,-14.7 -165.6,-41.3 -199.7,-18.2 -7,21 -4.8,32.1 6.1,48.4 34.1,10.3 205.5,53.2 232,36.3 34.3,-37.7 68.6,-75.3 102.9,-113 32.3,27.6 64.6,55.2 96.9,82.7 -1,62.6 -14.6,249.9 24.2,266.3 10.2,3 19.1,0.5 28.2,-2 5.4,-7.4 10.8,-14.8 16.1,-22.2 6.9,-27 0.3,-272.6 -6.1,-282.5 -37.7,-32.9 -75.3,-65.9 -113,-98.9 1.3,-1.3 2.7,-2.7 4,-4 45.7,-48.4 91.5,-96.9 137.2,-145.3 20.2,19.5 40.4,39 60.5,58.5 16.7,35.8 152.2,25.4 179.6,6.1 2,-8.1 4,-16.1 6.1,-24.2 -16,-40.1 -71.7,-31.8 -127.1,-30.3 C 741.8,384.3 590.6,253 545.5,225.7 c -1.7,-1 14.9,-23.3 15.4,-22.4 -2.2,-3.5 126,97.7 134.4,107.4 9.4,9.1 55.2,51.5 82.1,78.4 68.5,-2 122,-6.5 137.2,46.4 4.9,17.1 1.9,37.1 -8.1,50.4 -18.8,25.3 -156,39.1 -197.7,18.2 -20.2,-20.2 -40.4,-40.4 -60.5,-60.5 -18.8,18.2 -37.7,36.3 -56.5,54.5 -16.8,18.2 -33.6,36.3 -50.4,54.5 32.9,28.9 65.9,57.8 98.9,86.8 11.2,17.9 18.9,272.3 8.1,306.7 -4.8,15.2 -19.9,32.9 -34.3,38.3 C 498.3,1028.1 527.8,798.3 529.4,706 505.9,686.5 482.3,667 458.8,647.5 427.9,676.7 402,732.8 362,750.4 333.5,762.9 140.3,728.4 113.8,712.1 100.1,703.6 89.3,686 85.6,667.7 59.7,543.2 281.5,646 321.3,617.4 334.7,601.3 348.2,585.1 361.7,569 266.4,454.2 335.5,414.9 402.1,326.9 c 0,-0.7 0,-1.3 0,-2 -8.1,0 -16.1,0 -24.2,0 -26.3,36.3 -124.9,147 -173.5,64.6 -35.9,-60.8 103.6,-172.2 141.1,-189.8 56.7,-3.8 167.5,-11 215.9,4 0.8,0.7 -14.9,22.6 -16.1,22.2 z\"\n         id=\"path6\" stroke=\"black\" stroke-width=\"10\" /></g>\n    </defs>\n    ";
+        var output = "\n    <defs>\n    <pattern id=\"VerticalStripe\"\n      x=\"5\" y=\"0\" width=\"5\" height=\"10\"\n      patternUnits=\"userSpaceOnUse\" >\n      <line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"10\" stroke=\"black\" />\n    </pattern>\n    <g id=\"batterij\">\n      <rect x=\"0\" y=\"-12\" width=\"40\" height=\"27\" stroke=\"black\" fill=\"none\"/>\n      <rect x=\"5\" y=\"-15\" width=\"10\" height=\"3\" stroke=\"black\" fill=\"none\"/>\n      <rect x=\"25\" y=\"-15\" width=\"10\" height=\"3\" stroke=\"black\" fill=\"none\"/>\n      <line x1=\"8\" y1=\"-5\" x2=\"12\" y2=\"-5\" stroke=\"black\"/>\n      <line x1=\"10\" y1=\"-7\" x2=\"10\" y2=\"-3\" stroke=\"black\"/>\n      <line x1=\"28\" y1=\"-5\" x2=\"32\" y2=\"-5\" stroke=\"black\"/>\n    </g>\n    <g id=\"deurslot\">\n      <line x1=\"1\" y1=\"-15\" x2=\"31\" y2=\"-15\" stroke=\"black\"/>\n      <line x1=\"1\" y1=\"15\"  x2=\"46\" y2=\"15\" stroke=\"black\"/>\n      <line x1=\"1\" y1=\"-15\" x2=\"1\" y2=\"15\" stroke=\"black\"/>\n      <line x1=\"31\" y1=\"-15\" x2=\"46\" y2=\"15\" stroke=\"black\"/>\n      <path d=\"M 7 3 A 6 6 0 0 1 19 3 A 6 6 0 0 1 31 3\" stroke=\"black\" fill=\"none\" />\n    </g>\n    <g id=\"ster\">\n      <line x1=\"0\" y1=\"-5\" x2=\"0\" y2=\"5\" style=\"stroke:black\" />\n      <line x1=\"-4.33\" y1=\"-2.5\" x2=\"4.33\" y2=\"2.5\" style=\"stroke:black\" />\n      <line x1=\"-4.66\" y1=\"2.5\" x2=\"4.33\" y2=\"-2.5\" style=\"stroke:black\" />\n    </g>\n    <g id=\"EVlader\">\n      <rect x=\"0\" y=\"13\" width=\"40\" height=\"7\" fill=\"none\" style=\"stroke:black\" />\n      <line x1=\"0\" y1=\"0\" x2=\"7\" y2=\"0\" style=\"stroke:black\" />\n      <line x1=\"7\" y1=\"-20\" x2=\"7\" y2=\"13\" style=\"stroke:black\" />\n      <line x1=\"33\" y1=\"-20\" x2=\"33\" y2=\"13\" style=\"stroke:black\" />\n      <line x1=\"7\" y1=\"-20\" x2=\"33\" y2=\"-20\" style=\"stroke:black\" />\n      <rect x=\"10\" y=\"-17\" width=\"20\" height=\"8\" fill=\"none\" style=\"stroke:black\" />\n      <line x1=\"20\" y1=\"-6\" x2=\"20\" y2=\"10\" style=\"stroke:black\" />\n      <line x1=\"33\" y1=\"-6\" x2=\"36\" y2=\"-6\" style=\"stroke:black\" />\n      <line x1=\"36\" y1=\"-6\" x2=\"36\" y2=\"4\" style=\"stroke:black\" />\n      <line x1=\"36\" y1=\"4\" x2=\"39\" y2=\"4\" style=\"stroke:black\" />\n      <line x1=\"39\" y1=\"4\" x2=\"39\" y2=\"-15\" style=\"stroke:black\" />\n      <line x1=\"39\" y1=\"-6\" x2=\"39\" y2=\"-15\" style=\"stroke:black;stroke-width:2\" />\n      <text x=\"15\" y=\"1\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"6\">V</text>\n      <text x=\"25\" y=\"1\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"6\">E</text>\n      <text x=\"15\" y=\"9\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"6\">E</text>\n      <text x=\"25\" y=\"9\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"6\">V</text>\n    </g>\n    <g id=\"lamp\">\n      <line x1=\"-10.61\" y1=\"-10.61\" x2=\"10.61\" y2=\"10.61\" stroke=\"black\" stroke-width=\"2\" />\n      <line x1=\"-10.61\" y1=\"10.61\" x2=\"10.61\" y2=\"-10.61\" stroke=\"black\" stroke-width=\"2\" />\n    </g>\n    <g id=\"led\">\n      <line x1=\"0\" y1=\"-7\" x2=\"0\" y2=\"7\" stroke=\"black\" stroke-width=\"2\" />\n      <line x1=\"0\" y1=\"-7\" x2=\"12\" y2=\"0\" stroke=\"black\" stroke-width=\"2\" />\n      <line x1=\"0\" y1=\"7\" x2=\"12\" y2=\"0\" stroke=\"black\" stroke-width=\"2\" />\n      <line x1=\"12\" y1=\"-7\" x2=\"12\" y2=\"7\" stroke=\"black\" stroke-width=\"2\" />\n      <line x1=\"6\" y1=\"-6\" x2=\"7\" y2=\"-11\" stroke=\"black\" stroke-width=\"1\" />\n      <line x1=\"7\" y1=\"-11\" x2=\"8.11\" y2=\"-9.34\" stroke=\"black\" stroke-width=\"1\" />\n      <line x1=\"7\" y1=\"-11\" x2=\"5.34\" y2=\"-9.9\" stroke=\"black\" stroke-width=\"1\" />\n      <line x1=\"9\" y1=\"-6\" x2=\"10\" y2=\"-11\" stroke=\"black\" stroke-width=\"1\" />\n      <line x1=\"10\" y1=\"-11\" x2=\"11.11\" y2=\"-9.34\" stroke=\"black\" stroke-width=\"1\" />\n      <line x1=\"10\" y1=\"-11\" x2=\"8.34\" y2=\"-9.9\" stroke=\"black\" stroke-width=\"1\" />\n    </g>\n    <g id=\"sinus\">\n      <path d=\"M0,0 C2,-5 8,-5 10,0 S18,5 20,0\" style=\"stroke:black;fill:none\" />\n    </g>\n    <g id=\"spot\">\n      <path d=\"M0 0 A10 10 0 0 1 10 -10\" stroke=\"black\" fill=\"white\" stroke-width=\"1\" />\n      <path d=\"M0 0 A10 10 0 0 0 10 10\" stroke=\"black\" fill=\"white\" stroke-width=\"1\" />\n      <circle cx=\"10\" cy=\"0\" r=\"6\" style=\"stroke:black;fill:white\" />\n      <line x1=\"5.76\" x2=\"14.24\" y1=\"-4.24\" y2=\"4.24\" stroke=\"black\" stroke-width=\"1\" />\n      <line x1=\"5.76\" x2=\"14.24\" y1=\"4.24\" y2=\"-4.24\" stroke=\"black\" stroke-width=\"1\" />\n    </g>\n    <g id=\"noodlamp_decentraal\">\n      <rect x=\"-10.61\" y=\"-10.61\" width=\"21.22\" height=\"21.22\" fill=\"white\" stroke=\"black\" />\n      <circle cx=\"0\" cy=\"0\" r=\"5\" style=\"stroke:black;fill:black\" />\n      <line x1=\"-7\" y1=\"-7\" x2=\"7\" y2=\"7\" stroke=\"black\" stroke-width=\"2\" />\n      <line x1=\"-7\" y1=\"7\" x2=\"7\" y2=\"-7\" stroke=\"black\" stroke-width=\"2\" />\n    </g>\n    <g id=\"signalisatielamp\">\n      <circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n      <line x1=\"-3\" y1=\"-3\" x2=\"3\" y2=\"3\" stroke=\"black\" />\n      <line x1=\"-3\" y1=\"3\" x2=\"3\" y2=\"-3\" stroke=\"black\" />\n    </g>\n    <g id=\"schakelaar_enkel\">\n      <line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n      <circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n    </g>\n    <g id=\"schakelaar_klein\">\n      <line x1=\"0\" y1=\"0\" x2=\"6\" y2=\"-12\" stroke=\"black\" />\n      <line x1=\"6\" y1=\"-12\" x2=\"9\" y2=\"-10.5\" stroke=\"black\" />\n      <circle cx=\"0\" cy=\"0\" r=\"3\" fill=\"white\" stroke=\"black\" />\n    </g>\n    <g id=\"schakelaar_dubbel\">\n      <line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n      <line x1=\"8\" y1=\"-16\" x2=\"13\" y2=\"-13.5\" stroke=\"black\" />\n      <circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n    </g>\n    <g id=\"schakelaar_trippel\">\n      <line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n      <line x1=\"8\" y1=\"-16\" x2=\"13\" y2=\"-13.5\" stroke=\"black\" />\n      <line x1=\"6\" y1=\"-12\" x2=\"11\" y2=\"-9.5\" stroke=\"black\" />\n      <circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n    </g>\n    <g id=\"schakelaar_wissel_enkel\">\n      <line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n      <line x1=\"0\" y1=\"0\" x2=\"-10\" y2=\"20\" stroke=\"black\" />\n      <line x1=\"-10\" y1=\"20\" x2=\"-15\" y2=\"17.5\" stroke=\"black\" />\n      <circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n    </g>\n    <g id=\"schakelaar_rolluik\">\n      <line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n      <line x1=\"0\" y1=\"0\" x2=\"-10\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"-10\" y1=\"-20\" x2=\"-15\" y2=\"-17.5\" stroke=\"black\" />\n      <rect x=\"-8\" y=\"-8\" width=\"16\" height=\"16\" fill=\"white\" stroke=\"black\" />\n      <text x=\"0\" y=\"6\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"16\">S</text>\n    </g>\n    <g id=\"schakelaar_enkel_dim\">\n      <line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n      <circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n      <polygon points=\"-1,-8 11,-8 11,-15\" fill=\"black\" stroke=\"black\" />\n    </g>\n    <g id=\"schakelaar_wissel_dim\">\n      <line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n      <line x1=\"0\" y1=\"0\" x2=\"-10\" y2=\"20\" stroke=\"black\" />\n      <line x1=\"-10\" y1=\"20\" x2=\"-15\" y2=\"17.5\" stroke=\"black\" />\n      <circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n      <polygon points=\"-1,-8 11,-8 11,-15\" fill=\"black\" stroke=\"black\" />\n    </g>\n    <g id=\"schakelaar_kruis_enkel\">\n      <line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n      <line x1=\"0\" y1=\"0\" x2=\"-10\" y2=\"20\" stroke=\"black\" />\n      <line x1=\"-10\" y1=\"20\" x2=\"-15\" y2=\"17.5\" stroke=\"black\" />\n      <line x1=\"0\" y1=\"0\" x2=\"-10\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"-10\" y1=\"-20\" x2=\"-15\" y2=\"-17.5\" stroke=\"black\" />\n      <line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"20\" stroke=\"black\" />\n      <line x1=\"10\" y1=\"20\" x2=\"15\" y2=\"17.5\" stroke=\"black\" />\n      <circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n    </g>\n    <g id=\"schakelaar_dubbelaansteking\">\n      <line x1=\"0\" y1=\"0\" x2=\"-10\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"-10\" y1=\"-20\" x2=\"-15\" y2=\"-17.5\" stroke=\"black\" />\n      <line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n      <circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n    </g>\n    <g id=\"schakelaar_wissel_dubbel\">\n      <line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n      <line x1=\"8\" y1=\"-16\" x2=\"13\" y2=\"-13.5\" stroke=\"black\" />\n      <line x1=\"0\" y1=\"0\" x2=\"-10\" y2=\"20\" stroke=\"black\" />\n      <line x1=\"-10\" y1=\"20\" x2=\"-15\" y2=\"17.5\" stroke=\"black\" />\n      <line x1=\"-8\" y1=\"16\" x2=\"-13\" y2=\"13.5\" stroke=\"black\" />\n      <circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n    </g>\n    <g id=\"aansluitpunt\">\n      <circle cx=\"5\" cy=\"0\" r=\"5\" style=\"stroke:black;fill:none\" />\n    </g>\n    <g id=\"aftakdoos\">\n      <circle cx=\"15\" cy=\"0\" r=\"15\" style=\"stroke:black;fill:none\" />\n      <circle cx=\"15\" cy=\"0\" r=\"7.5\" style=\"stroke:black;fill:black\" />\n    </g>\n    <g id=\"bewegingsschakelaar\">\n      <rect x=\"0\" y=\"-13\" width=\"10\" height=\"26\" fill=\"none\" style=\"stroke:black\" />\n      <rect x=\"10\" y=\"-13\" width=\"30\" height=\"26\" fill=\"none\" style=\"stroke:black\" />\n      <line x1=\"10\" y1=\"13\" x2=\"40\" y2=\"-13\"  stroke=\"black\" />\n      <line x1=\"15\" y1=\"-5\" x2=\"20\" y2=\"-5\"  stroke=\"black\" />\n      <line x1=\"20\" y1=\"-10\" x2=\"20\" y2=\"-5\"  stroke=\"black\" />\n      <line x1=\"20\" y1=\"-10\" x2=\"25\" y2=\"-10\"  stroke=\"black\" />\n      <text x=\"22\" y=\"11\" style=\"text-anchor:start\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"10\">PIR</text>\n    </g>\n    <g id=\"schakelaar\">\n      <line x1=\"0\" y1=\"0\" x2=\"5\" y2=\"0\"  stroke=\"black\" />\n      <line x1=\"5\" y1=\"0\" x2=\"35\" y2=\"-10\"  stroke=\"black\" />\n      <line x1=\"35\" y1=\"0\" x2=\"40\" y2=\"0\"  stroke=\"black\" />\n    </g>\n    <g id=\"schemerschakelaar\">\n      <line x1=\"0\" y1=\"0\" x2=\"5\" y2=\"0\"  stroke=\"black\" />\n      <line x1=\"5\" y1=\"0\" x2=\"35\" y2=\"-10\"  stroke=\"black\" />\n      <line x1=\"35\" y1=\"0\" x2=\"40\" y2=\"0\"  stroke=\"black\" />\n      <use xlink:href=\"#arrow\" x=\"14\" y=\"-17\" transform=\"rotate(90 14 -17)\" />\n      <use xlink:href=\"#arrow\" x=\"18\" y=\"-17\" transform=\"rotate(90 18 -17)\" />\n    </g>\n    <g id=\"contactdoos\">\n      <path d=\"M20 0 A15 15 0 0 1 35 -15\" stroke=\"black\" fill=\"white\" stroke-width=\"2\" />\n      <path d=\"M20 0 A15 15 0 0 0 35 15\" stroke=\"black\" fill=\"white\" stroke-width=\"2\" />\n      <line x1=\"0\" y1=\"0\" x2=\"20\" y2=\"0\" stroke=\"black\" />\n    </g>\n    <g id=\"stoomoven\">\n      <rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n      <path d=\"M 6 -2 A 7 5 0 0 1 13 -7 A 7 5 0 0 1 27 -7 A 7 5 0 0 1 33 -2\" stroke=\"black\" fill=\"none\" />\n      <path d=\"M 6  5 A 7 5 0 0 1 13  0 A 7 5 0 0 1 27  0 A 7 5 0 0 1 33  5\" stroke=\"black\" fill=\"none\" />\n      <path d=\"M 6 12 A 7 5 0 0 1 13  7 A 7 5 0 0 1 27  7 A 7 5 0 0 1 33 12\" stroke=\"black\" fill=\"none\" />\n    </g>\n    <g id=\"contactdoos_aarding\">\n      <line x1=\"20\" y1=\"-15\" x2=\"20\" y2=\"15\"  stroke=\"black\" stroke-width=\"2\" />\n    </g>\n    <g id=\"contactdoos_kinderveilig\">\n      <line x1=\"35\" y1=\"-20\" x2=\"35\" y2=\"-14.1\"  stroke=\"black\" stroke-width=\"2\" />\n      <line x1=\"35\" y1=\"20\" x2=\"35\" y2=\"14.1\"  stroke=\"black\" stroke-width=\"2\" />\n    </g>\n    <g id=\"bel\">\n      <path d=\"M20 0 A15 15 0 0 1 0 15\" stroke=\"black\" fill=\"none\" stroke-width=\"2\" />\n      <path d=\"M20 0 A15 15 0 0 0 0 -15\" stroke=\"black\" fill=\"none\" stroke-width=\"2\" />\n      <line x1=\"0\" y1=\"15\" x2=\"0\" y2=\"-15\" stroke=\"black\" stroke-width=\"2\" />\n    </g>\n    <g id=\"boiler\">\n      <circle cx=\"20\" cy=\"0\" r=\"20\" style=\"stroke:black;fill:url(#VerticalStripe)\" />\n    </g>\n    <g id=\"boiler_accu\">\n      <circle cx=\"20\" cy=\"0\" r=\"20\" style=\"stroke:black;fill:none\" />\n      <circle cx=\"20\" cy=\"0\" r=\"15\" style=\"stroke:black;fill:url(#VerticalStripe)\" />\n    </g>\n    <g id=\"motor\">\n      <circle cx=\"20\" cy=\"0\" r=\"20\" style=\"stroke:black;fill:none\" />\n      <text x=\"20\" y=\"6\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"16\">M</text>\n    </g>\n    <g id=\"elektriciteitsmeter\">\n      <rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n      <line x1=\"0\" y1=\"-6\" x2=\"40\" y2=\"-6\" stroke=\"black\" stroke-width=\"1\" />\n      <text x=\"20\" y=\"10\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"12\">kWh</text>\n    </g>\n    <g id=\"diepvriezer\">\n      <rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n      <use xlink:href=\"#ster\" x=\"10\" y=\"0\" />\n      <use xlink:href=\"#ster\" x=\"20\" y=\"0\" />\n      <use xlink:href=\"#ster\" x=\"30\" y=\"0\" />\n    </g>\n    <g id=\"zonnepaneel\">\n      <rect x=\"0\" y=\"-20\" width=\"50\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n      <line x1=\"0\" y1=\"0\" x2=\"50\" y2=\"0\" stroke=\"black\" />\n      <use xlink:href=\"#arrow\" x=\"5\" y=\"-12\" transform=\"rotate(45 5 -10)\" />\n      <use xlink:href=\"#arrow\" x=\"10\" y=\"-14\" transform=\"rotate(45 10 -14)\" />\n    </g>\n    <g id=\"drukknop_klein\">\n      <circle cx=\"8\" cy=\"0\" r=\"7\" style=\"stroke:black;fill:none\" />\n      <circle cx=\"8\" cy=\"0\" r=\"4\" style=\"stroke:black;fill:none\" />\n    </g>\n    <g id=\"draadloos_klein\">\n      <path d=\"M 10 -7 A 10 10 0 0 1 10 7\" stroke=\"black\" fill=\"none\" /> \n      <path d=\"M 7 -5 A 8 8 0 0 1 7 5\" stroke=\"black\" fill=\"none\" /> \n      <path d=\"M 4 -3 A 6 6 0 0 1 4 3\" stroke=\"black\" fill=\"none\" /> \n    </g>\n    <g id=\"detectie_klein\">\n      <path d=\"M 10 -7 A 10 10 0 0 1 10 7\" stroke=\"black\" fill=\"none\" /> \n      <path d=\"M 5 -7 A 10 10 0 0 1 5 7\" stroke=\"black\" fill=\"none\" /> \n    </g>\n    <g id=\"drukknop\">\n      <circle cx=\"12\" cy=\"0\" r=\"12\" style=\"stroke:black;fill:none\" />\n      <circle cx=\"12\" cy=\"0\" r=\"7\" style=\"stroke:black;fill:none\" />\n    </g>\n    <g id=\"teleruptor\">\n      <rect x=\"0\" y=\"-13\" width=\"40\" height=\"26\" fill=\"none\" style=\"stroke:black\" />\n      <line x1=\"8\" y1=\"6\" x2=\"16\" y2=\"6\"  stroke=\"black\" />\n      <line x1=\"24\" y1=\"6\" x2=\"32\" y2=\"6\"  stroke=\"black\" />\n      <line x1=\"16\" y1=\"-6\" x2=\"16\" y2=\"6\"  stroke=\"black\" />\n      <line x1=\"24\" y1=\"-6\" x2=\"24\" y2=\"6\"  stroke=\"black\" />\n    </g>\n    <g id=\"dimmer\">\n      <rect x=\"0\" y=\"-13\" width=\"40\" height=\"26\" fill=\"none\" style=\"stroke:black\" />\n      <line x1=\"10\" y1=\"5\" x2=\"30\" y2=\"5\"  stroke=\"black\" />\n      <line x1=\"10\" y1=\"5\" x2=\"10\" y2=\"-5\"  stroke=\"black\" />\n      <line x1=\"10\" y1=\"-5\" x2=\"30\" y2=\"5\"  stroke=\"black\" />\n    </g>\n    <g id=\"relais\">\n      <rect x=\"0\" y=\"-13\" width=\"40\" height=\"26\" fill=\"none\" style=\"stroke:black\" />\n      <line x1=\"10\" y1=\"-13\" x2=\"30\" y2=\"13\"  stroke=\"black\" />\n    </g>\n    <g id=\"minuterie\">\n      <rect x=\"0\" y=\"-13\" width=\"40\" height=\"26\" fill=\"none\" style=\"stroke:black\" />\n      <text x=\"20\" y=\"6\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"16\">t</text>\n    </g>\n    <g id=\"thermostaat\">\n      <rect x=\"0\" y=\"-13\" width=\"40\" height=\"26\" fill=\"none\" style=\"stroke:black\" />\n      <circle cx=\"20\" cy=\"0\" r=\"8\" style=\"stroke:black;fill:none\" />\n      <line x1=\"12\" y1=\"0\" x2=\"28\" y2=\"0\"  stroke=\"black\" />\n    </g>\n    <g id=\"tijdschakelaar\">\n      <rect x=\"0\" y=\"-13\" width=\"40\" height=\"26\" fill=\"none\" style=\"stroke:black\" />\n      <circle cx=\"11\" cy=\"0\" r=\"8\" style=\"stroke:black;fill:none\" />\n      <line x1=\"10\" y1=\"0\"  x2=\"17\" y2=\"0\"  stroke=\"black\" />\n      <line x1=\"11\" y1=\"-6\" x2=\"11\" y2=\"1\"  stroke=\"black\" />\n      <line x1=\"21\" y1=\"0\"  x2=\"25\" y2=\"0\"  stroke=\"black\" />\n      <line x1=\"25\" y1=\"0\"  x2=\"31\" y2=\"-5\"  stroke=\"black\" />\n      <line x1=\"31\" y1=\"0\"  x2=\"36\" y2=\"0\"  stroke=\"black\" />\n    </g>\n    <g id=\"tijdschakelaar_klein\">\n      <circle cx=\"8\" cy=\"0\" r=\"7\" style=\"stroke:black;fill:none\" />\n      <line x1=\"7\" y1=\"0\"  x2=\"13\" y2=\"0\"  stroke=\"black\" />\n      <line x1=\"8\" y1=\"-5\" x2=\"8\" y2=\"1\"  stroke=\"black\" />\n    </g>\n    <g id=\"droogkast\">\n      <rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n      <circle cx=\"15\" cy=\"-7.5\" r=\"5\" style=\"stroke:black;fill:none\" />\n      <circle cx=\"25\" cy=\"-7.5\" r=\"5\" style=\"stroke:black;fill:none\" />\n      <circle cx=\"20\" cy=\"7.5\" r=\"3\" style=\"stroke:black;fill:black\" />\n    </g>\n    <g id=\"omvormer\">\n      <rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n      <line x1=\"0\" y1=\"20\" x2=\"40\" y2=\"-20\" stroke=\"black\" />\n      <use xlink:href=\"#sinus\" x=\"5\" y=\"-12\" />\"\n      <line x1=\"20\" y1=\"10\" x2=\"35\" y2=\"10\" stroke=\"black\" />\n      <line x1=\"20\" y1=\"13\" x2=\"35\" y2=\"13\" stroke=\"black\" stroke-dasharray=\"3\" />\n    </g>\n    <g id=\"overspanningsbeveiliging\">\n      <rect x=\"0\" y=\"-15\" width=\"15\" height=\"30\" fill=\"none\" style=\"stroke:black\" />\n      <line x1=\"7.5\" y1=\"-18\" x2=\"7.5\" y2=\"-5\" stroke=\"black\" />\n      <line x1=\"7.5\" y1=\"-5\" x2=\"4.5\" y2=\"-9\" stroke=\"black\" />\n      <line x1=\"7.5\" y1=\"-5\" x2=\"10.5\" y2=\"-9\" stroke=\"black\" />\n      <line x1=\"7.5\" y1=\"18\" x2=\"7.5\" y2=\"5\" stroke=\"black\" />\n      <line x1=\"7.5\" y1=\"5\" x2=\"4.5\" y2=\"9\" stroke=\"black\" />\n      <line x1=\"7.5\" y1=\"5\" x2=\"10.5\" y2=\"9\" stroke=\"black\" />\n    </g>\n    <g id=\"koelkast\">\n      <rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n      <use xlink:href=\"#ster\" x=\"20\" y=\"0\" />\"\n    </g>\n    <g id=\"kookfornuis\">\n      <rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n      <circle cx=\"10\" cy=\"10\" r=\"3\" style=\"stroke:black;fill:black\" />\n      <circle cx=\"30\" cy=\"10\" r=\"3\" style=\"stroke:black;fill:black\" />\n      <circle cx=\"30\" cy=\"-10\" r=\"3\" style=\"stroke:black;fill:black\" />\n    </g>\n    <g id=\"microgolf\">\n      <rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n      <use xlink:href=\"#sinus\" x=\"10\" y=\"-10\" />\"\n      <use xlink:href=\"#sinus\" x=\"10\" y=\"0\" />\"\n      <use xlink:href=\"#sinus\" x=\"10\" y=\"10\" />\"\n    </g>\n    <g id=\"oven\">\n      <rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n      <line x1=\"0\" y1=\"-5\" x2=\"40\" y2=\"-5\" stroke=\"black\" />\n      <circle cx=\"20\" cy=\"7.5\" r=\"3\" style=\"stroke:black;fill:black\" />\n    </g>\n    <g id=\"usblader\">\n      <rect x=\"0\" y=\"-15\" width=\"60\" height=\"30\" fill=\"none\" style=\"stroke:black\" />\n      <circle cx=\"12\" cy=\"-5\" r=\"5\" style=\"stroke:black;fill:none\" />\n      <circle cx=\"19\" cy=\"-5\" r=\"5\" style=\"stroke:black;fill:none\" />\n      <text x=\"15\" y=\"8\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"8\">AC/DC</text>\n      <text x=\"42\" y=\"4\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"11\">USB</text>\n    </g>\n    <g id=\"vaatwasmachine\">\n      <rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n      <line x1=\"0\" y1=\"-20\" x2=\"40\" y2=\"20\" style=\"stroke:black;fill:none\" />\n      <line x1=\"40\" y1=\"-20\" x2=\"0\" y2=\"20\" style=\"stroke:black;fill:none\" />\n      <circle cx=\"20\" cy=\"0\" r=\"8\" style=\"stroke:black;fill:white\" />\n    </g>\n    <g id=\"ventilator\">\n      <rect x=\"0\" y=\"-15\" width=\"30\" height=\"30\" fill=\"none\" style=\"stroke:black\" />\n      <circle cx=\"10\" cy=\"0\" r=\"5\" style=\"stroke:black;fill:none\" />\n      <circle cx=\"20\" cy=\"0\" r=\"5\" style=\"stroke:black;fill:none\" />\n    </g>\n    <g id=\"transformator\">\n      <circle cx=\"8\" cy=\"0\" r=\"8\" style=\"stroke:black;fill:none\" />\n      <circle cx=\"20\" cy=\"0\" r=\"8\" style=\"stroke:black;fill:none\" />\n    </g>\n    <g id=\"verwarmingstoestel\">\n      <rect x=\"0\" y=\"-15\" width=\"50\" height=\"30\" fill=\"url(#VerticalStripe)\" style=\"stroke:black\" />\n    </g>\n    <g id=\"verwarmingstoestel_accu\">\n      <rect x=\"0\" y=\"-15\" width=\"50\" height=\"30\" fill=\"none\" style=\"stroke:black\" />\n      <rect x=\"5\" y=\"-10\" width=\"40\" height=\"20\" fill=\"url(#VerticalStripe)\" style=\"stroke:black\" />\n    </g>\n    <g id=\"verwarmingstoestel_accu_ventilator\">\n      <rect x=\"0\" y=\"-15\" width=\"70\" height=\"30\" fill=\"none\" style=\"stroke:black\" />\n      <rect x=\"5\" y=\"-10\" width=\"35\" height=\"20\" fill=\"url(#VerticalStripe)\" style=\"stroke:black\" />\n      <circle cx=\"50\" cy=\"0\" r=\"5\" style=\"stroke:black;fill:none\" />\n      <circle cx=\"60\" cy=\"0\" r=\"5\" style=\"stroke:black;fill:none\" />\n    </g>\n    <g id=\"verbruiker\">\n      <rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n    </g>\n    <g id=\"wasmachine\">\n      <rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n      <circle cx=\"20\" cy=\"0\" r=\"3\" style=\"stroke:black;fill:black\" />\n      <circle cx=\"20\" cy=\"0\" r=\"15\" style=\"stroke:black;fill:none\" />\n    </g>\n    <g transform=\"rotate(-20)\" id=\"zekering_automatisch\">\n      <line x1=\"0\" y1=\"-30\" x2=\"0\" y2=\"0\"  stroke=\"black\" />\n      <rect x=\"-4\" y=\"-30\" width=\"4\" height=\"10\" style=\"fill:black\" />\n    </g>\n    <g id=\"zekering_smelt\">\n      <rect x=\"-4\" y=\"-30\" width=\"8\" height=\"30\" style=\"stroke:black;fill:none\" />\n      <line x1=\"0\" y1=\"-30\" x2=\"0\" y2=\"0\" stroke=\"black\" />\n    </g>\n    <g id=\"relais_kring\">\n      <rect x=\"-8\" y=\"-30\" width=\"16\" height=\"30\" style=\"stroke:black;fill:none\" />\n      <line x1=\"8\" y1=\"-22.5\" x2=\"-8\" y2=\"-7.5\" stroke=\"black\" />\n    </g>\n    <g id=\"overspanningsbeveiliging_inline\">   -> shift x -7.5  y -15\n      <rect x=\"-7.5\" y=\"-30\" width=\"15\" height=\"30\" fill=\"none\" style=\"stroke:black\" />\n      <line x1=\"0\" y1=\"-30\" x2=\"0\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"0\" y1=\"-20\" x2=\"-3\" y2=\"-24\" stroke=\"black\" />\n      <line x1=\"0\" y1=\"-20\" x2=\"3\" y2=\"-24\" stroke=\"black\" />\n      <line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-10\" stroke=\"black\" />\n      <line x1=\"0\" y1=\"-10\" x2=\"-3\" y2=\"-6\" stroke=\"black\" />\n      <line x1=\"0\" y1=\"-10\" x2=\"3\" y2=\"-6\" stroke=\"black\" />\n    </g>\n    <g transform=\"rotate(-20)\" id=\"zekering_empty\">\n      <line x1=\"0\" y1=\"-30\" x2=\"0\" y2=\"0\"  stroke=\"black\" />\n    </g>\n    <g id=\"arrow\">\n      <line x1=\"0\" y1=\"0\" x2=\"8\" y2=\"0\" stroke=\"black\" />\n      <line x1=\"8\" y1=\"0\" x2=\"5\" y2=\"-1\" stroke=\"black\" />\n      <line x1=\"8\" y1=\"0\" x2=\"5\" y2=\"1\" stroke=\"black\" />\n    </g>\n    <g id=\"gas_ventilator\">\n      <polygon points=\"-6,5.2 0,-5.2 6,5.2\" fill=\"black\" stroke=\"black\" />\n    </g>\n    <g id=\"gas_atmosferisch\">\n      <polygon points=\"-6,5.2 0,-5.2 6,5.2\" fill=\"white\" stroke=\"black\" />\n    </g>\n    <g id=\"bliksem\">\n      <line x1=\"0\" y1=\"-5.2\" x2=\"-3\" y2=\"0\" stroke=\"black\"/>\n      <line x1=\"-3\" y1=\"0\" x2=\"3\" y2=\"0\" stroke=\"black\"/>\n      <line x1=\"3\" y1=\"0\" x2=\"0\" y2=\"5.2\" stroke=\"black\"/>\n      <line x1=\"0\" y1=\"5.2\" x2=\"0\" y2=\"2.2\" stroke=\"black\"/>\n      <line x1=\"0\" y1=\"5.2\" x2=\"2.6\" y2=\"3.7\" stroke=\"black\"/>\n    </g>\n    <g id=\"moving_man\"\n       transform=\"matrix(0.0152987,0,0,0.01530866,0,0)\">\n       <path\n         d=\"M 710.7,10.1 C 904.8,5.2 908.6,261.4 730.9,278.4 637.5,287.3 566.3,181.5 603.8,90.8 623.4,43.4 668.7,12.9 711.4,10.1 c 1.1,-0.1 2.8,26.1 1.7,26.2 -31.4,2 -74.8,32.1 -89.1,74.7 -26.8,79.9 47,156.6 125.1,139.2 123.9,-27.6 114.1,-218.5 -36.3,-214 -0.7,0 -3.2,-26 -2.1,-26.1 z\"\n         id=\"path4\" stroke=\"black\" stroke-width=\"10\" />\n       <path\n         d=\"m 545.3,225.9 c -67.8,-5 -133.2,0 -199.7,0 -20.7,13.6 -115,100.7 -121.1,121.1 -5.7,19.1 6.2,31.9 12.1,40.4 60.1,18.3 96.7,-60.4 133.2,-88.8 29.6,0 59.2,0 88.8,0 -59.2,78.9 -190.7,169.9 -58.5,264.3 -27.6,31.6 -55.1,63.2 -82.7,94.8 -46.9,-14.7 -165.6,-41.3 -199.7,-18.2 -7,21 -4.8,32.1 6.1,48.4 34.1,10.3 205.5,53.2 232,36.3 34.3,-37.7 68.6,-75.3 102.9,-113 32.3,27.6 64.6,55.2 96.9,82.7 -1,62.6 -14.6,249.9 24.2,266.3 10.2,3 19.1,0.5 28.2,-2 5.4,-7.4 10.8,-14.8 16.1,-22.2 6.9,-27 0.3,-272.6 -6.1,-282.5 -37.7,-32.9 -75.3,-65.9 -113,-98.9 1.3,-1.3 2.7,-2.7 4,-4 45.7,-48.4 91.5,-96.9 137.2,-145.3 20.2,19.5 40.4,39 60.5,58.5 16.7,35.8 152.2,25.4 179.6,6.1 2,-8.1 4,-16.1 6.1,-24.2 -16,-40.1 -71.7,-31.8 -127.1,-30.3 C 741.8,384.3 590.6,253 545.5,225.7 c -1.7,-1 14.9,-23.3 15.4,-22.4 -2.2,-3.5 126,97.7 134.4,107.4 9.4,9.1 55.2,51.5 82.1,78.4 68.5,-2 122,-6.5 137.2,46.4 4.9,17.1 1.9,37.1 -8.1,50.4 -18.8,25.3 -156,39.1 -197.7,18.2 -20.2,-20.2 -40.4,-40.4 -60.5,-60.5 -18.8,18.2 -37.7,36.3 -56.5,54.5 -16.8,18.2 -33.6,36.3 -50.4,54.5 32.9,28.9 65.9,57.8 98.9,86.8 11.2,17.9 18.9,272.3 8.1,306.7 -4.8,15.2 -19.9,32.9 -34.3,38.3 C 498.3,1028.1 527.8,798.3 529.4,706 505.9,686.5 482.3,667 458.8,647.5 427.9,676.7 402,732.8 362,750.4 333.5,762.9 140.3,728.4 113.8,712.1 100.1,703.6 89.3,686 85.6,667.7 59.7,543.2 281.5,646 321.3,617.4 334.7,601.3 348.2,585.1 361.7,569 266.4,454.2 335.5,414.9 402.1,326.9 c 0,-0.7 0,-1.3 0,-2 -8.1,0 -16.1,0 -24.2,0 -26.3,36.3 -124.9,147 -173.5,64.6 -35.9,-60.8 103.6,-172.2 141.1,-189.8 56.7,-3.8 167.5,-11 215.9,4 0.8,0.7 -14.9,22.6 -16.1,22.2 z\"\n         id=\"path6\" stroke=\"black\" stroke-width=\"10\" /></g>\n    </defs>\n    ";
         return (output);
     };
     return SVGSymbols;
@@ -4214,8 +4213,8 @@ var Hierarchical_List = /** @class */ (function () {
             case 'Stoomoven':
                 tempval = new Stoomoven(structure);
                 break;
-            case 'Stopcontact':
-                tempval = new Stopcontact(structure);
+            case 'Contactdoos':
+                tempval = new Contactdoos(structure);
                 break;
             case 'Transformator':
                 tempval = new Transformator(structure);
@@ -4816,7 +4815,7 @@ var Print_Table = /** @class */ (function () {
     };
     return Print_Table;
 }());
-var CONFIGPAGE_LEFT = "\n    <center>\n        <p><font size=\"+2\">\n          <b>Eendraadschema ontwerpen: </b>\n          Kies &eacute;&eacute;n van onderstaande voorbeelden om van te starten (u kan zelf kringen toevoegen achteraf) of\n          start van een leeg schema (optie 3).\n        </font></p>\n      <font size=\"+1\">\n        <i>\n          <b>Tip: </b>Om de mogelijkheden van het programma te leren kennen is het vaak beter eerst een voorbeeldschema te\n          bekijken alvorens van een leeg schema te vertrekken.\n        </i>\n      </font>\n    </center><br><br>\n    <table border=\"1px\" style=\"border-collapse:collapse\" align=\"center\" width=\"100%\">\n      <tr>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Voorbeeld 1</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Voorbeeld 2</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Leeg schema</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Openen</b>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/example000.svg\" height=\"300px\"><br><br>\n          Eenvoudig schema, enkel stopcontacten en lichtpunten.\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/example001.svg\" height=\"300px\"><br><br>\n          Iets complexer schema met teleruptoren, verbruikers achter stopcontacten en gesplitste kringen.\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/gear.svg\" height=\"100px\"><br><br>\n";
+var CONFIGPAGE_LEFT = "\n    <center>\n        <p><font size=\"+2\">\n          <b>Eendraadschema ontwerpen: </b>\n          Kies &eacute;&eacute;n van onderstaande voorbeelden om van te starten (u kan zelf kringen toevoegen achteraf) of\n          start van een leeg schema (optie 3).\n        </font></p>\n      <font size=\"+1\">\n        <i>\n          <b>Tip: </b>Om de mogelijkheden van het programma te leren kennen is het vaak beter eerst een voorbeeldschema te\n          bekijken alvorens van een leeg schema te vertrekken.\n        </i>\n      </font>\n    </center><br><br>\n    <table border=\"1px\" style=\"border-collapse:collapse\" align=\"center\" width=\"100%\">\n      <tr>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Voorbeeld 1</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Voorbeeld 2</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Leeg schema</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Openen</b>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/example000.svg\" height=\"300px\"><br><br>\n          Eenvoudig schema, enkel contactdozen en lichtpunten.\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/example001.svg\" height=\"300px\"><br><br>\n          Iets complexer schema met teleruptoren, verbruikers achter contactdozen en gesplitste kringen.\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/gear.svg\" height=\"100px\"><br><br>\n";
 var CONFIGPAGE_RIGHT = "\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/import_icon.svg\" height=\"100px\"><br><br>\n          Open een schema dat u eerder heeft opgeslagen op uw computer (EDS-bestand). Enkel bestanden aangemaakt na 12 juli 2019 worden herkend.\n          <br><br>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"load_example(0)\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"load_example(1)\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"read_settings()\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"importclicked()\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n      </tr>\n    </table>\n  ";
 var CONFIGPRINTPAGE = "\n<div>\n</div>\n<br>\n";
 var EXAMPLE0 = "EDS0020000eJztnG1P4zgQgP9Kla/nLYkTQK1Op4MeQqvldqUr6p2EEHKTaeqNE0eJQ3kR//3GhtJ0adjjZbe51hJCxmPPjMd5Mo4dcusIyGI1dfpejzgRU8zpn906PMIK4uSsgEw5fZc4PIvmxVAKwfISsM2EiRKIk8B1if3OHHWdg0Oc4dHJ0eAUCwcsK0XFFc9i55ycOTEwVkQoOPzy5eTo4LNDVFGBliTaQHEJXPB4CnxlGxaGVVoJpjjUxcYJI2eZYqJunxqrgodTlRToxEUuF/ofW0GWgDAS0/wSB8rRiixWWrmBBLSuuoaITyagY8UBhFHC0hwKFptonP718fMxFgLXiBI2BlGvp1fenpFkjKV1wR+o1giW9F/MdBCXNPtuTfUFxmEGNzxeGUMTI1p33rsftRTqG3+p7452aDAy8lCmKTqAputNjKgEAaHy6jpLxbLIzPWiwZLRg5rAb+45llJ4K6dBS2ijxF8pKZWeOG8pcs5CQJ+OzNT7T+q1iaDR+O5TyTkOTFZFCIKXSFFWCXFH7jmjC868BWfeizg7lA/x+tmAeT8JMFYpmaJfZThtxIs24PXP6LDjH1Oyu5KxDeVrVYN1crZ2zHR+m3NGF5zRF3H2qbCZ7LlM9jxqL0hn36Htm0CtHzebzh7TmVvLZ70FaP57JbRH32xGsxltmzPafi2huU0ZTc/iVie0t3I2GLBnWDtoN2yfoEoga0LuY9aZITJNwA1eCdp8LBuT0vYsaO8E2sM+xzOgeQ2gHbYbtBEUJsLzSba0vZo2v5bX9l+7fhwqmYcSpylUdl/kVatIr93A2WXke/EWUMtbC3ijlrct4c2zvLWAN9/ytiW8uZa3FvAWWN62gze/Z3lrAW+7lrft4C3wF7wFtZPt4EXAjQr+FToKktICt4nHbn8zBUUiMSBN5N1IPa+dhEVLbZY8CFFxAUvydbK3566dPuqtPhwI7OHAS7H7/uFAE3qDdrN3yKKEpc3k2ZOB/8habaeS1t6V3LVLS3s0YJeWPwC4wALXBuDs2cC2ANd7D+BO9KUe8iKseJuJi6rxuLXItfx4YJhziB9e0LbkvQN5Xu0lr73X7lpa8N4Onl1cbgtx+5tAXJs2UOzi0gL33MEc3QTg/v9Pcy1fWlrg3gwc1rFQ8UtAhMzW/w/7hZY02mceocTrEeqSfbJH/H0SUBJ4JHCJ3yOBT/BhklJCA4JPmLjUxdzrU+ybYxDUhWJjga7eOkhRPL3/yEPKrmY80h+GcPU/hZa5YNe5vpj65nWaGErzoYhaD5zdYl6SORbuzu+0BYnc4EVeagMTLiBjKWpx4AqJEuC6bheiEuMqZxkUKBhJWWhkOgeIOJjir+Pit6EqGFMdV5exk9uJIQW8ekFXnILod37xaQfr5z+6/nj457x+WQAfUsaxz+WDsS57NPZ7JFPgWXesweEZDksI4xiPIDVVE4l/xaDwrpFFnRSU1jhVKi/7Ozuz2ayLfkXobYT3DkhZN5agpnixfPjKQjkutWaMTFgV5vgWn+1TGZmQRHhPvfsXXgCWFw==";
@@ -5344,6 +5343,20 @@ function import_to_structure(mystring, redraw) {
                 if (mystructure.data[i].keys[16][2] != "zonder kader")
                     mystructure.data[i].keys[16][2] = "verbruiker";
             }
+        }
+    }
+    // In versie 2 heetten Contactdozen altijd nog Stopcontacten
+    if (version < 3) {
+        for (var i = 0; i < mystructure.length; i++) {
+            if (mystructure.data[i].keys[0][2] === "Stopcontact")
+                mystructure.data[i].keys[0][2] = "Contactdoos";
+        }
+    }
+    // In versie 3 heetten Contactdozen ook soms nog Stopcontacten, maar niet altijd
+    if (version == 3) {
+        for (var i = 0; i < mystructure.length; i++) {
+            if (mystructure.data[i].props.type === "Stopcontact")
+                mystructure.data[i].props.type = "Contactdoos";
         }
     }
     /* We starten met het kopieren van data naar de eigenlijke structure.

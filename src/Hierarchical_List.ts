@@ -195,7 +195,7 @@ class Hierarchical_List {
             case 'Schakelaars': tempval = new Schakelaars(structure); break;
             case 'Splitsing': tempval = new Splitsing(structure); break;
             case 'Stoomoven': tempval = new Stoomoven(structure); break;
-            case 'Stopcontact': tempval = new Stopcontact(structure); break;
+            case 'Contactdoos': tempval = new Contactdoos(structure); break;
             case 'Transformator': tempval = new Transformator(structure); break;
             case 'USB lader': tempval = new USB_lader(structure); break;
             case 'Vaatwasmachine': tempval = new Vaatwasmachine(structure); break;

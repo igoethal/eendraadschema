@@ -35,9 +35,10 @@ class Lichtcircuit extends Schakelaars {
 
     toSVG() {
         let mySVG:SVGelement = new SVGelement();
+        let tekenKeten: Array<Schakelaar> = [];
 
         // Eerst maken we een keten van unieke schakelaars. De aantallen worden hier vervangen door individuele elementen in een array
-        this.bouwSchakelaarKeten();
+        this.bouwSchakelaarKeten(tekenKeten);
 
         var lowerbound = 20; // How low does the switch go below the baseline, needed to place adres afterwards
 
@@ -45,9 +46,9 @@ class Lichtcircuit extends Schakelaars {
         var endx;
 
         // Teken de schakelaars
-        for (let i=0; i<this.tekenKeten.length; i++ ) {
-            let islast: boolean = ( (i == this.tekenKeten.length-1) && (!this.heeftVerbruikerAlsKind()) );
-            let str:string; ( {endx: startx, str: str, lowerbound: lowerbound} = this.tekenKeten[i].toSVGString(startx,islast) ); mySVG.data += str;
+        for (let i=0; i<tekenKeten.length; i++ ) {
+            let islast: boolean = ( (i == tekenKeten.length-1) && (!this.heeftVerbruikerAlsKind()) );
+            let str:string; ( {endx: startx, str: str, lowerbound: lowerbound} = tekenKeten[i].toSVGString(startx,islast) ); mySVG.data += str;
         }
 
         if (this.props.aantal_lichtpunten >= 1) { //1 of meerdere lampen
@@ -74,7 +75,7 @@ class Lichtcircuit extends Schakelaars {
             lowerbound = Math.max(lowerbound,29);
         } else { //Geen lampen
             // Voor bepaalde symbolen moet wat extra ruimte rechts voorzien worden om te vermijden dat de tekening door de volgende kring loopt
-            if (!this.heeftVerbruikerAlsKind()) startx += this.tekenKeten[this.tekenKeten.length-1].extraPlaatsRechts();
+            if (!this.heeftVerbruikerAlsKind()) startx += tekenKeten[tekenKeten.length-1].extraPlaatsRechts();
         }    
 
         mySVG.xleft = 1; // foresee at least some space for the conductor

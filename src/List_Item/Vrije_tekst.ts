@@ -80,7 +80,7 @@ class Vrije_tekst extends Electro_Item {
         var shiftx;
         if (this.props.vrije_tekst_type === "zonder kader") {
             if ((this.getParent() as Electro_Item).getType() === "Kring") shiftx = 10;
-            else if ((this.getParent() as Electro_Item).getType() === "Stopcontact") shiftx = 0;
+            else if ((this.getParent() as Electro_Item).getType() === "Contactdoos") shiftx = 0;
             else shiftx = 5;
         } else shiftx = 20;
 

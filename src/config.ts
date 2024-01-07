@@ -31,13 +31,13 @@ var CONFIGPAGE_LEFT:string = `
         <td width="25%" align="center">
           <br>
           <img src="examples/example000.svg" height="300px"><br><br>
-          Eenvoudig schema, enkel stopcontacten en lichtpunten.
+          Eenvoudig schema, enkel contactdozen en lichtpunten.
           <br><br>
         </td>
         <td width="25%" align="center">
           <br>
           <img src="examples/example001.svg" height="300px"><br><br>
-          Iets complexer schema met teleruptoren, verbruikers achter stopcontacten en gesplitste kringen.
+          Iets complexer schema met teleruptoren, verbruikers achter contactdozen en gesplitste kringen.
           <br><br>
         </td>
         <td width="25%" align="center">

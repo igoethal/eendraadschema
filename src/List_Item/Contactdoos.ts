@@ -1,4 +1,4 @@
-class Stopcontact extends Electro_Item {
+class Contactdoos extends Electro_Item {
 
     convertLegacyKeys(mykeys: Array<[string,string,any]>) {
         this.props.type                           = this.getLegacyKey(mykeys,0);
@@ -17,7 +17,7 @@ class Stopcontact extends Electro_Item {
 
     resetProps() {
         this.clearProps();
-        this.props.type = "Stopcontact";
+        this.props.type = "Contactdoos";
         this.props.is_geaard = true;    
         this.props.is_kinderveilig = true; 
         this.props.aantal = "1";     
@@ -62,7 +62,7 @@ class Stopcontact extends Electro_Item {
 
         var startx: number = 1; // Punt waar we aan het tekenen zijn. Schuift gaandeweg op
 
-        // Teken lijnen voor meerfasig stopcontact
+        // Teken lijnen voor meerfasige contactdoos
         if (this.props.is_meerfasig) {
           mySVG.data += '<line x1="1" y1="25" x2="35" y2="25" stroke="black" />';
 
@@ -102,11 +102,11 @@ class Stopcontact extends Electro_Item {
             startx += 10; mySVG.xright += 10; //We schuiven alles 10 pixels op
         }
 
-        // Teken alle stopcontacten, inclusief aarding en kinderveiligheid indien van toepassing
+        // Teken alle contactdozen, inclusief aarding en kinderveiligheid indien van toepassing
         for (let i=0; i<this.props.aantal; ++i) {
-            mySVG.data += '<use xlink:href="#stopcontact" x="' + startx + '" y="25"></use>';
-            if (this.props.is_geaard) mySVG.data += '<use xlink:href="#stopcontact_aarding" x="' + startx + '" y="25"></use>';
-            if (this.props.is_kinderveilig) mySVG.data += '<use xlink:href="#stopcontact_kinderveilig" x="' + startx + '" y="25"></use>';
+            mySVG.data += '<use xlink:href="#contactdoos" x="' + startx + '" y="25"></use>';
+            if (this.props.is_geaard) mySVG.data += '<use xlink:href="#contactdoos_aarding" x="' + startx + '" y="25"></use>';
+            if (this.props.is_kinderveilig) mySVG.data += '<use xlink:href="#contactdoos_kinderveilig" x="' + startx + '" y="25"></use>';
             startx += 20; mySVG.xright += 20;
         }
 
@@ -119,7 +119,7 @@ class Stopcontact extends Electro_Item {
         // Teken halfwaterdicht indien van toepassing
         if (this.props.is_halfwaterdicht) mySVG.data += '<rect x="' + (22+(this.props.heeft_ingebouwde_schakelaar)*10+(this.props.is_meerfasig)*34) + '" y="0" width="6" height="8" style="fill:rgb(255,255,255)" /><text x="' + (25+(this.props.heeft_ingebouwde_schakelaar)*10+(this.props.is_meerfasig)*34) + '" y="8" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">h</text>';
 
-        // Indien het stopcontact een kind heeft, teken een streepje rechts
+        // Indien de contactdoos een kind heeft, teken een streepje rechts
         if (this.heeftVerbruikerAlsKind()) {
             mySVG.data += '<line x1="'+startx+'" y1="25" x2="'+(startx+21)+'" y2="25" stroke="black" />';
         };

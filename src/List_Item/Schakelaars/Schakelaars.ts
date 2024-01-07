@@ -1,10 +1,7 @@
 class Schakelaars extends Electro_Item {
-
-    tekenKeten: Array<Schakelaar>; // Een lijst van elementen die we willen tekenen
     
     constructor(mylist: Hierarchical_List) { 
         super(mylist);
-        this.tekenKeten = [];
     }
 
     convertLegacyKeys(mykeys: Array<[string,string,any]>) {
@@ -85,63 +82,63 @@ class Schakelaars extends Electro_Item {
         return(output);
     }
 
-    bouwSchakelaarKeten() {
-        this.tekenKeten = [];        
+    bouwSchakelaarKeten(tekenKeten: Array<Schakelaar>) {      
         switch (this.props.type_schakelaar) {
-            case "wissel_enkel":         this.tekenKeten.push(new Schakelaar("wissel_enkel",this.props.is_halfwaterdicht,this.props.heeft_verklikkerlampje,this.props.heeft_signalisatielampje,this.props.is_trekschakelaar)); break;
-            case "wissel_dubbel":        this.tekenKeten.push(new Schakelaar("wissel_dubbel",this.props.is_halfwaterdicht,this.props.heeft_verklikkerlampje,this.props.heeft_signalisatielampje,this.props.is_trekschakelaar)); break;
-            case "kruis_enkel":          this.tekenKeten.push(new Schakelaar("kruis_enkel",this.props.is_halfwaterdicht,this.props.heeft_verklikkerlampje,this.props.heeft_signalisatielampje,this.props.is_trekschakelaar)); break;
-            case "teleruptor":           this.tekenKeten.push(new Schakelaar("teleruptor")); break;
-            case "bewegingsschakelaar":  this.tekenKeten.push(new Schakelaar("bewegingsschakelaar")); break;
-            case "schemerschakelaar":    this.tekenKeten.push(new Schakelaar("schemerschakelaar")); break;
-            case "schakelaar":           this.tekenKeten.push(new Schakelaar("schakelaar")); break;
-            case "dimmer":               this.tekenKeten.push(new Schakelaar("dimmer")); break;
-            case "relais":               this.tekenKeten.push(new Schakelaar("relais")); break;
-            case "minuterie":            this.tekenKeten.push(new Schakelaar("minuterie")); break;
-            case "thermostaat":          this.tekenKeten.push(new Schakelaar("thermostaat")); break;
-            case "tijdschakelaar":       this.tekenKeten.push(new Schakelaar("tijdschakelaar")); break;
-            case "rolluikschakelaar":    this.tekenKeten.push(new Schakelaar("rolluikschakelaar",this.props.is_halfwaterdicht)); break;
-            case "dubbelaansteking":     this.tekenKeten.push(new Schakelaar("dubbelaansteking",this.props.is_halfwaterdicht,this.props.heeft_verklikkerlampje,this.props.heeft_signalisatielampje,this.props.is_trekschakelaar)); break;
-            case "dimschakelaar":        this.tekenKeten.push(new Schakelaar("dimschakelaar",this.props.is_halfwaterdicht,this.props.heeft_verklikkerlampje,this.props.heeft_signalisatielampje,false)); break;
-            case "dimschakelaar wissel": this.tekenKeten.push(new Schakelaar("dimschakelaar_wissel",this.props.is_halfwaterdicht,this.props.heeft_verklikkerlampje,this.props.heeft_signalisatielampje,false)); break;
+            case "wissel_enkel":         tekenKeten.push(new Schakelaar("wissel_enkel",this.props.is_halfwaterdicht,this.props.heeft_verklikkerlampje,this.props.heeft_signalisatielampje,this.props.is_trekschakelaar)); break;
+            case "wissel_dubbel":        tekenKeten.push(new Schakelaar("wissel_dubbel",this.props.is_halfwaterdicht,this.props.heeft_verklikkerlampje,this.props.heeft_signalisatielampje,this.props.is_trekschakelaar)); break;
+            case "kruis_enkel":          tekenKeten.push(new Schakelaar("kruis_enkel",this.props.is_halfwaterdicht,this.props.heeft_verklikkerlampje,this.props.heeft_signalisatielampje,this.props.is_trekschakelaar)); break;
+            case "teleruptor":           tekenKeten.push(new Schakelaar("teleruptor")); break;
+            case "bewegingsschakelaar":  tekenKeten.push(new Schakelaar("bewegingsschakelaar")); break;
+            case "schemerschakelaar":    tekenKeten.push(new Schakelaar("schemerschakelaar")); break;
+            case "schakelaar":           tekenKeten.push(new Schakelaar("schakelaar")); break;
+            case "dimmer":               tekenKeten.push(new Schakelaar("dimmer")); break;
+            case "relais":               tekenKeten.push(new Schakelaar("relais")); break;
+            case "minuterie":            tekenKeten.push(new Schakelaar("minuterie")); break;
+            case "thermostaat":          tekenKeten.push(new Schakelaar("thermostaat")); break;
+            case "tijdschakelaar":       tekenKeten.push(new Schakelaar("tijdschakelaar")); break;
+            case "rolluikschakelaar":    tekenKeten.push(new Schakelaar("rolluikschakelaar",this.props.is_halfwaterdicht)); break;
+            case "dubbelaansteking":     tekenKeten.push(new Schakelaar("dubbelaansteking",this.props.is_halfwaterdicht,this.props.heeft_verklikkerlampje,this.props.heeft_signalisatielampje,this.props.is_trekschakelaar)); break;
+            case "dimschakelaar":        tekenKeten.push(new Schakelaar("dimschakelaar",this.props.is_halfwaterdicht,this.props.heeft_verklikkerlampje,this.props.heeft_signalisatielampje,false)); break;
+            case "dimschakelaar wissel": tekenKeten.push(new Schakelaar("dimschakelaar_wissel",this.props.is_halfwaterdicht,this.props.heeft_verklikkerlampje,this.props.heeft_signalisatielampje,false)); break;
             case "enkelpolig":
-                if (Number(this.props.aantal_schakelaars) == 1) this.tekenKeten.push(new Schakelaar("enkel",this.props.is_halfwaterdicht,this.props.heeft_verklikkerlampje,this.props.heeft_signalisatielampje,this.props.is_trekschakelaar));
+                if (Number(this.props.aantal_schakelaars) == 1) tekenKeten.push(new Schakelaar("enkel",this.props.is_halfwaterdicht,this.props.heeft_verklikkerlampje,this.props.heeft_signalisatielampje,this.props.is_trekschakelaar));
                 if (Number(this.props.aantal_schakelaars) > 1) {
-                    this.tekenKeten.push(new Schakelaar("wissel_enkel",this.props.is_halfwaterdicht,this.props.heeft_verklikkerlampje,this.props.heeft_signalisatielampje,this.props.is_trekschakelaar));
+                    tekenKeten.push(new Schakelaar("wissel_enkel",this.props.is_halfwaterdicht,this.props.heeft_verklikkerlampje,this.props.heeft_signalisatielampje,this.props.is_trekschakelaar));
                     for (let i=2; i<Number(this.props.aantal_schakelaars); ++i) {
-                        this.tekenKeten.push(new Schakelaar("kruis_enkel",this.props.is_halfwaterdicht,this.props.heeft_verklikkerlampje,this.props.heeft_signalisatielampje,this.props.is_trekschakelaar)); }
-                    this.tekenKeten.push(new Schakelaar("wissel_enkel",this.props.is_halfwaterdicht,this.props.heeft_verklikkerlampje,this.props.heeft_signalisatielampje,this.props.is_trekschakelaar)); }
+                        tekenKeten.push(new Schakelaar("kruis_enkel",this.props.is_halfwaterdicht,this.props.heeft_verklikkerlampje,this.props.heeft_signalisatielampje,this.props.is_trekschakelaar)); }
+                    tekenKeten.push(new Schakelaar("wissel_enkel",this.props.is_halfwaterdicht,this.props.heeft_verklikkerlampje,this.props.heeft_signalisatielampje,this.props.is_trekschakelaar)); }
                 break;
             case "dubbelpolig":
-                if (Number(this.props.aantal_schakelaars) == 1) this.tekenKeten.push(new Schakelaar("dubbel",this.props.is_halfwaterdicht,this.props.heeft_verklikkerlampje,this.props.heeft_signalisatielampje,this.props.is_trekschakelaar));
+                if (Number(this.props.aantal_schakelaars) == 1) tekenKeten.push(new Schakelaar("dubbel",this.props.is_halfwaterdicht,this.props.heeft_verklikkerlampje,this.props.heeft_signalisatielampje,this.props.is_trekschakelaar));
                 if (Number(this.props.aantal_schakelaars) > 1) {
-                    this.tekenKeten.push(new Schakelaar("wissel_dubbel",this.props.is_halfwaterdicht,this.props.heeft_verklikkerlampje,this.props.heeft_signalisatielampje,this.props.is_trekschakelaar));
-                    this.tekenKeten.push(new Schakelaar("wissel_dubbel",this.props.is_halfwaterdicht,this.props.heeft_verklikkerlampje,this.props.heeft_signalisatielampje,this.props.is_trekschakelaar));
+                    tekenKeten.push(new Schakelaar("wissel_dubbel",this.props.is_halfwaterdicht,this.props.heeft_verklikkerlampje,this.props.heeft_signalisatielampje,this.props.is_trekschakelaar));
+                    tekenKeten.push(new Schakelaar("wissel_dubbel",this.props.is_halfwaterdicht,this.props.heeft_verklikkerlampje,this.props.heeft_signalisatielampje,this.props.is_trekschakelaar));
                 }  
                 break;
             case "driepolig":
-                this.tekenKeten.push(new Schakelaar("driepolig",this.props.is_halfwaterdicht,this.props.heeft_verklikkerlampje,this.props.heeft_signalisatielampje,this.props.is_trekschakelaar));
+                tekenKeten.push(new Schakelaar("driepolig",this.props.is_halfwaterdicht,this.props.heeft_verklikkerlampje,this.props.heeft_signalisatielampje,this.props.is_trekschakelaar));
                 break;
         }
     }
 
     toSVG() {
         let mySVG:SVGelement = new SVGelement();
+        let tekenKeten: Array<Schakelaar> = [];
 
         // Eerst maken we een keten van unieke schakelaars. De aantallen worden hier vervangen door individuele elementen in een array
-        this.bouwSchakelaarKeten();
+        this.bouwSchakelaarKeten(tekenKeten);
 
         var lowerbound = 20; // How low does the switch go below the baseline, needed to place adres afterwards
         
         var startx = 1;
         var endx;
 
-        for (let i=0; i<this.tekenKeten.length; i++ ) {
-            let islast: boolean = ( (i == this.tekenKeten.length-1) && (!this.heeftVerbruikerAlsKind()) );
-            let str:string; ( {endx: startx, str: str, lowerbound: lowerbound} = this.tekenKeten[i].toSVGString(startx,islast) ); mySVG.data += str;
+        for (let i=0; i<tekenKeten.length; i++ ) {
+            let islast: boolean = ( (i == tekenKeten.length-1) && (!this.heeftVerbruikerAlsKind()) );
+            let str:string; ( {endx: startx, str: str, lowerbound: lowerbound} = tekenKeten[i].toSVGString(startx,islast) ); mySVG.data += str;
         }
         // Voor bepaalde symbolen moet wat extra ruimte rechts voorzien worden om te vermijden dat de tekening door de volgende kring loopt
-        if (!this.heeftVerbruikerAlsKind()) startx += this.tekenKeten[this.tekenKeten.length-1].extraPlaatsRechts();
+        if (!this.heeftVerbruikerAlsKind()) startx += tekenKeten[tekenKeten.length-1].extraPlaatsRechts();
 
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = startx-2;

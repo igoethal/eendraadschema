@@ -572,14 +572,29 @@ function import_to_structure(mystring: string, redraw = true) {
     */
     if (version < 2) {
         for (let i = 0; i < mystructure.length; i++) {
-        // Breedte van Vrije tekst velden zonder kader met 30 verhogen sinds 16/12/2023
-        if ( (mystructure.data[i].keys[0][2] === "Vrije tekst") && (mystructure.data[i].keys[16][2] != "verbruiker") ) {
-            if (Number(mystructure.data[i].keys[22][2])>0) mystructure.data[i].keys[22][2] = String(Number(mystructure.data[i].keys[22][2]) + 30);
-                else mystructure.data[i].keys[18][2] = "automatisch";
-            if (mystructure.data[i].keys[16][2] != "zonder kader") mystructure.data[i].keys[16][2] = "verbruiker";
-        }
+            // Breedte van Vrije tekst velden zonder kader met 30 verhogen sinds 16/12/2023
+            if ( (mystructure.data[i].keys[0][2] === "Vrije tekst") && (mystructure.data[i].keys[16][2] != "verbruiker") ) {
+                if (Number(mystructure.data[i].keys[22][2])>0) mystructure.data[i].keys[22][2] = String(Number(mystructure.data[i].keys[22][2]) + 30);
+                    else mystructure.data[i].keys[18][2] = "automatisch";
+                if (mystructure.data[i].keys[16][2] != "zonder kader") mystructure.data[i].keys[16][2] = "verbruiker";
+            }
       } 
     }   
+
+    // In versie 2 heetten Contactdozen altijd nog Stopcontacten
+
+    if (version < 3) {
+        for (let i = 0; i < mystructure.length; i++) {
+            if (mystructure.data[i].keys[0][2] === "Stopcontact") mystructure.data[i].keys[0][2] = "Contactdoos";
+        }
+    }
+
+    // In versie 3 heetten Contactdozen ook soms nog Stopcontacten, maar niet altijd
+    if (version == 3) {
+        for (let i = 0; i < mystructure.length; i++) {
+            if (mystructure.data[i].props.type === "Stopcontact") mystructure.data[i].props.type = "Contactdoos";
+        }
+    }
 
     /* We starten met het kopieren van data naar de eigenlijke structure.
     * Ook hier houden we er rekening mee dat in oude saves mogelijk niet alle info voorhanden was
