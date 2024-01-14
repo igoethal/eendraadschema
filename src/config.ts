@@ -1,17 +1,20 @@
 var CONFIGPAGE_LEFT:string = `
-    <center>
+    <br>
+    <table border="1px" style="border-collapse:collapse;" align="center" width="100%"><tr><td style="padding-top: 0; padding-right: 10px; padding-bottom: 10px; padding-left: 10px;">
         <p><font size="+2">
-          <b>Eendraadschema ontwerpen: </b>
-          Kies &eacute;&eacute;n van onderstaande voorbeelden om van te starten (u kan zelf kringen toevoegen achteraf) of
-          start van een leeg schema (optie 3).
+          <b>Welkom op ééndraadschema</b>
         </font></p>
+      <p><font size="+1">  
+           Kies één van onderstaande voorbeelden om van te starten of start van een leeg schema (optie 3).
+      </font></p>
       <font size="+1">
         <i>
           <b>Tip: </b>Om de mogelijkheden van het programma te leren kennen is het vaak beter eerst een voorbeeldschema te
           bekijken alvorens van een leeg schema te vertrekken.
         </i>
       </font>
-    </center><br><br>
+    </td></tr></table>
+    <br>
     <table border="1px" style="border-collapse:collapse" align="center" width="100%">
       <tr>
         <td width="25%" align="center" bgcolor="LightGrey">
