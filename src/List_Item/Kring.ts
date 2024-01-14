@@ -102,7 +102,7 @@ class Kring extends Electro_Item {
 
         // Aantal polen en Ampérage
 
-        if ( (this.props.bescherming != "geen") && (this.props.bescherming != "relais") ) output += this.selectPropToHTML('aantal',["2","3","4","-","1"]) + this.stringPropToHTML('amperage',2) + "A";
+        if ( (this.props.bescherming != "geen") && (this.props.bescherming != "relais") ) output += this.selectPropToHTML('aantal_polen',["2","3","4","-","1"]) + this.stringPropToHTML('amperage',2) + "A";
 
         // Specifieke input voor differentielen en automaten
 

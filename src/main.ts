@@ -476,6 +476,7 @@ function restart_all() {
     strleft += CONFIGPAGE_RIGHT;
 
     strleft += PROP_getCookieText(); //Will only be displayed in the online version
+    strleft += PROP_development_options();
 
     document.getElementById("configsection").innerHTML = strleft;
     hide2col();
@@ -565,6 +566,13 @@ function import_to_structure(mystring: string, redraw = true) {
     * Afterwards we will gradually copy elements from this one into the official structure
     */
     let mystructure = JSON.parse(text);
+
+    // At a certain moment (2023-01-11 to 2023-01-13) there was a bug in the systen so that files where accidentally outputed with props, without keys, but with version 1.
+    // We correct for this below. If there are props and not keys but it still reads version 1, it should be interpreted as version 3.
+
+    if ((version == 1) && (mystructure.length > 0) && (typeof(mystructure.data[0].keys) == 'undefined') && (typeof(mystructure.data[0].props) != 'undefined') ) {
+        version = 3
+    }
     
     /* Indien versie 1 moeten we vrije tekst elementen die niet leeg zijn 30 pixels breder maken.
     * Merk ook op dat versie 1 nog een key based systeem had met keys[0][2] het type

@@ -1061,7 +1061,7 @@ var Aansluiting = /** @class */ (function (_super) {
         if (this.getParent() != null)
             output += "Nr: " + this.stringPropToHTML('nr', 5) + ", ";
         output += "Zekering: " + this.selectPropToHTML('bescherming', ["automatisch", "differentieel", "differentieelautomaat", "smelt", "geen", "---", "schakelaar", "schemer"])
-            + this.selectPropToHTML('aantal', ["2", "3", "4"])
+            + this.selectPropToHTML('aantal_polen', ["2", "3", "4"])
             + this.stringPropToHTML('amperage', 2) + "A";
         switch (this.props.bescherming) {
             case "differentieel":
@@ -2429,7 +2429,7 @@ var Kring = /** @class */ (function (_super) {
             + "Zekering: " + this.selectPropToHTML('bescherming', ["automatisch", "differentieel", "differentieelautomaat", "smelt", "geen", "---", "schakelaar", "relais", "schemer", "overspanningsbeveiliging"]);
         // Aantal polen en Ampérage
         if ((this.props.bescherming != "geen") && (this.props.bescherming != "relais"))
-            output += this.selectPropToHTML('aantal', ["2", "3", "4", "-", "1"]) + this.stringPropToHTML('amperage', 2) + "A";
+            output += this.selectPropToHTML('aantal_polen', ["2", "3", "4", "-", "1"]) + this.stringPropToHTML('amperage', 2) + "A";
         // Specifieke input voor differentielen en automaten
         switch (this.props.bescherming) {
             case "differentieel":
@@ -4829,6 +4829,18 @@ function PROP_GDPR() {
 function PROP_getCookieText() {
     return ("");
 }
+//--- START OF DEVELOPMENT OPTIONS ---
+function PROP_development_options() {
+    var outstr = '<br><h2>Expert ontwikkel opties, Gebruik enkel indien u weet wat u doet.</h2>'
+        + '<textarea id="HL_loadfromtext" style="width: 80%; height: 8em;"></textarea><br>'
+        + '<button onclick="loadFileFromText()">Load from input</button>';
+    return outstr;
+}
+function loadFileFromText() {
+    var str = document.getElementById('HL_loadfromtext').value;
+    import_to_structure(str);
+}
+/// --- END OF DEVELOPMENT OPTIONS ---
 function exportjson() {
     var filename;
     /* We use the Pako library to entropy code the data
@@ -5248,6 +5260,7 @@ function restart_all() {
         "\n      Hoofddifferentieel (in mA) <input id=\"differentieel_droog\" type=\"text\" size=\"5\" maxlength=\"5\" value=\"300\"><br><br>\n      Hoofdzekering (in A) <input id=\"hoofdzekering\" type=\"text\" size=\"4\" maxlength=\"4\" value=\"65\"><br><br>\n      Aantal fazen:\n      <select id=\"aantal_fazen_droog\"><option value=\"2\">2p</option><option value=\"3\">3p</option><option value=\"4\">4p (3p+n)</option></select>";
     strleft += CONFIGPAGE_RIGHT;
     strleft += PROP_getCookieText(); //Will only be displayed in the online version
+    strleft += PROP_development_options();
     document.getElementById("configsection").innerHTML = strleft;
     hide2col();
     if (browser_ie_detected()) {
@@ -5328,6 +5341,11 @@ function import_to_structure(mystring, redraw) {
     * Afterwards we will gradually copy elements from this one into the official structure
     */
     var mystructure = JSON.parse(text);
+    // At a certain moment there was a bug in the systen so that files where accidentally outputed with props, without keys, but with version 1.
+    // We correct for this below
+    if ((version == 1) && (mystructure.length > 0) && (typeof (mystructure.data[0].keys) == 'undefined') && (typeof (mystructure.data[0].props) != 'undefined')) {
+        version = 3;
+    }
     /* Indien versie 1 moeten we vrije tekst elementen die niet leeg zijn 30 pixels breder maken.
     * Merk ook op dat versie 1 nog een key based systeem had met keys[0][2] het type
     * en keys[16][2] die aangeeft of vrije tekst al dan niet een kader bevat (verbruiker) of niet (zonder kader)

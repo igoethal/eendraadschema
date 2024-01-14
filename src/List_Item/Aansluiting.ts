@@ -69,7 +69,7 @@ class Aansluiting extends Electro_Item {
         if (this.getParent() != null) output += "Nr: " + this.stringPropToHTML('nr',5) + ", ";
         
         output += "Zekering: " + this.selectPropToHTML('bescherming',["automatisch","differentieel","differentieelautomaat","smelt","geen","---","schakelaar","schemer"]) 
-                               + this.selectPropToHTML('aantal',["2","3","4"]) 
+                               + this.selectPropToHTML('aantal_polen',["2","3","4"]) 
                                + this.stringPropToHTML('amperage',2) + "A";
 
         switch (this.props.bescherming) {

@@ -22,6 +22,23 @@ function PROP_getCookieText() {
   return("");
 }
 
+//--- START OF DEVELOPMENT OPTIONS ---
+
+function PROP_development_options() {
+  let outstr:string = '<br><h2>Expert ontwikkel opties, Gebruik enkel indien u weet wat u doet.</h2>'
+                    + '<textarea id="HL_loadfromtext" style="width: 80%; height: 8em;"></textarea><br>'
+                    + '<button onclick="loadFileFromText()">Load from input</button>';
+  return outstr;
+}
+
+function loadFileFromText() {
+  let str:string = (document.getElementById('HL_loadfromtext') as HTMLInputElement).value;
+  import_to_structure(str)
+}
+
+
+/// --- END OF DEVELOPMENT OPTIONS ---
+
 function exportjson() {
     var filename:string;
 
