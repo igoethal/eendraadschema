@@ -75,7 +75,7 @@ class Lichtcircuit extends Schakelaars {
             lowerbound = Math.max(lowerbound,29);
         } else { //Geen lampen
             // Voor bepaalde symbolen moet wat extra ruimte rechts voorzien worden om te vermijden dat de tekening door de volgende kring loopt
-            if (!this.heeftVerbruikerAlsKind()) startx += tekenKeten[tekenKeten.length-1].extraPlaatsRechts();
+            if ((!this.heeftVerbruikerAlsKind()) && (tekenKeten.length>0)) startx += tekenKeten[tekenKeten.length-1].extraPlaatsRechts();
         }    
 
         mySVG.xleft = 1; // foresee at least some space for the conductor

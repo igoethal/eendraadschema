@@ -980,7 +980,7 @@ var Lichtcircuit = /** @class */ (function (_super) {
         }
         else { //Geen lampen
             // Voor bepaalde symbolen moet wat extra ruimte rechts voorzien worden om te vermijden dat de tekening door de volgende kring loopt
-            if (!this.heeftVerbruikerAlsKind())
+            if ((!this.heeftVerbruikerAlsKind()) && (tekenKeten.length > 0))
                 startx += tekenKeten[tekenKeten.length - 1].extraPlaatsRechts();
         }
         mySVG.xleft = 1; // foresee at least some space for the conductor
@@ -5382,14 +5382,16 @@ function import_to_structure(mystring, redraw) {
     */
     structure = new Hierarchical_List();
     // Kopieren van hoofd-eigenschappen
-    if (typeof mystructure.properties.filename != "undefined")
-        structure.properties.filename = mystructure.properties.filename;
-    if (typeof mystructure.properties.owner != "undefined")
-        structure.properties.owner = mystructure.properties.owner;
-    if (typeof mystructure.properties.installer != "undefined")
-        structure.properties.installer = mystructure.properties.installer;
-    if (typeof mystructure.properties.info != "undefined")
-        structure.properties.info = mystructure.properties.info;
+    if (typeof mystructure.properties != 'undefined') {
+        if (typeof mystructure.properties.filename != "undefined")
+            structure.properties.filename = mystructure.properties.filename;
+        if (typeof mystructure.properties.owner != "undefined")
+            structure.properties.owner = mystructure.properties.owner;
+        if (typeof mystructure.properties.installer != "undefined")
+            structure.properties.installer = mystructure.properties.installer;
+        if (typeof mystructure.properties.info != "undefined")
+            structure.properties.info = mystructure.properties.info;
+    }
     // Kopieren van de paginatie voor printen
     if (typeof mystructure.print_table != "undefined") {
         structure.print_table.setHeight(mystructure.print_table.height);
