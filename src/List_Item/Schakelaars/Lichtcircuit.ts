@@ -27,14 +27,14 @@ class Lichtcircuit extends Schakelaars {
             case "enkelpolig":  
                 if (this.props.aantal_schakelaars == 0) {
                     output += ", Aantal schakelaars: " + this.selectPropToHTML('aantal_schakelaars',["0", "1","2","3","4","5"]) 
-                           +  '<span style="color: red;">Compatibiliteitsmodus, kies aantal schakelaars verschillend van 0 of gebruik element lichtpunt</span>';
+                           +  '<span style="color: red;"> Compatibiliteitsmodus, kies aantal schakelaars verschillend van 0 of gebruik element lichtpunt</span>';
                 } else {
                     output += ", Aantal schakelaars: " + this.selectPropToHTML('aantal_schakelaars',["1","2","3","4","5"]); }
                 break;
             case "dubbelpolig": 
                 if (this.props.aantal_schakelaars == 0) {
                     output += ", Aantal schakelaars: " + this.selectPropToHTML('aantal_schakelaars',["0","1","2"])
-                           +  '<span style="color: red;">Compatibiliteitsmodus, kies aantal schakelaars verschillend van 0 of gebruik element lichtpunt</span>';
+                           +  '<span style="color: red;"> Compatibiliteitsmodus, kies aantal schakelaars verschillend van 0 of gebruik element lichtpunt</span>';
                 } else {
                     output += ", Aantal schakelaars: " + this.selectPropToHTML('aantal_schakelaars',["1","2"]); }
                 break;

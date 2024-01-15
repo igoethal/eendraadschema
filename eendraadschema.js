@@ -928,10 +928,22 @@ var Lichtcircuit = /** @class */ (function (_super) {
             output += ", Trekschakelaar: " + this.checkboxPropToHTML('is_trekschakelaar');
         switch (this.props.type_schakelaar) {
             case "enkelpolig":
-                output += ", Aantal schakelaars: " + this.selectPropToHTML('aantal_schakelaars', ["1", "2", "3", "4", "5"]);
+                if (this.props.aantal_schakelaars == 0) {
+                    output += ", Aantal schakelaars: " + this.selectPropToHTML('aantal_schakelaars', ["0", "1", "2", "3", "4", "5"])
+                        + '<span style="color: red;"> Compatibiliteitsmodus, kies aantal schakelaars verschillend van 0 of gebruik element lichtpunt</span>';
+                }
+                else {
+                    output += ", Aantal schakelaars: " + this.selectPropToHTML('aantal_schakelaars', ["1", "2", "3", "4", "5"]);
+                }
                 break;
             case "dubbelpolig":
-                output += ", Aantal schakelaars: " + this.selectPropToHTML('aantal_schakelaars', ["1", "2"]);
+                if (this.props.aantal_schakelaars == 0) {
+                    output += ", Aantal schakelaars: " + this.selectPropToHTML('aantal_schakelaars', ["0", "1", "2"])
+                        + '<span style="color: red;"> Compatibiliteitsmodus, kies aantal schakelaars verschillend van 0 of gebruik element lichtpunt</span>';
+                }
+                else {
+                    output += ", Aantal schakelaars: " + this.selectPropToHTML('aantal_schakelaars', ["1", "2"]);
+                }
                 break;
         }
         output += ", Aantal lichtpunten: " + this.selectPropToHTML('aantal_lichtpunten', ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]);
@@ -4795,7 +4807,7 @@ var Print_Table = /** @class */ (function () {
         for (pagenum = 0; pagenum < this.pages.length; pagenum++) {
             outstr += '<tr><td align=center>' + (pagenum + 1) + '</td><td align=center>' + this.pages[pagenum].start + '</td><td align=center>';
             if (pagenum != this.pages.length - 1) {
-                outstr += '<input size="4" id="id_stop_change_' + pagenum + '" type="number" min="' + this.pages[pagenum].start + '" step="1" max="' + this.maxwidth + '" onchange="HLChangePrintStop(' + pagenum + ')" value="' + this.pages[pagenum].stop + '">';
+                outstr += '<input size="5" id="id_stop_change_' + pagenum + '" type="number" min="' + this.pages[pagenum].start + '" step="1" max="' + this.maxwidth + '" onchange="HLChangePrintStop(' + pagenum + ')" value="' + this.pages[pagenum].stop + '">';
             }
             else {
                 outstr += this.pages[pagenum].stop.toString();
