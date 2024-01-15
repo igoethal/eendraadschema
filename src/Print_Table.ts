@@ -167,7 +167,7 @@ class Print_Table {
     for (pagenum=0; pagenum<this.pages.length; pagenum++) {
       outstr += '<tr><td align=center>' + (pagenum+1) + '</td><td align=center>' + this.pages[pagenum].start + '</td><td align=center>';
       if (pagenum != this.pages.length-1) {
-        outstr += '<input size="4" id="id_stop_change_' + pagenum + '" type="number" min="' + this.pages[pagenum].start +  '" step="1" max="' + this.maxwidth + '" onchange="HLChangePrintStop(' + pagenum + ')" value="' + this.pages[pagenum].stop + '">';
+        outstr += '<input size="5" id="id_stop_change_' + pagenum + '" type="number" min="' + this.pages[pagenum].start +  '" step="1" max="' + this.maxwidth + '" onchange="HLChangePrintStop(' + pagenum + ')" value="' + this.pages[pagenum].stop + '">';
       } else {
         outstr += this.pages[pagenum].stop.toString();
       }  
