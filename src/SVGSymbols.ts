@@ -61,6 +61,13 @@ static outputSVGSymbols() {
       <line x1="10" y1="-11" x2="11.11" y2="-9.34" stroke="black" stroke-width="1" />
       <line x1="10" y1="-11" x2="8.34" y2="-9.9" stroke="black" stroke-width="1" />
     </g>
+    <g id="luidspreker">
+      <polygon points="0,-10 7,-10 17,-20 17,20 7,10 0,10" fill="none" stroke="black"/>
+      <line x1="7" y1="-10" x2="7" y2="10" stroke="black" stroke-width="1" />
+    </g>
+    <g id="magneetcontact">
+      <rect x="0" y="-10" width="20" height="20" fill="black" stroke="black"/>
+    </g>
     <g id="sinus">
       <path d="M0,0 C2,-5 8,-5 10,0 S18,5 20,0" style="stroke:black;fill:none" />
     </g>

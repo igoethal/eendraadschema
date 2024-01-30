@@ -51,9 +51,10 @@ class Schakelaars extends Electro_Item {
 
     overrideKeys() {
         switch (this.props.type_schakelaar) {
-            case "enkelpolig":  this.props.aantal_schakelaars = String(Math.min(Number(this.props.aantal_schakelaars),5)); break;
-            case "dubbelpolig": this.props.aantal_schakelaars = String(Math.min(Number(this.props.aantal_schakelaars),2)); break;
-            default:            this.props.aantal_schakelaars = "1"; break;
+            case "enkelpolig":     this.props.aantal_schakelaars = String(Math.min(Number(this.props.aantal_schakelaars),5)); break;
+            case "dubbelpolig":    this.props.aantal_schakelaars = String(Math.min(Number(this.props.aantal_schakelaars),2)); break;
+            case "magneetcontact": this.props.aantal_schakelaars = String(Math.min(Number(this.props.aantal_schakelaars),20)); break;
+            default:               this.props.aantal_schakelaars = "1"; break;
         }
         if (!this.kanHalfwaterdichtZijn) this.props.is_halfwaterdicht = false;
         if (!this.kanVerklikkerlampjeHebben) this.props.heeft_verklikkerlampje = false;
@@ -66,7 +67,7 @@ class Schakelaars extends Electro_Item {
         let output = this.toHTMLHeader(mode);
 
         output += "&nbsp;Nr: " + this.stringPropToHTML('nr',5);
-        output += ", " + this.selectPropToHTML('type_schakelaar',["enkelpolig", "dubbelpolig", "driepolig", "dubbelaansteking", "wissel_enkel", "wissel_dubbel", "kruis_enkel", "---", "schakelaar", "dimschakelaar", "dimschakelaar wissel", "bewegingsschakelaar", "schemerschakelaar", "---", "teleruptor", "relais", "dimmer", "tijdschakelaar", "minuterie", "thermostaat", "rolluikschakelaar"]);
+        output += ", " + this.selectPropToHTML('type_schakelaar',["enkelpolig", "dubbelpolig", "driepolig", "dubbelaansteking", "wissel_enkel", "wissel_dubbel", "kruis_enkel", "---", "schakelaar", "dimschakelaar", "dimschakelaar wissel", "bewegingsschakelaar", "schemerschakelaar", "---", "teleruptor", "relais", "dimmer", "tijdschakelaar", "minuterie", "thermostaat", "rolluikschakelaar", "---", "magneetcontact"]);
 
         if (this.kanHalfwaterdichtZijn())       output += ", Halfwaterdicht: " + this.checkboxPropToHTML('is_halfwaterdicht');
         if (this.kanVerklikkerlampjeHebben())   output += ", Verklikkerlampje: " + this.checkboxPropToHTML('heeft_verklikkerlampje');
@@ -74,8 +75,9 @@ class Schakelaars extends Electro_Item {
         if (this.kanTrekschakelaarHebben())     output += ", Trekschakelaar: " + this.checkboxPropToHTML('is_trekschakelaar');
         
         switch (this.props.type_schakelaar) {
-            case "enkelpolig":  output += ", Aantal schakelaars: " + this.selectPropToHTML('aantal_schakelaars',["1","2","3","4","5"]); break;
-            case "dubbelpolig": output += ", Aantal schakelaars: " + this.selectPropToHTML('aantal_schakelaars',["1","2"]); break;
+            case "enkelpolig":     output += ", Aantal schakelaars: " + this.selectPropToHTML('aantal_schakelaars',["1","2","3","4","5"]); break;
+            case "dubbelpolig":    output += ", Aantal schakelaars: " + this.selectPropToHTML('aantal_schakelaars',["1","2"]); break;
+            case "magneetcontact": output += ", Aantal schakelaars: " + this.selectPropToHTML('aantal_schakelaars',["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]); break;
         }
 
         output += ", Adres/tekst: " + this.stringPropToHTML('adres',5);
@@ -96,6 +98,7 @@ class Schakelaars extends Electro_Item {
             case "minuterie":            tekenKeten.push(new Schakelaar("minuterie")); break;
             case "thermostaat":          tekenKeten.push(new Schakelaar("thermostaat")); break;
             case "tijdschakelaar":       tekenKeten.push(new Schakelaar("tijdschakelaar")); break;
+            case "magneetcontact":       tekenKeten.push(new Schakelaar("magneetcontact",false,false,false,false,this.props.aantal_schakelaars)); break;
             case "rolluikschakelaar":    tekenKeten.push(new Schakelaar("rolluikschakelaar",this.props.is_halfwaterdicht)); break;
             case "dubbelaansteking":     tekenKeten.push(new Schakelaar("dubbelaansteking",this.props.is_halfwaterdicht,this.props.heeft_verklikkerlampje,this.props.heeft_signalisatielampje,this.props.is_trekschakelaar)); break;
             case "dimschakelaar":        tekenKeten.push(new Schakelaar("dimschakelaar",this.props.is_halfwaterdicht,this.props.heeft_verklikkerlampje,this.props.heeft_signalisatielampje,false)); break;

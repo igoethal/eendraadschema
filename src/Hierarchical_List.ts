@@ -188,6 +188,7 @@ class Hierarchical_List {
             case 'Lichtcircuit': tempval = new Lichtcircuit(structure); break;
             case 'Lichtpunt': tempval = new Lichtpunt(structure); break;
             case 'Meerdere verbruikers': tempval = new Meerdere_verbruikers(structure); break;
+            case 'Media': tempval = new Media(structure); break;
             case 'Microgolfoven': tempval = new Microgolfoven(structure); break;
             case 'Motor': tempval = new Motor(structure); break;
             case 'Omvormer': tempval = new Omvormer(structure); break;

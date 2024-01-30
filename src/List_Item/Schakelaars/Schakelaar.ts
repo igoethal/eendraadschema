@@ -11,13 +11,15 @@ class Schakelaar {
     verklikkerlamp: boolean;
     signalisatielamp: boolean;
     trekschakelaar: boolean;
+    aantal: number;
 
-    constructor(type: String, halfwaterdicht: boolean=false, verklikkerlamp: boolean=false, signalisatielamp: boolean=false, trekschakelaar: boolean=false) {
+    constructor(type: String, halfwaterdicht: boolean=false, verklikkerlamp: boolean=false, signalisatielamp: boolean=false, trekschakelaar: boolean=false, aantal: number=1) {
         this.type = type;
         this.halfwaterdicht = halfwaterdicht;
         this.verklikkerlamp = verklikkerlamp;
         this.signalisatielamp = signalisatielamp;
         this.trekschakelaar = trekschakelaar;
+        this.aantal = aantal;
     }
 
     schakelaarAttributentoSVGString(endx: number, isdubbel: boolean = false) {
@@ -160,6 +162,21 @@ class Schakelaar {
         return({endx: endx, str: outputstr, lowerbound: null});        
     }
 
+    magneetcontacttoDrawReturnObj(startx: number): drawReturnObj {
+        let outputstr:string = "";
+        let endx = startx + 20;
+
+        // Alles naar beneden schuiven als we het aantal laders boven het symbool willen plaatsen
+        if (this.aantal>1) {
+            outputstr += '<text x="31" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">x' + htmlspecialchars(this.aantal) + '</text>'
+        }
+
+        outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
+                  +  '<use xlink:href="#magneetcontact" x="' + endx + '" y="25" />';
+
+        return({endx: endx, str: outputstr, lowerbound: null});
+    }
+
     defaulttoDrawReturnObj(startx: number, symbol: string): drawReturnObj {
         let outputstr:string = "";
         let endx = startx + 20;
@@ -233,6 +250,11 @@ class Schakelaar {
                 endx += 8;
                 lowerbound = Math.max(lowerbound,25);
                 break;    
+            case "magneetcontact": 
+                ( {endx: endx, str: outputstr} = (this.magneetcontacttoDrawReturnObj(startx,)) ); 
+                endx += 20; 
+                lowerbound = Math.max(lowerbound,25);
+                break;                    
             case "schakelaar": 
                 ( {endx: endx, str: outputstr} = (this.defaulttoDrawReturnObj(startx,'#schakelaar')) ); 
                 endx += 40; 
@@ -270,7 +292,7 @@ class Schakelaar {
                 ( {endx: endx, str: outputstr} = (this.defaulttoDrawReturnObj(startx,'#tijdschakelaar')) ); 
                 endx += 40; 
                 lowerbound = Math.max(lowerbound,30);
-                break;                
+                break;
             default:
                 endx = 30; //Indien type niet herkend wordt minstens deze variabele definieren
         }
