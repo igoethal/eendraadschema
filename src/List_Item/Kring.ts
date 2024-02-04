@@ -154,9 +154,15 @@ class Kring extends Electro_Item {
             cable_location_available = 1;
         }
 
+        // Determine how much everything needs to be shifted right
+        let shiftright = 35+20*cable_location_available;
+        if (this.props.naam.length>2) {
+            shiftright = Math.max(shiftright,svgTextWidth(htmlspecialchars(this.props.naam),12,'font-weight="bold"')+20); 
+        }
+
         // Alle verbruikers van de kring tekenen
 
-        mySVG = this.sourcelist.toSVG(this.id,"vertical",35 + 20*cable_location_available);
+        mySVG = this.sourcelist.toSVG(this.id,"vertical",shiftright);
 
         // Kabel tekenen
 
