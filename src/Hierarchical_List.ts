@@ -175,6 +175,7 @@ class Hierarchical_List {
             case 'Bord': tempval = new Bord(structure); break;
             case 'Diepvriezer': tempval = new Diepvriezer(structure); break;
             case 'Domotica': tempval = new Domotica(structure); break; 
+            case 'Domotica module (verticaal)': tempval = new Domotica_verticaal(structure); break; 
             case 'Domotica gestuurde verbruiker': tempval = new Domotica_gestuurde_verbruiker(structure); break; 
             case 'Droogkast': tempval = new Droogkast(structure); break; 
             case 'Drukknop': tempval = new Drukknop(structure); break; 
@@ -185,6 +186,7 @@ class Hierarchical_List {
             case 'Koelkast': tempval = new Koelkast(structure); break;
             case 'Kookfornuis': tempval = new Kookfornuis(structure); break;
             case 'Kring': tempval = new Kring(structure); break;
+            case 'Leiding': tempval = new Leiding(structure); break;
             case 'Lichtcircuit': tempval = new Lichtcircuit(structure); break;
             case 'Lichtpunt': tempval = new Lichtpunt(structure); break;
             case 'Meerdere verbruikers': tempval = new Meerdere_verbruikers(structure); break;
@@ -466,7 +468,9 @@ class Hierarchical_List {
 
                 // Teken de lijn
                 mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + y1 + '" y2="' + y2 + '" stroke="black" />'
+            }
 
+            if ( (parent.getType() == "Kring") || (parent.getType() == "Domotica module (verticaal)") ) {
                 // Plaats het nummer van het item naast de lijn
                 let displaynr:string;
                 displaynr = item.props.nr;
@@ -474,7 +478,7 @@ class Hierarchical_List {
                   '<text x="' + (mySVG.xleft+9) + '" y="' + (mySVG.yup - 5) + '" ' +
                   'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' +
                   htmlspecialchars(displaynr)+'</text>';
-              }
+            }
         };
     };
 
@@ -558,6 +562,11 @@ class Hierarchical_List {
                     case "Vrije ruimte":
                         inSVG[elementCounter] = this.data[i].toSVG(); //Maak de tekening
                         break;  
+
+                    case "Domotica module (verticaal)":
+                        inSVG[elementCounter] = this.data[i].toSVG(); //Maak de tekening
+                        this.tekenVerticaleLijnIndienKindVanKring(this.data[i] as Electro_Item,inSVG[elementCounter]);         
+                        break; 
 
                     case "Domotica gestuurde verbruiker":
                         inSVG[elementCounter] = this.data[i].toSVG(); //Maak de tekening
@@ -660,7 +669,8 @@ class Hierarchical_List {
                 // decide on the output structure
                 outSVG.yup = height; //As a general rule, there is no ydown, but to be confirmed
                 outSVG.ydown = 0;
-                outSVG.xleft = Math.max(max_xleft,35); // foresee at least 35 for text at the left
+                //outSVG.xleft = Math.max(max_xleft,35); // foresee at least 35 for text at the left
+                outSVG.xleft = max_xleft; 
                 outSVG.xright = Math.max(max_xright,25); // foresee at least 25 at the right
 
                 // create the output data

@@ -313,7 +313,7 @@ var Electro_Item = /** @class */ (function (_super) {
     };
     // -- Lijst met toegestande kinderen van het Electro_item --
     Electro_Item.prototype.allowedChilds = function () {
-        return ["", "Aansluiting", "Domotica", "Domotica gestuurde verbruiker", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Contactdoos", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Media", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
+        return ["", "Aansluiting", "Domotica", "Domotica module (verticaal)", "Domotica gestuurde verbruiker", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Contactdoos", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Media", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
     };
     // -- Aantal actieve kinderen van het Electro_item --
     Electro_Item.prototype.getNumChildsWithKnownType = function () {
@@ -1937,6 +1937,60 @@ var Domotica = /** @class */ (function (_super) {
     };
     return Domotica;
 }(Electro_Item));
+var Domotica_verticaal = /** @class */ (function (_super) {
+    __extends(Domotica_verticaal, _super);
+    function Domotica_verticaal() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Domotica_verticaal.prototype.convertLegacyKeys = function (mykeys) {
+        //Niet nodig, bestond niet toen we nog Keys gebruikten
+    };
+    Domotica_verticaal.prototype.resetProps = function () {
+        this.clearProps();
+        this.props.type = "Domotica module (verticaal)";
+        this.props.nr = "";
+        this.props.tekst = "Domotica";
+    };
+    Domotica_verticaal.prototype.allowedChilds = function () {
+        return ["", "Aansluiting", "Domotica", "Domotica gestuurde verbruiker", "Leiding", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Contactdoos", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Media", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
+    };
+    Domotica_verticaal.prototype.getMaxNumChilds = function () {
+        return 256;
+    };
+    Domotica_verticaal.prototype.toHTML = function (mode) {
+        var output = this.toHTMLHeader(mode);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5)
+            + ", Tekst: " + this.stringPropToHTML('tekst', 10);
+        return (output);
+    };
+    Domotica_verticaal.prototype.toSVG = function () {
+        var mySVG = new SVGelement();
+        // Eerst vragen we een tekening van alle kinderen
+        mySVG = this.sourcelist.toSVG(this.id, "vertical");
+        // Dan bepalen we de hoogte van het object en zorgen ervoor dat de tekst past
+        var heightunaltered = mySVG.yup + mySVG.ydown;
+        var height = heightunaltered;
+        if (height < 50)
+            height = 50;
+        height = Math.max(height, svgTextWidth(htmlspecialchars(this.props.tekst), 10, 'font-weight="bold"') + 25);
+        mySVG.yup = height / 2;
+        mySVG.ydown = mySVG.yup;
+        // Nu zetten we detekening effectief op de goede plaats in het schema
+        mySVG.data = '<svg x="60" y="' + (height - heightunaltered) + '">' + mySVG.data + '</svg>';
+        // Vervolgens tekenen we de module zelf
+        mySVG.xleft = 1;
+        mySVG.xright += 60;
+        mySVG.data += '<rect x="' + (21) + '" width="' + (40) +
+            '" y="' + (5) + '" height="' + (height - 10) + '" stroke="black" stroke-width="2" fill="white" />';
+        mySVG.data += '<line x1="1" x2="21" y1="' + mySVG.yup + '" y2="' + mySVG.yup + '" stroke="black" />';
+        mySVG.data += '<text x="' + (44) + '" ' + 'y="' + (mySVG.yup) + '" '
+            + 'transform="rotate(90 ' + (44) + ',' + (mySVG.yup) + ')" '
+            + 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="10"' + '>'
+            + htmlspecialchars(this.props.tekst) + '</text>';
+        return (mySVG);
+    };
+    return Domotica_verticaal;
+}(Electro_Item));
 var Droogkast = /** @class */ (function (_super) {
     __extends(Droogkast, _super);
     function Droogkast() {
@@ -2450,7 +2504,7 @@ var Kring = /** @class */ (function (_super) {
             }
     };
     Kring.prototype.allowedChilds = function () {
-        return ["", "Aansluiting", "Bord", "Domotica", "Domotica gestuurde verbruiker", "Kring", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Contactdoos", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Media", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
+        return ["", "Aansluiting", "Bord", "Domotica", "Domotica module (verticaal)", "Domotica gestuurde verbruiker", "Kring", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Contactdoos", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Media", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
     };
     Kring.prototype.getMaxNumChilds = function () {
         return 256;
@@ -2740,6 +2794,85 @@ var Kring = /** @class */ (function (_super) {
         return (mySVG);
     };
     return Kring;
+}(Electro_Item));
+var Leiding = /** @class */ (function (_super) {
+    __extends(Leiding, _super);
+    function Leiding() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Leiding.prototype.convertLegacyKeys = function (mykeys) {
+        // Niet van toepassing, element bestond nog niet toen we met legacy keys werkten
+    };
+    Leiding.prototype.resetProps = function () {
+        this.clearProps();
+        this.props.type = "Leiding";
+        this.props.type_kabel = "XVB Cca 3G2,5";
+        this.props.kabel_locatie = "N/A";
+        this.props.kabel_is_in_buis = false;
+        this.props.adres = "";
+    };
+    Leiding.prototype.overrideKeys = function () {
+        if (this.props.kabel_locatie == "Luchtleiding")
+            this.props.kabel_is_in_buis = false; //Indien luchtleiding nooit een buis tekenen
+    };
+    Leiding.prototype.toHTML = function (mode) {
+        var output = this.toHTMLHeader(mode);
+        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5)
+            + ", Type: " + this.stringPropToHTML('type_kabel', 10)
+            + ", Plaatsing: " + this.selectPropToHTML('kabel_locatie', ["N/A", "Ondergronds", "Luchtleiding", "In wand", "Op wand"]);
+        if (this.props.kabel_locatie != "Luchtleiding")
+            output += ", In buis: " + this.checkboxPropToHTML('kabel_is_in_buis');
+        return (output);
+    };
+    Leiding.prototype.toSVG = function () {
+        this.overrideKeys();
+        var mySVG = new SVGelement();
+        var outputstr = "";
+        var width = 100;
+        mySVG.xleft = 1; // foresee at least some space for the conductor
+        mySVG.xright = width - 1;
+        mySVG.yup = 25;
+        mySVG.ydown = 25;
+        mySVG.data += '<line x1="1" y1="25" x2="' + (width + 1) + '" y2="25" stroke="black" />';
+        // Luchtleiding tekenen indien van toepassing
+        if (this.props.kabel_locatie == "Luchtleiding")
+            mySVG.data += '<circle cx="' + (80) + '" cy="' + (25) + '" r="4" style="stroke:black;fill:none" />';
+        // Symbolen naast de kabel zetten
+        if ((this.props.kabel_is_in_buis) && (this.props.kabel_locatie != "Luchtleiding")) // Rondje voor "in buis" tekenen
+            mySVG.data += '<circle cx="' + (65) + '" cy="' + (15) + '" r="4" style="stroke:black;fill:none" />';
+        switch (this.props.kabel_locatie) {
+            case "Ondergronds":
+                mySVG.data += '<line y1="' + (25 - 13) + '" y2="' + (25 - 13) + '" x1="' + (100 - 60 + 5) + '" x2="' + (100 - 80 + 5) + '" style="stroke:black" />'
+                    + '<line y1="' + (25 - 10) + '" y2="' + (25 - 10) + '" x1="' + (100 - 62 + 5) + '" x2="' + (100 - 78 + 5) + '" style="stroke:black" />'
+                    + '<line y1="' + (25 - 7) + '" y2="' + (25 - 7) + '" x1="' + (100 - 64 + 5) + '" x2="' + (100 - 76 + 5) + '" style="stroke:black" />';
+                break;
+            case "In wand":
+                mySVG.data += '<line y1="' + (25 - 15) + '" y2="' + (25 - 15) + '" x1="' + (100 - 10 + 5) + '" x2="' + (100 - 30 + 5) + '" style="stroke:black" />'
+                    + '<line y1="' + (25 - 15) + '" y2="' + (25 - 5) + '" x1="' + (100 - 10 + 5) + '" x2="' + (100 - 10 + 5) + '" style="stroke:black" />'
+                    + '<line y1="' + (25 - 15) + '" y2="' + (25 - 5) + '" x1="' + (100 - 20 + 5) + '" x2="' + (100 - 20 + 5) + '" style="stroke:black" />'
+                    + '<line y1="' + (25 - 15) + '" y2="' + (25 - 5) + '" x1="' + (100 - 30 + 5) + '" x2="' + (100 - 30 + 5) + '" style="stroke:black" />'
+                    + '<line y1="' + (25 - 15) + '" y2="' + (25 - 15) + '" x1="' + (100 - 65 + 5) + '" x2="' + (100 - 85 + 5) + '" style="stroke:black" />'
+                    + '<line y1="' + (25 - 15) + '" y2="' + (25 - 5) + '" x1="' + (100 - 85 + 5) + '" x2="' + (100 - 85 + 5) + '" style="stroke:black" />'
+                    + '<line y1="' + (25 - 15) + '" y2="' + (25 - 5) + '" x1="' + (100 - 65 + 5) + '" x2="' + (100 - 65 + 5) + '" style="stroke:black" />'
+                    + '<line y1="' + (25 - 15) + '" y2="' + (25 - 5) + '" x1="' + (100 - 75 + 5) + '" x2="' + (100 - 75 + 5) + '" style="stroke:black" />';
+                break;
+            case "Op wand":
+                mySVG.data += '<line y1="' + (25 - 5) + '" y2="' + (25 - 5) + '" x1="' + (100 - 10 + 5) + '" x2="' + (100 - 30 + 5) + '" style="stroke:black" />'
+                    + '<line y1="' + (25 - 15) + '" y2="' + (25 - 5) + '" x1="' + (100 - 10 + 5) + '" x2="' + (100 - 10 + 5) + '" style="stroke:black" />'
+                    + '<line y1="' + (25 - 15) + '" y2="' + (25 - 5) + '" x1="' + (100 - 20 + 5) + '" x2="' + (100 - 20 + 5) + '" style="stroke:black" />'
+                    + '<line y1="' + (25 - 15) + '" y2="' + (25 - 5) + '" x1="' + (100 - 30 + 5) + '" x2="' + (100 - 30 + 5) + '" style="stroke:black" />'
+                    + '<line y1="' + (25 - 5) + '" y2="' + (25 - 5) + '" x1="' + (100 - 65 + 5) + '" x2="' + (100 - 85 + 5) + '" style="stroke:black" />'
+                    + '<line y1="' + (25 - 15) + '" y2="' + (25 - 5) + '" x1="' + (100 - 85 + 5) + '" x2="' + (100 - 85 + 5) + '" style="stroke:black" />'
+                    + '<line y1="' + (25 - 15) + '" y2="' + (25 - 5) + '" x1="' + (100 - 65 + 5) + '" x2="' + (100 - 65 + 5) + '" style="stroke:black" />'
+                    + '<line y1="' + (25 - 15) + '" y2="' + (25 - 5) + '" x1="' + (100 - 75 + 5) + '" x2="' + (100 - 75 + 5) + '" style="stroke:black" />';
+                break;
+        }
+        mySVG.data += '<text x="' + (15) + '" y="' + (39) + '" style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-size="10">'
+            + htmlspecialchars(this.props.type_kabel) + '</text>';
+        mySVG.data += "\n";
+        return (mySVG);
+    };
+    return Leiding;
 }(Electro_Item));
 var Lichtpunt = /** @class */ (function (_super) {
     __extends(Lichtpunt, _super);
@@ -4257,6 +4390,9 @@ var Hierarchical_List = /** @class */ (function () {
             case 'Domotica':
                 tempval = new Domotica(structure);
                 break;
+            case 'Domotica module (verticaal)':
+                tempval = new Domotica_verticaal(structure);
+                break;
             case 'Domotica gestuurde verbruiker':
                 tempval = new Domotica_gestuurde_verbruiker(structure);
                 break;
@@ -4286,6 +4422,9 @@ var Hierarchical_List = /** @class */ (function () {
                 break;
             case 'Kring':
                 tempval = new Kring(structure);
+                break;
+            case 'Leiding':
+                tempval = new Leiding(structure);
                 break;
             case 'Lichtcircuit':
                 tempval = new Lichtcircuit(structure);
@@ -4569,6 +4708,8 @@ var Hierarchical_List = /** @class */ (function () {
                 }
                 // Teken de lijn
                 mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + y1 + '" y2="' + y2 + '" stroke="black" />';
+            }
+            if ((parent.getType() == "Kring") || (parent.getType() == "Domotica module (verticaal)")) {
                 // Plaats het nummer van het item naast de lijn
                 var displaynr = void 0;
                 displaynr = item.props.nr;
@@ -4651,6 +4792,10 @@ var Hierarchical_List = /** @class */ (function () {
                         break;
                     case "Vrije ruimte":
                         inSVG[elementCounter] = this.data[i].toSVG(); //Maak de tekening
+                        break;
+                    case "Domotica module (verticaal)":
+                        inSVG[elementCounter] = this.data[i].toSVG(); //Maak de tekening
+                        this.tekenVerticaleLijnIndienKindVanKring(this.data[i], inSVG[elementCounter]);
                         break;
                     case "Domotica gestuurde verbruiker":
                         inSVG[elementCounter] = this.data[i].toSVG(); //Maak de tekening
@@ -4744,7 +4889,8 @@ var Hierarchical_List = /** @class */ (function () {
                 // decide on the output structure
                 outSVG.yup = height; //As a general rule, there is no ydown, but to be confirmed
                 outSVG.ydown = 0;
-                outSVG.xleft = Math.max(max_xleft, 35); // foresee at least 35 for text at the left
+                //outSVG.xleft = Math.max(max_xleft,35); // foresee at least 35 for text at the left
+                outSVG.xleft = max_xleft;
                 outSVG.xright = Math.max(max_xright, 25); // foresee at least 25 at the right
                 // create the output data
                 var ypos = 0;
