@@ -175,6 +175,21 @@ class Electro_Item extends List_Item {
 
   toHTML(mode: string) { return(this.toHTMLHeader(mode)); } // Implemented in the derived classes
 
+  // -- Display the number in the html tree view, but only if it is displayable
+
+  nrToHtml() {
+      let str = "";
+      let parent:Electro_Item = (this.getParent() as Electro_Item);
+      if (parent != null) {
+          if ( (parent.getType() == "Kring") || (parent.getType() == "Domotica module (verticaal)") ) {
+              str += "Nr: " + this.stringPropToHTML('nr',5) + ", "
+          } else {
+              this.props.nr = "";
+          }
+      };
+      return(str);
+  };
+
   // -- Code to add the addressline below when drawing SVG. This is called by most derived classes --
 
   addAddressToSVG(mySVG: SVGelement, starty:number = 60, godown:number = 15, shiftx:number = 0): String {

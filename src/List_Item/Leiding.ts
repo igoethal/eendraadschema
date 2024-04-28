@@ -20,8 +20,8 @@ class Leiding extends Electro_Item {
     toHTML(mode: string) {
         let output = this.toHTMLHeader(mode);
 
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr',5)
-               +  ", Type: " + this.stringPropToHTML('type_kabel',10)
+        output += "&nbsp;" + this.nrToHtml()
+               +  "Type: " + this.stringPropToHTML('type_kabel',10)
                +  ", Plaatsing: " + this.selectPropToHTML('kabel_locatie',["N/A","Ondergronds","Luchtleiding","In wand","Op wand"]);
         
         if (this.props.kabel_locatie != "Luchtleiding") output += ", In buis: " + this.checkboxPropToHTML('kabel_is_in_buis');

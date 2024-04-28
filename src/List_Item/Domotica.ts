@@ -26,8 +26,8 @@ class Domotica extends Electro_Item {
     toHTML(mode: string) {
         let output = this.toHTMLHeader(mode);
 
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr',5)
-               +  ", Tekst (nieuwe lijn = \"|\"): " + this.stringPropToHTML('tekst',30)
+        output += "&nbsp;" + this.nrToHtml()
+               +  "Tekst (nieuwe lijn = \"|\"): " + this.stringPropToHTML('tekst',30)
                +  ", Adres/tekst: " + this.stringPropToHTML('adres',5);
 
         return(output);

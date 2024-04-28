@@ -24,8 +24,8 @@ class Verwarmingstoestel extends Electro_Item {
         this.overrideKeys;
         let output = this.toHTMLHeader(mode);
 
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr',5)
-               +  ", Accumulatie: " + this.checkboxPropToHTML('heeft_accumulatie')
+        output += "&nbsp;" + this.nrToHtml()
+               +  "Accumulatie: " + this.checkboxPropToHTML('heeft_accumulatie')
                +  (this.props.heeft_accumulatie ? ", Ventilator: " + this.checkboxPropToHTML('heeft_ventilator') : "")
                +  ", Adres/tekst: " + this.stringPropToHTML('adres',5);
 

@@ -33,7 +33,7 @@ class Contactdoos extends Electro_Item {
     toHTML(mode: string) {
         let output = this.toHTMLHeader(mode);
 
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr',5) + ", "
+        output += "&nbsp;" + this.nrToHtml()
                +  "Geaard: " + this.checkboxPropToHTML('is_geaard') + ", "
                +  "Kinderveiligheid: " + this.checkboxPropToHTML('is_kinderveilig') + " "
                +  "Halfwaterdicht: " + this.checkboxPropToHTML('is_halfwaterdicht') + ", "

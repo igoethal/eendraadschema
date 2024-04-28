@@ -35,8 +35,8 @@ class Domotica_gestuurde_verbruiker extends Electro_Item {
     toHTML(mode: string) {
         let output = this.toHTMLHeader(mode);
 
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr',5)
-               +  ", Draadloos: " + this.checkboxPropToHTML('is_draadloos')
+        output += "&nbsp;" + this.nrToHtml()
+               +    "Draadloos: " + this.checkboxPropToHTML('is_draadloos')
                +  ", Lokale Drukknop: " + this.checkboxPropToHTML('heeft_lokale_drukknop')
                +  ", Geprogrammeerd: " + this.checkboxPropToHTML('is_geprogrammeerd')
                +  ", Detectie: " + this.checkboxPropToHTML('heeft_detectie')

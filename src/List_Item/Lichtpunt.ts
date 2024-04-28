@@ -29,7 +29,7 @@ class Lichtpunt extends Electro_Item {
     toHTML(mode: string) {
         let output = this.toHTMLHeader(mode);
 
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr',5) + ", "
+        output += "&nbsp;" + this.nrToHtml() 
                +  "Type: " + this.selectPropToHTML('type_lamp',["standaard", "TL", "spot", "led" /*, "Spot", "Led", "Signalisatielamp" */]) + ", ";
 
         if (this.props.type_lamp == "TL") {

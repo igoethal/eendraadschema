@@ -27,8 +27,8 @@ class Drukknop extends Electro_Item {
     toHTML(mode: string) {
         let output = this.toHTMLHeader(mode);
 
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr',5)
-               +  ", Type: " + this.selectPropToHTML('type_knop',["standaard","dimmer","rolluik"])
+        output += "&nbsp;" + this.nrToHtml()
+               +    "Type: " + this.selectPropToHTML('type_knop',["standaard","dimmer","rolluik"])
                +  ", Verklikkerlampje: " + this.checkboxPropToHTML('heeft_verklikkerlampje')
                +  ", Halfwaterdicht: " + this.checkboxPropToHTML('is_halfwaterdicht')
                +  ", Afgeschermd: " + this.checkboxPropToHTML('is_afgeschermd')

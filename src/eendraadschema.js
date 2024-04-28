@@ -448,6 +448,22 @@ var Electro_Item = /** @class */ (function (_super) {
     };
     // -- This one will get called if the type of the Electro_Item has not yet been chosen --
     Electro_Item.prototype.toHTML = function (mode) { return (this.toHTMLHeader(mode)); }; // Implemented in the derived classes
+    // -- Display the number in the html tree view, but only if it is displayable
+    Electro_Item.prototype.nrToHtml = function () {
+        var str = "";
+        var parent = this.getParent();
+        if (parent != null) {
+            if ((parent.getType() == "Kring") || (parent.getType() == "Domotica module (verticaal)")) {
+                str += "Nr: " + this.stringPropToHTML('nr', 5) + ", ";
+            }
+            else {
+                this.props.nr = "";
+            }
+        }
+        ;
+        return (str);
+    };
+    ;
     // -- Code to add the addressline below when drawing SVG. This is called by most derived classes --
     Electro_Item.prototype.addAddressToSVG = function (mySVG, starty, godown, shiftx) {
         if (starty === void 0) { starty = 60; }
@@ -797,8 +813,8 @@ var Schakelaars = /** @class */ (function (_super) {
     Schakelaars.prototype.toHTML = function (mode) {
         this.overrideKeys();
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
-        output += ", " + this.selectPropToHTML('type_schakelaar', ["enkelpolig", "dubbelpolig", "driepolig", "dubbelaansteking", "wissel_enkel", "wissel_dubbel", "kruis_enkel", "---", "schakelaar", "dimschakelaar", "dimschakelaar wissel", "bewegingsschakelaar", "schemerschakelaar", "---", "teleruptor", "relais", "dimmer", "tijdschakelaar", "minuterie", "thermostaat", "rolluikschakelaar", "---", "magneetcontact"]);
+        output += "&nbsp;" + this.nrToHtml();
+        output += this.selectPropToHTML('type_schakelaar', ["enkelpolig", "dubbelpolig", "driepolig", "dubbelaansteking", "wissel_enkel", "wissel_dubbel", "kruis_enkel", "---", "schakelaar", "dimschakelaar", "dimschakelaar wissel", "bewegingsschakelaar", "schemerschakelaar", "---", "teleruptor", "relais", "dimmer", "tijdschakelaar", "minuterie", "thermostaat", "rolluikschakelaar", "---", "magneetcontact"]);
         if (this.kanHalfwaterdichtZijn())
             output += ", Halfwaterdicht: " + this.checkboxPropToHTML('is_halfwaterdicht');
         if (this.kanVerklikkerlampjeHebben())
@@ -943,8 +959,8 @@ var Lichtcircuit = /** @class */ (function (_super) {
     Lichtcircuit.prototype.toHTML = function (mode) {
         this.overrideKeys();
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
-        output += ", " + this.selectPropToHTML('type_schakelaar', ["enkelpolig", "dubbelpolig", "driepolig", "dubbelaansteking", "wissel_enkel", "wissel_dubbel", "kruis_enkel", "---", "schakelaar", "dimschakelaar", "dimschakelaar wissel", "bewegingsschakelaar", "schemerschakelaar", "---", "teleruptor", "relais", "dimmer", "tijdschakelaar", "minuterie", "thermostaat", "rolluikschakelaar"]);
+        output += "&nbsp;" + this.nrToHtml();
+        output += this.selectPropToHTML('type_schakelaar', ["enkelpolig", "dubbelpolig", "driepolig", "dubbelaansteking", "wissel_enkel", "wissel_dubbel", "kruis_enkel", "---", "schakelaar", "dimschakelaar", "dimschakelaar wissel", "bewegingsschakelaar", "schemerschakelaar", "---", "teleruptor", "relais", "dimmer", "tijdschakelaar", "minuterie", "thermostaat", "rolluikschakelaar"]);
         if (this.kanHalfwaterdichtZijn())
             output += ", Halfwaterdicht: " + this.checkboxPropToHTML('is_halfwaterdicht');
         if (this.kanVerklikkerlampjeHebben())
@@ -1341,8 +1357,8 @@ var Aansluitpunt = /** @class */ (function (_super) {
     };
     Aansluitpunt.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
-        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
+        output += "&nbsp;" + this.nrToHtml();
+        output += "Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Aansluitpunt.prototype.toSVG = function () {
@@ -1376,8 +1392,8 @@ var Aftakdoos = /** @class */ (function (_super) {
     };
     Aftakdoos.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
-        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
+        output += "&nbsp;" + this.nrToHtml();
+        output += "Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Aftakdoos.prototype.toSVG = function () {
@@ -1411,8 +1427,8 @@ var Batterij = /** @class */ (function (_super) {
     };
     Batterij.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
-        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
+        output += "&nbsp;" + this.nrToHtml();
+        output += "Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Batterij.prototype.toSVG = function () {
@@ -1447,8 +1463,8 @@ var Bel = /** @class */ (function (_super) {
     };
     Bel.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
-        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
+        output += "&nbsp;" + this.nrToHtml();
+        output += "Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Bel.prototype.toSVG = function () {
@@ -1485,7 +1501,7 @@ var Boiler = /** @class */ (function (_super) {
     };
     Boiler.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5) + ", ";
+        output += "&nbsp;" + this.nrToHtml();
         output += "Accumulatie: " + this.checkboxPropToHTML('heeft_accumulatie');
         output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
@@ -1621,7 +1637,7 @@ var Contactdoos = /** @class */ (function (_super) {
     };
     Contactdoos.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5) + ", "
+        output += "&nbsp;" + this.nrToHtml()
             + "Geaard: " + this.checkboxPropToHTML('is_geaard') + ", "
             + "Kinderveiligheid: " + this.checkboxPropToHTML('is_kinderveilig') + " "
             + "Halfwaterdicht: " + this.checkboxPropToHTML('is_halfwaterdicht') + ", "
@@ -1728,8 +1744,8 @@ var Diepvriezer = /** @class */ (function (_super) {
     };
     Diepvriezer.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
-        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
+        output += "&nbsp;" + this.nrToHtml();
+        output += "Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Diepvriezer.prototype.toSVG = function () {
@@ -1782,8 +1798,8 @@ var Domotica_gestuurde_verbruiker = /** @class */ (function (_super) {
     };
     Domotica_gestuurde_verbruiker.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5)
-            + ", Draadloos: " + this.checkboxPropToHTML('is_draadloos')
+        output += "&nbsp;" + this.nrToHtml()
+            + "Draadloos: " + this.checkboxPropToHTML('is_draadloos')
             + ", Lokale Drukknop: " + this.checkboxPropToHTML('heeft_lokale_drukknop')
             + ", Geprogrammeerd: " + this.checkboxPropToHTML('is_geprogrammeerd')
             + ", Detectie: " + this.checkboxPropToHTML('heeft_detectie')
@@ -1890,8 +1906,8 @@ var Domotica = /** @class */ (function (_super) {
     };
     Domotica.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5)
-            + ", Tekst (nieuwe lijn = \"|\"): " + this.stringPropToHTML('tekst', 30)
+        output += "&nbsp;" + this.nrToHtml()
+            + "Tekst (nieuwe lijn = \"|\"): " + this.stringPropToHTML('tekst', 30)
             + ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
@@ -1959,8 +1975,8 @@ var Domotica_verticaal = /** @class */ (function (_super) {
     };
     Domotica_verticaal.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5)
-            + ", Tekst: " + this.stringPropToHTML('tekst', 10);
+        output += "&nbsp;" + this.nrToHtml()
+            + "Tekst: " + this.stringPropToHTML('tekst', 10);
         return (output);
     };
     Domotica_verticaal.prototype.toSVG = function () {
@@ -2008,8 +2024,8 @@ var Droogkast = /** @class */ (function (_super) {
     };
     Droogkast.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
-        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
+        output += "&nbsp;" + this.nrToHtml();
+        output += "Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Droogkast.prototype.toSVG = function () {
@@ -2055,8 +2071,8 @@ var Drukknop = /** @class */ (function (_super) {
     };
     Drukknop.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5)
-            + ", Type: " + this.selectPropToHTML('type_knop', ["standaard", "dimmer", "rolluik"])
+        output += "&nbsp;" + this.nrToHtml()
+            + "Type: " + this.selectPropToHTML('type_knop', ["standaard", "dimmer", "rolluik"])
             + ", Verklikkerlampje: " + this.checkboxPropToHTML('heeft_verklikkerlampje')
             + ", Halfwaterdicht: " + this.checkboxPropToHTML('is_halfwaterdicht')
             + ", Afgeschermd: " + this.checkboxPropToHTML('is_afgeschermd')
@@ -2144,8 +2160,8 @@ var Elektriciteitsmeter = /** @class */ (function (_super) {
     };
     Elektriciteitsmeter.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
-        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
+        output += "&nbsp;" + this.nrToHtml();
+        output += "Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Elektriciteitsmeter.prototype.toSVG = function () {
@@ -2180,8 +2196,8 @@ var Elektrische_oven = /** @class */ (function (_super) {
     };
     Elektrische_oven.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
-        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
+        output += "&nbsp;" + this.nrToHtml();
+        output += "Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Elektrische_oven.prototype.toSVG = function () {
@@ -2216,8 +2232,8 @@ var EV_lader = /** @class */ (function (_super) {
     };
     EV_lader.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
-        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
+        output += "&nbsp;" + this.nrToHtml();
+        output += "Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     EV_lader.prototype.toSVG = function () {
@@ -2260,8 +2276,8 @@ var Ketel = /** @class */ (function (_super) {
     };
     Ketel.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
-        output += ", Type: " + this.selectPropToHTML('keteltype', ["", "Met boiler", "Met tapspiraal", "Warmtekrachtkoppeling", "Warmtewisselaar"]);
+        output += "&nbsp;" + this.nrToHtml();
+        output += "Type: " + this.selectPropToHTML('keteltype', ["", "Met boiler", "Met tapspiraal", "Warmtekrachtkoppeling", "Warmtewisselaar"]);
         output += ", Energiebron: " + this.selectPropToHTML('energiebron', ["", "Elektriciteit", "Gas (atmosferisch)", "Gas (ventilator)", "Vaste brandstof", "Vloeibare brandstof"]);
         output += ", Warmte functie: " + this.selectPropToHTML('warmtefunctie', ["", "Koelend", "Verwarmend", "Verwarmend en koelend"]);
         output += ", Aantal: " + this.selectPropToHTML('aantal', ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"]);
@@ -2365,8 +2381,8 @@ var Koelkast = /** @class */ (function (_super) {
     };
     Koelkast.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
-        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
+        output += "&nbsp;" + this.nrToHtml();
+        output += "Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Koelkast.prototype.toSVG = function () {
@@ -2401,8 +2417,8 @@ var Kookfornuis = /** @class */ (function (_super) {
     };
     Kookfornuis.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
-        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
+        output += "&nbsp;" + this.nrToHtml();
+        output += "Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Kookfornuis.prototype.toSVG = function () {
@@ -2822,8 +2838,8 @@ var Leiding = /** @class */ (function (_super) {
     };
     Leiding.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5)
-            + ", Type: " + this.stringPropToHTML('type_kabel', 10)
+        output += "&nbsp;" + this.nrToHtml()
+            + "Type: " + this.stringPropToHTML('type_kabel', 10)
             + ", Plaatsing: " + this.selectPropToHTML('kabel_locatie', ["N/A", "Ondergronds", "Luchtleiding", "In wand", "Op wand"]);
         if (this.props.kabel_locatie != "Luchtleiding")
             output += ", In buis: " + this.checkboxPropToHTML('kabel_is_in_buis');
@@ -2910,7 +2926,7 @@ var Lichtpunt = /** @class */ (function (_super) {
     };
     Lichtpunt.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5) + ", "
+        output += "&nbsp;" + this.nrToHtml()
             + "Type: " + this.selectPropToHTML('type_lamp', ["standaard", "TL", "spot", "led" /*, "Spot", "Led", "Signalisatielamp" */]) + ", ";
         if (this.props.type_lamp == "TL") {
             output += "Aantal buizen: " + this.selectPropToHTML('aantal_buizen_indien_TL', ["1", "2", "3", "4"]) + ", ";
@@ -3148,8 +3164,8 @@ var Media = /** @class */ (function (_super) {
     Media.prototype.toHTML = function (mode) {
         this.overrideKeys();
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5)
-            + ", Symbool: " + this.selectPropToHTML('symbool', ["", "luidspreker"]);
+        output += "&nbsp;" + this.nrToHtml()
+            + "Symbool: " + this.selectPropToHTML('symbool', ["", "luidspreker"]);
         if (this.props.symbool == 'luidspreker') {
             output += ", Aantal: " + this.selectPropToHTML('aantal', ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"]);
         }
@@ -3207,8 +3223,8 @@ var Meerdere_verbruikers = /** @class */ (function (_super) {
     };
     Meerdere_verbruikers.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5)
-            + ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
+        output += "&nbsp;" + this.nrToHtml()
+            + "Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Meerdere_verbruikers.prototype.toSVG = function () {
@@ -3246,8 +3262,8 @@ var Microgolfoven = /** @class */ (function (_super) {
     };
     Microgolfoven.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
-        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
+        output += "&nbsp;" + this.nrToHtml()
+            + "Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Microgolfoven.prototype.toSVG = function () {
@@ -3282,8 +3298,8 @@ var Motor = /** @class */ (function (_super) {
     };
     Motor.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
-        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
+        output += "&nbsp;" + this.nrToHtml()
+            + "Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Motor.prototype.toSVG = function () {
@@ -3318,8 +3334,8 @@ var Omvormer = /** @class */ (function (_super) {
     };
     Omvormer.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
-        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
+        output += "&nbsp;" + this.nrToHtml()
+            + "Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Omvormer.prototype.toSVG = function () {
@@ -3354,8 +3370,8 @@ var Overspanningsbeveiliging = /** @class */ (function (_super) {
     };
     Overspanningsbeveiliging.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
-        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
+        output += "&nbsp;" + this.nrToHtml()
+            + "Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Overspanningsbeveiliging.prototype.toSVG = function () {
@@ -3440,8 +3456,8 @@ var Stoomoven = /** @class */ (function (_super) {
     };
     Stoomoven.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
-        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
+        output += "&nbsp;" + this.nrToHtml()
+            + "Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Stoomoven.prototype.toSVG = function () {
@@ -3478,8 +3494,8 @@ var Transformator = /** @class */ (function (_super) {
     };
     Transformator.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5)
-            + ", Voltage: " + this.stringPropToHTML('voltage', 8)
+        output += "&nbsp;" + this.nrToHtml()
+            + "Voltage: " + this.stringPropToHTML('voltage', 8)
             + ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
@@ -3518,8 +3534,8 @@ var USB_lader = /** @class */ (function (_super) {
     };
     USB_lader.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
-        output += ", Aantal: " + this.selectPropToHTML('aantal', ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]);
+        output += "&nbsp;" + this.nrToHtml();
+        output += "Aantal: " + this.selectPropToHTML('aantal', ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]);
         output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
@@ -3561,8 +3577,8 @@ var Vaatwasmachine = /** @class */ (function (_super) {
     };
     Vaatwasmachine.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
-        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
+        output += "&nbsp;" + this.nrToHtml();
+        output += "Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Vaatwasmachine.prototype.toSVG = function () {
@@ -3597,8 +3613,8 @@ var Ventilator = /** @class */ (function (_super) {
     };
     Ventilator.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
-        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
+        output += "&nbsp;" + this.nrToHtml();
+        output += "Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Ventilator.prototype.toSVG = function () {
@@ -3651,8 +3667,8 @@ var Verbruiker = /** @class */ (function (_super) {
     };
     Verbruiker.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5)
-            + ", Tekst (nieuwe lijn = \"|\"): " + this.stringPropToHTML('tekst', 30)
+        output += "&nbsp;" + this.nrToHtml()
+            + "Tekst (nieuwe lijn = \"|\"): " + this.stringPropToHTML('tekst', 30)
             + ", Breedte: " + this.selectPropToHTML('heeft_automatische_breedte', ["automatisch", "handmatig"]);
         if (this.props.heeft_automatische_breedte != "automatisch")
             output += " " + this.stringPropToHTML('breedte', 3);
@@ -3739,8 +3755,8 @@ var Verlenging = /** @class */ (function (_super) {
     };
     Verlenging.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5)
-            + ", Breedte: " + this.stringPropToHTML('breedte', 3)
+        output += "&nbsp;" + this.nrToHtml()
+            + "Breedte: " + this.stringPropToHTML('breedte', 3)
             + ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
@@ -3796,8 +3812,8 @@ var Verwarmingstoestel = /** @class */ (function (_super) {
     Verwarmingstoestel.prototype.toHTML = function (mode) {
         this.overrideKeys;
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5)
-            + ", Accumulatie: " + this.checkboxPropToHTML('heeft_accumulatie')
+        output += "&nbsp;" + this.nrToHtml()
+            + "Accumulatie: " + this.checkboxPropToHTML('heeft_accumulatie')
             + (this.props.heeft_accumulatie ? ", Ventilator: " + this.checkboxPropToHTML('heeft_ventilator') : "")
             + ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
@@ -3916,8 +3932,8 @@ var Vrije_tekst = /** @class */ (function (_super) {
     Vrije_tekst.prototype.toHTML = function (mode) {
         this.overrideKeys();
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5)
-            + ", Tekst (nieuwe lijn = \"|\"): " + this.stringPropToHTML('tekst', 30)
+        output += "&nbsp;" + this.nrToHtml()
+            + "Tekst (nieuwe lijn = \"|\"): " + this.stringPropToHTML('tekst', 30)
             + ", Breedte: " + this.selectPropToHTML('heeft_automatische_breedte', ["automatisch", "handmatig"]);
         if (this.props.heeft_automatische_breedte != "automatisch")
             output += " " + this.stringPropToHTML('breedte', 3);
@@ -4024,8 +4040,8 @@ var Warmtepomp = /** @class */ (function (_super) {
     };
     Warmtepomp.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5)
-            + ", Warmte functie: " + this.selectPropToHTML('warmtefunctie', ["", "Koelend", "Verwarmend", "Verwarmend en koelend"])
+        output += "&nbsp;" + this.nrToHtml()
+            + "Warmte functie: " + this.selectPropToHTML('warmtefunctie', ["", "Koelend", "Verwarmend", "Verwarmend en koelend"])
             + ", Aantal: " + this.selectPropToHTML('aantal', ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"])
             + ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
@@ -4093,8 +4109,8 @@ var Wasmachine = /** @class */ (function (_super) {
     };
     Wasmachine.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5);
-        output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
+        output += "&nbsp;" + this.nrToHtml()
+            + "Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Wasmachine.prototype.toSVG = function () {
@@ -4131,8 +4147,8 @@ var Zeldzame_symbolen = /** @class */ (function (_super) {
     };
     Zeldzame_symbolen.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5)
-            + ", Symbool: " + this.selectPropToHTML('symbool', ["", "deurslot"])
+        output += "&nbsp;" + this.nrToHtml()
+            + "Symbool: " + this.selectPropToHTML('symbool', ["", "deurslot"])
             + ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
@@ -4177,7 +4193,7 @@ var Zonnepaneel = /** @class */ (function (_super) {
     };
     Zonnepaneel.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr', 5) + ", "
+        output += "&nbsp;" + this.nrToHtml()
             + " Aantal: " + this.selectPropToHTML('aantal', ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20",
             "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40"])
             + ", Adres/tekst: " + this.stringPropToHTML('adres', 5);

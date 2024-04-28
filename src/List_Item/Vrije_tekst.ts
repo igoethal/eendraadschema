@@ -37,8 +37,8 @@ class Vrije_tekst extends Electro_Item {
         this.overrideKeys();
         let output = this.toHTMLHeader(mode);
 
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr',5)
-               +  ", Tekst (nieuwe lijn = \"|\"): " + this.stringPropToHTML('tekst',30)
+        output += "&nbsp;" + this.nrToHtml()
+               +  "Tekst (nieuwe lijn = \"|\"): " + this.stringPropToHTML('tekst',30)
                +  ", Breedte: " + this.selectPropToHTML('heeft_automatische_breedte',["automatisch","handmatig"]);
 
         if (this.props.heeft_automatische_breedte != "automatisch") output += " " + this.stringPropToHTML('breedte',3);

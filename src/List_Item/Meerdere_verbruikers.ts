@@ -23,8 +23,8 @@ class Meerdere_verbruikers extends Electro_Item {
     toHTML(mode: string) {
         let output = this.toHTMLHeader(mode);
 
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr',5)
-               +  ", Adres/tekst: " + this.stringPropToHTML('adres',5);
+        output += "&nbsp;" + this.nrToHtml()
+               +  "Adres/tekst: " + this.stringPropToHTML('adres',5);
 
         return(output);
     }

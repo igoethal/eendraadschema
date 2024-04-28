@@ -22,8 +22,8 @@ class Domotica_verticaal extends Electro_Item {
     toHTML(mode: string) {
         let output = this.toHTMLHeader(mode);
 
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr',5)
-               +  ", Tekst: " + this.stringPropToHTML('tekst',10);
+        output += "&nbsp;" + this.nrToHtml()
+               +  "Tekst: " + this.stringPropToHTML('tekst',10);
 
         return(output);
     }

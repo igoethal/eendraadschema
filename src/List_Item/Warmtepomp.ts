@@ -19,8 +19,8 @@ class Warmtepomp extends Electro_Item {
     toHTML(mode: string) {
         let output = this.toHTMLHeader(mode);
 
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr',5)
-               +  ", Warmte functie: " + this.selectPropToHTML('warmtefunctie',["", "Koelend", "Verwarmend", "Verwarmend en koelend"])
+        output += "&nbsp;" + this.nrToHtml()
+               +  "Warmte functie: " + this.selectPropToHTML('warmtefunctie',["", "Koelend", "Verwarmend", "Verwarmend en koelend"])
                +  ", Aantal: " + this.selectPropToHTML('aantal',["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"])
                +  ", Adres/tekst: " + this.stringPropToHTML('adres',5);
 

@@ -17,8 +17,8 @@ class USB_lader extends Electro_Item {
     toHTML(mode: string) {
         let output = this.toHTMLHeader(mode);
 
-        output += "&nbsp;Nr: " + this.stringPropToHTML('nr',5);
-        output += ", Aantal: " + this.selectPropToHTML('aantal',["1","2","3","4","5","6","7","8","9","10"]);
+        output += "&nbsp;" + this.nrToHtml();
+        output += "Aantal: " + this.selectPropToHTML('aantal',["1","2","3","4","5","6","7","8","9","10"]);
         output += ", Adres/tekst: " + this.stringPropToHTML('adres',5);
 
         return(output);
