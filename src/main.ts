@@ -604,6 +604,19 @@ function import_to_structure(mystring: string, redraw = true) {
         }
     }
 
+    //Vanaf versie 4 staan niet automatisch meer haakjes <> rond de benaming van borden. Indien kleiner dan versie 4 moeten we deze toevoegen
+    if (version < 4) {
+        if (version < 3) {
+            for (let i = 0; i < mystructure.length; i++) {
+                if ( (mystructure.data[i].keys[0][2] === "Bord") && (mystructure.data[i].keys[10][2] !== "") ) mystructure.data[i].keys[10][2] = '<' + mystructure.data[i].keys[10][2] + '>';
+            }
+        } else {
+            for (let i = 0; i < mystructure.length; i++) {
+                if ( (mystructure.data[i].props.type === "Bord") && (mystructure.data[i].props.naam !== "") ) mystructure.data[i].props.naam = '<' + mystructure.data[i].props.naam + '>';
+            }
+        }    
+    }
+
     /* We starten met het kopieren van data naar de eigenlijke structure.
     * Ook hier houden we er rekening mee dat in oude saves mogelijk niet alle info voorhanden was
     */

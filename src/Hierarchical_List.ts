@@ -211,6 +211,7 @@ class Hierarchical_List {
             case 'Warmtepomp/airco': tempval = new Warmtepomp(structure); break;
             case 'Wasmachine': tempval = new Wasmachine(structure); break;
             case 'Zeldzame symbolen': tempval = new Zeldzame_symbolen(structure); break;
+            case 'Zekering/differentieel': tempval = new Zekering(structure); break;
             case 'Zonnepaneel': tempval = new Zonnepaneel(structure); break;
             default: tempval = new Electro_Item(structure);
         }

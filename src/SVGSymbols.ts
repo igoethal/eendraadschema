@@ -394,9 +394,17 @@ static outputSVGSymbols() {
       <line x1="0" y1="-30" x2="0" y2="0"  stroke="black" />
       <rect x="-4" y="-30" width="4" height="10" style="fill:black" />
     </g>
+    <g transform="rotate(-20)" id="zekering_automatisch_horizontaal">
+      <line x1="0" y1="0" x2="30" y2="0"  stroke="black" />
+      <rect x="20" y="-4" height="4" width="10" style="fill:black" />
+    </g>
     <g id="zekering_smelt">
       <rect x="-4" y="-30" width="8" height="30" style="stroke:black;fill:none" />
       <line x1="0" y1="-30" x2="0" y2="0" stroke="black" />
+    </g>
+    <g id="zekering_smelt_horizontaal">
+      <rect x="0" y="-4" height="8" width="30" style="stroke:black;fill:none" />
+      <line x1="0" y1="0" x2="30" y2="0" stroke="black" />
     </g>
     <g id="relais_kring">
       <rect x="-8" y="-30" width="16" height="30" style="stroke:black;fill:none" />

@@ -44,9 +44,16 @@ class Bord extends Electro_Item {
 
         // Schuif het geheel voldoende naar links om plaats te hebben voor label en eventuele aarding
 
-        let mintextsize = Math.max(30, svgTextWidth('&lt'+htmlspecialchars(this.props.naam)+'&gt',10,'font-weight="bold"') + 13);
+        let mintextsize = Math.max(30, svgTextWidth(htmlspecialchars(this.props.naam),10,'font-weight="bold"') + 13);
         let minxleft = mintextsize + (this.props.is_geaard ? 70 : 0); //Indien geaard hebben we 70 meer nodig
-
+        if (this.isChildOf("Aansluiting")) {
+            let maxTotalSize = 145;
+            if (this.getParent().props.type_kabel_voor_teller != "") maxTotalSize = maxTotalSize + 50;
+            let lengthToAdd = Math.max(0,(maxTotalSize - minxleft));
+            mintextsize = mintextsize + lengthToAdd;
+            minxleft = minxleft + lengthToAdd;
+        }
+        
         if (mySVG.xleft <= minxleft) { // Minstens 100 pixels indien aarding
             mySVG.xright = mySVG.xleft + mySVG.xright - minxleft;
             mySVG.xleft = minxleft;
@@ -65,8 +72,8 @@ class Bord extends Electro_Item {
         // Voeg naam van het bord toe
         if (this.props.naam !== "")
             mySVG.data += '<text x="' + (5) + '" y="' + (mySVG.yup + 13) + '" ' 
-                       +  'style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="10">&lt;' 
-                       +  htmlspecialchars(this.props.naam)+'&gt;</text>';
+                       +  'style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="10">' 
+                       +  htmlspecialchars(this.props.naam)+'</text>';
         
         // Teken aarding onderaan
         if (this.props.is_geaard)

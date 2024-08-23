@@ -61,15 +61,15 @@ function exportjson() {
         listitem.sourcelist = structure;
     }
 
-    // Compress the output structure and offer as download to the user. We are at version 003
+    // Compress the output structure and offer as download to the user. We are at version 004
     try {
         let decoder = new TextDecoder("utf-8");
         let encoder = new TextEncoder();
         let pako_inflated = new Uint8Array(encoder.encode(text));
         let pako_deflated = new Uint8Array(pako.deflate(pako_inflated));
-        text = "EDS0030000" + btoa(String.fromCharCode.apply(null, pako_deflated));
+        text = "EDS0040000" + btoa(String.fromCharCode.apply(null, pako_deflated));
     } catch (error) {
-        text = "TXT0030000" + text;
+        text = "TXT0040000" + text;
     } finally {
         download_by_blob(text, filename, 'data:text/eds;charset=utf-8');
     }

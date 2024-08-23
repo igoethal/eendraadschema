@@ -32,7 +32,7 @@ class Electro_Item extends List_Item {
   // -- Lijst met toegestande kinderen van het Electro_item --
 
   allowedChilds() : Array<string> { 
-      return ["", "Aansluiting", "Domotica", "Domotica module (verticaal)", "Domotica gestuurde verbruiker", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Contactdoos", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Media", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
+      return ["", "Aansluiting", "Domotica", "Domotica module (verticaal)", "Domotica gestuurde verbruiker", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Contactdoos", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Media", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zekering/differentieel", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Leeg", "Zeldzame symbolen"];
   }
 
   // -- Aantal actieve kinderen van het Electro_item --
@@ -103,6 +103,12 @@ class Electro_Item extends List_Item {
 
   getType() : string { return this.props.type; }
 
+  // -- Checken of parent een gevraagd type is --
+
+  isChildOf(typestr: string) {
+      if (this.parent != 0) return (this.getParent().getType() == typestr); else return false;
+  }
+
   //-- Clear all keys, met uitzondering van nr indien er een nummer is --
 
   clearProps() {
@@ -163,7 +169,7 @@ class Electro_Item extends List_Item {
     let parent:Electro_Item = this.getParent();
     let consumerArray;
     
-    if (parent == null) consumerArray = ["", "Kring", "Aansluiting"];
+    if (parent == null) consumerArray = ["", "Aansluiting", "Zekering/differentieel", "Kring"];
     else consumerArray = this.getParent().allowedChilds()
 
     output += this.selectPropToHTML('type', consumerArray);
