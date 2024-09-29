@@ -69,8 +69,8 @@ table.html_edit_table td:nth-child(2) {
 }
 
 #canvas_2col {
-  padding:7px;
-  margin:7 0 0 40%;
+  padding:0px;
+  margin:0 0 0 40%;
   /*background: url(right.jpg);*/
   color:#fff; width:60%;
   min-height:100%; float:right;
@@ -87,6 +87,21 @@ table.html_edit_table td:nth-child(2) {
 }
 
 #left_col_inner {padding:10px; color:#000000}
+
+#ribbon {padding: 0px; color:#000000}
+
+.container {
+  overflow: hidden;
+}
+
+#body {
+#  overflow: hidden;
+#}
+
+#configsection {
+  overflow-y: auto;
+  max-height: 100%; /* Adjust as needed */
+}
 
 #right_col {
   height: 92vh;

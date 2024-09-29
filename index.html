@@ -17,26 +17,28 @@
     </style>
   </head>
   <body>
-    <div id="topmenu">
-      <ul id="minitabs">
-        <!--<li><a href="#">Thuis</a></li>-->
-        <li><a href="javascript:restart_all()">Nieuw</a></li>
-        <li><a href="javascript:HLRedrawTree()">Bewerken</a></li>
-        <li><a href="javascript:importclicked()">Openen</a></li>
-        <li><a href="javascript:exportscreen()">Opslaan</a></li>
-        <li><a href="javascript:printsvg()">Print</a></li>
-        <li><a href="Documentation/edsdoc.pdf" target="_blank">Documentatie</a></li>
-        <li><a href="javascript:openContactForm()">Info/Contact</a></li>
-      </ul>
-    </div>
-    <div id="configsection">
-    </div>
-    <div id="canvas_2col">
-      <div id="left_col">
-        <div id="left_col_inner"></div>
+    <div class="container">
+      <div id="topmenu">
+        <ul id="minitabs">
+          <!--<li><a href="#">Thuis</a></li>-->
+          <li><a href="javascript:restart_all()">Nieuw</a></li>
+          <li><a href="javascript:HLRedrawTree()">Bewerken</a></li>
+          <li><a href="javascript:importclicked()">Openen</a></li>
+          <li><a href="javascript:exportscreen()">Opslaan</a></li>
+          <li><a href="javascript:printsvg()">Print</a></li>
+          <li><a href="Documentation/edsdoc.pdf" target="_blank">Documentatie</a></li>
+          <li><a href="javascript:openContactForm()">Info/Contact</a></li>
+        </ul>
       </div>
-      <div id="right_col">
-        <div id="right_col_inner"></div>
+      <div id="ribbon"></div>
+      <div id="configsection"></div>
+      <div id="canvas_2col">
+        <div id="left_col">
+          <div id="left_col_inner"></div>
+        </div>
+        <div id="right_col">
+          <div id="right_col_inner"></div>
+        </div>
       </div>
     </div>
     <input id="importfile" type="file" accept=".eds" onchange="importjson(event)" style="display:none;" >

@@ -33,9 +33,8 @@ function PROP_development_options() {
 
 function loadFileFromText() {
   let str:string = (document.getElementById('HL_loadfromtext') as HTMLInputElement).value;
-  import_to_structure(str)
+  import_to_structure(str);
 }
-
 
 /// --- END OF DEVELOPMENT OPTIONS ---
 
@@ -48,18 +47,7 @@ function exportjson() {
      */
     filename = structure.properties.filename;
 
-    // Remove some unneeded data members that would only inflate the size of the output file
-    for (let listitem of structure.data) {
-      listitem.sourcelist = null;
-    }
-
-    // Create the output structure in uncompressed form
-    var text:string = JSON.stringify(structure);
-
-    // Put the removed data members back
-    for (let listitem of structure.data) {
-        listitem.sourcelist = structure;
-    }
+    var text:string = structure_to_json();
 
     // Compress the output structure and offer as download to the user. We are at version 004
     try {
@@ -67,6 +55,7 @@ function exportjson() {
         let encoder = new TextEncoder();
         let pako_inflated = new Uint8Array(encoder.encode(text));
         let pako_deflated = new Uint8Array(pako.deflate(pako_inflated));
+
         text = "EDS0040000" + btoa(String.fromCharCode.apply(null, pako_deflated));
     } catch (error) {
         text = "TXT0040000" + text;

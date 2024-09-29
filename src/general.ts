@@ -15,6 +15,9 @@ function deepClone (obj) {
   return _out;
 }
 
+// Function for length of a string in 8 bit bytes
+const byteSize = str => new Blob([str]).size;
+
 function contains(a, obj) {
     for (let i = 0; i < a.length; i++) {
         if (a[i] === obj) {

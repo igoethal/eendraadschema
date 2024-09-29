@@ -483,25 +483,38 @@ class Hierarchical_List {
         };
     };
 
+    updateRibbon() {
+        let output: string = "";
+
+        // Plaats bovenaan de switch van editeer-mode (teken of verplaats) --
+        output += '<p style="margin-top: 5px;margin-bottom: 5px;">';
+        switch (this.mode) {
+            case "edit":
+                output+= 'Modus (Invoegen/Verplaatsen/Clone) <select id="edit_mode" onchange="HL_editmode()"><option value="edit" selected>Invoegen</option><option value="move">Verplaatsen/Clone</option></select>';
+                output+= '&nbsp;<button ' + (undostruct.undoStackSize() > 0 ? "" : "disabled ")  + 'onclick="undoClicked()">Undo (' + undostruct.undoStackSize()  + ')</button>&nbsp;' 
+                      +  '<button ' + (undostruct.redoStackSize() > 0 ? "" : "disabled ")  + 'onclick="redoClicked()">Redo (' + undostruct.redoStackSize() + ')</button>'
+                break;
+            case "move":
+                output+= 'Modus (Invoegen/Verplaatsen/Clone) <select id="edit_mode" onchange="HL_editmode()"><option value="edit">Invoegen</option><option value="move" selected>Verplaatsen/Clone</option></select>';
+                output+= '&nbsp;<button ' + (undostruct.undoStackSize() > 0 ? "" : "disabled ")  + 'onclick="undoClicked()">Undo (' + undostruct.undoStackSize()  + ')</button>&nbsp;' 
+                      +  '<button ' + (undostruct.redoStackSize() > 0 ? "" : "disabled ")  + 'onclick="redoClicked()">Redo (' + undostruct.redoStackSize() + ')</button>'
+                output+= '<div style="color:black"><i>&nbsp;Gebruik de pijlen om de volgorde van elementen te wijzigen. '+
+                        'Gebruik het Moeder-veld om een component elders in het schema te hangen. Kies "clone" om een dubbel te maken van een element.</i></div>';
+                break;
+        }
+        output += '</p>';
+        
+        document.getElementById("ribbon").innerHTML = output;
+    }
+
     // -- Functie om de tree links te tekenen te starten by node met id = myParent --
 
     toHTML(myParent: number) {
+        
+        if (myParent==0) this.updateRibbon();
+
         let output: string = "";
         let numberDrawn: number = 0;
-
-        // Plaats bovenaan de switch van editeer-mode (teken of verplaats) --
-        if (myParent == 0) {
-            switch (this.mode) {
-                case "edit":
-                    output+= 'Modus (Invoegen/Verplaatsen/Clone) <select id="edit_mode" onchange="HL_editmode()"><option value="edit" selected>Invoegen</option><option value="move">Verplaatsen/Clone</option></select><br><br>';
-                    break;
-                case "move":
-                    output+= 'Modus (Invoegen/Verplaatsen/Clone) <select id="edit_mode" onchange="HL_editmode()"><option value="edit">Invoegen</option><option value="move" selected>Verplaatsen/Clone</option></select>'+
-                            '<span style="color:black"><i>&nbsp;Gebruik de pijlen om de volgorde van elementen te wijzigen. '+
-                            'Gebruik het Moeder-veld om een component elders in het schema te hangen. Kies "clone" om een dubbel te maken van een element.</i></span><br><br>';
-                    break;
-            }
-        }
 
         // Teken het volledige schema in HTML
         for (let i = 0; i<this.length; i++) {

@@ -2,6 +2,10 @@ interface Navigator{
    msSaveBlob:(blob: Blob,fileName:string) => boolean
 }
 
+function forceUndoStore() {
+    undostruct.store();
+}
+
 function HLCollapseExpand(my_id: number, state?: Boolean) {
     let ordinal: number;
     ordinal = structure.getOrdinalById(my_id);
@@ -10,46 +14,55 @@ function HLCollapseExpand(my_id: number, state?: Boolean) {
     } else {
        structure.data[ordinal].collapsed = state;
     }
+    undostruct.store();
     HLRedrawTree();
 }
 
 function HLDelete(my_id: number) {
     structure.deleteById(my_id);
+    undostruct.store();
     HLRedrawTree();
 }
 
 function HLAdd(my_id: number) {
     structure.addItem("");
+    undostruct.store();
     HLRedrawTree();
 }
 
 function HLInsertBefore(my_id: number) {
     structure.insertItemBeforeId(new Electro_Item(structure), my_id);
+    undostruct.store();
     HLRedrawTree();
 }
 
 function HLInsertAfter(my_id: number) {
     structure.insertItemAfterId(new Electro_Item(structure), my_id);
+    undostruct.store();
     HLRedrawTree();
 }
 
 function HLMoveDown(my_id: number) {
     structure.moveDown(my_id);
+    undostruct.store();
     HLRedrawTree();
 }
 
 function HLMoveUp(my_id: number) {
     structure.moveUp(my_id);
+    undostruct.store();
     HLRedrawTree();
 }
 
 function HLClone(my_id: number) {
     structure.clone(my_id);
+    undostruct.store();
     HLRedrawTree();
 }
 
 function HLInsertChild(my_id: number) {
     structure.insertChildAfterId(new Electro_Item(structure), my_id);
+    //undostruct.store();  We should not call this as the CollapseExpand already does that
     HLCollapseExpand(my_id, false);
     //No need to call HLRedrawTree as HLCollapseExpand already does that
 }
@@ -75,6 +88,7 @@ function HLPropUpdate(my_id: number, item: string, type: string, docId: string) 
           HLRedrawTreeHTML();
           break;
     }
+    undostruct.store();
     HLRedrawTreeSVG();
 }
 
@@ -103,6 +117,7 @@ function HL_changeparent(my_id: number) {
     else structure.data[structure.getOrdinalById(my_id)].parent = int_newparentid;
 
     structure.reSort();
+    undostruct.store();
 
     HLRedrawTree();
 }
@@ -295,9 +310,9 @@ function renderAddress() {
               '<div style="display:inline-block; width:25px;"></div><div style="display:inline-block;"><table cols="3" rows="1" style="border-collapse: collapse;border-style: solid; border-width:medium;" cellpadding="5">' +
               '  <tr><th style="text-align: left;border-style: solid; border-width:thin;">Plaats van de elektrische installatie</th><th style="text-align: left;border-style: solid; border-width:thin;">Installateur</th><th style="text-align: left;border-style: solid; border-width:thin;">Info</th></tr>' +
               '  <tr>' +
-              '    <td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_owner" onkeyup="javascript:changeAddressParams()">' + structure.properties.owner + '</td>' +
-              '    <td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_installer" onkeyup="javascript:changeAddressParams()">' + structure.properties.installer + '</td>' +
-              '    <td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_info" onkeyup="javascript:changeAddressParams()">' + structure.properties.info + '</td>' +
+              '    <td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_owner" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + structure.properties.owner + '</td>' +
+              '    <td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_installer" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + structure.properties.installer + '</td>' +
+              '    <td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_info" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + structure.properties.info + '</td>' +
               '  </tr>' +
               '</table></div></div>';
 
@@ -309,15 +324,15 @@ function renderAddressStacked() {
 
     outHTML = 'Plaats van de elektrische installatie' +
               '<table width="90%" cols="1" rows="1" style="border-collapse: collapse;border-style: solid; border-width:thin;" cellpadding="5">' +
-              '<tr><td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_owner" onkeyup="javascript:changeAddressParams()">' + structure.properties.owner + '</td></tr>' +
+              '<tr><td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_owner" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + structure.properties.owner + '</td></tr>' +
               '</table><br>' +
               'Installateur' +
               '<table width="90%" cols="1" rows="1" style="border-collapse: collapse;border-style: solid; border-width:thin;" cellpadding="5">' +
-              '<tr><td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_installer" onkeyup="javascript:changeAddressParams()">' + structure.properties.installer + '</td></tr>' +
+              '<tr><td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_installer" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + structure.properties.installer + '</td></tr>' +
               '</table><br>' +
               'Info' +
               '<table width="90%" cols="1" rows="1" style="border-collapse: collapse;border-style: solid; border-width:thin;" cellpadding="5">' +
-              '<tr><td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_info" onkeyup="javascript:changeAddressParams()">' + structure.properties.info + '</td></tr>' +
+              '<tr><td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_info" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + structure.properties.info + '</td></tr>' +
               '</table>';
 
     return outHTML;
@@ -496,188 +511,15 @@ function hide2col() {
         rightElement.innerHTML = "";
     };
     document.getElementById("canvas_2col").innerHTML = "";
+    document.getElementById("ribbon").innerHTML = "";
 }
 
 function show2col() {
     if (document.getElementById("canvas_2col").innerHTML == "") {
         document.getElementById("canvas_2col").innerHTML = '<div id="left_col"><div id="left_col_inner"></div></div><div id="right_col"><div id="right_col_inner"></div></div>';
     }
-}
 
-function import_to_structure(mystring: string, redraw = true) {
-
-    var text:string = "";
-    var version;
-
-    /* If first 3 bytes read "EDS", it is an entropy coded file
-    * The first 3 bytes are EDS, the next 3 bytes indicate the version
-    * The next 4 bytes are decimal zeroes "0000"
-    * thereafter is a base64 encoded data-structure 
-    * 
-    * If the first 3 bytes read "TXT", it is not entropy coded, nor base64
-    * The next 7 bytes are the same as above.
-    * 
-    * If there is no identifier, it is treated as a version 1 TXT
-    * */
-    
-    if ( (mystring.charCodeAt(0)==69) && (mystring.charCodeAt(1)==68) && (mystring.charCodeAt(2)==83) ) { //recognize as EDS
-
-        /* Determine versioning
-        * < 16/12/2023: Version 1, original key based implementation
-        *   16/12/2023: Version 2, Introductie van automatische breedte voor bepaalde SVG-tekst
-        *                          Vrije tekst van Version 1 moet 30 pixels groter gemaakt worden om nog mooi in het schema te passen
-        *   XX/01/2024: Version 3, Overgang van key based implementation naar props based implementation
-        *                          functies convertLegacyKeys ingevoerd om oude files nog te lezen.
-        */
-
-        version = Number(mystring.substring(3,6));
-        if (isNaN(version)) version = 1; // Hele oude files bevatten geen versie, ze proberen ze te lezen als versie 1
-
-        mystring = atob(mystring.substring(10,mystring.length))
-        var buffer:Uint8Array = new Uint8Array(mystring.length);
-        for (let i = 0; i < mystring.length; i++) {
-            buffer[i-0] = mystring.charCodeAt(i);
-        }
-
-        try { //See if the text decoder works, if not, we will do it manually (slower)
-            let decoder = new TextDecoder("utf-8");
-            text = decoder.decode(pako.inflate(buffer));
-        } catch (error) { //Continue without the text decoder (old browsers)
-            var inflated:Uint8Array = pako.inflate(buffer);
-            text = "";
-            for (let i=0; i<inflated.length; i++) {
-                text += String.fromCharCode(inflated[i])
-            }
-        }
-    } else if ( (mystring.charCodeAt(0)==84) && (mystring.charCodeAt(1)==88) && (mystring.charCodeAt(2)==84) ) { //recognize as TXT
- 
-        version = Number(mystring.substring(3,6));
-        if (isNaN(version)) version = 3;
-
-        text = mystring.substring(10,mystring.length)
-
-    } else { // Very old file without header
-
-        text = mystring;
-        version = 1;
-    }
-
-    /* Read all data from disk in a javascript structure mystructure.
-    * Afterwards we will gradually copy elements from this one into the official structure
-    */
-    let mystructure = JSON.parse(text);
-
-    // At a certain moment (2023-01-11 to 2023-01-13) there was a bug in the systen so that files where accidentally outputed with props, without keys, but with version 1.
-    // We correct for this below. If there are props and not keys but it still reads version 1, it should be interpreted as version 3.
-
-    if ((version == 1) && (mystructure.length > 0) && (typeof(mystructure.data[0].keys) == 'undefined') && (typeof(mystructure.data[0].props) != 'undefined') ) {
-        version = 3
-    }
-    
-    /* Indien versie 1 moeten we vrije tekst elementen die niet leeg zijn 30 pixels breder maken.
-    * Merk ook op dat versie 1 nog een key based systeem had met keys[0][2] het type
-    * en keys[16][2] die aangeeft of vrije tekst al dan niet een kader bevat (verbruiker) of niet (zonder kader)
-    */
-    if (version < 2) {
-        for (let i = 0; i < mystructure.length; i++) {
-            // Breedte van Vrije tekst velden zonder kader met 30 verhogen sinds 16/12/2023
-            if ( (mystructure.data[i].keys[0][2] === "Vrije tekst") && (mystructure.data[i].keys[16][2] != "verbruiker") ) {
-                if (Number(mystructure.data[i].keys[22][2])>0) mystructure.data[i].keys[22][2] = String(Number(mystructure.data[i].keys[22][2]) + 30);
-                    else mystructure.data[i].keys[18][2] = "automatisch";
-                if (mystructure.data[i].keys[16][2] != "zonder kader") mystructure.data[i].keys[16][2] = "verbruiker";
-            }
-      } 
-    }   
-
-    // In versie 2 heetten Contactdozen altijd nog Stopcontacten
-
-    if (version < 3) {
-        for (let i = 0; i < mystructure.length; i++) {
-            if (mystructure.data[i].keys[0][2] === "Stopcontact") mystructure.data[i].keys[0][2] = "Contactdoos";
-        }
-    }
-
-    // In versie 3 heetten Contactdozen ook soms nog Stopcontacten, maar niet altijd
-    if (version == 3) {
-        for (let i = 0; i < mystructure.length; i++) {
-            if (mystructure.data[i].props.type === "Stopcontact") mystructure.data[i].props.type = "Contactdoos";
-        }
-    }
-
-    //Vanaf versie 4 staan niet automatisch meer haakjes <> rond de benaming van borden. Indien kleiner dan versie 4 moeten we deze toevoegen
-    if (version < 4) {
-        if (version < 3) {
-            for (let i = 0; i < mystructure.length; i++) {
-                if ( (mystructure.data[i].keys[0][2] === "Bord") && (mystructure.data[i].keys[10][2] !== "") ) mystructure.data[i].keys[10][2] = '<' + mystructure.data[i].keys[10][2] + '>';
-            }
-        } else {
-            for (let i = 0; i < mystructure.length; i++) {
-                if ( (mystructure.data[i].props.type === "Bord") && (mystructure.data[i].props.naam !== "") ) mystructure.data[i].props.naam = '<' + mystructure.data[i].props.naam + '>';
-            }
-        }    
-    }
-
-    /* We starten met het kopieren van data naar de eigenlijke structure.
-    * Ook hier houden we er rekening mee dat in oude saves mogelijk niet alle info voorhanden was
-    */
-
-    structure = new Hierarchical_List();
-
-    // Kopieren van hoofd-eigenschappen
-
-    if (typeof mystructure.properties != 'undefined') {
-        if (typeof mystructure.properties.filename != "undefined") structure.properties.filename = mystructure.properties.filename;
-        if (typeof mystructure.properties.owner != "undefined") structure.properties.owner = mystructure.properties.owner;
-        if (typeof mystructure.properties.installer != "undefined") structure.properties.installer = mystructure.properties.installer;
-        if (typeof mystructure.properties.info != "undefined") structure.properties.info = mystructure.properties.info;
-    }    
-
-    // Kopieren van de paginatie voor printen
-
-    if (typeof mystructure.print_table != "undefined") {
-        structure.print_table.setHeight(mystructure.print_table.height);
-        structure.print_table.setMaxWidth(mystructure.print_table.maxwidth);
-        structure.print_table.setPaperSize(mystructure.print_table.papersize);
-        structure.print_table.setModeVertical(mystructure.print_table.modevertical);
-        structure.print_table.setstarty(mystructure.print_table.starty);
-        structure.print_table.setstopy(mystructure.print_table.stopy);
-
-        for (let i=0; i<mystructure.print_table.pages.length; i++) {
-            if (i != 0) this.structure.print_table.addPage();
-            this.structure.print_table.pages[i].height = mystructure.print_table.pages[i].height;
-            this.structure.print_table.pages[i].start = mystructure.print_table.pages[i].start;
-            this.structure.print_table.pages[i].stop = mystructure.print_table.pages[i].stop;
-        }
-    }
-
-    /* Kopieren van de eigenschappen van elk element.
-    * Keys voor versies 1 en 2 en props voor versie 3
-    */
-
-    for (let i = 0; i < mystructure.length; i++) {
-        if (version < 3) {
-            structure.addItem(mystructure.data[i].keys[0][2]);
-            (structure.data[i] as Electro_Item).convertLegacyKeys(mystructure.data[i].keys);
-        } else {
-            structure.addItem(mystructure.data[i].props.type);
-            (Object as any).assign(structure.data[i].props,mystructure.data[i].props);
-        }
-        structure.data[i].parent = mystructure.data[i].parent;
-        structure.active[i] = mystructure.active[i];
-        structure.id[i] = mystructure.id[i];
-        structure.data[i].id = mystructure.data[i].id;
-        structure.data[i].indent = mystructure.data[i].indent;
-        structure.data[i].collapsed = mystructure.data[i].collapsed;
-    }
-
-    // As we re-read the structure and it might be shorter then it once was (due to deletions) but we might still have the old high ID's, always take over the curid from the file
-    structure.curid = mystructure.curid;
-
-    // Sort the entire new structure
-    structure.reSort();
-
-    // Draw the structure
-    if (redraw == true) HLRedrawTree();
+    structure.updateRibbon();
 }
 
 function load_example(nr: number) {
@@ -714,6 +556,14 @@ var importjson = function(event) {
 function importclicked() {
     document.getElementById('importfile').click();
     (document.getElementById('importfile') as HTMLInputElement).value = "";
+}
+
+function undoClicked() {
+    undostruct.undo();    
+}
+
+function redoClicked() {
+    undostruct.redo();    
 }
 
 function download_by_blob(text, filename, mimeType) {
@@ -778,6 +628,8 @@ var CONF_differentieel_nat = 30;
 var CONF_upload_OK = "ask"; //can be "ask", "yes", "no"; //before uploading, we ask
 
 var structure: Hierarchical_List;
+var undostruct: undoRedo = new undoRedo(100);
+
 import_to_structure(EXAMPLE_DEFAULT,false); //Just in case the user doesn't select a scheme and goes to drawing immediately, there should be something there
 
 restart_all();
