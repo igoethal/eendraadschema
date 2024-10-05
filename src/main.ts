@@ -449,28 +449,6 @@ function printsvg() {
     hide2col();
 }
 
-function exportscreen() {
-    var strleft: string = "";
-
-    strleft += '<br><table border=0><tr><td width=500 style="vertical-align:top;padding:5px">';
-    strleft += 'Bestandsnaam: <span id="settings"><code>' + structure.properties.filename + '</code><br><button onclick="HL_enterSettings()">Wijzigen</button>&nbsp;<button onclick="exportjson()">Opslaan</button></span>';
-    strleft += '</td><td style="vertical-align:top;padding:5px">'
-    strleft += 'U kan het schema opslaan op uw lokale harde schijf voor later gebruik. De standaard-naam is eendraadschema.eds. U kan deze wijzigen door links op "wijzigen" te klikken. ';
-    strleft += 'Klik vervolgens op "opslaan" en volg de instructies van uw browser. '
-    strleft += 'In de meeste gevallen zal uw browser het bestand automatisch plaatsen in de Downloads-folder tenzij u uw browser instelde dat die eerst een locatie moet vragen.<br><br>'
-    strleft += 'Eens opgeslagen kan het schema later opnieuw geladen worden door in het menu "openen" te kiezen en vervolgens het bestand op uw harde schijf te selecteren.<br><br>'
-    strleft += '</td></tr>';
-
-    strleft += PROP_GDPR(); //Function returns empty for GIT version, returns GDPR notice when used online.
-
-    strleft += '</table>';
-
-    // Plaats input box voor naam van het schema bovenaan --
-    strleft += '<br>';
-    document.getElementById("configsection").innerHTML = strleft;
-    hide2col();
-}
-
 function openContactForm() {
     var strleft: string = PROP_Contact_Text;
 
@@ -526,36 +504,13 @@ function load_example(nr: number) {
     switch (nr) {
         case 0:
             import_to_structure(EXAMPLE0);
+            fileAPIobj.clear();
             break;
         case 1:
             import_to_structure(EXAMPLE1);
+            fileAPIobj.clear();
             break;
     }
-}
-
-var importjson = function(event) {
-    var input = event.target;
-    var reader = new FileReader();
-    var text:string = "";
-
-    reader.onload = function(){
-        import_to_structure(reader.result.toString());
-    };
-
-    reader.readAsText(input.files[0]);
-
-    // Scroll to top left for the SVG, this can only be done at the end because "right col" has to actually be visible
-    const rightelem = document.getElementById("right_col");
-    if (rightelem != null) {
-      rightelem.scrollTop = 0;
-      rightelem.scrollLeft = 0;
-    }
-};
-
-
-function importclicked() {
-    document.getElementById('importfile').click();
-    (document.getElementById('importfile') as HTMLInputElement).value = "";
 }
 
 function undoClicked() {
@@ -564,25 +519,6 @@ function undoClicked() {
 
 function redoClicked() {
     undostruct.redo();    
-}
-
-function download_by_blob(text, filename, mimeType) {
-    var element = document.createElement('a');
-    if (navigator.msSaveBlob) {
-        navigator.msSaveBlob(new Blob([text], {
-          type: mimeType
-        }), filename);
-    } else if (URL && 'download' in element) {
-        let uriContent = URL.createObjectURL(new Blob([text], {type : mimeType}));
-        element.setAttribute('href', uriContent);
-        element.setAttribute('download', filename);
-        element.style.display = 'none';
-        document.body.appendChild(element);
-        element.click();
-        document.body.removeChild(element);
-    } else {
-        this.location.go(`${mimeType},${encodeURIComponent(text)}`);
-    }
 }
 
 function download(type: string) {
@@ -611,6 +547,7 @@ function read_settings() {
   CONF_aantal_fazen_nat = CONF_aantal_fazen_droog;
   CONF_hoofdzekering = parseInt((document.getElementById("hoofdzekering") as HTMLInputElement).value);
   CONF_differentieel_droog = parseInt((document.getElementById("differentieel_droog") as HTMLInputElement).value);
+  fileAPIobj.clear();
   reset_all();
 }
 

@@ -34,11 +34,12 @@ function PROP_development_options() {
 function loadFileFromText() {
   let str:string = (document.getElementById('HL_loadfromtext') as HTMLInputElement).value;
   import_to_structure(str);
+  fileAPIobj.clear();
 }
 
 /// --- END OF DEVELOPMENT OPTIONS ---
 
-function exportjson() {
+function exportjson(saveAs: boolean = true) { //if the boolean is false and the file API is installed, a normal save is performed (known filename)
     var filename:string;
 
     /* We use the Pako library to entropy code the data
@@ -60,7 +61,11 @@ function exportjson() {
     } catch (error) {
         text = "TXT0040000" + text;
     } finally {
-        download_by_blob(text, filename, 'data:text/eds;charset=utf-8');
+        if ((window as any).showOpenFilePicker) { // Use fileAPI     
+          if (saveAs) this.fileAPIobj.saveAs(text); else this.fileAPIobj.save(text);
+        } else { // legacy
+          download_by_blob(text, filename, 'data:text/eds;charset=utf-8');
+        }
     }
 }
 

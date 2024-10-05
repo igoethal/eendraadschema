@@ -1,3 +1,141 @@
+class importExportUsingFileAPI {
+
+    saveNeeded: boolean;
+    fileHandle: any;
+    filename: string;
+    lastsaved: string;
+
+    constructor() {
+        this.clear();
+        //this.updateButtons();
+    }
+
+    clear() {
+        this.saveNeeded = false;
+        this.fileHandle = null;
+        this.filename = null;
+    }
+
+    updateLastSaved() {
+        var currentdate = new Date();
+        this.lastsaved = currentdate.getHours().toString().padStart(2, '0') + ":" +
+                         currentdate.getMinutes().toString().padStart(2, '0') + ":" +
+                         currentdate.getSeconds().toString().padStart(2, '0');;
+
+        //If there is an object on the screen that needs updating, do it
+        if (document.getElementById('exportscreen') as HTMLInputElement) {
+            exportscreen(); // Update the export screen if we are actually on the export screen
+        }
+    }
+
+    //updateButtons() {
+        //document.getElementById('saveAsButton').disabled = !(this.fileAPIdata.saveNeeded);
+    /*    document.getElementById('saveAsButton').disabled = false;
+        document.getElementById('saveButton').disabled = !(this.fileAPIdata.saveNeeded);
+    }*/
+
+    setSaveNeeded(input) {
+        let lastSaveNeeded = this.saveNeeded;
+        this.saveNeeded = input;
+        //if (input !== lastSaveNeeded) this.updateButtons();
+    }
+
+    async readFile() {
+        
+        [this.fileHandle] = await (window as any).showOpenFilePicker({
+            types: [{
+                description: 'Eendraadschema (.eds)',
+                accept: {'application/eds': ['.eds']},
+            }],
+        });
+
+        const file = await (this.fileHandle as any).getFile();
+        const contents = await file.text();
+
+        this.filename = file.name;
+        structure.properties.filename = file.name;
+
+        this.setSaveNeeded(false);
+
+        this.updateLastSaved(); // Needed because import_to_structure whipes everything   
+
+        return contents;
+    }
+
+    async saveAs(content: string) {
+        const options = {
+            suggestedName: structure.properties.filename,
+            types: [{
+                description: 'Eendraadschema (.eds)',
+                accept: {'application/eds': ['.eds']},
+            }],
+            startIn: 'documents' // Suggests the Documents folder
+        };
+
+        this.fileHandle = await (window as any).showSaveFilePicker(options);
+        await this.saveFile(content, this.fileHandle);
+
+        
+    };
+
+    async saveFile(content: any, handle: any) {
+        const writable = await handle.createWritable();
+        await writable.write(content);
+        await writable.close();
+
+        this.filename = handle.name;
+        structure.properties.filename = handle.name;
+
+        this.setSaveNeeded(false);
+
+        this.updateLastSaved();
+    };
+
+    async save(content: string) {
+        await this.saveFile(content, this.fileHandle);
+    };
+}
+
+var fileAPIobj = new importExportUsingFileAPI();
+
+/* FUNCTION importjson
+
+   This is the callback function for the legacy filepicker if the file API is not available in the browser */
+
+var importjson = function(event) {
+    var input = event.target;
+    var reader = new FileReader();
+    var text:string = "";
+
+    reader.onload = function(){
+        import_to_structure(reader.result.toString());
+    };
+
+    reader.readAsText(input.files[0]);
+
+    // Scroll to top left for the SVG, this can only be done at the end because "right col" has to actually be visible
+    /*const rightelem = document.getElementById("right_col");
+    if (rightelem != null) {
+      rightelem.scrollTop = 0;
+      rightelem.scrollLeft = 0;
+    }*/
+};
+
+/* FUNCTION importclicked()
+
+   Gets called when a user wants to open a file.  Checks if the fileAPI is available in the browser.
+   If so, the fileAPI is used.  If not, the legacy function importjson is called */
+
+async function importclicked() {
+    if ((window as any).showOpenFilePicker) { // Use fileAPI
+        let data = await fileAPIobj.readFile();
+        import_to_structure(data);
+    } else { // Legacy
+        document.getElementById('importfile').click();
+        (document.getElementById('importfile') as HTMLInputElement).value = "";
+    }
+}
+
 /* FUNCTION upgrade_version
 
    Takes a structure, usually imported from json into javascript object, and performs a version upgrade if needed.
@@ -212,6 +350,20 @@ function import_to_structure(mystring: string, redraw = true) {
     // Clear the undo stack and push this one on top
     undostruct.clear();
     undostruct.store();
+
+    // Scroll to top left for the SVG and HTML, this can only be done at the end because "right col" has to actually be visible
+    const leftelem = document.getElementById("left_col");
+    if (leftelem != null) {
+      leftelem.scrollTop = 0;
+      leftelem.scrollLeft = 0;
+    }
+    
+    const rightelem = document.getElementById("right_col");
+    if (rightelem != null) {
+      rightelem.scrollTop = 0;
+      rightelem.scrollLeft = 0;
+    }
+
 }
 
 function structure_to_json() {
@@ -231,4 +383,79 @@ function structure_to_json() {
 
     return(text);
 
+}
+
+/* FUNCTION download_by_blob
+
+   Downloads an EDS file to the user's PC
+
+*/
+
+function download_by_blob(text, filename, mimeType) {
+    
+    var element = document.createElement('a');
+    if (navigator.msSaveBlob) {
+        navigator.msSaveBlob(new Blob([text], {
+        type: mimeType
+        }), filename);
+    } else if (URL && 'download' in element) {
+        let uriContent = URL.createObjectURL(new Blob([text], {type : mimeType}));
+        element.setAttribute('href', uriContent);
+        element.setAttribute('download', filename);
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+    } else {
+        this.location.go(`${mimeType},${encodeURIComponent(text)}`);
+    }
+    
+}
+
+/* FUNCTION exportScreen
+   
+   Shows the exportscreen.  It will look different depending on whether the browser supports the file API or not
+
+*/
+
+function exportscreen() {
+
+    var strleft: string = '<br><span id="exportscreen"></span>'; //We need the id to check elsewhere that the screen is open
+
+    if ((window as any).showOpenFilePicker) { // Use fileAPI
+ 
+        if (fileAPIobj.filename != null) { 
+            strleft += 'Laatst geopend of opgeslagen om <b>' + fileAPIobj.lastsaved + '</b> met naam <b>' + fileAPIobj.filename + '</b><br><br>'
+                    +  'Klik hieronder om bij te werken<br><br>'
+            strleft += '<button onclick="exportjson(saveAs = false)">Opslaan</button>&nbsp;';
+            strleft += '<button onclick="exportjson(saveAs = true)">Opslaan als</button><br><br>';
+        } else {
+            strleft += 'Uw werk werd nog niet opgeslagen. Klik hieronder.<br><br>';
+            strleft += '<button onclick="exportjson(saveAs = true)">Opslaan als</button>';
+            strleft += '<br><br>';
+        }
+        strleft += '<table border=0>';      
+        strleft += PROP_GDPR(); //Function returns empty for GIT version, returns GDPR notice when used online.
+        strleft += '</table>';
+        
+    } else { // Legacy
+        strleft += '<table border=0><tr><td width=500 style="vertical-align:top;padding:5px">';
+        strleft += 'Bestandsnaam: <span id="settings"><code>' + structure.properties.filename + '</code><br><button onclick="HL_enterSettings()">Wijzigen</button>&nbsp;<button onclick="exportjson()">Opslaan</button></span>';
+        strleft += '</td><td style="vertical-align:top;padding:5px">'
+        strleft += 'U kan het schema opslaan op uw lokale harde schijf voor later gebruik. De standaard-naam is eendraadschema.eds. U kan deze wijzigen door links op "wijzigen" te klikken. ';
+        strleft += 'Klik vervolgens op "opslaan" en volg de instructies van uw browser. '
+        strleft += 'In de meeste gevallen zal uw browser het bestand automatisch plaatsen in de Downloads-folder tenzij u uw browser instelde dat die eerst een locatie moet vragen.<br><br>'
+        strleft += 'Eens opgeslagen kan het schema later opnieuw geladen worden door in het menu "openen" te kiezen en vervolgens het bestand op uw harde schijf te selecteren.<br><br>'
+        strleft += '</td></tr>';
+    
+        strleft += PROP_GDPR(); //Function returns empty for GIT version, returns GDPR notice when used online.
+    
+        strleft += '</table>';
+    
+        // Plaats input box voor naam van het schema bovenaan --
+        strleft += '<br>';    
+    }
+    
+    document.getElementById("configsection").innerHTML = strleft;
+    hide2col();
 }

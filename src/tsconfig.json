@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": ["es2017", "dom"],
+    "outFile": "swap.js",
+    // other options...
+  },
+  "include": [
+    "general.ts",
+    "SVGelement.ts",
+    "importExport.ts",
+    "undoRedo.ts",
+    "List_Item/List_Item.ts",
+    "List_Item/Electro_Item.ts",
+    "List_Item/Schakelaars/Schakelaar.ts",
+    "List_Item/Schakelaars/Schakelaars.ts",
+    "List_Item/Schakelaars/Lichtcircuit.ts",
+    "List_Item/*.ts",
+    "Properties.ts",
+    "SVGSymbols.ts",
+    "Hierarchical_List.ts",
+    "Print_Table.ts",
+    "config.ts",
+    "../prop/prop_scripts.ts",
+    "main.ts"
+  ]
+}

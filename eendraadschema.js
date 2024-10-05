@@ -18,6 +18,42 @@
 //
 //=========================================================================//
 
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
@@ -203,6 +239,177 @@ var SVGelement = /** @class */ (function () {
     }
     return SVGelement;
 }());
+var importExportUsingFileAPI = /** @class */ (function () {
+    function importExportUsingFileAPI() {
+        this.clear();
+        //this.updateButtons();
+    }
+    importExportUsingFileAPI.prototype.clear = function () {
+        this.saveNeeded = false;
+        this.fileHandle = null;
+        this.filename = null;
+    };
+    importExportUsingFileAPI.prototype.updateLastSaved = function () {
+        var currentdate = new Date();
+        this.lastsaved = currentdate.getHours().toString().padStart(2, '0') + ":" +
+            currentdate.getMinutes().toString().padStart(2, '0') + ":" +
+            currentdate.getSeconds().toString().padStart(2, '0');
+        ;
+        //If there is an object on the screen that needs updating, do it
+        if (document.getElementById('exportscreen')) {
+            exportscreen(); // Update the export screen if we are actually on the export screen
+        }
+    };
+    //updateButtons() {
+    //document.getElementById('saveAsButton').disabled = !(this.fileAPIdata.saveNeeded);
+    /*    document.getElementById('saveAsButton').disabled = false;
+        document.getElementById('saveButton').disabled = !(this.fileAPIdata.saveNeeded);
+    }*/
+    importExportUsingFileAPI.prototype.setSaveNeeded = function (input) {
+        var lastSaveNeeded = this.saveNeeded;
+        this.saveNeeded = input;
+        //if (input !== lastSaveNeeded) this.updateButtons();
+    };
+    importExportUsingFileAPI.prototype.readFile = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, file, contents;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _a = this;
+                        return [4 /*yield*/, window.showOpenFilePicker({
+                                types: [{
+                                        description: 'Eendraadschema (.eds)',
+                                        accept: { 'application/eds': ['.eds'] },
+                                    }],
+                            })];
+                    case 1:
+                        _a.fileHandle = (_b.sent())[0];
+                        return [4 /*yield*/, this.fileHandle.getFile()];
+                    case 2:
+                        file = _b.sent();
+                        return [4 /*yield*/, file.text()];
+                    case 3:
+                        contents = _b.sent();
+                        this.filename = file.name;
+                        structure.properties.filename = file.name;
+                        this.setSaveNeeded(false);
+                        this.updateLastSaved(); // Needed because import_to_structure whipes everything   
+                        return [2 /*return*/, contents];
+                }
+            });
+        });
+    };
+    importExportUsingFileAPI.prototype.saveAs = function (content) {
+        return __awaiter(this, void 0, void 0, function () {
+            var options, _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        options = {
+                            suggestedName: structure.properties.filename,
+                            types: [{
+                                    description: 'Eendraadschema (.eds)',
+                                    accept: { 'application/eds': ['.eds'] },
+                                }],
+                            startIn: 'documents' // Suggests the Documents folder
+                        };
+                        _a = this;
+                        return [4 /*yield*/, window.showSaveFilePicker(options)];
+                    case 1:
+                        _a.fileHandle = _b.sent();
+                        return [4 /*yield*/, this.saveFile(content, this.fileHandle)];
+                    case 2:
+                        _b.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    ;
+    importExportUsingFileAPI.prototype.saveFile = function (content, handle) {
+        return __awaiter(this, void 0, void 0, function () {
+            var writable;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, handle.createWritable()];
+                    case 1:
+                        writable = _a.sent();
+                        return [4 /*yield*/, writable.write(content)];
+                    case 2:
+                        _a.sent();
+                        return [4 /*yield*/, writable.close()];
+                    case 3:
+                        _a.sent();
+                        this.filename = handle.name;
+                        structure.properties.filename = handle.name;
+                        this.setSaveNeeded(false);
+                        this.updateLastSaved();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    ;
+    importExportUsingFileAPI.prototype.save = function (content) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.saveFile(content, this.fileHandle)];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    ;
+    return importExportUsingFileAPI;
+}());
+var fileAPIobj = new importExportUsingFileAPI();
+/* FUNCTION importjson
+
+   This is the callback function for the legacy filepicker if the file API is not available in the browser */
+var importjson = function (event) {
+    var input = event.target;
+    var reader = new FileReader();
+    var text = "";
+    reader.onload = function () {
+        import_to_structure(reader.result.toString());
+    };
+    reader.readAsText(input.files[0]);
+    // Scroll to top left for the SVG, this can only be done at the end because "right col" has to actually be visible
+    /*const rightelem = document.getElementById("right_col");
+    if (rightelem != null) {
+      rightelem.scrollTop = 0;
+      rightelem.scrollLeft = 0;
+    }*/
+};
+/* FUNCTION importclicked()
+
+   Gets called when a user wants to open a file.  Checks if the fileAPI is available in the browser.
+   If so, the fileAPI is used.  If not, the legacy function importjson is called */
+function importclicked() {
+    return __awaiter(this, void 0, void 0, function () {
+        var data;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    if (!window.showOpenFilePicker) return [3 /*break*/, 2];
+                    return [4 /*yield*/, fileAPIobj.readFile()];
+                case 1:
+                    data = _a.sent();
+                    import_to_structure(data);
+                    return [3 /*break*/, 3];
+                case 2:
+                    document.getElementById('importfile').click();
+                    document.getElementById('importfile').value = "";
+                    _a.label = 3;
+                case 3: return [2 /*return*/];
+            }
+        });
+    });
+}
 /* FUNCTION upgrade_version
 
    Takes a structure, usually imported from json into javascript object, and performs a version upgrade if needed.
@@ -401,6 +608,17 @@ function import_to_structure(mystring, redraw) {
     // Clear the undo stack and push this one on top
     undostruct.clear();
     undostruct.store();
+    // Scroll to top left for the SVG and HTML, this can only be done at the end because "right col" has to actually be visible
+    var leftelem = document.getElementById("left_col");
+    if (leftelem != null) {
+        leftelem.scrollTop = 0;
+        leftelem.scrollLeft = 0;
+    }
+    var rightelem = document.getElementById("right_col");
+    if (rightelem != null) {
+        rightelem.scrollTop = 0;
+        rightelem.scrollLeft = 0;
+    }
 }
 function structure_to_json() {
     // Remove some unneeded data members that would only inflate the size of the output file
@@ -416,6 +634,71 @@ function structure_to_json() {
         listitem.sourcelist = structure;
     }
     return (text);
+}
+/* FUNCTION download_by_blob
+
+   Downloads an EDS file to the user's PC
+
+*/
+function download_by_blob(text, filename, mimeType) {
+    var element = document.createElement('a');
+    if (navigator.msSaveBlob) {
+        navigator.msSaveBlob(new Blob([text], {
+            type: mimeType
+        }), filename);
+    }
+    else if (URL && 'download' in element) {
+        var uriContent = URL.createObjectURL(new Blob([text], { type: mimeType }));
+        element.setAttribute('href', uriContent);
+        element.setAttribute('download', filename);
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+    }
+    else {
+        this.location.go("".concat(mimeType, ",").concat(encodeURIComponent(text)));
+    }
+}
+/* FUNCTION exportScreen
+   
+   Shows the exportscreen.  It will look different depending on whether the browser supports the file API or not
+
+*/
+function exportscreen() {
+    var strleft = '<br><span id="exportscreen"></span>'; //We need the id to check elsewhere that the screen is open
+    if (window.showOpenFilePicker) { // Use fileAPI
+        if (fileAPIobj.filename != null) {
+            strleft += 'Laatst geopend of opgeslagen om <b>' + fileAPIobj.lastsaved + '</b> met naam <b>' + fileAPIobj.filename + '</b><br><br>'
+                + 'Klik hieronder om bij te werken<br><br>';
+            strleft += '<button onclick="exportjson(saveAs = false)">Opslaan</button>&nbsp;';
+            strleft += '<button onclick="exportjson(saveAs = true)">Opslaan als</button><br><br>';
+        }
+        else {
+            strleft += 'Uw werk werd nog niet opgeslagen. Klik hieronder.<br><br>';
+            strleft += '<button onclick="exportjson(saveAs = true)">Opslaan als</button>';
+            strleft += '<br><br>';
+        }
+        strleft += '<table border=0>';
+        strleft += PROP_GDPR(); //Function returns empty for GIT version, returns GDPR notice when used online.
+        strleft += '</table>';
+    }
+    else { // Legacy
+        strleft += '<table border=0><tr><td width=500 style="vertical-align:top;padding:5px">';
+        strleft += 'Bestandsnaam: <span id="settings"><code>' + structure.properties.filename + '</code><br><button onclick="HL_enterSettings()">Wijzigen</button>&nbsp;<button onclick="exportjson()">Opslaan</button></span>';
+        strleft += '</td><td style="vertical-align:top;padding:5px">';
+        strleft += 'U kan het schema opslaan op uw lokale harde schijf voor later gebruik. De standaard-naam is eendraadschema.eds. U kan deze wijzigen door links op "wijzigen" te klikken. ';
+        strleft += 'Klik vervolgens op "opslaan" en volg de instructies van uw browser. ';
+        strleft += 'In de meeste gevallen zal uw browser het bestand automatisch plaatsen in de Downloads-folder tenzij u uw browser instelde dat die eerst een locatie moet vragen.<br><br>';
+        strleft += 'Eens opgeslagen kan het schema later opnieuw geladen worden door in het menu "openen" te kiezen en vervolgens het bestand op uw harde schijf te selecteren.<br><br>';
+        strleft += '</td></tr>';
+        strleft += PROP_GDPR(); //Function returns empty for GIT version, returns GDPR notice when used online.
+        strleft += '</table>';
+        // Plaats input box voor naam van het schema bovenaan --
+        strleft += '<br>';
+    }
+    document.getElementById("configsection").innerHTML = strleft;
+    hide2col();
 }
 var jsonStore = /** @class */ (function () {
     function jsonStore(maxSteps) {
@@ -2063,6 +2346,79 @@ var Diepvriezer = /** @class */ (function (_super) {
     };
     return Diepvriezer;
 }(Electro_Item));
+var Domotica = /** @class */ (function (_super) {
+    __extends(Domotica, _super);
+    function Domotica() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Domotica.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.tekst = this.getLegacyKey(mykeys, 15);
+        this.props.adres = this.getLegacyKey(mykeys, 23);
+    };
+    Domotica.prototype.resetProps = function () {
+        this.clearProps();
+        this.props.type = "Domotica";
+        this.props.tekst = "Domotica";
+        this.props.adres = "";
+        this.props.nr = "";
+    };
+    Domotica.prototype.allowedChilds = function () {
+        return ["", "Kring"];
+    };
+    Domotica.prototype.getMaxNumChilds = function () {
+        return 256;
+    };
+    Domotica.prototype.toHTML = function (mode) {
+        var output = this.toHTMLHeader(mode);
+        output += "&nbsp;" + this.nrToHtml()
+            + "Tekst (nieuwe lijn = \"|\"): " + this.stringPropToHTML('tekst', 30)
+            + ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
+        return (output);
+    };
+    Domotica.prototype.toSVG = function () {
+        var mySVG; // = new SVGelement();
+        var strlines = htmlspecialchars(this.props.tekst).split("|");
+        // Maak een tekening van alle kinderen
+        mySVG = this.sourcelist.toSVG(this.id, "horizontal");
+        // We voorzien altijd minimaal een kader van 80 en zeker genoeg voor de tekst in het Domotica-symbool
+        var minwidth = 80;
+        for (var _i = 0, strlines_1 = strlines; _i < strlines_1.length; _i++) {
+            var str = strlines_1[_i];
+            minwidth = Math.max(minwidth, svgTextWidth(htmlspecialchars(str), 10, 'font-weight="bold"') + 15);
+        } //15 padding
+        minwidth += 20; //Ruimte voor leiding links
+        if ((mySVG.xright + mySVG.xleft) <= minwidth)
+            mySVG.xright = (minwidth - mySVG.xleft);
+        // We voorzien altijd verticale ruimte, zelfs als de kinderen nog niet gedefinieerd zijn
+        var extraplace = 15 * Math.max(strlines.length - 2, 0);
+        mySVG.yup = Math.max(mySVG.yup + 20, 25) + extraplace / 2.0;
+        mySVG.ydown = Math.max(mySVG.ydown, 25) + extraplace / 2.0;
+        // We tekenen kader en aansluitende lijn links
+        var width = (mySVG.xleft + mySVG.xright - 20);
+        mySVG.data += '<rect x="' + (20) + '" width="' + (width) +
+            '" y="' + (mySVG.yup - 20 - extraplace / 2.0) + '" height="' + (40 + extraplace) + '" stroke="black" stroke-width="2" fill="white" />';
+        mySVG.data += '<line x1="1" x2="20" y1="' + (mySVG.yup) + '" y2="' + (mySVG.yup) + '" stroke="black" />';
+        // We plaatsen de tekst in het kader
+        var outputstr_common = '<text style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="bold" ';
+        for (var i = 0; i < strlines.length; i++) {
+            var dispy = mySVG.yup + 3 - extraplace / 2.0 - (strlines.length > 1 ? 7.5 : 0) + 15 * i;
+            mySVG.data += outputstr_common + ' x="' + (21 + width / 2) + '" y="' + (dispy) + '">' + strlines[i] + '</text>';
+        }
+        // Forceer 1 pixel links en de rest rechts
+        mySVG.xright = mySVG.xleft + mySVG.xright - 1;
+        mySVG.xleft = 1; //we leave one pixel for the bold kring-line at the left
+        // Plaats adres onderaan indien niet leeg en indien er actieve kinderen zijn
+        if (!(/^\s*$/.test(this.props.adres))) { // Controleer of adres leeg is
+            mySVG.data += '<text x="' + ((mySVG.xright - 20) / 2 + 21) + '" y="' + (mySVG.yup + mySVG.ydown + 10)
+                + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.props.adres) + '</text>';
+            mySVG.ydown += 15;
+        }
+        return (mySVG);
+    };
+    return Domotica;
+}(Electro_Item));
 var Domotica_gestuurde_verbruiker = /** @class */ (function (_super) {
     __extends(Domotica_gestuurde_verbruiker, _super);
     function Domotica_gestuurde_verbruiker() {
@@ -2179,79 +2535,6 @@ var Domotica_gestuurde_verbruiker = /** @class */ (function (_super) {
         return (mySVG);
     };
     return Domotica_gestuurde_verbruiker;
-}(Electro_Item));
-var Domotica = /** @class */ (function (_super) {
-    __extends(Domotica, _super);
-    function Domotica() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Domotica.prototype.convertLegacyKeys = function (mykeys) {
-        this.props.type = this.getLegacyKey(mykeys, 0);
-        this.props.nr = this.getLegacyKey(mykeys, 10);
-        this.props.tekst = this.getLegacyKey(mykeys, 15);
-        this.props.adres = this.getLegacyKey(mykeys, 23);
-    };
-    Domotica.prototype.resetProps = function () {
-        this.clearProps();
-        this.props.type = "Domotica";
-        this.props.tekst = "Domotica";
-        this.props.adres = "";
-        this.props.nr = "";
-    };
-    Domotica.prototype.allowedChilds = function () {
-        return ["", "Kring"];
-    };
-    Domotica.prototype.getMaxNumChilds = function () {
-        return 256;
-    };
-    Domotica.prototype.toHTML = function (mode) {
-        var output = this.toHTMLHeader(mode);
-        output += "&nbsp;" + this.nrToHtml()
-            + "Tekst (nieuwe lijn = \"|\"): " + this.stringPropToHTML('tekst', 30)
-            + ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
-        return (output);
-    };
-    Domotica.prototype.toSVG = function () {
-        var mySVG; // = new SVGelement();
-        var strlines = htmlspecialchars(this.props.tekst).split("|");
-        // Maak een tekening van alle kinderen
-        mySVG = this.sourcelist.toSVG(this.id, "horizontal");
-        // We voorzien altijd minimaal een kader van 80 en zeker genoeg voor de tekst in het Domotica-symbool
-        var minwidth = 80;
-        for (var _i = 0, strlines_1 = strlines; _i < strlines_1.length; _i++) {
-            var str = strlines_1[_i];
-            minwidth = Math.max(minwidth, svgTextWidth(htmlspecialchars(str), 10, 'font-weight="bold"') + 15);
-        } //15 padding
-        minwidth += 20; //Ruimte voor leiding links
-        if ((mySVG.xright + mySVG.xleft) <= minwidth)
-            mySVG.xright = (minwidth - mySVG.xleft);
-        // We voorzien altijd verticale ruimte, zelfs als de kinderen nog niet gedefinieerd zijn
-        var extraplace = 15 * Math.max(strlines.length - 2, 0);
-        mySVG.yup = Math.max(mySVG.yup + 20, 25) + extraplace / 2.0;
-        mySVG.ydown = Math.max(mySVG.ydown, 25) + extraplace / 2.0;
-        // We tekenen kader en aansluitende lijn links
-        var width = (mySVG.xleft + mySVG.xright - 20);
-        mySVG.data += '<rect x="' + (20) + '" width="' + (width) +
-            '" y="' + (mySVG.yup - 20 - extraplace / 2.0) + '" height="' + (40 + extraplace) + '" stroke="black" stroke-width="2" fill="white" />';
-        mySVG.data += '<line x1="1" x2="20" y1="' + (mySVG.yup) + '" y2="' + (mySVG.yup) + '" stroke="black" />';
-        // We plaatsen de tekst in het kader
-        var outputstr_common = '<text style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="bold" ';
-        for (var i = 0; i < strlines.length; i++) {
-            var dispy = mySVG.yup + 3 - extraplace / 2.0 - (strlines.length > 1 ? 7.5 : 0) + 15 * i;
-            mySVG.data += outputstr_common + ' x="' + (21 + width / 2) + '" y="' + (dispy) + '">' + strlines[i] + '</text>';
-        }
-        // Forceer 1 pixel links en de rest rechts
-        mySVG.xright = mySVG.xleft + mySVG.xright - 1;
-        mySVG.xleft = 1; //we leave one pixel for the bold kring-line at the left
-        // Plaats adres onderaan indien niet leeg en indien er actieve kinderen zijn
-        if (!(/^\s*$/.test(this.props.adres))) { // Controleer of adres leeg is
-            mySVG.data += '<text x="' + ((mySVG.xright - 20) / 2 + 21) + '" y="' + (mySVG.yup + mySVG.ydown + 10)
-                + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.props.adres) + '</text>';
-            mySVG.ydown += 15;
-        }
-        return (mySVG);
-    };
-    return Domotica;
 }(Electro_Item));
 var Domotica_verticaal = /** @class */ (function (_super) {
     __extends(Domotica_verticaal, _super);
@@ -2443,6 +2726,42 @@ var Drukknop = /** @class */ (function (_super) {
     };
     return Drukknop;
 }(Electro_Item));
+var EV_lader = /** @class */ (function (_super) {
+    __extends(EV_lader, _super);
+    function EV_lader() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    EV_lader.prototype.convertLegacyKeys = function (mykeys) {
+        this.props.type = this.getLegacyKey(mykeys, 0);
+        this.props.nr = this.getLegacyKey(mykeys, 10);
+        this.props.adres = this.getLegacyKey(mykeys, 15);
+    };
+    EV_lader.prototype.resetProps = function () {
+        this.clearProps();
+        this.props.type = "EV lader";
+        this.props.adres = "";
+    };
+    EV_lader.prototype.toHTML = function (mode) {
+        var output = this.toHTMLHeader(mode);
+        output += "&nbsp;" + this.nrToHtml();
+        output += "Adres/tekst: " + this.stringPropToHTML('adres', 5);
+        return (output);
+    };
+    EV_lader.prototype.toSVG = function () {
+        var mySVG = new SVGelement();
+        var outputstr = "";
+        mySVG.xleft = 1; // foresee at least some space for the conductor
+        mySVG.xright = 60;
+        mySVG.yup = 25;
+        mySVG.ydown = 25;
+        mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
+            + '<use xlink:href="#EVlader" x="21" y="25"></use>';
+        mySVG.data += this.addAddressToSVG(mySVG, 60, 15);
+        mySVG.data += "\n";
+        return (mySVG);
+    };
+    return EV_lader;
+}(Electro_Item));
 var Elektriciteitsmeter = /** @class */ (function (_super) {
     __extends(Elektriciteitsmeter, _super);
     function Elektriciteitsmeter() {
@@ -2514,42 +2833,6 @@ var Elektrische_oven = /** @class */ (function (_super) {
         return (mySVG);
     };
     return Elektrische_oven;
-}(Electro_Item));
-var EV_lader = /** @class */ (function (_super) {
-    __extends(EV_lader, _super);
-    function EV_lader() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    EV_lader.prototype.convertLegacyKeys = function (mykeys) {
-        this.props.type = this.getLegacyKey(mykeys, 0);
-        this.props.nr = this.getLegacyKey(mykeys, 10);
-        this.props.adres = this.getLegacyKey(mykeys, 15);
-    };
-    EV_lader.prototype.resetProps = function () {
-        this.clearProps();
-        this.props.type = "EV lader";
-        this.props.adres = "";
-    };
-    EV_lader.prototype.toHTML = function (mode) {
-        var output = this.toHTMLHeader(mode);
-        output += "&nbsp;" + this.nrToHtml();
-        output += "Adres/tekst: " + this.stringPropToHTML('adres', 5);
-        return (output);
-    };
-    EV_lader.prototype.toSVG = function () {
-        var mySVG = new SVGelement();
-        var outputstr = "";
-        mySVG.xleft = 1; // foresee at least some space for the conductor
-        mySVG.xright = 60;
-        mySVG.yup = 25;
-        mySVG.ydown = 25;
-        mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
-            + '<use xlink:href="#EVlader" x="21" y="25"></use>';
-        mySVG.data += this.addAddressToSVG(mySVG, 60, 15);
-        mySVG.data += "\n";
-        return (mySVG);
-    };
-    return EV_lader;
 }(Electro_Item));
 var Ketel = /** @class */ (function (_super) {
     __extends(Ketel, _super);
@@ -5597,9 +5880,11 @@ function PROP_development_options() {
 function loadFileFromText() {
     var str = document.getElementById('HL_loadfromtext').value;
     import_to_structure(str);
+    fileAPIobj.clear();
 }
 /// --- END OF DEVELOPMENT OPTIONS ---
-function exportjson() {
+function exportjson(saveAs) {
+    if (saveAs === void 0) { saveAs = true; }
     var filename;
     /* We use the Pako library to entropy code the data
      * Final data reads "EDSXXX0000" with XXX a version and thereafter a 64base encoding of the deflated output from Pako
@@ -5619,7 +5904,15 @@ function exportjson() {
         text = "TXT0040000" + text;
     }
     finally {
-        download_by_blob(text, filename, 'data:text/eds;charset=utf-8');
+        if (window.showOpenFilePicker) { // Use fileAPI     
+            if (saveAs)
+                this.fileAPIobj.saveAs(text);
+            else
+                this.fileAPIobj.save(text);
+        }
+        else { // legacy
+            download_by_blob(text, filename, 'data:text/eds;charset=utf-8');
+        }
     }
 }
 function displayButtonPrintToPdf() {
@@ -5993,23 +6286,6 @@ function printsvg() {
     renderPrintSVG();
     hide2col();
 }
-function exportscreen() {
-    var strleft = "";
-    strleft += '<br><table border=0><tr><td width=500 style="vertical-align:top;padding:5px">';
-    strleft += 'Bestandsnaam: <span id="settings"><code>' + structure.properties.filename + '</code><br><button onclick="HL_enterSettings()">Wijzigen</button>&nbsp;<button onclick="exportjson()">Opslaan</button></span>';
-    strleft += '</td><td style="vertical-align:top;padding:5px">';
-    strleft += 'U kan het schema opslaan op uw lokale harde schijf voor later gebruik. De standaard-naam is eendraadschema.eds. U kan deze wijzigen door links op "wijzigen" te klikken. ';
-    strleft += 'Klik vervolgens op "opslaan" en volg de instructies van uw browser. ';
-    strleft += 'In de meeste gevallen zal uw browser het bestand automatisch plaatsen in de Downloads-folder tenzij u uw browser instelde dat die eerst een locatie moet vragen.<br><br>';
-    strleft += 'Eens opgeslagen kan het schema later opnieuw geladen worden door in het menu "openen" te kiezen en vervolgens het bestand op uw harde schijf te selecteren.<br><br>';
-    strleft += '</td></tr>';
-    strleft += PROP_GDPR(); //Function returns empty for GIT version, returns GDPR notice when used online.
-    strleft += '</table>';
-    // Plaats input box voor naam van het schema bovenaan --
-    strleft += '<br>';
-    document.getElementById("configsection").innerHTML = strleft;
-    hide2col();
-}
 function openContactForm() {
     var strleft = PROP_Contact_Text;
     document.getElementById("configsection").innerHTML = strleft;
@@ -6052,56 +6328,19 @@ function load_example(nr) {
     switch (nr) {
         case 0:
             import_to_structure(EXAMPLE0);
+            fileAPIobj.clear();
             break;
         case 1:
             import_to_structure(EXAMPLE1);
+            fileAPIobj.clear();
             break;
     }
-}
-var importjson = function (event) {
-    var input = event.target;
-    var reader = new FileReader();
-    var text = "";
-    reader.onload = function () {
-        import_to_structure(reader.result.toString());
-    };
-    reader.readAsText(input.files[0]);
-    // Scroll to top left for the SVG, this can only be done at the end because "right col" has to actually be visible
-    var rightelem = document.getElementById("right_col");
-    if (rightelem != null) {
-        rightelem.scrollTop = 0;
-        rightelem.scrollLeft = 0;
-    }
-};
-function importclicked() {
-    document.getElementById('importfile').click();
-    document.getElementById('importfile').value = "";
 }
 function undoClicked() {
     undostruct.undo();
 }
 function redoClicked() {
     undostruct.redo();
-}
-function download_by_blob(text, filename, mimeType) {
-    var element = document.createElement('a');
-    if (navigator.msSaveBlob) {
-        navigator.msSaveBlob(new Blob([text], {
-            type: mimeType
-        }), filename);
-    }
-    else if (URL && 'download' in element) {
-        var uriContent = URL.createObjectURL(new Blob([text], { type: mimeType }));
-        element.setAttribute('href', uriContent);
-        element.setAttribute('download', filename);
-        element.style.display = 'none';
-        document.body.appendChild(element);
-        element.click();
-        document.body.removeChild(element);
-    }
-    else {
-        this.location.go("".concat(mimeType, ",").concat(encodeURIComponent(text)));
-    }
 }
 function download(type) {
     var filename;
@@ -6128,6 +6367,7 @@ function read_settings() {
     CONF_aantal_fazen_nat = CONF_aantal_fazen_droog;
     CONF_hoofdzekering = parseInt(document.getElementById("hoofdzekering").value);
     CONF_differentieel_droog = parseInt(document.getElementById("differentieel_droog").value);
+    fileAPIobj.clear();
     reset_all();
 }
 var CONF_aantal_droge_kringen = 7;
