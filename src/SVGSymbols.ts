@@ -197,8 +197,8 @@ static outputSVGSymbols() {
       <use xlink:href="#arrow" x="18" y="-17" transform="rotate(90 18 -17)" />
     </g>
     <g id="contactdoos">
-      <path d="M20 0 A15 15 0 0 1 35 -15" stroke="black" fill="white" stroke-width="2" />
-      <path d="M20 0 A15 15 0 0 0 35 15" stroke="black" fill="white" stroke-width="2" />
+      <path d="M20 0 A15 15 0 0 1 35 -15" stroke="black" fill="none" stroke-width="2" />
+      <path d="M20 0 A15 15 0 0 0 35 15" stroke="black" fill="none" stroke-width="2" />
       <line x1="0" y1="0" x2="20" y2="0" stroke="black" />
     </g>
     <g id="stoomoven">

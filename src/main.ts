@@ -251,6 +251,13 @@ function buildNewStructure(structure: Hierarchical_List) {
     structure.data[itemCounter].props.type = "Bord";
     structure.data[itemCounter].props.is_geaard = false; // Geaard
     itemCounter++;
+
+    // Pas info aan
+    switch (CONF_aantal_fazen_droog) {
+        case 2: structure.properties.info = '2 x 230V ~50 Hz'; break;
+        case 3: structure.properties.info = '3 x 230V ~50 Hz'; break;
+        case 4: structure.properties.info = '3 x 400V + N ~50 Hz';
+    }
 }
 
 function reset_all() {
@@ -301,6 +308,21 @@ function dosvgdownload() {
     var prtContent = document.getElementById("printsvgarea").innerHTML;
     var filename = (document.getElementById("dosvgname") as HTMLInputElement).value;
     download_by_blob(prtContent, filename, 'data:image/svg+xml;charset=utf-8'); //Was text/plain
+}
+
+function dopdfdownload() {
+    printPDF(
+        document.getElementById("printsvgarea").innerHTML,
+        structure.print_table.pages[structure.print_table.displaypage].stop - structure.print_table.pages[structure.print_table.displaypage].start, 
+        structure.print_table.pages[structure.print_table.displaypage].height, 
+        structure.properties.owner,
+        structure.properties.installer,
+        structure.properties.info,
+        300, 
+        structure.print_table.displaypage+1, //starts counting at zero so we need to add 1
+        structure.print_table.pages.length,
+        document.getElementById("progress_pdf")
+    );
 }
 
 function renderAddress() {
@@ -439,6 +461,7 @@ function printsvg() {
     strleft += '<br><br>';
     
     strleft += '<table border="0"><tr><td style="vertical-align:top"><button onclick="dosvgdownload()">Download SVG</button></td><td>&nbsp;</td><td style="vertical-align:top"><input id="dosvgname" size="20" value="eendraadschema_print.svg"></td><td>&nbsp;&nbsp;</td><td>Sla tekening hieronder op als SVG en converteer met een ander programma naar PDF (bvb Inkscape).</td></tr></table><br>';
+    strleft += '<table border="0"><tr><td style="vertical-align:top"><button onclick="dopdfdownload()">Maak PDF (Experimenteel, momenteel enkel A4)</button></td><td>&nbsp;</td><td style="vertical-align:top"><input id="dopdfname" size="20" value="eendraadschema_print.pdf"></td><td>&nbsp;&nbsp;</td><td id="progress_pdf">Sla tekening dadelijk op als PDF.</td></tr></table><br>';
     strleft += displayButtonPrintToPdf();
 
     strleft += '<div id="printarea"></div>';
