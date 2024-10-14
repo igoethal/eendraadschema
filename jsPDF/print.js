@@ -1,17 +1,32 @@
-function printPDF(svg, sizex, sizey, owner="", installer="", info="", DPI=300, page=1, maxpage=1, statuscallback) { // Defaults to A4 and 300 DPI but 600 DPI is better
+function printPDF(svg, format="A4", sizex, sizey, owner="", installer="", control="", info="", DPI=300, page=1, maxpage=1, filename="eendraadschema_print.pdf", statuscallback) { // Defaults to A4 and 300 DPI but 600 DPI is better
 
-    paperdetails = { // All sizes in millimeters
-        paperwidth: 297,
-        paperheight: 210,
+    if (format=="A3") {
+        paperdetails = { // All sizes in millimeters
+            paperwidth: 420,
+            paperheight: 297,
 
-        paper_margin: 10,
-        svg_padding: 5, //minimal size to keep below svg before the text boxes start
+            paper_margin: 10,
+            svg_padding: 5, //minimal size to keep below svg before the text boxes start
 
-        drawnby_box_height: 5,
+            drawnby_box_height: 5,
 
-        owner_box_height: 30,
-        owner_box_width: 80
-    };
+            owner_box_height: 30,
+            owner_box_width: 80
+        };
+    } else {
+        paperdetails = { // All sizes in millimeters
+            paperwidth: 297,
+            paperheight: 210,
+
+            paper_margin: 10,
+            svg_padding: 5, //minimal size to keep below svg before the text boxes start
+
+            drawnby_box_height: 5,
+
+            owner_box_height: 30,
+            owner_box_width: 80
+        };
+    }    
 
     // ___ FUNCTION svgToPng ___
     //
@@ -65,7 +80,7 @@ function printPDF(svg, sizex, sizey, owner="", installer="", info="", DPI=300, p
 
         let printlines = [];
 
-        lines = html.split(/<br>|<div><\/div>/);
+        lines = html.split(/<br>|<\/div><div>/);
         lines = lines.map(htmlToUnicode);
         for (let line of lines) {
             let wrappedlines = doc.splitTextToSize(line, paperdetails.owner_box_width - 2 * 2 - 3);
@@ -81,7 +96,13 @@ function printPDF(svg, sizex, sizey, owner="", installer="", info="", DPI=300, p
 
     function generatePDF(svg, sizex, sizey) {
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('landscape', 'mm', 'a4', true);
+        var doc;
+
+        if (format=="A3") {
+            doc = new jsPDF('landscape', 'mm', 'a3', true);
+        } else {
+            doc = new jsPDF('landscape', 'mm', 'a4', true);
+        }
 
         svgToPng(svg, sizex, sizey, function(png,scale) {
 
@@ -89,48 +110,44 @@ function printPDF(svg, sizex, sizey, owner="", installer="", info="", DPI=300, p
             let canvasy = (paperdetails.paperheight - 2*paperdetails.paper_margin - paperdetails.owner_box_height - paperdetails.drawnby_box_height - paperdetails.svg_padding);
 
             if (sizex/sizey > canvasx/canvasy) { //width is leading
-                doc.addImage(png, 'PNG', paperdetails.paper_margin, paperdetails.paper_margin, canvasx, sizey/sizex * canvasx, undefined, 'FAST');
+                let max_height_in_mm = paperdetails.paperheight - 2 * paperdetails.paper_margin - paperdetails.owner_box_height - paperdetails.drawnby_box_height - paperdetails.svg_padding;
+                //let max_height_in_pixels = max_height_in_mm/25.4*DPI;
+                let shiftdown = (max_height_in_mm - sizey/sizex*canvasx)/2;
+                doc.addImage(png, 'PNG', paperdetails.paper_margin, paperdetails.paper_margin+shiftdown, canvasx, sizey/sizex * canvasx, undefined, 'FAST');
             } else { //height is leading
                 doc.addImage(png, 'PNG', paperdetails.paper_margin, paperdetails.paper_margin, sizex/sizey * canvasy, canvasy, undefined, 'FAST');
             }
 
             // Set the properties to remove margins
             doc.setProperties({
-                title: 'Eendraadschema',
+                title: 'Eendraadschema.pdf',
                 subject: 'Eendraadschema',
                 author: 'eendraadschema.goethals-jacobs.be',
                 keywords: 'eendraadschema, online',
                 creator: 'eendraadschema.goethals-jacobs.be'
             });
 
-            let pageHeight = 210;
-            let pageWidth = 297;
-            let margin = 10;
+            let startx = paperdetails.paperwidth - (297 - paperdetails.paper_margin); //In "A4" we fill everything, in A3 we squeeze to the right
 
-            let largeRecWidth = 80;
-            let largeRecHeight = 30;
-
-            let drawnByHeight = 5;
-
-            doc.rect(paperdetails.paper_margin,
+            doc.rect(startx, // Drawn by box below
                      paperdetails.paperheight - paperdetails.paper_margin - paperdetails.drawnby_box_height, 
                      3 * paperdetails.owner_box_width, 
                      paperdetails.drawnby_box_height);
-            doc.rect(paperdetails.paper_margin, 
+            doc.rect(startx, // first large box from left to right
                      paperdetails.paperheight - paperdetails.paper_margin - paperdetails.drawnby_box_height - paperdetails.owner_box_height, 
                      paperdetails.owner_box_width, 
                      paperdetails.owner_box_height);
-            doc.rect(paperdetails.paper_margin + paperdetails.owner_box_width, 
+            doc.rect(startx + paperdetails.owner_box_width, // second large box from left to right
                      paperdetails.paperheight - paperdetails.paper_margin - paperdetails.drawnby_box_height - paperdetails.owner_box_height, 
                      paperdetails.owner_box_width, 
                      paperdetails.owner_box_height);
-            doc.rect(paperdetails.paper_margin + 2 * paperdetails.owner_box_width, 
+            doc.rect(startx + 2 * paperdetails.owner_box_width, // third large box from left to right
                      paperdetails.paperheight - paperdetails.paper_margin - paperdetails.drawnby_box_height - paperdetails.owner_box_height, 
                      paperdetails.owner_box_width,
                      paperdetails.owner_box_height);
-            doc.rect(paperdetails.paper_margin + 3 * paperdetails.owner_box_width, 
+            doc.rect(startx + 3 * paperdetails.owner_box_width, // Last box at the right
                      paperdetails.paperheight - paperdetails.paper_margin - paperdetails.drawnby_box_height - paperdetails.owner_box_height, 
-                     paperdetails.paperwidth - 2 * paperdetails.paper_margin - 3 * paperdetails.owner_box_width, 
+                     paperdetails.paperwidth - paperdetails.paper_margin - startx - 3 * paperdetails.owner_box_width, 
                      paperdetails.drawnby_box_height + paperdetails.owner_box_height);
 
             const fontSize = 8; // Set your font size
@@ -140,52 +157,63 @@ function printPDF(svg, sizex, sizey, owner="", installer="", info="", DPI=300, p
             doc.setFontSize(fontSize); 
         
             doc.text("Getekend met https://www.eendraadschema.goethals-jacobs.be", 
-                     paperdetails.paper_margin + 2, // Leave 2mm at the left of the drawn by text
+                     startx + 2, // Leave 2mm at the left of the drawn by text
                      paperdetails.paperheight - paperdetails.paper_margin - (paperdetails.drawnby_box_height-textHeight)/2 - textHeight/6);
 
             doc.text('pagina. ' + page + '/' + maxpage, 
-                     paperdetails.paper_margin + 3 * paperdetails.owner_box_width + 2, //Leave 2mm at the left 
+                     startx + 3 * paperdetails.owner_box_width + 2, //Leave 2mm at the left 
                      paperdetails.paperheight - paperdetails.paper_margin - paperdetails.drawnby_box_height - paperdetails.owner_box_height - textHeight/6 + textHeight + 1.5 ); //Leave 1.55mm at the top
 
             doc.text("Eendraadschema", 
-                     paperdetails.paper_margin + 3 * paperdetails.owner_box_width + 2, 
+                     startx + 3 * paperdetails.owner_box_width + 2, 
                      paperdetails.paperheight - paperdetails.paper_margin - paperdetails.drawnby_box_height - paperdetails.owner_box_height - textHeight/6 + textHeight * (1 + 1.2) + 1.5);
 
             doc.text(htmlToPDFlines(doc,"Erkend Organisme"), 
-                    paperdetails.paper_margin + 2, 
+                    startx + 2, 
                     paperdetails.paperheight - paperdetails.paper_margin - paperdetails.drawnby_box_height - paperdetails.owner_box_height - textHeight/6 + textHeight + 1.5);
 
             doc.text(htmlToPDFlines(doc,"Plaats van de elektrische installatie"), 
-                     paperdetails.paper_margin + paperdetails.owner_box_width + 2, 
+                     startx + paperdetails.owner_box_width + 2, 
                      paperdetails.paperheight - paperdetails.paper_margin - paperdetails.drawnby_box_height - paperdetails.owner_box_height - textHeight/6 + textHeight + 1.5);
 
             doc.text(htmlToPDFlines(doc,"Installateur"), 
-                    paperdetails.paper_margin + (2*paperdetails.owner_box_width) + 2, 
+                    startx + (2*paperdetails.owner_box_width) + 2, 
                     paperdetails.paperheight - paperdetails.paper_margin - paperdetails.drawnby_box_height - paperdetails.owner_box_height - textHeight/6 + textHeight + 1.5);
 
             doc.setFont("helvetica", "normal");
 
+            doc.text(htmlToPDFlines(doc,control).slice(0,8), 
+                    startx + 2 + 3, 
+                    paperdetails.paperheight - paperdetails.paper_margin - paperdetails.drawnby_box_height - paperdetails.owner_box_height - textHeight/6 + textHeight * (1+1.2) + 1.5);
+
             doc.text(htmlToPDFlines(doc,owner).slice(0,8), 
-                     paperdetails.paper_margin + paperdetails.owner_box_width + 2 + 3, 
+                     startx + paperdetails.owner_box_width + 2 + 3, 
                      paperdetails.paperheight - paperdetails.paper_margin - paperdetails.drawnby_box_height - paperdetails.owner_box_height - textHeight/6 + textHeight * (1+1.2) + 1.5);
 
             doc.text(htmlToPDFlines(doc,installer).slice(0,8), 
-                     paperdetails.paper_margin + (2*paperdetails.owner_box_width) + 2 + 3, 
+                     startx + (2*paperdetails.owner_box_width) + 2 + 3, 
                      paperdetails.paperheight - paperdetails.paper_margin - paperdetails.drawnby_box_height - paperdetails.owner_box_height - textHeight/6 + textHeight * (1+1.2) + 1.5);
 
             let infoshorter = info.replace('https://www.eendraadschema.goethals-jacobs.be','eendraadschema');
             doc.text(htmlToPDFlines(doc,infoshorter).slice(0,8), 
-                     paperdetails.paper_margin + (3*paperdetails.owner_box_width) + 2 + 3, 
+                     startx + (3*paperdetails.owner_box_width) + 2 + 3, 
                      paperdetails.paperheight - paperdetails.paper_margin - paperdetails.drawnby_box_height - paperdetails.owner_box_height - textHeight/6 + textHeight * (1+3*1.2) + 1.5);
 
+            doc.save(filename);
+            statuscallback.innerHTML = 'PDF is klaar. Kijk in uw Downloads folder indien deze niet spontaan wordt geopend.';
 
             //--- functions that could be useful some day ---
             //const textWidth = doc.getTextWidth("Page 1");
             //doc.addPage();
-            //window.open(doc.output('bloburl'), '_blank');
+            
+            // Open PDF in a new tab with the correct filename
+            //const pdfBlob = doc.output('blob');
+            //doc.output('dataurlnewwindow');
+            /*const pdfBlob = doc.output('pdfjsnewwindow');
+            const url = URL.createObjectURL(pdfBlob);
+            window.open(url, '_blank');*/
 
-            doc.save("landscape_a4.pdf");
-            statuscallback.innerHTML = 'PDF is klaar. Kijk in uw Downloads folder indien deze niet spontaan wordt geopend.';
+            //window.open(doc.output('bloburl'), '_blank');
         });
     }
 

@@ -226,8 +226,10 @@ function json_to_structure(text: string, version = 0, redraw = true) {
     if (typeof mystructure.properties != 'undefined') {
         if (typeof mystructure.properties.filename != "undefined") structure.properties.filename = mystructure.properties.filename;
         if (typeof mystructure.properties.owner != "undefined") structure.properties.owner = mystructure.properties.owner;
+        if (typeof mystructure.properties.control != "undefined") structure.properties.control = mystructure.properties.control;
         if (typeof mystructure.properties.installer != "undefined") structure.properties.installer = mystructure.properties.installer;
         if (typeof mystructure.properties.info != "undefined") structure.properties.info = mystructure.properties.info;
+        if (typeof mystructure.properties.info != "undefined") structure.properties.dpi = mystructure.properties.dpi;
     }    
 
     // Kopieren van de paginatie voor printen

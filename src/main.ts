@@ -310,18 +310,28 @@ function dosvgdownload() {
     download_by_blob(prtContent, filename, 'data:image/svg+xml;charset=utf-8'); //Was text/plain
 }
 
+function updateDPI() {
+    structure.properties.dpi = parseInt((document.getElementById("dpiSelect") as HTMLInputElement).value,0);
+}
+
 function dopdfdownload() {
+    updateDPI();
+
     printPDF(
         document.getElementById("printsvgarea").innerHTML,
+        structure.print_table.papersize, //Page format can be "A4" and "A3", nothing else
         structure.print_table.pages[structure.print_table.displaypage].stop - structure.print_table.pages[structure.print_table.displaypage].start, 
-        structure.print_table.pages[structure.print_table.displaypage].height, 
+        /*structure.print_table.pages[structure.print_table.displaypage].height, */
+        structure.print_table.stopy - structure.print_table.starty,
         structure.properties.owner,
         structure.properties.installer,
+        structure.properties.control,
         structure.properties.info,
-        300, 
+        structure.properties.dpi, 
         structure.print_table.displaypage+1, //starts counting at zero so we need to add 1
         structure.print_table.pages.length,
-        document.getElementById("progress_pdf")
+        (document.getElementById("dopdfname") as HTMLInputElement).value, //filename
+        document.getElementById("progress_pdf") //HTML element where callback status can be given
     );
 }
 
@@ -334,6 +344,7 @@ function renderAddress() {
               '  <tr>' +
               '    <td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_owner" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + structure.properties.owner + '</td>' +
               '    <td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_installer" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + structure.properties.installer + '</td>' +
+              '    <td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_control" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + structure.properties.control + '</td>' +
               '    <td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_info" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + structure.properties.info + '</td>' +
               '  </tr>' +
               '</table></div></div>';
@@ -344,6 +355,8 @@ function renderAddress() {
 function renderAddressStacked() {
     var outHTML: string = "";
 
+    if (!structure.properties.control) structure.properties.control = "<br>";
+
     outHTML = 'Plaats van de elektrische installatie' +
               '<table width="90%" cols="1" rows="1" style="border-collapse: collapse;border-style: solid; border-width:thin;" cellpadding="5">' +
               '<tr><td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_owner" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + structure.properties.owner + '</td></tr>' +
@@ -351,6 +364,10 @@ function renderAddressStacked() {
               'Installateur' +
               '<table width="90%" cols="1" rows="1" style="border-collapse: collapse;border-style: solid; border-width:thin;" cellpadding="5">' +
               '<tr><td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_installer" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + structure.properties.installer + '</td></tr>' +
+              '</table><br>' +
+              'Erkend organisme (keuring)' +
+              '<table width="90%" cols="1" rows="1" style="border-collapse: collapse;border-style: solid; border-width:thin;" cellpadding="5">' +
+              '<tr><td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_control" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + structure.properties.control + '</td></tr>' +
               '</table><br>' +
               'Info' +
               '<table width="90%" cols="1" rows="1" style="border-collapse: collapse;border-style: solid; border-width:thin;" cellpadding="5">' +
@@ -395,6 +412,7 @@ function changePrintParams() {
 function changeAddressParams() {
     structure.properties.owner = (document.getElementById("conf_owner") as HTMLElement).innerHTML;
     structure.properties.installer = (document.getElementById("conf_installer") as HTMLElement).innerHTML;
+    structure.properties.control = (document.getElementById("conf_control") as HTMLElement).innerHTML;
     structure.properties.info = (document.getElementById("conf_info") as HTMLElement).innerHTML;
 }
 
@@ -461,7 +479,13 @@ function printsvg() {
     strleft += '<br><br>';
     
     strleft += '<table border="0"><tr><td style="vertical-align:top"><button onclick="dosvgdownload()">Download SVG</button></td><td>&nbsp;</td><td style="vertical-align:top"><input id="dosvgname" size="20" value="eendraadschema_print.svg"></td><td>&nbsp;&nbsp;</td><td>Sla tekening hieronder op als SVG en converteer met een ander programma naar PDF (bvb Inkscape).</td></tr></table><br>';
-    strleft += '<table border="0"><tr><td style="vertical-align:top"><button onclick="dopdfdownload()">Maak PDF (Experimenteel, momenteel enkel A4)</button></td><td>&nbsp;</td><td style="vertical-align:top"><input id="dopdfname" size="20" value="eendraadschema_print.pdf"></td><td>&nbsp;&nbsp;</td><td id="progress_pdf">Sla tekening dadelijk op als PDF.</td></tr></table><br>';
+    strleft += '<table border="0"><tr><td style="vertical-align:top"><button onclick="dopdfdownload()">Maak PDF</button></td>';
+    if (structure.properties.dpi==600) {
+            strleft += '<td style="vertical-align:top"><select id="dpiSelect" onchange="updateDPI()"><option value="300">300dpi (standaard)</option><option value="600" selected>600dpi (beter maar trager)</option></select></td>'
+    } else {
+            strleft += '<td style="vertical-align:top"><select id="dpiSelect" onchange="updateDPI()"><option value="300" selected>300dpi (standaard)</option><option value="600">600dpi (beter maar trager)</option></select></td>'
+    }
+    strleft +=  '<td>&nbsp;</td><td style="vertical-align:top"><input id="dopdfname" size="20" value="eendraadschema_print.pdf"></td><td>&nbsp;&nbsp;</td><td id="progress_pdf">Sla tekening dadelijk op als PDF.</td></tr></table><br>';
     strleft += displayButtonPrintToPdf();
 
     strleft += '<div id="printarea"></div>';

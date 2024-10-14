@@ -496,10 +496,14 @@ function json_to_structure(text, version, redraw) {
             structure.properties.filename = mystructure.properties.filename;
         if (typeof mystructure.properties.owner != "undefined")
             structure.properties.owner = mystructure.properties.owner;
+        if (typeof mystructure.properties.control != "undefined")
+            structure.properties.control = mystructure.properties.control;
         if (typeof mystructure.properties.installer != "undefined")
             structure.properties.installer = mystructure.properties.installer;
         if (typeof mystructure.properties.info != "undefined")
             structure.properties.info = mystructure.properties.info;
+        if (typeof mystructure.properties.info != "undefined")
+            structure.properties.dpi = mystructure.properties.dpi;
     }
     // Kopieren van de paginatie voor printen
     if (typeof mystructure.print_table != "undefined") {
@@ -4976,6 +4980,8 @@ var Properties = /** @class */ (function () {
         this.owner = "Voornaam Achternaam<br>Straat 0<br>0000 gemeente<br>Tel: +32 00 00 00 00<br>GSM: +32 000 00 00 00<br>e-mail: voornaam.achternaam@domein.be";
         ;
         this.installer = "idem";
+        this.control = "";
+        this.dpi = 300;
         this.info = "1 x 230V + N ~50 Hz";
     }
     ;
@@ -6180,9 +6186,18 @@ function dosvgdownload() {
     var filename = document.getElementById("dosvgname").value;
     download_by_blob(prtContent, filename, 'data:image/svg+xml;charset=utf-8'); //Was text/plain
 }
+function updateDPI() {
+    structure.properties.dpi = parseInt(document.getElementById("dpiSelect").value, 0);
+}
 function dopdfdownload() {
-    printPDF(document.getElementById("printsvgarea").innerHTML, structure.print_table.pages[structure.print_table.displaypage].stop - structure.print_table.pages[structure.print_table.displaypage].start, structure.print_table.pages[structure.print_table.displaypage].height, structure.properties.owner, structure.properties.installer, structure.properties.info, 300, structure.print_table.displaypage + 1, //starts counting at zero so we need to add 1
-    structure.print_table.pages.length, document.getElementById("progress_pdf"));
+    updateDPI();
+    printPDF(document.getElementById("printsvgarea").innerHTML, structure.print_table.papersize, //Page format can be "A4" and "A3", nothing else
+    structure.print_table.pages[structure.print_table.displaypage].stop - structure.print_table.pages[structure.print_table.displaypage].start, 
+    /*structure.print_table.pages[structure.print_table.displaypage].height, */
+    structure.print_table.stopy - structure.print_table.starty, structure.properties.owner, structure.properties.installer, structure.properties.control, structure.properties.info, structure.properties.dpi, structure.print_table.displaypage + 1, //starts counting at zero so we need to add 1
+    structure.print_table.pages.length, document.getElementById("dopdfname").value, //filename
+    document.getElementById("progress_pdf") //HTML element where callback status can be given
+    );
 }
 function renderAddress() {
     var outHTML = "";
@@ -6192,6 +6207,7 @@ function renderAddress() {
         '  <tr>' +
         '    <td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_owner" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + structure.properties.owner + '</td>' +
         '    <td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_installer" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + structure.properties.installer + '</td>' +
+        '    <td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_control" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + structure.properties.control + '</td>' +
         '    <td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_info" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + structure.properties.info + '</td>' +
         '  </tr>' +
         '</table></div></div>';
@@ -6199,6 +6215,8 @@ function renderAddress() {
 }
 function renderAddressStacked() {
     var outHTML = "";
+    if (!structure.properties.control)
+        structure.properties.control = "<br>";
     outHTML = 'Plaats van de elektrische installatie' +
         '<table width="90%" cols="1" rows="1" style="border-collapse: collapse;border-style: solid; border-width:thin;" cellpadding="5">' +
         '<tr><td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_owner" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + structure.properties.owner + '</td></tr>' +
@@ -6206,6 +6224,10 @@ function renderAddressStacked() {
         'Installateur' +
         '<table width="90%" cols="1" rows="1" style="border-collapse: collapse;border-style: solid; border-width:thin;" cellpadding="5">' +
         '<tr><td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_installer" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + structure.properties.installer + '</td></tr>' +
+        '</table><br>' +
+        'Erkend organisme (keuring)' +
+        '<table width="90%" cols="1" rows="1" style="border-collapse: collapse;border-style: solid; border-width:thin;" cellpadding="5">' +
+        '<tr><td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_control" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + structure.properties.control + '</td></tr>' +
         '</table><br>' +
         'Info' +
         '<table width="90%" cols="1" rows="1" style="border-collapse: collapse;border-style: solid; border-width:thin;" cellpadding="5">' +
@@ -6240,6 +6262,7 @@ function changePrintParams() {
 function changeAddressParams() {
     structure.properties.owner = document.getElementById("conf_owner").innerHTML;
     structure.properties.installer = document.getElementById("conf_installer").innerHTML;
+    structure.properties.control = document.getElementById("conf_control").innerHTML;
     structure.properties.info = document.getElementById("conf_info").innerHTML;
 }
 function printsvg() {
@@ -6294,7 +6317,14 @@ function printsvg() {
     }
     strleft += '<br><br>';
     strleft += '<table border="0"><tr><td style="vertical-align:top"><button onclick="dosvgdownload()">Download SVG</button></td><td>&nbsp;</td><td style="vertical-align:top"><input id="dosvgname" size="20" value="eendraadschema_print.svg"></td><td>&nbsp;&nbsp;</td><td>Sla tekening hieronder op als SVG en converteer met een ander programma naar PDF (bvb Inkscape).</td></tr></table><br>';
-    strleft += '<table border="0"><tr><td style="vertical-align:top"><button onclick="dopdfdownload()">Maak PDF (Experimenteel, momenteel enkel A4)</button></td><td>&nbsp;</td><td style="vertical-align:top"><input id="dopdfname" size="20" value="eendraadschema_print.pdf"></td><td>&nbsp;&nbsp;</td><td id="progress_pdf">Sla tekening dadelijk op als PDF.</td></tr></table><br>';
+    strleft += '<table border="0"><tr><td style="vertical-align:top"><button onclick="dopdfdownload()">Maak PDF</button></td>';
+    if (structure.properties.dpi == 600) {
+        strleft += '<td style="vertical-align:top"><select id="dpiSelect" onchange="updateDPI()"><option value="300">300dpi (standaard)</option><option value="600" selected>600dpi (beter maar trager)</option></select></td>';
+    }
+    else {
+        strleft += '<td style="vertical-align:top"><select id="dpiSelect" onchange="updateDPI()"><option value="300" selected>300dpi (standaard)</option><option value="600">600dpi (beter maar trager)</option></select></td>';
+    }
+    strleft += '<td>&nbsp;</td><td style="vertical-align:top"><input id="dopdfname" size="20" value="eendraadschema_print.pdf"></td><td>&nbsp;&nbsp;</td><td id="progress_pdf">Sla tekening dadelijk op als PDF.</td></tr></table><br>';
     strleft += displayButtonPrintToPdf();
     strleft += '<div id="printarea"></div>';
     document.getElementById("configsection").innerHTML = strleft;
