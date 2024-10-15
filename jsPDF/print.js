@@ -1,6 +1,6 @@
-function printPDF(svg, format="A4", sizex, sizey, owner="", installer="", control="", info="", DPI=300, page=1, maxpage=1, filename="eendraadschema_print.pdf", statuscallback) { // Defaults to A4 and 300 DPI but 600 DPI is better
+function printPDF(svg, print_table, properties, pages=[1], filename="eendraadschema_print.pdf", statuscallback) { // Defaults to A4 and 300 DPI but 600 DPI is better
 
-    if (format=="A3") {
+    if (print_table.papersize=="A3") {
         paperdetails = { // All sizes in millimeters
             paperwidth: 420,
             paperheight: 297,
@@ -38,8 +38,8 @@ function printPDF(svg, format="A4", sizex, sizey, owner="", installer="", contro
         let max_height_in_mm = paperdetails.paperheight - 2 * paperdetails.paper_margin - paperdetails.owner_box_height - paperdetails.drawnby_box_height - paperdetails.svg_padding;
         let max_width_in_mm = paperdetails.paperwidth - 2 * paperdetails.paper_margin;
 
-        let max_height_in_pixels = max_height_in_mm/25.4*DPI;
-        let max_width_in_pixels = max_width_in_mm/25.4*DPI;
+        let max_height_in_pixels = max_height_in_mm/25.4*properties.dpi;
+        let max_width_in_pixels = max_width_in_mm/25.4*properties.dpi;
 
         let scale = Math.min(max_height_in_pixels/sizey, max_width_in_pixels/sizex);
 
@@ -69,9 +69,6 @@ function printPDF(svg, format="A4", sizex, sizey, owner="", installer="", contro
             // Create a temporary element to hold the HTML
             const tempElement = document.createElement('div');
             tempElement.innerHTML = html;
-
-            // Replace <br> tags with \n
-            //tempElement.innerHTML = tempElement.innerHTML.replace(/<br>/g, "\n");
         
             // Use the textContent property to get the Unicode string
             const unicodeString = tempElement.textContent || tempElement.innerText || '';
@@ -90,19 +87,25 @@ function printPDF(svg, format="A4", sizex, sizey, owner="", installer="", contro
         return printlines;
     }
 
-    // ___ FUNCTION generatePDF ___
-    //
-    // Makes the actual PDF
-
-    function generatePDF(svg, sizex, sizey) {
+    function init() {
         const { jsPDF } = window.jspdf;
         var doc;
 
-        if (format=="A3") {
+        if (print_table.papersize=="A3") {
             doc = new jsPDF('landscape', 'mm', 'a3', true);
         } else {
             doc = new jsPDF('landscape', 'mm', 'a4', true);
         }
+
+        return(doc);
+    }
+
+    // ___ FUNCTION generatePDF ___
+    //
+    // Makes the actual PDF
+
+    function addPage(doc, svg, sizex, sizey, callback, iter=0) {
+        const { jsPDF } = window.jspdf;
 
         svgToPng(svg, sizex, sizey, function(png,scale) {
 
@@ -111,7 +114,7 @@ function printPDF(svg, format="A4", sizex, sizey, owner="", installer="", contro
 
             if (sizex/sizey > canvasx/canvasy) { //width is leading
                 let max_height_in_mm = paperdetails.paperheight - 2 * paperdetails.paper_margin - paperdetails.owner_box_height - paperdetails.drawnby_box_height - paperdetails.svg_padding;
-                //let max_height_in_pixels = max_height_in_mm/25.4*DPI;
+                //let max_height_in_pixels = max_height_in_mm/25.4*properties.dpi;
                 let shiftdown = (max_height_in_mm - sizey/sizex*canvasx)/2;
                 doc.addImage(png, 'PNG', paperdetails.paper_margin, paperdetails.paper_margin+shiftdown, canvasx, sizey/sizex * canvasx, undefined, 'FAST');
             } else { //height is leading
@@ -160,7 +163,7 @@ function printPDF(svg, format="A4", sizex, sizey, owner="", installer="", contro
                      startx + 2, // Leave 2mm at the left of the drawn by text
                      paperdetails.paperheight - paperdetails.paper_margin - (paperdetails.drawnby_box_height-textHeight)/2 - textHeight/6);
 
-            doc.text('pagina. ' + page + '/' + maxpage, 
+            doc.text('pagina. ' + pages[iter] + '/' + print_table.pages.length, 
                      startx + 3 * paperdetails.owner_box_width + 2, //Leave 2mm at the left 
                      paperdetails.paperheight - paperdetails.paper_margin - paperdetails.drawnby_box_height - paperdetails.owner_box_height - textHeight/6 + textHeight + 1.5 ); //Leave 1.55mm at the top
 
@@ -182,42 +185,65 @@ function printPDF(svg, format="A4", sizex, sizey, owner="", installer="", contro
 
             doc.setFont("helvetica", "normal");
 
-            doc.text(htmlToPDFlines(doc,control).slice(0,8), 
+            doc.text(htmlToPDFlines(doc,properties.control).slice(0,8), 
                     startx + 2 + 3, 
                     paperdetails.paperheight - paperdetails.paper_margin - paperdetails.drawnby_box_height - paperdetails.owner_box_height - textHeight/6 + textHeight * (1+1.2) + 1.5);
 
-            doc.text(htmlToPDFlines(doc,owner).slice(0,8), 
+            doc.text(htmlToPDFlines(doc,properties.owner).slice(0,8), 
                      startx + paperdetails.owner_box_width + 2 + 3, 
                      paperdetails.paperheight - paperdetails.paper_margin - paperdetails.drawnby_box_height - paperdetails.owner_box_height - textHeight/6 + textHeight * (1+1.2) + 1.5);
 
-            doc.text(htmlToPDFlines(doc,installer).slice(0,8), 
+            doc.text(htmlToPDFlines(doc,properties.installer).slice(0,8), 
                      startx + (2*paperdetails.owner_box_width) + 2 + 3, 
                      paperdetails.paperheight - paperdetails.paper_margin - paperdetails.drawnby_box_height - paperdetails.owner_box_height - textHeight/6 + textHeight * (1+1.2) + 1.5);
 
-            let infoshorter = info.replace('https://www.eendraadschema.goethals-jacobs.be','eendraadschema');
+            let infoshorter = properties.info.replace('https://www.eendraadschema.goethals-jacobs.be','eendraadschema');
             doc.text(htmlToPDFlines(doc,infoshorter).slice(0,8), 
                      startx + (3*paperdetails.owner_box_width) + 2 + 3, 
                      paperdetails.paperheight - paperdetails.paper_margin - paperdetails.drawnby_box_height - paperdetails.owner_box_height - textHeight/6 + textHeight * (1+3*1.2) + 1.5);
 
-            doc.save(filename);
-            statuscallback.innerHTML = 'PDF is klaar. Kijk in uw Downloads folder indien deze niet spontaan wordt geopend.';
-
-            //--- functions that could be useful some day ---
-            //const textWidth = doc.getTextWidth("Page 1");
-            //doc.addPage();
-            
-            // Open PDF in a new tab with the correct filename
-            //const pdfBlob = doc.output('blob');
-            //doc.output('dataurlnewwindow');
-            /*const pdfBlob = doc.output('pdfjsnewwindow');
-            const url = URL.createObjectURL(pdfBlob);
-            window.open(url, '_blank');*/
-
-            //window.open(doc.output('bloburl'), '_blank');
+            callback(doc, iter+1);
         });
     }
 
+    function cropSVG(svg, page) {
+
+        let startx = print_table.pages[page].start;
+        let width = print_table.pages[page].stop;
+        let starty = print_table.starty;
+        let height = print_table.stopy - starty;
+    
+        let viewbox = '' + startx + ' ' + starty + ' ' + width + ' ' + height;
+    
+        let outsvg = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" transform="scale(1,1)" style="border:1px solid white" ' +
+                     'height="' + (height) + '" width="' + (width) + '" viewBox="' + viewbox + '">' +
+                     svg + '</svg>';
+    
+        return(outsvg);
+    }
+
+    function nextpage(doc, iter=0) {
+        
+        if (iter < pages.length ) {
+            statuscallback.innerHTML = 'Pagina ' + pages[iter] + ' wordt gegenereerd. Even geduld..';
+            if (iter > 0) doc.addPage();
+            let sizex = print_table.pages[pages[iter]-1].stop - print_table.pages[pages[iter]-1].start;
+            let sizey = print_table.stopy - print_table.starty;
+            addPage(doc, cropSVG(svg, pages[iter]-1), sizex, sizey, nextpage, iter); //add one more page and callback here
+        } else {
+            save(doc); //we are done
+        }
+    }
+
+    function save(doc) {
+        doc.save(filename);
+        statuscallback.innerHTML = 'PDF is klaar. Kijk in uw Downloads folder indien deze niet spontaan wordt geopend.';
+    }
+
     statuscallback.innerHTML = 'PDF wordt gegenereerd. Even geduld..';
-    generatePDF(svg, sizex, sizey);
+
+    doc = init();
+    nextpage(doc, 0)
+    
 
 }

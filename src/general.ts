@@ -1,5 +1,5 @@
 declare var pako: any;
-declare function printPDF(svg, format, sizex, sizey, owner, installer, control, info, DPI, page, maxpage, filename, statuscallback): any;
+declare function printPDF(svgs, print_table, properties, pages, filename, statuscallback): any;
 
 function deepClone (obj) {
   var _out = new obj.constructor;

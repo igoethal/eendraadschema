@@ -317,19 +317,16 @@ function updateDPI() {
 function dopdfdownload() {
     updateDPI();
 
+    //let page = structure.print_table.displaypage+1; //starts counting at zero so we need to add 1
+
+    let svg = flattenSVGfromString(structure.toSVG(0,"horizontal").data);
+    const pages = Array.from({ length: structure.print_table.pages.length }, (_, i) => i+1);  
+
     printPDF(
-        document.getElementById("printsvgarea").innerHTML,
-        structure.print_table.papersize, //Page format can be "A4" and "A3", nothing else
-        structure.print_table.pages[structure.print_table.displaypage].stop - structure.print_table.pages[structure.print_table.displaypage].start, 
-        /*structure.print_table.pages[structure.print_table.displaypage].height, */
-        structure.print_table.stopy - structure.print_table.starty,
-        structure.properties.owner,
-        structure.properties.installer,
-        structure.properties.control,
-        structure.properties.info,
-        structure.properties.dpi, 
-        structure.print_table.displaypage+1, //starts counting at zero so we need to add 1
-        structure.print_table.pages.length,
+        svg,  /*document.getElementById("printsvgarea").innerHTML*/
+        structure.print_table,
+        structure.properties,
+        pages, 
         (document.getElementById("dopdfname") as HTMLInputElement).value, //filename
         document.getElementById("progress_pdf") //HTML element where callback status can be given
     );
@@ -377,14 +374,13 @@ function renderAddressStacked() {
     return outHTML;
 }
 
-function getPrintSVGWithoutAddress() {
+function getPrintSVGWithoutAddress(page:number = structure.print_table.displaypage) {
     var outSVG = new SVGelement();
     outSVG = structure.toSVG(0,"horizontal");
 
     var scale = 1;
     //var height = outSVG.yup + outSVG.ydown;
 
-    var page = structure.print_table.displaypage;
     var startx = structure.print_table.pages[page].start;
     var width = structure.print_table.pages[page].stop - startx;
     var starty = structure.print_table.getstarty();
@@ -430,6 +426,23 @@ function printsvg() {
     structure.print_table.setHeight(height);
     structure.print_table.setMaxWidth(width);
 
+    strleft += '<br><button onclick="dopdfdownload()">Genereer PDF</button>';
+
+    switch (structure.print_table.getPaperSize()) {
+        case "A3": strleft += '&nbsp;<select onchange="HLChangePaperSize()" id="id_papersize"><option value="A4">A4</option><option value="A3" selected="selected">A3</option></select>'; break;
+        case "A4": default: strleft += '&nbsp;<select onchange="HLChangePaperSize()" id="id_papersize"><option value="A4" selected="Selected">A4</option><option value="A3">A3</option></select>';
+    }
+
+    if (structure.properties.dpi==600) {
+            strleft += '&nbsp;<select id="dpiSelect" onchange="updateDPI()"><option value="300">300dpi (standaard)</option><option value="600" selected>600dpi (beter maar trager)</option></select>'
+    } else {
+            strleft += '&nbsp;<select id="dpiSelect" onchange="updateDPI()"><option value="300" selected>300dpi (standaard)</option><option value="600">600dpi (beter maar trager)</option></select>'
+    }  
+
+    strleft +=  '&nbsp;<input id="dopdfname" size="20" value="eendraadschema_print.pdf">&nbsp;&nbsp;<span id="progress_pdf"></span><br>';
+
+
+
     strleft += '<br><table border="0"><tr><td style="vertical-align:top;">';
 
     strleft += structure.print_table.toHTML() + '<br>';
@@ -437,14 +450,14 @@ function printsvg() {
     strleft += '</td><td style="vertical-align:top;padding:5px">';
 
     strleft += 'Klik op de groene pijl om het schema over meerdere pagina\'s te printen en kies voor elke pagina de start- en stop-positie in het schema (in pixels). '
-            +  '<br><br>Onderaan kan je bekijken welk deel van het schema op welke pagina belandt en de pagina exporteren en/of omzetten naar PDF. '
-            +  "Het exporteren of omzetten naar PDF dient voor elke pagina herhaald te worden.";
+            +  '<br><br>Onderaan kan je bekijken welk deel van het schema op welke pagina belandt. ';
 
     strleft += '</td></tr></table>'
 
+    
     strleft += '<hr>';
 
-    strleft += 'Pagina <select onchange="HLDisplayPage()" id="id_select_page">'
+    strleft += '<b>Printvoorbeeld: </b>Pagina <select onchange="HLDisplayPage()" id="id_select_page">'
     for (let i=0; i<structure.print_table.pages.length; i++) {
         if (i==structure.print_table.displaypage) {
             strleft += '<option value=' + (i+1) + ' selected>' + (i+1) + '</option>';
@@ -453,16 +466,7 @@ function printsvg() {
         }  
     }
     strleft += '</select>&nbsp;&nbsp;';
-    strleft += 'Layout ';
-    switch (structure.print_table.getPaperSize()) {
-        case "A3":
-            strleft += '<select onchange="HLChangePaperSize()" id="id_papersize"><option value="A4">A4</option><option value="A3" selected="selected">A3</option></select>';
-            break;
-        case "A4":
-            strleft += '<select onchange="HLChangePaperSize()" id="id_papersize"><option value="A4" selected="Selected">A4</option><option value="A3">A3</option></select>';
-        default:
-    }
-    strleft += '&nbsp;&nbsp;';
+    
 
     switch (structure.print_table.getModeVertical()) {
         case "kies":
@@ -478,14 +482,9 @@ function printsvg() {
     }
     strleft += '<br><br>';
     
-    strleft += '<table border="0"><tr><td style="vertical-align:top"><button onclick="dosvgdownload()">Download SVG</button></td><td>&nbsp;</td><td style="vertical-align:top"><input id="dosvgname" size="20" value="eendraadschema_print.svg"></td><td>&nbsp;&nbsp;</td><td>Sla tekening hieronder op als SVG en converteer met een ander programma naar PDF (bvb Inkscape).</td></tr></table><br>';
-    strleft += '<table border="0"><tr><td style="vertical-align:top"><button onclick="dopdfdownload()">Maak PDF</button></td>';
-    if (structure.properties.dpi==600) {
-            strleft += '<td style="vertical-align:top"><select id="dpiSelect" onchange="updateDPI()"><option value="300">300dpi (standaard)</option><option value="600" selected>600dpi (beter maar trager)</option></select></td>'
-    } else {
-            strleft += '<td style="vertical-align:top"><select id="dpiSelect" onchange="updateDPI()"><option value="300" selected>300dpi (standaard)</option><option value="600">600dpi (beter maar trager)</option></select></td>'
-    }
-    strleft +=  '<td>&nbsp;</td><td style="vertical-align:top"><input id="dopdfname" size="20" value="eendraadschema_print.pdf"></td><td>&nbsp;&nbsp;</td><td id="progress_pdf">Sla tekening dadelijk op als PDF.</td></tr></table><br>';
+    strleft += '<table border="0"><tr><td style="vertical-align:top"><button onclick="dosvgdownload()">Zichtbare pagina als SVG opslaan</button></td><td>&nbsp;</td><td style="vertical-align:top"><input id="dosvgname" size="20" value="eendraadschema_print.svg"></td><td>&nbsp;&nbsp;</td><td>Sla tekening hieronder op als SVG en converteer met een ander programma naar PDF (bvb Inkscape).</td></tr></table><br>';
+    
+    
     strleft += displayButtonPrintToPdf();
 
     strleft += '<div id="printarea"></div>';
