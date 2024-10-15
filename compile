@@ -5,7 +5,7 @@ cd src
 tsc # Uses the tsconfig.json file
 
 cat GPL3.js swap.js > eendraadschema.js
-cp eendraadschema.js ..
+mv eendraadschema.js ..
 rm swap.js
 
 cd ..
