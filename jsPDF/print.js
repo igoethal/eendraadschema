@@ -112,13 +112,15 @@ function printPDF(svg, print_table, properties, pages=[1], filename="eendraadsch
             let canvasx = (paperdetails.paperwidth - 2*paperdetails.paper_margin);
             let canvasy = (paperdetails.paperheight - 2*paperdetails.paper_margin - paperdetails.owner_box_height - paperdetails.drawnby_box_height - paperdetails.svg_padding);
 
-            if (sizex/sizey > canvasx/canvasy) { //width is leading
-                let max_height_in_mm = paperdetails.paperheight - 2 * paperdetails.paper_margin - paperdetails.owner_box_height - paperdetails.drawnby_box_height - paperdetails.svg_padding;
-                //let max_height_in_pixels = max_height_in_mm/25.4*properties.dpi;
-                let shiftdown = (max_height_in_mm - sizey/sizex*canvasx)/2;
-                doc.addImage(png, 'PNG', paperdetails.paper_margin, paperdetails.paper_margin+shiftdown, canvasx, sizey/sizex * canvasx, undefined, 'FAST');
-            } else { //height is leading
-                doc.addImage(png, 'PNG', paperdetails.paper_margin, paperdetails.paper_margin, sizex/sizey * canvasy, canvasy, undefined, 'FAST');
+            if ( sizex * sizey > 0) {
+                if (sizex/sizey > canvasx/canvasy) { //width is leading
+                    let max_height_in_mm = paperdetails.paperheight - 2 * paperdetails.paper_margin - paperdetails.owner_box_height - paperdetails.drawnby_box_height - paperdetails.svg_padding;
+                    //let max_height_in_pixels = max_height_in_mm/25.4*properties.dpi;
+                    let shiftdown = (max_height_in_mm - sizey/sizex*canvasx)/2;
+                    doc.addImage(png, 'PNG', paperdetails.paper_margin, paperdetails.paper_margin+shiftdown, canvasx, sizey/sizex * canvasx, undefined, 'FAST');
+                } else { //height is leading
+                    doc.addImage(png, 'PNG', paperdetails.paper_margin, paperdetails.paper_margin, sizex/sizey * canvasy, canvasy, undefined, 'FAST');
+                }
             }
 
             // Set the properties to remove margins
