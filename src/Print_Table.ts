@@ -10,6 +10,49 @@ class Page_Info {
   }
 }
 
+class MarkerList {
+  markers: any;
+
+  constructor() {
+    this.clear();
+  }
+
+  clear() {
+    this.markers = [];
+  }
+
+  addMarker(depth, xpos) {
+      // Check if the marker already exists
+      const exists = this.markers.some(marker => marker.depth === depth && marker.xpos === xpos);
+      if (!exists) {
+        this.markers.push({ depth, xpos });
+      }
+  }
+
+  sort() {
+      this.markers.sort((a, b) => a.xpos - b.xpos);
+  }
+
+  findMinDepth(min, max) {
+    // Filter markers within the range
+    const filteredMarkers = this.markers.filter(marker => marker.xpos > min && marker.xpos <= max);
+    if (filteredMarkers.length === 0) {
+        return {depth: null, xpos: max}; // No markers in the specified range so we just take the maximum
+    }
+    
+    // Find the marker with the lowest depth
+    let minDepthMarker = filteredMarkers[0];
+    for (let marker of filteredMarkers) {
+        if (marker.depth < minDepthMarker.depth ||
+            (marker.depth === minDepthMarker.depth && marker.xpos > minDepthMarker.xpos)) {
+            minDepthMarker = marker;
+        }
+    }
+    return minDepthMarker;
+  }
+
+}
+
 class Print_Table {
   pages:Array<Page_Info>
 
@@ -21,15 +64,21 @@ class Print_Table {
   stopy: number;
   papersize: string;
 
+  pagemarkers: MarkerList;
+  enableAutopage: boolean = true;
+
   constructor() {
     this.height = 0;
     this.maxwidth = 0;
     this.displaypage = 0;
+    this.enableAutopage = true;
 
     this.pages = new Array<Page_Info>();
     var page_info: Page_Info;
     page_info = new Page_Info();
     this.pages.push(page_info); 
+
+    this.pagemarkers = new MarkerList;
   }
 
   setPaperSize(papersize : string) {
@@ -137,6 +186,47 @@ class Print_Table {
     this.forceCorrectFigures();
   }
 
+  autopage() {
+
+    /*  Autopage uses some ratio's determined by the useful SVG drawing size on the PDF.  This depends on the margins configured in print.js
+        At present all of this is still hard-coded.  Should become a function of print.js
+       
+        A4
+
+        Height: 210-20-30-5-5  --> 150
+        Width: 297-20 --> 277
+        Ratio: 1.8467
+    
+        A3
+    
+        Height: 297-20-30-5-5 --> 237
+        Width: 420-20 --> 400
+        Ratio: 1.6878  
+    */
+
+    let height = this.getstopy() - this.getstarty();
+    let maxsvgwidth = height * (this.getPaperSize()=="A3" ? 1.6878 : 1.8467 );
+    let minsvgwidth = 3/4*maxsvgwidth;
+
+    let page = 0;
+    let pos = 0;
+    while ( (this.maxwidth - pos) > maxsvgwidth ) { // The undivided part still does not fit on a page
+      pos = this.pagemarkers.findMinDepth(pos+minsvgwidth,pos+maxsvgwidth).xpos;
+      while (this.pages.length < page+2) this.addPage();
+      this.setStop(page,pos);
+      page++;
+    }
+
+    // 
+    this.setStop(page,this.maxwidth);
+
+    // Delete unneeded pages at the end
+    for (let i=this.pages.length-1;i>page;i--) {
+      this.deletePage(i);
+    }
+
+  }
+
   addPage() {
     var page_info: Page_Info;
     page_info = new Page_Info();
@@ -158,11 +248,13 @@ class Print_Table {
   }
 
   toHTML() {
+    if (structure.print_table.enableAutopage) this.autopage();
+
     let outstr: String = "";
     let pagenum: number;
 
     outstr += '<table border="1" cellpadding="3">';
-    outstr += '<tr><th align="center">Pagina</th><th align="center">Start</th><th align"center">Stop</th><th align"left">Acties</th></tr>';
+    outstr += '<tr><th align="center">Pagina</th><th align="center">Startx</th><th align"center">Stopx</th><th align"left">Acties</th></tr>';
 
     for (pagenum=0; pagenum<this.pages.length; pagenum++) {
       outstr += '<tr><td align=center>' + (pagenum+1) + '</td><td align=center>' + this.pages[pagenum].start + '</td><td align=center>';

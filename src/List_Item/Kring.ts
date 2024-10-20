@@ -156,7 +156,7 @@ class Kring extends Electro_Item {
         }
 
         // Determine how much everything needs to be shifted right
-        let shiftright = 35+20*cable_location_available;
+        let shiftright = /*35*/25+20*cable_location_available;
         if (this.props.naam.length>2) {
             shiftright = Math.max(shiftright,svgTextWidth(htmlspecialchars(this.props.naam),12,'font-weight="bold"')+20); 
         }

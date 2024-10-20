@@ -127,7 +127,7 @@ function HL_cancelFilename() {
 }
 
 function HL_changeFilename() {
-    var regex:RegExp = new RegExp('^[-_ A-Za-z0-9]{2,}\\.eds$');
+    var regex:RegExp = new RegExp('^.*\\.eds$');
     var filename = (document.getElementById("filename") as HTMLInputElement).value;
     if (regex.test(filename)) {
         structure.properties.setFilename((document.getElementById("filename") as HTMLInputElement).value);
@@ -139,7 +139,7 @@ function HL_changeFilename() {
 }
 
 function HL_enterSettings() {
-    document.getElementById("settings").innerHTML = '<input type="text" id="filename" onchange="HL_changeFilename()" value="' + structure.properties.filename + '" pattern="^[-_ A-Za-z0-9]{2,}\\\.eds$">&nbsp;<i>Gebruik enkel alphanumerieke karakters a-z A-Z 0-9, streepjes en spaties. <b>Eindig met ".eds"</b>. Druk daarna op enter.</i><br><button onclick="HL_cancelFilename()">Annuleer</button>&nbsp;<button onclick="HL_changeFilename()">Toepassen</button>';
+    document.getElementById("settings").innerHTML = '<input type="text" id="filename" onchange="HL_changeFilename()" value="' + structure.properties.filename + '" pattern="^.*\\.eds$">&nbsp;<i>Gebruik enkel alphanumerieke karakters a-z A-Z 0-9, streepjes en spaties. <b>Eindig met ".eds"</b>. Druk daarna op enter.</i><br><button onclick="HL_cancelFilename()">Annuleer</button>&nbsp;<button onclick="HL_changeFilename()">Toepassen</button>';
 }
 
 function HLRedrawTreeHTML() {
@@ -213,6 +213,17 @@ function HLChangeStopY() {
 
 function HLChangePaperSize() {
     structure.print_table.setPaperSize((document.getElementById("id_papersize") as HTMLInputElement).value);
+    printsvg();
+}
+
+function HLupdateAutopage() {
+    structure.print_table.enableAutopage = !((document.getElementById("autopage") as HTMLInputElement).checked);
+    printsvg();
+}
+
+function HLsuggestPages() {
+    structure.print_table.autopage();
+    printsvg();
 }
 
 function buildNewStructure(structure: Hierarchical_List) {
@@ -424,7 +435,7 @@ function printsvg() {
     var width = outSVG.xleft + outSVG.xright;
 
     structure.print_table.setHeight(height);
-    structure.print_table.setMaxWidth(width);
+    structure.print_table.setMaxWidth(width); // foresee some extra space for items like boiler that sometimes go our of their box
 
     strleft += '<br><button onclick="dopdfdownload()">Genereer PDF</button>';
 
@@ -441,20 +452,39 @@ function printsvg() {
 
     strleft +=  '&nbsp;<input id="dopdfname" size="20" value="eendraadschema_print.pdf">&nbsp;&nbsp;<span id="progress_pdf"></span><br>';
 
+    if (structure.print_table.enableAutopage) {
+        strleft += '<br><input type="checkbox" id="autopage" onchange="HLupdateAutopage()" name="autopage" /><label for="autopage">Handmatig over pagina\'s verdelen</label><br>';
+        structure.print_table.setModeVertical("alles");
+        structure.print_table.autopage();
+    } else {
+        strleft += '<br><input type="checkbox" id="autopage" onchange="HLupdateAutopage()" name="autopage" checked /><label for="autopage">Handmatig over pagina\'s verdelen</label>';
+        strleft += '<span style="margin-left: 2em"></span>';
 
+        switch (structure.print_table.getModeVertical()) {
+            case "kies":
+                strleft += 'Hoogte <select onchange="HLChangeModeVertical()" id="id_modeVerticalSelect"><option value="alles">Alles (standaard)</option><option value="kies" selected="Selected">Kies (expert)</option></select>';
+                strleft += '&nbsp;&nbsp;StartY ';
+                strleft += '<input size="4" id="id_starty" type="number" min="0" step="1" max="' + structure.print_table.getHeight() + '" onchange="HLChangeStartY()" value="' + structure.print_table.getstarty() + '">';
+                strleft += '&nbsp;&nbsp;StopY '
+                strleft += '<input size="4" id="id_stopy" type="number" min="0" step="1" max="' + structure.print_table.getHeight() + '" onchange="HLChangeStopY()" value="' + structure.print_table.getstopy() + '">';
+                break;
+            case "alles":  
+            default:
+                strleft += 'Hoogte <select onchange="HLChangeModeVertical()" id="id_modeVerticalSelect"><option value="alles">Alles (standaard)</option><option value="kies">Kies (expert)</option></select>';  
+        }
 
-    strleft += '<br><table border="0"><tr><td style="vertical-align:top;">';
+        strleft += '<span style="margin-left: 2em"></span><button onclick="HLsuggestPages()">Suggereer X-posities</button>';
 
-    strleft += structure.print_table.toHTML() + '<br>';
-
-    strleft += '</td><td style="vertical-align:top;padding:5px">';
-
-    strleft += 'Klik op de groene pijl om het schema over meerdere pagina\'s te printen en kies voor elke pagina de start- en stop-positie in het schema (in pixels). '
-            +  '<br><br>Onderaan kan je bekijken welk deel van het schema op welke pagina belandt. ';
-
-    strleft += '</td></tr></table>'
-
+        strleft += '<br><br><table border="0"><tr><td style="vertical-align:top;">';
+        strleft += structure.print_table.toHTML() + '<br>';
+        strleft += '</td><td style="vertical-align:top;padding:5px">';
     
+        strleft += 'Klik op de groene pijl om het schema over meerdere pagina\'s te printen en kies voor elke pagina de start- en stop-positie in het schema (in pixels). '
+                +  '<br><br>Onderaan kan je bekijken welk deel van het schema op welke pagina belandt. ';
+    
+        strleft += '</td></tr></table>'
+    }
+
     strleft += '<hr>';
 
     strleft += '<b>Printvoorbeeld: </b>Pagina <select onchange="HLDisplayPage()" id="id_select_page">'
@@ -465,21 +495,10 @@ function printsvg() {
             strleft += '<option value=' + (i+1) + '>' + (i+1) + '</option>';
         }  
     }
-    strleft += '</select>&nbsp;&nbsp;';
+    strleft += '</select>&nbsp;&nbsp;(Enkel tekening, kies "Genereer PDF" om ook de tekstuele gegevens te zien)';
     
 
-    switch (structure.print_table.getModeVertical()) {
-        case "kies":
-            strleft += 'Hoogte <select onchange="HLChangeModeVertical()" id="id_modeVerticalSelect"><option value="alles">Alles (standaard)</option><option value="kies" selected="Selected">Kies (expert)</option></select>';
-            strleft += '&nbsp;&nbsp;StartY ';
-            strleft += '<input size="4" id="id_starty" type="number" min="0" step="1" max="' + structure.print_table.getHeight() + '" onchange="HLChangeStartY()" value="' + structure.print_table.getstarty() + '">';
-            strleft += '&nbsp;&nbsp;StopY '
-            strleft += '<input size="4" id="id_stopy" type="number" min="0" step="1" max="' + structure.print_table.getHeight() + '" onchange="HLChangeStopY()" value="' + structure.print_table.getstopy() + '">';
-            break;
-        case "alles":  
-        default:
-            strleft += 'Hoogte <select onchange="HLChangeModeVertical()" id="id_modeVerticalSelect"><option value="alles">Alles (standaard)</option><option value="kies">Kies (expert)</option></select>';  
-    }
+    
     strleft += '<br><br>';
     
     strleft += '<table border="0"><tr><td style="vertical-align:top"><button onclick="dosvgdownload()">Zichtbare pagina als SVG opslaan</button></td><td>&nbsp;</td><td style="vertical-align:top"><input id="dosvgname" size="20" value="eendraadschema_print.svg"></td><td>&nbsp;&nbsp;</td><td>Sla tekening hieronder op als SVG en converteer met een ander programma naar PDF (bvb Inkscape).</td></tr></table><br>';

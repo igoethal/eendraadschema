@@ -44,6 +44,9 @@ function svgTextWidth(input:String, fontsize:Number = 10, options:String = '') {
 }
 
 function flattenSVG(SVGstruct,shiftx,shifty,node) {
+
+  if (node==0) structure.print_table.pagemarkers.clear();
+  
   var str:string = "";
 
   var X = new XMLSerializer()
@@ -131,6 +134,9 @@ function flattenSVG(SVGstruct,shiftx,shifty,node) {
     var regex = /xmlns="[^"]+"/g;
     str = str.replace(regex, '');
   }
+
+  structure.print_table.pagemarkers.addMarker(node,shiftx);
+
   return str;
 }
 

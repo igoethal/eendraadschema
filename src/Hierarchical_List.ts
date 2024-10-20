@@ -685,6 +685,7 @@ class Hierarchical_List {
                 outSVG.ydown = 0;
                 //outSVG.xleft = Math.max(max_xleft,35); // foresee at least 35 for text at the left
                 outSVG.xleft = max_xleft; 
+                if ((this.data[this.getOrdinalById(myParent)] as Electro_Item).getType() == "Kring") max_xright += 10; // Altijd 10 extra rechts voorzien voor uitstekende tekst/adressen
                 outSVG.xright = Math.max(max_xright,25); // foresee at least 25 at the right
 
                 // create the output data

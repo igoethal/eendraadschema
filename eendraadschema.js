@@ -107,6 +107,8 @@ function svgTextWidth(input, fontsize, options) {
     return (Math.ceil(width));
 }
 function flattenSVG(SVGstruct, shiftx, shifty, node) {
+    if (node == 0)
+        structure.print_table.pagemarkers.clear();
     var str = "";
     var X = new XMLSerializer();
     var parser = new DOMParser();
@@ -195,6 +197,7 @@ function flattenSVG(SVGstruct, shiftx, shifty, node) {
         var regex = /xmlns="[^"]+"/g;
         str = str.replace(regex, '');
     }
+    structure.print_table.pagemarkers.addMarker(node, shiftx);
     return str;
 }
 function flattenSVGfromString(xmlstr) {
@@ -238,6 +241,237 @@ var SVGelement = /** @class */ (function () {
         this.ydown = 0;
     }
     return SVGelement;
+}());
+var Page_Info = /** @class */ (function () {
+    function Page_Info() {
+        this.height = 0;
+        this.start = 0;
+        this.stop = 0;
+    }
+    return Page_Info;
+}());
+var MarkerList = /** @class */ (function () {
+    function MarkerList() {
+        this.clear();
+    }
+    MarkerList.prototype.clear = function () {
+        this.markers = [];
+    };
+    MarkerList.prototype.addMarker = function (depth, xpos) {
+        // Check if the marker already exists
+        var exists = this.markers.some(function (marker) { return marker.depth === depth && marker.xpos === xpos; });
+        if (!exists) {
+            this.markers.push({ depth: depth, xpos: xpos });
+        }
+    };
+    MarkerList.prototype.sort = function () {
+        this.markers.sort(function (a, b) { return a.xpos - b.xpos; });
+    };
+    MarkerList.prototype.findMinDepth = function (min, max) {
+        // Filter markers within the range
+        var filteredMarkers = this.markers.filter(function (marker) { return marker.xpos > min && marker.xpos <= max; });
+        if (filteredMarkers.length === 0) {
+            return { depth: null, xpos: max }; // No markers in the specified range so we just take the maximum
+        }
+        // Find the marker with the lowest depth
+        var minDepthMarker = filteredMarkers[0];
+        for (var _i = 0, filteredMarkers_1 = filteredMarkers; _i < filteredMarkers_1.length; _i++) {
+            var marker = filteredMarkers_1[_i];
+            if (marker.depth < minDepthMarker.depth ||
+                (marker.depth === minDepthMarker.depth && marker.xpos > minDepthMarker.xpos)) {
+                minDepthMarker = marker;
+            }
+        }
+        return minDepthMarker;
+    };
+    return MarkerList;
+}());
+var Print_Table = /** @class */ (function () {
+    function Print_Table() {
+        this.enableAutopage = true;
+        this.height = 0;
+        this.maxwidth = 0;
+        this.displaypage = 0;
+        this.enableAutopage = true;
+        this.pages = new Array();
+        var page_info;
+        page_info = new Page_Info();
+        this.pages.push(page_info);
+        this.pagemarkers = new MarkerList;
+    }
+    Print_Table.prototype.setPaperSize = function (papersize) {
+        this.papersize = papersize;
+    };
+    Print_Table.prototype.getPaperSize = function () {
+        if (!this.papersize) {
+            this.papersize = "A4";
+        }
+        return (this.papersize);
+    };
+    Print_Table.prototype.setHeight = function (height) {
+        var pagenum;
+        this.height = height;
+        for (pagenum = 0; pagenum < this.pages.length; pagenum++) {
+            this.pages[pagenum].height = height;
+        }
+    };
+    Print_Table.prototype.getHeight = function () {
+        return (this.height);
+    };
+    Print_Table.prototype.setModeVertical = function (mode) {
+        this.modevertical = mode;
+    };
+    Print_Table.prototype.getModeVertical = function () {
+        this.forceCorrectFigures();
+        return (this.modevertical);
+    };
+    Print_Table.prototype.forceCorrectFigures = function () {
+        if (!this.modevertical) {
+            this.modevertical = "alles";
+        }
+        switch (this.modevertical) {
+            case "kies":
+                this.starty = Math.min(Math.max(0, this.starty), this.height);
+                this.stopy = Math.min(Math.max(this.starty, this.stopy), this.height);
+                break;
+            default:
+                this.starty = 0;
+                this.stopy = this.height;
+        }
+        var pagenum;
+        this.pages[this.pages.length - 1].stop = this.maxwidth;
+        for (pagenum = 0; pagenum < this.pages.length; pagenum++) {
+            if (pagenum > 0) {
+                this.pages[pagenum].start = this.pages[pagenum - 1].stop;
+            }
+            if (this.pages[pagenum].stop > this.maxwidth) {
+                this.pages[this.pages.length - 1].stop = this.maxwidth;
+            }
+            ;
+            if (this.pages[pagenum].start > this.pages[pagenum].stop) {
+                this.pages[pagenum].start = this.pages[pagenum].stop;
+            }
+            ;
+        }
+    };
+    Print_Table.prototype.setMaxWidth = function (maxwidth) {
+        this.maxwidth = maxwidth;
+        this.forceCorrectFigures();
+    };
+    Print_Table.prototype.getMaxWidth = function () {
+        return (this.maxwidth);
+    };
+    Print_Table.prototype.getstarty = function () {
+        this.forceCorrectFigures();
+        return (this.starty);
+    };
+    Print_Table.prototype.getstopy = function () {
+        this.forceCorrectFigures();
+        return (this.stopy);
+    };
+    Print_Table.prototype.setstarty = function (starty) {
+        this.starty = starty;
+        this.forceCorrectFigures;
+    };
+    Print_Table.prototype.setstopy = function (stopy) {
+        this.stopy = stopy;
+        this.forceCorrectFigures;
+    };
+    Print_Table.prototype.setStop = function (page, stop) {
+        if (page > 0) {
+            if (stop < this.pages[page - 1].stop)
+                stop = this.pages[page - 1].stop;
+        }
+        if (page < this.pages.length - 1) {
+            if (stop > this.pages[page + 1].stop)
+                stop = this.pages[page + 1].stop;
+        }
+        if (stop > this.maxwidth)
+            stop = this.maxwidth;
+        this.pages[page].stop = stop;
+        this.forceCorrectFigures();
+    };
+    Print_Table.prototype.autopage = function () {
+        /*  Autopage uses some ratio's determined by the useful SVG drawing size on the PDF.  This depends on the margins configured in print.js
+            At present all of this is still hard-coded.  Should become a function of print.js
+           
+            A4
+    
+            Height: 210-20-30-5-5  --> 150
+            Width: 297-20 --> 277
+            Ratio: 1.8467
+        
+            A3
+        
+            Height: 297-20-30-5-5 --> 237
+            Width: 420-20 --> 400
+            Ratio: 1.6878
+        */
+        var height = this.getstopy() - this.getstarty();
+        var maxsvgwidth = height * (this.getPaperSize() == "A3" ? 1.6878 : 1.8467);
+        var minsvgwidth = 3 / 4 * maxsvgwidth;
+        var page = 0;
+        var pos = 0;
+        while ((this.maxwidth - pos) > maxsvgwidth) { // The undivided part still does not fit on a page
+            pos = this.pagemarkers.findMinDepth(pos + minsvgwidth, pos + maxsvgwidth).xpos;
+            while (this.pages.length < page + 2)
+                this.addPage();
+            this.setStop(page, pos);
+            page++;
+        }
+        // 
+        this.setStop(page, this.maxwidth);
+        // Delete unneeded pages at the end
+        for (var i = this.pages.length - 1; i > page; i--) {
+            this.deletePage(i);
+        }
+    };
+    Print_Table.prototype.addPage = function () {
+        var page_info;
+        page_info = new Page_Info();
+        page_info.height = this.height;
+        page_info.start = this.pages[this.pages.length - 1].stop;
+        page_info.stop = this.maxwidth;
+        this.pages.push(page_info);
+    };
+    Print_Table.prototype.deletePage = function (page) {
+        if (page == 0) {
+            this.pages[1].start = 0;
+        }
+        else {
+            this.pages[page - 1].stop = this.pages[page].stop;
+        }
+        this.pages.splice(page, 1);
+    };
+    Print_Table.prototype.toHTML = function () {
+        if (structure.print_table.enableAutopage)
+            this.autopage();
+        var outstr = "";
+        var pagenum;
+        outstr += '<table border="1" cellpadding="3">';
+        outstr += '<tr><th align="center">Pagina</th><th align="center">Startx</th><th align"center">Stopx</th><th align"left">Acties</th></tr>';
+        for (pagenum = 0; pagenum < this.pages.length; pagenum++) {
+            outstr += '<tr><td align=center>' + (pagenum + 1) + '</td><td align=center>' + this.pages[pagenum].start + '</td><td align=center>';
+            if (pagenum != this.pages.length - 1) {
+                outstr += '<input size="5" id="id_stop_change_' + pagenum + '" type="number" min="' + this.pages[pagenum].start + '" step="1" max="' + this.maxwidth + '" onchange="HLChangePrintStop(' + pagenum + ')" value="' + this.pages[pagenum].stop + '">';
+            }
+            else {
+                outstr += this.pages[pagenum].stop.toString();
+            }
+            outstr += '</td><td align=left>';
+            if (pagenum == this.pages.length - 1) {
+                outstr += '<button style="background-color:green;" onclick="HLAddPrintPage()">&#9660;</button>';
+            }
+            if (this.pages.length > 1) {
+                outstr += '<button style="background-color:red;" onclick="HLDeletePrintPage(' + pagenum + ')">&#9851</button>';
+            }
+            outstr += '</td></tr>';
+            //outstr += this.Pages[pagenum].height.toString();
+        }
+        outstr += "</table>";
+        return (outstr);
+    };
+    return Print_Table;
 }());
 var importExportUsingFileAPI = /** @class */ (function () {
     function importExportUsingFileAPI() {
@@ -513,6 +747,12 @@ function json_to_structure(text, version, redraw) {
         structure.print_table.setModeVertical(mystructure.print_table.modevertical);
         structure.print_table.setstarty(mystructure.print_table.starty);
         structure.print_table.setstopy(mystructure.print_table.stopy);
+        if (typeof mystructure.print_table.enableAutopage != "undefined") {
+            structure.print_table.enableAutopage = mystructure.print_table.enableAutopage;
+        }
+        else {
+            structure.print_table.enableAutopage = false;
+        }
         for (var i = 0; i < mystructure.print_table.pages.length; i++) {
             if (i != 0)
                 this.structure.print_table.addPage();
@@ -630,6 +870,8 @@ function structure_to_json() {
         var listitem = _a[_i];
         listitem.sourcelist = null;
     }
+    var swap = structure.print_table.pagemarkers;
+    structure.print_table.pagemarkers = null;
     // Create the output structure in uncompressed form
     var text = JSON.stringify(structure);
     // Put the removed data members back
@@ -637,6 +879,7 @@ function structure_to_json() {
         var listitem = _c[_b];
         listitem.sourcelist = structure;
     }
+    structure.print_table.pagemarkers = swap;
     return (text);
 }
 /* FUNCTION download_by_blob
@@ -3167,7 +3410,7 @@ var Kring = /** @class */ (function (_super) {
             cable_location_available = 1;
         }
         // Determine how much everything needs to be shifted right
-        var shiftright = 35 + 20 * cable_location_available;
+        var shiftright = /*35*/ 25 + 20 * cable_location_available;
         if (this.props.naam.length > 2) {
             shiftright = Math.max(shiftright, svgTextWidth(htmlspecialchars(this.props.naam), 12, 'font-weight="bold"') + 20);
         }
@@ -5685,6 +5928,8 @@ var Hierarchical_List = /** @class */ (function () {
                 outSVG.ydown = 0;
                 //outSVG.xleft = Math.max(max_xleft,35); // foresee at least 35 for text at the left
                 outSVG.xleft = max_xleft;
+                if (this.data[this.getOrdinalById(myParent)].getType() == "Kring")
+                    max_xright += 10; // Altijd 10 extra rechts voorzien voor uitstekende tekst/adressen
                 outSVG.xright = Math.max(max_xright, 25); // foresee at least 25 at the right
                 // create the output data
                 var ypos = 0;
@@ -5707,167 +5952,12 @@ var Hierarchical_List = /** @class */ (function () {
     };
     return Hierarchical_List;
 }());
-var Page_Info = /** @class */ (function () {
-    function Page_Info() {
-        this.height = 0;
-        this.start = 0;
-        this.stop = 0;
-    }
-    return Page_Info;
-}());
-var Print_Table = /** @class */ (function () {
-    function Print_Table() {
-        this.height = 0;
-        this.maxwidth = 0;
-        this.displaypage = 0;
-        this.pages = new Array();
-        var page_info;
-        page_info = new Page_Info();
-        this.pages.push(page_info);
-    }
-    Print_Table.prototype.setPaperSize = function (papersize) {
-        this.papersize = papersize;
-    };
-    Print_Table.prototype.getPaperSize = function () {
-        if (!this.papersize) {
-            this.papersize = "A4";
-        }
-        return (this.papersize);
-    };
-    Print_Table.prototype.setHeight = function (height) {
-        var pagenum;
-        this.height = height;
-        for (pagenum = 0; pagenum < this.pages.length; pagenum++) {
-            this.pages[pagenum].height = height;
-        }
-    };
-    Print_Table.prototype.getHeight = function () {
-        return (this.height);
-    };
-    Print_Table.prototype.setModeVertical = function (mode) {
-        this.modevertical = mode;
-    };
-    Print_Table.prototype.getModeVertical = function () {
-        this.forceCorrectFigures();
-        return (this.modevertical);
-    };
-    Print_Table.prototype.forceCorrectFigures = function () {
-        if (!this.modevertical) {
-            this.modevertical = "alles";
-        }
-        switch (this.modevertical) {
-            case "kies":
-                this.starty = Math.min(Math.max(0, this.starty), this.height);
-                this.stopy = Math.min(Math.max(this.starty, this.stopy), this.height);
-                break;
-            default:
-                this.starty = 0;
-                this.stopy = this.height;
-        }
-        var pagenum;
-        this.pages[this.pages.length - 1].stop = this.maxwidth;
-        for (pagenum = 0; pagenum < this.pages.length; pagenum++) {
-            if (pagenum > 0) {
-                this.pages[pagenum].start = this.pages[pagenum - 1].stop;
-            }
-            if (this.pages[pagenum].stop > this.maxwidth) {
-                this.pages[this.pages.length - 1].stop = this.maxwidth;
-            }
-            ;
-            if (this.pages[pagenum].start > this.pages[pagenum].stop) {
-                this.pages[pagenum].start = this.pages[pagenum].stop;
-            }
-            ;
-        }
-    };
-    Print_Table.prototype.setMaxWidth = function (maxwidth) {
-        this.maxwidth = maxwidth;
-        this.forceCorrectFigures();
-    };
-    Print_Table.prototype.getMaxWidth = function () {
-        return (this.maxwidth);
-    };
-    Print_Table.prototype.getstarty = function () {
-        this.forceCorrectFigures();
-        return (this.starty);
-    };
-    Print_Table.prototype.getstopy = function () {
-        this.forceCorrectFigures();
-        return (this.stopy);
-    };
-    Print_Table.prototype.setstarty = function (starty) {
-        this.starty = starty;
-        this.forceCorrectFigures;
-    };
-    Print_Table.prototype.setstopy = function (stopy) {
-        this.stopy = stopy;
-        this.forceCorrectFigures;
-    };
-    Print_Table.prototype.setStop = function (page, stop) {
-        if (page > 0) {
-            if (stop < this.pages[page - 1].stop)
-                stop = this.pages[page - 1].stop;
-        }
-        if (page < this.pages.length - 1) {
-            if (stop > this.pages[page + 1].stop)
-                stop = this.pages[page + 1].stop;
-        }
-        if (stop > this.maxwidth)
-            stop = this.maxwidth;
-        this.pages[page].stop = stop;
-        this.forceCorrectFigures();
-    };
-    Print_Table.prototype.addPage = function () {
-        var page_info;
-        page_info = new Page_Info();
-        page_info.height = this.height;
-        page_info.start = this.pages[this.pages.length - 1].stop;
-        page_info.stop = this.maxwidth;
-        this.pages.push(page_info);
-    };
-    Print_Table.prototype.deletePage = function (page) {
-        if (page == 0) {
-            this.pages[1].start = 0;
-        }
-        else {
-            this.pages[page - 1].stop = this.pages[page].stop;
-        }
-        this.pages.splice(page, 1);
-    };
-    Print_Table.prototype.toHTML = function () {
-        var outstr = "";
-        var pagenum;
-        outstr += '<table border="1" cellpadding="3">';
-        outstr += '<tr><th align="center">Pagina</th><th align="center">Start</th><th align"center">Stop</th><th align"left">Acties</th></tr>';
-        for (pagenum = 0; pagenum < this.pages.length; pagenum++) {
-            outstr += '<tr><td align=center>' + (pagenum + 1) + '</td><td align=center>' + this.pages[pagenum].start + '</td><td align=center>';
-            if (pagenum != this.pages.length - 1) {
-                outstr += '<input size="5" id="id_stop_change_' + pagenum + '" type="number" min="' + this.pages[pagenum].start + '" step="1" max="' + this.maxwidth + '" onchange="HLChangePrintStop(' + pagenum + ')" value="' + this.pages[pagenum].stop + '">';
-            }
-            else {
-                outstr += this.pages[pagenum].stop.toString();
-            }
-            outstr += '</td><td align=left>';
-            if (pagenum == this.pages.length - 1) {
-                outstr += '<button style="background-color:green;" onclick="HLAddPrintPage()">&#9660;</button>';
-            }
-            if (this.pages.length > 1) {
-                outstr += '<button style="background-color:red;" onclick="HLDeletePrintPage(' + pagenum + ')">&#9851</button>';
-            }
-            outstr += '</td></tr>';
-            //outstr += this.Pages[pagenum].height.toString();
-        }
-        outstr += "</table>";
-        return (outstr);
-    };
-    return Print_Table;
-}());
 var CONFIGPAGE_LEFT = "\n    <br>\n    <table border=\"1px\" style=\"border-collapse:collapse;\" align=\"center\" width=\"100%\"><tr><td style=\"padding-top: 0; padding-right: 10px; padding-bottom: 10px; padding-left: 10px;\">\n        <p><font size=\"+2\">\n          <b>Welkom op \u00E9\u00E9ndraadschema</b>\n        </font></p>\n      <p><font size=\"+1\">  \n           Kies \u00E9\u00E9n van onderstaande voorbeelden om van te starten of start van een leeg schema (optie 3).\n      </font></p>\n      <font size=\"+1\">\n        <i>\n          <b>Tip: </b>Om de mogelijkheden van het programma te leren kennen is het vaak beter eerst een voorbeeldschema te\n          bekijken alvorens van een leeg schema te vertrekken.\n        </i>\n      </font>\n    </td></tr></table>\n    <br>\n    <table border=\"1px\" style=\"border-collapse:collapse\" align=\"center\" width=\"100%\">\n      <tr>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Voorbeeld 1</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Voorbeeld 2</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Leeg schema</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Openen</b>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/example000.svg\" height=\"300px\"><br><br>\n          Eenvoudig schema, enkel contactdozen en lichtpunten.\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/example001.svg\" height=\"300px\"><br><br>\n          Iets complexer schema met teleruptoren, verbruikers achter contactdozen en gesplitste kringen.\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/gear.svg\" height=\"100px\"><br><br>\n";
 var CONFIGPAGE_RIGHT = "\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/import_icon.svg\" height=\"100px\"><br><br>\n          Open een schema dat u eerder heeft opgeslagen op uw computer (EDS-bestand). Enkel bestanden aangemaakt na 12 juli 2019 worden herkend.\n          <br><br>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"load_example(0)\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"load_example(1)\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"read_settings()\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"importclicked()\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n      </tr>\n    </table>\n  ";
 var CONFIGPRINTPAGE = "\n<div>\n</div>\n<br>\n";
-var EXAMPLE0 = "EDS0040000eJztWe9r6zYU/VeMv84rjp0fNIyxtoO38bZPHd2gPIxi3TiqFcnITtL20fe370h2Yue9NEvSDl6hUIp9pXt1dc6VdBR/9iWprJr549554HNWMX98+9kXHIbAL5ghVfnjMPCF4uvHVEvJipLQZ8pkSehndFH648++Mv7Y/1VMp37gVw8F4e2CqVIuRCVUBiNjqmIyKTSGRWME04TKdEZmbjuMfQ5nsqMKImkd5gUZltlI/bCJmuRsQjJRLKlISrJjRve9IVq3vBNOsmJJJ0Ic2hCMG0K2/jra9pDIGA3pwiwpYYtKzxmr6s7bwUWZlCQpxdt0A0SuTeVmu8SEdObmGMNVMTbvjFjnv9TatDPwnwK/1AuTkhQlRlQLKZ+CmoqopaLXUtH7bypaGi614XhD1hkxhudxZRbUzWwDy55EbJGsM4naTKJjMvloXr0UYPnn5tKLP0TB4JAqsM6Ulw2vNRtSpwwOMJUVU9xhdGSB1IEAsVDJZCHKDRQvqJxNTMC1okeRbTwa5txq21c7Yad4zlvO4pdVz3YSB5bPqFM94XPlU9fli6unpqYSsG3XTrSzdq6u2OH10y2gj7TIkcK3ZfS78lYopOeKaFcNXe0sohqQ162hrcV/sY+z4ffAmdvcn+GsdzxnN2SkSGfNmfR2ibvcR1zcWW2jo9Z9r6XuSoOytOJal7tODxhyGxhwCNmmVxPdROoct00BTFlJFiYuSCVzIgODdd7aeWdE0wqdMproxYpTgqJgOUk0b9LG8DMmpytWkeGW0G5LJ3BjrEMCox1jr/1UAg44mJrozTa3B+R+dCrI0TvIB4PcOxXk+B3kg0EOTwW5/w7yoSDH56eCPHgH+eBKjluQ+51bSv8YxXtjxB15tWBohcPfdla5znFjC/yl7ZK4pqTxetQWeC9n3PWYaSMeLVuSEpzuUtypWuikSMhQ3ccB0FE+lEzQxKuvryKtdRjWvC9pC1yokrKrKg5R5FFvt7zrfzfy7gRJfsl4zuYO3ber7a720taRHVHnJ4HBu7h7xY0k6p+M8ru6Oxzl85NR7si7P2zuqTApVloLUzvhslP6Wzj4fDHBSsSuJbIO1NeFoMz97FRPGTNUDMnbfURi57mjAyCsXYFGLkWOQ+NbR5wC+Q5WmvTdJbVYqMrtGr29v8x17unDU297rw3i20FvdCp60XHoRTvRI5W/YfDi6FTwXmX9vlHwPqE3lMISYW/dlv+//cNIlqbbXhAFvfMAMm8UDIN4FEAc42qNix+uJRDN2HyhK3DoYUfGdoI1EUefLGVCQeCyiSRL3IxEZqEaDEH7nN2vBLefj/qjvpVDZSHZQ+FEmbtPZpaN26+8cEaZ+lNSWenC+Vo45poTMK9E6g4+JiXZE9P1fth0f2iCFAzqrxSP7htT30Jsa8u6kyuwqYAMhQq0FXIP/iSFYXhG3IbUK+W+udxobazc8i7AF7nHnybm5+vKQPp5oX2GU+hlhGMObFrDXyTH3g9x5MG+/rP2D9d/ru3bDfTjnAn4LJvBzthmsF+4npNQZxOyykBhps3HIMFp7kxTbTcN796L4vDG+zIIvd8e7VyhUt1VZ1DDZifJsXCe/gU6jIrZ";
-var EXAMPLE1 = "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";
-var EXAMPLE_DEFAULT = "EDS0040000eJytVE2P0zAQ/SuRr4SSJt09RAhRLiAhuCzaS7WKJvEkteqPyHba7lbltzNO2mYDaFGBKIomY8/Me2/GPjCJuvFrli9ixsEDy1cHJjjL5zFrwaL2LE9iJjQ/m5WRElqHtKcG6ZD2WdM6lh+YtixnLGb+sUWylqCd7IQXuiEngPYgi9ZQRZanMSvRVWu0KiznjIu6xlBPIMqwXbVooaE8tzdDxmIDJcpCQ+FRSgy10v38lvZOYguO0kMxxmcJoQZu0Y3oimm53l91dosFdN4oAD/4ppmFKxxKrOivvrDfGOt7mlviYppALkRqAPWs3oB9a4wd0bNjzJzpbIVSOCqoOymP8SB/Oso/H+WfXyP/B2M5/RHoBgHIzr3t8DmyiygvAMlGIOkIJL0GyGf7Xyfgd535tecUgRt3auOgvjQV0HZyfX2zvHIQhgykpdBF2Ql3If33E3JJSbrs8Ek0l4Bzh15oy2JsSza2Jfu3+fip/B8G5IHWieiWcq36yZp+aDkAXc3jNM7ixUMAIrQvPJQSA5w1imY93CkK9jvBwzWUBEVdK+Gx7RuZBJ5NALGaRDgP9myZlozjw3GgipbE7/nWggYNVOCKqLkF4GHeFMyQO2Jndro/h/d0KgPnaFmtPfbm29K+u/MU4aMk2Ak9UYOK8ngMjm8o8+hVlkbkP7/B//Huy9k/XcDXCgTFbE/FZnAp9p4bhULPSgzt0ETtdEEIjqp31SZcdtE+SrPkPvp+k0SfnkJPaFKDxnQ8lOE9Ty48O/4AHu7vTA==";
+var EXAMPLE0 = "EDS0040000eJztWe9r6zYU/VeMv84rjp2kaxhjbQdv422f3qMblIdRrBtHtSwF2Un6g+5v35HsxM5emiVpB68QKCWRda+uzjmSjuInX5LKqqk/6l0EPmcV80e3T77gaAj8GTOkKn8UBr5QfPUx1VKyWUnoM2GyJPQzelb6oydfGX/k/yImEz/wq4cZ4dslU6Wci0qoDI2MqYrJZKYxLB5GaBpTmU7JFLbDyOcIJjuqIJI2oJiRYZnN1A+brEnOxiQTxZKKpCQ7ZnTfG+LpRnTCSVYs6WSIQ5uCcUOo1l9l2xwSFeNBOjcLSti80gVjVd15M7kok5Ikpfg2WQORa1O52S4wIZ25OcYIVYwVnRHr+hdam3YG/nPgl3puUpKixIhqLuVzUFMRtVT0Wip6/01FS8OVNhzfUHVGjOHzqDJz6la2hmVHIVYkq0qitpLokEo+mjeXAlr+urny4g9RMNhHBTaY8rLhtWZD6pQhAE1lxRR3GB0okDoRIBYqGc9FuYbiFcpZ5wRcS3oU2TqiYc6ttl3aCTviuWg5i1+nns0i9pTPeUc94UvyqXX5avXU1FQCbZvaibZq5/qa7a+froA+0jxHCV/L6DflLSGkl0S0TUPXW0VUA/K2GtpY/Je7OBt+C5y5zf0FznqHc3ZDRop02pxJ75e4q13ExZ3Vdn7Quu+11F1rUJZWXOty2+mBhtwmBhxCtuXVRDeZOsdtI4AJK8nCxAWppCAyaLDBGzvvlGhSoVNGYz1fckogCpaTxON12Rh+yuRkySoy3BLafdJJ3DTWKYHRlrFXcSoBBxxMjfV6m9sBcj86FuToBPLeIPeOBTk+gbw3yOGxIPdPIO8LcnxxLMiDE8h7KzluQe53bin9QxzvjRF35NWGoTUOf9pZ5TrHjS3wF7ZL4h4lTdSjtsB7OeOux1Qb8WjZkpTgdJfiTtVGJ0VBhuo+DoCO86FkjEe8+vdVpG0dhjXvC9oAF66k7LqKfRx51Ntu7/rfjL07wpJfMZ6zwqH7fr3d9U7aOrYj6vwkMDiZuzfcSKL+0Sif3N3+KF8cjXLH3v1ua0+FSbHSWpjaCZcd6W/g4PP5GCsRu5bIOlB/mgnK3M9O9ZQxQ8VQvN1HJHaeO9oDwjoUaORS5Dg0vg7EKZBvYaUp311SZ3NVuV2jt/OXuc49fXjsbe+tQXw/6J0fi150GHrRVvRI5e8YvDg6Frw3Wb/vFLwv6A2nsEDaW7fl/2//MJKl6bYXREHvIoDNOw+GQXwewBzjao2LH64lMM3YfOErcOhhR8Z2gjURR18sZULB4LKxJEscKfvpEv5o5rxXfVxNSWQWwMEQYijY/VJw+1Kp/0PfmqRyJtlD3d3dMjPL0e3TZhROLlO/YCqR28VakGzvghmwUNbIIb/mBHIqkboTkklJ9mh1CR7WGR6avDMGm1iKR/cyqm+5sCK04eSUOBHwq7CLVkr3IFpSGIZnxG1KvVTu5cyN1sb6Mu8SxJL7+OPY/PSpMvCIXmg/Iyj0UCpB/GQbPpMced/FkYf21Z9t//Dpj1X75gP6vmACMYtmsDO2HuxnrgsS6mxM1kIozLR5ayQ4Fda0wmMYbcGwiVyfibbbjXfvRXF44/09CL1fH+3k4W/dJWlQ42hnzbHknv8BXkCfFg==";
+var EXAMPLE1 = "EDS0040000eJztWm1v2zYQ/iuCvk4rJEp2amMYlqRAO6z9lCIbEBQCLZ1lVpQoUJTzhu637yjJFp3YjqK4Q1O4CAqZr8fneXh3pHRvc8gTtbCnPnHsmCpqT6/ubRbbU8+xCyohV/bUdWyWx6vHSHBOixKwzZzyErCdFEVpT+/tXNpT+x2bz23HVrcF4K9Tmpe8YorlCRZSmivKw0LgtFhJsGgGZbQAmekGUzvGzqBnZQBcd8gKkDTRIwVuO2qY0hnwMKehAs5Bz0luvDHWbvQOY+CKhsYIvquHoLEEtNZejbY5JVqMFVEllxDSSomMUtU03hyclWEJHCL8NV8DkQqp6tUucUEiqdfoY9ec0syYsbF/KYTsVmB/c+xSVDICzkqcMa84/+Y0VJCOCq+jwnuaio6GMyFj/IVWJ0ApPk+VrMC0bA3LHkO8SWcJ6Swhz7HkL3lwKWDJP5dnlv+eOKM+KtCdIS1bXhs2uIgodsCiUtE8rjF6pkCagRBiloezipVrKF6gnPWYCNc13LFk3aNlrt5t+7TjGuKZdJz5L1PPphE95XNiqMfdJZ9Gly9WT0ONYli2qR2yVTvnEe2vH1NAf9EMpOVt0dGfuXWNStqlom0iOt+qogaRw4poY/ef7hXQ2GAt6FgbP0dAf9Myo9GC5dBTKuMfQSp1TNkhFW+oVMirlsrZ3vBgsDbe5Wq2keZ1rH0CkDEab6FhM1mxFGTZUzNvu9lPBjq6i4IzVba66TEl8bbrNPhhdDrApZ3RONVSfdVCPd9Hm5HGvN1F2qHSmASwokcEGkTVkPTlf8pe+iQve52J24OkA+2sI0fDOCLGyYQYR5PR0zvJcPnnAumJVCxEue2IggWpHhjhYLzb5w2p7UjGma4le05L0DjFDPIww6CCBbrzBvYLgLnCRgnMRHUdQ4iioClwrF6bjdMvKJ9fU4WBiUULZdYYA7eFzZAI0pa5V/3ycKmDHPCZWOfSe1D2J4NRJkeU+6JMhqPsdyh/1LZHTEa40TqYugWXhvQ3cLDjaoY7EX0USzahbtaKS8spWq09CEdf8xV6YNd0RRhSzlLMpB53VBK91GM6Wru5Hq2oclV7C2+vuz4ZmPuR54FHtoIHefqKsfPJQOwOIjyFoUJWhRLyNWIXjHpg90Qu905kQjFMlxMoVVWh0zBOHyvM4AaXmSN2qpJN1rBLdLi8WFIac+1qW94aRLhIKcdoL6s0zUVhApIAWpdImmlPFm92i0HVwfwBvo8sesrFBcb5TOM2KPH9uOLGfhgdGu4wL7lDh9z65c8fH8SODxWsENWqwBIO6zQoFyJG5Gv6G4zfN5kZAqTPHU2PnvLbF3D2OTLjSDc5pjTfJ9h6/lCQjxlNb5CDwLj69Qfe3H1iEfolwedi2ZyR+rwmIEPZ9Q/GLvnZ2fWDHiBvSxqCg1y2eUbc9dxnkTw6buHefjIYjPL4iHJvR2lcNfmTgY7yUrKvYDWXPt3lzwcNBDrQOo9c6iZhXRW2ve6EBt5KaVy3WAjJ7jRbmCViIs/Z17zJgyI0SELTpgbAuAyGcIZVsXp4s9SVjkYN70vYADeqZGleEfXZ94GRHnlGwv2sHPLCOJa81kPyPozIATB6YZ79IMl+dOPYL9VeO4jvkWkH/s8C026Nmce4gTD5RqT1h76A/cl3nD8+AEbHMLkD5C+4mkixJYJ0VS/6x/0PTdV6uPIc4ngTh7jOiUPGzthBB/PWIZ4zcTCPIsTBOE/w+cTxiROMnABbeA6ekvDQhMcX1BAmuJh9YWqAEQ8dOjor3Ij++IvWD8sxgNMZB60iyPXTKcbjon79s9ryLNEcjYITx87ozTWL9Wd2o8lIv60pC05vm+Z17pFo1Vzdb/ZChcjmk7tS6csi7Kup0K0zKutcveYHxxcxIJX6DksrkXIOWsL1ALfrEW7bcQtaYF90i9j0NNDBXu8I3R3qbTFnHNeU6Wq4wa3JwXW9NxDrIcV1Xn+udimE1C+IrFNUItSPv83k7xdKUqosVz+7+M9CU9FfKtAFn4FPrV98YmH56k+Xv7/4tCrfrIBfM8qwz7Kd7A1dT/ZHLDJg+ZuZvk1iOa60/Y6OxZDpt2e4l6XQYOiB6jZzoY+F1o1FfPfS+nfkWh/u9OIxC6qj0UmDo151zJT97T8FxBHk";
+var EXAMPLE_DEFAULT = "EDS0040000eJytVN9v00AM/leieyWM/GgniBCivICE4GVoL9MUuTk3PfVyF91dunbT+NuxkzZZAQ0VqKLq4rM/f/7s+EFoNHVYi2IWCwkBRHHzIJQURRqLFhyaIIokFsrI47GyWkPrkXxWoD2Sn7OtF8WDME4UQsQi7Fuk0wKM150KytRkBDABdNlayiiKLBZL9NUaXcPXhZBqtULOpxA1uzctOqgJ53I+IJYbWKIuDZQBtUbOle3SS/I9iS0l6gDlFJ8nxBqkQz+xK0/T9faqc1ssoQu2AQiD7RRZ+dKjxoreVmP1G+tCX+aWarE1F8eRBqB5km/gvrXWTezFYyy87VyFWnlKaDqtH+NB/mySP53kT8+R/4N1kt6IdI0AdC6C6/Aps1GUZ4jkE5FsIpKdQ+Sz+68T8LvO/NpzisCNP7RxUF/bCsidTF9fLc4chAGBtFSmXHbKj0X//YSMkKTLHd6regw4duiZtsymtuRTW/J/m4+f0v9hQG7pngrdEtZNP1mnf3TNRG/SOIvzeHbLRJQJZYClRqaDhk8LkrntezZM5xpVveZRv3wTiwZ2d0ryekpfp6y1bzXsB/eEFaiZHm2skygfwA27yhN2H8tk2bsBt0HnhwoI30qkpgRVAfce6MP04gCwHxH2B9wWaLy8uu9324w1YWk5HHt9V4oGGxq+RjTSAUie7wYuUDKsvTP9d39NW4A1jhbVOmB/fLt0764CRYQo4XNCv4joEk5ANnxDXUQv8iwi+/Fh+8erL0f76QW+bEBRzPaQ7ALGZO+lbVCZiyVy+w1Ve1hISmLD829NcJYFYaDeZ2V520a7KMuT6+j7PIk+3bMA9Klwk+eDlFy4VEE8/gDGURmI";
 var VERSION = "git"; //can be "git" or "online"
 var PROP_Contact_Text = "<html>\n  <head>\n    <title>Eendraadschema online</title>\n    <link rel=\"stylesheet\" href=\"css/about.css\">\n  </head>\n  <body>\n    <h2>Een &eacute;&eacute;ndraadschema tekenen.</h2>\n    <p class=\"ondertitel\">Een cr&eacute;atie van <a target=\"_blank\" href=\"https://ivan.goethals-jacobs.be\">Ivan Goethals</a></p>\n    <p>Dit is een standalone versie (development) waarbij enkele functionaliteiten zijn uitgeschakeld.</p>\n    <p>Gebruik de online versie op <a href=\"https://eendraadschema.goethals-jacobs.be\">https://eendraadschema.goethals-jacobs.be</a> om toegang te krijgen tot het contactformulier.</p>\n    <p>Kies <b>Bewerken</b> in het menu om verder te gaan met tekenen.</p>\n  </body>\n</html>";
 function PROP_GDPR() {
@@ -6043,7 +6133,7 @@ function HL_cancelFilename() {
     document.getElementById("settings").innerHTML = '<code>' + structure.properties.filename + '</code>&nbsp;<button onclick="HL_enterSettings()">Wijzigen</button>&nbsp;<button onclick="exportjson()">Opslaan</button>';
 }
 function HL_changeFilename() {
-    var regex = new RegExp('^[-_ A-Za-z0-9]{2,}\\.eds$');
+    var regex = new RegExp('^.*\\.eds$');
     var filename = document.getElementById("filename").value;
     if (regex.test(filename)) {
         structure.properties.setFilename(document.getElementById("filename").value);
@@ -6055,7 +6145,7 @@ function HL_changeFilename() {
     }
 }
 function HL_enterSettings() {
-    document.getElementById("settings").innerHTML = '<input type="text" id="filename" onchange="HL_changeFilename()" value="' + structure.properties.filename + '" pattern="^[-_ A-Za-z0-9]{2,}\\\.eds$">&nbsp;<i>Gebruik enkel alphanumerieke karakters a-z A-Z 0-9, streepjes en spaties. <b>Eindig met ".eds"</b>. Druk daarna op enter.</i><br><button onclick="HL_cancelFilename()">Annuleer</button>&nbsp;<button onclick="HL_changeFilename()">Toepassen</button>';
+    document.getElementById("settings").innerHTML = '<input type="text" id="filename" onchange="HL_changeFilename()" value="' + structure.properties.filename + '" pattern="^.*\\.eds$">&nbsp;<i>Gebruik enkel alphanumerieke karakters a-z A-Z 0-9, streepjes en spaties. <b>Eindig met ".eds"</b>. Druk daarna op enter.</i><br><button onclick="HL_cancelFilename()">Annuleer</button>&nbsp;<button onclick="HL_changeFilename()">Toepassen</button>';
 }
 function HLRedrawTreeHTML() {
     show2col();
@@ -6119,6 +6209,15 @@ function HLChangeStopY() {
 }
 function HLChangePaperSize() {
     structure.print_table.setPaperSize(document.getElementById("id_papersize").value);
+    printsvg();
+}
+function HLupdateAutopage() {
+    structure.print_table.enableAutopage = !(document.getElementById("autopage").checked);
+    printsvg();
+}
+function HLsuggestPages() {
+    structure.print_table.autopage();
+    printsvg();
 }
 function buildNewStructure(structure) {
     // Paremeterisation of the electro board
@@ -6273,7 +6372,7 @@ function printsvg() {
     var height = outSVG.yup + outSVG.ydown;
     var width = outSVG.xleft + outSVG.xright;
     structure.print_table.setHeight(height);
-    structure.print_table.setMaxWidth(width);
+    structure.print_table.setMaxWidth(width); // foresee some extra space for items like boiler that sometimes go our of their box
     strleft += '<br><button onclick="dopdfdownload()">Genereer PDF</button>';
     switch (structure.print_table.getPaperSize()) {
         case "A3":
@@ -6289,12 +6388,34 @@ function printsvg() {
         strleft += '&nbsp;<select id="dpiSelect" onchange="updateDPI()"><option value="300" selected>300dpi (standaard)</option><option value="600">600dpi (beter maar trager)</option></select>';
     }
     strleft += '&nbsp;<input id="dopdfname" size="20" value="eendraadschema_print.pdf">&nbsp;&nbsp;<span id="progress_pdf"></span><br>';
-    strleft += '<br><table border="0"><tr><td style="vertical-align:top;">';
-    strleft += structure.print_table.toHTML() + '<br>';
-    strleft += '</td><td style="vertical-align:top;padding:5px">';
-    strleft += 'Klik op de groene pijl om het schema over meerdere pagina\'s te printen en kies voor elke pagina de start- en stop-positie in het schema (in pixels). '
-        + '<br><br>Onderaan kan je bekijken welk deel van het schema op welke pagina belandt. ';
-    strleft += '</td></tr></table>';
+    if (structure.print_table.enableAutopage) {
+        strleft += '<br><input type="checkbox" id="autopage" onchange="HLupdateAutopage()" name="autopage" /><label for="autopage">Handmatig over pagina\'s verdelen</label><br>';
+        structure.print_table.setModeVertical("alles");
+        structure.print_table.autopage();
+    }
+    else {
+        strleft += '<br><input type="checkbox" id="autopage" onchange="HLupdateAutopage()" name="autopage" checked /><label for="autopage">Handmatig over pagina\'s verdelen</label>';
+        strleft += '<span style="margin-left: 2em"></span>';
+        switch (structure.print_table.getModeVertical()) {
+            case "kies":
+                strleft += 'Hoogte <select onchange="HLChangeModeVertical()" id="id_modeVerticalSelect"><option value="alles">Alles (standaard)</option><option value="kies" selected="Selected">Kies (expert)</option></select>';
+                strleft += '&nbsp;&nbsp;StartY ';
+                strleft += '<input size="4" id="id_starty" type="number" min="0" step="1" max="' + structure.print_table.getHeight() + '" onchange="HLChangeStartY()" value="' + structure.print_table.getstarty() + '">';
+                strleft += '&nbsp;&nbsp;StopY ';
+                strleft += '<input size="4" id="id_stopy" type="number" min="0" step="1" max="' + structure.print_table.getHeight() + '" onchange="HLChangeStopY()" value="' + structure.print_table.getstopy() + '">';
+                break;
+            case "alles":
+            default:
+                strleft += 'Hoogte <select onchange="HLChangeModeVertical()" id="id_modeVerticalSelect"><option value="alles">Alles (standaard)</option><option value="kies">Kies (expert)</option></select>';
+        }
+        strleft += '<span style="margin-left: 2em"></span><button onclick="HLsuggestPages()">Suggereer X-posities</button>';
+        strleft += '<br><br><table border="0"><tr><td style="vertical-align:top;">';
+        strleft += structure.print_table.toHTML() + '<br>';
+        strleft += '</td><td style="vertical-align:top;padding:5px">';
+        strleft += 'Klik op de groene pijl om het schema over meerdere pagina\'s te printen en kies voor elke pagina de start- en stop-positie in het schema (in pixels). '
+            + '<br><br>Onderaan kan je bekijken welk deel van het schema op welke pagina belandt. ';
+        strleft += '</td></tr></table>';
+    }
     strleft += '<hr>';
     strleft += '<b>Printvoorbeeld: </b>Pagina <select onchange="HLDisplayPage()" id="id_select_page">';
     for (var i = 0; i < structure.print_table.pages.length; i++) {
@@ -6305,19 +6426,7 @@ function printsvg() {
             strleft += '<option value=' + (i + 1) + '>' + (i + 1) + '</option>';
         }
     }
-    strleft += '</select>&nbsp;&nbsp;';
-    switch (structure.print_table.getModeVertical()) {
-        case "kies":
-            strleft += 'Hoogte <select onchange="HLChangeModeVertical()" id="id_modeVerticalSelect"><option value="alles">Alles (standaard)</option><option value="kies" selected="Selected">Kies (expert)</option></select>';
-            strleft += '&nbsp;&nbsp;StartY ';
-            strleft += '<input size="4" id="id_starty" type="number" min="0" step="1" max="' + structure.print_table.getHeight() + '" onchange="HLChangeStartY()" value="' + structure.print_table.getstarty() + '">';
-            strleft += '&nbsp;&nbsp;StopY ';
-            strleft += '<input size="4" id="id_stopy" type="number" min="0" step="1" max="' + structure.print_table.getHeight() + '" onchange="HLChangeStopY()" value="' + structure.print_table.getstopy() + '">';
-            break;
-        case "alles":
-        default:
-            strleft += 'Hoogte <select onchange="HLChangeModeVertical()" id="id_modeVerticalSelect"><option value="alles">Alles (standaard)</option><option value="kies">Kies (expert)</option></select>';
-    }
+    strleft += '</select>&nbsp;&nbsp;(Enkel tekening, kies "Genereer PDF" om ook de tekstuele gegevens te zien)';
     strleft += '<br><br>';
     strleft += '<table border="0"><tr><td style="vertical-align:top"><button onclick="dosvgdownload()">Zichtbare pagina als SVG opslaan</button></td><td>&nbsp;</td><td style="vertical-align:top"><input id="dosvgname" size="20" value="eendraadschema_print.svg"></td><td>&nbsp;&nbsp;</td><td>Sla tekening hieronder op als SVG en converteer met een ander programma naar PDF (bvb Inkscape).</td></tr></table><br>';
     strleft += displayButtonPrintToPdf();

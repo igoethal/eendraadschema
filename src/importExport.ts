@@ -241,6 +241,11 @@ function json_to_structure(text: string, version = 0, redraw = true) {
         structure.print_table.setModeVertical(mystructure.print_table.modevertical);
         structure.print_table.setstarty(mystructure.print_table.starty);
         structure.print_table.setstopy(mystructure.print_table.stopy);
+        if (typeof mystructure.print_table.enableAutopage != "undefined") {
+            structure.print_table.enableAutopage = mystructure.print_table.enableAutopage;
+        } else {
+            structure.print_table.enableAutopage = false;
+        }
 
         for (let i=0; i<mystructure.print_table.pages.length; i++) {
             if (i != 0) this.structure.print_table.addPage();
@@ -374,6 +379,8 @@ function structure_to_json() {
     for (let listitem of structure.data) {
         listitem.sourcelist = null;
     }
+    let swap:MarkerList = structure.print_table.pagemarkers;
+    structure.print_table.pagemarkers = null;
     
     // Create the output structure in uncompressed form
     var text:string = JSON.stringify(structure);
@@ -382,6 +389,7 @@ function structure_to_json() {
     for (let listitem of structure.data) {
         listitem.sourcelist = structure;
     }
+    structure.print_table.pagemarkers = swap;
 
     return(text);
 

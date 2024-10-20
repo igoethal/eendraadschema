@@ -8,6 +8,7 @@
   "include": [
     "general.ts",
     "SVGelement.ts",
+    "Print_Table.ts",
     "importExport.ts",
     "undoRedo.ts",
     "List_Item/List_Item.ts",
@@ -19,7 +20,6 @@
     "Properties.ts",
     "SVGSymbols.ts",
     "Hierarchical_List.ts",
-    "Print_Table.ts",
     "config.ts",
     "../prop/prop_scripts.ts",
     "main.ts"
