@@ -435,7 +435,7 @@ function printsvg() {
     var width = outSVG.xleft + outSVG.xright;
 
     structure.print_table.setHeight(height);
-    structure.print_table.setMaxWidth(width); // foresee some extra space for items like boiler that sometimes go our of their box
+    structure.print_table.setMaxWidth(width);
 
     strleft += '<br><button onclick="dopdfdownload()">Genereer PDF</button>';
 
