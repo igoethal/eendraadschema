@@ -8,7 +8,7 @@
   "include": [
     "general.ts",
     "SVGelement.ts",
-    "Print_Table.ts",
+    "print/*.ts",
     "importExport.ts",
     "undoRedo.ts",
     "List_Item/List_Item.ts",

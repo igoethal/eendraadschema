@@ -242,6 +242,70 @@ var SVGelement = /** @class */ (function () {
     }
     return SVGelement;
 }());
+/**
+ * A class to handle a list of potential page breaks or markers in the form {depth,xpos} with depth how nested
+ * they are (lower depth is better to include a page break) and xpos the location in pixels in the SVG where
+ * the break could be added
+ */
+var MarkerList = /** @class */ (function () {
+    function MarkerList() {
+        this.markers = [];
+    }
+    /**
+     * Clear the list of markers
+     */
+    MarkerList.prototype.clear = function () {
+        this.markers = [];
+    };
+    /**
+     * Add a marker to the markerlist.
+     * If the same marker already exists, no new one will be added.
+     * @param depth - The depth of the marker, or how nested it is (lower depth is better for page breaks).
+     * @param xpos - The x-coordinate position of the marker.
+     */
+    MarkerList.prototype.addMarker = function (depth, xpos) {
+        // Check if the marker already exists
+        var exists = this.markers.some(function (marker) { return marker.depth === depth && marker.xpos === xpos; });
+        if (!exists) {
+            this.markers.push({ depth: depth, xpos: xpos });
+        }
+    };
+    /**
+     * Sorts the markers by their x-coordinate position in ascending order.
+     */
+    MarkerList.prototype.sort = function () {
+        this.markers.sort(function (a, b) { return a.xpos - b.xpos; });
+    };
+    /**
+     * Looks for the marker in the half-open internal (minx, maxx] with the lowest possible depth.
+     * If multiple markers exist with the same depth, the one with the highest xpos is returned.
+     * If no suitable marker is found, a dummy {depth=null, xpos=maxx} is returned.
+     * @param minx - Minimal x for any markers that will be considered.
+     * @param maxx - Maximal x for any markers that will be considered.
+     * @returns The marker with the lowest depth (and highest xpos if multiple exist) or a dummy marker if none are found.
+     */
+    MarkerList.prototype.findMinDepth = function (minx, maxx) {
+        // Filter markers within the range
+        var filteredMarkers = this.markers.filter(function (marker) { return marker.xpos > minx && marker.xpos <= maxx; });
+        if (filteredMarkers.length === 0) {
+            return { depth: null, xpos: maxx }; // No markers in the specified range so we just take the maximum
+        }
+        // Find the marker with the lowest depth, if multiple exist with the same depth, take the one with the highest xpos
+        return filteredMarkers.reduce(function (minDepthMarker, marker) {
+            if (marker.depth < minDepthMarker.depth ||
+                (marker.depth === minDepthMarker.depth && marker.xpos > minDepthMarker.xpos)) {
+                return marker;
+            }
+            return minDepthMarker;
+        }, filteredMarkers[0]);
+    };
+    return MarkerList;
+}());
+/**
+ * Store information on what part of the SVG lands on one specific page
+ * The height is the final height in number of pixels
+ * The start and stop are the x-locations in pixels of the part of the total SVG that needs to land on this particular page
+ */
 var Page_Info = /** @class */ (function () {
     function Page_Info() {
         this.height = 0;
@@ -250,82 +314,80 @@ var Page_Info = /** @class */ (function () {
     }
     return Page_Info;
 }());
-var MarkerList = /** @class */ (function () {
-    function MarkerList() {
-        this.clear();
-    }
-    MarkerList.prototype.clear = function () {
-        this.markers = [];
-    };
-    MarkerList.prototype.addMarker = function (depth, xpos) {
-        // Check if the marker already exists
-        var exists = this.markers.some(function (marker) { return marker.depth === depth && marker.xpos === xpos; });
-        if (!exists) {
-            this.markers.push({ depth: depth, xpos: xpos });
-        }
-    };
-    MarkerList.prototype.sort = function () {
-        this.markers.sort(function (a, b) { return a.xpos - b.xpos; });
-    };
-    MarkerList.prototype.findMinDepth = function (min, max) {
-        // Filter markers within the range
-        var filteredMarkers = this.markers.filter(function (marker) { return marker.xpos > min && marker.xpos <= max; });
-        if (filteredMarkers.length === 0) {
-            return { depth: null, xpos: max }; // No markers in the specified range so we just take the maximum
-        }
-        // Find the marker with the lowest depth
-        var minDepthMarker = filteredMarkers[0];
-        for (var _i = 0, filteredMarkers_1 = filteredMarkers; _i < filteredMarkers_1.length; _i++) {
-            var marker = filteredMarkers_1[_i];
-            if (marker.depth < minDepthMarker.depth ||
-                (marker.depth === minDepthMarker.depth && marker.xpos > minDepthMarker.xpos)) {
-                minDepthMarker = marker;
-            }
-        }
-        return minDepthMarker;
-    };
-    return MarkerList;
-}());
+/**
+ * Stores all information about pagination and how pages will be printed.
+ * Can perform automatic pagination or ask the user to paginate.
+ *
+ * We don't use private variables in this class as we want to serialize it (JSON)
+ */
 var Print_Table = /** @class */ (function () {
+    /**
+     * Initialize list of pages (foresee at least 1 page) and pagemarkers
+     */
     function Print_Table() {
-        this.enableAutopage = true;
-        this.height = 0;
-        this.maxwidth = 0;
+        this.height = 0; //How high is the SVG that will be printed in pixels
+        this.maxwidth = 0; //What is the width of the SVG that will be printed in pixels and therefore the maximum printing width
         this.displaypage = 0;
-        this.enableAutopage = true;
+        this.enableAutopage = true; //Flag to indicate if automatic pagination is used or not
         this.pages = new Array();
-        var page_info;
-        page_info = new Page_Info();
-        this.pages.push(page_info);
+        this.pages.push(new Page_Info());
         this.pagemarkers = new MarkerList;
     }
+    /**
+     * Set papersize to either "A4" or "A3"
+     * @param papersize - A string, if it is neither "A4" or "A3", the papersize will default to "A4".
+     */
     Print_Table.prototype.setPaperSize = function (papersize) {
-        this.papersize = papersize;
+        this.papersize = (papersize === "A3" ? "A3" : "A4");
     };
+    /**
+     * Get papersize.  If papersize was not yet defined, it is forced to "A4"
+     * @returns The papersize, either "A3" or "A4"
+     */
     Print_Table.prototype.getPaperSize = function () {
-        if (!this.papersize) {
+        if (!this.papersize)
             this.papersize = "A4";
-        }
         return (this.papersize);
     };
+    /**
+     * Set displayheight of all pages to height
+     * @param height - Height in pixels
+     */
     Print_Table.prototype.setHeight = function (height) {
-        var pagenum;
         this.height = height;
-        for (pagenum = 0; pagenum < this.pages.length; pagenum++) {
-            this.pages[pagenum].height = height;
-        }
+        this.pages.forEach(function (page) { page.height = height; });
     };
+    /**
+     * Get displayheight
+     * @returns Height in pixels
+     */
     Print_Table.prototype.getHeight = function () {
         return (this.height);
     };
+    /**
+     * Set modevertical to either "alles" (meaning we show the full height of the page) or "kies" meaning the user can choose
+     * @param more - Either "alles" or "kies"
+     */
     Print_Table.prototype.setModeVertical = function (mode) {
-        this.modevertical = mode;
+        this.modevertical = (mode === "kies" ? "kies" : "alles");
+        this.forceCorrectFigures();
     };
+    /**
+     * Get modevertical
+     * @returns either "alles" or "kies"
+     */
     Print_Table.prototype.getModeVertical = function () {
         this.forceCorrectFigures();
         return (this.modevertical);
     };
+    /**
+     * Checks that all start and stop position of pages are valid
+     * For instance, the startx position should never be higher than the stopx.
+     * In addition, the SVG always goes from left to right over the pages so the startx
+     * of a new page cannot be lower than the stopx of the page before.
+     */
     Print_Table.prototype.forceCorrectFigures = function () {
+        var _this = this;
         if (!this.modevertical) {
             this.modevertical = "alles";
         }
@@ -338,45 +400,79 @@ var Print_Table = /** @class */ (function () {
                 this.starty = 0;
                 this.stopy = this.height;
         }
-        var pagenum;
         this.pages[this.pages.length - 1].stop = this.maxwidth;
-        for (pagenum = 0; pagenum < this.pages.length; pagenum++) {
-            if (pagenum > 0) {
-                this.pages[pagenum].start = this.pages[pagenum - 1].stop;
+        this.pages.forEach(function (page, index) {
+            if (page.stop < 0)
+                page.stop = 0;
+            if (page.start < 0)
+                page.start = 0;
+            if (index > 0) {
+                page.start = _this.pages[index - 1].stop;
             }
-            if (this.pages[pagenum].stop > this.maxwidth) {
-                this.pages[this.pages.length - 1].stop = this.maxwidth;
+            if (page.stop > _this.maxwidth) {
+                _this.pages[_this.pages.length - 1].stop = _this.maxwidth;
             }
-            ;
-            if (this.pages[pagenum].start > this.pages[pagenum].stop) {
-                this.pages[pagenum].start = this.pages[pagenum].stop;
+            if (page.start > page.stop) {
+                page.start = page.stop;
             }
-            ;
-        }
+        });
     };
+    /**
+     * Sets the maximum width of the SVG to be displayed.
+     * As a general rule this equals the width of the SVG itself in pixels
+     * @param maxwidth
+     */
     Print_Table.prototype.setMaxWidth = function (maxwidth) {
         this.maxwidth = maxwidth;
         this.forceCorrectFigures();
     };
+    /**
+     * Gets the maximum width that can be displayed or printed
+     * @returns maxwidth, as a general rule this equals the width of the SVG itsef in pixels
+     */
     Print_Table.prototype.getMaxWidth = function () {
         return (this.maxwidth);
     };
+    /**
+     * Returns the starty position of the page that will be displayed or printed
+     * @returns starty
+     */
     Print_Table.prototype.getstarty = function () {
         this.forceCorrectFigures();
         return (this.starty);
     };
+    /**
+     * Returns the stopy position of the page that will be displayed or printed
+     * @returns stopy
+     */
     Print_Table.prototype.getstopy = function () {
         this.forceCorrectFigures();
         return (this.stopy);
     };
+    /**
+     * Sets the starty position of the page that will be displayed or printed
+     * @param starty
+     */
     Print_Table.prototype.setstarty = function (starty) {
         this.starty = starty;
         this.forceCorrectFigures;
     };
+    /**
+     * Sets the stopy position of the page that will be displayed or printed
+     * @param starty
+     */
     Print_Table.prototype.setstopy = function (stopy) {
         this.stopy = stopy;
         this.forceCorrectFigures;
     };
+    /**
+     * Sets the stopx position of one specific page to a desired value.
+     * The function calls forceCorrectFigures() afterwards to ensure the natural flow of pages (left to right)
+     * is respected.  Note that stopx in the underlying Page_Info object is called stop and we cannot change that
+     * anymore as the classes are used for serialization.
+     * @param page - page number for which we want to set the stopx (starts counting at zero)
+     * @param stop - stopx position to set
+     */
     Print_Table.prototype.setStop = function (page, stop) {
         if (page > 0) {
             if (stop < this.pages[page - 1].stop)
@@ -391,12 +487,15 @@ var Print_Table = /** @class */ (function () {
         this.pages[page].stop = stop;
         this.forceCorrectFigures();
     };
+    /**
+     * Automatically create pages based on pagemarkers
+     */
     Print_Table.prototype.autopage = function () {
         /*  Autopage uses some ratio's determined by the useful SVG drawing size on the PDF.  This depends on the margins configured in print.js
             At present all of this is still hard-coded.  Should become a function of print.js
-           
+          
             A4
-    
+
             Height: 210-20-30-5-5  --> 150
             Width: 297-20 --> 277
             Ratio: 1.8467
@@ -407,6 +506,11 @@ var Print_Table = /** @class */ (function () {
             Width: 420-20 --> 400
             Ratio: 1.6878
         */
+        var _this = this;
+        //First set all pages to maximum to avoid that we bump into boundaries
+        this.pages.forEach(function (page, index) {
+            page.stop = _this.maxwidth;
+        });
         var height = this.getstopy() - this.getstarty();
         var maxsvgwidth = height * (this.getPaperSize() == "A3" ? 1.6878 : 1.8467);
         var minsvgwidth = 3 / 4 * maxsvgwidth;
@@ -419,13 +523,16 @@ var Print_Table = /** @class */ (function () {
             this.setStop(page, pos);
             page++;
         }
-        // 
+        // The last page stops at the maximum size of the SVG
         this.setStop(page, this.maxwidth);
         // Delete unneeded pages at the end
         for (var i = this.pages.length - 1; i > page; i--) {
             this.deletePage(i);
         }
     };
+    /**
+     * Add a page
+     */
     Print_Table.prototype.addPage = function () {
         var page_info;
         page_info = new Page_Info();
@@ -434,6 +541,10 @@ var Print_Table = /** @class */ (function () {
         page_info.stop = this.maxwidth;
         this.pages.push(page_info);
     };
+    /**
+     * Remove a page
+     * @param page - number of the page to be removed, starting at 0
+     */
     Print_Table.prototype.deletePage = function (page) {
         if (page == 0) {
             this.pages[1].start = 0;
@@ -443,7 +554,170 @@ var Print_Table = /** @class */ (function () {
         }
         this.pages.splice(page, 1);
     };
-    Print_Table.prototype.toHTML = function () {
+    /**
+     * Display a Select box to choose papersize (A3 or A4)
+     * The table is displayed in the HTMLElement div that is given as a parameter to the function.
+     * If any manipulation is done by the user that would require redrawing the print preview, the redrawCallBack function is executed
+     * from within this function
+     * @param div - Existing HTMLElement where the table will be inserted
+     * @param redrawCallBack - Callback function that ensures everything that needs to be redrawn is redrawn
+     */
+    Print_Table.prototype.insertHTMLselectPaperSize = function (div, redrawCallBack) {
+        var _this = this;
+        var select = document.createElement('select');
+        var optionA4 = document.createElement('option');
+        optionA4.value = 'A4';
+        optionA4.textContent = 'A4';
+        var optionA3 = document.createElement('option');
+        optionA3.value = 'A3';
+        optionA3.textContent = 'A3';
+        if (this.papersize == "A3")
+            optionA3.selected = true;
+        else
+            optionA4.selected = true;
+        select.appendChild(optionA4);
+        select.appendChild(optionA3);
+        select.onchange = function (event) {
+            _this.setPaperSize(event.target.value);
+            redrawCallBack();
+        };
+        div.appendChild(select);
+    };
+    /**
+     * Display a Select box to choose dpi (300 or 600)
+     * The table is displayed in the HTMLElement div that is given as a parameter to the function.
+     * If any manipulation is done by the user that would require redrawing the print preview, the redrawCallBack function is executed
+     * from within this function
+     * @param div - Existing HTMLElement where the table will be inserted
+     * @param redrawCallBack - Callback function that ensures everything that needs to be redrawn is redrawn
+     */
+    Print_Table.prototype.insertHTMLselectdpi = function (div, redrawCallBack) {
+        var select = document.createElement('select');
+        var option300 = document.createElement('option');
+        option300.value = '300';
+        option300.textContent = '300dpi (standaard)';
+        var option600 = document.createElement('option');
+        option600.value = '600';
+        option600.textContent = '600dpi (beter maar trager)';
+        if (typeof (structure.properties.dpi) == 'undefined')
+            structure.properties.dpi = 300;
+        if (structure.properties.dpi == 600)
+            option600.selected = true;
+        else
+            option300.selected = true;
+        select.appendChild(option300);
+        select.appendChild(option600);
+        select.onchange = function (event) {
+            structure.properties.dpi = parseInt(event.target.value, 0);
+        };
+        div.appendChild(select);
+    };
+    /**
+     * Display a Check box to decide if one wants to use autopage or not.
+     * If autopage is enabled, we also recalculate the page boundaries
+     * The checkbox is displayed in the HTMLElement div that is given as a parameter to the function.
+     * If any manipulation is done by the user that would require redrawing the print preview, the redrawCallBack function is executed
+     * from within this function
+     * @param div - Existing HTMLElement where the table will be inserted
+     * @param redrawCallBack - Callback function that ensures everything that needs to be redrawn is redrawn
+     */
+    Print_Table.prototype.insertHTMLcheckAutopage = function (div, redrawCallBack) {
+        var _this = this;
+        var checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = 'autopage';
+        checkbox.name = 'autopage';
+        var label = document.createElement('label');
+        label.htmlFor = 'autopage';
+        label.textContent = "Handmatig over pagina's verdelen";
+        if (this.enableAutopage) {
+            this.setModeVertical("alles");
+            this.autopage();
+        }
+        else {
+            checkbox.checked = true;
+        }
+        div.append(checkbox);
+        div.append(label);
+        checkbox.onchange = function (event) {
+            _this.enableAutopage = !event.target.checked;
+            redrawCallBack();
+        };
+    };
+    /**
+     * Display a select box to choose the vertical mode.
+     * If vertical mode is "kies", we also display input boxes to choose the starty and stopy positions.
+     * The checkbox is displayed in the HTMLElement div that is given as a parameter to the function.
+     * If any manipulation is done by the user that would require redrawing the print preview, the redrawCallBack function is executed
+     * from within this function
+     * @param div - Existing HTMLElement where the table will be inserted
+     * @param redrawCallBack - Callback function that ensures everything that needs to be redrawn is redrawn
+     */
+    Print_Table.prototype.insertHTMLchooseVerticals = function (div, redrawCallBack) {
+        var _this = this;
+        var outstr = "";
+        switch (this.modevertical) {
+            case "kies":
+                outstr += 'Hoogte <select id="select_modeVertical"><option value="alles">Alles (standaard)</option><option value="kies" selected="Selected">Kies (expert)</option></select>';
+                outstr += '&nbsp;&nbsp;StartY ';
+                outstr += '<input size="4" id="input_starty" type="number" min="0" step="1" max="' + this.getHeight() + '" value="' + this.getstarty() + '">';
+                outstr += '&nbsp;&nbsp;StopY ';
+                outstr += '<input size="4" id="input_stopy" type="number" min="0" step="1" max="' + this.getHeight() + '" value="' + this.getstopy() + '">';
+                break;
+            case "alles":
+            default:
+                outstr += 'Hoogte <select id="select_modeVertical"><option value="alles">Alles (standaard)</option><option value="kies">Kies (expert)</option></select>';
+        }
+        div.insertAdjacentHTML('beforeend', outstr);
+        document.getElementById('select_modeVertical').onchange = function (event) {
+            _this.setModeVertical(event.target.value);
+            redrawCallBack();
+        };
+        if (this.modevertical == "kies") {
+            document.getElementById('input_starty').onchange = function (event) {
+                var starty = parseInt(event.target.value);
+                if (isNaN(starty))
+                    starty = 0;
+                _this.setstarty(starty);
+                _this.forceCorrectFigures();
+                redrawCallBack();
+            };
+            document.getElementById('input_stopy').onchange = function (event) {
+                var stopy = parseInt(event.target.value);
+                if (isNaN(stopy))
+                    stopy = _this.getHeight();
+                ;
+                _this.setstopy(stopy);
+                _this.forceCorrectFigures();
+                redrawCallBack();
+            };
+        }
+    };
+    /**
+     * Display a button to force auto-pagination even when in manual mode
+     * @param div - Existing HTMLElement where the table will be inserted
+     * @param redrawCallBack - Callback function that ensures everything that needs to be redrawn is redrawn
+     */
+    Print_Table.prototype.insertHTMLsuggestXposButton = function (div, redrawCallBack) {
+        var _this = this;
+        var button = document.createElement('button');
+        button.innerText = 'Suggereer X-posities';
+        div.append(button);
+        button.onclick = function () {
+            _this.autopage();
+            redrawCallBack();
+        };
+    };
+    /**
+     * Display a table where the user can choose start and stop positions for the x-coordinates in the SVG of each individual page
+     * The table is displayed in the HTMLElement div that is given as a parameter to the function.
+     * If any manipulation is done by the user that would require redrawing the print preview, the redrawCallBack function is executed
+     * from within this function
+     * @param div - Existing HTMLElement where the table will be inserted
+     * @param redrawCallBack - Callback function that ensures everything that needs to be redrawn is redrawn
+     */
+    Print_Table.prototype.insertHTMLposxTable = function (div, redrawCallBack) {
+        var _this = this;
         if (structure.print_table.enableAutopage)
             this.autopage();
         var outstr = "";
@@ -453,26 +727,162 @@ var Print_Table = /** @class */ (function () {
         for (pagenum = 0; pagenum < this.pages.length; pagenum++) {
             outstr += '<tr><td align=center>' + (pagenum + 1) + '</td><td align=center>' + this.pages[pagenum].start + '</td><td align=center>';
             if (pagenum != this.pages.length - 1) {
-                outstr += '<input size="5" id="id_stop_change_' + pagenum + '" type="number" min="' + this.pages[pagenum].start + '" step="1" max="' + this.maxwidth + '" onchange="HLChangePrintStop(' + pagenum + ')" value="' + this.pages[pagenum].stop + '">';
+                outstr += '<input size="5" id="input_stop_' + pagenum + '" type="number" min="' + this.pages[pagenum].start
+                    + '" step="1" max="' + this.maxwidth + '" value="' + this.pages[pagenum].stop + '">';
             }
             else {
                 outstr += this.pages[pagenum].stop.toString();
             }
             outstr += '</td><td align=left>';
             if (pagenum == this.pages.length - 1) {
-                outstr += '<button style="background-color:green;" onclick="HLAddPrintPage()">&#9660;</button>';
+                outstr += '<button style="background-color:green;" id="Btn_Addpage">&#9660;</button>';
             }
             if (this.pages.length > 1) {
-                outstr += '<button style="background-color:red;" onclick="HLDeletePrintPage(' + pagenum + ')">&#9851</button>';
+                outstr += '<button style="background-color:red;" id="Btn_Deletepage_' + pagenum + '">&#9851;</button>';
             }
             outstr += '</td></tr>';
-            //outstr += this.Pages[pagenum].height.toString();
         }
         outstr += "</table>";
-        return (outstr);
+        div.insertAdjacentHTML('beforeend', outstr);
+        document.getElementById('Btn_Addpage').onclick = function () {
+            _this.addPage();
+            redrawCallBack();
+        };
+        document.querySelectorAll('button[id^="Btn_Deletepage_"]').forEach(function (button) {
+            var match = button.id.match(/Btn_Deletepage_(\d+)/);
+            if (match) {
+                var page_1 = parseInt(match[1]);
+                button.onclick = function () {
+                    _this.deletePage(page_1);
+                    redrawCallBack();
+                };
+            }
+        });
+        document.querySelectorAll('input[id^="input_stop_"]').forEach(function (input) {
+            input.addEventListener('change', function (event) {
+                var match = event.target.id.match(/input_stop_(\d+)/);
+                if (match) {
+                    var page = parseInt(match[1]);
+                    var stop_1 = parseInt(event.target.value);
+                    _this.setStop(page, stop_1);
+                    redrawCallBack();
+                }
+            });
+        });
     };
     return Print_Table;
 }());
+function HLDisplayPage() {
+    structure.print_table.displaypage = parseInt(document.getElementById("id_select_page").value) - 1;
+    printsvg();
+}
+function dosvgdownload() {
+    var prtContent = document.getElementById("printsvgarea").innerHTML;
+    var filename = document.getElementById("dosvgname").value;
+    download_by_blob(prtContent, filename, 'data:image/svg+xml;charset=utf-8'); //Was text/plain
+}
+function printsvg() {
+    function generatePdf() {
+        if (typeof (structure.properties.dpi) == 'undefined')
+            structure.properties.dpi = 300;
+        var svg = flattenSVGfromString(structure.toSVG(0, "horizontal").data);
+        var pages = Array.from({ length: structure.print_table.pages.length }, function (_, i) { return i + 1; });
+        printPDF(svg, structure.print_table, structure.properties, pages, document.getElementById("dopdfname").value, //filename
+        document.getElementById("progress_pdf") //HTML element where callback status can be given
+        );
+    }
+    function renderPrintSVG(outSVG) {
+        function getPrintSVGWithoutAddress(outSVG, page) {
+            if (page === void 0) { page = structure.print_table.displaypage; }
+            var scale = 1;
+            var startx = structure.print_table.pages[page].start;
+            var width = structure.print_table.pages[page].stop - startx;
+            var starty = structure.print_table.getstarty();
+            var height = structure.print_table.getstopy() - starty;
+            var viewbox = '' + startx + ' ' + starty + ' ' + width + ' ' + height;
+            var outstr = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" transform="scale(1,1)" style="border:1px solid white" ' +
+                'height="' + (height * scale) + '" width="' + (width * scale) + '" viewBox="' + viewbox + '">' +
+                flattenSVGfromString(outSVG.data) + '</svg>';
+            return (outstr);
+        }
+        document.getElementById("printarea").innerHTML = '<div id="printsvgarea">' +
+            getPrintSVGWithoutAddress(outSVG) +
+            '</div>';
+    }
+    // First we generate an SVG image. We do this first because we need the size
+    // We will display it at the end of this function    
+    var outSVG = new SVGelement();
+    outSVG = structure.toSVG(0, "horizontal");
+    var height = outSVG.yup + outSVG.ydown;
+    var width = outSVG.xleft + outSVG.xright;
+    structure.print_table.setHeight(height);
+    structure.print_table.setMaxWidth(width);
+    // Then we display all the print options
+    var outstr = "";
+    var strleft = "";
+    document.getElementById("configsection").innerHTML
+        = '<br>'
+            + '<div>'
+            + '    <button id="button_pdfdownload">Genereer PDF</button>' // Generate PDF button comes here
+            + '    <span id="select_papersize"></span>' // Selector to choose "A3" and "A4" comes here
+            + '    <span id="select_dpi"></span>' // Selector for dpi 300 or 600 comes here
+            + '    <input id="dopdfname" size="20" value="eendraadschema_print.pdf">&nbsp;' // Input box for filename of pdf document
+            + '    <span id="progress_pdf"></span>' // Area where status of pdf generation can be displayed
+            + '</div>';
+    document.getElementById('button_pdfdownload').onclick = generatePdf;
+    structure.print_table.insertHTMLselectPaperSize(document.getElementById('select_papersize'), printsvg);
+    structure.print_table.insertHTMLselectdpi(document.getElementById('select_dpi'), printsvg);
+    outstr
+        = '<br>'
+            + '<div>'
+            + '    <span style="margin-right: 2em" id="check_autopage"></span>' // Checkbox to choose if we want to auto paginate or not comes here
+            + '    <span style="margin-right: 2em" id="id_verticals"></span>' // An optional area to choose what part of the y-space of the image is shown
+            + '    <span id="id_suggest_xpos_button"></span>' // A button to force auto pagination comes here
+            + '</div>';
+    document.getElementById("configsection").insertAdjacentHTML('beforeend', outstr);
+    structure.print_table.insertHTMLcheckAutopage(document.getElementById('check_autopage'), printsvg);
+    if (!structure.print_table.enableAutopage) {
+        structure.print_table.insertHTMLchooseVerticals(document.getElementById('id_verticals'), printsvg);
+        structure.print_table.insertHTMLsuggestXposButton(document.getElementById('id_suggest_xpos_button'), printsvg);
+    }
+    if (!structure.print_table.enableAutopage) {
+        outstr
+            = '<br>'
+                + '<table border="0">'
+                + '    <tr>'
+                + '        <td style="vertical-align:top;">'
+                + '            <div id="id_print_table"></div>' // Table with all startx and stopx comes here
+                + '        </td>'
+                + '        <td style="vertical-align:top;padding:5px">'
+                + '            <div>Klik op de groene pijl om het schema over meerdere pagina\'s te printen en kies voor elke pagina de start- en stop-positie in het schema (in pixels).</div>'
+                + '            <div>Onderaan kan je bekijken welk deel van het schema op welke pagina belandt.</div>'
+                + '        </td>'
+                + '    </tr>'
+                + '</table>'
+                + '<br>';
+        document.getElementById("configsection").insertAdjacentHTML('beforeend', outstr);
+        structure.print_table.insertHTMLposxTable(document.getElementById('id_print_table'), printsvg);
+    }
+    strleft += '<hr>';
+    strleft += '<b>Printvoorbeeld: </b>Pagina <select onchange="HLDisplayPage()" id="id_select_page">';
+    for (var i = 0; i < structure.print_table.pages.length; i++) {
+        if (i == structure.print_table.displaypage) {
+            strleft += '<option value=' + (i + 1) + ' selected>' + (i + 1) + '</option>';
+        }
+        else {
+            strleft += '<option value=' + (i + 1) + '>' + (i + 1) + '</option>';
+        }
+    }
+    strleft += '</select>&nbsp;&nbsp;(Enkel tekening, kies "Genereer PDF" om ook de tekstuele gegevens te zien)';
+    strleft += '<br><br>';
+    strleft += '<table border="0"><tr><td style="vertical-align:top"><button onclick="dosvgdownload()">Zichtbare pagina als SVG opslaan</button></td><td>&nbsp;</td><td style="vertical-align:top"><input id="dosvgname" size="20" value="eendraadschema_print.svg"></td><td>&nbsp;&nbsp;</td><td>Sla tekening hieronder op als SVG en converteer met een ander programma naar PDF (bvb Inkscape).</td></tr></table><br>';
+    strleft += displayButtonPrintToPdf(); // This is only for the online version
+    strleft += '<div id="printarea"></div>';
+    document.getElementById("configsection").insertAdjacentHTML('beforeend', strleft);
+    // Finally we show the actual SVG
+    renderPrintSVG(outSVG);
+    hide2col();
+}
 var importExportUsingFileAPI = /** @class */ (function () {
     function importExportUsingFileAPI() {
         this.clear();
@@ -6169,56 +6579,6 @@ function HLRedrawTree() {
     HLRedrawTreeHTML();
     HLRedrawTreeSVG();
 }
-function HLAddPrintPage() {
-    this.structure.print_table.addPage();
-    printsvg();
-}
-function HLDeletePrintPage(mypage) {
-    this.structure.print_table.deletePage(mypage);
-    printsvg();
-}
-function HLChangePrintStop(page) {
-    var str_newstop = document.getElementById("id_stop_change_" + page).value;
-    var int_newstop = parseInt(str_newstop);
-    structure.print_table.setStop(page, int_newstop);
-    printsvg();
-}
-function HLDisplayPage() {
-    structure.print_table.displaypage = parseInt(document.getElementById("id_select_page").value) - 1;
-    printsvg();
-}
-function HLChangeModeVertical() {
-    structure.print_table.setModeVertical(document.getElementById("id_modeVerticalSelect").value);
-    printsvg();
-}
-function HLChangeStartY() {
-    var starty = parseInt(document.getElementById("id_starty").value);
-    if (isNaN(starty))
-        starty = 0;
-    structure.print_table.setstarty(starty);
-    structure.print_table.forceCorrectFigures();
-    printsvg();
-}
-function HLChangeStopY() {
-    var stopy = parseInt(document.getElementById("id_stopy").value);
-    if (isNaN(stopy))
-        stopy = structure.print_table.getHeight();
-    structure.print_table.setstopy(stopy);
-    structure.print_table.forceCorrectFigures();
-    printsvg();
-}
-function HLChangePaperSize() {
-    structure.print_table.setPaperSize(document.getElementById("id_papersize").value);
-    printsvg();
-}
-function HLupdateAutopage() {
-    structure.print_table.enableAutopage = !(document.getElementById("autopage").checked);
-    printsvg();
-}
-function HLsuggestPages() {
-    structure.print_table.autopage();
-    printsvg();
-}
 function buildNewStructure(structure) {
     // Paremeterisation of the electro board
     var aantalDrogeKringen = CONF_aantal_droge_kringen;
@@ -6269,34 +6629,6 @@ function reset_all() {
     buildNewStructure(structure);
     HLRedrawTree();
 }
-function doprint() {
-    var prtContent = document.getElementById("printarea");
-    var WinPrint = window.open();
-    var prtStr = "\n  <html>\n    <head>\n    <style type=\"text/css\">\n    @media print {\n      .header, .hide { visibility: hidden }\n    }\n    @page\n    {\n\t    size: landscape;\n\t    margin: 0cm;\n      body { margin: 2cm; }\n    }\n    </style>\n    <style type=\"text/css\" media=\"print\">\n    @page\n    {\n\t    size: landscape;\n\t    margin: 0cm;\n      body { margin: 2cm; }\n    }\n    </style>\n    </head>\n    <body>"
-        + prtContent.innerHTML + '</body></html>';
-    WinPrint.document.write(prtStr);
-    WinPrint.document.close();
-    WinPrint.focus();
-    WinPrint.print();
-    WinPrint.close();
-}
-function dosvgdownload() {
-    var prtContent = document.getElementById("printsvgarea").innerHTML;
-    var filename = document.getElementById("dosvgname").value;
-    download_by_blob(prtContent, filename, 'data:image/svg+xml;charset=utf-8'); //Was text/plain
-}
-function updateDPI() {
-    structure.properties.dpi = parseInt(document.getElementById("dpiSelect").value, 0);
-}
-function dopdfdownload() {
-    updateDPI();
-    //let page = structure.print_table.displaypage+1; //starts counting at zero so we need to add 1
-    var svg = flattenSVGfromString(structure.toSVG(0, "horizontal").data);
-    var pages = Array.from({ length: structure.print_table.pages.length }, function (_, i) { return i + 1; });
-    printPDF(svg, /*document.getElementById("printsvgarea").innerHTML*/ structure.print_table, structure.properties, pages, document.getElementById("dopdfname").value, //filename
-    document.getElementById("progress_pdf") //HTML element where callback status can be given
-    );
-}
 function renderAddress() {
     var outHTML = "";
     outHTML = '<div align="left">' +
@@ -6333,107 +6665,11 @@ function renderAddressStacked() {
         '</table>';
     return outHTML;
 }
-function getPrintSVGWithoutAddress(page) {
-    if (page === void 0) { page = structure.print_table.displaypage; }
-    var outSVG = new SVGelement();
-    outSVG = structure.toSVG(0, "horizontal");
-    var scale = 1;
-    //var height = outSVG.yup + outSVG.ydown;
-    var startx = structure.print_table.pages[page].start;
-    var width = structure.print_table.pages[page].stop - startx;
-    var starty = structure.print_table.getstarty();
-    var height = structure.print_table.getstopy() - starty;
-    var viewbox = '' + startx + ' ' + starty + ' ' + width + ' ' + height;
-    var outstr = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" transform="scale(1,1)" style="border:1px solid white" ' +
-        'height="' + (height * scale) + '" width="' + (width * scale) + '" viewBox="' + viewbox + '">' +
-        flattenSVGfromString(outSVG.data) + '</svg>';
-    return (outstr);
-}
-function renderPrintSVG() {
-    document.getElementById("printarea").innerHTML = '<div id="printsvgarea">' +
-        getPrintSVGWithoutAddress() +
-        '</div>';
-}
-function changePrintParams() {
-    renderPrintSVG();
-}
 function changeAddressParams() {
     structure.properties.owner = document.getElementById("conf_owner").innerHTML;
     structure.properties.installer = document.getElementById("conf_installer").innerHTML;
     structure.properties.control = document.getElementById("conf_control").innerHTML;
     structure.properties.info = document.getElementById("conf_info").innerHTML;
-}
-function printsvg() {
-    var strleft = "";
-    var outSVG = new SVGelement();
-    outSVG = structure.toSVG(0, "horizontal");
-    var scale = 1;
-    var startx = 0;
-    var height = outSVG.yup + outSVG.ydown;
-    var width = outSVG.xleft + outSVG.xright;
-    structure.print_table.setHeight(height);
-    structure.print_table.setMaxWidth(width); // foresee some extra space for items like boiler that sometimes go our of their box
-    strleft += '<br><button onclick="dopdfdownload()">Genereer PDF</button>';
-    switch (structure.print_table.getPaperSize()) {
-        case "A3":
-            strleft += '&nbsp;<select onchange="HLChangePaperSize()" id="id_papersize"><option value="A4">A4</option><option value="A3" selected="selected">A3</option></select>';
-            break;
-        case "A4":
-        default: strleft += '&nbsp;<select onchange="HLChangePaperSize()" id="id_papersize"><option value="A4" selected="Selected">A4</option><option value="A3">A3</option></select>';
-    }
-    if (structure.properties.dpi == 600) {
-        strleft += '&nbsp;<select id="dpiSelect" onchange="updateDPI()"><option value="300">300dpi (standaard)</option><option value="600" selected>600dpi (beter maar trager)</option></select>';
-    }
-    else {
-        strleft += '&nbsp;<select id="dpiSelect" onchange="updateDPI()"><option value="300" selected>300dpi (standaard)</option><option value="600">600dpi (beter maar trager)</option></select>';
-    }
-    strleft += '&nbsp;<input id="dopdfname" size="20" value="eendraadschema_print.pdf">&nbsp;&nbsp;<span id="progress_pdf"></span><br>';
-    if (structure.print_table.enableAutopage) {
-        strleft += '<br><input type="checkbox" id="autopage" onchange="HLupdateAutopage()" name="autopage" /><label for="autopage">Handmatig over pagina\'s verdelen</label><br>';
-        structure.print_table.setModeVertical("alles");
-        structure.print_table.autopage();
-    }
-    else {
-        strleft += '<br><input type="checkbox" id="autopage" onchange="HLupdateAutopage()" name="autopage" checked /><label for="autopage">Handmatig over pagina\'s verdelen</label>';
-        strleft += '<span style="margin-left: 2em"></span>';
-        switch (structure.print_table.getModeVertical()) {
-            case "kies":
-                strleft += 'Hoogte <select onchange="HLChangeModeVertical()" id="id_modeVerticalSelect"><option value="alles">Alles (standaard)</option><option value="kies" selected="Selected">Kies (expert)</option></select>';
-                strleft += '&nbsp;&nbsp;StartY ';
-                strleft += '<input size="4" id="id_starty" type="number" min="0" step="1" max="' + structure.print_table.getHeight() + '" onchange="HLChangeStartY()" value="' + structure.print_table.getstarty() + '">';
-                strleft += '&nbsp;&nbsp;StopY ';
-                strleft += '<input size="4" id="id_stopy" type="number" min="0" step="1" max="' + structure.print_table.getHeight() + '" onchange="HLChangeStopY()" value="' + structure.print_table.getstopy() + '">';
-                break;
-            case "alles":
-            default:
-                strleft += 'Hoogte <select onchange="HLChangeModeVertical()" id="id_modeVerticalSelect"><option value="alles">Alles (standaard)</option><option value="kies">Kies (expert)</option></select>';
-        }
-        strleft += '<span style="margin-left: 2em"></span><button onclick="HLsuggestPages()">Suggereer X-posities</button>';
-        strleft += '<br><br><table border="0"><tr><td style="vertical-align:top;">';
-        strleft += structure.print_table.toHTML() + '<br>';
-        strleft += '</td><td style="vertical-align:top;padding:5px">';
-        strleft += 'Klik op de groene pijl om het schema over meerdere pagina\'s te printen en kies voor elke pagina de start- en stop-positie in het schema (in pixels). '
-            + '<br><br>Onderaan kan je bekijken welk deel van het schema op welke pagina belandt. ';
-        strleft += '</td></tr></table>';
-    }
-    strleft += '<hr>';
-    strleft += '<b>Printvoorbeeld: </b>Pagina <select onchange="HLDisplayPage()" id="id_select_page">';
-    for (var i = 0; i < structure.print_table.pages.length; i++) {
-        if (i == structure.print_table.displaypage) {
-            strleft += '<option value=' + (i + 1) + ' selected>' + (i + 1) + '</option>';
-        }
-        else {
-            strleft += '<option value=' + (i + 1) + '>' + (i + 1) + '</option>';
-        }
-    }
-    strleft += '</select>&nbsp;&nbsp;(Enkel tekening, kies "Genereer PDF" om ook de tekstuele gegevens te zien)';
-    strleft += '<br><br>';
-    strleft += '<table border="0"><tr><td style="vertical-align:top"><button onclick="dosvgdownload()">Zichtbare pagina als SVG opslaan</button></td><td>&nbsp;</td><td style="vertical-align:top"><input id="dosvgname" size="20" value="eendraadschema_print.svg"></td><td>&nbsp;&nbsp;</td><td>Sla tekening hieronder op als SVG en converteer met een ander programma naar PDF (bvb Inkscape).</td></tr></table><br>';
-    strleft += displayButtonPrintToPdf();
-    strleft += '<div id="printarea"></div>';
-    document.getElementById("configsection").innerHTML = strleft;
-    renderPrintSVG();
-    hide2col();
 }
 function openContactForm() {
     var strleft = PROP_Contact_Text;
