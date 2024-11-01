@@ -403,8 +403,6 @@ import_to_structure(EXAMPLE_DEFAULT,false); //Just in case the user doesn't sele
 
 document.querySelector('#left_col_inner').addEventListener('change', function(event) {
 
-    console.log("go go go");
-
     function propUpdate(my_id: number, item: string, type: string, value: string | boolean): void {
         switch (type) {
           case "select-one":
@@ -439,8 +437,6 @@ document.querySelector('#left_col_inner').addEventListener('change', function(ev
     const match = id.match(/^HL_edit_(\d+)_(.+)$/);
     const idNumber = match ? match[1] : null;
     const key = match ? match[2] : null;
-
-    console.log({ type, value, id: idNumber, key });
 
     propUpdate(parseInt(idNumber),key,type,value);
 

@@ -77,7 +77,8 @@ function printPDF(svg, print_table, properties, pages=[1], filename="eendraadsch
 
         let printlines = [];
 
-        lines = html.split(/<br>|<\/div><div>/);
+        html = html.replace(/<div>/g, ''); //remove all instances of <div>
+        lines = html.split(/<br>|<\/div>/);
         lines = lines.map(htmlToUnicode);
         for (let line of lines) {
             let wrappedlines = doc.splitTextToSize(line, paperdetails.owner_box_width - 2 * 2 - 3);
