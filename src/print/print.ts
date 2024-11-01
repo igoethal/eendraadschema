@@ -27,25 +27,24 @@ function printsvg() {
         );
     }
 
+    function getPrintSVGWithoutAddress(outSVG: SVGelement, page:number = structure.print_table.displaypage) {
+        var scale = 1;
+    
+        var startx = structure.print_table.pages[page].start;
+        var width = structure.print_table.pages[page].stop - startx;
+        var starty = structure.print_table.getstarty();
+        var height = structure.print_table.getstopy() - starty;
+    
+        var viewbox = '' + startx + ' ' + starty + ' ' + width + ' ' + height;
+    
+        var outstr = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" transform="scale(1,1)" style="border:1px solid white" ' +
+                  'height="' + (height*scale) + '" width="' + (width*scale) + '" viewBox="' + viewbox + '">' +
+                  flattenSVGfromString(outSVG.data) + '</svg>';
+    
+        return(outstr);
+    }
+
     function renderPrintSVG(outSVG: SVGelement) {
-
-        function getPrintSVGWithoutAddress(outSVG: SVGelement, page:number = structure.print_table.displaypage) {
-            var scale = 1;
-        
-            var startx = structure.print_table.pages[page].start;
-            var width = structure.print_table.pages[page].stop - startx;
-            var starty = structure.print_table.getstarty();
-            var height = structure.print_table.getstopy() - starty;
-        
-            var viewbox = '' + startx + ' ' + starty + ' ' + width + ' ' + height;
-        
-            var outstr = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" transform="scale(1,1)" style="border:1px solid white" ' +
-                      'height="' + (height*scale) + '" width="' + (width*scale) + '" viewBox="' + viewbox + '">' +
-                      flattenSVGfromString(outSVG.data) + '</svg>';
-        
-            return(outstr);
-        }
-
         document.getElementById("printarea").innerHTML = '<div id="printsvgarea">' +
                                                             getPrintSVGWithoutAddress(outSVG) +
                                                         '</div>';
