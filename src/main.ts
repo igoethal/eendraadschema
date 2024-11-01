@@ -15,7 +15,8 @@ function HLCollapseExpand(my_id: number, state?: Boolean) {
        structure.data[ordinal].collapsed = state;
     }
     undostruct.store();
-    HLRedrawTree();
+    structure.updateHTMLinner(my_id);
+    HLRedrawTreeSVG();
 }
 
 function HLDelete(my_id: number) {
@@ -68,7 +69,7 @@ function HLInsertChild(my_id: number) {
 }
 
 function HLPropUpdate(my_id: number, item: string, type: string, docId: string) {
-    switch (type) {
+    /*switch (type) {
       case "SELECT":
           var setvalueselect: string = (document.getElementById(docId) as HTMLInputElement).value;
           if (item == "type") { // Type changed
@@ -89,7 +90,7 @@ function HLPropUpdate(my_id: number, item: string, type: string, docId: string) 
           break;
     }
     undostruct.store();
-    HLRedrawTreeSVG();
+    HLRedrawTreeSVG();*/
 }
 
 function HL_editmode() {
@@ -145,6 +146,11 @@ function HL_enterSettings() {
 function HLRedrawTreeHTML() {
     show2col();
     document.getElementById("configsection").innerHTML = "";
+    var output:string = structure.toHTML(0) + "<br>" + renderAddressStacked();
+    document.getElementById("left_col_inner").innerHTML = output;
+}
+
+function HLRedrawTreeHTMLLight() {
     var output:string = structure.toHTML(0) + "<br>" + renderAddressStacked();
     document.getElementById("left_col_inner").innerHTML = output;
 }
@@ -299,7 +305,10 @@ function restart_all() {
 }
 
 function hide2col() {
-    var leftElement = document.getElementById("left_col_inner");
+    document.getElementById("configsection").style.display = 'block';
+    document.getElementById("ribbon").style.display = 'none';
+    document.getElementById("canvas_2col").style.display = 'none';
+    /*var leftElement = document.getElementById("left_col_inner");
     var rightElement = document.getElementById("right_col_inner");
     if(typeof(leftElement) != 'undefined' && leftElement != null){
         leftElement.innerHTML = "";
@@ -308,14 +317,16 @@ function hide2col() {
         rightElement.innerHTML = "";
     };
     document.getElementById("canvas_2col").innerHTML = "";
-    document.getElementById("ribbon").innerHTML = "";
+    document.getElementById("ribbon").innerHTML = "";*/
 }
 
 function show2col() {
-    if (document.getElementById("canvas_2col").innerHTML == "") {
+    document.getElementById("configsection").style.display = 'none';
+    document.getElementById("ribbon").style.display = 'block';
+    document.getElementById("canvas_2col").style.display = 'flex';
+    /*if (document.getElementById("canvas_2col").innerHTML == "") {
         document.getElementById("canvas_2col").innerHTML = '<div id="left_col"><div id="left_col_inner"></div></div><div id="right_col"><div id="right_col_inner"></div></div>';
-    }
-
+    }*/
     structure.updateRibbon();
 }
 
@@ -387,5 +398,54 @@ var structure: Hierarchical_List;
 var undostruct: undoRedo = new undoRedo(100);
 
 import_to_structure(EXAMPLE_DEFAULT,false); //Just in case the user doesn't select a scheme and goes to drawing immediately, there should be something there
+
+// Now add handlers for everything that changes in the left column
+
+document.querySelector('#left_col_inner').addEventListener('change', function(event) {
+
+    console.log("go go go");
+
+    function propUpdate(my_id: number, item: string, type: string, value: string | boolean): void {
+        switch (type) {
+          case "select-one":
+              if (item == "type") { // Type changed
+                structure.adjustTypeById(my_id, value as string);
+              } else {
+                structure.data[structure.getOrdinalById(my_id)].props[item] = (value as string);
+              }
+              structure.updateHTMLinner(my_id);
+              break;
+          case "text":
+              structure.data[structure.getOrdinalById(my_id)].props[item] = (value as string);
+              break;
+          case "checkbox":
+              structure.data[structure.getOrdinalById(my_id)].props[item] = (value as boolean);
+              structure.updateHTMLinner(my_id);
+              break;
+        }
+        undostruct.store();
+        HLRedrawTreeSVG();
+    }
+
+    const element: HTMLInputElement = event.target as HTMLInputElement;
+
+    // Ensure the id starts with 'HL_edit_'
+    if (!element.id.startsWith('HL_edit_')) return;
+
+    const { type, id } = element;
+    const value = type === 'checkbox' ? element.checked : element.value;
+
+    // Extract id and key from id
+    const match = id.match(/^HL_edit_(\d+)_(.+)$/);
+    const idNumber = match ? match[1] : null;
+    const key = match ? match[2] : null;
+
+    console.log({ type, value, id: idNumber, key });
+
+    propUpdate(parseInt(idNumber),key,type,value);
+
+    
+    // Perform your logic here with the extracted data
+});
 
 restart_all();

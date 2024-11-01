@@ -60,8 +60,7 @@ class List_Item {
         let output:string = "";
         let sizestr:string = "";
         if (size!=null) sizestr = ' size="'+size+'" ';
-        output = '<input type="text"' + sizestr + ' id="' + 'HL_edit_' + this.id + '_' + item +  '" ' 
-               + 'onchange=HLPropUpdate(' + this.id + ',"' + item + '","STRING","' + 'HL_edit_' + this.id + '_' + item + '") value="' + this.props[item] + '">';
+        output = '<input type="text"' + sizestr + ' id="' + 'HL_edit_' + this.id + '_' + item +  '" value="' + this.props[item] + '">';
 
         return(output);
     }
@@ -71,7 +70,6 @@ class List_Item {
     checkboxPropToHTML(item: string) {
         let output:string;    
         output = '<input type="checkbox" id="' + 'HL_edit_' + this.id + '_' + item + '" '
-               + 'onchange=HLPropUpdate(' + this.id + ',"' + item + '","BOOLEAN","' + 'HL_edit_' + this.id + '_' + item + '")' 
                + (this.props[item] ? ' checked' : '') + '>';
 
         return(output);
@@ -84,7 +82,7 @@ class List_Item {
         let output: string = "";
         let options: string = "";
 
-        output = '<select id="' + myId + '" onchange=HLPropUpdate(' + this.id + ',"' + item + '","SELECT","' + myId + '")>';
+        output = '<select id="' + myId + '">';
         for (let i:number=0; i<items.length; i++) {
             options = "";
             if (this.props[item]==items[i]) { options += " selected"; }

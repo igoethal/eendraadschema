@@ -821,8 +821,7 @@ function printsvg() {
     var outstr = "";
     var strleft = "";
     document.getElementById("configsection").innerHTML
-        = '<br>'
-            + '<div>'
+        = '<div>'
             + '    <button id="button_pdfdownload">Genereer PDF</button>' // Generate PDF button comes here
             + '    <span id="select_papersize"></span>' // Selector to choose "A3" and "A4" comes here
             + '    <span id="select_dpi"></span>' // Selector for dpi 300 or 600 comes here
@@ -1323,7 +1322,7 @@ function download_by_blob(text, filename, mimeType) {
 
 */
 function exportscreen() {
-    var strleft = '<br><span id="exportscreen"></span>'; //We need the id to check elsewhere that the screen is open
+    var strleft = '<span id="exportscreen"></span>'; //We need the id to check elsewhere that the screen is open
     if (window.showOpenFilePicker) { // Use fileAPI
         if (fileAPIobj.filename != null) {
             strleft += 'Laatst geopend of opgeslagen om <b>' + fileAPIobj.lastsaved + '</b> met naam <b>' + fileAPIobj.filename + '</b><br><br>'
@@ -1466,15 +1465,13 @@ var List_Item = /** @class */ (function () {
         var sizestr = "";
         if (size != null)
             sizestr = ' size="' + size + '" ';
-        output = '<input type="text"' + sizestr + ' id="' + 'HL_edit_' + this.id + '_' + item + '" '
-            + 'onchange=HLPropUpdate(' + this.id + ',"' + item + '","STRING","' + 'HL_edit_' + this.id + '_' + item + '") value="' + this.props[item] + '">';
+        output = '<input type="text"' + sizestr + ' id="' + 'HL_edit_' + this.id + '_' + item + '" value="' + this.props[item] + '">';
         return (output);
     };
     // -- Editeren van een checkbox --
     List_Item.prototype.checkboxPropToHTML = function (item) {
         var output;
         output = '<input type="checkbox" id="' + 'HL_edit_' + this.id + '_' + item + '" '
-            + 'onchange=HLPropUpdate(' + this.id + ',"' + item + '","BOOLEAN","' + 'HL_edit_' + this.id + '_' + item + '")'
             + (this.props[item] ? ' checked' : '') + '>';
         return (output);
     };
@@ -1483,7 +1480,7 @@ var List_Item = /** @class */ (function () {
         var myId = "HL_edit_" + this.id + "_" + item;
         var output = "";
         var options = "";
-        output = '<select id="' + myId + '" onchange=HLPropUpdate(' + this.id + ',"' + item + '","SELECT","' + myId + '")>';
+        output = '<select id="' + myId + '">';
         for (var i = 0; i < items.length; i++) {
             options = "";
             if (this.props[item] == items[i]) {
@@ -6181,6 +6178,18 @@ var Hierarchical_List = /** @class */ (function () {
         document.getElementById("ribbon").innerHTML = output;
     };
     // -- Functie om de tree links te tekenen te starten by node met id = myParent --
+    Hierarchical_List.prototype.toHTMLinner = function (ordinal) {
+        if (this.data[ordinal].collapsed) {
+            return ("<tr>\n                        <td bgcolor=\"#8AB2E4\" onclick=\"HLCollapseExpand(".concat(this.data[ordinal].id, ")\" valign= \"top\">&#x229E;</td>\n                        <td width=\"100%\">").concat(this.data[ordinal].toHTML(structure.mode), "<br></td>\n                    </tr>"));
+        }
+        else {
+            return ("<tr>\n                       <td bgcolor=\"C0C0C0\" onclick=\"HLCollapseExpand(".concat(this.data[ordinal].id, ")\" valign= \"top\">&#x229E;</td>\n                       <td width=\"100%\">").concat(this.data[ordinal].toHTML(structure.mode), "<br>").concat(this.toHTML(this.id[ordinal]), "</td>\n                    </tr>"));
+        }
+    };
+    Hierarchical_List.prototype.updateHTMLinner = function (id) {
+        var ordinal = this.getOrdinalById(id);
+        document.getElementById('id_elem_' + id).innerHTML = this.toHTMLinner(ordinal);
+    };
     Hierarchical_List.prototype.toHTML = function (myParent) {
         if (myParent == 0)
             this.updateRibbon();
@@ -6190,16 +6199,9 @@ var Hierarchical_List = /** @class */ (function () {
         for (var i = 0; i < this.length; i++) {
             if (this.active[i] && (this.data[i].parent == myParent)) {
                 numberDrawn++;
-                if (this.data[i].collapsed) {
-                    output += '<table class="html_edit_table"><tr><td bgcolor="#8AB2E4" onclick="HLCollapseExpand(' + this.data[i].id + ')" valign= "top">&#x229E;</td><td width="100%">'
-                        + this.data[i].toHTML(structure.mode) + "<br>";
-                }
-                else {
-                    output += '<table class="html_edit_table"><tr><td bgcolor="#C0C0C0" onclick="HLCollapseExpand(' + this.data[i].id + ')" valign= "top">&#x229F;</td><td width="100%">'
-                        + this.data[i].toHTML(structure.mode) + "<br>"
-                        + this.toHTML(this.id[i]);
-                }
-                output += "</td></tr></table>";
+                output += '<table class="html_edit_table" id="id_elem_' + this.id[i] + '">';
+                output += this.toHTMLinner(i);
+                output += "</table>";
             }
         }
         if ((myParent == 0) && (numberDrawn < 1)) {
@@ -6362,7 +6364,7 @@ var Hierarchical_List = /** @class */ (function () {
     };
     return Hierarchical_List;
 }());
-var CONFIGPAGE_LEFT = "\n    <br>\n    <table border=\"1px\" style=\"border-collapse:collapse;\" align=\"center\" width=\"100%\"><tr><td style=\"padding-top: 0; padding-right: 10px; padding-bottom: 10px; padding-left: 10px;\">\n        <p><font size=\"+2\">\n          <b>Welkom op \u00E9\u00E9ndraadschema</b>\n        </font></p>\n      <p><font size=\"+1\">  \n           Kies \u00E9\u00E9n van onderstaande voorbeelden om van te starten of start van een leeg schema (optie 3).\n      </font></p>\n      <font size=\"+1\">\n        <i>\n          <b>Tip: </b>Om de mogelijkheden van het programma te leren kennen is het vaak beter eerst een voorbeeldschema te\n          bekijken alvorens van een leeg schema te vertrekken.\n        </i>\n      </font>\n    </td></tr></table>\n    <br>\n    <table border=\"1px\" style=\"border-collapse:collapse\" align=\"center\" width=\"100%\">\n      <tr>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Voorbeeld 1</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Voorbeeld 2</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Leeg schema</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Openen</b>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/example000.svg\" height=\"300px\"><br><br>\n          Eenvoudig schema, enkel contactdozen en lichtpunten.\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/example001.svg\" height=\"300px\"><br><br>\n          Iets complexer schema met teleruptoren, verbruikers achter contactdozen en gesplitste kringen.\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/gear.svg\" height=\"100px\"><br><br>\n";
+var CONFIGPAGE_LEFT = "\n    <table border=\"1px\" style=\"border-collapse:collapse;\" align=\"center\" width=\"100%\"><tr><td style=\"padding-top: 0; padding-right: 10px; padding-bottom: 10px; padding-left: 10px;\">\n        <p><font size=\"+2\">\n          <b>Welkom op \u00E9\u00E9ndraadschema</b>\n        </font></p>\n      <p><font size=\"+1\">  \n           Kies \u00E9\u00E9n van onderstaande voorbeelden om van te starten of start van een leeg schema (optie 3).\n      </font></p>\n      <font size=\"+1\">\n        <i>\n          <b>Tip: </b>Om de mogelijkheden van het programma te leren kennen is het vaak beter eerst een voorbeeldschema te\n          bekijken alvorens van een leeg schema te vertrekken.\n        </i>\n      </font>\n    </td></tr></table>\n    <br>\n    <table border=\"1px\" style=\"border-collapse:collapse\" align=\"center\" width=\"100%\">\n      <tr>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Voorbeeld 1</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Voorbeeld 2</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Leeg schema</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Openen</b>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/example000.svg\" height=\"300px\"><br><br>\n          Eenvoudig schema, enkel contactdozen en lichtpunten.\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/example001.svg\" height=\"300px\"><br><br>\n          Iets complexer schema met teleruptoren, verbruikers achter contactdozen en gesplitste kringen.\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/gear.svg\" height=\"100px\"><br><br>\n";
 var CONFIGPAGE_RIGHT = "\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/import_icon.svg\" height=\"100px\"><br><br>\n          Open een schema dat u eerder heeft opgeslagen op uw computer (EDS-bestand). Enkel bestanden aangemaakt na 12 juli 2019 worden herkend.\n          <br><br>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"load_example(0)\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"load_example(1)\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"read_settings()\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"importclicked()\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n      </tr>\n    </table>\n  ";
 var CONFIGPRINTPAGE = "\n<div>\n</div>\n<br>\n";
 var EXAMPLE0 = "EDS0040000eJztWe9r6zYU/VeMv84rjp2kaxhjbQdv422f3qMblIdRrBtHtSwF2Un6g+5v35HsxM5emiVpB68QKCWRda+uzjmSjuInX5LKqqk/6l0EPmcV80e3T77gaAj8GTOkKn8UBr5QfPUx1VKyWUnoM2GyJPQzelb6oydfGX/k/yImEz/wq4cZ4dslU6Wci0qoDI2MqYrJZKYxLB5GaBpTmU7JFLbDyOcIJjuqIJI2oJiRYZnN1A+brEnOxiQTxZKKpCQ7ZnTfG+LpRnTCSVYs6WSIQ5uCcUOo1l9l2xwSFeNBOjcLSti80gVjVd15M7kok5Ikpfg2WQORa1O52S4wIZ25OcYIVYwVnRHr+hdam3YG/nPgl3puUpKixIhqLuVzUFMRtVT0Wip6/01FS8OVNhzfUHVGjOHzqDJz6la2hmVHIVYkq0qitpLokEo+mjeXAlr+urny4g9RMNhHBTaY8rLhtWZD6pQhAE1lxRR3GB0okDoRIBYqGc9FuYbiFcpZ5wRcS3oU2TqiYc6ttl3aCTviuWg5i1+nns0i9pTPeUc94UvyqXX5avXU1FQCbZvaibZq5/qa7a+froA+0jxHCV/L6DflLSGkl0S0TUPXW0VUA/K2GtpY/Je7OBt+C5y5zf0FznqHc3ZDRop02pxJ75e4q13ExZ3Vdn7Quu+11F1rUJZWXOty2+mBhtwmBhxCtuXVRDeZOsdtI4AJK8nCxAWppCAyaLDBGzvvlGhSoVNGYz1fckogCpaTxON12Rh+yuRkySoy3BLafdJJ3DTWKYHRlrFXcSoBBxxMjfV6m9sBcj86FuToBPLeIPeOBTk+gbw3yOGxIPdPIO8LcnxxLMiDE8h7KzluQe53bin9QxzvjRF35NWGoTUOf9pZ5TrHjS3wF7ZL4h4lTdSjtsB7OeOux1Qb8WjZkpTgdJfiTtVGJ0VBhuo+DoCO86FkjEe8+vdVpG0dhjXvC9oAF66k7LqKfRx51Ntu7/rfjL07wpJfMZ6zwqH7fr3d9U7aOrYj6vwkMDiZuzfcSKL+0Sif3N3+KF8cjXLH3v1ua0+FSbHSWpjaCZcd6W/g4PP5GCsRu5bIOlB/mgnK3M9O9ZQxQ8VQvN1HJHaeO9oDwjoUaORS5Dg0vg7EKZBvYaUp311SZ3NVuV2jt/OXuc49fXjsbe+tQXw/6J0fi150GHrRVvRI5e8YvDg6Frw3Wb/vFLwv6A2nsEDaW7fl/2//MJKl6bYXREHvIoDNOw+GQXwewBzjao2LH64lMM3YfOErcOhhR8Z2gjURR18sZULB4LKxJEscKfvpEv5o5rxXfVxNSWQWwMEQYijY/VJw+1Kp/0PfmqRyJtlD3d3dMjPL0e3TZhROLlO/YCqR28VakGzvghmwUNbIIb/mBHIqkboTkklJ9mh1CR7WGR6avDMGm1iKR/cyqm+5sCK04eSUOBHwq7CLVkr3IFpSGIZnxG1KvVTu5cyN1sb6Mu8SxJL7+OPY/PSpMvCIXmg/Iyj0UCpB/GQbPpMced/FkYf21Z9t//Dpj1X75gP6vmACMYtmsDO2HuxnrgsS6mxM1kIozLR5ayQ4Fda0wmMYbcGwiVyfibbbjXfvRXF44/09CL1fH+3k4W/dJWlQ42hnzbHknv8BXkCfFg==";
@@ -6442,7 +6444,8 @@ function HLCollapseExpand(my_id, state) {
         structure.data[ordinal].collapsed = state;
     }
     undostruct.store();
-    HLRedrawTree();
+    structure.updateHTMLinner(my_id);
+    HLRedrawTreeSVG();
 }
 function HLDelete(my_id) {
     structure.deleteById(my_id);
@@ -6486,29 +6489,28 @@ function HLInsertChild(my_id) {
     //No need to call HLRedrawTree as HLCollapseExpand already does that
 }
 function HLPropUpdate(my_id, item, type, docId) {
-    switch (type) {
-        case "SELECT":
-            var setvalueselect = document.getElementById(docId).value;
-            if (item == "type") { // Type changed
-                structure.adjustTypeById(my_id, setvalueselect);
-            }
-            else {
-                structure.data[structure.getOrdinalById(my_id)].props[item] = setvalueselect;
-            }
-            HLRedrawTreeHTML();
-            break;
-        case "STRING":
-            var setvaluestr = document.getElementById(docId).value;
-            structure.data[structure.getOrdinalById(my_id)].props[item] = setvaluestr;
-            break;
-        case "BOOLEAN":
-            var setvaluebool = document.getElementById(docId).checked;
-            structure.data[structure.getOrdinalById(my_id)].props[item] = setvaluebool;
-            HLRedrawTreeHTML();
-            break;
+    /*switch (type) {
+      case "SELECT":
+          var setvalueselect: string = (document.getElementById(docId) as HTMLInputElement).value;
+          if (item == "type") { // Type changed
+            structure.adjustTypeById(my_id, setvalueselect);
+          } else {
+            structure.data[structure.getOrdinalById(my_id)].props[item] = setvalueselect;
+          }
+          HLRedrawTreeHTML();
+          break;
+      case "STRING":
+          var setvaluestr: string = (document.getElementById(docId) as HTMLInputElement).value;
+          structure.data[structure.getOrdinalById(my_id)].props[item] = setvaluestr;
+          break;
+      case "BOOLEAN":
+          var setvaluebool: boolean = (document.getElementById(docId) as HTMLInputElement).checked;
+          structure.data[structure.getOrdinalById(my_id)].props[item] = setvaluebool;
+          HLRedrawTreeHTML();
+          break;
     }
     undostruct.store();
-    HLRedrawTreeSVG();
+    HLRedrawTreeSVG();*/
 }
 function HL_editmode() {
     structure.mode = document.getElementById("edit_mode").value;
@@ -6560,6 +6562,10 @@ function HL_enterSettings() {
 function HLRedrawTreeHTML() {
     show2col();
     document.getElementById("configsection").innerHTML = "";
+    var output = structure.toHTML(0) + "<br>" + renderAddressStacked();
+    document.getElementById("left_col_inner").innerHTML = output;
+}
+function HLRedrawTreeHTMLLight() {
     var output = structure.toHTML(0) + "<br>" + renderAddressStacked();
     document.getElementById("left_col_inner").innerHTML = output;
 }
@@ -6690,23 +6696,27 @@ function restart_all() {
     }
 }
 function hide2col() {
-    var leftElement = document.getElementById("left_col_inner");
+    document.getElementById("configsection").style.display = 'block';
+    document.getElementById("ribbon").style.display = 'none';
+    document.getElementById("canvas_2col").style.display = 'none';
+    /*var leftElement = document.getElementById("left_col_inner");
     var rightElement = document.getElementById("right_col_inner");
-    if (typeof (leftElement) != 'undefined' && leftElement != null) {
+    if(typeof(leftElement) != 'undefined' && leftElement != null){
         leftElement.innerHTML = "";
-    }
-    ;
-    if (typeof (rightElement) != 'undefined' && rightElement != null) {
+    };
+    if(typeof(rightElement) != 'undefined' && rightElement != null){
         rightElement.innerHTML = "";
-    }
-    ;
+    };
     document.getElementById("canvas_2col").innerHTML = "";
-    document.getElementById("ribbon").innerHTML = "";
+    document.getElementById("ribbon").innerHTML = "";*/
 }
 function show2col() {
-    if (document.getElementById("canvas_2col").innerHTML == "") {
+    document.getElementById("configsection").style.display = 'none';
+    document.getElementById("ribbon").style.display = 'block';
+    document.getElementById("canvas_2col").style.display = 'flex';
+    /*if (document.getElementById("canvas_2col").innerHTML == "") {
         document.getElementById("canvas_2col").innerHTML = '<div id="left_col"><div id="left_col_inner"></div></div><div id="right_col"><div id="right_col_inner"></div></div>';
-    }
+    }*/
     structure.updateRibbon();
 }
 function load_example(nr) {
@@ -6766,4 +6776,43 @@ var CONF_upload_OK = "ask"; //can be "ask", "yes", "no"; //before uploading, we 
 var structure;
 var undostruct = new undoRedo(100);
 import_to_structure(EXAMPLE_DEFAULT, false); //Just in case the user doesn't select a scheme and goes to drawing immediately, there should be something there
+// Now add handlers for everything that changes in the left column
+document.querySelector('#left_col_inner').addEventListener('change', function (event) {
+    console.log("go go go");
+    function propUpdate(my_id, item, type, value) {
+        switch (type) {
+            case "select-one":
+                if (item == "type") { // Type changed
+                    structure.adjustTypeById(my_id, value);
+                }
+                else {
+                    structure.data[structure.getOrdinalById(my_id)].props[item] = value;
+                }
+                structure.updateHTMLinner(my_id);
+                break;
+            case "text":
+                structure.data[structure.getOrdinalById(my_id)].props[item] = value;
+                break;
+            case "checkbox":
+                structure.data[structure.getOrdinalById(my_id)].props[item] = value;
+                structure.updateHTMLinner(my_id);
+                break;
+        }
+        undostruct.store();
+        HLRedrawTreeSVG();
+    }
+    var element = event.target;
+    // Ensure the id starts with 'HL_edit_'
+    if (!element.id.startsWith('HL_edit_'))
+        return;
+    var type = element.type, id = element.id;
+    var value = type === 'checkbox' ? element.checked : element.value;
+    // Extract id and key from id
+    var match = id.match(/^HL_edit_(\d+)_(.+)$/);
+    var idNumber = match ? match[1] : null;
+    var key = match ? match[2] : null;
+    console.log({ type: type, value: value, id: idNumber, key: key });
+    propUpdate(parseInt(idNumber), key, type, value);
+    // Perform your logic here with the extracted data
+});
 restart_all();

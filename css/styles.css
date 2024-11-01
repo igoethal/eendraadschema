@@ -1,36 +1,121 @@
+* {
+  box-sizing: border-box; /* Ensure all elements include border and padding in their dimensions */
+}
+
 html {height:100%; background-color: #FFFFFF;}
 
-#topmenu {width:100%; background-color: #F0F0F0;}
+body {
+  margin: 0;
+  padding: 0;
+  /*overflow: hidden;*/
+}
+
+.container {
+  /*overflow: hidden;*/
+  width: 100vw; /* 100% of the viewport width */
+  height: 100vh; /* 100% of the viewport height */
+}
+
+#topmenu {
+  height: 40px;
+  width:100%; 
+  background-color: #F1F3F4;
+  align-items: center;
+  padding: 0px 7px 0px 7px;
+  border-bottom: 1px solid #CCC;
+}
+
+#app {
+  flex: 1; /* Take up the remaining space */
+  overflow: hidden; /* Ensure no scrollbars appear within the app */
+}
+
+#configsection {
+  position: absolute;
+  top: 40px; /* Start 40px from the top */
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: auto; /* Add scrollbars if content overflows */
+  background-color: #ffffff; /* Optional: Background color for visibility */
+  padding: 12px 8px 8px 8px; /* Padding to create the empty border effect */
+}
+
+/*#app * {
+  margin: 2px;
+  padding: 2px;
+}*/
+
+#ribbon {
+  position: absolute;
+  top: 40px; /* Start 40px from the top */
+  height: 30px;
+  left: 0px;
+  right: 0px;
+  bottom: 0;
+  padding: 0px 12px 0px 12px; 
+  background-color: #ffffff; /* Optional: Background color for visibility */
+}
+
+#canvas_2col {
+  display: flex;
+  position: absolute;
+  top: 70px; 
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden; 
+  background-color: #ffffff; /* Optional: Background color for visibility */
+  padding: 0x; /* Padding to create the empty border effect */
+  display: flex;
+  flex-direction: row; /* Ensure columns are side by side */
+}
+
+#left_col {
+  flex: 0.45;
+  overflow: auto;
+}
+
+#right_col {
+  flex: 0.55;
+  overflow: auto;
+}
+
+/* --- CODE FOR THE MENU --- */
 
 ul#minitabs {
-list-style: none;
-margin: 0;
-padding: 7px 0;
-border-left: 1px solid #CCC;
-border-right: 1px solid #CCC;
-border-top: 1px solid #CCC;
-border-bottom: 1px solid #CCC;
-font-weight: bold;
-text-align: left;
-white-space: nowrap;
+  display: flex;
+  height: 100%;
+  /*height: 40px;*/
+  list-style: none;
+  margin: 0;
+  padding: 1px 0; /* 7px */
+  /*border-left: 1px solid #CCC;
+  border-right: 1px solid #CCC;
+  border-top: 1px solid #CCC;
+  border-bottom: 1px solid #CCC;*/
+  font-weight: bold;
+  text-align: left;
+  align-items: center;
+  white-space: nowrap;
 }
 ul#minitabs li {
-display: inline;
-margin: 0 6px;
+  display: inline;
+  margin: 0 6px;
 }
 ul#minitabs a {
-text-decoration: none;
-padding: 0 0 3px;
-border-bottom: 4px solid #F0F0F0;
-color: #999
-  }
+  text-decoration: none;
+  padding: 0 0 3px;
+  border-bottom: 4px solid #F0F0F0;
+  color: #555565
+}
 ul#minitabs a#current {
-border-color: #F60;
-color:#06F
+  border-color: #F60;
+  color:#06F
 }
 ul#minitabs a:hover {
-border-color: #F60;
-color: #666
+  border-color: #F60;
+  color: #333
 }
 
 table.html_edit_table {
@@ -68,48 +153,24 @@ table.html_edit_table td:nth-child(2) {
   min-height:0px;
 }
 
-#canvas_2col {
-  padding:0px;
-  margin:0 0 0 40%;
-  /*background: url(right.jpg);*/
-  color:#fff; width:60%;
-  min-height:100%; float:right;
-}
 
-#left_col {
-  float:left;
-  width:76%;
-  height: 92vh;
-  margin-left:-66%;
-  text-align:left;
-  color:#000;
-  overflow: auto;
-}
+
+
+
 
 #left_col_inner {padding:10px; color:#000000}
 
-#ribbon {padding: 0px; color:#000000}
-
-.container {
-  overflow: hidden;
-}
-
-#body {
-#  overflow: hidden;
-#}
-
-#configsection {
-  overflow-y: auto;
-  max-height: 100%; /* Adjust as needed */
-}
-
-#right_col {
-  height: 92vh;
-  //min-height: calc(100vh - 50px);
-  overflow: auto;
-}
-
 #right_col_inner {padding:10px; color:#000000;}
+
+
+
+
+
+
+
+
+
+
 #AJAX_sent {padding:0px; color:#000000;}
 #AJAX_received {padding:0px; color:#000000;}
 #AJAX_draw {padding:0px; color:#000000;}

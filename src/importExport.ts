@@ -430,7 +430,7 @@ function download_by_blob(text, filename, mimeType) {
 
 function exportscreen() {
 
-    var strleft: string = '<br><span id="exportscreen"></span>'; //We need the id to check elsewhere that the screen is open
+    var strleft: string = '<span id="exportscreen"></span>'; //We need the id to check elsewhere that the screen is open
 
     if ((window as any).showOpenFilePicker) { // Use fileAPI
  

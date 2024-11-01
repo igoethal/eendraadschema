@@ -509,6 +509,25 @@ class Hierarchical_List {
 
     // -- Functie om de tree links te tekenen te starten by node met id = myParent --
 
+    toHTMLinner(ordinal: number) {
+        if (this.data[ordinal].collapsed) {
+            return(`<tr>
+                        <td bgcolor="#8AB2E4" onclick="HLCollapseExpand(${this.data[ordinal].id})" valign= "top">&#x229E;</td>
+                        <td width="100%">${this.data[ordinal].toHTML(structure.mode)}<br></td>
+                    </tr>`);
+        } else {
+            return(`<tr>
+                       <td bgcolor="C0C0C0" onclick="HLCollapseExpand(${this.data[ordinal].id})" valign= "top">&#x229E;</td>
+                       <td width="100%">${this.data[ordinal].toHTML(structure.mode)}<br>${this.toHTML(this.id[ordinal])}</td>
+                    </tr>`);
+        }
+    }
+
+    updateHTMLinner(id: number) {
+        let ordinal: number = this.getOrdinalById(id);
+        (document.getElementById('id_elem_'+id) as HTMLElement).innerHTML = this.toHTMLinner(ordinal);
+    }
+
     toHTML(myParent: number) {
         
         if (myParent==0) this.updateRibbon();
@@ -520,15 +539,9 @@ class Hierarchical_List {
         for (let i = 0; i<this.length; i++) {
             if (this.active[i] && (this.data[i].parent == myParent)) {
                 numberDrawn++;
-                if (this.data[i].collapsed) {
-                    output += '<table class="html_edit_table"><tr><td bgcolor="#8AB2E4" onclick="HLCollapseExpand(' + this.data[i].id + ')" valign= "top">&#x229E;</td><td width="100%">'
-                           +  this.data[i].toHTML(structure.mode) + "<br>"; 
-                } else {
-                    output += '<table class="html_edit_table"><tr><td bgcolor="#C0C0C0" onclick="HLCollapseExpand(' + this.data[i].id + ')" valign= "top">&#x229F;</td><td width="100%">'
-                           +  this.data[i].toHTML(structure.mode) + "<br>"
-                           +  this.toHTML(this.id[i]);
-                }
-                output += "</td></tr></table>";
+                output += '<table class="html_edit_table" id="id_elem_' + this.id[i]  + '">';
+                output += this.toHTMLinner(i);
+                output += "</table>";
             }
         }
         if ( (myParent == 0) && (numberDrawn<1) ) {

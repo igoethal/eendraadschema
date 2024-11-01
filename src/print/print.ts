@@ -70,8 +70,7 @@ function printsvg() {
 
 
     document.getElementById("configsection").innerHTML
-        =  '<br>'
-        +  '<div>'
+        =  '<div>'
         +  '    <button id="button_pdfdownload">Genereer PDF</button>' // Generate PDF button comes here
         +  '    <span id="select_papersize"></span>' // Selector to choose "A3" and "A4" comes here
         +  '    <span id="select_dpi"></span>' // Selector for dpi 300 or 600 comes here
