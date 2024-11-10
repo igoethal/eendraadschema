@@ -37,13 +37,21 @@ function isInt(value) {
 function svgTextWidth(input:String, fontsize:Number = 10, options:String = '') {
     const div = document.createElement('div');
     div.innerHTML = '<svg width="1000" height="20"><text x="0" y="10" style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-size="' + Number(fontsize) + '" ' + options + '>' + input + '</text></svg>';
-    document.getElementById("configsection").appendChild(div);
+    
+    let tryoutdiv: HTMLElement;
+    if (document.getElementById("configsection").style.display === 'block') {
+      tryoutdiv = document.getElementById("configsection") as HTMLElement;
+    } else {
+      tryoutdiv = document.getElementById("right_col_inner") as HTMLElement;
+    }
+    
+    tryoutdiv.appendChild(div);
     const width = (div.children[0].children[0] as SVGGraphicsElement).getBBox().width;
-    document.getElementById("configsection").removeChild(div);
+    tryoutdiv.removeChild(div);
     return(Math.ceil(width));
 }
 
-function flattenSVG(SVGstruct,shiftx,shifty,node) {
+function flattenSVG(SVGstruct,shiftx,shifty,node,overflowright=0) {
 
   if (node==0) structure.print_table.pagemarkers.clear();
   
@@ -67,7 +75,7 @@ function flattenSVG(SVGstruct,shiftx,shifty,node) {
     }
     if (node <= 0) {
       if (outstruct.attributes.getNamedItem("width")) { // make SVG a 0,0 element
-        str = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" transform="scale(1,1)" width="' + (outstruct.attributes.getNamedItem("width").nodeValue)  +
+        str = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" transform="scale(1,1)" width="' + (parseInt(outstruct.attributes.getNamedItem("width").nodeValue)+overflowright)  +
                     '" height="' + (outstruct.attributes.getNamedItem("height").nodeValue) + '">' + str + '</svg>';
       } else {
         str = '<svg>' + str + '</svg>';
@@ -140,11 +148,11 @@ function flattenSVG(SVGstruct,shiftx,shifty,node) {
   return str;
 }
 
-function flattenSVGfromString(xmlstr) {
+function flattenSVGfromString(xmlstr, overflowright: number = 0) {
   var str:string = "";
   var parser = new DOMParser();
   var xmlDoc = parser.parseFromString(xmlstr, "text/xml"); //important to use "text/xml"
-  str = flattenSVG(xmlDoc.childNodes[0],0,0,0);
+  str = flattenSVG(xmlDoc.childNodes[0],0,0,0,overflowright);
   return str;
 }
 

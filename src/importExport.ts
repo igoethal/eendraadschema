@@ -28,12 +28,6 @@ class importExportUsingFileAPI {
         }
     }
 
-    //updateButtons() {
-        //document.getElementById('saveAsButton').disabled = !(this.fileAPIdata.saveNeeded);
-    /*    document.getElementById('saveAsButton').disabled = false;
-        document.getElementById('saveButton').disabled = !(this.fileAPIdata.saveNeeded);
-    }*/
-
     setSaveNeeded(input) {
         let lastSaveNeeded = this.saveNeeded;
         this.saveNeeded = input;
@@ -112,13 +106,6 @@ var importjson = function(event) {
     };
 
     reader.readAsText(input.files[0]);
-
-    // Scroll to top left for the SVG, this can only be done at the end because "right col" has to actually be visible
-    /*const rightelem = document.getElementById("right_col");
-    if (rightelem != null) {
-      rightelem.scrollTop = 0;
-      rightelem.scrollLeft = 0;
-    }*/
 };
 
 /* FUNCTION importclicked()

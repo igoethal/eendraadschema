@@ -68,31 +68,6 @@ function HLInsertChild(my_id: number) {
     //No need to call HLRedrawTree as HLCollapseExpand already does that
 }
 
-function HLPropUpdate(my_id: number, item: string, type: string, docId: string) {
-    /*switch (type) {
-      case "SELECT":
-          var setvalueselect: string = (document.getElementById(docId) as HTMLInputElement).value;
-          if (item == "type") { // Type changed
-            structure.adjustTypeById(my_id, setvalueselect);
-          } else {
-            structure.data[structure.getOrdinalById(my_id)].props[item] = setvalueselect;
-          }
-          HLRedrawTreeHTML();
-          break;
-      case "STRING":
-          var setvaluestr: string = (document.getElementById(docId) as HTMLInputElement).value;
-          structure.data[structure.getOrdinalById(my_id)].props[item] = setvaluestr;
-          break;
-      case "BOOLEAN":
-          var setvaluebool: boolean = (document.getElementById(docId) as HTMLInputElement).checked;
-          structure.data[structure.getOrdinalById(my_id)].props[item] = setvaluebool;
-          HLRedrawTreeHTML();
-          break;
-    }
-    undostruct.store();
-    HLRedrawTreeSVG();*/
-}
-
 function HL_editmode() {
     structure.mode = (document.getElementById("edit_mode") as HTMLInputElement).value;
     HLRedrawTreeHTML();
@@ -157,7 +132,7 @@ function HLRedrawTreeHTMLLight() {
 
 function HLRedrawTreeSVG() {
     let str:string = '<b>Tekening: </b>Ga naar het print-menu om de tekening af te printen of te exporteren als SVG vector graphics.<br><br>'
-                   +  flattenSVGfromString(structure.toSVG(0,"horizontal").data)
+                   +  flattenSVGfromString(structure.toSVG(0,"horizontal").data,10)
                    + '<h2>Legende:</h2>'
                    + '<button style="background-color:green;">&#9650;</button> Item hierboven invoegen (zelfde niveau)<br>'
                    + '<button style="background-color:green;">&#9660;</button> Item hieronder invoegen (zelfde niveau)<br>'
@@ -308,25 +283,12 @@ function hide2col() {
     document.getElementById("configsection").style.display = 'block';
     document.getElementById("ribbon").style.display = 'none';
     document.getElementById("canvas_2col").style.display = 'none';
-    /*var leftElement = document.getElementById("left_col_inner");
-    var rightElement = document.getElementById("right_col_inner");
-    if(typeof(leftElement) != 'undefined' && leftElement != null){
-        leftElement.innerHTML = "";
-    };
-    if(typeof(rightElement) != 'undefined' && rightElement != null){
-        rightElement.innerHTML = "";
-    };
-    document.getElementById("canvas_2col").innerHTML = "";
-    document.getElementById("ribbon").innerHTML = "";*/
 }
 
 function show2col() {
     document.getElementById("configsection").style.display = 'none';
     document.getElementById("ribbon").style.display = 'block';
     document.getElementById("canvas_2col").style.display = 'flex';
-    /*if (document.getElementById("canvas_2col").innerHTML == "") {
-        document.getElementById("canvas_2col").innerHTML = '<div id="left_col"><div id="left_col_inner"></div></div><div id="right_col"><div id="right_col_inner"></div></div>';
-    }*/
     structure.updateRibbon();
 }
 
@@ -394,6 +356,8 @@ var CONF_differentieel_droog = 300;
 var CONF_differentieel_nat = 30;
 var CONF_upload_OK = "ask"; //can be "ask", "yes", "no"; //before uploading, we ask
 
+var session = new Session();
+
 var structure: Hierarchical_List;
 var undostruct: undoRedo = new undoRedo(100);
 
@@ -440,7 +404,6 @@ document.querySelector('#left_col_inner').addEventListener('change', function(ev
 
     propUpdate(parseInt(idNumber),key,type,value);
 
-    
     // Perform your logic here with the extracted data
 });
 

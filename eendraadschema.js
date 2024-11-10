@@ -101,12 +101,20 @@ function svgTextWidth(input, fontsize, options) {
     if (options === void 0) { options = ''; }
     var div = document.createElement('div');
     div.innerHTML = '<svg width="1000" height="20"><text x="0" y="10" style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-size="' + Number(fontsize) + '" ' + options + '>' + input + '</text></svg>';
-    document.getElementById("configsection").appendChild(div);
+    var tryoutdiv;
+    if (document.getElementById("configsection").style.display === 'block') {
+        tryoutdiv = document.getElementById("configsection");
+    }
+    else {
+        tryoutdiv = document.getElementById("right_col_inner");
+    }
+    tryoutdiv.appendChild(div);
     var width = div.children[0].children[0].getBBox().width;
-    document.getElementById("configsection").removeChild(div);
+    tryoutdiv.removeChild(div);
     return (Math.ceil(width));
 }
-function flattenSVG(SVGstruct, shiftx, shifty, node) {
+function flattenSVG(SVGstruct, shiftx, shifty, node, overflowright) {
+    if (overflowright === void 0) { overflowright = 0; }
     if (node == 0)
         structure.print_table.pagemarkers.clear();
     var str = "";
@@ -127,7 +135,7 @@ function flattenSVG(SVGstruct, shiftx, shifty, node) {
         }
         if (node <= 0) {
             if (outstruct.attributes.getNamedItem("width")) { // make SVG a 0,0 element
-                str = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" transform="scale(1,1)" width="' + (outstruct.attributes.getNamedItem("width").nodeValue) +
+                str = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" transform="scale(1,1)" width="' + (parseInt(outstruct.attributes.getNamedItem("width").nodeValue) + overflowright) +
                     '" height="' + (outstruct.attributes.getNamedItem("height").nodeValue) + '">' + str + '</svg>';
             }
             else {
@@ -200,11 +208,12 @@ function flattenSVG(SVGstruct, shiftx, shifty, node) {
     structure.print_table.pagemarkers.addMarker(node, shiftx);
     return str;
 }
-function flattenSVGfromString(xmlstr) {
+function flattenSVGfromString(xmlstr, overflowright) {
+    if (overflowright === void 0) { overflowright = 0; }
     var str = "";
     var parser = new DOMParser();
     var xmlDoc = parser.parseFromString(xmlstr, "text/xml"); //important to use "text/xml"
-    str = flattenSVG(xmlDoc.childNodes[0], 0, 0, 0);
+    str = flattenSVG(xmlDoc.childNodes[0], 0, 0, 0, overflowright);
     return str;
 }
 function htmlspecialchars(my_input) {
@@ -231,6 +240,38 @@ function browser_ie_detected() {
     else
         return false;
 }
+var Session = /** @class */ (function () {
+    function Session() {
+        this.sessionKey = 'SessionJS';
+        this.newUser = false;
+        var storedSessionId = localStorage.getItem(this.sessionKey);
+        if (storedSessionId) {
+            this.sessionId = storedSessionId;
+        }
+        else {
+            this.sessionId = this.generateRandomBase64String(64);
+            localStorage.setItem(this.sessionKey, this.sessionId);
+            this.newUser = true;
+        }
+    }
+    Session.prototype.generateRandomBase64String = function (length) {
+        var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+        var result = '';
+        var charactersLength = characters.length;
+        for (var i = 0; i < length; i++) {
+            var randomIndex = Math.floor(Math.random() * charactersLength);
+            result += characters[randomIndex];
+        }
+        return result;
+    };
+    Session.prototype.getSessionId = function () {
+        return this.sessionId;
+    };
+    Session.prototype.isNewUser = function () {
+        return this.newUser;
+    };
+    return Session;
+}());
 var SVGelement = /** @class */ (function () {
     function SVGelement() {
         this.data = "";
@@ -816,7 +857,7 @@ function printsvg() {
     var height = outSVG.yup + outSVG.ydown;
     var width = outSVG.xleft + outSVG.xright;
     structure.print_table.setHeight(height);
-    structure.print_table.setMaxWidth(width);
+    structure.print_table.setMaxWidth(width + 10);
     // Then we display all the print options
     var outstr = "";
     var strleft = "";
@@ -903,11 +944,6 @@ var importExportUsingFileAPI = /** @class */ (function () {
             exportscreen(); // Update the export screen if we are actually on the export screen
         }
     };
-    //updateButtons() {
-    //document.getElementById('saveAsButton').disabled = !(this.fileAPIdata.saveNeeded);
-    /*    document.getElementById('saveAsButton').disabled = false;
-        document.getElementById('saveButton').disabled = !(this.fileAPIdata.saveNeeded);
-    }*/
     importExportUsingFileAPI.prototype.setSaveNeeded = function (input) {
         var lastSaveNeeded = this.saveNeeded;
         this.saveNeeded = input;
@@ -1021,12 +1057,6 @@ var importjson = function (event) {
         import_to_structure(reader.result.toString());
     };
     reader.readAsText(input.files[0]);
-    // Scroll to top left for the SVG, this can only be done at the end because "right col" has to actually be visible
-    /*const rightelem = document.getElementById("right_col");
-    if (rightelem != null) {
-      rightelem.scrollTop = 0;
-      rightelem.scrollLeft = 0;
-    }*/
 };
 /* FUNCTION importclicked()
 
@@ -6488,30 +6518,6 @@ function HLInsertChild(my_id) {
     HLCollapseExpand(my_id, false);
     //No need to call HLRedrawTree as HLCollapseExpand already does that
 }
-function HLPropUpdate(my_id, item, type, docId) {
-    /*switch (type) {
-      case "SELECT":
-          var setvalueselect: string = (document.getElementById(docId) as HTMLInputElement).value;
-          if (item == "type") { // Type changed
-            structure.adjustTypeById(my_id, setvalueselect);
-          } else {
-            structure.data[structure.getOrdinalById(my_id)].props[item] = setvalueselect;
-          }
-          HLRedrawTreeHTML();
-          break;
-      case "STRING":
-          var setvaluestr: string = (document.getElementById(docId) as HTMLInputElement).value;
-          structure.data[structure.getOrdinalById(my_id)].props[item] = setvaluestr;
-          break;
-      case "BOOLEAN":
-          var setvaluebool: boolean = (document.getElementById(docId) as HTMLInputElement).checked;
-          structure.data[structure.getOrdinalById(my_id)].props[item] = setvaluebool;
-          HLRedrawTreeHTML();
-          break;
-    }
-    undostruct.store();
-    HLRedrawTreeSVG();*/
-}
 function HL_editmode() {
     structure.mode = document.getElementById("edit_mode").value;
     HLRedrawTreeHTML();
@@ -6571,7 +6577,7 @@ function HLRedrawTreeHTMLLight() {
 }
 function HLRedrawTreeSVG() {
     var str = '<b>Tekening: </b>Ga naar het print-menu om de tekening af te printen of te exporteren als SVG vector graphics.<br><br>'
-        + flattenSVGfromString(structure.toSVG(0, "horizontal").data)
+        + flattenSVGfromString(structure.toSVG(0, "horizontal").data, 10)
         + '<h2>Legende:</h2>'
         + '<button style="background-color:green;">&#9650;</button> Item hierboven invoegen (zelfde niveau)<br>'
         + '<button style="background-color:green;">&#9660;</button> Item hieronder invoegen (zelfde niveau)<br>'
@@ -6699,24 +6705,11 @@ function hide2col() {
     document.getElementById("configsection").style.display = 'block';
     document.getElementById("ribbon").style.display = 'none';
     document.getElementById("canvas_2col").style.display = 'none';
-    /*var leftElement = document.getElementById("left_col_inner");
-    var rightElement = document.getElementById("right_col_inner");
-    if(typeof(leftElement) != 'undefined' && leftElement != null){
-        leftElement.innerHTML = "";
-    };
-    if(typeof(rightElement) != 'undefined' && rightElement != null){
-        rightElement.innerHTML = "";
-    };
-    document.getElementById("canvas_2col").innerHTML = "";
-    document.getElementById("ribbon").innerHTML = "";*/
 }
 function show2col() {
     document.getElementById("configsection").style.display = 'none';
     document.getElementById("ribbon").style.display = 'block';
     document.getElementById("canvas_2col").style.display = 'flex';
-    /*if (document.getElementById("canvas_2col").innerHTML == "") {
-        document.getElementById("canvas_2col").innerHTML = '<div id="left_col"><div id="left_col_inner"></div></div><div id="right_col"><div id="right_col_inner"></div></div>';
-    }*/
     structure.updateRibbon();
 }
 function load_example(nr) {
@@ -6773,12 +6766,12 @@ var CONF_hoofdzekering = 65;
 var CONF_differentieel_droog = 300;
 var CONF_differentieel_nat = 30;
 var CONF_upload_OK = "ask"; //can be "ask", "yes", "no"; //before uploading, we ask
+var session = new Session();
 var structure;
 var undostruct = new undoRedo(100);
 import_to_structure(EXAMPLE_DEFAULT, false); //Just in case the user doesn't select a scheme and goes to drawing immediately, there should be something there
 // Now add handlers for everything that changes in the left column
 document.querySelector('#left_col_inner').addEventListener('change', function (event) {
-    console.log("go go go");
     function propUpdate(my_id, item, type, value) {
         switch (type) {
             case "select-one":
@@ -6811,7 +6804,6 @@ document.querySelector('#left_col_inner').addEventListener('change', function (e
     var match = id.match(/^HL_edit_(\d+)_(.+)$/);
     var idNumber = match ? match[1] : null;
     var key = match ? match[2] : null;
-    console.log({ type: type, value: value, id: idNumber, key: key });
     propUpdate(parseInt(idNumber), key, type, value);
     // Perform your logic here with the extracted data
 });

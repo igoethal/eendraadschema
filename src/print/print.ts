@@ -60,7 +60,7 @@ function printsvg() {
     var width = outSVG.xleft + outSVG.xright;
 
     structure.print_table.setHeight(height);
-    structure.print_table.setMaxWidth(width);
+    structure.print_table.setMaxWidth(width+10);
 
     // Then we display all the print options
 
