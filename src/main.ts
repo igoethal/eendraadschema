@@ -287,7 +287,7 @@ function hide2col() {
 
 function show2col() {
     document.getElementById("configsection").style.display = 'none';
-    document.getElementById("ribbon").style.display = 'block';
+    document.getElementById("ribbon").style.display = 'flex';
     document.getElementById("canvas_2col").style.display = 'flex';
     structure.updateRibbon();
 }

@@ -33,7 +33,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
+        while (g && (g = 0, op[0] && (_ = 0)), _) try {
             if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
             if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
@@ -6189,19 +6189,15 @@ var Hierarchical_List = /** @class */ (function () {
     Hierarchical_List.prototype.updateRibbon = function () {
         var output = "";
         // Plaats bovenaan de switch van editeer-mode (teken of verplaats) --
+        output += "\n            <div class=\"icon\" onclick=\"undoClicked()\" ".concat((undostruct.undoStackSize() > 0 ? "" : "style=\"filter: opacity(45%)\""), ">\n                <img src=\"gif/undo.png\" alt=\"Ongedaan maken\" class=\"icon-image\">\n                <span class=\"icon-text\">Ongedaan maken</span>\n            </div>\n            <div class=\"icon\" onclick=\"redoClicked()\" ").concat((undostruct.redoStackSize() > 0 ? "" : "style=\"filter: opacity(45%)\""), ">\n                <img src=\"gif/redo.png\" alt=\"Opnieuw\" class=\"icon-image\">\n                <span class=\"icon-text\">Opnieuw</span>\n            </div>\n            <span style=\"display: inline-block; width: 30px;\"></span>\n        ");
         output += '<p style="margin-top: 5px;margin-bottom: 5px;">';
         switch (this.mode) {
             case "edit":
-                output += 'Modus (Invoegen/Verplaatsen/Clone) <select id="edit_mode" onchange="HL_editmode()"><option value="edit" selected>Invoegen</option><option value="move">Verplaatsen/Clone</option></select>';
-                output += '&nbsp;<button ' + (undostruct.undoStackSize() > 0 ? "" : "disabled ") + 'onclick="undoClicked()">Undo (' + undostruct.undoStackSize() + ')</button>&nbsp;'
-                    + '<button ' + (undostruct.redoStackSize() > 0 ? "" : "disabled ") + 'onclick="redoClicked()">Redo (' + undostruct.redoStackSize() + ')</button>';
+                output += "\n                        <div>\n                            Werkmodus<br>\n                            <select id=\"edit_mode\" onchange=\"HL_editmode()\">\n                                <option value=\"edit\" selected>Invoegen</option>\n                                <option value=\"move\">Verplaatsen/Clone</option>\n                            </select>\n                        </div>";
                 break;
             case "move":
-                output += 'Modus (Invoegen/Verplaatsen/Clone) <select id="edit_mode" onchange="HL_editmode()"><option value="edit">Invoegen</option><option value="move" selected>Verplaatsen/Clone</option></select>';
-                output += '&nbsp;<button ' + (undostruct.undoStackSize() > 0 ? "" : "disabled ") + 'onclick="undoClicked()">Undo (' + undostruct.undoStackSize() + ')</button>&nbsp;'
-                    + '<button ' + (undostruct.redoStackSize() > 0 ? "" : "disabled ") + 'onclick="redoClicked()">Redo (' + undostruct.redoStackSize() + ')</button>';
-                output += '<div style="color:black"><i>&nbsp;Gebruik de pijlen om de volgorde van elementen te wijzigen. ' +
-                    'Gebruik het Moeder-veld om een component elders in het schema te hangen. Kies "clone" om een dubbel te maken van een element.</i></div>';
+                output += "\n                        <div>\n                            Werkmodus<br>\n                            <select id=\"edit_mode\" onchange=\"HL_editmode()\">\n                                <option value=\"edit\">Invoegen</option>\n                                <option value=\"move\" selected>Verplaatsen/Clone</option>\n                            </select>\n                        </div>\n                        <span style=\"display: inline-block; width: 30px;\"></span>";
+                output += "\n                        <div style=\"color:black;font-size:12px\"><i>\n                            Gebruik de <b>blauwe</b> pijlen om de volgorde van elementen te wijzigen.<br>\n                            Gebruik het <u>Moeder</u>-veld om een component elders in het schema te hangen.<br>\n                            Kies \"<b>clone</b>\" om een dubbel te maken van een element.\n                        </i></div>";
                 break;
         }
         output += '</p>';
@@ -6708,7 +6704,7 @@ function hide2col() {
 }
 function show2col() {
     document.getElementById("configsection").style.display = 'none';
-    document.getElementById("ribbon").style.display = 'block';
+    document.getElementById("ribbon").style.display = 'flex';
     document.getElementById("canvas_2col").style.display = 'flex';
     structure.updateRibbon();
 }

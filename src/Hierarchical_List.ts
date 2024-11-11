@@ -487,19 +487,46 @@ class Hierarchical_List {
         let output: string = "";
 
         // Plaats bovenaan de switch van editeer-mode (teken of verplaats) --
+        output += `
+            <div class="icon" onclick="undoClicked()" ${(undostruct.undoStackSize() > 0 ? "" : "style=\"filter: opacity(45%)\"")}>
+                <img src="gif/undo.png" alt="Ongedaan maken" class="icon-image">
+                <span class="icon-text">Ongedaan maken</span>
+            </div>
+            <div class="icon" onclick="redoClicked()" ${(undostruct.redoStackSize() > 0 ? "" : "style=\"filter: opacity(45%)\"")}>
+                <img src="gif/redo.png" alt="Opnieuw" class="icon-image">
+                <span class="icon-text">Opnieuw</span>
+            </div>
+            <span style="display: inline-block; width: 30px;"></span>
+        `
         output += '<p style="margin-top: 5px;margin-bottom: 5px;">';
         switch (this.mode) {
             case "edit":
-                output+= 'Modus (Invoegen/Verplaatsen/Clone) <select id="edit_mode" onchange="HL_editmode()"><option value="edit" selected>Invoegen</option><option value="move">Verplaatsen/Clone</option></select>';
-                output+= '&nbsp;<button ' + (undostruct.undoStackSize() > 0 ? "" : "disabled ")  + 'onclick="undoClicked()">Undo (' + undostruct.undoStackSize()  + ')</button>&nbsp;' 
-                      +  '<button ' + (undostruct.redoStackSize() > 0 ? "" : "disabled ")  + 'onclick="redoClicked()">Redo (' + undostruct.redoStackSize() + ')</button>'
+                output += `
+                        <div>
+                            Werkmodus<br>
+                            <select id="edit_mode" onchange="HL_editmode()">
+                                <option value="edit" selected>Invoegen</option>
+                                <option value="move">Verplaatsen/Clone</option>
+                            </select>
+                        </div>`;
                 break;
             case "move":
-                output+= 'Modus (Invoegen/Verplaatsen/Clone) <select id="edit_mode" onchange="HL_editmode()"><option value="edit">Invoegen</option><option value="move" selected>Verplaatsen/Clone</option></select>';
-                output+= '&nbsp;<button ' + (undostruct.undoStackSize() > 0 ? "" : "disabled ")  + 'onclick="undoClicked()">Undo (' + undostruct.undoStackSize()  + ')</button>&nbsp;' 
-                      +  '<button ' + (undostruct.redoStackSize() > 0 ? "" : "disabled ")  + 'onclick="redoClicked()">Redo (' + undostruct.redoStackSize() + ')</button>'
-                output+= '<div style="color:black"><i>&nbsp;Gebruik de pijlen om de volgorde van elementen te wijzigen. '+
-                        'Gebruik het Moeder-veld om een component elders in het schema te hangen. Kies "clone" om een dubbel te maken van een element.</i></div>';
+                output += `
+                        <div>
+                            Werkmodus<br>
+                            <select id="edit_mode" onchange="HL_editmode()">
+                                <option value="edit">Invoegen</option>
+                                <option value="move" selected>Verplaatsen/Clone</option>
+                            </select>
+                        </div>
+                        <span style="display: inline-block; width: 30px;"></span>`;
+
+                output+= `
+                        <div style="color:black;font-size:12px"><i>
+                            Gebruik de <b>blauwe</b> pijlen om de volgorde van elementen te wijzigen.<br>
+                            Gebruik het <u>Moeder</u>-veld om een component elders in het schema te hangen.<br>
+                            Kies "<b>clone</b>" om een dubbel te maken van een element.
+                        </i></div>`;
                 break;
         }
         output += '</p>';
