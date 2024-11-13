@@ -161,7 +161,7 @@ function printPDF(svg, print_table, properties, pages=[1], filename="eendraadsch
             doc.setFont("helvetica", "bold");
             doc.setFontSize(fontSize); 
         
-            doc.text("Getekend met https://www.eendraadschema.goethals-jacobs.be", 
+            doc.text("Getekend met https://eendraadschema.goethals-jacobs.be", 
                      startx + 2, // Leave 2mm at the left of the drawn by text
                      paperdetails.paperheight - paperdetails.paper_margin - (paperdetails.drawnby_box_height-textHeight)/2 - textHeight/6);
 
