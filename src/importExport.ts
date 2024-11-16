@@ -24,7 +24,7 @@ class importExportUsingFileAPI {
 
         //If there is an object on the screen that needs updating, do it
         if (document.getElementById('exportscreen') as HTMLInputElement) {
-            exportscreen(); // Update the export screen if we are actually on the export screen
+            showFilePage(); // Update the export screen if we are actually on the export screen
         }
     }
 
@@ -159,6 +159,7 @@ function upgrade_version(mystructure, version) {
     if (version < 3) {
         for (let i = 0; i < mystructure.length; i++) {
             if (mystructure.data[i].keys[0][2] === "Stopcontact") mystructure.data[i].keys[0][2] = "Contactdoos";
+            if (mystructure.data[i].keys[0][2] === "Leeg") mystructure.data[i].keys[0][2] = "Aansluitpunt";
         }
     }
 
@@ -180,6 +181,14 @@ function upgrade_version(mystructure, version) {
                 if ( (mystructure.data[i].props.type === "Bord") && (mystructure.data[i].props.naam !== "") ) mystructure.data[i].props.naam = '<' + mystructure.data[i].props.naam + '>';
             }
         }    
+    }
+
+    //Algemene upgrade voor versies 3 tot en met 4
+
+    if ( (version >= 3) && (version <= 4) ) {
+        for (let i = 0; i < mystructure.length; i++) {
+            if (mystructure.data[i].props.type === "Leeg") mystructure.data[i].props.type = "Aansluitpunt";
+        }
     }
 
 }
@@ -409,40 +418,74 @@ function download_by_blob(text, filename, mimeType) {
     
 }
 
-/* FUNCTION exportScreen
+/* FUNCTION showFilePage
    
-   Shows the exportscreen.  It will look different depending on whether the browser supports the file API or not
+   Shows the File-Page.  It will look different depending on whether the browser supports the file API or not
 
 */
 
-function exportscreen() {
+function showFilePage() {
 
     var strleft: string = '<span id="exportscreen"></span>'; //We need the id to check elsewhere that the screen is open
 
+    strleft += `
+    <table border="1px" style="border-collapse:collapse" align="center" width="100%">
+      <tr>
+        <td width="100%" align="center" bgcolor="LightGrey">
+          <b>Openen</b>
+        </td>
+      </tr>
+      <tr>
+        <td width="100%" align="left">
+            <table border=0>
+              <tr>
+                <td width=350 style="vertical-align:top;padding:5px">
+                  <button style="font-size:14px" onclick="importclicked()">Openen</button>
+                </td>
+                <td style="vertical-align:top;padding:7px">
+                  Click op "openen" en selecteer een eerder opgeslagen EDS bestand.
+                </td>
+              </tr>
+            </table>
+        </td>
+      </tr>
+    </table><br>
+    <table border="1px" style="border-collapse:collapse" align="center" width="100%">
+      <tr>
+        <td width="100%" align="center" bgcolor="LightGrey">
+          <b>Opslaan</b>
+        </td>
+      </tr>
+      <tr>
+        <td width="100%" align="left">
+    `;
+
     if ((window as any).showOpenFilePicker) { // Use fileAPI
  
+        strleft += '<table border=0><tr><td width=350 style="vertical-align:top;padding:5px">';
         if (fileAPIobj.filename != null) { 
+            strleft += '<button style="font-size:14px" onclick="exportjson(saveAs = false)">Opslaan</button>&nbsp;';
+            strleft += '<button style="font-size:14px" onclick="exportjson(saveAs = true)">Opslaan als</button>';
+            strleft += '</td><td style="vertical-align:top;padding:5px">'    
             strleft += 'Laatst geopend of opgeslagen om <b>' + fileAPIobj.lastsaved + '</b> met naam <b>' + fileAPIobj.filename + '</b><br><br>'
-                    +  'Klik hieronder om bij te werken<br><br>'
-            strleft += '<button onclick="exportjson(saveAs = false)">Opslaan</button>&nbsp;';
-            strleft += '<button onclick="exportjson(saveAs = true)">Opslaan als</button><br><br>';
+                    +  'Klik links op "Opslaan" om bij te werken'
         } else {
-            strleft += 'Uw werk werd nog niet opgeslagen. Klik hieronder.<br><br>';
-            strleft += '<button onclick="exportjson(saveAs = true)">Opslaan als</button>';
-            strleft += '<br><br>';
+            strleft += '<button style="font-size:14px" onclick="exportjson(saveAs = true)">Opslaan als</button>';
+            strleft += '</td><td style="vertical-align:top;padding:7px">'    
+            strleft += '<span class="highlight-warning">Uw werk werd nog niet opgeslagen. Klik links op "Opslaan als".</span>';
         }
-        strleft += '<table border=0>';      
+        strleft += '</td></tr>';
         strleft += PROP_GDPR(); //Function returns empty for GIT version, returns GDPR notice when used online.
         strleft += '</table>';
         
     } else { // Legacy
-        strleft += '<table border=0><tr><td width=500 style="vertical-align:top;padding:5px">';
-        strleft += 'Bestandsnaam: <span id="settings"><code>' + structure.properties.filename + '</code><br><button onclick="HL_enterSettings()">Wijzigen</button>&nbsp;<button onclick="exportjson()">Opslaan</button></span>';
+        strleft += '<table border=0><tr><td width=350 style="vertical-align:top;padding:7px">';
+        strleft += 'Bestandsnaam: <span id="settings"><code>' + structure.properties.filename + '</code><br><button style="font-size:14px" onclick="exportjson()">Opslaan</button>&nbsp;<button style="font-size:14px" onclick="HL_enterSettings()">Naam wijzigen</button></span>';
         strleft += '</td><td style="vertical-align:top;padding:5px">'
         strleft += 'U kan het schema opslaan op uw lokale harde schijf voor later gebruik. De standaard-naam is eendraadschema.eds. U kan deze wijzigen door links op "wijzigen" te klikken. ';
         strleft += 'Klik vervolgens op "opslaan" en volg de instructies van uw browser. '
         strleft += 'In de meeste gevallen zal uw browser het bestand automatisch plaatsen in de Downloads-folder tenzij u uw browser instelde dat die eerst een locatie moet vragen.<br><br>'
-        strleft += 'Eens opgeslagen kan het schema later opnieuw geladen worden door in het menu "openen" te kiezen en vervolgens het bestand op uw harde schijf te selecteren.<br><br>'
+        strleft += 'Eens opgeslagen kan het schema later opnieuw geladen worden door in het menu "openen" te kiezen en vervolgens het bestand op uw harde schijf te selecteren.'
         strleft += '</td></tr>';
     
         strleft += PROP_GDPR(); //Function returns empty for GIT version, returns GDPR notice when used online.
@@ -450,8 +493,14 @@ function exportscreen() {
         strleft += '</table>';
     
         // Plaats input box voor naam van het schema bovenaan --
-        strleft += '<br>';    
+        //strleft += '<br>';    
     }
+
+    strleft += `
+        </td>
+      </tr>
+    </table>    
+    `;
     
     document.getElementById("configsection").innerHTML = strleft;
     hide2col();

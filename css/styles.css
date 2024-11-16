@@ -226,3 +226,20 @@ div.verbruiker {
 table {
     border-collapse: collapse;
 }
+
+.highlight-warning {
+  background-color: #FFD1D1; /* Light red/pink background */
+  border-left: 5px solid #FF6347;
+  padding: 2px 10px 2px 10px;
+  font-weight: bold;
+  color: #B22222; /* Firebrick red for text */
+}
+
+.highlight-warning-big {
+  background-color: #FFD1D1; /* Light red/pink background */
+  border-left: 5px solid #FF6347; /* Tomato red border to mimic marker */
+  padding: 2px 10px 2px 10px;
+  font-weight: bold;
+  color: #B22222; /* Firebrick red for text */
+}
+

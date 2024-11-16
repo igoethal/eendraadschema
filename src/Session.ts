@@ -9,7 +9,7 @@ class Session {
         if (storedSessionId) {
             this.sessionId = storedSessionId;
         } else {
-            this.sessionId = this.generateRandomBase64String(64);
+            this.sessionId = this.generateRandomBase64String(22);
             localStorage.setItem(this.sessionKey, this.sessionId);
             this.newUser = true;
         }

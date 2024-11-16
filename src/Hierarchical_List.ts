@@ -530,6 +530,10 @@ class Hierarchical_List {
                 break;
         }
         output += '</p>';
+
+        output += '<span style="display: inline-block; width: 30px;"></span>';
+
+        output += '<p style="margin-top: 5px;margin-bottom: 5px;" class="highlight-warning-big">Vergeet niet regelmatig uw werk<br>op te slaan in het "Bestand"-menu.</p>';
         
         document.getElementById("ribbon").innerHTML = output;
     }
