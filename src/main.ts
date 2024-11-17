@@ -361,6 +361,21 @@ var session = new Session();
 var structure: Hierarchical_List;
 var undostruct: undoRedo = new undoRedo(100);
 
+// Build the menu
+
+const menuItems: MenuItem[] = [
+    { name: 'Nieuw', callback: restart_all },
+    { name: 'Bestand', callback: showFilePage },
+    { name: 'Bewerken', callback: HLRedrawTree },
+    { name: 'Print', callback: printsvg },
+    { name: 'Documentatie', callback: () => {window.open('Documentation/edsdoc.pdf', '_blank');} },
+    { name: 'Info/Contact', callback: openContactForm }
+];
+
+const topMenu = new TopMenu('minitabs', 'menu-item', menuItems);
+
+// Download a default structure
+
 import_to_structure(EXAMPLE_DEFAULT,false); //Just in case the user doesn't select a scheme and goes to drawing immediately, there should be something there
 
 // Now add handlers for everything that changes in the left column

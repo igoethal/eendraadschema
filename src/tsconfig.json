@@ -12,6 +12,7 @@
     "print/*.ts",
     "importExport.ts",
     "undoRedo.ts",
+    "TopMenu.ts",
     "List_Item/List_Item.ts",
     "List_Item/Electro_Item.ts",
     "List_Item/Schakelaars/Schakelaar.ts",

@@ -1234,7 +1234,7 @@ function json_to_structure(text, version, redraw) {
     structure.reSort();
     // Draw the structure
     if (redraw == true)
-        HLRedrawTree();
+        topMenu.selectMenuItemByName('Bewerken'); // Ga naar het bewerken scherm, dat zal automatisch voor hertekenen zorgen.
 }
 /* FUNCTION import_to_structure
    
@@ -1467,6 +1467,55 @@ var undoRedo = /** @class */ (function () {
     undoRedo.prototype.undoStackSize = function () { return (this.history.undoStackSize()); };
     undoRedo.prototype.redoStackSize = function () { return (this.history.redoStackSize()); };
     return undoRedo;
+}());
+var TopMenu = /** @class */ (function () {
+    function TopMenu(ulId, liClassName, menuItems) {
+        this.ulElement = document.getElementById(ulId);
+        this.liClassName = liClassName;
+        this.menuItems = menuItems;
+        this.renderMenu();
+        this.resetToFirstItem(); // Ensure the first item is selected initially
+    }
+    TopMenu.prototype.renderMenu = function () {
+        var _this = this;
+        this.ulElement.innerHTML = ''; // Clear any existing content
+        this.menuItems.forEach(function (item) {
+            var liElement = document.createElement('li');
+            var aElement = document.createElement('a');
+            liElement.className = _this.liClassName;
+            aElement.innerText = item.name;
+            aElement.addEventListener('click', function () {
+                _this.selectItem(aElement);
+                item.callback();
+            });
+            liElement.appendChild(aElement);
+            _this.ulElement.appendChild(liElement);
+        });
+    };
+    TopMenu.prototype.selectItem = function (selectedElement) {
+        // Remove 'current' ID from all <a> elements
+        var items = this.ulElement.querySelectorAll('a');
+        items.forEach(function (item) { return item.removeAttribute('id'); });
+        // Add 'current' ID to the clicked <a> element
+        selectedElement.id = 'current';
+    };
+    TopMenu.prototype.resetToFirstItem = function () {
+        var firstItem = this.ulElement.querySelector('a');
+        if (firstItem) {
+            this.selectItem(firstItem);
+        }
+    };
+    TopMenu.prototype.selectMenuItemByName = function (name) {
+        var item = this.menuItems.find(function (menuItem) { return menuItem.name === name; });
+        if (item) {
+            var aElement = Array.from(this.ulElement.querySelectorAll('a')).find(function (a) { return a.innerText === name; });
+            if (aElement) {
+                this.selectItem(aElement);
+                item.callback();
+            }
+        }
+    };
+    return TopMenu;
 }());
 var List_Item = /** @class */ (function () {
     // -- Constructor --
@@ -6780,6 +6829,17 @@ var CONF_upload_OK = "ask"; //can be "ask", "yes", "no"; //before uploading, we 
 var session = new Session();
 var structure;
 var undostruct = new undoRedo(100);
+// Build the menu
+var menuItems = [
+    { name: 'Nieuw', callback: restart_all },
+    { name: 'Bestand', callback: showFilePage },
+    { name: 'Bewerken', callback: HLRedrawTree },
+    { name: 'Print', callback: printsvg },
+    { name: 'Documentatie', callback: function () { window.open('Documentation/edsdoc.pdf', '_blank'); } },
+    { name: 'Info/Contact', callback: openContactForm }
+];
+var topMenu = new TopMenu('minitabs', 'menu-item', menuItems);
+// Download a default structure
 import_to_structure(EXAMPLE_DEFAULT, false); //Just in case the user doesn't select a scheme and goes to drawing immediately, there should be something there
 // Now add handlers for everything that changes in the left column
 document.querySelector('#left_col_inner').addEventListener('change', function (event) {

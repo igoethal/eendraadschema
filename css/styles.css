@@ -54,6 +54,10 @@ ul#minitabs li {
   display: inline;
   margin: 0 6px;
 }
+ul#minitabs li.menu-item { 
+  display: inline; margin: 
+  0 6px; 
+}
 ul#minitabs a {
   text-decoration: none;
   padding: 0 0 3px;
