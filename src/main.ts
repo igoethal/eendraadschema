@@ -197,7 +197,7 @@ function buildNewStructure(structure: Hierarchical_List) {
 function reset_all() {
     structure = new Hierarchical_List();
     buildNewStructure(structure);
-    HLRedrawTree();
+    topMenu.selectMenuItemByName('Bewerken');
 }
 
 function renderAddress() {

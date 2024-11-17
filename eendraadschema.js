@@ -6699,7 +6699,7 @@ function buildNewStructure(structure) {
 function reset_all() {
     structure = new Hierarchical_List();
     buildNewStructure(structure);
-    HLRedrawTree();
+    topMenu.selectMenuItemByName('Bewerken');
 }
 function renderAddress() {
     var outHTML = "";
