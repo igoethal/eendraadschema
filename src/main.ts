@@ -368,9 +368,11 @@ const menuItems: MenuItem[] = [
     { name: 'Bestand', callback: showFilePage },
     { name: 'Bewerken', callback: HLRedrawTree },
     { name: 'Print', callback: printsvg },
-    { name: 'Documentatie', callback: () => {window.open('Documentation/edsdoc.pdf', '_blank');} },
+    { name: 'Documentatie', callback: showDocumentationPage },
     { name: 'Info/Contact', callback: openContactForm }
 ];
+
+PROP_edit_menu(menuItems);
 
 const topMenu = new TopMenu('minitabs', 'menu-item', menuItems);
 

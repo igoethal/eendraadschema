@@ -1,5 +1,6 @@
 declare var pako: any;
 declare function printPDF(svgs, print_table, properties, pages, filename, statuscallback): any;
+declare function openDonatePage(): any;
 
 function deepClone (obj) {
   var _out = new obj.constructor;

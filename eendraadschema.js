@@ -1517,6 +1517,17 @@ var TopMenu = /** @class */ (function () {
     };
     return TopMenu;
 }());
+/* FUNCTION showFilePage
+   
+   Shows the Documentation-Page.
+
+*/
+function showDocumentationPage() {
+    var strleft = "\n    <table border=\"1px\" style=\"border-collapse:collapse\" align=\"center\" width=\"100%\">\n      <tr>\n        <td width=\"100%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Handleiding</b>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"100%\" align=\"left\">\n            <table border=0>\n              <tr>\n                <td width=100 style=\"vertical-align:top;padding:5px\">\n                  <button style=\"font-size:14px\" id=\"Btn_downloadManual\">Download</button>\n                </td>\n                <td style=\"vertical-align:top;padding:7px\">\n                  Een volledige handleiding is beschikbaar in PDF formaat.\n                  Click link op \"Download\" om deze in een ander venster te openen.\n                  <br>\n                  Het programma is in volle ontwikkeling dus delen van de handleiding zijn\n                  mogelijk ietwat verouderd.  \n                </td>\n              </tr>\n            </table>\n        </td>\n      </tr>\n    </table>";
+    document.getElementById("configsection").innerHTML = strleft;
+    hide2col();
+    document.getElementById('Btn_downloadManual').onclick = function () { window.open('Documentation/edsdoc.pdf', '_blank'); };
+}
 var List_Item = /** @class */ (function () {
     // -- Constructor --
     function List_Item(mylist) {
@@ -6468,6 +6479,7 @@ function PROP_GDPR() {
 function PROP_getCookieText() {
     return ("");
 }
+function PROP_edit_menu(menuItems) { }
 //--- START OF DEVELOPMENT OPTIONS ---
 function PROP_development_options() {
     var outstr = '<br><h2>Expert ontwikkel opties, Gebruik enkel indien u weet wat u doet.</h2>'
@@ -6835,9 +6847,10 @@ var menuItems = [
     { name: 'Bestand', callback: showFilePage },
     { name: 'Bewerken', callback: HLRedrawTree },
     { name: 'Print', callback: printsvg },
-    { name: 'Documentatie', callback: function () { window.open('Documentation/edsdoc.pdf', '_blank'); } },
+    { name: 'Documentatie', callback: showDocumentationPage },
     { name: 'Info/Contact', callback: openContactForm }
 ];
+PROP_edit_menu(menuItems);
 var topMenu = new TopMenu('minitabs', 'menu-item', menuItems);
 // Download a default structure
 import_to_structure(EXAMPLE_DEFAULT, false); //Just in case the user doesn't select a scheme and goes to drawing immediately, there should be something there

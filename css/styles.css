@@ -20,6 +20,15 @@ html {height:100%; background-color: #FFFFFF;}
 body {
   margin: 0;
   padding: 0;
+  cursor: default;
+}
+
+button, select, select option, input[type="checkbox"] {
+  cursor: pointer;
+}
+
+td[contenteditable="true"] { 
+  cursor: text; /* Set the cursor to text edit pointer */ 
 }
 
 /* CONTAINER */
@@ -38,6 +47,9 @@ body {
   align-items: center;
   padding: 0px 7px 0px 7px;
   border-bottom: 1px solid #b8b8b8;
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE 10 and IE 11 */
 }
 ul#minitabs {
   display: flex;
@@ -70,7 +82,8 @@ ul#minitabs a#current {
 }
 ul#minitabs a:hover {
   border-color: #F60;
-  color: #333
+  color: #333;
+  cursor: pointer
 }
 
 /* RIBBON */
@@ -217,7 +230,7 @@ table.html_edit_table td:nth-child(2) {
   cursor: pointer;
 }
 
-p {font-size:16px; line-height:24px;}
+p {font-size:16px; line-height:16px}
 
 div.kring {
   background-color: #FFCC99;

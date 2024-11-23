@@ -22,6 +22,8 @@ function PROP_getCookieText() {
   return("");
 }
 
+function PROP_edit_menu(menuItems) {}
+
 //--- START OF DEVELOPMENT OPTIONS ---
 
 function PROP_development_options() {
