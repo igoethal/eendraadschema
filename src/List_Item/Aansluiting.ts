@@ -13,6 +13,7 @@ class Aansluiting extends Electro_Item {
         this.props.kortsluitvermogen                    = this.getLegacyKey(mykeys,22);
         this.props.naam                                 = this.getLegacyKey(mykeys,23);
         this.props.type_kabel_voor_teller               = this.getLegacyKey(mykeys,24);
+        this.props.huishoudelijk                        = true;
         switch (this.props.bescherming) {
             case "differentieel":
                 this.props.type_differentieel = this.getLegacyKey(mykeys,17);
@@ -42,6 +43,7 @@ class Aansluiting extends Electro_Item {
         this.props.kortsluitvermogen = "";
         this.props.naam = "";
         this.props.type_kabel_voor_teller = "";
+        this.props.huishoudelijk = true;
     }
 
     allowedChilds() : Array<string> { // returns an array with the type-names of allowed childs
@@ -58,6 +60,7 @@ class Aansluiting extends Electro_Item {
 
     overrideKeys() {
         if ( ( (this.props.aantal_polen as number) < 1 ) || ( (this.props.aantal_polen as number) > 4 ) ) this.props.aantal_polen = "2"; //Test dat aantal polen bestaat
+        if (typeof(this.props.huishoudelijk) == 'undefined') this.props.huishoudelijk = true;
     }
 
     toHTML(mode: string) {
@@ -97,8 +100,13 @@ class Aansluiting extends Electro_Item {
         }
 
         output += ", Kabeltype na teller: " + this.stringPropToHTML('type_kabel_na_teller',10)
-               +  ", Kabeltype v&oacute;&oacute;r teller: " + this.stringPropToHTML('type_kabel_voor_teller',10)
-               +  ", Adres/tekst: " + this.stringPropToHTML('adres',5);
+               +  ", Kabeltype v&oacute;&oacute;r teller: " + this.stringPropToHTML('type_kabel_voor_teller',10);
+
+        if ((this.props.kortsluitvermogen != '') && (['differentieel','automatisch','differentieelautomaat'].includes(this.props.bescherming))) {
+            output += ", Huishoudelijke installatie: " + this.checkboxPropToHTML('huishoudelijk');
+        }
+
+        output += ", Adres/tekst: " + this.stringPropToHTML('adres',5);
 
         return(output);
     }
@@ -146,13 +154,21 @@ class Aansluiting extends Electro_Item {
 
                 // Code om kortsluitvermogen toe te voegen
                 if ( (this.props.kortsluitvermogen!='') ) {
-                    numlines = numlines + 1.3;
-                    mySVG.data += "<text x=\"" + (mySVG.xleft+15+11*(numlines-1)) + "\" y=\"" + (mySVG.yup-10) + "\"" 
+                    if (this.props.huishoudelijk) {
+                        numlines = numlines + 1.3;
+                        mySVG.data += "<text x=\"" + (mySVG.xleft+15+11*(numlines-1)) + "\" y=\"" + (mySVG.yup-10) + "\"" 
                                 +  " transform=\"rotate(-90 " + (mySVG.xleft+15+11*(numlines-1)) + "," + (mySVG.yup-10) + ")" 
                                 +  "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" 
                                 +  htmlspecialchars("" + (this.props.kortsluitvermogen*1000)) + "</text>";
-                    let rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen*1000)))+6;
-                    mySVG.data += '<rect x="' + (mySVG.xleft+15+11*(numlines-2)+1) + '" y="' + (mySVG.yup-10-(rectsize/2)) + '" width="' + (11*1.2) + '" height="' + rectsize + '" fill="none" stroke="black" />';
+                        let rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen*1000)))+6;
+                        mySVG.data += '<rect x="' + (mySVG.xleft+15+11*(numlines-2)+1) + '" y="' + (mySVG.yup-10-(rectsize/2)) + '" width="' + (11*1.2) + '" height="' + rectsize + '" fill="none" stroke="black" />';
+                    } else {
+                        numlines = numlines + 1.0;
+                        mySVG.data += "<text x=\"" + (mySVG.xleft+15+11*(numlines-1)) + "\" y=\"" + (mySVG.yup-10) + "\"" 
+                                +  " transform=\"rotate(-90 " + (mySVG.xleft+15+11*(numlines-1)) + "," + (mySVG.yup-10) + ")" 
+                                +  "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" 
+                                +  htmlspecialchars("" + (this.props.kortsluitvermogen)) + "kA</text>";
+                    }
                 }
 
                 // Genoeg plaats voorzien aan de rechterkant en eindigen
@@ -196,13 +212,21 @@ class Aansluiting extends Electro_Item {
 
                 // Code om kortsluitvermogen toe te voegen
                 if ( (this.props.kortsluitvermogen!='') ) {
-                    numlines = numlines + 1.3;
-                    mySVG.data += "<text x=\"" + (mySVG.xleft+15+11*(numlines-1)) + "\" y=\"" + (mySVG.yup-10) + "\"" 
+                    if (this.props.huishoudelijk) {
+                        numlines = numlines + 1.3;
+                        mySVG.data += "<text x=\"" + (mySVG.xleft+15+11*(numlines-1)) + "\" y=\"" + (mySVG.yup-10) + "\"" 
                                 +  " transform=\"rotate(-90 " + (mySVG.xleft+15+11*(numlines-1)) + "," + (mySVG.yup-10) + ")" 
                                 +  "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" 
                                 +  htmlspecialchars("" + (this.props.kortsluitvermogen*1000)) + "</text>";
-                    let rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen*1000)))+6;
-                    mySVG.data += '<rect x="' + (mySVG.xleft+15+11*(numlines-2)+1) + '" y="' + (mySVG.yup-10-(rectsize/2)) + '" width="' + (11*1.2) + '" height="' + rectsize + '" fill="none" stroke="black" />';
+                        let rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen*1000)))+6;
+                        mySVG.data += '<rect x="' + (mySVG.xleft+15+11*(numlines-2)+1) + '" y="' + (mySVG.yup-10-(rectsize/2)) + '" width="' + (11*1.2) + '" height="' + rectsize + '" fill="none" stroke="black" />';
+                    } else {
+                        numlines = numlines + 1.0;
+                        mySVG.data += "<text x=\"" + (mySVG.xleft+15+11*(numlines-1)) + "\" y=\"" + (mySVG.yup-10) + "\"" 
+                                +  " transform=\"rotate(-90 " + (mySVG.xleft+15+11*(numlines-1)) + "," + (mySVG.yup-10) + ")" 
+                                +  "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" 
+                                +  htmlspecialchars("" + (this.props.kortsluitvermogen)) + "kA</text>";
+                    }
                 }
 
                 // genoeg plaats voorzien aan de rechterkant en eindigen
@@ -254,13 +278,21 @@ class Aansluiting extends Electro_Item {
 
                 // Code om kortsluitvermogen toe te voegen
                 if ( (this.props.kortsluitvermogen!='') ) {
-                    numlines = numlines + 1.3;
-                    mySVG.data += "<text x=\"" + (mySVG.xleft+15+11*(numlines-1)) + "\" y=\"" + (mySVG.yup-10) + "\"" 
+                    if (this.props.huishoudelijk) {
+                        numlines = numlines + 1.3;
+                        mySVG.data += "<text x=\"" + (mySVG.xleft+15+11*(numlines-1)) + "\" y=\"" + (mySVG.yup-10) + "\"" 
                                 +  " transform=\"rotate(-90 " + (mySVG.xleft+15+11*(numlines-1)) + "," + (mySVG.yup-10) + ")" 
                                 +  "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" 
                                 +  htmlspecialchars("" + (this.props.kortsluitvermogen*1000)) + "</text>";
-                    let rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen*1000)))+6;
-                    mySVG.data += '<rect x="' + (mySVG.xleft+15+11*(numlines-2)+1) + '" y="' + (mySVG.yup-10-(rectsize/2)) + '" width="' + (11*1.2) + '" height="' + rectsize + '" fill="none" stroke="black" />';
+                        let rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen*1000)))+6;
+                        mySVG.data += '<rect x="' + (mySVG.xleft+15+11*(numlines-2)+1) + '" y="' + (mySVG.yup-10-(rectsize/2)) + '" width="' + (11*1.2) + '" height="' + rectsize + '" fill="none" stroke="black" />';
+                    } else {
+                        numlines = numlines + 1.0;
+                        mySVG.data += "<text x=\"" + (mySVG.xleft+15+11*(numlines-1)) + "\" y=\"" + (mySVG.yup-10) + "\"" 
+                                +  " transform=\"rotate(-90 " + (mySVG.xleft+15+11*(numlines-1)) + "," + (mySVG.yup-10) + ")" 
+                                +  "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" 
+                                +  htmlspecialchars("" + (this.props.kortsluitvermogen)) + "kA</text>";
+                    }
                 }
 
                 // genoeg plaats voorzien aan de rechterkant en eindigen

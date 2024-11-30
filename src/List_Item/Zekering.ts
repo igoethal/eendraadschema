@@ -14,12 +14,14 @@ class Zekering extends Electro_Item {
         this.props.curve_automaat = "";
         this.props.differentieel_is_selectief = false;
         this.props.kortsluitvermogen = "";
+        this.props.huishoudelijk = true;
     }
 
     overrideKeys() {
         if ( ( (this.props.aantal_polen as number) < 1 ) || ( (this.props.aantal_polen as number) > 4 ) ) this.props.aantal_polen = "2"; //Test dat aantal polen bestaat
         if ( (this.props.bescherming != "differentieel") && (this.props.bescherming != "differentieelautomaat") ) this.props.differentieel_is_selectief = false;
         if (!this.isChildOf("Kring")) this.props.nr = "";
+        if (typeof(this.props.huishoudelijk) == 'undefined') this.props.huishoudelijk = true;
     }
 
     toHTML(mode: string) {
@@ -60,6 +62,10 @@ class Zekering extends Electro_Item {
 
         }
 
+        if ((this.props.kortsluitvermogen != '') && (['differentieel','automatisch','differentieelautomaat'].includes(this.props.bescherming))) {
+            output += ", Huishoudelijke installatie: " + this.checkboxPropToHTML('huishoudelijk');
+        }
+
         return(output);
     }
 
@@ -97,12 +103,19 @@ class Zekering extends Electro_Item {
 
                 // Code om kortsluitvermogen toe te voegen
                 if ( (this.props.kortsluitvermogen!='') ) {
-                    numlines = numlines + 1.3;
-                    mySVG.data += '<text x="' + (21+10) + '" y="' + (25+15+(numlines-1)*11) + '" ' 
-                                +  'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' 
-                                +  htmlspecialchars("" + (this.props.kortsluitvermogen*1000)) + '</text>';
-                    let rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen*1000)))+6;
-                    mySVG.data += '<rect x="' + (21+10-(rectsize/2)) + '" y="' + (25+15+(numlines-1)*11-10) + '" width="' + rectsize + '" height="' + (11*1.2) + '" fill="none" stroke="black" />';
+                    if (this.props.huishoudelijk) {
+                        numlines = numlines + 1.3;
+                        mySVG.data += '<text x="' + (21+10) + '" y="' + (25+15+(numlines-1)*11) + '" ' 
+                                    +  'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' 
+                                    +  htmlspecialchars("" + (this.props.kortsluitvermogen*1000)) + '</text>';
+                        let rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen*1000)))+6;
+                        mySVG.data += '<rect x="' + (21+10-(rectsize/2)) + '" y="' + (25+15+(numlines-1)*11-10) + '" width="' + rectsize + '" height="' + (11*1.2) + '" fill="none" stroke="black" />';
+                    } else {
+                        numlines = numlines + 1.0;
+                        mySVG.data += '<text x="' + (21+10) + '" y="' + (25+15+(numlines-1)*11) + '" ' 
+                                    +  'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' 
+                                    +  htmlspecialchars("" + (this.props.kortsluitvermogen)) + 'kA</text>';
+                    }
                 }
                 break;                          
 
@@ -129,12 +142,19 @@ class Zekering extends Electro_Item {
 
                 // Code om kortsluitvermogen toe te voegen
                 if ( (this.props.kortsluitvermogen!='') ) {
-                    numlines = numlines + 1.3;
-                    mySVG.data += '<text x="' + (21+10) + '" y="' + (25+15+(numlines-1)*11) + '" ' 
-                                +  'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' 
-                                +  htmlspecialchars("" + (this.props.kortsluitvermogen*1000)) + '</text>';
-                    let rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen*1000)))+6;
-                    mySVG.data += '<rect x="' + (21+10-(rectsize/2)) + '" y="' + (25+15+(numlines-1)*11-10) + '" width="' + rectsize + '" height="' + (11*1.2) + '" fill="none" stroke="black" />';
+                    if (this.props.huishoudelijk) {
+                        numlines = numlines + 1.3;
+                        mySVG.data += '<text x="' + (21+10) + '" y="' + (25+15+(numlines-1)*11) + '" ' 
+                                    +  'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' 
+                                    +  htmlspecialchars("" + (this.props.kortsluitvermogen*1000)) + '</text>';
+                        let rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen*1000)))+6;
+                        mySVG.data += '<rect x="' + (21+10-(rectsize/2)) + '" y="' + (25+15+(numlines-1)*11-10) + '" width="' + rectsize + '" height="' + (11*1.2) + '" fill="none" stroke="black" />';
+                    } else {
+                        numlines = numlines + 1.0;
+                        mySVG.data += '<text x="' + (21+10) + '" y="' + (25+15+(numlines-1)*11) + '" ' 
+                                    +  'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' 
+                                    +  htmlspecialchars("" + (this.props.kortsluitvermogen)) + 'kA</text>';
+                    }
                 }
                 break;
 
@@ -170,12 +190,19 @@ class Zekering extends Electro_Item {
 
                 // Code om kortsluitvermogen toe te voegen
                 if ( (this.props.kortsluitvermogen!='') ) {
-                    numlines = numlines + 1.3;
-                    mySVG.data += '<text x="' + (21+10) + '" y="' + (25+15+(numlines-1)*11) + '" ' 
-                                +  'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' 
-                                +  htmlspecialchars("" + (this.props.kortsluitvermogen*1000)) + '</text>';
-                    let rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen*1000)))+6;
-                    mySVG.data += '<rect x="' + (21+10-(rectsize/2)) + '" y="' + (25+15+(numlines-1)*11-10) + '" width="' + rectsize + '" height="' + (11*1.2) + '" fill="none" stroke="black" />';
+                    if (this.props.huishoudelijk) {
+                        numlines = numlines + 1.3;
+                        mySVG.data += '<text x="' + (21+10) + '" y="' + (25+15+(numlines-1)*11) + '" ' 
+                                    +  'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' 
+                                    +  htmlspecialchars("" + (this.props.kortsluitvermogen*1000)) + '</text>';
+                        let rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen*1000)))+6;
+                        mySVG.data += '<rect x="' + (21+10-(rectsize/2)) + '" y="' + (25+15+(numlines-1)*11-10) + '" width="' + rectsize + '" height="' + (11*1.2) + '" fill="none" stroke="black" />';
+                    } else {
+                        numlines = numlines + 1.0;
+                        mySVG.data += '<text x="' + (21+10) + '" y="' + (25+15+(numlines-1)*11) + '" ' 
+                                    +  'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' 
+                                    +  htmlspecialchars("" + (this.props.kortsluitvermogen)) + 'kA</text>';
+                    }
                 }
                 break;
 

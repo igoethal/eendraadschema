@@ -396,6 +396,7 @@ document.querySelector('#left_col_inner').addEventListener('change', function(ev
               break;
           case "text":
               structure.data[structure.getOrdinalById(my_id)].props[item] = (value as string);
+              if (item==='kortsluitvermogen') structure.updateHTMLinner(my_id);
               break;
           case "checkbox":
               structure.data[structure.getOrdinalById(my_id)].props[item] = (value as boolean);
