@@ -97,10 +97,12 @@ class Zekering extends Electro_Item {
 
                 // Code om kortsluitvermogen toe te voegen
                 if ( (this.props.kortsluitvermogen!='') ) {
-                    ++numlines;
+                    numlines = numlines + 1.3;
                     mySVG.data += '<text x="' + (21+10) + '" y="' + (25+15+(numlines-1)*11) + '" ' 
                                 +  'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' 
-                                +  htmlspecialchars("" + this.props.kortsluitvermogen) + 'kA</text>';
+                                +  htmlspecialchars("" + (this.props.kortsluitvermogen*1000)) + '</text>';
+                    let rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen*1000)))+6;
+                    mySVG.data += '<rect x="' + (21+10-(rectsize/2)) + '" y="' + (25+15+(numlines-1)*11-10) + '" width="' + rectsize + '" height="' + (11*1.2) + '" fill="none" stroke="black" />';
                 }
                 break;                          
 
@@ -127,10 +129,12 @@ class Zekering extends Electro_Item {
 
                 // Code om kortsluitvermogen toe te voegen
                 if ( (this.props.kortsluitvermogen!='') ) {
-                    ++numlines;
+                    numlines = numlines + 1.3;
                     mySVG.data += '<text x="' + (21+10) + '" y="' + (25+15+(numlines-1)*11) + '" ' 
-                               +  'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">'
-                               +  htmlspecialchars("" + this.props.kortsluitvermogen) + 'kA</text>';
+                                +  'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' 
+                                +  htmlspecialchars("" + (this.props.kortsluitvermogen*1000)) + '</text>';
+                    let rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen*1000)))+6;
+                    mySVG.data += '<rect x="' + (21+10-(rectsize/2)) + '" y="' + (25+15+(numlines-1)*11-10) + '" width="' + rectsize + '" height="' + (11*1.2) + '" fill="none" stroke="black" />';
                 }
                 break;
 
@@ -166,10 +170,12 @@ class Zekering extends Electro_Item {
 
                 // Code om kortsluitvermogen toe te voegen
                 if ( (this.props.kortsluitvermogen!='') ) {
-                    ++numlines;
+                    numlines = numlines + 1.3;
                     mySVG.data += '<text x="' + (21+10) + '" y="' + (25+15+(numlines-1)*11) + '" ' 
-                                +  'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">'
-                                +  htmlspecialchars("" + this.props.kortsluitvermogen) + 'kA</text>';
+                                +  'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' 
+                                +  htmlspecialchars("" + (this.props.kortsluitvermogen*1000)) + '</text>';
+                    let rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen*1000)))+6;
+                    mySVG.data += '<rect x="' + (21+10-(rectsize/2)) + '" y="' + (25+15+(numlines-1)*11-10) + '" width="' + rectsize + '" height="' + (11*1.2) + '" fill="none" stroke="black" />';
                 }
                 break;
 

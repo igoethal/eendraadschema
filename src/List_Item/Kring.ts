@@ -265,11 +265,13 @@ class Kring extends Electro_Item {
 
                 // Code om kortsluitvermogen toe te voegen
                 if ( (this.props.kortsluitvermogen!='') ) {
-                    ++numlines;
+                    numlines = numlines + 1.3;
                     mySVG.data += "<text x=\"" + (mySVG.xleft+15+11*(numlines-1)) + "\" y=\"" + (mySVG.yup-10) + "\"" 
                                +  " transform=\"rotate(-90 " + (mySVG.xleft+15+11*(numlines-1)) + "," + (mySVG.yup-10) + ")" 
                                +  "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" 
-                               +  htmlspecialchars("" + this.props.kortsluitvermogen) + "kA</text>";
+                               +  htmlspecialchars("" + (this.props.kortsluitvermogen*1000)) + "</text>";
+                    let rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen*1000)))+6;
+                    mySVG.data += '<rect x="' + (mySVG.xleft+15+11*(numlines-2)+1) + '" y="' + (mySVG.yup-10-(rectsize/2)) + '" width="' + (11*1.2) + '" height="' + rectsize + '" fill="none" stroke="black" />';
                 }
 
                 // Genoeg plaats voorzien aan de rechterkant en eindigen
@@ -304,11 +306,13 @@ class Kring extends Electro_Item {
 
                 // Code om kortsluitvermogen toe te voegen
                 if ( (this.props.kortsluitvermogen!='') ) {
-                    ++numlines;
+                    numlines = numlines + 1.3;
                     mySVG.data += "<text x=\"" + (mySVG.xleft+15+11*(numlines-1)) + "\" y=\"" + (mySVG.yup-10) + "\"" 
                                +  " transform=\"rotate(-90 " + (mySVG.xleft+15+11*(numlines-1)) + "," + (mySVG.yup-10) + ")" 
                                +  "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" 
-                               +  htmlspecialchars("" + this.props.kortsluitvermogen) + "kA</text>";
+                               +  htmlspecialchars("" + (this.props.kortsluitvermogen*1000)) + "</text>";
+                    let rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen*1000)))+6;
+                    mySVG.data += '<rect x="' + (mySVG.xleft+15+11*(numlines-2)+1) + '" y="' + (mySVG.yup-10-(rectsize/2)) + '" width="' + (11*1.2) + '" height="' + rectsize + '" fill="none" stroke="black" />';
                 }
 
                 // genoeg plaats voorzien aan de rechterkant en eindigen
@@ -351,11 +355,13 @@ class Kring extends Electro_Item {
 
                 // Code om kortsluitvermogen toe te voegen
                 if ( (this.props.kortsluitvermogen!='') ) {
-                    ++numlines;
+                    numlines = numlines + 1.3;
                     mySVG.data += "<text x=\"" + (mySVG.xleft+15+11*(numlines-1)) + "\" y=\"" + (mySVG.yup-10) + "\"" 
                                +  " transform=\"rotate(-90 " + (mySVG.xleft+15+11*(numlines-1)) + "," + (mySVG.yup-10) + ")" 
                                +  "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" 
-                               +  htmlspecialchars("" + this.props.kortsluitvermogen) + "kA</text>";
+                               +  htmlspecialchars("" + (this.props.kortsluitvermogen*1000)) + "</text>";
+                    let rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen*1000)))+6;
+                    mySVG.data += '<rect x="' + (mySVG.xleft+15+11*(numlines-2)+1) + '" y="' + (mySVG.yup-10-(rectsize/2)) + '" width="' + (11*1.2) + '" height="' + rectsize + '" fill="none" stroke="black" />';
                 }
 
                 // genoeg plaats voorzien aan de rechterkant en eindigen
