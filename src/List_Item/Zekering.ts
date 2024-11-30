@@ -41,20 +41,20 @@ class Zekering extends Electro_Item {
             case "differentieel":
                 output += ", \u0394 " + this.stringPropToHTML('differentieel_delta_amperage',3) + "mA"
                        +  ", Type:" + this.selectPropToHTML('type_differentieel',["","A","B"])
-                       +  ", Kortsluitvermogen: " + this.stringPropToHTML('kortsluitvermogen',3) + "kA"
+                       +  ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen',3) + "kA"
                        +  ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief');
                 break;
 
             case "automatisch":
                 output += ", Curve:" + this.selectPropToHTML('curve_automaat',["","B","C","D"])
-                       +  ", Kortsluitvermogen: " + this.stringPropToHTML('kortsluitvermogen',3) + "kA";               
+                       +  ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen',3) + "kA";               
                 break;
 
             case "differentieelautomaat":
                 output += ", \u0394 " + this.stringPropToHTML('differentieel_delta_amperage',3) + "mA"
                        +  ", Curve:" + this.selectPropToHTML('curve_automaat',["","B","C","D"])
                        +  ", Type:" + this.selectPropToHTML('type_differentieel',["","A","B"])
-                       +  ", Kortsluitvermogen: " + this.stringPropToHTML('kortsluitvermogen',3) + "kA"
+                       +  ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen',3) + "kA"
                        +  ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief');
                 break;
 
