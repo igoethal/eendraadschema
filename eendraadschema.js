@@ -2454,18 +2454,18 @@ var Aansluiting = /** @class */ (function (_super) {
             case "differentieel":
                 output += ", \u0394 " + this.stringPropToHTML('differentieel_delta_amperage', 3) + "mA"
                     + ", Type:" + this.selectPropToHTML('type_differentieel', ["", "A", "B"])
-                    + ", Kortsluitvermogen: " + this.stringPropToHTML('kortsluitvermogen', 3) + "kA"
+                    + ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen', 3) + "kA"
                     + ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief');
                 break;
             case "automatisch":
                 output += ", Curve:" + this.selectPropToHTML('curve_automaat', ["", "B", "C", "D"])
-                    + ", Kortsluitvermogen: " + this.stringPropToHTML('kortsluitvermogen', 3) + "kA";
+                    + ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen', 3) + "kA";
                 break;
             case "differentieelautomaat":
                 output += ", \u0394 " + this.stringPropToHTML('differentieel_delta_amperage', 3) + "mA"
                     + ", Curve:" + this.selectPropToHTML('curve_automaat', ["", "B", "C", "D"])
                     + ", Type:" + this.selectPropToHTML('type_differentieel', ["", "A", "B"])
-                    + ", Kortsluitvermogen: " + this.stringPropToHTML('kortsluitvermogen', 3) + "kA"
+                    + ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen', 3) + "kA"
                     + ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief');
                 break;
         }
@@ -2507,11 +2507,13 @@ var Aansluiting = /** @class */ (function (_super) {
                 }
                 // Code om kortsluitvermogen toe te voegen
                 if ((this.props.kortsluitvermogen != '')) {
-                    ++numlines;
+                    numlines = numlines + 1.3;
                     mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
                         + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
                         + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
-                        + htmlspecialchars("" + this.props.kortsluitvermogen) + "kA</text>";
+                        + htmlspecialchars("" + (this.props.kortsluitvermogen * 1000)) + "</text>";
+                    var rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen * 1000))) + 6;
+                    mySVG.data += '<rect x="' + (mySVG.xleft + 15 + 11 * (numlines - 2) + 1) + '" y="' + (mySVG.yup - 10 - (rectsize / 2)) + '" width="' + (11 * 1.2) + '" height="' + rectsize + '" fill="none" stroke="black" />';
                 }
                 // Genoeg plaats voorzien aan de rechterkant en eindigen
                 mySVG.xright = Math.max(mySVG.xright, 20 + 11 * (numlines - 1));
@@ -2547,11 +2549,13 @@ var Aansluiting = /** @class */ (function (_super) {
                 }
                 // Code om kortsluitvermogen toe te voegen
                 if ((this.props.kortsluitvermogen != '')) {
-                    ++numlines;
+                    numlines = numlines + 1.3;
                     mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
                         + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
                         + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
-                        + htmlspecialchars("" + this.props.kortsluitvermogen) + "kA</text>";
+                        + htmlspecialchars("" + (this.props.kortsluitvermogen * 1000)) + "</text>";
+                    var rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen * 1000))) + 6;
+                    mySVG.data += '<rect x="' + (mySVG.xleft + 15 + 11 * (numlines - 2) + 1) + '" y="' + (mySVG.yup - 10 - (rectsize / 2)) + '" width="' + (11 * 1.2) + '" height="' + rectsize + '" fill="none" stroke="black" />';
                 }
                 // genoeg plaats voorzien aan de rechterkant en eindigen
                 mySVG.xright = Math.max(mySVG.xright, 20 + 11 * (numlines - 1));
@@ -2595,11 +2599,13 @@ var Aansluiting = /** @class */ (function (_super) {
                 }
                 // Code om kortsluitvermogen toe te voegen
                 if ((this.props.kortsluitvermogen != '')) {
-                    ++numlines;
+                    numlines = numlines + 1.3;
                     mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
                         + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
                         + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
-                        + htmlspecialchars("" + this.props.kortsluitvermogen) + "kA</text>";
+                        + htmlspecialchars("" + (this.props.kortsluitvermogen * 1000)) + "</text>";
+                    var rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen * 1000))) + 6;
+                    mySVG.data += '<rect x="' + (mySVG.xleft + 15 + 11 * (numlines - 2) + 1) + '" y="' + (mySVG.yup - 10 - (rectsize / 2)) + '" width="' + (11 * 1.2) + '" height="' + rectsize + '" fill="none" stroke="black" />';
                 }
                 // genoeg plaats voorzien aan de rechterkant en eindigen
                 mySVG.xright = Math.max(mySVG.xright, 20 + 11 * (numlines - 1));
