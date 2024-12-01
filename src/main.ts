@@ -119,7 +119,7 @@ function HL_enterSettings() {
 }
 
 function HLRedrawTreeHTML() {
-    show2col();
+    toggleAppView('2col');
     document.getElementById("configsection").innerHTML = "";
     var output:string = structure.toHTML(0) + "<br>" + renderAddressStacked();
     document.getElementById("left_col_inner").innerHTML = output;
@@ -197,7 +197,7 @@ function buildNewStructure(structure: Hierarchical_List) {
 function reset_all() {
     structure = new Hierarchical_List();
     buildNewStructure(structure);
-    topMenu.selectMenuItemByName('Bewerken');
+    topMenu.selectMenuItemByName(isDevMode() ? 'Eéndraadschema' : 'Bewerken');
 }
 
 function renderAddress() {
@@ -251,9 +251,12 @@ function changeAddressParams() {
 
 function openContactForm() {
     var strleft: string = PROP_Contact_Text;
+    if (isDevMode()) {
+        strleft = strleft.replace(/Bewerken/g, "Eéndraadschema");
+    }
 
     document.getElementById("configsection").innerHTML = strleft;
-    hide2col();
+    toggleAppView('config');
 }
 
 function restart_all() {
@@ -272,24 +275,31 @@ function restart_all() {
     strleft += PROP_development_options();
 
     document.getElementById("configsection").innerHTML = strleft;
-    hide2col();
+    toggleAppView('config');
 
     if (browser_ie_detected()) {
        alert("Deze appicatie werkt niet in Internet Explorer. Wij raden aan een moderne browser te gebruiken zoals Edge, Firefox, Google Chrome, Opera, Vivaldi, ...");
     }
 }
 
-function hide2col() {
-    document.getElementById("configsection").style.display = 'block';
-    document.getElementById("ribbon").style.display = 'none';
-    document.getElementById("canvas_2col").style.display = 'none';
-}
-
-function show2col() {
-    document.getElementById("configsection").style.display = 'none';
-    document.getElementById("ribbon").style.display = 'flex';
-    document.getElementById("canvas_2col").style.display = 'flex';
-    structure.updateRibbon();
+function toggleAppView(type: '2col' | 'config' | 'draw') {
+    if (type === '2col') {
+        document.getElementById("configsection").style.display = 'none';
+        document.getElementById("outerbox").style.display = 'none';
+        document.getElementById("ribbon").style.display = 'flex';
+        document.getElementById("canvas_2col").style.display = 'flex';
+        structure.updateRibbon();
+    } else if (type === 'config') {
+        document.getElementById("configsection").style.display = 'block';
+        document.getElementById("outerbox").style.display = 'none';
+        document.getElementById("ribbon").style.display = 'none';
+        document.getElementById("canvas_2col").style.display = 'none';
+    } else if (type === 'draw') {
+        document.getElementById("configsection").style.display = 'none';
+        document.getElementById("outerbox").style.display = 'flex';
+        document.getElementById("ribbon").style.display = 'flex';
+        document.getElementById("canvas_2col").style.display = 'none';
+    }
 }
 
 function load_example(nr: number) {
@@ -363,14 +373,27 @@ var undostruct: undoRedo = new undoRedo(100);
 
 // Build the menu
 
-const menuItems: MenuItem[] = [
-    { name: 'Nieuw', callback: restart_all },
-    { name: 'Bestand', callback: showFilePage },
-    { name: 'Bewerken', callback: HLRedrawTree },
-    { name: 'Print', callback: printsvg },
-    { name: 'Documentatie', callback: showDocumentationPage },
-    { name: 'Info/Contact', callback: openContactForm }
-];
+let menuItems: MenuItem[]
+if (isDevMode()) {
+    menuItems = [
+        { name: 'Nieuw', callback: restart_all },
+        { name: 'Bestand', callback: showFilePage },
+        { name: 'Eéndraadschema', callback: HLRedrawTree },
+        { name: 'Situatieplan', callback: showSituationPlanPage },
+        { name: 'Print', callback: printsvg },
+        { name: 'Documentatie', callback: showDocumentationPage },
+        { name: 'Info/Contact', callback: openContactForm }
+    ];
+} else {
+    menuItems = [
+        { name: 'Nieuw', callback: restart_all },
+        { name: 'Bestand', callback: showFilePage },
+        { name: 'Bewerken', callback: HLRedrawTree },
+        { name: 'Print', callback: printsvg },
+        { name: 'Documentatie', callback: showDocumentationPage },
+        { name: 'Info/Contact', callback: openContactForm }
+    ];
+}
 
 PROP_edit_menu(menuItems);
 

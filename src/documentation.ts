@@ -34,7 +34,7 @@ function showDocumentationPage() {
     </table>`;
 
     document.getElementById("configsection").innerHTML = strleft;
-    hide2col();
+    toggleAppView('config');
 
     (document.getElementById('Btn_downloadManual') as HTMLElement).onclick = () => { window.open('Documentation/edsdoc.pdf', '_blank') };
 }

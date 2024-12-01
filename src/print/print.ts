@@ -144,5 +144,5 @@ function printsvg() {
 
     renderPrintSVG(outSVG);
 
-    hide2col();
+    toggleAppView('config');
 }

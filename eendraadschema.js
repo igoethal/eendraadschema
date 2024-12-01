@@ -921,7 +921,7 @@ function printsvg() {
     document.getElementById("configsection").insertAdjacentHTML('beforeend', strleft);
     // Finally we show the actual SVG
     renderPrintSVG(outSVG);
-    hide2col();
+    toggleAppView('config');
 }
 var importExportUsingFileAPI = /** @class */ (function () {
     function importExportUsingFileAPI() {
@@ -1234,7 +1234,7 @@ function json_to_structure(text, version, redraw) {
     structure.reSort();
     // Draw the structure
     if (redraw == true)
-        topMenu.selectMenuItemByName('Bewerken'); // Ga naar het bewerken scherm, dat zal automatisch voor hertekenen zorgen.
+        topMenu.selectMenuItemByName(isDevMode() ? 'Eéndraadschema' : 'Bewerken'); // Ga naar het bewerken scherm, dat zal automatisch voor hertekenen zorgen.
 }
 /* FUNCTION import_to_structure
    
@@ -1397,7 +1397,7 @@ function showFilePage() {
     }
     strleft += "\n        </td>\n      </tr>\n    </table>    \n    ";
     document.getElementById("configsection").innerHTML = strleft;
-    hide2col();
+    toggleAppView('config');
 }
 var jsonStore = /** @class */ (function () {
     function jsonStore(maxSteps) {
@@ -1525,8 +1525,20 @@ var TopMenu = /** @class */ (function () {
 function showDocumentationPage() {
     var strleft = "\n    <table border=\"1px\" style=\"border-collapse:collapse\" align=\"center\" width=\"100%\">\n      <tr>\n        <td width=\"100%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Handleiding</b>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"100%\" align=\"left\">\n            <table border=0>\n              <tr>\n                <td width=100 style=\"vertical-align:top;padding:5px\">\n                  <button style=\"font-size:14px\" id=\"Btn_downloadManual\">Download</button>\n                </td>\n                <td style=\"vertical-align:top;padding:7px\">\n                  Een volledige handleiding is beschikbaar in PDF formaat.\n                  Click link op \"Download\" om deze in een ander venster te openen.\n                  <br>\n                  Het programma is in volle ontwikkeling dus delen van de handleiding zijn\n                  mogelijk ietwat verouderd.  \n                </td>\n              </tr>\n            </table>\n        </td>\n      </tr>\n    </table>";
     document.getElementById("configsection").innerHTML = strleft;
-    hide2col();
+    toggleAppView('config');
     document.getElementById('Btn_downloadManual').onclick = function () { window.open('Documentation/edsdoc.pdf', '_blank'); };
+}
+function isDevMode() {
+    var urlParams = new URLSearchParams(window.location.search);
+    return urlParams.has('dev');
+}
+function showSituationPlanPage() {
+    updateRibbon();
+    toggleAppView('draw');
+}
+function updateRibbon() {
+    var output = "";
+    document.getElementById("ribbon").innerHTML = output;
 }
 var List_Item = /** @class */ (function () {
     // -- Constructor --
@@ -6754,7 +6766,7 @@ function HL_enterSettings() {
     document.getElementById("settings").innerHTML = '<input type="text" id="filename" onchange="HL_changeFilename()" value="' + structure.properties.filename + '" pattern="^.*\\.eds$"><br><i>Gebruik enkel alphanumerieke karakters a-z A-Z 0-9, streepjes en spaties. <b>Eindig met ".eds"</b>. Druk daarna op enter.</i><br><button onclick="HL_cancelFilename()">Annuleer</button>&nbsp;<button onclick="HL_changeFilename()">Toepassen</button>';
 }
 function HLRedrawTreeHTML() {
-    show2col();
+    toggleAppView('2col');
     document.getElementById("configsection").innerHTML = "";
     var output = structure.toHTML(0) + "<br>" + renderAddressStacked();
     document.getElementById("left_col_inner").innerHTML = output;
@@ -6827,7 +6839,7 @@ function buildNewStructure(structure) {
 function reset_all() {
     structure = new Hierarchical_List();
     buildNewStructure(structure);
-    topMenu.selectMenuItemByName('Bewerken');
+    topMenu.selectMenuItemByName(isDevMode() ? 'Eéndraadschema' : 'Bewerken');
 }
 function renderAddress() {
     var outHTML = "";
@@ -6873,8 +6885,11 @@ function changeAddressParams() {
 }
 function openContactForm() {
     var strleft = PROP_Contact_Text;
+    if (isDevMode()) {
+        strleft = strleft.replace(/Bewerken/g, "Eéndraadschema");
+    }
     document.getElementById("configsection").innerHTML = strleft;
-    hide2col();
+    toggleAppView('config');
 }
 function restart_all() {
     var strleft = CONFIGPAGE_LEFT;
@@ -6884,21 +6899,31 @@ function restart_all() {
     strleft += PROP_getCookieText(); //Will only be displayed in the online version
     strleft += PROP_development_options();
     document.getElementById("configsection").innerHTML = strleft;
-    hide2col();
+    toggleAppView('config');
     if (browser_ie_detected()) {
         alert("Deze appicatie werkt niet in Internet Explorer. Wij raden aan een moderne browser te gebruiken zoals Edge, Firefox, Google Chrome, Opera, Vivaldi, ...");
     }
 }
-function hide2col() {
-    document.getElementById("configsection").style.display = 'block';
-    document.getElementById("ribbon").style.display = 'none';
-    document.getElementById("canvas_2col").style.display = 'none';
-}
-function show2col() {
-    document.getElementById("configsection").style.display = 'none';
-    document.getElementById("ribbon").style.display = 'flex';
-    document.getElementById("canvas_2col").style.display = 'flex';
-    structure.updateRibbon();
+function toggleAppView(type) {
+    if (type === '2col') {
+        document.getElementById("configsection").style.display = 'none';
+        document.getElementById("outerbox").style.display = 'none';
+        document.getElementById("ribbon").style.display = 'flex';
+        document.getElementById("canvas_2col").style.display = 'flex';
+        structure.updateRibbon();
+    }
+    else if (type === 'config') {
+        document.getElementById("configsection").style.display = 'block';
+        document.getElementById("outerbox").style.display = 'none';
+        document.getElementById("ribbon").style.display = 'none';
+        document.getElementById("canvas_2col").style.display = 'none';
+    }
+    else if (type === 'draw') {
+        document.getElementById("configsection").style.display = 'none';
+        document.getElementById("outerbox").style.display = 'flex';
+        document.getElementById("ribbon").style.display = 'flex';
+        document.getElementById("canvas_2col").style.display = 'none';
+    }
 }
 function load_example(nr) {
     switch (nr) {
@@ -6958,14 +6983,28 @@ var session = new Session();
 var structure;
 var undostruct = new undoRedo(100);
 // Build the menu
-var menuItems = [
-    { name: 'Nieuw', callback: restart_all },
-    { name: 'Bestand', callback: showFilePage },
-    { name: 'Bewerken', callback: HLRedrawTree },
-    { name: 'Print', callback: printsvg },
-    { name: 'Documentatie', callback: showDocumentationPage },
-    { name: 'Info/Contact', callback: openContactForm }
-];
+var menuItems;
+if (isDevMode()) {
+    menuItems = [
+        { name: 'Nieuw', callback: restart_all },
+        { name: 'Bestand', callback: showFilePage },
+        { name: 'Eéndraadschema', callback: HLRedrawTree },
+        { name: 'Situatieplan', callback: showSituationPlanPage },
+        { name: 'Print', callback: printsvg },
+        { name: 'Documentatie', callback: showDocumentationPage },
+        { name: 'Info/Contact', callback: openContactForm }
+    ];
+}
+else {
+    menuItems = [
+        { name: 'Nieuw', callback: restart_all },
+        { name: 'Bestand', callback: showFilePage },
+        { name: 'Bewerken', callback: HLRedrawTree },
+        { name: 'Print', callback: printsvg },
+        { name: 'Documentatie', callback: showDocumentationPage },
+        { name: 'Info/Contact', callback: openContactForm }
+    ];
+}
 PROP_edit_menu(menuItems);
 var topMenu = new TopMenu('minitabs', 'menu-item', menuItems);
 // Download a default structure

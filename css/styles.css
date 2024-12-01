@@ -169,6 +169,31 @@ ul#minitabs a:hover {
   flex-direction: row; /* Ensure columns are side by side */
 }
 
+#outerbox {
+  display: flex;
+  position: absolute;
+  top: calc(var(--menu-height) + var(--ribbon-height)); 
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden; 
+  background-color: #ffffff; /* Optional: Background color for visibility */
+  padding: 0x; /* Padding to create the empty border effect */
+  display: flex;
+  flex-direction: row; /* Ensure columns are side by side */
+}
+
+#paper {
+  top: 10px;
+  left: 10px;
+  width: 297mm; /* A4 paper width in landscape mode */
+  height: 210mm; /* A4 paper height */
+  background-color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), 0 6px 20px rgba(0, 0, 0, 0.19);
+  border-radius: 5px;
+  position: absolute;
+}
+
 #left_col {
   flex: 0.45;
   overflow: auto;
