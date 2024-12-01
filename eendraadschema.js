@@ -6989,7 +6989,7 @@ if (isDevMode()) {
         { name: 'Nieuw', callback: restart_all },
         { name: 'Bestand', callback: showFilePage },
         { name: 'Eéndraadschema', callback: HLRedrawTree },
-        { name: 'Situatieplan', callback: showSituationPlanPage },
+        { name: 'Situatieschema', callback: showSituationPlanPage },
         { name: 'Print', callback: printsvg },
         { name: 'Documentatie', callback: showDocumentationPage },
         { name: 'Info/Contact', callback: openContactForm }
