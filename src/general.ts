@@ -1,5 +1,5 @@
 declare var pako: any;
-declare function printPDF(svgs, print_table, properties, pages, filename, statuscallback): any;
+declare function printPDF(svgs, print_table, properties, pages, filename, statuscallback, sitplanprint): any;
 declare function openDonatePage(): any;
 
 function deepClone (obj) {
@@ -34,6 +34,22 @@ function isInt(value) {
          parseInt(value) == value &&
          !isNaN(parseInt(value, 10));
 }
+
+function getPixelsPerMillimeter() {
+  const div = document.createElement('div');
+  div.style.width = '10mm';
+  div.style.position = 'absolute';
+  document.body.appendChild(div);
+  const widthInPixels = div.offsetWidth;
+  document.body.removeChild(div);
+  const pixelsPerMillimeter = widthInPixels / 10;
+  return pixelsPerMillimeter;
+}
+
+// Example usage
+const pixelsPerMM = getPixelsPerMillimeter();
+console.log(`Your browser uses approximately ${pixelsPerMM} pixels per millimeter.`);
+
 
 function svgTextWidth(input:String, fontsize:Number = 10, options:String = '') {
     const div = document.createElement('div');
@@ -121,9 +137,14 @@ function flattenSVG(SVGstruct,shiftx,shifty,node,overflowright=0) {
       outstruct.attributes.getNamedItem("x").nodeValue = parseFloat(outstruct.attributes.getNamedItem("x").nodeValue) + shiftx;
       outstruct.attributes.getNamedItem("y").nodeValue = parseFloat(outstruct.attributes.getNamedItem("y").nodeValue) + shifty;
       if (outstruct.attributes.getNamedItem("transform")) {
-        outstruct.attributes.getNamedItem("transform").value = "rotate(-90 " +
-        outstruct.attributes.getNamedItem("x").nodeValue + "," +
-        outstruct.attributes.getNamedItem("y").nodeValue + ")";
+        if (outstruct.attributes.getNamedItem("transform").value.includes('rotate')) {
+          outstruct.attributes.getNamedItem("transform").value = "rotate(-90 " +
+          outstruct.attributes.getNamedItem("x").nodeValue + "," +
+          outstruct.attributes.getNamedItem("y").nodeValue + ")";
+        } else {
+          outstruct.attributes.getNamedItem("transform").value = "scale(-1,1) translate(-" +
+          outstruct.attributes.getNamedItem("x").nodeValue*2 + ",0)";
+        }
       }
     }
     if (SVGstruct.localName == "polygon") {
@@ -182,3 +203,18 @@ function browser_ie_detected()
 
     if ( (msie > 0) || (trident > 0) ) return true; else return false;
 }
+
+const randomId = (() => {
+  const counters: Record<string, number> = {};
+  
+  return (prefix: string = "Rnd_"): string => {
+      if (!(prefix in counters)) {
+          counters[prefix] = 0;
+      }
+  
+      const value = counters[prefix];
+      counters[prefix]++;
+      
+      return `${prefix}${value.toString()}`;
+  };
+})();

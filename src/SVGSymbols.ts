@@ -2,9 +2,7 @@ class SVGSymbols {
 static outputSVGSymbols() {
     var output: string = `
     <defs>
-    <pattern id="VerticalStripe"
-      x="5" y="0" width="5" height="10"
-      patternUnits="userSpaceOnUse" >
+    <pattern id="VerticalStripe" x="5" y="0" width="5" height="10" patternUnits="userSpaceOnUse" >
       <line x1="0" y1="0" x2="0" y2="10" stroke="black" />
     </pattern>
     <g id="batterij">

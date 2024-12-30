@@ -62,6 +62,14 @@ class TopMenu {
             } 
         } 
     }
+
+    public selectMenuItemByOrdinal(nr: number) {
+        // Remove 'current' ID from all <a> elements
+        const items = this.ulElement.querySelectorAll('a');
+        items.forEach(item => item.removeAttribute('id'));
+
+        this.selectItem(items[nr]);
+    }
     
 }
 

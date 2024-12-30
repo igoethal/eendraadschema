@@ -37,7 +37,7 @@ class Media extends Electro_Item {
         return(output);
     }
 
-    toSVG() {
+    toSVG(sitplan = false) {
         let mySVG:SVGelement = new SVGelement();
 
         // Alles naar beneden schuiven als we het aantal laders boven het symbool willen plaatsen
@@ -54,13 +54,13 @@ class Media extends Electro_Item {
 
         switch (this.props.symbool) {
             case "luidspreker":
-                mySVG.data += '<line x1="1" y1="' + (25 + shifty) + '" x2="21" y2="' + (25 + shifty) + '" stroke="black"></line>'
-                            +  '<use xlink:href="#luidspreker" x="21" y="' + (25 + shifty) + '"></use>';
+                mySVG.data += (sitplan? '' : '<line x1="1" y1="' + (25 + shifty) + '" x2="21" y2="' + (25 + shifty) + '" stroke="black"></line>');
+                mySVG.data += '<use xlink:href="#luidspreker" x="21" y="' + (25 + shifty) + '"></use>';
                 mySVG.xright = 36;
-                mySVG.data += this.addAddressToSVG(mySVG,60 + shifty,15,0);
+                mySVG.data += (sitplan? '' : this.addAddressToSVG(mySVG,60 + shifty,15,0));
                 break;
             default:
-                mySVG.data += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
+                mySVG.data += (sitplan? '' : '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>');
                 mySVG.xright = 19;
                 break;
           }

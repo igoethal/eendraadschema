@@ -34,7 +34,6 @@ class Bel extends Electro_Item {
                    + '<use xlink:href="#bel" x="21" y="25"></use>';
         
         mySVG.data += this.addAddressToSVG(mySVG,60,15);
-        mySVG.data += "\n";
 
         return(mySVG);
     }

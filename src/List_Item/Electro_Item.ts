@@ -181,6 +181,34 @@ class Electro_Item extends List_Item {
 
   toHTML(mode: string) { return(this.toHTMLHeader(mode)); } // Implemented in the derived classes
 
+  // -- Get the number of the Electro_Item, if it is not defined, ask the parent
+
+  getnr() {
+      let parent:Electro_Item = (this.getParent() as Electro_Item);
+      if (parent != null) {
+          switch (parent.getType()) {
+              case "Kring": 
+              case "Domotica module (verticaal)": 
+                  return this.props.nr;
+              default: 
+                  return parent.getnr();
+          }
+      } else {
+          return "";
+      };
+  }
+
+  // -- Get readable address of the Electro_Item, if it is not defined, ask the parent --
+
+  getReadableAdres() {
+      let kringname:string = structure.findKringName(this.id).trim();
+      let nr:string = this.getnr().trim();
+
+      if (kringname == "") return nr;
+      else if (nr == "") return kringname
+      else return kringname + "." + nr;
+  }
+
   // -- Display the number in the html tree view, but only if it is displayable
 
   nrToHtml() {
@@ -199,7 +227,7 @@ class Electro_Item extends List_Item {
   // -- Code to add the addressline below when drawing SVG. This is called by most derived classes --
 
   addAddressToSVG(mySVG: SVGelement, starty:number = 60, godown:number = 15, shiftx:number = 0): String {
-    let returnstr:string;
+    let returnstr:string = "";
     if (!(/^\s*$/.test(this.props.adres))) { //check if adres contains only white space
       returnstr = '<text x="' + ((mySVG.xright-20)/2 + 21 + shiftx) + '" y="' + starty + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.props.adres) + '</text>';
       mySVG.ydown = mySVG.ydown + godown;
@@ -209,5 +237,45 @@ class Electro_Item extends List_Item {
 
   // -- Make the SVG for the electro item, placeholder for derived classes --
 
-  toSVG(): SVGelement { return(new SVGelement()); } //Placeholder for derived classes
+  toSVG(sitplan: boolean = false, mirror: boolean=false): SVGelement { return(new SVGelement()); } //Placeholder for derived classes
+
+  /** ToSituationPlanElement
+   * 
+   * @returns {SituationPlanElement} The SituationPlanElement that represents this Electro_Item
+   */
+
+  toSituationPlanElement() {
+    let myElement = new SituationPlanElement(1,0,0,0,0,0,1,randomId("SP_"),"");
+    this.updateSituationPlanElement(myElement);
+    return(myElement);
+  }
+
+  updateSituationPlanElement(myElement: SituationPlanElement) {
+    
+    let spiegeltext = false;
+    let rotate = myElement.rotate % 360;
+    if ( (rotate >= 90) && (rotate < 270) ) spiegeltext = true;
+
+    let mySVGElement:SVGelement = this.toSVG(true, spiegeltext);
+    let sizex = mySVGElement.xright + mySVGElement.xleft + 10;
+    let sizey = mySVGElement.yup + mySVGElement.ydown;
+   
+    let clipleft = 0;
+    if (['Contactdoos','Bel'].includes(this.getType())) {
+      clipleft = 0;
+    } else {
+      clipleft = 12;
+    }
+
+    let addright = 0;
+
+    myElement.setSVG(`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
+                       transform="scale(1,1)" viewBox="${clipleft} 0 ${sizex-clipleft} ${sizey}" width="${sizex-clipleft+addright}" height="${sizey}">` 
+                    + SVGSymbols.outputSVGSymbols()
+                  + mySVGElement.data 
+                  + '</svg>'); 
+
+    myElement.getSizeFromString();
+  }
+
 }

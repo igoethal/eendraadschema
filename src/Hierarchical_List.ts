@@ -79,6 +79,10 @@ class Hierarchical_List {
     length: number;
     curid: number;
     mode: string; //can be "edit" or "move"
+    sitplan: SituationPlan;
+    sitplanjson: any; //this is where we store the situation plan in plan object exporting to json
+    sitplanview: SituationPlanView;
+    currentView: string; // Here we store '2col' | 'config' | 'draw'
 
     // -- Constructor --
 
@@ -91,11 +95,21 @@ class Hierarchical_List {
         this.properties = new Properties();
         this.curid = 1;
         this.mode = "edit";
+        this.sitplan = new SituationPlan();
       };
+
+    /** dispose
+     * 
+     */
+    dispose() {
+        if (this.sitplanview != null) {
+            this.sitplanview.dispose();
+        }
+    }
 
     // -- Definitief verwijderen van items die als inactief werden geflagged --
 
-    deleteInactive() {
+/*    deleteInactive() {
         for (let i = 0; i<this.length; i++) { //Loop over all items
             while ( (!this.active[i]) && (i<this.length) ) {
                 this.data.splice(i,1);
@@ -104,34 +118,49 @@ class Hierarchical_List {
                 this.length--;
             }
         }
-    }
+    }*/
 
-    // -- Opnieuw sorteren van de array na clone/verplaatsen van items, ouders moeten steeds vóór de kinderen in de array zitten --
+    /** Member functie resort
+     * 
+     *  Sorteert de structuur zodat ouders steeds vlak voor de kinderen zitten en alles in de volgorde zoals
+     *  zichtbaar in het schema.
+     * 
+     *  Onbereikbare of niet actieve elementen worden verwijderd
+     * 
+     **/
 
     reSort() {
-        this.deleteInactive();
-        let continue_looping = true;
-        while (continue_looping) {
-            continue_looping = false
-            for (let i = 0; i<this.length; i++) { //Loop over all items
-                if (this.active[i]) { //We only do something for active members
-                    let parentOrdinal = this.getOrdinalById(this.data[i].parent);
-                    if (parentOrdinal > i) { //If this happens we perform a swap
-                        //We will need another pass to ensure we had them all
-                        continue_looping = true;
-                        //Repush mis-placed item to the end
-                        this.data.push(this.data[i]);
-                        this.active.push(true);
-                        this.id.push(this.id[i]);
-                        this.length += 1
-                        //Set the original element to inactive
-                        this.active[i] = false;
+        let sortToOrdinal = (parent = 0, ordinals = []) => {
+            for (let i = 0; i<this.length; i++) {
+                if (this.active[i]) {
+                    if (this.data[i].parent == parent) {
+                        ordinals.push(i);
+                        sortToOrdinal(this.id[i], ordinals)
                     }
                 }
             }
+            return ordinals;
         }
-        this.deleteInactive();
+
+        let ordinals = sortToOrdinal();
+
+        let data = [];
+        let active = [];
+        let id=[];
+
+        for (let i=0; i<ordinals.length; i++) {
+            data.push(this.data[ordinals[i]]);
+            active.push(this.active[ordinals[i]]);
+            id.push(this.id[ordinals[i]]);
+        }
+
+        this.data = data;
+        this.active = active;
+        this.id = id;
+        this.length = ordinals.length;
     }
+
+
 
     // -- Plaats in de array zoeken op basis van de id --
 
@@ -535,7 +564,7 @@ class Hierarchical_List {
 
         output += '<p style="margin-top: 5px;margin-bottom: 5px;" class="highlight-warning-big">Vergeet niet regelmatig uw werk<br>op te slaan in het "Bestand"-menu.</p>';
         
-        document.getElementById("ribbon").innerHTML = output;
+        document.getElementById("ribbon").innerHTML = `<div id="left-icons">${output}</div>`;
     }
 
     // -- Functie om de tree links te tekenen te starten by node met id = myParent --
@@ -579,6 +608,31 @@ class Hierarchical_List {
             output += "<button onclick=\"HLAdd()\">Voeg eerste object toe of kies bovenaan \"Nieuw\"</button><br>"; //no need for the add button if we have items
         }
         return(output);
+    }
+
+    /** Functie om de naam van een kring te vinden waartoe een element behoord 
+     * 
+    */
+
+    findKringName(my_id: number) : string {
+        let myOrdinal = this.getOrdinalById(my_id);
+        let myParent = this.data[myOrdinal].parent;
+        if (myParent == 0) {
+            return("");
+        } else {
+            let myParentOrdinal = this.getOrdinalById(myParent);
+            if (myParentOrdinal == null) return("");
+            if ((this.data[myParentOrdinal] as Electro_Item).getType() == "Kring") {
+                let kringnaam:string = this.data[myParentOrdinal].props.naam;
+                if (kringnaam.trim() != "") {
+                    return(this.data[myParentOrdinal].props.naam);
+                } else {
+                    return(this.findKringName(myParent));
+                }
+            } else {
+                return(this.findKringName(myParent));
+            }
+        }
     }
 
     // -- Functie om de tree links te tekenen te starten by node met id = myParent --

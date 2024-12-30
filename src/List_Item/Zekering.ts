@@ -226,8 +226,6 @@ class Zekering extends Electro_Item {
                         + 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' + 'S' + '</text>';
             mySVG.xright = mySVG.xright + 30;
         }
-        
-        mySVG.data += "\n";
 
         return(mySVG);
     }

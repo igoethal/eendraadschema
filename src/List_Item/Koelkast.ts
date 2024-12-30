@@ -21,20 +21,18 @@ class Koelkast extends Electro_Item {
         return(output);
     }
 
-    toSVG() {
+    toSVG(sitplan = false) {
         let mySVG:SVGelement = new SVGelement();
-        let outputstr:string = "";
 
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 59;
         mySVG.yup = 25;
         mySVG.ydown = 25;
 
-        mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
+        mySVG.data = (sitplan? "" : '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>')
                    + '<use xlink:href="#koelkast" x="21" y="25"></use>';
         
         mySVG.data += this.addAddressToSVG(mySVG,60,15);
-        mySVG.data += "\n";
 
         return(mySVG);
     }

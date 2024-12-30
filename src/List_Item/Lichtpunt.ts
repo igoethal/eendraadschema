@@ -46,7 +46,7 @@ class Lichtpunt extends Electro_Item {
         return(output);
     }
 
-    toSVG() {
+    toSVG(sitplan: boolean = false, mirrortext = false) {
         let mySVG:SVGelement = new SVGelement();
 
         mySVG.xleft = 1;   // Links voldoende ruimte voor een eventuele kring voorzien
@@ -55,7 +55,7 @@ class Lichtpunt extends Electro_Item {
         mySVG.ydown = 25;
 
         // Teken de leiding links
-        mySVG.data = '<line x1="1" x2="30" y1="25" y2="25" stroke="black" />';
+        mySVG.data = (sitplan? "" : '<line x1="1" x2="30" y1="25" y2="25" stroke="black" />');
 
         // Indien halfwaterdicht en/of meerdere lampen, voorzie de tekst bovenaan
         let print_str_upper = "";
@@ -92,7 +92,13 @@ class Lichtpunt extends Electro_Item {
                     if ( (print_str_upper.length > 2) && ( (this.props.type_noodverlichting == "Centraal") || (this.props.type_noodverlichting == "Decentraal") ) ) textxpos = 40;
                     else textxpos = 36; };
 
-                if (print_str_upper != "") mySVG.data += '<text x="' + textxpos + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="7">' + htmlspecialchars(print_str_upper) + '</text>';
+                if (print_str_upper != "") {
+                    let textoptions = 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="7"';
+                    if (mirrortext==false)
+                        mySVG.data += `<text x="${textxpos}" y="10" ${textoptions}>${htmlspecialchars(print_str_upper)}</text>`;
+                    else
+                        mySVG.data += `<text transform="scale(-1,1) translate(${-2*textxpos},0)" x="${textxpos}" y="10" ${textoptions}>${htmlspecialchars(print_str_upper)}</text>`;
+                }
                 
                 switch (this.props.type_noodverlichting) { // Type noodverlichting
                     case "Centraal":
@@ -112,7 +118,7 @@ class Lichtpunt extends Electro_Item {
 
                 // Verdere uitlijning en adres onderaan   
                 mySVG.xright = 42;
-                mySVG.data += this.addAddressToSVG(mySVG,50,5,2);
+                mySVG.data += (sitplan? "" : this.addAddressToSVG(mySVG,50,5,2));
                 break;
 
             case "spot":
@@ -139,7 +145,13 @@ class Lichtpunt extends Electro_Item {
                     if ( (print_str_upper.length > 2) && ( (this.props.type_noodverlichting == "Centraal") || (this.props.type_noodverlichting == "Decentraal") ) ) textxpos = 44;
                     else textxpos = 40; }
                   
-                if (print_str_upper != "") mySVG.data += '<text x="' + textxpos + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="7">' + htmlspecialchars(print_str_upper) + '</text>';
+                if (print_str_upper != "") {
+                    let textoptions = 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="7"';
+                    if (mirrortext==false)
+                        mySVG.data += `<text x="${textxpos}" y="10" ${textoptions}>${htmlspecialchars(print_str_upper)}</text>`;
+                    else
+                        mySVG.data += `<text transform="scale(-1,1) translate(${-2*textxpos},0)" x="${textxpos}" y="10" ${textoptions}>${htmlspecialchars(print_str_upper)}</text>`;
+                }
                   
                 switch (this.props.type_noodverlichting) {
                     case "Centraal":
@@ -159,7 +171,7 @@ class Lichtpunt extends Electro_Item {
 
                 // Verdere uitlijning en adres onderaan
                 mySVG.xright = 45;
-                mySVG.data += this.addAddressToSVG(mySVG,52,7,4);
+                mySVG.data += (sitplan? "" : this.addAddressToSVG(mySVG,52,7,4));
                 break;
 
             case "TL":
@@ -179,7 +191,13 @@ class Lichtpunt extends Electro_Item {
                 if (this.props.is_wandlamp) mySVG.data += '<line x1="50" y1="' + (27 + (aantal_buizen*3.5)) + '" x2="70" y2="' + (27 + (aantal_buizen*3.5)) + '" stroke="black" />';
 
                 // Zet symbool halfwaterdicht en aantal lampen bovenaan
-                if (print_str_upper != "") mySVG.data += '<text x="60" y="' + (25 - (aantal_buizen*3.5)) + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' + htmlspecialchars(print_str_upper) + '</text>';
+                if (print_str_upper != "") {
+                    let textoptions = 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10"';
+                    if (mirrortext == false)
+                        mySVG.data += `<text x="60" y="${25 - (aantal_buizen*3.5)}" ${textoptions}>${htmlspecialchars(print_str_upper)}</text>`;
+                    else
+                        mySVG.data += `<text transform="scale(-1,1) translate(-120,0)" x="60" y="${25 - (aantal_buizen*3.5)}" ${textoptions}>${htmlspecialchars(print_str_upper)}</text>`;
+                }
                 
                 // Teken ingebouwde schakelaar indien van toepassing
                 if (this.props.heeft_ingebouwde_schakelaar) {
@@ -209,7 +227,7 @@ class Lichtpunt extends Electro_Item {
 
                 // Verdere uitlijning en adres onderaan
                 mySVG.xright = 90;
-                mySVG.data += this.addAddressToSVG(mySVG,endy+13,Math.max(mySVG.ydown,endy+18-25),2);
+                mySVG.data += (sitplan? "" : this.addAddressToSVG(mySVG,endy+13,Math.max(mySVG.ydown,endy+18-25),2));
                 break;
                 
             default: //Normaal lichtpunt (kruisje)
@@ -218,7 +236,7 @@ class Lichtpunt extends Electro_Item {
                     case "Centraal":
                         mySVG.data += '<use xlink:href="#lamp" x="' + 30 + '" y="25" />'
                                    +  '<circle cx="30" cy="25" r="5" style="stroke:black;fill:black" />';
-                        if (this.heeftVerbruikerAlsKind()) mySVG.data += '<line x1="'+30+'" y1="25" x2="'+(30+11)+'" y2="25" stroke="black" />';
+                        if ( (this.heeftVerbruikerAlsKind()) && (!sitplan) ) mySVG.data += '<line x1="'+30+'" y1="25" x2="'+(30+11)+'" y2="25" stroke="black" />';
                         break;
                     case "Decentraal":
                         mySVG.data += '<use xlink:href="#noodlamp_decentraal" x="' + 30 + '" y="25" />';
@@ -226,12 +244,18 @@ class Lichtpunt extends Electro_Item {
                         break;
                     default:
                         mySVG.data += '<use xlink:href="#lamp" x="' + 30 + '" y="25" />';
-                        if (this.heeftVerbruikerAlsKind()) mySVG.data += '<line x1="'+30+'" y1="25" x2="'+(30+11)+'" y2="25" stroke="black" />';
+                        if ( (this.heeftVerbruikerAlsKind()) && (!sitplan) ) mySVG.data += '<line x1="'+30+'" y1="25" x2="'+(30+11)+'" y2="25" stroke="black" />';
                         break;
                 }
 
                 // Zet symbool halfwaterdicht en aantal lampen bovenaan
-                if (print_str_upper != "") mySVG.data += '<text x="30" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' + htmlspecialchars(print_str_upper) + '</text>';
+                if (print_str_upper != "") {
+                    let textoptions = 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10"';
+                    if (mirrortext == false)
+                        mySVG.data += `<text x="30" y="10" ${textoptions}>${htmlspecialchars(print_str_upper)}</text>`;
+                    else
+                        mySVG.data += `<text transform="scale(-1,1) translate(-60,0)" x="30" y="10" ${textoptions}>${htmlspecialchars(print_str_upper)}</text>`;
+                }
                 
                 // Teken wandlamp indien van toepassing
                 if (this.props.is_wandlamp) mySVG.data += '<line x1="20" y1="40" x2="40" y2="40" stroke="black" />';
@@ -241,7 +265,7 @@ class Lichtpunt extends Electro_Item {
                 
                 // Verdere uitlijning en adres onderaan
                 mySVG.xright = 39;
-                mySVG.data += this.addAddressToSVG(mySVG,54,10,-1);
+                mySVG.data += (sitplan? "" : this.addAddressToSVG(mySVG,54,10,-1));
                 break;
         }
 

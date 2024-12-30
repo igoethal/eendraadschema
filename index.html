@@ -23,7 +23,10 @@
       <div id="topmenu"><ul id="minitabs"></ul></div>
       <div id="app">
         <div id="configsection" class="configsection"></div> <!-- Full page configuratie --> 
-        <div id="ribbon" style="display:none;"></div> <!-- Ribbon -->
+        <div id="ribbon" style="display:none;">
+          <div id="left-icons" class="left-icons"></div>
+          <div id="right-icons" class="right-icons"></div>
+        </div> <!-- Ribbon -->
         <div id="canvas_2col" style="display:none;"> <!-- Eendraadschema-->
           <div id="left_col">
             <div id="left_col_inner"></div>
@@ -38,6 +41,7 @@
       </div>
     </div>
     <input id="importfile" type="file" accept=".eds" onchange="importjson(event)" style="display:none;" >
+    <input type="file" id="fileInput" style="display:none;">  <!-- Hidden file input element -->
     <script src="eendraadschema.js"></script>
   </body>
 </html>

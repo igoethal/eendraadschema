@@ -24,7 +24,7 @@ class Boiler extends Electro_Item {
         return(output);
     }
 
-    toSVG() {
+    toSVG(sitplan: boolean = false) {
         let mySVG:SVGelement = new SVGelement();
         let outputstr:string = "";
 
@@ -33,7 +33,7 @@ class Boiler extends Electro_Item {
         mySVG.yup = 25;
         mySVG.ydown = 25;
 
-        mySVG.data = '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>';
+        mySVG.data = (sitplan? "" : '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>');
         switch (this.props.heeft_accumulatie) { //accumulatie
             case false:
                 mySVG.data += '<use xlink:href="#boiler" x="21" y="25"></use>';
@@ -43,8 +43,7 @@ class Boiler extends Electro_Item {
                 break;
           }
 
-        mySVG.data += this.addAddressToSVG(mySVG,60);
-        mySVG.data += "\n";
+        mySVG.data += (sitplan? "" : this.addAddressToSVG(mySVG,60));
 
         return(mySVG);
     }

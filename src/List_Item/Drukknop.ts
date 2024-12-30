@@ -39,7 +39,7 @@ class Drukknop extends Electro_Item {
         return(output);
     }
 
-    toSVG() {
+    toSVG(sitplan: boolean = false, mirrortext: boolean = false) {
         let mySVG:SVGelement = new SVGelement();
         
         mySVG.xleft = 1; // Links voldoende ruimte voor een eventuele kring voorzien
@@ -50,7 +50,7 @@ class Drukknop extends Electro_Item {
         var aantal_knoppen:number = this.props.aantal;
         
         // Teken lijn links
-        mySVG.data += '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>'
+        mySVG.data += (sitplan? "" : '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>')
                    +  '<use xlink:href="#drukknop" x="21" y="25"></use>';
 
         // Teken verklikkerlampje indien van toepassing
@@ -75,12 +75,22 @@ class Drukknop extends Electro_Item {
           if (printstr != '') { printstr += ', ' }
           printstr += 'x' + aantal_knoppen;
         }
-        if (printstr != '') mySVG.data += '<text x="33" y="49" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' + htmlspecialchars(printstr) + '</text>';
+        if (printstr != '') {
+            let textoptions = 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10"';
+            if (mirrortext == false)
+                mySVG.data += '<text x="33" y="49" ' + textoptions + '>' + htmlspecialchars(printstr) + '</text>';
+            else
+                mySVG.data += '<text transform="scale(-1,1) translate(-66,0)" x="33" y="49" ' + textoptions + '>' + htmlspecialchars(printstr) + '</text>';
+        }
 
-        // Plaats tekst voor aantal knoppen
+        // Plaats tekst voor aantal knoppen per armatuur
         if (this.props.aantal_knoppen_per_armatuur > 1) {
-            mySVG.data += '<text x="44" y="13" style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-size="10">' + htmlspecialchars(this.props.aantal_knoppen_per_armatuur) + '</text>'
-                       +  '<line x1="39" y1="19" x2="44" y2="14" stroke="black" />';
+            let textoptions = 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10"';
+            if (mirrortext == false)
+                mySVG.data += '<text x="44" y="13" ' + textoptions + '>' + htmlspecialchars(this.props.aantal_knoppen_per_armatuur) + '</text>';
+            else
+                mySVG.data += '<text transform="scale(-1,1) translate(-88,0)" x="44" y="13" ' + textoptions + '>' + htmlspecialchars(this.props.aantal_knoppen_per_armatuur) + '</text>';
+            mySVG.data += '<line x1="39" y1="19" x2="44" y2="14" stroke="black" />';
         }
 
         // Plaats extra tekens voor rolluik of dimmer
@@ -97,9 +107,9 @@ class Drukknop extends Electro_Item {
 
         // Plaats adres helemaal onderaan
         if (printstr != '') {
-            mySVG.data += this.addAddressToSVG(mySVG,65,20);
+            mySVG.data += (sitplan? "" : this.addAddressToSVG(mySVG,65,20));
         } else {
-            mySVG.data += this.addAddressToSVG(mySVG,49,5);
+            mySVG.data += (sitplan? "" : this.addAddressToSVG(mySVG,49,5));
         }
 
         return(mySVG);

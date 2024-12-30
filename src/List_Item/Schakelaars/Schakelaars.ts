@@ -124,7 +124,7 @@ class Schakelaars extends Electro_Item {
         }
     }
 
-    toSVG() {
+    toSVG(sitplan = false, mirrortext = false) {
         let mySVG:SVGelement = new SVGelement();
         let tekenKeten: Array<Schakelaar> = [];
 
@@ -138,18 +138,21 @@ class Schakelaars extends Electro_Item {
 
         for (let i=0; i<tekenKeten.length; i++ ) {
             let islast: boolean = ( (i == tekenKeten.length-1) && (!this.heeftVerbruikerAlsKind()) );
-            let str:string; ( {endx: startx, str: str, lowerbound: lowerbound} = tekenKeten[i].toSVGString(startx,islast) ); mySVG.data += str;
+            let str:string; ( {endx: startx, str: str, lowerbound: lowerbound} = tekenKeten[i].toSVGString(startx,islast,sitplan,mirrortext) ); mySVG.data += str;
         }
         // Voor bepaalde symbolen moet wat extra ruimte rechts voorzien worden om te vermijden dat de tekening door de volgende kring loopt
-        if (!this.heeftVerbruikerAlsKind()) startx += tekenKeten[tekenKeten.length-1].extraPlaatsRechts();
+        if ( (!this.heeftVerbruikerAlsKind()) || (sitplan) ) {
+            let extra = tekenKeten[tekenKeten.length-1].extraPlaatsRechts();
+            if (sitplan) extra = Math.max(0,extra - 5);
+            startx += extra;
+        }
 
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = startx-2;
         mySVG.yup = 25;
         mySVG.ydown = 25;
         
-        mySVG.data += this.addAddressToSVG(mySVG,25+lowerbound,Math.max(0,lowerbound-20));
-        mySVG.data += "\n";
+        mySVG.data += (sitplan? '' : this.addAddressToSVG(mySVG,25+lowerbound,Math.max(0,lowerbound-20)));
 
         return(mySVG);
     }

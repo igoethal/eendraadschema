@@ -52,7 +52,7 @@ class Contactdoos extends Electro_Item {
         return(output);
     }
 
-    toSVG() {
+    toSVG(sitplan: boolean = false, mirrortext: boolean = false): SVGelement {
         let mySVG:SVGelement = new SVGelement();
 
         mySVG.xleft = 1; // Links voldoende ruimte voor een eventuele kring voorzien
@@ -117,18 +117,25 @@ class Contactdoos extends Electro_Item {
         };  
 
         // Teken halfwaterdicht indien van toepassing
-        if (this.props.is_halfwaterdicht) mySVG.data += '<rect x="' + (22+(this.props.heeft_ingebouwde_schakelaar)*10+(this.props.is_meerfasig)*34) + '" y="0" width="6" height="8" style="fill:rgb(255,255,255)" /><text x="' + (25+(this.props.heeft_ingebouwde_schakelaar)*10+(this.props.is_meerfasig)*34) + '" y="8" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">h</text>';
+        if (this.props.is_halfwaterdicht) {
+            mySVG.data += '<rect x="' + (22+(this.props.heeft_ingebouwde_schakelaar)*10+(this.props.is_meerfasig)*34) + '" y="0" width="6" height="8" style="fill:rgb(255,255,255)" />';
+            let textX = (25+(this.props.heeft_ingebouwde_schakelaar)*10+(this.props.is_meerfasig)*34);
+            let textStyle = 'text-anchor:middle" font-family="Arial, Helvetica, sans-serif';
+            if (mirrortext == false)
+                mySVG.data += '<text x="' + (+textX) + '" y="8" style="' + textStyle + '" font-size="10">h</text>';
+            else
+                mySVG.data += '<text transform="scale(-1,1) translate(' + (-textX*2) + ',0)" x="' + (+textX) + '" y="8" style="' + textStyle + '" font-size="10">h</text>';
+        }
 
         // Indien de contactdoos een kind heeft, teken een streepje rechts
-        if (this.heeftVerbruikerAlsKind()) {
+        if ( (this.heeftVerbruikerAlsKind()) && (!sitplan) ) {
             mySVG.data += '<line x1="'+startx+'" y1="25" x2="'+(startx+21)+'" y2="25" stroke="black" />';
         };
        
         // Adres helemaal onderaan plaatsen
-        mySVG.data += this.addAddressToSVG(mySVG,60,15);
-        mySVG.data += "\n";
+        mySVG.data += (sitplan? "" : this.addAddressToSVG(mySVG,60,15));
 
         return(mySVG);
     }
-
+         
 }

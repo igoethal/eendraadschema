@@ -27,7 +27,7 @@ class Warmtepomp extends Electro_Item {
         return(output);
     }
 
-    toSVG() {
+    toSVG(sitplan = false) {
         let mySVG:SVGelement = new SVGelement();
 
         // Alles naar beneden schuiven als we het aantal laders boven het symbool willen plaatsen
@@ -42,7 +42,7 @@ class Warmtepomp extends Electro_Item {
         mySVG.yup = 25 + shifty;
         mySVG.ydown = 25;
 
-        mySVG.data += '<line x1="1" y1="' + (shifty+25) + '" x2="21" y2="' + (shifty+25) + '" stroke="black"></line>'
+        mySVG.data += (sitplan? "" : '<line x1="1" y1="' + (shifty+25) + '" x2="21" y2="' + (shifty+25) + '" stroke="black"></line>')
                    +  '<use xlink:href="#verbruiker" x="21" y="' + (shifty+25) + '"></use>'
                    +  '<line x1="26" y1="' + (shifty+0) + '" x2="26" y2="' + (shifty+5) + '" stroke="black" />'
                    +  '<line x1="56" y1="' + (shifty+0) + '" x2="56" y2="' + (shifty+5) + '" stroke="black" />'
@@ -68,8 +68,7 @@ class Warmtepomp extends Electro_Item {
         }
     
         // Adres helemaal onderaan plaatsen
-        mySVG.data += this.addAddressToSVG(mySVG,60 + shifty,15);
-        mySVG.data += "\n";
+        mySVG.data += (sitplan? "" : this.addAddressToSVG(mySVG,60 + shifty,15));
 
         return(mySVG);
     }

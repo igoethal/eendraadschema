@@ -33,6 +33,8 @@ function printsvg() {
     
         let svg = flattenSVGfromString(structure.toSVG(0,"horizontal").data);
         const pages = Array.from({ length: structure.print_table.pages.length }, (_, i) => i+1);  
+
+        const sitplanprint = structure.sitplan.toSitPlanPrint();
     
         printPDF(
             svg,
@@ -40,7 +42,8 @@ function printsvg() {
             structure.properties,
             pages, 
             (document.getElementById("dopdfname") as HTMLInputElement).value, //filename
-            document.getElementById("progress_pdf") //HTML element where callback status can be given
+            document.getElementById("progress_pdf"), //HTML element where callback status can be given
+            sitplanprint
         );
     }
 

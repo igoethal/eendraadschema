@@ -13,6 +13,9 @@ class Schakelaar {
     trekschakelaar: boolean;
     aantal: number;
 
+    sitplan: boolean = false;
+    mirrortext: boolean = false;
+
     constructor(type: String, halfwaterdicht: boolean=false, verklikkerlamp: boolean=false, signalisatielamp: boolean=false, trekschakelaar: boolean=false, aantal: number=1) {
         this.type = type;
         this.halfwaterdicht = halfwaterdicht;
@@ -25,7 +28,13 @@ class Schakelaar {
     schakelaarAttributentoSVGString(endx: number, isdubbel: boolean = false) {
         let outputstr:string = "";
         if (this.signalisatielamp) outputstr += '<use xlink:href="#signalisatielamp" x="' + (endx-10) + '" y="25" />';
-        if (this.halfwaterdicht)   outputstr += '<text x="' + endx + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">h</text>';
+        if (this.halfwaterdicht) {
+            let textoptions = 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10"';
+            if (this.mirrortext == false)
+                outputstr += `<text x="${endx}" y="10" ${textoptions}>h</text>`;
+            else
+                outputstr += `<text transform="scale(-1,1) translate(${-2*endx},0)" x="${endx}" y="10" ${textoptions}>h</text>`;
+        }
         if (this.verklikkerlamp)   outputstr += '<line x1="' + (endx-3) + '" x2="' + (endx+3) + '" y1="22" y2="28" stroke="black" /><line x1="' + (endx-3) + '" x2="' + (endx+3) + '" y1="28" y2="22" stroke="black" />';
         if (this.trekschakelaar) {
             switch (isdubbel) {
@@ -157,7 +166,13 @@ class Schakelaar {
         outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
                   +  '<use xlink:href="#schakelaar_rolluik" x="' + endx + '" y="25" />';
 
-        if (this.halfwaterdicht) outputstr += '<text x="' + endx + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">h</text>';
+        if (this.halfwaterdicht) {
+            let textoptions = 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10"';
+            if (this.mirrortext == false)
+                outputstr += `<text x="${endx}" y="10" ${textoptions}>h</text>`;
+            else 
+                outputstr += `<text transform="scale(-1,1) translate(${-2*endx},0)" x="${endx}" y="10" ${textoptions}>h</text>`;
+        }
 
         return({endx: endx, str: outputstr, lowerbound: null});        
     }
@@ -168,7 +183,11 @@ class Schakelaar {
 
         // Alles naar beneden schuiven als we het aantal laders boven het symbool willen plaatsen
         if (this.aantal>1) {
-            outputstr += '<text x="31" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">x' + htmlspecialchars(this.aantal) + '</text>'
+            let textoptions = 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10"';
+            if (this.mirrortext == false)
+                outputstr += `<text x="31" y="10" ${textoptions}>x${htmlspecialchars(this.aantal)}</text>`;
+            else
+                outputstr += `<text transform="scale(-1,1) translate(-62,0)" x="31" y="10" ${textoptions}>x${htmlspecialchars(this.aantal)}</text>`;
         }
 
         outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
@@ -195,10 +214,14 @@ class Schakelaar {
         else                                         return 0;
     }
 
-    toSVGString(startx: number, last: boolean): drawReturnObj {
+    toSVGString(startx: number, last: boolean, sitplan: boolean = false, mirrortext: boolean = false): drawReturnObj {
         let outputstr:string = "";
         let endx;
         let lowerbound = 20;
+
+        this.sitplan = sitplan;
+        this.mirrortext = mirrortext;
+
         switch(this.type) {
             case "enkel":
                 ( {endx: endx, str: outputstr} = (this.enkeltoDrawReturnObj(startx)) );

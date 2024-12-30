@@ -5,6 +5,7 @@ class Properties {
   control: string;
   info: string;
   dpi: number;
+  currentView: string;
 
   constructor() {
     this.filename = "eendraadschema.eds";
@@ -13,6 +14,7 @@ class Properties {
     this.control = "";
     this.dpi = 300;
     this.info = "1 x 230V + N ~50 Hz";
+    this.currentView = 'config';
   };
 
   setFilename(name) {

@@ -251,11 +251,13 @@ class Print_Table {
 
         let page = 0;
         let pos = 0;
-        while ( (this.maxwidth - pos) > maxsvgwidth ) { // The undivided part still does not fit on a page
-            pos = this.pagemarkers.findMinDepth(pos+minsvgwidth,pos+maxsvgwidth).xpos;
-            while (this.pages.length < page+2) this.addPage();
-            this.setStop(page,pos);
-            page++;
+        if (maxsvgwidth > 0) {
+            while ( (this.maxwidth - pos) > maxsvgwidth ) { // The undivided part still does not fit on a page
+                pos = this.pagemarkers.findMinDepth(pos+minsvgwidth,pos+maxsvgwidth).xpos;
+                while (this.pages.length < page+2) this.addPage();
+                this.setStop(page,pos);
+                page++;
+            }
         }
 
         // The last page stops at the maximum size of the SVG

@@ -52,22 +52,42 @@ class undoRedo {
         this.history = new jsonStore(maxSteps);
     }
 
-    store() { this.history.store(structure_to_json()); structure.updateRibbon(); }
+    store() { 
+        this.history.store(structure_to_json());
+        if (structure.currentView == 'draw') structure.sitplanview.updateRibbon();
+        else if (structure.currentView == '2col') structure.updateRibbon(); 
+    }
 
     undo() {
-        var lastmode = structure.mode;
-        var text:string = this.history.undo();
+        let lastView = structure.properties.currentView;
+        let lastmode = structure.mode;
+        let text:string = this.history.undo();
         if (text != null) json_to_structure(text, 0, false); 
         structure.mode = lastmode;
-        HLRedrawTree();
+        if (structure.properties.currentView != lastView) toggleAppView(structure.properties.currentView as '2col' | 'config' | 'draw');
+        if (structure.properties.currentView == 'draw') {
+            topMenu.selectMenuItemByOrdinal(3);
+            showSituationPlanPage();
+        } else if (structure.properties.currentView == '2col') {
+            topMenu.selectMenuItemByOrdinal(2);
+            HLRedrawTree(); 
+        }
     }
 
     redo() { 
-        var lastmode = structure.mode;
-        var text:string = this.history.redo();
+        let lastView = structure.properties.currentView;
+        let lastmode = structure.mode;
+        let text:string = this.history.redo();
         if (text != null) json_to_structure(text, 0, false); 
         structure.mode = lastmode;
-        HLRedrawTree();
+        if (structure.properties.currentView != lastView) toggleAppView(structure.properties.currentView as '2col' | 'config' | 'draw');
+        if (structure.properties.currentView == 'draw') {
+            topMenu.selectMenuItemByOrdinal(3);
+            showSituationPlanPage();
+        } else if (structure.properties.currentView == '2col') {
+            topMenu.selectMenuItemByOrdinal(2);
+            HLRedrawTree(); 
+        }
     }
 
     clear() {

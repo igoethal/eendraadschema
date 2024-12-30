@@ -1,3 +1,7 @@
+const SITPLANVIEW_SELECT_PADDING:number = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--selectPadding').trim());
+const SITPLANVIEW_ZOOMINTERVAL = {MIN: 0.1, MAX: 1000};
+const SITPLANVIEW_DEFAULT_SCALE = 0.7;
+
 var CONFIGPAGE_LEFT:string = `
     <table border="1px" style="border-collapse:collapse;" align="center" width="100%"><tr><td style="padding-top: 0; padding-right: 10px; padding-bottom: 10px; padding-left: 10px;">
         <p><font size="+2">

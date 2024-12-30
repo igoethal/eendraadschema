@@ -1,4 +1,4 @@
-function printPDF(svg, print_table, properties, pages=[1], filename="eendraadschema_print.pdf", statuscallback) { // Defaults to A4 and 300 DPI but 600 DPI is better
+function printPDF(svg, print_table, properties, pages=[1], filename="eendraadschema_print.pdf", statuscallback, sitplanprint) { // Defaults to A4 and 300 DPI but 600 DPI is better
 
     if (print_table.papersize=="A3") {
         paperdetails = { // All sizes in millimeters
@@ -165,11 +165,21 @@ function printPDF(svg, print_table, properties, pages=[1], filename="eendraadsch
                      startx + 2, // Leave 2mm at the left of the drawn by text
                      paperdetails.paperheight - paperdetails.paper_margin - (paperdetails.drawnby_box_height-textHeight)/2 - textHeight/6);
 
-            doc.text('pagina. ' + pages[iter] + '/' + print_table.pages.length, 
+            let page = 0;
+            if (iter < print_table.pages.length) 
+                page = pages[iter];
+            else
+                page = pages[print_table.pages.length-1] + (iter - print_table.pages.length + 1);
+
+            let maxpages = print_table.pages.length + sitplanprint.numpages;
+
+            doc.text('pagina. ' + page + '/' + maxpages, 
                      startx + 3 * paperdetails.owner_box_width + 2, //Leave 2mm at the left 
                      paperdetails.paperheight - paperdetails.paper_margin - paperdetails.drawnby_box_height - paperdetails.owner_box_height - textHeight/6 + textHeight + 1.5 ); //Leave 1.55mm at the top
 
-            doc.text("Eendraadschema", 
+            let pagename = (iter < print_table.pages.length ? 'Eendraadschema' : 'Situatieschema');
+
+            doc.text(pagename, 
                      startx + 3 * paperdetails.owner_box_width + 2, 
                      paperdetails.paperheight - paperdetails.paper_margin - paperdetails.drawnby_box_height - paperdetails.owner_box_height - textHeight/6 + textHeight * (1 + 1.2) + 1.5);
 
@@ -232,6 +242,11 @@ function printPDF(svg, print_table, properties, pages=[1], filename="eendraadsch
             let sizex = print_table.pages[pages[iter]-1].stop - print_table.pages[pages[iter]-1].start;
             let sizey = print_table.stopy - print_table.starty;
             addPage(doc, cropSVG(svg, pages[iter]-1), sizex, sizey, nextpage, iter); //add one more page and callback here
+        } else if (iter < pages.length + sitplanprint.numpages) {
+            statuscallback.innerHTML = 'Pagina ' + (pages[pages.length-1]+(iter-pages.length)+1) + ' wordt gegenereerd. Even geduld..';
+            if (iter > 0) doc.addPage();
+            toprint = sitplanprint.pages[iter-pages.length];
+            addPage(doc, toprint.svg, toprint.sizex, toprint.sizey, nextpage, iter);
         } else {
             save(doc); //we are done
         }

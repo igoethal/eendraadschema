@@ -204,6 +204,9 @@ function upgrade_version(mystructure, version) {
 
 function json_to_structure(text: string, version = 0, redraw = true) {
 
+    // If a structure exists, clear it
+    if (structure != null) structure.dispose(); // Clear the structure
+
     /* Read all data from disk in a javascript structure mystructure.
         * Afterwards we will gradually copy elements from this one into the official structure
         */
@@ -226,6 +229,7 @@ function json_to_structure(text: string, version = 0, redraw = true) {
         if (typeof mystructure.properties.installer != "undefined") structure.properties.installer = mystructure.properties.installer;
         if (typeof mystructure.properties.info != "undefined") structure.properties.info = mystructure.properties.info;
         if (typeof mystructure.properties.info != "undefined") structure.properties.dpi = mystructure.properties.dpi;
+        if (typeof mystructure.properties.currentView != "undefined") structure.properties.currentView = mystructure.properties.currentView;
     }    
 
     // Kopieren van de paginatie voor printen
@@ -249,6 +253,13 @@ function json_to_structure(text: string, version = 0, redraw = true) {
             this.structure.print_table.pages[i].start = mystructure.print_table.pages[i].start;
             this.structure.print_table.pages[i].stop = mystructure.print_table.pages[i].stop;
         }
+    }
+
+    // Kopieren van de situatieplannen
+
+    if (typeof mystructure.sitplanjson != "undefined") {
+        structure.sitplan = new SituationPlan();
+        structure.sitplan.fromJsonObject(mystructure.sitplanjson);
     }
 
     /* Kopieren van de eigenschappen van elk element.
@@ -377,7 +388,13 @@ function structure_to_json() {
         listitem.sourcelist = null;
     }
     let swap:MarkerList = structure.print_table.pagemarkers;
+    let swap2:SituationPlan = structure.sitplan;
+    let swap3:SituationPlanView = structure.sitplanview;
+    
     structure.print_table.pagemarkers = null;
+    structure.sitplanjson = structure.sitplan.toJsonObject();
+    structure.sitplan = null;
+    structure.sitplanview = null;
     
     // Create the output structure in uncompressed form
     var text:string = JSON.stringify(structure);
@@ -387,18 +404,20 @@ function structure_to_json() {
         listitem.sourcelist = structure;
     }
     structure.print_table.pagemarkers = swap;
+    structure.sitplan = swap2;
+    structure.sitplanview = swap3;
 
     return(text);
 
 }
 
-/* FUNCTION download_by_blob
+/** FUNCTION download_by_blob
+ *
+ *  Downloads an EDS file to the user's PC
+ *
+ */
 
-   Downloads an EDS file to the user's PC
-
-*/
-
-function download_by_blob(text, filename, mimeType) {
+function download_by_blob(text, filename, mimeType): void {
     
     var element = document.createElement('a');
     if (navigator.msSaveBlob) {

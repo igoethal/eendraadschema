@@ -67,7 +67,7 @@ class Vrije_tekst extends Electro_Item {
         }    
     }
 
-    toSVG() {
+    toSVG(sitplan = false) {
         let mySVG:SVGelement = new SVGelement();
         var strlines = htmlspecialchars(this.props.tekst).split("|");
 
@@ -111,7 +111,7 @@ class Vrije_tekst extends Electro_Item {
         switch (this.props.vrije_tekst_type) {
             case "zonder kader": break;
             default: //Wegens compatibiliteit met oudere versies van de software is het ontbreken van eender welke parameter een "met kader"
-                mySVG.data += '<line x1="1" y1="' + (25 + extraplace/2.0) + '" x2="21" y2="' + (25 + extraplace/2.0) + '" stroke="black" />'
+                mySVG.data += (sitplan? "" : '<line x1="1" y1="' + (25 + extraplace/2.0) + '" x2="21" y2="' + (25 + extraplace/2.0) + '" stroke="black" />')
                            + '<rect x="21" y="5" width="' + width + '" height="' + (40 + extraplace) + '" fill="none" style="stroke:black" />'
                            + this.addAddressToSVG(mySVG,60+extraplace,15,width/2-(mySVG.xright-20)/2);
                 break;

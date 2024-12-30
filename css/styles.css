@@ -23,6 +23,34 @@ body {
   cursor: default;
 }
 
+/* SPINNER STUFF */
+
+.spinner {
+    display: none;
+    width: 50px;
+    height: 50px;
+    border: 5px solid rgba(0, 0, 0, 0.1);
+    border-top: 5px solid #000;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading .spinner {
+    display: block;
+}
+
+
+
+
 button, select, select option, input[type="checkbox"] {
   cursor: pointer;
 }
@@ -95,6 +123,47 @@ ul#minitabs a:hover {
   left: 0px;
   right: 0px;
   bottom: 0;
+  justify-content: space-between;
+  /*padding: 0px 12px 0px 12px;*/ 
+  display: flex;
+  background-color: #f8f8f8;
+  align-items: center;
+  width: 100%;
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+  border-bottom: 1px solid #c8c8c8; 
+  flex-direction: row;
+}
+
+#left-icons {
+  top: var(--menu-height);
+  height: var(--ribbon-height);
+  left: 0px;
+  right: 0px;
+  bottom: 0;
+  justify-content: left;
+  /*padding: 0px 12px 0px 12px;*/ 
+  display: flex;
+  background-color: #f8f8f8;
+  align-items: center;
+  width: 100%;
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+  border-bottom: 1px solid #c8c8c8; 
+  flex-direction: row;
+}
+
+#right-icons {
+  top: var(--menu-height);
+  height: var(--ribbon-height);
+  left: 0px;
+  right: 0px;
+  bottom: 0;
+  justify-content: right;
   /*padding: 0px 12px 0px 12px;*/ 
   display: flex;
   background-color: #f8f8f8;
@@ -137,6 +206,46 @@ ul#minitabs a:hover {
   white-space: nowrap; /* Prevent text from wrapping */
 }
 
+.icon-button {
+  height: 50px;
+  margin: 0 0 0 5px;
+  text-align: center;
+  cursor: pointer;
+  font-size: 24px;
+}
+
+.box {
+  position: absolute;
+  background-color: rgba(192, 192, 192, 0);
+  border: 0px solid #000;
+  cursor: pointer;
+  box-sizing: border-box; /* Include border in size calculation */
+  transform: rotate(0deg);
+}
+
+.boxlabel {
+  position: absolute;
+  font-size: 11px;
+  background-color: rgba(192, 192, 192, 0);
+  border: 0px solid #000;
+  cursor: pointer;
+  box-sizing: border-box; /* Include border in size calculation */
+  transform: rotate(0deg);
+  display: inline-block;
+  white-space: nowrap;
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+}
+
+.boxlabel.hidden { display: none; }
+
+.box.selected {
+  border: calc(var(--selectPadding) * 1px) solid red;
+}
+
+.box.hidden { display: none; }
+
 /* APP */
 
 #app {
@@ -176,18 +285,17 @@ ul#minitabs a:hover {
   left: 0;
   right: 0;
   bottom: 0;
-  overflow: hidden; 
+  overflow: auto; /* Add scrollbars if content overflows */
   background-color: #ffffff; /* Optional: Background color for visibility */
-  padding: 0x; /* Padding to create the empty border effect */
-  display: flex;
+  padding: 0; /* Padding to create the empty border effect */
   flex-direction: row; /* Ensure columns are side by side */
 }
 
 #paper {
   top: 10px;
   left: 10px;
-  width: 297mm; /* A4 paper width in landscape mode */
-  height: 210mm; /* A4 paper height */
+  width: 277mm; /* Useful drawing area on A4 */
+  height: 150mm; /* Useful drawing area on A4 */
   background-color: white;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), 0 6px 20px rgba(0, 0, 0, 0.19);
   border-radius: 5px;
@@ -285,3 +393,12 @@ table {
   color: #B22222; /* Firebrick red for text */
 }
 
+.svg-icon {
+  position: absolute;
+  /*width: 90px;
+  height: 90px;*/
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none; /* Allow clicks to pass through the SVG */
+}

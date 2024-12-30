@@ -60,7 +60,7 @@ class Verbruiker extends Electro_Item {
         }    
     }
 
-    toSVG() {
+    toSVG(sitplan = false) {
         let mySVG:SVGelement = new SVGelement();
         var strlines = htmlspecialchars(this.props.tekst).split("|");
 
@@ -95,7 +95,7 @@ class Verbruiker extends Electro_Item {
         }
        
         // Kader en adres tekenen --
-        mySVG.data += '<line x1="1" y1="' + (25 + extraplace/2.0) + '" x2="21" y2="' + (25 + extraplace/2.0) + '" stroke="black" />'
+        mySVG.data += (sitplan? "" : '<line x1="1" y1="' + (25 + extraplace/2.0) + '" x2="21" y2="' + (25 + extraplace/2.0) + '" stroke="black" />')
                    + '<rect x="21" y="5" width="' + width + '" height="' + (40 + extraplace) + '" fill="none" style="stroke:black" />'
                    + this.addAddressToSVG(mySVG,60+extraplace,15,width/2-(mySVG.xright-20)/2);
 

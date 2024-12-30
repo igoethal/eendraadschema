@@ -45,7 +45,7 @@ class Lichtcircuit extends Schakelaars {
         return(output);
     }
 
-    toSVG() {
+    toSVG(sitplan: boolean = false, mirrortext: boolean = false) {
         let mySVG:SVGelement = new SVGelement();
         let tekenKeten: Array<Schakelaar> = [];
 
@@ -60,7 +60,7 @@ class Lichtcircuit extends Schakelaars {
         // Teken de schakelaars
         for (let i=0; i<tekenKeten.length; i++ ) {
             let islast: boolean = ( (i == tekenKeten.length-1) && (!this.heeftVerbruikerAlsKind()) );
-            let str:string; ( {endx: startx, str: str, lowerbound: lowerbound} = tekenKeten[i].toSVGString(startx,islast) ); mySVG.data += str;
+            let str:string; ( {endx: startx, str: str, lowerbound: lowerbound} = tekenKeten[i].toSVGString(startx,islast,sitplan,mirrortext) ); mySVG.data += str;
         }
 
         if (this.props.aantal_lichtpunten >= 1) { //1 of meerdere lampen
@@ -77,7 +77,13 @@ class Lichtcircuit extends Schakelaars {
             } else if (parseInt(this.props.aantal_lichtpunten) > 1) {
                 print_str_upper = "x" + this.props.aantal_lichtpunten; }
 
-            if (print_str_upper != "") mySVG.data += '<text x="' + endx + '" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' + htmlspecialchars(print_str_upper) + '</text>';
+            if (print_str_upper != "") {
+                let textoptions = 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10"';
+                if (mirrortext==false)
+                    mySVG.data += `<text x="${endx}" y="10" ${textoptions}>${htmlspecialchars(print_str_upper)}</text>`;
+                else
+                    mySVG.data += `<text transform="scale(-1,1) translate(${-2*endx},0)" x="${endx}" y="10" ${textoptions}>${htmlspecialchars(print_str_upper)}</text>`;
+            }
 
             // Teken een leiding achter de lamp indien er nog kinderen zijn
             if (this.heeftVerbruikerAlsKind()) mySVG.data += '<line x1="'+endx+'" y1="25" x2="'+(endx+10)+'" y2="25" stroke="black" />';
@@ -87,7 +93,11 @@ class Lichtcircuit extends Schakelaars {
             lowerbound = Math.max(lowerbound,29);
         } else { //Geen lampen
             // Voor bepaalde symbolen moet wat extra ruimte rechts voorzien worden om te vermijden dat de tekening door de volgende kring loopt
-            if ((!this.heeftVerbruikerAlsKind()) && (tekenKeten.length>0)) startx += tekenKeten[tekenKeten.length-1].extraPlaatsRechts();
+            if ((!this.heeftVerbruikerAlsKind() || sitplan) && (tekenKeten.length>0)) {
+                let extra = tekenKeten[tekenKeten.length-1].extraPlaatsRechts();
+                if (sitplan) extra = Math.max(0,extra - 5);
+                startx += extra;
+            }
         }    
 
         mySVG.xleft = 1; // foresee at least some space for the conductor
@@ -95,8 +105,7 @@ class Lichtcircuit extends Schakelaars {
         mySVG.yup = 25;
         mySVG.ydown = 25;
 
-        mySVG.data += this.addAddressToSVG(mySVG,25+lowerbound,Math.max(0,lowerbound-20));
-        mySVG.data += "\n";
+        mySVG.data += (sitplan? '' : this.addAddressToSVG(mySVG,25+lowerbound,Math.max(0,lowerbound-20)));
 
         return(mySVG);
     }

@@ -24,9 +24,8 @@ class USB_lader extends Electro_Item {
         return(output);
     }
 
-    toSVG() {
+    toSVG(sitplan = false) {
         let mySVG:SVGelement = new SVGelement();
-        let outputstr:string = "";
 
         // Alles naar beneden schuiven als we het aantal laders boven het symbool willen plaatsen
         var shifty = 0;
@@ -40,11 +39,10 @@ class USB_lader extends Electro_Item {
         mySVG.yup = 25 + shifty;
         mySVG.ydown = 25;
 
-        mySVG.data += '<line x1="1" y1="' + (shifty+25) + '" x2="21" y2="' + (shifty+25) + '" stroke="black"></line>'
+        mySVG.data += (sitplan? "" : '<line x1="1" y1="' + (shifty+25) + '" x2="21" y2="' + (shifty+25) + '" stroke="black"></line>')
                    +  '<use xlink:href="#usblader" x="21" y="' + (shifty+25) + '"></use>';
         
-        mySVG.data += this.addAddressToSVG(mySVG,55 + shifty,10);
-        mySVG.data += "\n";
+        mySVG.data += (sitplan? "" : this.addAddressToSVG(mySVG,55 + shifty,10));
 
         return(mySVG);
     }

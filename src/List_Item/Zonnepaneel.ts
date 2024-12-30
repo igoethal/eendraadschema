@@ -25,7 +25,7 @@ class Zonnepaneel extends Electro_Item {
         return(output);
     }
 
-    toSVG() {
+    toSVG(sitplan = false) {
         let mySVG:SVGelement = new SVGelement();
 
         mySVG.xleft = 1; // Links voldoende ruimte voor een eventuele kring voorzien
@@ -33,13 +33,12 @@ class Zonnepaneel extends Electro_Item {
         mySVG.yup = 35;
         mySVG.ydown = 25;
 
-        mySVG.data += '<line x1="1" y1="35" x2="21" y2="35" stroke="black"></line>'
+        mySVG.data += (sitplan? "" : '<line x1="1" y1="35" x2="21" y2="35" stroke="black"></line>')
                    +  '<use xlink:href="#zonnepaneel" x="21" y="35"></use>'
                    +  '<text x="45" y="9" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' + htmlspecialchars(this.props.aantal) + 'x</text>';
             
         // Adres helemaal onderaan plaatsen
-        mySVG.data += this.addAddressToSVG(mySVG,70,15);
-        mySVG.data += "\n";
+        mySVG.data += (sitplan? "" : this.addAddressToSVG(mySVG,70,15));
 
         return(mySVG);
     }
