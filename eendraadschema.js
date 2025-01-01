@@ -114,13 +114,14 @@ function svgTextWidth(input, fontsize, options) {
     if (options === void 0) { options = ''; }
     var div = document.createElement('div');
     div.innerHTML = '<svg width="1000" height="20"><text x="0" y="10" style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-size="' + Number(fontsize) + '" ' + options + '>' + input + '</text></svg>';
-    var tryoutdiv;
-    if (document.getElementById("configsection").style.display === 'block') {
-        tryoutdiv = document.getElementById("configsection");
-    }
-    else {
-        tryoutdiv = document.getElementById("right_col_inner");
-    }
+    var tryoutdiv = document.body;
+    /*if (document.getElementById("configsection").style.display === 'block') {
+      tryoutdiv = document.getElementById("configsection") as HTMLElement;
+    } else if (document.getElementById("outerbox").style.display === 'block') {
+      tryoutdiv = document.getElementById("outerbox") as HTMLElement;
+    } else {
+      tryoutdiv = document.getElementById("right_col_inner") as HTMLElement;
+    }*/
     tryoutdiv.appendChild(div);
     var width = div.children[0].children[0].getBBox().width;
     tryoutdiv.removeChild(div);

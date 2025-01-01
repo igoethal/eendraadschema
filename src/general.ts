@@ -55,12 +55,15 @@ function svgTextWidth(input:String, fontsize:Number = 10, options:String = '') {
     const div = document.createElement('div');
     div.innerHTML = '<svg width="1000" height="20"><text x="0" y="10" style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-size="' + Number(fontsize) + '" ' + options + '>' + input + '</text></svg>';
     
-    let tryoutdiv: HTMLElement;
-    if (document.getElementById("configsection").style.display === 'block') {
+    let tryoutdiv: HTMLElement = document.body;
+
+    /*if (document.getElementById("configsection").style.display === 'block') {
       tryoutdiv = document.getElementById("configsection") as HTMLElement;
+    } else if (document.getElementById("outerbox").style.display === 'block') {
+      tryoutdiv = document.getElementById("outerbox") as HTMLElement;
     } else {
       tryoutdiv = document.getElementById("right_col_inner") as HTMLElement;
-    }
+    }*/
     
     tryoutdiv.appendChild(div);
     const width = (div.children[0].children[0] as SVGGraphicsElement).getBBox().width;
