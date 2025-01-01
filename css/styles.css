@@ -1,7 +1,7 @@
 /* ROOT */
 
 :root {
-  --selectPadding: 5;
+  --selectPadding: 2;
 
   --menu-height: 40px; 
   --ribbon-height: 68px; 
@@ -395,8 +395,6 @@ table {
 
 .svg-icon {
   position: absolute;
-  /*width: 90px;
-  height: 90px;*/
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);

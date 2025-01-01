@@ -54,8 +54,8 @@ class undoRedo {
 
     store() { 
         this.history.store(structure_to_json());
-        if (structure.currentView == 'draw') structure.sitplanview.updateRibbon();
-        else if (structure.currentView == '2col') structure.updateRibbon(); 
+        if (structure.properties.currentView == 'draw') structure.sitplanview.updateRibbon();
+        else if (structure.properties.currentView == '2col') structure.updateRibbon(); 
     }
 
     undo() {
@@ -65,12 +65,10 @@ class undoRedo {
         if (text != null) json_to_structure(text, 0, false); 
         structure.mode = lastmode;
         if (structure.properties.currentView != lastView) toggleAppView(structure.properties.currentView as '2col' | 'config' | 'draw');
-        if (structure.properties.currentView == 'draw') {
-            topMenu.selectMenuItemByOrdinal(3);
-            showSituationPlanPage();
-        } else if (structure.properties.currentView == '2col') {
-            topMenu.selectMenuItemByOrdinal(2);
-            HLRedrawTree(); 
+        switch (structure.properties.currentView) {
+            case 'draw': topMenu.selectMenuItemByOrdinal(3); showSituationPlanPage(); break;
+            case '2col': topMenu.selectMenuItemByOrdinal(2); HLRedrawTree(); break;
+            case 'config': topMenu.selectMenuItemByOrdinal((isDevMode() ? 4 : 3)); printsvg(); break;
         }
     }
 

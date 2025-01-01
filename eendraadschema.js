@@ -1496,9 +1496,9 @@ var undoRedo = /** @class */ (function () {
     }
     undoRedo.prototype.store = function () {
         this.history.store(structure_to_json());
-        if (structure.currentView == 'draw')
+        if (structure.properties.currentView == 'draw')
             structure.sitplanview.updateRibbon();
-        else if (structure.currentView == '2col')
+        else if (structure.properties.currentView == '2col')
             structure.updateRibbon();
     };
     undoRedo.prototype.undo = function () {
@@ -1510,13 +1510,19 @@ var undoRedo = /** @class */ (function () {
         structure.mode = lastmode;
         if (structure.properties.currentView != lastView)
             toggleAppView(structure.properties.currentView);
-        if (structure.properties.currentView == 'draw') {
-            topMenu.selectMenuItemByOrdinal(3);
-            showSituationPlanPage();
-        }
-        else if (structure.properties.currentView == '2col') {
-            topMenu.selectMenuItemByOrdinal(2);
-            HLRedrawTree();
+        switch (structure.properties.currentView) {
+            case 'draw':
+                topMenu.selectMenuItemByOrdinal(3);
+                showSituationPlanPage();
+                break;
+            case '2col':
+                topMenu.selectMenuItemByOrdinal(2);
+                HLRedrawTree();
+                break;
+            case 'config':
+                topMenu.selectMenuItemByOrdinal((isDevMode() ? 4 : 3));
+                printsvg();
+                break;
         }
     };
     undoRedo.prototype.redo = function () {
@@ -1621,21 +1627,21 @@ var SituationPlan = /** @class */ (function () {
         this.elements.push(element);
     };
     SituationPlan.prototype.addElementFromFile = function (event, page, posx, posy, callback) {
-        var element = new SituationPlanElement(page, posx, posy, 0, 0, 0, SITPLANVIEW_DEFAULT_SCALE, randomId("SP_"), "");
+        var element = new SituationPlanElement(page, posx, posy, 0, 0, 11, 0, SITPLANVIEW_DEFAULT_SCALE, randomId("SP_"), "");
         element.importFromFile(event, callback);
         this.elements.push(element);
         return element;
     };
     SituationPlan.prototype.addElementFromSVG = function (svg, page, posx, posy) {
-        var element = new SituationPlanElement(page, posx, posy, 0, 0, 0, SITPLANVIEW_DEFAULT_SCALE, randomId("SP_"), svg);
+        var element = new SituationPlanElement(page, posx, posy, 0, 0, 11, 0, SITPLANVIEW_DEFAULT_SCALE, randomId("SP_"), svg);
         element.getSizeFromString();
         this.elements.push(element);
     };
-    SituationPlan.prototype.addElectroItem = function (id, page, posx, posy, adrestype, adres, adreslocation, scale, rotate) {
+    SituationPlan.prototype.addElectroItem = function (id, page, posx, posy, adrestype, adres, adreslocation, labelfontsize, scale, rotate) {
         var electroItem = structure.data[structure.getOrdinalById(id)];
         if (electroItem != null) {
             var element = electroItem.toSituationPlanElement();
-            Object.assign(element, { page: page, posx: posx, posy: posy, scale: scale, rotate: rotate });
+            Object.assign(element, { page: page, posx: posx, posy: posy, labelfontsize: labelfontsize, scale: scale, rotate: rotate });
             element.setElectroItemId(id);
             element.setAdres(adrestype, adres, adreslocation);
             this.elements.push(element);
@@ -1669,25 +1675,10 @@ var SituationPlan = /** @class */ (function () {
         this.elements = [];
         for (var _i = 0, _a = json.elements; _i < _a.length; _i++) {
             var element = _a[_i];
-            var newElement = new SituationPlanElement(1, 0, 0, 0, 0, 0, SITPLANVIEW_DEFAULT_SCALE, randomId("SP_"), "");
+            var newElement = new SituationPlanElement(1, 0, 0, 0, 0, 11, 0, SITPLANVIEW_DEFAULT_SCALE, randomId("SP_"), "");
             newElement.fromJsonObject(element);
             this.elements.push(newElement);
         }
-    };
-    SituationPlan.prototype.toSVG = function () {
-        var outstr = '';
-        var pixelsPerMm = getPixelsPerMillimeter();
-        var maxx = pixelsPerMm * 277;
-        var maxy = pixelsPerMm * 150;
-        for (var _i = 0, _a = this.elements; _i < _a.length; _i++) {
-            var element = _a[_i];
-            outstr += element.getScaledSVG(true);
-            maxx = Math.max(maxx, element.posx + element.sizex / 2);
-            maxy = Math.max(maxy, element.posy + element.sizey / 2);
-            outstr += "<text x=\"".concat(element.labelposx, "\" y=\"").concat(element.labelposy, "\" font-size=\"11\" fill=\"black\" text-anchor=\"middle\" dominant-baseline=\"middle\">").concat(element.getAdres(), "</text>");
-        }
-        outstr = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"".concat(maxx, "px\" height=\"").concat(maxy, "px\" viewBox=\"0 0 ").concat(maxx, " ").concat(maxy, "\">").concat(outstr, "</svg>");
-        return outstr;
     };
     SituationPlan.prototype.toSitPlanPrint = function () {
         var outstruct = {};
@@ -1701,10 +1692,17 @@ var SituationPlan = /** @class */ (function () {
             for (var _i = 0, _a = this.elements; _i < _a.length; _i++) {
                 var element = _a[_i];
                 if (element.page == (i + 1)) {
+                    var fontsize = element.labelfontsize;
+                    if (fontsize == null)
+                        fontsize = 11;
                     svgstr += element.getScaledSVG(true);
-                    maxx = Math.max(maxx, element.posx + element.sizex / 2);
-                    maxy = Math.max(maxy, element.posy + element.sizey / 2);
-                    svgstr += "<text x=\"".concat(element.labelposx, "\" y=\"").concat(element.labelposy, "\" font-size=\"11\" fill=\"black\" text-anchor=\"middle\" dominant-baseline=\"middle\">").concat(element.getAdres(), "</text>");
+                    var rotatedimgwidth = element.sizex * element.scale;
+                    var rotatedimgheight = element.sizey * element.scale;
+                    rotatedimgwidth = Math.max(rotatedimgwidth * Math.cos(element.rotate * Math.PI / 180), rotatedimgheight * Math.sin(element.rotate * Math.PI / 180));
+                    rotatedimgheight = Math.max(rotatedimgwidth * Math.sin(element.rotate * Math.PI / 180), rotatedimgheight * Math.cos(element.rotate * Math.PI / 180));
+                    maxx = Math.max(maxx, element.posx + rotatedimgwidth / 2);
+                    maxy = Math.max(maxy, element.posy + rotatedimgheight / 2);
+                    svgstr += "<text x=\"".concat(element.labelposx, "\" y=\"").concat(element.labelposy, "\" font-size=\"").concat(fontsize, "\" fill=\"black\" text-anchor=\"middle\" dominant-baseline=\"middle\">").concat(element.getAdres(), "</text>");
                 }
             }
             svgstr = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"".concat(maxx, "px\" height=\"").concat(maxy, "px\" viewBox=\"0 0 ").concat(maxx, " ").concat(maxy, "\">").concat(svgstr, "</svg>");
@@ -1715,7 +1713,7 @@ var SituationPlan = /** @class */ (function () {
     return SituationPlan;
 }());
 var SituationPlanElement = /** @class */ (function () {
-    function SituationPlanElement(page, posx, posy, sizex, sizey, rotate, scale, id, svg) {
+    function SituationPlanElement(page, posx, posy, sizex, sizey, labelfontsize, rotate, scale, id, svg) {
         this.page = 1;
         this.posx = 0; //center positie-x in het schema
         this.posy = 0; //center positie-y in het schema
@@ -1723,6 +1721,7 @@ var SituationPlanElement = /** @class */ (function () {
         this.sizey = 0; //hoogte
         this.labelposx = 0;
         this.labelposy = 0;
+        this.labelfontsize = 11;
         this.rotate = 0;
         this.scale = SITPLANVIEW_DEFAULT_SCALE;
         this.boxref = null;
@@ -1736,6 +1735,7 @@ var SituationPlanElement = /** @class */ (function () {
         this.posx = posx;
         this.posy = posy;
         this.sizex = sizex, this.sizey = sizey;
+        this.labelfontsize = labelfontsize;
         this.rotate = rotate;
         this.scale = scale;
         this.id = id;
@@ -1846,8 +1846,11 @@ var SituationPlanElement = /** @class */ (function () {
                     rotate = rotate + 180;
             }
             transform = "transform=\"rotate(".concat(rotate, " ").concat(this.posx, " ").concat(this.posy, ")").concat((spiegel ? ' scale(-1,1) translate(' + (-2 * this.posx) + ' 0)' : ''), "\"");
+            return "<g ".concat(transform, ">\n                      <svg xmlns=\"http://www.w3.org/2000/svg\" ").concat(posinfo, " width=\"").concat(this.sizex * this.scale, "px\" height=\"").concat(this.sizey * this.scale, "px\" viewBox=\"0 0 ").concat(this.sizex, " ").concat(this.sizey, "\">").concat(svg, "</svg>\n                    </g>");
         }
-        return "\n            <svg class=\"svg-icon\" xmlns=\"http://www.w3.org/2000/svg\" ".concat(posinfo, " ").concat(transform, " width=\"").concat(this.sizex * this.scale, "px\" height=\"").concat(this.sizey * this.scale, "px\" viewBox=\"0 0 ").concat(this.sizex, " ").concat(this.sizey, "\">\n                ").concat(svg, "   \n            </svg>");
+        else {
+            return "<svg class=\"svg-icon\" xmlns=\"http://www.w3.org/2000/svg\" width=\"".concat(this.sizex * this.scale, "px\" height=\"").concat(this.sizey * this.scale, "px\" viewBox=\"0 0 ").concat(this.sizex, " ").concat(this.sizey, "\">").concat(svg, "</svg>");
+        }
     };
     SituationPlanElement.prototype.getSizeFromString = function () {
         // Create a DOMParser to parse the SVG string
@@ -1864,13 +1867,36 @@ var SituationPlanElement = /** @class */ (function () {
         var file = event.target.files[0];
         if (file) {
             var reader = new FileReader();
-            reader.onload = function (e) {
-                var fileContent = e.target.result;
-                _this.svg = fileContent.toString();
-                _this.getSizeFromString();
-                callback();
-            };
-            reader.readAsText(file); // Read the file as a text string
+            var fileName = file.name.toLowerCase();
+            var mimeType = file.type;
+            if (fileName.endsWith('.svg')) {
+                //Handle SVG
+                reader.onload = function (e) {
+                    var fileContent = e.target.result;
+                    _this.svg = fileContent;
+                    _this.getSizeFromString();
+                    callback();
+                };
+                reader.readAsText(file); // Read the file as a text string
+            }
+            else {
+                //Handle image
+                reader.onload = function (e) {
+                    var fileContent = e.target.result;
+                    var image = new Image();
+                    image.src = fileContent;
+                    image.onload = function () {
+                        _this.sizex = image.width;
+                        _this.sizey = image.height;
+                        _this.svg = "<svg width=\"".concat(image.width, "\" height=\"").concat(image.height, "\" xmlns=\"http://www.w3.org/2000/svg\"><image href=\"").concat(fileContent, "\" width=\"").concat(image.width, "\" height=\"").concat(image.height, "\"/></svg>");
+                        callback();
+                    };
+                    image.onerror = function () {
+                        console.error('Unsupported image format or failed to load image.');
+                    };
+                };
+                reader.readAsDataURL(file); // Read the file as a data URL
+            }
         }
     };
     SituationPlanElement.prototype.toJsonObject = function () {
@@ -1879,6 +1905,7 @@ var SituationPlanElement = /** @class */ (function () {
             page: this.page, posx: this.posx, posy: this.posy,
             sizex: this.sizex, sizey: this.sizey,
             labelposx: this.labelposx, labelposy: this.labelposy,
+            labelfontsize: this.labelfontsize,
             adrestype: this.adrestype, adres: this.adres, adreslocation: this.adreslocation,
             rotate: this.rotate, scale: this.scale,
             svg: svg, electroItemId: this.electroItemId
@@ -1890,6 +1917,7 @@ var SituationPlanElement = /** @class */ (function () {
         this.posy = json.posy;
         this.labelposx = (json.labelposx != null) ? json.labelposx : this.posx + 20;
         this.labelposy = (json.labelposy != null) ? json.labelposy : this.posy;
+        this.labelfontsize = (json.labelfontsize != null ? json.labelfontsize : 11);
         this.sizex = json.sizex;
         this.sizey = json.sizey;
         this.adrestype = (json.adrestype != null) ? json.adrestype : "manueel";
@@ -2093,6 +2121,7 @@ var SituationPlanView = /** @class */ (function () {
         this.event_manager.addEventListener(fileinput, 'change', function (event) {
             var element = _this.sitplan.addElementFromFile(event, _this.sitplan.activePage, 550, 300, (function () {
                 _this.reloadSitPlan();
+                _this.clearSelection();
                 _this.selectBox(element.boxref);
                 _this.redraw();
                 undostruct.store();
@@ -2103,11 +2132,12 @@ var SituationPlanView = /** @class */ (function () {
         var _this = this;
         this.event_manager.addEventListener(elem, 'click', function () {
             // Display an html input dialog in the browser and ask for a number, return the number as variable id
-            SituationPlanView_ElementPropertiesPopup(null, function (id, adrestype, adres, adreslocation, scale, rotate) {
+            SituationPlanView_ElementPropertiesPopup(null, function (id, adrestype, adres, adreslocation, labelfontsize, scale, rotate) {
                 if (id != null) {
-                    var element = _this.sitplan.addElectroItem(id, _this.sitplan.activePage, 550, 300, adrestype, adres, adreslocation, scale, rotate);
+                    var element = _this.sitplan.addElectroItem(id, _this.sitplan.activePage, 550, 300, adrestype, adres, adreslocation, labelfontsize, scale, rotate);
                     if (element != null) {
                         _this.reloadSitPlan();
+                        _this.clearSelection();
                         _this.selectBox(element.boxref);
                         _this.redraw();
                         undostruct.store();
@@ -2125,11 +2155,12 @@ var SituationPlanView = /** @class */ (function () {
             if (_this.selectedBox) {
                 var id = _this.selectedBox.id;
                 var pic_1 = _this.selectedBox.picref;
-                SituationPlanView_ElementPropertiesPopup(pic_1, function (id, adrestype, adres, adreslocation, scale, rotate) {
+                SituationPlanView_ElementPropertiesPopup(pic_1, function (id, adrestype, adres, adreslocation, labelfontsize, scale, rotate) {
                     if (id != null) {
                         pic_1.setElectroItemId(id);
                         pic_1.setAdres(adrestype, adres, adreslocation);
                     }
+                    pic_1.labelfontsize = labelfontsize;
                     pic_1.scale = scale;
                     pic_1.rotate = rotate;
                     _this.updateBoxContent(_this.selectedBox); //content needs to be updated first to know the size of the box
@@ -2198,6 +2229,7 @@ var SituationPlanView = /** @class */ (function () {
     };
     SituationPlanView.prototype.updateBoxPosition = function (box) {
         var pic = box.picref;
+        box.classList.remove('hidden');
         box.style.left = ((pic.posx - pic.sizex * pic.scale / 2 - SITPLANVIEW_SELECT_PADDING)).toString() + "px";
         box.style.top = ((pic.posy - pic.sizey * pic.scale / 2 - SITPLANVIEW_SELECT_PADDING)).toString() + "px";
         box.style.width = ((pic.sizex * pic.scale + SITPLANVIEW_SELECT_PADDING * 2)).toString() + "px";
@@ -2211,9 +2243,10 @@ var SituationPlanView = /** @class */ (function () {
             if (pic.isEDSymbol())
                 rotate = rotate - 180;
         }
-        box.style.transform = "rotate(".concat(rotate, "deg)") + (spiegel /*pic.mirror*/ ? ' scaleX(-1)' : '');
+        box.style.transform = "rotate(".concat(rotate, "deg)") + (spiegel ? ' scaleX(-1)' : '');
         if (pic != null) {
             var boxlabel = pic.boxlabelref;
+            boxlabel.classList.remove('hidden');
             if (boxlabel != null) {
                 pic.labelsizex = boxlabel.offsetWidth;
                 pic.labelsizey = boxlabel.offsetHeight;
@@ -2272,7 +2305,11 @@ var SituationPlanView = /** @class */ (function () {
                     }
                 }
             }
+            if (this.sitplan.activePage != pic.page)
+                boxlabel.classList.add('hidden');
         }
+        if (this.sitplan.activePage != pic.page)
+            box.classList.add('hidden');
     };
     SituationPlanView.prototype.updateBoxContent = function (box) {
         var pic = box.picref;
@@ -2281,6 +2318,8 @@ var SituationPlanView = /** @class */ (function () {
             box.innerHTML = pic.getScaledSVG();
         if (pic.boxlabelref != null) {
             var adres = pic.getAdres();
+            if (pic.labelfontsize != null)
+                pic.boxlabelref.style.fontSize = String(pic.labelfontsize) + 'px';
             if (adres != null)
                 pic.boxlabelref.innerHTML = adres;
         }
@@ -2311,6 +2350,7 @@ var SituationPlanView = /** @class */ (function () {
         }
     };
     SituationPlanView.prototype.redraw = function () {
+        this.selectPage(this.sitplan.activePage);
         this.reloadSitPlan();
         for (var _i = 0, _a = this.sitplan.elements; _i < _a.length; _i++) {
             var element = _a[_i];
@@ -2376,22 +2416,10 @@ var SituationPlanView = /** @class */ (function () {
         outputleft += '</center></div>';
         // -- Visuals om pagina te zoomen --
         outputright += '<span style="display: inline-block; width: 10px;"></span>';
-        outputright += "<span style=\"font-size: 24px;\">\uD83D\uDD0D</span>\n        <button class=\"icon-button\" id=\"button_zoomin\">+</button>\n        <button class=\"icon-button\" id=\"button_zoomout\">-</button>\n        <button class=\"icon-button\" id=\"button_zoomToFit\">pas</button>";
+        outputright += "\n        <div class=\"icon\" id=\"button_zoomin\">\n            <span class=\"icon-image\" style=\"font-size: 24px;\">\uD83D\uDD0D</span>\n            <span class=\"icon-text\">In</span>\n        </div>\n        <div class=\"icon\" id=\"button_zoomout\">\n            <span class=\"icon-image\" style=\"font-size: 24px;\">\uD83C\uDF0D</span>\n            <span class=\"icon-text\">Uit</span>\n        </div>\n        <div class=\"icon\" id=\"button_zoomToFit\">\n            <span class=\"icon-image\" style=\"font-size: 24px;\">\uD83D\uDDA5\uFE0F</span>\n            <!--<img src=\"gif/scaleup.png\" alt=\"Schermvullend\" class=\"icon-image\">-->\n            <span class=\"icon-text\">Schermvullend</span>\n        </div>";
         outputright += '<span style="display: inline-block; width: 10px;"></span>';
-        outputright += '<button id="myPrint">print</button>';
         // -- Put everything in the ribbon --
         document.getElementById("ribbon").innerHTML = "<div id=\"left-icons\">".concat(outputleft, "</div><div id=\"right-icons\">").concat(outputright, "</div>");
-        // -- Actions om printen te testen --
-        var myPrintButton = document.getElementById('myPrint');
-        myPrintButton.onclick = function () {
-            function openSVGInNewTab(str) {
-                var blob = new Blob([str], { type: 'image/svg+xml' });
-                var url = URL.createObjectURL(blob);
-                window.open(url, '_blank');
-            }
-            var SVGstr = _this.sitplan.toSVG();
-            openSVGInNewTab(SVGstr);
-        };
         // -- Actions om pagina te selecteren --
         document.getElementById('id_sitplanpage').onchange = function (event) {
             var target = event.target;
@@ -2434,13 +2462,14 @@ var SituationPlanView = /** @class */ (function () {
 }());
 function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK) {
     var div = document.createElement('div');
-    div.innerHTML = "\n        <div id=\"popupOverlay\" style=\"position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; visibility: hidden; z-index: 9999;\">\n            <div id=\"popupWindow\" style=\"width: 400px; background-color: white; padding: 20px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); display: flex; flex-direction: column; justify-content: space-between;\">\n                <div id=\"selectKringContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block;\">Kring:</label>\n                    <select id=\"KringSelect\"></select>\n                </div>\n                <div id=\"selectElectroItemContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block;\">Kring:</label>\n                    <select id=\"selectElectroItemBox\"></select>\n                </div>\n                <div id=\"textContainer\" style=\"display: flex; margin-bottom: 30px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block;\">ID:</label>\n                    <input id=\"textInput\" style=\"width: 100px;\" type=\"number\" min=\"0\" step=\"1\" value=\"\">\n                    <div id=\"feedback\" style=\"margin-left: 10px; width: 100%; font-size: 12px\"></div>\n                </div>\n                <div id=\"selectContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block; white-space: nowrap;\">Label type:</label>\n                    <select id=\"selectBox\">\n                        <option value=\"auto\">Automatisch</option>\n                        <!--<option value=\"adres\">Uit schema: [Adres]</option>-->\n                        <option value=\"manueel\">Handmatig</option>\n                    </select>\n                </div>\n                <div id=\"adresContainer\" style=\"display: flex; margin-bottom: 30px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block; white-space: nowrap;\">Label tekst:</label>\n                    <input id=\"adresInput\" style=\"width: 100%;\" type=\"text\" value=\"\">\n                    <select id=\"selectAdresLocation\" style=\"margin-left: 10px; display: inline-block;\">\n                        <option value=\"links\">Links</option>\n                        <option value=\"rechts\">Rechts</option>\n                        <option value=\"boven\">Boven</option>\n                        <option value=\"onder\">Onder</option>\n                    </select>\n                </div> \n                <div style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block;\">Schaal (%):</label>\n                    <input id=\"scaleInput\" style=\"width: 100px;\" type=\"number\" min=\"10\" max=\"400\" step=\"10\" value=\"".concat(String(SITPLANVIEW_DEFAULT_SCALE * 100), "\">\n                </div>\n                <div style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block;\">Rotatie (\u00B0):</label>\n                    <input id=\"rotationInput\" style=\"width: 100px;\" type=\"number\" min=\"0\" max=\"360\" step=\"10\" value=\"0\">\n                </div>\n                <div style=\"display: flex; justify-content: space-between;\">\n                    <button id=\"okButton\">OK</button>\n                    <button id=\"cancelButton\">Cancel</button>\n                </div>\n            </div>\n        </div>");
+    div.innerHTML = "\n        <div id=\"popupOverlay\" style=\"position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; visibility: hidden; z-index: 9999;\">\n            <div id=\"popupWindow\" style=\"width: 400px; background-color: white; padding: 20px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); display: flex; flex-direction: column; justify-content: space-between;\">\n                <div id=\"selectKringContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block;\">Kring:</label>\n                    <select id=\"KringSelect\"></select>\n                </div>\n                <div id=\"selectElectroItemContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block;\">Kring:</label>\n                    <select id=\"selectElectroItemBox\"></select>\n                </div>\n                <div id=\"textContainer\" style=\"display: flex; margin-bottom: 30px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block;\">ID:</label>\n                    <input id=\"textInput\" style=\"width: 100px;\" type=\"number\" min=\"0\" step=\"1\" value=\"\">\n                    <div id=\"feedback\" style=\"margin-left: 10px; width: 100%; font-size: 12px\"></div>\n                </div>\n                <div id=\"selectContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block; white-space: nowrap;\">Label type:</label>\n                    <select id=\"selectBox\">\n                        <option value=\"auto\">Automatisch</option>\n                        <!--<option value=\"adres\">Uit schema: [Adres]</option>-->\n                        <option value=\"manueel\">Handmatig</option>\n                    </select>\n                </div>\n                <div id=\"adresContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block; white-space: nowrap;\">Label tekst:</label>\n                    <input id=\"adresInput\" style=\"width: 100%;\" type=\"text\" value=\"\">\n                    <select id=\"selectAdresLocation\" style=\"margin-left: 10px; display: inline-block;\">\n                        <option value=\"links\">Links</option>\n                        <option value=\"rechts\">Rechts</option>\n                        <option value=\"boven\">Boven</option>\n                        <option value=\"onder\">Onder</option>\n                    </select>\n                </div>\n                <div id=\"fontSizeContainer\" style=\"display: flex; margin-bottom: 30px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block; white-space: nowrap;\">Font grootte (px):</label>\n                    <input id=\"fontSizeInput\" style=\"width: 100px;\" type=\"number\" min=\"1\" max=\"72\" step=\"11\" value=\"11\">\n                </div> \n                <div style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block;\">Schaal (%):</label>\n                    <input id=\"scaleInput\" style=\"width: 100px;\" type=\"number\" min=\"10\" max=\"400\" step=\"10\" value=\"".concat(String(SITPLANVIEW_DEFAULT_SCALE * 100), "\">\n                </div>\n                <div style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block;\">Rotatie (\u00B0):</label>\n                    <input id=\"rotationInput\" style=\"width: 100px;\" type=\"number\" min=\"0\" max=\"360\" step=\"10\" value=\"0\">\n                </div>\n                <div style=\"display: flex; justify-content: space-between;\">\n                    <button id=\"okButton\">OK</button>\n                    <button id=\"cancelButton\">Cancel</button>\n                </div>\n            </div>\n        </div>");
     var popupOverlay = div.querySelector('#popupOverlay');
     var popupWindow = popupOverlay.querySelector('#popupWindow');
     var selectKringContainer = popupWindow.querySelector('#selectKringContainer');
     var selectElectroItemContainer = popupWindow.querySelector('#selectElectroItemContainer');
     var textContainer = popupWindow.querySelector('#textContainer');
     var selectContainer = popupWindow.querySelector('#selectContainer');
+    var fontSizeContainer = popupWindow.querySelector('#fontSizeContainer');
     var adresContainer = popupWindow.querySelector('#adresContainer');
     var KringSelect = popupWindow.querySelector('#KringSelect');
     var selectElectroItemBox = popupWindow.querySelector('#selectElectroItemBox');
@@ -2448,6 +2477,7 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK) {
     var feedback = popupWindow.querySelector('#feedback');
     var selectBox = popupWindow.querySelector('#selectBox');
     var adresInput = popupWindow.querySelector('#adresInput');
+    var fontSizeInput = popupWindow.querySelector('#fontSizeInput');
     var selectAdresLocation = popupWindow.querySelector('#selectAdresLocation');
     var scaleInput = popupWindow.querySelector('#scaleInput');
     var rotationInput = popupWindow.querySelector('#rotationInput');
@@ -2604,15 +2634,16 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK) {
         if (sitplanElement.getElectroItemId() != null) { // Het gaat over een bestaand Electro-item
             selectBox.value = sitplanElement.getAdresType();
             adresInput.value = sitplanElement.getAdres();
+            fontSizeInput.value = String(sitplanElement.labelfontsize);
             selectAdresLocation.value = sitplanElement.getAdresLocation();
             selectBoxChanged();
         }
         else { // Het gaat over een geimporteerde CSV
-            //textInput.value = '';
             selectKringContainer.style.display = 'none';
             selectElectroItemContainer.style.display = 'none';
             textContainer.style.display = 'none';
             selectContainer.style.display = 'none';
+            fontSizeContainer.style.display = 'none';
             adresContainer.style.display = 'none';
         }
         scaleInput.value = String(sitplanElement.scale * 100);
@@ -2620,12 +2651,14 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK) {
     }
     else { // Form werd aangeroepen om een nieuw element te creëren
         selectBoxChanged();
+        fontSizeInput.value = '11';
         scaleInput.value = String(SITPLANVIEW_DEFAULT_SCALE * 100);
         rotationInput.value = '0';
         selectAdresLocation.value = 'rechts';
     }
     textInput.onkeydown = handleEnterKey;
     adresInput.onkeydown = handleEnterKey;
+    fontSizeInput.onkeydown = handleEnterKey;
     scaleInput.onkeydown = handleEnterKey;
     rotationInput.onkeydown = handleEnterKey;
     textInput.onblur = selectBoxChanged;
@@ -2633,7 +2666,7 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK) {
     okButton.onclick = function () {
         var returnId = (textInput.value.trim() == '' ? null : Number(textInput.value));
         closePopup(); // We close the popup first to avoid that an error somewhere leaves it open
-        callbackOK(returnId, selectBox.value, adresInput.value, selectAdresLocation.value, Number(scaleInput.value) / 100, Number(rotationInput.value));
+        callbackOK(returnId, selectBox.value, adresInput.value, selectAdresLocation.value, Number(fontSizeInput.value), Number(scaleInput.value) / 100, Number(rotationInput.value));
     };
     cancelButton.onclick = function () {
         closePopup();
@@ -3001,7 +3034,7 @@ var Electro_Item = /** @class */ (function (_super) {
      * @returns {SituationPlanElement} The SituationPlanElement that represents this Electro_Item
      */
     Electro_Item.prototype.toSituationPlanElement = function () {
-        var myElement = new SituationPlanElement(1, 0, 0, 0, 0, 0, 1, randomId("SP_"), "");
+        var myElement = new SituationPlanElement(1, 0, 0, 0, 0, 11, 0, 1, randomId("SP_"), "");
         this.updateSituationPlanElement(myElement);
         return (myElement);
     };
@@ -8165,6 +8198,8 @@ function reset_all() {
     structure = new Hierarchical_List();
     buildNewStructure(structure);
     topMenu.selectMenuItemByName(isDevMode() ? 'Eéndraadschema' : 'Bewerken');
+    undostruct.clear();
+    undostruct.store();
 }
 function renderAddress() {
     var outHTML = "";
@@ -8230,7 +8265,8 @@ function restart_all() {
     }
 }
 function toggleAppView(type) {
-    var lastView = structure.properties.currentView;
+    if ((['2col', 'draw'].includes(type)) && (['2col', 'draw'].includes(structure.properties.currentView)) && (type !== structure.properties.currentView))
+        undostruct.store();
     structure.properties.currentView = type;
     if (type === '2col') {
         document.getElementById("configsection").style.display = 'none';
@@ -8251,8 +8287,6 @@ function toggleAppView(type) {
         document.getElementById("ribbon").style.display = 'flex';
         document.getElementById("canvas_2col").style.display = 'none';
     }
-    if ((lastView != null) && (lastView != type))
-        undostruct.store();
 }
 function load_example(nr) {
     switch (nr) {

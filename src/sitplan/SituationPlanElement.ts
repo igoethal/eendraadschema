@@ -8,6 +8,7 @@ class SituationPlanElement {
 
     public labelposx = 0;
     public labelposy = 0;
+    public labelfontsize = 11;
 
     public rotate:number = 0;
     public scale:number = SITPLANVIEW_DEFAULT_SCALE;
@@ -26,12 +27,14 @@ class SituationPlanElement {
         page: number,
         posx: number, posy: number,
         sizex: number, sizey: number,
+        labelfontsize: number,
         rotate: number, scale: number,
         id: string, svg: string ) 
     {
         this.page = page;
         this.posx = posx; this.posy = posy;
         this.sizex = sizex, this.sizey = sizey;
+        this.labelfontsize = labelfontsize;
         this.rotate = rotate; this.scale = scale;
         this.id = id; this.svg = svg;
     }
@@ -143,12 +146,12 @@ class SituationPlanElement {
                 if (this.isEDSymbol()) rotate = rotate + 180;
             }
             transform = `transform="rotate(${rotate} ${this.posx} ${this.posy})${(spiegel ? ' scale(-1,1) translate(' + (-2*this.posx) + ' 0)' : '')}"`;
+            return `<g ${transform}>
+                      <svg xmlns="http://www.w3.org/2000/svg" ${posinfo} width="${this.sizex*this.scale}px" height="${this.sizey*this.scale}px" viewBox="0 0 ${this.sizex} ${this.sizey}">${svg}</svg>
+                    </g>`;               
+        } else {
+            return `<svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="${this.sizex*this.scale}px" height="${this.sizey*this.scale}px" viewBox="0 0 ${this.sizex} ${this.sizey}">${svg}</svg>`;           
         }
-
-        return `
-            <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" ${posinfo} ${transform} width="${this.sizex*this.scale}px" height="${this.sizey*this.scale}px" viewBox="0 0 ${this.sizex} ${this.sizey}">
-                ${svg}   
-            </svg>`;           
     }
 
     getSizeFromString() {
@@ -168,13 +171,36 @@ class SituationPlanElement {
         const file = event.target.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onload = (e) => { 
-                const fileContent = e.target.result; 
-                this.svg = fileContent.toString();
-                this.getSizeFromString();
-                callback();
-            }; 
-            reader.readAsText(file); // Read the file as a text string
+            const fileName = file.name.toLowerCase();
+            const mimeType = file.type;
+
+            if (fileName.endsWith('.svg')) {
+                //Handle SVG
+                reader.onload = (e) => { 
+                    const fileContent = e.target.result as string; 
+                    this.svg = fileContent;
+                    this.getSizeFromString();
+                    callback();
+                }; 
+                reader.readAsText(file); // Read the file as a text string
+            } else {
+                //Handle image
+                reader.onload = (e) => { 
+                    const fileContent = e.target.result as string; 
+                    const image = new Image();
+                    image.src = fileContent;
+                    image.onload = () => {
+                        this.sizex = image.width;
+                        this.sizey = image.height;
+                        this.svg = `<svg width="${image.width}" height="${image.height}" xmlns="http://www.w3.org/2000/svg"><image href="${fileContent}" width="${image.width}" height="${image.height}"/></svg>`;
+                        callback();
+                    };
+                    image.onerror = () => { 
+                        console.error('Unsupported image format or failed to load image.'); 
+                    };
+                }; 
+                reader.readAsDataURL(file); // Read the file as a data URL
+            }
         }
     }
 
@@ -184,6 +210,7 @@ class SituationPlanElement {
             page: this.page, posx: this.posx, posy: this.posy,
             sizex: this.sizex, sizey: this.sizey, 
             labelposx: this.labelposx, labelposy: this.labelposy,
+            labelfontsize: this.labelfontsize,
             adrestype: this.adrestype, adres: this.adres, adreslocation: this.adreslocation,
             rotate: this.rotate, scale: this.scale,
             svg: svg, electroItemId: this.electroItemId
@@ -196,6 +223,7 @@ class SituationPlanElement {
         this.posy = json.posy;
         this.labelposx = (json.labelposx != null) ? json.labelposx : this.posx + 20;
         this.labelposy = (json.labelposy != null) ? json.labelposy : this.posy;
+        this.labelfontsize = (json.labelfontsize != null ? json.labelfontsize : 11);
         this.sizex = json.sizex;
         this.sizey = json.sizey;
         this.adrestype = (json.adrestype != null) ? json.adrestype : "manueel";

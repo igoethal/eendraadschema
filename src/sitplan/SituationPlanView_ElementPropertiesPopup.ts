@@ -1,6 +1,6 @@
 function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanElement, 
                          callbackOK: (id: number, adresType: string, adres: string, selectAdresLocation: string,
-                                      scale: number, rotation: number) => void) {
+                                      labelfontsize: number, scale: number, rotation: number) => void) {
 
     const div = document.createElement('div');
 
@@ -28,7 +28,7 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanE
                         <option value="manueel">Handmatig</option>
                     </select>
                 </div>
-                <div id="adresContainer" style="display: flex; margin-bottom: 30px; align-items: center;">
+                <div id="adresContainer" style="display: flex; margin-bottom: 10px; align-items: center;">
                     <label style="margin-right: 10px; display: inline-block; white-space: nowrap;">Label tekst:</label>
                     <input id="adresInput" style="width: 100%;" type="text" value="">
                     <select id="selectAdresLocation" style="margin-left: 10px; display: inline-block;">
@@ -37,6 +37,10 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanE
                         <option value="boven">Boven</option>
                         <option value="onder">Onder</option>
                     </select>
+                </div>
+                <div id="fontSizeContainer" style="display: flex; margin-bottom: 30px; align-items: center;">
+                    <label style="margin-right: 10px; display: inline-block; white-space: nowrap;">Font grootte (px):</label>
+                    <input id="fontSizeInput" style="width: 100px;" type="number" min="1" max="72" step="11" value="11">
                 </div> 
                 <div style="display: flex; margin-bottom: 10px; align-items: center;">
                     <label style="margin-right: 10px; display: inline-block;">Schaal (%):</label>
@@ -60,6 +64,7 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanE
     const selectElectroItemContainer = popupWindow.querySelector('#selectElectroItemContainer') as HTMLSelectElement;
     const textContainer = popupWindow.querySelector('#textContainer') as HTMLElement;
     const selectContainer = popupWindow.querySelector('#selectContainer') as HTMLSelectElement;
+    const fontSizeContainer = popupWindow.querySelector('#fontSizeContainer') as HTMLElement;
     const adresContainer = popupWindow.querySelector('#adresContainer') as HTMLElement;
 
     const KringSelect = popupWindow.querySelector('#KringSelect') as HTMLSelectElement;
@@ -69,6 +74,7 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanE
     const feedback = popupWindow.querySelector('#feedback') as HTMLElement;
     const selectBox = popupWindow.querySelector('#selectBox') as HTMLSelectElement;
     const adresInput = popupWindow.querySelector('#adresInput') as HTMLInputElement;
+    const fontSizeInput = popupWindow.querySelector('#fontSizeInput') as HTMLInputElement;
     const selectAdresLocation = popupWindow.querySelector('#selectAdresLocation') as HTMLSelectElement;
     const scaleInput = popupWindow.querySelector('#scaleInput') as HTMLInputElement;
     const rotationInput = popupWindow.querySelector('#rotationInput') as HTMLInputElement;
@@ -237,40 +243,40 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanE
         if (sitplanElement.getElectroItemId() != null) { // Het gaat over een bestaand Electro-item
             selectBox.value = sitplanElement.getAdresType();
             adresInput.value = sitplanElement.getAdres();
+            fontSizeInput.value = String(sitplanElement.labelfontsize);
             selectAdresLocation.value = sitplanElement.getAdresLocation();
             selectBoxChanged();
         } else { // Het gaat over een geimporteerde CSV
-            //textInput.value = '';
             selectKringContainer.style.display = 'none';
             selectElectroItemContainer.style.display = 'none';
             textContainer.style.display = 'none';
             selectContainer.style.display = 'none';
+            fontSizeContainer.style.display = 'none';
             adresContainer.style.display = 'none';
         }
         scaleInput.value = String(sitplanElement.scale*100);
         rotationInput.value = String(sitplanElement.rotate);
     } else { // Form werd aangeroepen om een nieuw element te creëren
         selectBoxChanged();
+        fontSizeInput.value = '11';
         scaleInput.value = String(SITPLANVIEW_DEFAULT_SCALE*100);
         rotationInput.value = '0';
         selectAdresLocation.value = 'rechts';
     }
-
-    
+   
     textInput.onkeydown = handleEnterKey;
     adresInput.onkeydown = handleEnterKey;
+    fontSizeInput.onkeydown = handleEnterKey;
     scaleInput.onkeydown = handleEnterKey;
     rotationInput.onkeydown = handleEnterKey;
 
     textInput.onblur = selectBoxChanged;
     selectBox.onchange = selectBoxChanged; 
-    
-    
 
     okButton.onclick = () => {
         let returnId = (textInput.value.trim() == '' ? null : Number(textInput.value));
         closePopup(); // We close the popup first to avoid that an error somewhere leaves it open
-        callbackOK(returnId, selectBox.value, adresInput.value, selectAdresLocation.value, Number(scaleInput.value)/100, Number(rotationInput.value));
+        callbackOK(returnId, selectBox.value, adresInput.value, selectAdresLocation.value, Number(fontSizeInput.value), Number(scaleInput.value)/100, Number(rotationInput.value));
     };
 
     cancelButton.onclick = () => {

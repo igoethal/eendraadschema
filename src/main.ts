@@ -199,6 +199,8 @@ function reset_all() {
     structure = new Hierarchical_List();
     buildNewStructure(structure);
     topMenu.selectMenuItemByName(isDevMode() ? 'Eéndraadschema' : 'Bewerken');
+    undostruct.clear();
+    undostruct.store();
 }
 
 function renderAddress() {
@@ -284,7 +286,9 @@ function restart_all() {
 }
 
 function toggleAppView(type: '2col' | 'config' | 'draw') {
-    let lastView = structure.properties.currentView;
+    if ( (['2col','draw'].includes(type)) && (['2col','draw'].includes(structure.properties.currentView)) && (type !== structure.properties.currentView) )
+        undostruct.store();
+
     structure.properties.currentView = type;
     if (type === '2col') {  
         document.getElementById("configsection").style.display = 'none';
@@ -303,7 +307,6 @@ function toggleAppView(type: '2col' | 'config' | 'draw') {
         document.getElementById("ribbon").style.display = 'flex';
         document.getElementById("canvas_2col").style.display = 'none';
     }
-    if ( (lastView != null) && (lastView != type) ) undostruct.store();
 }
 
 function load_example(nr: number) {

@@ -165,6 +165,7 @@ class SituationPlanView {
             let element = this.sitplan.addElementFromFile(event, this.sitplan.activePage, 550, 300, 
                 (() => {
                     this.reloadSitPlan();
+                    this.clearSelection();
                     this.selectBox(element.boxref);
                     this.redraw();
                     undostruct.store();
@@ -177,13 +178,14 @@ class SituationPlanView {
         this.event_manager.addEventListener(elem, 'click', () => {
             // Display an html input dialog in the browser and ask for a number, return the number as variable id
             SituationPlanView_ElementPropertiesPopup(null,
-                (id, adrestype, adres, adreslocation, scale, rotate) => {
+                (id, adrestype, adres, adreslocation, labelfontsize, scale, rotate) => {
                     if (id != null) {
                         let element = this.sitplan.addElectroItem(id, this.sitplan.activePage, 550, 300, 
-                                                                  adrestype, adres, adreslocation, 
+                                                                  adrestype, adres, adreslocation, labelfontsize,
                                                                   scale, rotate);
                         if (element != null) {
                             this.reloadSitPlan();
+                            this.clearSelection();
                             this.selectBox(element.boxref);
                             this.redraw();
                             undostruct.store();
@@ -202,11 +204,12 @@ class SituationPlanView {
                 const id = this.selectedBox.id;
                 const pic = (this.selectedBox as any).picref;
                 SituationPlanView_ElementPropertiesPopup(pic,
-                    (id, adrestype, adres, adreslocation, scale, rotate) => {
+                    (id, adrestype, adres, adreslocation, labelfontsize, scale, rotate) => {
                         if (id != null) {
                             pic.setElectroItemId(id);
                             pic.setAdres(adrestype,adres,adreslocation);
                         }
+                        pic.labelfontsize = labelfontsize;
                         pic.scale = scale;
                         pic.rotate = rotate;
                         this.updateBoxContent(this.selectedBox); //content needs to be updated first to know the size of the box
@@ -286,6 +289,8 @@ class SituationPlanView {
 
     private updateBoxPosition(box) {
         let pic = box.picref;
+
+        box.classList.remove('hidden');
     
         box.style.left = ((pic.posx-pic.sizex*pic.scale/2-SITPLANVIEW_SELECT_PADDING)).toString() + "px";
         box.style.top = ((pic.posy-pic.sizey*pic.scale/2-SITPLANVIEW_SELECT_PADDING)).toString() + "px";
@@ -300,10 +305,12 @@ class SituationPlanView {
             if (pic.isEDSymbol()) rotate = rotate - 180;
         }
 
-        box.style.transform = `rotate(${rotate}deg)` + (spiegel/*pic.mirror*/ ? ' scaleX(-1)' : '');
+        box.style.transform = `rotate(${rotate}deg)` + (spiegel ? ' scaleX(-1)' : '');
 
         if (pic != null) {
             let boxlabel = pic.boxlabelref;
+            boxlabel.classList.remove('hidden');
+
             if (boxlabel != null) {
 
                 pic.labelsizex = boxlabel.offsetWidth;
@@ -366,16 +373,22 @@ class SituationPlanView {
                         break; }
                 }
             }
+
+            if (this.sitplan.activePage != pic.page) boxlabel.classList.add('hidden');
         }
+
+        if (this.sitplan.activePage != pic.page) box.classList.add('hidden');
     }
 
     private updateBoxContent(box) {
         let pic = box.picref;
+
         let svg = pic.getScaledSVG();
         if (svg != null) box.innerHTML = pic.getScaledSVG();
 
         if (pic.boxlabelref != null) {
             let adres = pic.getAdres();
+            if (pic.labelfontsize != null) pic.boxlabelref.style.fontSize = String(pic.labelfontsize) + 'px';
             if (adres != null) pic.boxlabelref.innerHTML = adres;
         }
     }
@@ -459,6 +472,7 @@ class SituationPlanView {
     }
 
     redraw() {
+        this.selectPage(this.sitplan.activePage);
         this.reloadSitPlan();
         for (let element of this.sitplan.elements) {
             this.updateBoxContent(element.boxref); //content needs to be updated first to know the size of the box
@@ -613,31 +627,25 @@ class SituationPlanView {
         // -- Visuals om pagina te zoomen --
 
         outputright += '<span style="display: inline-block; width: 10px;"></span>';
-        outputright += `<span style="font-size: 24px;">🔍</span>
-        <button class="icon-button" id="button_zoomin">+</button>
-        <button class="icon-button" id="button_zoomout">-</button>
-        <button class="icon-button" id="button_zoomToFit">pas</button>`
+        outputright += `
+        <div class="icon" id="button_zoomin">
+            <span class="icon-image" style="font-size: 24px;">🔍</span>
+            <span class="icon-text">In</span>
+        </div>
+        <div class="icon" id="button_zoomout">
+            <span class="icon-image" style="font-size: 24px;">🌍</span>
+            <span class="icon-text">Uit</span>
+        </div>
+        <div class="icon" id="button_zoomToFit">
+            <span class="icon-image" style="font-size: 24px;">🖥️</span>
+            <!--<img src="gif/scaleup.png" alt="Schermvullend" class="icon-image">-->
+            <span class="icon-text">Schermvullend</span>
+        </div>`
 
         outputright += '<span style="display: inline-block; width: 10px;"></span>';
-
-        outputright += '<button id="myPrint">print</button>';
         
         // -- Put everything in the ribbon --
         document.getElementById("ribbon").innerHTML = `<div id="left-icons">${outputleft}</div><div id="right-icons">${outputright}</div>`;
-
-        // -- Actions om printen te testen --
-
-        let myPrintButton = document.getElementById('myPrint');
-        myPrintButton.onclick = () => {
-            function openSVGInNewTab(str) { 
-                const blob = new Blob([str], { type: 'image/svg+xml' }); 
-                const url = URL.createObjectURL(blob); 
-                window.open(url, '_blank'); 
-            }
-
-            let SVGstr = this.sitplan.toSVG();
-            openSVGInNewTab(SVGstr);
-        }
 
         // -- Actions om pagina te selecteren --
 

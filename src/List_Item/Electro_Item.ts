@@ -245,7 +245,7 @@ class Electro_Item extends List_Item {
    */
 
   toSituationPlanElement() {
-    let myElement = new SituationPlanElement(1,0,0,0,0,0,1,randomId("SP_"),"");
+    let myElement = new SituationPlanElement(1,0,0,0,0,11,0,1,randomId("SP_"),"");
     this.updateSituationPlanElement(myElement);
     return(myElement);
   }
