@@ -28,6 +28,9 @@ class Zonnepaneel extends Electro_Item {
     toSVG(sitplan = false) {
         let mySVG:SVGelement = new SVGelement();
 
+        SVGSymbols.addSymbol('arrow');
+        SVGSymbols.addSymbol('zonnepaneel');
+        
         mySVG.xleft = 1; // Links voldoende ruimte voor een eventuele kring voorzien
         mySVG.xright = 69;
         mySVG.yup = 35;

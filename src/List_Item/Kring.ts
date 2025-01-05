@@ -155,6 +155,13 @@ class Kring extends Electro_Item {
     toSVG() {
         let mySVG:SVGelement = new SVGelement();
 
+        SVGSymbols.addSymbol('zekering_automatisch');
+        SVGSymbols.addSymbol('zekering_empty');
+        SVGSymbols.addSymbol('zekering_smelt');
+        SVGSymbols.addSymbol('overspanningsbeveiliging_inline');
+        SVGSymbols.addSymbol('arrow');
+        SVGSymbols.addSymbol('relais_kring');
+            
         // Bepalen of we de hele kring naar rechts moeten opschuiven om rekening te houden met symbooltjes qua kabel-locatie
 
         let cable_location_available: number = 0;

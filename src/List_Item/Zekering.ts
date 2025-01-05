@@ -73,6 +73,9 @@ class Zekering extends Electro_Item {
         let mySVG:SVGelement = new SVGelement();
         let outputstr:string = "";
 
+        SVGSymbols.addSymbol('zekering_automatisch_horizontaal');
+        SVGSymbols.addSymbol('zekering_smelt_horizontaal');
+
         mySVG.xleft = 1; // Links voldoende ruimte voor een eventuele kring voorzien
         mySVG.xright = 50;
         mySVG.yup = 25;

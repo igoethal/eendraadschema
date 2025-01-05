@@ -245,8 +245,8 @@ class Electro_Item extends List_Item {
    */
 
   toSituationPlanElement() {
-    let myElement = new SituationPlanElement(1,0,0,0,0,11,0,1,randomId("SP_"),"");
-    this.updateSituationPlanElement(myElement);
+    let myElement = new SituationPlanElement();
+    //this.updateSituationPlanElement(myElement); //Lijkt niet nodig aangezien dit zoiezo gebeurt in getScaledSVG bij iedere update
     return(myElement);
   }
 
@@ -255,6 +255,8 @@ class Electro_Item extends List_Item {
     let spiegeltext = false;
     let rotate = myElement.rotate % 360;
     if ( (rotate >= 90) && (rotate < 270) ) spiegeltext = true;
+
+    SVGSymbols.clearSymbols(); // We gaan enkel de symbolen gebruiken die nodig zijn voor dit element
 
     let mySVGElement:SVGelement = this.toSVG(true, spiegeltext);
     let sizex = mySVGElement.xright + mySVGElement.xleft + 10;
@@ -269,13 +271,14 @@ class Electro_Item extends List_Item {
 
     let addright = 0;
 
-    myElement.setSVG(`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
-                       transform="scale(1,1)" viewBox="${clipleft} 0 ${sizex-clipleft} ${sizey}" width="${sizex-clipleft+addright}" height="${sizey}">` 
-                    + SVGSymbols.outputSVGSymbols()
-                  + mySVGElement.data 
-                  + '</svg>'); 
+    let width = sizex-clipleft+addright;
+    let height = sizey;
 
-    myElement.getSizeFromString();
+    myElement.updateElectroItemSVG( '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" transform="scale(1,1)" ' +
+                                    `viewBox="${clipleft} 0 ${sizex-clipleft} ${sizey}" width="${width}" height="${height}">` +
+                                        SVGSymbols.getNeededSymbols() + // enkel de symbolen die nodig zijn voor dit element
+                                        mySVGElement.data +
+                                    '</svg>',width,height); 
   }
 
 }

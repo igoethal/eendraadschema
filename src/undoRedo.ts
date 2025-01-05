@@ -45,16 +45,64 @@ class jsonStore {
     redoStackSize():number {return(Math.max(this.redoStack.length,0));}
 }
 
+class LargeStringStore {
+    private data = [];
+
+    push(text: string): number {
+        this.data.push(text);
+        return (this.data.length-1);
+    }
+
+    pushIfNotExists(text: string): number {
+        let index = this.data.indexOf(text);
+        if (index == -1) {
+            this.data.push(text);
+            return (this.data.length-1);
+        } else {
+            return index;
+        }
+    }
+
+    get(index: number): string {
+        return this.data[index];
+    }
+
+    clear() {
+        this.data = [];
+    }
+}
+
 class undoRedo {
     private history: jsonStore;
+    private largeStrings: LargeStringStore = new LargeStringStore();
 
     constructor(maxSteps: number = 100) {
         this.history = new jsonStore(maxSteps);
     }
 
-    store() { 
+    replaceSVGsByStringStore() {
+        if (structure.sitplan != null) {
+            for (let element of structure.sitplan.getElements()) {
+                if (!element.isEendraadschemaSymbool()) element.svg = this.largeStrings.pushIfNotExists(element.getUnscaledSVGifNotElectroItem()).toString();
+            }
+        }
+    }
+
+    replaceStringStoreBySVGs() {
+        if (structure.sitplan != null) {
+            for (let element of structure.sitplan.getElements()) {
+                if (!element.isEendraadschemaSymbool()) element.svg = this.largeStrings.get(parseInt(element.svg));
+            }
+        }
+    }
+
+    store() {
+        // We store the current state of the structure in the history but we replace the SVGs by a reference to a large string store
+        this.replaceSVGsByStringStore();
         this.history.store(structure_to_json());
-        if (structure.properties.currentView == 'draw') structure.sitplanview.updateRibbon();
+        this.replaceStringStoreBySVGs();
+
+        if ( (structure.properties.currentView == 'draw') && (structure.sitplanview != null) ) structure.sitplanview.updateRibbon();
         else if (structure.properties.currentView == '2col') structure.updateRibbon(); 
     }
 
@@ -62,7 +110,13 @@ class undoRedo {
         let lastView = structure.properties.currentView;
         let lastmode = structure.mode;
         let text:string = this.history.undo();
-        if (text != null) json_to_structure(text, 0, false); 
+        if (text != null) json_to_structure(text, 0, false);
+        
+        // We replace the references to the large string store by the actual SVGs
+        this.replaceStringStoreBySVGs();
+        // We need to resort and clean the structure to avoid bad references
+        structure.reSort();
+
         structure.mode = lastmode;
         if (structure.properties.currentView != lastView) toggleAppView(structure.properties.currentView as '2col' | 'config' | 'draw');
         switch (structure.properties.currentView) {
@@ -76,7 +130,13 @@ class undoRedo {
         let lastView = structure.properties.currentView;
         let lastmode = structure.mode;
         let text:string = this.history.redo();
-        if (text != null) json_to_structure(text, 0, false); 
+        if (text != null) json_to_structure(text, 0, false);
+        
+        // We replace the references to the large string store by the actual SVGs
+        this.replaceStringStoreBySVGs();
+        // We need to resort and clean the structure to avoid bad references
+        structure.reSort();
+
         structure.mode = lastmode;
         if (structure.properties.currentView != lastView) toggleAppView(structure.properties.currentView as '2col' | 'config' | 'draw');
         if (structure.properties.currentView == 'draw') {
@@ -90,6 +150,7 @@ class undoRedo {
 
     clear() {
         this.history.clear();
+        this.largeStrings.clear();
         structure.updateRibbon();
     }
 

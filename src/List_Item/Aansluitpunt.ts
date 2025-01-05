@@ -24,6 +24,8 @@ class Aansluitpunt extends Electro_Item {
     toSVG(sitplan: boolean = false) {
         let mySVG:SVGelement = new SVGelement();
 
+        SVGSymbols.addSymbol('aansluitpunt');
+
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 29;
         mySVG.yup = 25;

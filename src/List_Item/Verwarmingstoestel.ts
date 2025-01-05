@@ -33,7 +33,7 @@ class Verwarmingstoestel extends Electro_Item {
     }
 
     toSVG(sitplan = false) {
-        let mySVG:SVGelement = new SVGelement();
+        let mySVG:SVGelement = new SVGelement();      
 
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 69;
@@ -43,14 +43,20 @@ class Verwarmingstoestel extends Electro_Item {
         mySVG.data = (sitplan? "" : '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>');
         switch (this.props.heeft_accumulatie) { //accumulatie
             case false:
+                SVGSymbols.addSymbol('VerticalStripe');
+                SVGSymbols.addSymbol('verwarmingstoestel');
                 mySVG.data += '<use xlink:href="#verwarmingstoestel" x="21" y="25"></use>';
                 break;
             case true:
                 switch (this.props.heeft_ventilator) { //ventilator
                     case false:
+                        SVGSymbols.addSymbol('VerticalStripe');
+                        SVGSymbols.addSymbol('verwarmingstoestel_accu');
                         mySVG.data += '<use xlink:href="#verwarmingstoestel_accu" x="21" y="25"></use>';
                         break;
                     case true:
+                        SVGSymbols.addSymbol('VerticalStripe');
+                        SVGSymbols.addSymbol('verwarmingstoestel_accu_ventilator');
                         mySVG.data += '<use xlink:href="#verwarmingstoestel_accu_ventilator" x="21" y="25"></use>';
                         mySVG.xright = 89;
                         break;

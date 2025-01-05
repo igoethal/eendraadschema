@@ -1490,14 +1490,62 @@ var jsonStore = /** @class */ (function () {
     jsonStore.prototype.redoStackSize = function () { return (Math.max(this.redoStack.length, 0)); };
     return jsonStore;
 }());
+var LargeStringStore = /** @class */ (function () {
+    function LargeStringStore() {
+        this.data = [];
+    }
+    LargeStringStore.prototype.push = function (text) {
+        this.data.push(text);
+        return (this.data.length - 1);
+    };
+    LargeStringStore.prototype.pushIfNotExists = function (text) {
+        var index = this.data.indexOf(text);
+        if (index == -1) {
+            this.data.push(text);
+            return (this.data.length - 1);
+        }
+        else {
+            return index;
+        }
+    };
+    LargeStringStore.prototype.get = function (index) {
+        return this.data[index];
+    };
+    LargeStringStore.prototype.clear = function () {
+        this.data = [];
+    };
+    return LargeStringStore;
+}());
 var undoRedo = /** @class */ (function () {
     function undoRedo(maxSteps) {
         if (maxSteps === void 0) { maxSteps = 100; }
+        this.largeStrings = new LargeStringStore();
         this.history = new jsonStore(maxSteps);
     }
+    undoRedo.prototype.replaceSVGsByStringStore = function () {
+        if (structure.sitplan != null) {
+            for (var _i = 0, _a = structure.sitplan.getElements(); _i < _a.length; _i++) {
+                var element = _a[_i];
+                if (!element.isEendraadschemaSymbool())
+                    element.svg = this.largeStrings.pushIfNotExists(element.getUnscaledSVGifNotElectroItem()).toString();
+            }
+        }
+    };
+    undoRedo.prototype.replaceStringStoreBySVGs = function () {
+        if (structure.sitplan != null) {
+            for (var _i = 0, _a = structure.sitplan.getElements(); _i < _a.length; _i++) {
+                var element = _a[_i];
+                if (!element.isEendraadschemaSymbool())
+                    element.svg = this.largeStrings.get(parseInt(element.svg));
+            }
+        }
+    };
     undoRedo.prototype.store = function () {
+        // We store the current state of the structure in the history but we replace the SVGs by a reference to a large string store
+        this.replaceSVGsByStringStore();
         this.history.store(structure_to_json());
-        if (structure.properties.currentView == 'draw')
+        this.replaceStringStoreBySVGs();
+        if ((structure.properties.currentView == 'draw') && (structure.sitplanview != null))
             structure.sitplanview.updateRibbon();
         else if (structure.properties.currentView == '2col')
             structure.updateRibbon();
@@ -1508,6 +1556,10 @@ var undoRedo = /** @class */ (function () {
         var text = this.history.undo();
         if (text != null)
             json_to_structure(text, 0, false);
+        // We replace the references to the large string store by the actual SVGs
+        this.replaceStringStoreBySVGs();
+        // We need to resort and clean the structure to avoid bad references
+        structure.reSort();
         structure.mode = lastmode;
         if (structure.properties.currentView != lastView)
             toggleAppView(structure.properties.currentView);
@@ -1532,6 +1584,10 @@ var undoRedo = /** @class */ (function () {
         var text = this.history.redo();
         if (text != null)
             json_to_structure(text, 0, false);
+        // We replace the references to the large string store by the actual SVGs
+        this.replaceStringStoreBySVGs();
+        // We need to resort and clean the structure to avoid bad references
+        structure.reSort();
         structure.mode = lastmode;
         if (structure.properties.currentView != lastView)
             toggleAppView(structure.properties.currentView);
@@ -1546,6 +1602,7 @@ var undoRedo = /** @class */ (function () {
     };
     undoRedo.prototype.clear = function () {
         this.history.clear();
+        this.largeStrings.clear();
         structure.updateRibbon();
     };
     undoRedo.prototype.undoStackSize = function () { return (this.history.undoStackSize()); };
@@ -1618,70 +1675,165 @@ function showDocumentationPage() {
     toggleAppView('config');
     document.getElementById('Btn_downloadManual').onclick = function () { window.open('Documentation/edsdoc.pdf', '_blank'); };
 }
+/**
+ * Volledig overzicht van een situatieplan.
+ * Werd gebouwd voor gebruik in de browser maar is redelijk browser-agnostic.
+ * De effectieve code om te interageren met de browser zelf zit in class SituationPlanView.
+ *
+ * GLOBALS: structure
+ */
 var SituationPlan = /** @class */ (function () {
     function SituationPlan() {
+        this.activePage = 1; // We houden deze bij in situationplan zodat ook wijzigingen van pagina's worden opgeslagen
         this.numPages = 1;
-        this.activePage = 1;
         this.elements = [];
     }
+    /**
+     * Workaround om de private variabele elements te kunnen gebruiken in friend classs
+     * @returns {SituationPlanElement[]} De elementen van het situatieplan
+     */
+    SituationPlan.prototype.getElements = function () {
+        return this.elements;
+    };
+    /**
+     * SituationPlanElement toevoegen aan het situatieplan
+     * @param element
+     * @returns {void}
+     */
     SituationPlan.prototype.addElement = function (element) {
         this.elements.push(element);
     };
+    /**
+     * Laad een SVG-inhoud vanuit een bestand en voegt deze toe aan het situatieplan.
+     * De SVG werd geselecteerd in een fileInput HTML element en komt binnen via het event in de functie header.
+     *
+     * @param {any} event Het event dat aangaf dat er een bestand was gekozen om te uploaden.
+     * @param {number} page Het pagina-nummer van het element in het situatieplan.
+     * @param {number} posx De x-coordinaat van het element in het situatieplan.
+     * @param {number} posy De y-coordinaat van het element in het situatieplan.
+     * @param {() => void} callback Een callback-functie die wordt aangeroepen wanneer het element is toegevoegd.
+     * @returns {SituationPlanElement} Het element dat is toegevoegd.
+     */
     SituationPlan.prototype.addElementFromFile = function (event, page, posx, posy, callback) {
-        var element = new SituationPlanElement(page, posx, posy, 0, 0, 11, 0, SITPLANVIEW_DEFAULT_SCALE, randomId("SP_"), "");
+        var element = new SituationPlanElement();
+        element.setVars({ page: page, posx: posx, posy: posy });
         element.importFromFile(event, callback);
         this.elements.push(element);
         return element;
     };
-    SituationPlan.prototype.addElementFromSVG = function (svg, page, posx, posy) {
-        var element = new SituationPlanElement(page, posx, posy, 0, 0, 11, 0, SITPLANVIEW_DEFAULT_SCALE, randomId("SP_"), svg);
-        element.getSizeFromString();
-        this.elements.push(element);
-    };
-    SituationPlan.prototype.addElectroItem = function (id, page, posx, posy, adrestype, adres, adreslocation, labelfontsize, scale, rotate) {
-        var electroItem = structure.data[structure.getOrdinalById(id)];
-        if (electroItem != null) {
-            var element = electroItem.toSituationPlanElement();
-            Object.assign(element, { page: page, posx: posx, posy: posy, labelfontsize: labelfontsize, scale: scale, rotate: rotate });
-            element.setElectroItemId(id);
-            element.setAdres(adrestype, adres, adreslocation);
-            this.elements.push(element);
-            return element;
-        }
-        else {
+    /**
+     * Creëer een nieuw element in het situatieplan dat gelinkt is aan een Electro_Item
+     *
+     * @param {number} electroItemId Het ID van de Electro_Item.
+     * @param {number} page Het pagina-nummer van het element in het situatieplan.
+     * @param {number} posx De x-coordinaat van het element in het situatieplan.
+     * @param {number} posy De y-coordinaat van het element in het situatieplan.
+     * @param {AdresType} adrestype Het type van het adres, bijvoorbeeld 'manueel'.
+     *                              AdresType wordt definieerd in SituationPlanElement.ts
+     * @param {string} adres Het adres.
+     * @param {AdresLocation} adreslocation De locatie van het adres in het label ('boven' of 'onder' of 'rechts' of 'links').
+     *                                      AdresLocation wordt definieerd in SituationPlanElement.ts
+     * @param {number} labelfontsize De lettergrootte van het label.
+     * @param {number} scale De schaal van het element.
+     * @param {number} rotate De rotatie van het element.
+     * @returns {SituationPlanElement} Het element dat is toegevoegd.
+     */
+    SituationPlan.prototype.addElementFromElectroItem = function (electroItemId, page, posx, posy, adrestype, adres, adreslocation, labelfontsize, scale, rotate) {
+        var electroItem = structure.getElectroItemById(electroItemId);
+        if (!electroItem)
             return null;
-        }
+        var element = electroItem.toSituationPlanElement();
+        Object.assign(element, { page: page, posx: posx, posy: posy, labelfontsize: labelfontsize, scale: scale, rotate: rotate });
+        element.setElectroItemId(electroItemId);
+        element.setAdres(adrestype, adres, adreslocation);
+        this.elements.push(element);
+        return element;
     };
+    /**
+     * Verwijder een element van het situatieplan.
+     * In principe is er altijd maar één maar de functie gebruikt recursie in het geval er meerdere zouden zijn
+     * om ze allemaal te verwijderen.
+     *
+     * @param {SituationPlanElement} element Het element dat verwijderd moet worden.
+     * @returns {void}
+     */
     SituationPlan.prototype.removeElement = function (element) {
-        for (var i = this.elements.length - 1; i >= 0; i--) {
-            if (this.elements[i] == element) {
-                this.elements.splice(i, 1);
-            }
-        }
+        var index = this.elements.indexOf(element);
+        if (index === -1)
+            return;
+        this.elements.splice(index, 1);
         if (element.boxref != null)
             element.boxref.remove();
         if (element.boxlabelref != null)
             element.boxlabelref.remove();
+        this.removeElement(element); // Recurse in het geval er meerdere zouden zijn maar dit zou niet mogen gebeuren
     };
+    /**
+     * Sorteer de elementen in het situatieplan op basis van de z-index van hun boxref elementen in de DOM.
+     * Elementen met een `null` `boxref` worden naar het einde van de lijst verplaatst.
+     *
+     * Het sorteren is nodig om ervoor te zorgen dat bij het printen wanneer lineair door de elementen wordt gegaan
+     * de elementen in de juiste volgorde worden gestacked.
+     *
+     * @returns {void}
+     */
+    SituationPlan.prototype.orderByZIndex = function () {
+        this.elements.sort(function (a, b) {
+            if (a.boxref == null)
+                return 1;
+            if (b.boxref == null)
+                return -1;
+            return parseInt(a.boxref.style.zIndex) - parseInt(b.boxref.style.zIndex);
+        });
+    };
+    /**
+     * Initialiseer het situatieplan vanuit een json-object.
+     *
+     * @param {Object} json Het json-object dat het situatieplan bevat.
+     *                      Het object bevat een 'numPages' property dat het aantal pagina's in het situatieplan aangeeft.
+     *                      Verder bevat het een 'elements' property dat een array is van json-objecten die elk een element in het situatieplan vertegenwoordigen.
+     *                      Elke json-object in de array bevat de properties van een SituationPlanElement.
+     * @returns {void}
+     */
+    SituationPlan.prototype.fromJsonObject = function (json) {
+        if (json.numPages !== undefined) {
+            this.numPages = json.numPages;
+        }
+        else {
+            this.numPages = 1;
+        }
+        if (json.activePage !== undefined) {
+            this.activePage = json.activePage;
+        }
+        else {
+            this.activePage = 1;
+        }
+        if (Array.isArray(json.elements)) {
+            this.elements = json.elements.map(function (element) {
+                var newElement = new SituationPlanElement();
+                newElement.fromJsonObject(element);
+                return newElement;
+            });
+        }
+        else {
+            this.elements = [];
+        }
+    };
+    /**
+     * Converteer het situatieplan naar een JSON-object.
+     *
+     * @returns {any} Het JSON-object.
+     */
     SituationPlan.prototype.toJsonObject = function () {
         var elements = [];
         for (var _i = 0, _a = this.elements; _i < _a.length; _i++) {
             var element = _a[_i];
             elements.push(element.toJsonObject());
         }
-        return { numPages: this.numPages, elements: elements };
-    };
-    SituationPlan.prototype.fromJsonObject = function (json) {
-        this.numPages = json.numPages;
-        this.elements = [];
-        for (var _i = 0, _a = json.elements; _i < _a.length; _i++) {
-            var element = _a[_i];
-            var newElement = new SituationPlanElement(1, 0, 0, 0, 0, 11, 0, SITPLANVIEW_DEFAULT_SCALE, randomId("SP_"), "");
-            newElement.fromJsonObject(element);
-            this.elements.push(newElement);
-        }
+        return { numPages: this.numPages, activePage: this.activePage, elements: elements };
     };
     SituationPlan.prototype.toSitPlanPrint = function () {
+        this.orderByZIndex();
         var outstruct = {};
         outstruct.numpages = (this.elements.length > 0 ? structure.sitplan.numPages : 0);
         outstruct.pages = [];
@@ -1697,10 +1849,8 @@ var SituationPlan = /** @class */ (function () {
                     if (fontsize == null)
                         fontsize = 11;
                     svgstr += element.getScaledSVG(true);
-                    var rotatedimgwidth = element.sizex * element.scale;
-                    var rotatedimgheight = element.sizey * element.scale;
-                    rotatedimgwidth = Math.max(rotatedimgwidth * Math.cos(element.rotate * Math.PI / 180), rotatedimgheight * Math.sin(element.rotate * Math.PI / 180));
-                    rotatedimgheight = Math.max(rotatedimgwidth * Math.sin(element.rotate * Math.PI / 180), rotatedimgheight * Math.cos(element.rotate * Math.PI / 180));
+                    var rotatedimgwidth = Math.max(element.sizex * element.scale * Math.cos(element.rotate * Math.PI / 180), element.sizey * element.scale * Math.sin(element.rotate * Math.PI / 180));
+                    var rotatedimgheight = Math.max(element.sizex * element.scale * Math.sin(element.rotate * Math.PI / 180), element.sizey * element.scale * Math.cos(element.rotate * Math.PI / 180));
                     maxx = Math.max(maxx, element.posx + rotatedimgwidth / 2);
                     maxy = Math.max(maxy, element.posy + rotatedimgheight / 2);
                     svgstr += "<text x=\"".concat(element.labelposx, "\" y=\"").concat(element.labelposy, "\" font-size=\"").concat(fontsize, "\" fill=\"black\" text-anchor=\"middle\" dominant-baseline=\"middle\">").concat(element.getAdres(), "</text>");
@@ -1713,60 +1863,75 @@ var SituationPlan = /** @class */ (function () {
     };
     return SituationPlan;
 }());
+/**
+ * Class SituationPlanElement
+ *
+ * GLOBALS: structure, SITPLANVIEW_DEFAULT_SCALE
+ */
 var SituationPlanElement = /** @class */ (function () {
-    function SituationPlanElement(page, posx, posy, sizex, sizey, labelfontsize, rotate, scale, id, svg) {
-        this.page = 1;
+    /**
+     * Constructor
+     */
+    function SituationPlanElement() {
+        this.electroItemId = null; // Referentie naar het electro-element in de datastructuur indien van toepassing
+        // -- Basis eigenschappen van het element zelf --
+        this.boxref = null; // Referentie naar het DIV document in de browser waar het element wordt afgebeeld
+        this.svg = ''; /* SVG content van het element indien van toepassing
+                                    Indien electroItemId == null dan is dit de SVG content van het element zelf
+                                    Indien electroItemId != null dan is dit de laatste geladen SVG content van het electro-element
+                                    Altijd te verifiëren dat deze niet leeg is en evenueel een update forceren */
+        // -- Basis eigenschappen van het label --
+        //    adres gegevens zijn private gedefinieerd omwille van consistentie (bvb adres kan leeg gelaten worden als het type auto is)
+        this.boxlabelref = null; // Referentie naar het DIV document in de browser waar het label wordt afgebeeld
+        this.adrestype = null;
+        this.adres = null;
+        this.adreslocation = 'rechts';
+        // -- Positionering van het element zelf --
+        this.page = 1; //pagina waarop het element zich bevindt    
         this.posx = 0; //center positie-x in het schema
         this.posy = 0; //center positie-y in het schema
         this.sizex = 0; //breedte
         this.sizey = 0; //hoogte
+        this.rotate = 0;
+        this.scale = SITPLANVIEW_DEFAULT_SCALE;
+        // -- Positionering van het label --
         this.labelposx = 0;
         this.labelposy = 0;
         this.labelfontsize = 11;
-        this.rotate = 0;
-        this.scale = SITPLANVIEW_DEFAULT_SCALE;
-        this.boxref = null;
-        this.boxlabelref = null;
-        this.svg = "";
-        this.electroItemId = null;
-        this.adrestype = null;
-        this.adres = null;
-        this.adreslocation = "rechts";
-        this.page = page;
-        this.posx = posx;
-        this.posy = posy;
-        this.sizex = sizex, this.sizey = sizey;
-        this.labelfontsize = labelfontsize;
-        this.rotate = rotate;
-        this.scale = scale;
-        this.id = id;
-        this.svg = svg;
+        this.id = randomId("SP_");
     }
-    SituationPlanElement.prototype.isEDSymbol = function () {
+    /**
+     * isEendraadschemaSymbool
+     *
+     * Controleer of het element een geldig electro-element is
+     * Hiervoor is een geldige electroItemId nodig en moet het element in de datastructuur voorkomen.
+     *
+     * @returns boolean
+     */
+    SituationPlanElement.prototype.isEendraadschemaSymbool = function () {
         if (this.electroItemId != null) {
-            var idnum = Number(this.electroItemId);
-            if (!isNaN(idnum)) {
-                var ordinal = structure.getOrdinalById(idnum);
-                if (ordinal != null) {
-                    var electroElement = structure.data[ordinal];
-                    if (electroElement != null)
-                        return true;
-                }
-            }
+            return (structure.getElectroItemById(this.electroItemId) != null);
         }
         return false;
     };
-    SituationPlanElement.prototype.needsTextMirroring = function () {
-        if (this.isEDSymbol()) {
-            var electroElement = structure.data[structure.getOrdinalById(Number(this.getElectroItemId()))];
-            var type = electroElement.getType();
-            if (['Contactdoos', 'Lichtpunt', 'Drukknop', 'Media', 'Schakelaars', 'Lichtcircuit'].includes(type))
-                return true;
-            else
-                return false;
+    SituationPlanElement.prototype.rotates360degrees = function () {
+        if (this.isEendraadschemaSymbool()) {
+            var electroElement = structure.getElectroItemById(this.electroItemId);
+            if (electroElement != null) {
+                var type = electroElement.getType();
+                return SituationPlanElement.ROTATES_360_DEGREES_TYPES.has(type);
+            }
+            return false;
         }
         return true;
     };
+    /**
+     * setAdres
+     *
+     * @param adrestype string : 'auto' of 'manueel'
+     * @param adres string : Indien manueel, het adres. Indien auto wordt deze genegeerd en this.adres altijd op null gezet.
+     * @param adreslocation string: 'rechts' of 'links' of 'boven' of 'onder'
+     */
     SituationPlanElement.prototype.setAdres = function (adrestype, adres, adreslocation) {
         this.adrestype = adrestype;
         this.adreslocation = adreslocation;
@@ -1775,152 +1940,251 @@ var SituationPlanElement = /** @class */ (function () {
         else
             this.adres = null;
     };
+    /**
+     * getAdresType
+     *
+     * @returns string : 'auto' of 'manueel'
+     */
     SituationPlanElement.prototype.getAdresType = function () {
         return this.adrestype;
     };
+    /**
+     * getAdres
+     *
+     * @returns string : adres
+     */
     SituationPlanElement.prototype.getAdres = function () {
-        if (this.electroItemId == null)
-            return "";
-        var id = this.electroItemId;
-        var element = structure.data[structure.getOrdinalById(id)];
-        switch (this.adrestype) {
-            case 'auto':
-                return element.getReadableAdres();
-                break;
-            case 'adres':
-                return "Adres";
-            case 'manueel':
-            default:
-                return (this.adres == null) ? "" : this.adres;
+        var _a;
+        if (!this.isEendraadschemaSymbool())
+            return ''; // Geen adres voor niet-elektro-elementen
+        var element = structure.getElectroItemById(this.electroItemId);
+        if (element == null)
+            return ''; // zou redundant moeten zijn want we controleerden al in isEendraadschemaSymbool
+        if (this.adrestype === 'auto') {
+            return element.getReadableAdres();
+        }
+        else {
+            return (_a = this.adres) !== null && _a !== void 0 ? _a : '';
         }
     };
+    /**
+     * getAdresLocation
+     *
+     * @returns 'rechts'|'links'|'boven'|'onder'
+     */
     SituationPlanElement.prototype.getAdresLocation = function () {
         return this.adreslocation;
     };
-    SituationPlanElement.prototype.setElectroItemId = function (id) {
-        this.electroItemId = id;
+    /**
+     * setElectroItemId
+     *
+     * @param electroItemId number : id van het electroitem in structure
+     *
+     * TODO: zou beter een private functie zijn en niet worden aangeroepen vanuit SituationPlan en SituationPlanView
+     */
+    SituationPlanElement.prototype.setElectroItemId = function (electroItemId) {
+        this.electroItemId = electroItemId;
     };
+    /**
+     * getElectroItemId
+     *
+     * @returns number : id van het electroitem in structure
+     */
     SituationPlanElement.prototype.getElectroItemId = function () {
-        return this.electroItemId;
-    };
-    SituationPlanElement.prototype.setSVG = function (svg) {
-        this.svg = svg;
-        this.getSizeFromString();
-    };
-    SituationPlanElement.prototype.getSVG = function () {
-        if (this.electroItemId != null) {
-            var ordinal = structure.getOrdinalById(this.electroItemId);
-            if (ordinal != null) {
-                var electroItem = structure.data[ordinal];
-                electroItem.updateSituationPlanElement(this);
-            }
-            else {
-                return null;
-            }
-        }
-        function removeBeforeFirstSVG(input) {
-            var index = input.indexOf('<svg');
-            if (index !== -1)
-                return input.substring(index);
-            return input;
-        }
-        return removeBeforeFirstSVG(this.svg);
-    };
-    SituationPlanElement.prototype.getScaledSVG = function (positioned) {
-        if (positioned === void 0) { positioned = false; }
-        var svg = this.getSVG();
-        if (svg == null)
+        if (this.isEendraadschemaSymbool())
+            return this.electroItemId;
+        else
             return null;
-        var posinfo = '';
-        var transform = '';
-        if (positioned) {
-            posinfo = "x=\"".concat(this.posx - this.sizex / 2 * this.scale, "\" y=\"").concat(this.posy - this.sizey / 2 * this.scale, "\"");
-            var rotate = this.rotate;
+    };
+    /**
+     * updateElectroItemSVG
+     *
+     * @param svg string : nieuwe gegenereerde SVG door het electro-element
+     * @param width number : breedte van de SVG zonder schaling en rotatie, indien niet gegeven wordt de breedte gezocht met functie getSizeFromString
+     * @param height number : hoogte van de SVG zonder schaling en rotatie
+     */
+    SituationPlanElement.prototype.updateElectroItemSVG = function (svg, width, height) {
+        if (width === void 0) { width = undefined; }
+        if (height === void 0) { height = undefined; }
+        if (this.isEendraadschemaSymbool()) {
+            this.svg = svg;
+            if (width != null)
+                this.sizex = width;
+            if (height != null)
+                this.sizey = height;
+            if (width == null || height == null)
+                this.getSizeFromString();
+        }
+    };
+    /**
+     * getUnscaledSVGifNotElectroItem
+     *
+     * @returns string : SVG content van het element op voorwaarde dat het geen electro-element is
+     */
+    SituationPlanElement.prototype.getUnscaledSVGifNotElectroItem = function () {
+        // cleanSVG(): Deze functie is nodig omdat gebleken is dat de print SVG commando's in jsPDF niet overweg kunnen met SVG's die niet dadelijk beginnen met '<svg' 
+        var _this = this;
+        var cleanSVG = function () {
+            if (_this.svg == null)
+                _this.svg = '';
+            else {
+                var index = _this.svg.indexOf('<svg');
+                if (index !== -1)
+                    _this.svg = _this.svg.substring(index);
+            }
+        };
+        if (!this.isEendraadschemaSymbool()) {
+            cleanSVG();
+            return this.svg;
+        }
+        else {
+            return '';
+        }
+    };
+    /**
+     * getScaledSVG
+     *
+     * @param positioned boolean : indien true wordt de SVG getransformeerd naar de correcte positie en rotatie
+     * @returns string : SVG content van het element dat onmmiddellijk in een innerHTML van de browser of een grotere SVG
+     *                   om te printen kan worden geplaatst
+     *
+     * TODO: kan nog efficienter indien we een flag "updated" hebben in het element zodat we weten wanneer we alles moeten hertekenen
+     */
+    SituationPlanElement.prototype.getScaledSVG = function (positioned) {
+        var _this = this;
+        if (positioned === void 0) { positioned = false; }
+        var berekenAfbeeldingsRotatieEnSpiegeling = function () {
+            var rotate = _this.rotate;
             while (rotate < 0)
                 rotate = rotate + 360;
             rotate = rotate % 360;
             var spiegel = false;
             if ((rotate >= 90) && (rotate < 270)) {
-                if (this.needsTextMirroring())
+                if (_this.rotates360degrees())
                     spiegel = true;
-                if (this.isEDSymbol())
+                if (_this.isEendraadschemaSymbool())
                     rotate = rotate + 180;
             }
-            transform = "transform=\"rotate(".concat(rotate, " ").concat(this.posx, " ").concat(this.posy, ")").concat((spiegel ? ' scale(-1,1) translate(' + (-2 * this.posx) + ' 0)' : ''), "\"");
-            return "<g ".concat(transform, ">\n                      <svg xmlns=\"http://www.w3.org/2000/svg\" ").concat(posinfo, " width=\"").concat(this.sizex * this.scale, "px\" height=\"").concat(this.sizey * this.scale, "px\" viewBox=\"0 0 ").concat(this.sizex, " ").concat(this.sizey, "\">").concat(svg, "</svg>\n                    </g>");
+            return [rotate, spiegel];
+        };
+        if (this.isEendraadschemaSymbool()) {
+            var electroItem = structure.getElectroItemById(this.electroItemId);
+            if (electroItem != null)
+                electroItem.updateSituationPlanElement(this);
         }
-        else {
-            return "<svg class=\"svg-icon\" xmlns=\"http://www.w3.org/2000/svg\" width=\"".concat(this.sizex * this.scale, "px\" height=\"").concat(this.sizey * this.scale, "px\" viewBox=\"0 0 ").concat(this.sizex, " ").concat(this.sizey, "\">").concat(svg, "</svg>");
+        var posinfo = '';
+        var transform = '';
+        if (positioned) { // Indien we de SVG willen positioneren en roteren, bvb voor gebruik in een print
+            posinfo = "x=\"".concat(this.posx - this.sizex / 2 * this.scale, "\" y=\"").concat(this.posy - this.sizey / 2 * this.scale, "\"");
+            var _a = berekenAfbeeldingsRotatieEnSpiegeling(), rotate = _a[0], spiegel = _a[1];
+            transform = "transform=\"rotate(".concat(rotate, " ").concat(this.posx, " ").concat(this.posy, ")").concat((spiegel ? " scale(-1,1) translate(".concat(-this.posx * 2, " 0)") : ''), "\"");
+            return "<g ".concat(transform, ">\n                    <svg ").concat(posinfo, " width=\"").concat(this.sizex * this.scale, "px\" height=\"").concat(this.sizey * this.scale, "px\" viewBox=\"0 0 ").concat(this.sizex, " ").concat(this.sizey, "\">").concat(this.svg, "</svg>\n                    </g>");
+        }
+        else { // Indien we de SVG willen gebruiken in een innerHTML van een div element en dit element dan zelf positioneren en roteren
+            return "<svg class=\"svg-icon\" width=\"".concat(this.sizex * this.scale, "px\" height=\"").concat(this.sizey * this.scale, "px\" viewBox=\"0 0 ").concat(this.sizex, " ").concat(this.sizey, "\">").concat(this.svg, "</svg>");
         }
     };
+    /**
+     * getSizeFromString
+     *
+     * Haal de grootte van het SVG element uit de SVG string
+     */
     SituationPlanElement.prototype.getSizeFromString = function () {
         // Create a DOMParser to parse the SVG string
         var parser = new DOMParser();
         var svgDoc = parser.parseFromString(this.svg, "image/svg+xml");
         // Access the SVG element
         var svgElement = svgDoc.querySelector('svg');
-        // Extract the height and width attributes
-        this.sizey = parseInt(svgElement.getAttribute('height'));
-        this.sizex = parseInt(svgElement.getAttribute('width'));
+        if (svgElement) {
+            // Extract the height and width attributes
+            this.sizey = parseInt(svgElement.getAttribute('height'));
+            this.sizex = parseInt(svgElement.getAttribute('width'));
+        }
+        else {
+            console.error('Invalid SVG string');
+        }
     };
+    /**
+     * Leest de inhoud van een situatieplanelement uit een image bestand
+     * Enkel image bestanden ondersteund door de browser worden ondersteund
+     *
+     * @param event Event van het file input element gedefinieerd in index.html
+     * @param callback Callback functie die wordt uitgevoerd na het inladen van de file
+     */
     SituationPlanElement.prototype.importFromFile = function (event, callback) {
         var _this = this;
-        var file = event.target.files[0];
+        var input = event.target;
+        var file = input.files[0];
         if (file) {
             var reader = new FileReader();
             var fileName = file.name.toLowerCase();
             var mimeType = file.type;
-            if (fileName.endsWith('.svg')) {
-                //Handle SVG
-                reader.onload = function (e) {
-                    var fileContent = e.target.result;
-                    _this.svg = fileContent;
-                    _this.getSizeFromString();
+            reader.onload = function (e) {
+                var fileContent = e.target.result;
+                var image = new Image();
+                image.src = fileContent;
+                image.onload = function () {
+                    _this.sizex = image.width;
+                    _this.sizey = image.height;
+                    _this.svg = "<svg width=\"".concat(image.width, "\" height=\"").concat(image.height, "\"><image href=\"").concat(fileContent, "\" width=\"").concat(image.width, "\" height=\"").concat(image.height, "\"/></svg>");
                     callback();
                 };
-                reader.readAsText(file); // Read the file as a text string
-            }
-            else {
-                //Handle image
-                reader.onload = function (e) {
-                    var fileContent = e.target.result;
-                    var image = new Image();
-                    image.src = fileContent;
-                    image.onload = function () {
-                        _this.sizex = image.width;
-                        _this.sizey = image.height;
-                        _this.svg = "<svg width=\"".concat(image.width, "\" height=\"").concat(image.height, "\" xmlns=\"http://www.w3.org/2000/svg\"><image href=\"").concat(fileContent, "\" width=\"").concat(image.width, "\" height=\"").concat(image.height, "\"/></svg>");
-                        callback();
-                    };
-                    image.onerror = function () {
-                        console.error('Unsupported image format or failed to load image.');
-                    };
+                image.onerror = function () {
+                    alert('Het formaat van deze file wordt niet ondersteund.');
                 };
-                reader.readAsDataURL(file); // Read the file as a data URL
-            }
+            };
+            reader.readAsDataURL(file); // Read the file as a data URL 
+        }
+        else {
+            alert('Geen bestand geselecteerd');
         }
     };
+    /**
+     * setVars
+     *
+     * @param object Object : object met de variabelen die moeten worden ingesteld
+     */
+    SituationPlanElement.prototype.setVars = function (object) {
+        Object.assign(this, object);
+    };
+    /**
+     * toJsonObject
+     *
+     * @returns Object : object met de variabelen van het element dat dadelijk kan worden omgezet naar een JSON string
+     */
     SituationPlanElement.prototype.toJsonObject = function () {
-        var svg = ((this.electroItemId != null) ? "" : this.svg);
         return {
-            page: this.page, posx: this.posx, posy: this.posy,
-            sizex: this.sizex, sizey: this.sizey,
-            labelposx: this.labelposx, labelposy: this.labelposy,
+            page: this.page,
+            posx: this.posx,
+            posy: this.posy,
+            sizex: this.sizex,
+            sizey: this.sizey,
+            labelposx: this.labelposx,
+            labelposy: this.labelposy,
             labelfontsize: this.labelfontsize,
-            adrestype: this.adrestype, adres: this.adres, adreslocation: this.adreslocation,
-            rotate: this.rotate, scale: this.scale,
-            svg: svg, electroItemId: this.electroItemId
+            adrestype: this.adrestype,
+            adres: this.adres,
+            adreslocation: this.adreslocation,
+            rotate: this.rotate,
+            scale: this.scale,
+            svg: (this.isEendraadschemaSymbool() ? '' : this.svg),
+            electroItemId: this.electroItemId
         };
     };
+    /**
+     * fromJsonObject
+     *
+     * @param json any : object met de variabelen van het element dat dadelijk kan worden omgezet naar een JSON string
+     */
     SituationPlanElement.prototype.fromJsonObject = function (json) {
-        this.page = (json.page != null) ? json.page : 1;
+        this.page = json.page;
         this.posx = json.posx;
         this.posy = json.posy;
+        this.sizex = json.sizex;
+        this.sizey = json.sizey;
         this.labelposx = (json.labelposx != null) ? json.labelposx : this.posx + 20;
         this.labelposy = (json.labelposy != null) ? json.labelposy : this.posy;
         this.labelfontsize = (json.labelfontsize != null ? json.labelfontsize : 11);
-        this.sizex = json.sizex;
-        this.sizey = json.sizey;
         this.adrestype = (json.adrestype != null) ? json.adrestype : "manueel";
         this.adres = json.adres;
         this.adreslocation = (json.adreslocation != null) ? json.adreslocation : "rechts";
@@ -1929,6 +2193,20 @@ var SituationPlanElement = /** @class */ (function () {
         this.svg = json.svg;
         this.electroItemId = json.electroItemId;
     };
+    /**
+     * rotates360degrees
+     *
+     * Per default wordt er vanuit gegaan dat bij rotatie over rotatiehoeken alpha tussen 90 en 270 graden deze rotatie kan vervangen worden.
+     * door een rotatie over alpha-180 graden.  Om een voorbeeld te geven, een batterij roteren over 180 graden heeft geen zin, dat blijft het originele symbool.
+     *
+     * Voor bepaalde elementen is dit niet het geval. Een contactdoos gedraaid over 180 graden moet de opening naar rechts hebben in plaats van naar links.
+     * Deze functie geeft true terug indien een volledige rotatie nodig is.
+     *
+     * @returns boolean
+     *
+     * TODO: functie verplaatsen naar Electro_Item
+     */
+    SituationPlanElement.ROTATES_360_DEGREES_TYPES = new Set(['Contactdoos', 'Lichtpunt', 'Drukknop', 'Media', 'Schakelaars', 'Lichtcircuit']);
     return SituationPlanElement;
 }());
 function isDevMode() {
@@ -2135,7 +2413,7 @@ var SituationPlanView = /** @class */ (function () {
             // Display an html input dialog in the browser and ask for a number, return the number as variable id
             SituationPlanView_ElementPropertiesPopup(null, function (id, adrestype, adres, adreslocation, labelfontsize, scale, rotate) {
                 if (id != null) {
-                    var element = _this.sitplan.addElectroItem(id, _this.sitplan.activePage, 550, 300, adrestype, adres, adreslocation, labelfontsize, scale, rotate);
+                    var element = _this.sitplan.addElementFromElectroItem(id, _this.sitplan.activePage, 550, 300, adrestype, adres, adreslocation, labelfontsize, scale, rotate);
                     if (element != null) {
                         _this.reloadSitPlan();
                         _this.clearSelection();
@@ -2216,17 +2494,33 @@ var SituationPlanView = /** @class */ (function () {
             this.selectedBox.style.transform = "rotate(".concat(pic.rotate, "deg)");
         }
     };
+    /**
+     * Send the selected box to the back of the z-index stack and reorder the elements of the situation plan accordingly
+     * so that after saving or during printing the elements are drawn in the same order.
+     *
+     * @returns void
+     */
     SituationPlanView.prototype.sendToBack = function () {
         if (this.selectedBox) {
-            var boxes = this.paper.querySelectorAll('.box');
-            var newzIndex = 0;
-            for (var _i = 0, _a = Array.from(boxes); _i < _a.length; _i++) {
-                var box = _a[_i];
-                box.style.zIndex = ((parseInt(box.style.zIndex) || 0) + 1).toString();
+            for (var _i = 0, _a = this.sitplan.elements; _i < _a.length; _i++) {
+                var element = _a[_i];
+                if (element.boxref != null) {
+                    var newzindex = void 0;
+                    if (element.boxref != this.selectedBox) {
+                        newzindex = (parseInt(element.boxref.style.zIndex) || 0) + 1;
+                    }
+                    else {
+                        newzindex = 0;
+                    }
+                    element.boxref.style.zIndex = newzindex.toString();
+                    if (element.boxlabelref != null) {
+                        element.boxlabelref.style.zIndex = newzindex.toString();
+                    }
+                }
             }
-            newzIndex--;
-            this.selectedBox.style.zIndex = "0";
         }
+        this.sitplan.orderByZIndex();
+        undostruct.store();
     };
     SituationPlanView.prototype.updateBoxPosition = function (box) {
         var pic = box.picref;
@@ -2239,9 +2533,9 @@ var SituationPlanView = /** @class */ (function () {
         var spiegel = false;
         rotate = rotate % 360;
         if ((rotate >= 90) && (rotate < 270)) {
-            if (pic.needsTextMirroring())
+            if (pic.rotates360degrees())
                 spiegel = true;
-            if (pic.isEDSymbol())
+            if (pic.isEendraadschemaSymbool())
                 rotate = rotate - 180;
         }
         box.style.transform = "rotate(".concat(rotate, "deg)") + (spiegel ? ' scaleX(-1)' : '');
@@ -2425,6 +2719,7 @@ var SituationPlanView = /** @class */ (function () {
         document.getElementById('id_sitplanpage').onchange = function (event) {
             var target = event.target;
             _this.selectPage(Number(target.value));
+            undostruct.store();
         };
         document.getElementById('btn_sitplan_addpage').onclick = function () {
             _this.sitplan.numPages++;
@@ -2707,7 +3002,7 @@ function SituationPlanView_Kringen() {
             var kringnaam = structure.findKringName(id).trim();
             if (kringnaam != '') {
                 var type = structure.data[i].getType();
-                if (excludedTypes.indexOf(type) === -1) {
+                if ((type != null) && (excludedTypes.indexOf(type) === -1)) {
                     var adres = structure.data[i].getReadableAdres();
                     output.alldata.push({ id: id, kringnaam: kringnaam, adres: adres, type: type });
                 }
@@ -3035,8 +3330,8 @@ var Electro_Item = /** @class */ (function (_super) {
      * @returns {SituationPlanElement} The SituationPlanElement that represents this Electro_Item
      */
     Electro_Item.prototype.toSituationPlanElement = function () {
-        var myElement = new SituationPlanElement(1, 0, 0, 0, 0, 11, 0, 1, randomId("SP_"), "");
-        this.updateSituationPlanElement(myElement);
+        var myElement = new SituationPlanElement();
+        //this.updateSituationPlanElement(myElement); //Lijkt niet nodig aangezien dit zoiezo gebeurt in getScaledSVG bij iedere update
         return (myElement);
     };
     Electro_Item.prototype.updateSituationPlanElement = function (myElement) {
@@ -3044,6 +3339,7 @@ var Electro_Item = /** @class */ (function (_super) {
         var rotate = myElement.rotate % 360;
         if ((rotate >= 90) && (rotate < 270))
             spiegeltext = true;
+        SVGSymbols.clearSymbols(); // We gaan enkel de symbolen gebruiken die nodig zijn voor dit element
         var mySVGElement = this.toSVG(true, spiegeltext);
         var sizex = mySVGElement.xright + mySVGElement.xleft + 10;
         var sizey = mySVGElement.yup + mySVGElement.ydown;
@@ -3055,11 +3351,13 @@ var Electro_Item = /** @class */ (function (_super) {
             clipleft = 12;
         }
         var addright = 0;
-        myElement.setSVG("<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" \n                       transform=\"scale(1,1)\" viewBox=\"".concat(clipleft, " 0 ").concat(sizex - clipleft, " ").concat(sizey, "\" width=\"").concat(sizex - clipleft + addright, "\" height=\"").concat(sizey, "\">")
-            + SVGSymbols.outputSVGSymbols()
-            + mySVGElement.data
-            + '</svg>');
-        myElement.getSizeFromString();
+        var width = sizex - clipleft + addright;
+        var height = sizey;
+        myElement.updateElectroItemSVG('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" transform="scale(1,1)" ' +
+            "viewBox=\"".concat(clipleft, " 0 ").concat(sizex - clipleft, " ").concat(sizey, "\" width=\"").concat(width, "\" height=\"").concat(height, "\">") +
+            SVGSymbols.getNeededSymbols() + // enkel de symbolen die nodig zijn voor dit element
+            mySVGElement.data +
+            '</svg>', width, height);
     };
     return Electro_Item;
 }(List_Item));
@@ -3081,6 +3379,7 @@ var Schakelaar = /** @class */ (function () {
     }
     Schakelaar.prototype.schakelaarAttributentoSVGString = function (endx, isdubbel) {
         if (isdubbel === void 0) { isdubbel = false; }
+        SVGSymbols.addSymbol('signalisatielamp');
         var outputstr = "";
         if (this.signalisatielamp)
             outputstr += '<use xlink:href="#signalisatielamp" x="' + (endx - 10) + '" y="25" />';
@@ -3108,6 +3407,7 @@ var Schakelaar = /** @class */ (function () {
     Schakelaar.prototype.enkeltoDrawReturnObj = function (startx) {
         var outputstr = "";
         var endx = startx + 30;
+        SVGSymbols.addSymbol('schakelaar_enkel');
         outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
             + '<use xlink:href="#schakelaar_enkel" x="' + endx + '" y="25" />'
             + this.schakelaarAttributentoSVGString(endx);
@@ -3116,6 +3416,7 @@ var Schakelaar = /** @class */ (function () {
     Schakelaar.prototype.dubbeltoDrawReturnObj = function (startx) {
         var outputstr = "";
         var endx = startx + 30;
+        SVGSymbols.addSymbol('schakelaar_dubbel');
         outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
             + '<use xlink:href="#schakelaar_dubbel" x="' + endx + '" y="25" />'
             + this.schakelaarAttributentoSVGString(endx, true);
@@ -3124,6 +3425,7 @@ var Schakelaar = /** @class */ (function () {
     Schakelaar.prototype.driepoligtoDrawReturnObj = function (startx) {
         var outputstr = "";
         var endx = startx + 30;
+        SVGSymbols.addSymbol('schakelaar_trippel');
         outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
             + '<use xlink:href="#schakelaar_trippel" x="' + endx + '" y="25" />'
             + this.schakelaarAttributentoSVGString(endx, true);
@@ -3132,6 +3434,7 @@ var Schakelaar = /** @class */ (function () {
     Schakelaar.prototype.dubbelaanstekingtoDrawReturnObj = function (startx) {
         var outputstr = "";
         var endx = startx + 30;
+        SVGSymbols.addSymbol('schakelaar_dubbelaansteking');
         outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
             + '<use xlink:href="#schakelaar_dubbelaansteking" x="' + endx + '" y="25" />'
             + this.schakelaarAttributentoSVGString(endx);
@@ -3140,6 +3443,7 @@ var Schakelaar = /** @class */ (function () {
     Schakelaar.prototype.wissel_enkeltoDrawReturnObj = function (startx) {
         var outputstr = "";
         var endx = startx + 30;
+        SVGSymbols.addSymbol('schakelaar_wissel_enkel');
         outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
             + '<use xlink:href="#schakelaar_wissel_enkel" x="' + endx + '" y="25" />'
             + this.schakelaarAttributentoSVGString(endx);
@@ -3148,6 +3452,7 @@ var Schakelaar = /** @class */ (function () {
     Schakelaar.prototype.wissel_dubbeltoDrawReturnObj = function (startx) {
         var outputstr = "";
         var endx = startx + 30;
+        SVGSymbols.addSymbol('schakelaar_wissel_dubbel');
         outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
             + '<use xlink:href="#schakelaar_wissel_dubbel" x="' + endx + '" y="25" />'
             + this.schakelaarAttributentoSVGString(endx, true);
@@ -3156,6 +3461,7 @@ var Schakelaar = /** @class */ (function () {
     Schakelaar.prototype.kruis_enkeltoDrawReturnObj = function (startx) {
         var outputstr = "";
         var endx = startx + 30;
+        SVGSymbols.addSymbol('schakelaar_kruis_enkel');
         outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
             + '<use xlink:href="#schakelaar_kruis_enkel" x="' + endx + '" y="25" />'
             + this.schakelaarAttributentoSVGString(endx);
@@ -3164,6 +3470,7 @@ var Schakelaar = /** @class */ (function () {
     Schakelaar.prototype.dimschakelaartoDrawReturnObj = function (startx) {
         var outputstr = "";
         var endx = startx + 30;
+        SVGSymbols.addSymbol('schakelaar_enkel_dim');
         outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
             + '<use xlink:href="#schakelaar_enkel_dim" x="' + endx + '" y="25" />'
             + this.schakelaarAttributentoSVGString(endx);
@@ -3172,6 +3479,7 @@ var Schakelaar = /** @class */ (function () {
     Schakelaar.prototype.dimschakelaarWisseltoDrawReturnObj = function (startx) {
         var outputstr = "";
         var endx = startx + 30;
+        SVGSymbols.addSymbol('schakelaar_wissel_dim');
         outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
             + '<use xlink:href="#schakelaar_wissel_dim" x="' + endx + '" y="25" />'
             + this.schakelaarAttributentoSVGString(endx);
@@ -3180,6 +3488,9 @@ var Schakelaar = /** @class */ (function () {
     Schakelaar.prototype.bewegingsschakelaartoDrawReturnObj = function (startx) {
         var outputstr = "";
         var endx = startx + 20;
+        SVGSymbols.addSymbol('relais');
+        SVGSymbols.addSymbol('moving_man');
+        SVGSymbols.addSymbol('detectie_klein');
         outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
             + '<use xlink:href="#relais" x="' + endx + '" y="16" />'
             + '<use xlink:href="#moving_man" x="' + (endx + 1.5) + '" y="11" />'
@@ -3192,6 +3503,7 @@ var Schakelaar = /** @class */ (function () {
     Schakelaar.prototype.rolluikschakelaartoDrawReturnObj = function (startx) {
         var outputstr = "";
         var endx = startx + 30;
+        SVGSymbols.addSymbol('schakelaar_rolluik');
         outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
             + '<use xlink:href="#schakelaar_rolluik" x="' + endx + '" y="25" />';
         if (this.halfwaterdicht) {
@@ -3206,6 +3518,7 @@ var Schakelaar = /** @class */ (function () {
     Schakelaar.prototype.magneetcontacttoDrawReturnObj = function (startx) {
         var outputstr = "";
         var endx = startx + 20;
+        SVGSymbols.addSymbol('magneetcontact');
         // Alles naar beneden schuiven als we het aantal laders boven het symbool willen plaatsen
         if (this.aantal > 1) {
             var textoptions = 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10"';
@@ -3221,6 +3534,7 @@ var Schakelaar = /** @class */ (function () {
     Schakelaar.prototype.defaulttoDrawReturnObj = function (startx, symbol) {
         var outputstr = "";
         var endx = startx + 20;
+        SVGSymbols.addSymbol(symbol);
         outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
             + '<use xlink:href="' + symbol + '" x="' + endx + '" y="25" />';
         return ({ endx: endx, str: outputstr, lowerbound: null });
@@ -3305,6 +3619,7 @@ var Schakelaar = /** @class */ (function () {
                 endx += 40;
                 break;
             case "schemerschakelaar":
+                SVGSymbols.addSymbol('arrow'); // nodig voor de schemerschakelaar
                 (_p = (this.defaulttoDrawReturnObj(startx, '#schemerschakelaar')), endx = _p.endx, outputstr = _p.str);
                 endx += 40;
                 break;
@@ -3769,6 +4084,11 @@ var Aansluiting = /** @class */ (function (_super) {
     };
     Aansluiting.prototype.toSVG = function () {
         var mySVG = new SVGelement();
+        SVGSymbols.addSymbol('zekering_automatisch');
+        SVGSymbols.addSymbol('zekering_empty');
+        SVGSymbols.addSymbol('arrow');
+        SVGSymbols.addSymbol('zekering_smelt');
+        SVGSymbols.addSymbol('elekriciteitsmeter');
         // Indien er een kabeltype vóór de teller is schuiven we alles op
         var extrashift = 0;
         if (this.props.type_kabel_voor_teller != "")
@@ -4022,6 +4342,7 @@ var Aansluitpunt = /** @class */ (function (_super) {
     Aansluitpunt.prototype.toSVG = function (sitplan) {
         if (sitplan === void 0) { sitplan = false; }
         var mySVG = new SVGelement();
+        SVGSymbols.addSymbol('aansluitpunt');
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 29;
         mySVG.yup = 25;
@@ -4057,6 +4378,7 @@ var Aftakdoos = /** @class */ (function (_super) {
     Aftakdoos.prototype.toSVG = function (sitplan) {
         if (sitplan === void 0) { sitplan = false; }
         var mySVG = new SVGelement();
+        SVGSymbols.addSymbol('aftakdoos');
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 49;
         mySVG.yup = 25;
@@ -4093,6 +4415,7 @@ var Batterij = /** @class */ (function (_super) {
         if (sitplan === void 0) { sitplan = false; }
         var mySVG = new SVGelement();
         var outputstr = "";
+        SVGSymbols.addSymbol('batterij');
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 59;
         mySVG.yup = 25;
@@ -4128,6 +4451,7 @@ var Bel = /** @class */ (function (_super) {
     Bel.prototype.toSVG = function () {
         var mySVG = new SVGelement();
         var outputstr = "";
+        SVGSymbols.addSymbol('bel');
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 40;
         mySVG.yup = 25;
@@ -4174,9 +4498,13 @@ var Boiler = /** @class */ (function (_super) {
         mySVG.data = (sitplan ? "" : '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>');
         switch (this.props.heeft_accumulatie) { //accumulatie
             case false:
+                SVGSymbols.addSymbol('VerticalStripe');
+                SVGSymbols.addSymbol('boiler');
                 mySVG.data += '<use xlink:href="#boiler" x="21" y="25"></use>';
                 break;
             case true:
+                SVGSymbols.addSymbol('VerticalStripe');
+                SVGSymbols.addSymbol('boiler_accu');
                 mySVG.data += '<use xlink:href="#boiler_accu" x="21" y="25"></use>';
                 break;
         }
@@ -4322,6 +4650,9 @@ var Contactdoos = /** @class */ (function (_super) {
         if (sitplan === void 0) { sitplan = false; }
         if (mirrortext === void 0) { mirrortext = false; }
         var mySVG = new SVGelement();
+        SVGSymbols.addSymbol('contactdoos');
+        SVGSymbols.addSymbol('contactdoos_aarding');
+        SVGSymbols.addSymbol('contactdoos_kinderveilig');
         mySVG.xleft = 1; // Links voldoende ruimte voor een eventuele kring voorzien
         mySVG.xright = 20; // We starten met breedte 20 (leidings links) en vullen later aan in functie van wat moet getekend worden
         mySVG.yup = 25;
@@ -4424,6 +4755,8 @@ var Diepvriezer = /** @class */ (function (_super) {
     Diepvriezer.prototype.toSVG = function (sitplan) {
         if (sitplan === void 0) { sitplan = false; }
         var mySVG = new SVGelement();
+        SVGSymbols.addSymbol('ster');
+        SVGSymbols.addSymbol('diepvriezer');
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 60;
         mySVG.yup = 25;
@@ -4557,6 +4890,11 @@ var Domotica_gestuurde_verbruiker = /** @class */ (function (_super) {
     Domotica_gestuurde_verbruiker.prototype.toSVG = function (sitplan) {
         if (sitplan === void 0) { sitplan = false; }
         var mySVG = new SVGelement();
+        SVGSymbols.addSymbol('draadloos_klein');
+        SVGSymbols.addSymbol('drukknop_klein');
+        SVGSymbols.addSymbol('tijdschakelaar_klein');
+        SVGSymbols.addSymbol('detectie_klein');
+        SVGSymbols.addSymbol('schakelaar_klein');
         // Eerst de tekening van de aangestuurde verbruiker maken
         var childcounter = 0; // Variabele voor het aantal kinderen, op dit moment ondersteunt de tool slechts 1 kind
         // Kind 1 is het element dat effectief gestuurd wordt.                
@@ -4706,6 +5044,7 @@ var Droogkast = /** @class */ (function (_super) {
     Droogkast.prototype.toSVG = function (sitplan) {
         if (sitplan === void 0) { sitplan = false; }
         var mySVG = new SVGelement();
+        SVGSymbols.addSymbol('droogkast');
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 59;
         mySVG.yup = 25;
@@ -4760,6 +5099,7 @@ var Drukknop = /** @class */ (function (_super) {
         if (sitplan === void 0) { sitplan = false; }
         if (mirrortext === void 0) { mirrortext = false; }
         var mySVG = new SVGelement();
+        SVGSymbols.addSymbol('drukknop');
         mySVG.xleft = 1; // Links voldoende ruimte voor een eventuele kring voorzien
         mySVG.xright = 43;
         mySVG.yup = 25;
@@ -4853,6 +5193,7 @@ var EV_lader = /** @class */ (function (_super) {
     EV_lader.prototype.toSVG = function (sitplan) {
         if (sitplan === void 0) { sitplan = false; }
         var mySVG = new SVGelement();
+        SVGSymbols.addSymbol('EVlader');
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 60;
         mySVG.yup = 25;
@@ -4888,6 +5229,7 @@ var Elektriciteitsmeter = /** @class */ (function (_super) {
     Elektriciteitsmeter.prototype.toSVG = function (sitplan) {
         if (sitplan === void 0) { sitplan = false; }
         var mySVG = new SVGelement();
+        SVGSymbols.addSymbol('elektriciteitsmeter');
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 59;
         mySVG.yup = 25;
@@ -4923,6 +5265,7 @@ var Elektrische_oven = /** @class */ (function (_super) {
     Elektrische_oven.prototype.toSVG = function (sitplan) {
         if (sitplan === void 0) { sitplan = false; }
         var mySVG = new SVGelement();
+        SVGSymbols.addSymbol('oven');
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 59;
         mySVG.yup = 25;
@@ -4970,6 +5313,10 @@ var Ketel = /** @class */ (function (_super) {
     Ketel.prototype.toSVG = function (sitplan) {
         if (sitplan === void 0) { sitplan = false; }
         var mySVG = new SVGelement();
+        SVGSymbols.addSymbol('verbruiker');
+        SVGSymbols.addSymbol('gas_ventilator');
+        SVGSymbols.addSymbol('gas_atmosferisch');
+        SVGSymbols.addSymbol('bliksem');
         // Alles naar beneden schuiven als we het aantal laders boven het symbool willen plaatsen
         var shifty = 0;
         if (this.props.aantal > 1) {
@@ -5071,6 +5418,8 @@ var Koelkast = /** @class */ (function (_super) {
     Koelkast.prototype.toSVG = function (sitplan) {
         if (sitplan === void 0) { sitplan = false; }
         var mySVG = new SVGelement();
+        SVGSymbols.addSymbol('ster');
+        SVGSymbols.addSymbol('koelkast');
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 59;
         mySVG.yup = 25;
@@ -5106,7 +5455,7 @@ var Kookfornuis = /** @class */ (function (_super) {
     Kookfornuis.prototype.toSVG = function (sitplan) {
         if (sitplan === void 0) { sitplan = false; }
         var mySVG = new SVGelement();
-        var outputstr = "";
+        SVGSymbols.addSymbol('kookfornuis');
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 59;
         mySVG.yup = 25;
@@ -5263,6 +5612,12 @@ var Kring = /** @class */ (function (_super) {
     };
     Kring.prototype.toSVG = function () {
         var mySVG = new SVGelement();
+        SVGSymbols.addSymbol('zekering_automatisch');
+        SVGSymbols.addSymbol('zekering_empty');
+        SVGSymbols.addSymbol('zekering_smelt');
+        SVGSymbols.addSymbol('overspanningsbeveiliging_inline');
+        SVGSymbols.addSymbol('arrow');
+        SVGSymbols.addSymbol('relais_kring');
         // Bepalen of we de hele kring naar rechts moeten opschuiven om rekening te houden met symbooltjes qua kabel-locatie
         var cable_location_available = 0;
         if (this.props.kabel_is_aanwezig /* kabel aanwezig */ && (this.props.kabel_is_in_buis /* kabel in buis */ || contains(["Ondergronds", "In wand", "Op wand"], this.props.kabel_locatie))) {
@@ -5684,6 +6039,7 @@ var Lichtpunt = /** @class */ (function (_super) {
             print_str_upper = "x" + this.props.aantal;
         switch (this.props.type_lamp) {
             case "led":
+                SVGSymbols.addSymbol('led');
                 // Teken led
                 mySVG.data += '<use xlink:href="#led" x="' + 30 + '" y="25" />';
                 // Teken wandlamp indien van toepassing
@@ -5737,6 +6093,7 @@ var Lichtpunt = /** @class */ (function (_super) {
                 mySVG.data += (sitplan ? "" : this.addAddressToSVG(mySVG, 50, 5, 2));
                 break;
             case "spot":
+                SVGSymbols.addSymbol('spot');
                 // teken spot
                 mySVG.data += '<use xlink:href="#spot" x="' + 30 + '" y="25" />';
                 // Teken wandlamp indien van toepassing
@@ -5841,17 +6198,20 @@ var Lichtpunt = /** @class */ (function (_super) {
             default: //Normaal lichtpunt (kruisje)
                 switch (this.props.type_noodverlichting) {
                     case "Centraal":
+                        SVGSymbols.addSymbol('lamp');
                         mySVG.data += '<use xlink:href="#lamp" x="' + 30 + '" y="25" />'
                             + '<circle cx="30" cy="25" r="5" style="stroke:black;fill:black" />';
                         if ((this.heeftVerbruikerAlsKind()) && (!sitplan))
                             mySVG.data += '<line x1="' + 30 + '" y1="25" x2="' + (30 + 11) + '" y2="25" stroke="black" />';
                         break;
                     case "Decentraal":
+                        SVGSymbols.addSymbol('noodlamp_decentraal');
                         mySVG.data += '<use xlink:href="#noodlamp_decentraal" x="' + 30 + '" y="25" />';
                         if (this.props.heeft_ingebouwde_schakelaar)
                             mySVG.data += '<line x1="37" y1="18" x2="40" y2="15" stroke="black" stroke-width="2" />'; //Ingebouwde schakelaar
                         break;
                     default:
+                        SVGSymbols.addSymbol('lamp');
                         mySVG.data += '<use xlink:href="#lamp" x="' + 30 + '" y="25" />';
                         if ((this.heeftVerbruikerAlsKind()) && (!sitplan))
                             mySVG.data += '<line x1="' + 30 + '" y1="25" x2="' + (30 + 11) + '" y2="25" stroke="black" />';
@@ -5921,6 +6281,7 @@ var Media = /** @class */ (function (_super) {
     Media.prototype.toSVG = function (sitplan) {
         if (sitplan === void 0) { sitplan = false; }
         var mySVG = new SVGelement();
+        SVGSymbols.addSymbol('luidspreker');
         // Alles naar beneden schuiven als we het aantal laders boven het symbool willen plaatsen
         var shifty = 0;
         if (this.props.aantal > 1) {
@@ -6016,6 +6377,8 @@ var Microgolfoven = /** @class */ (function (_super) {
     Microgolfoven.prototype.toSVG = function (sitplan) {
         if (sitplan === void 0) { sitplan = false; }
         var mySVG = new SVGelement();
+        SVGSymbols.addSymbol('sinus');
+        SVGSymbols.addSymbol('microgolf');
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 59;
         mySVG.yup = 25;
@@ -6051,6 +6414,7 @@ var Motor = /** @class */ (function (_super) {
     Motor.prototype.toSVG = function (sitplan) {
         if (sitplan === void 0) { sitplan = false; }
         var mySVG = new SVGelement();
+        SVGSymbols.addSymbol('motor');
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 59;
         mySVG.yup = 25;
@@ -6086,6 +6450,8 @@ var Omvormer = /** @class */ (function (_super) {
     Omvormer.prototype.toSVG = function (sitplan) {
         if (sitplan === void 0) { sitplan = false; }
         var mySVG = new SVGelement();
+        SVGSymbols.addSymbol('sinus');
+        SVGSymbols.addSymbol('omvormer');
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 59;
         mySVG.yup = 25;
@@ -6121,6 +6487,7 @@ var Overspanningsbeveiliging = /** @class */ (function (_super) {
     Overspanningsbeveiliging.prototype.toSVG = function (sitplan) {
         if (sitplan === void 0) { sitplan = false; }
         var mySVG = new SVGelement();
+        SVGSymbols.addSymbol('overspanningsbeveiliging');
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 34;
         mySVG.yup = 25;
@@ -6206,6 +6573,7 @@ var Stoomoven = /** @class */ (function (_super) {
     Stoomoven.prototype.toSVG = function (sitplan) {
         if (sitplan === void 0) { sitplan = false; }
         var mySVG = new SVGelement();
+        SVGSymbols.addSymbol('stoomoven');
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 59;
         mySVG.yup = 25;
@@ -6244,6 +6612,7 @@ var Transformator = /** @class */ (function (_super) {
     Transformator.prototype.toSVG = function (sitplan) {
         if (sitplan === void 0) { sitplan = false; }
         var mySVG = new SVGelement();
+        SVGSymbols.addSymbol('transformator');
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 47;
         mySVG.yup = 25;
@@ -6284,6 +6653,7 @@ var USB_lader = /** @class */ (function (_super) {
     USB_lader.prototype.toSVG = function (sitplan) {
         if (sitplan === void 0) { sitplan = false; }
         var mySVG = new SVGelement();
+        SVGSymbols.addSymbol('usblader');
         // Alles naar beneden schuiven als we het aantal laders boven het symbool willen plaatsen
         var shifty = 0;
         if (this.props.aantal > 1) {
@@ -6325,6 +6695,7 @@ var Vaatwasmachine = /** @class */ (function (_super) {
     Vaatwasmachine.prototype.toSVG = function (sitplan) {
         if (sitplan === void 0) { sitplan = false; }
         var mySVG = new SVGelement();
+        SVGSymbols.addSymbol('vaatwasmachine');
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 59;
         mySVG.yup = 25;
@@ -6360,6 +6731,7 @@ var Ventilator = /** @class */ (function (_super) {
     Ventilator.prototype.toSVG = function (sitplan) {
         if (sitplan === void 0) { sitplan = false; }
         var mySVG = new SVGelement();
+        SVGSymbols.addSymbol('ventilator');
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 49;
         mySVG.yup = 25;
@@ -6568,14 +6940,20 @@ var Verwarmingstoestel = /** @class */ (function (_super) {
         mySVG.data = (sitplan ? "" : '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>');
         switch (this.props.heeft_accumulatie) { //accumulatie
             case false:
+                SVGSymbols.addSymbol('VerticalStripe');
+                SVGSymbols.addSymbol('verwarmingstoestel');
                 mySVG.data += '<use xlink:href="#verwarmingstoestel" x="21" y="25"></use>';
                 break;
             case true:
                 switch (this.props.heeft_ventilator) { //ventilator
                     case false:
+                        SVGSymbols.addSymbol('VerticalStripe');
+                        SVGSymbols.addSymbol('verwarmingstoestel_accu');
                         mySVG.data += '<use xlink:href="#verwarmingstoestel_accu" x="21" y="25"></use>';
                         break;
                     case true:
+                        SVGSymbols.addSymbol('VerticalStripe');
+                        SVGSymbols.addSymbol('verwarmingstoestel_accu_ventilator');
                         mySVG.data += '<use xlink:href="#verwarmingstoestel_accu_ventilator" x="21" y="25"></use>';
                         mySVG.xright = 89;
                         break;
@@ -6789,6 +7167,8 @@ var Warmtepomp = /** @class */ (function (_super) {
     Warmtepomp.prototype.toSVG = function (sitplan) {
         if (sitplan === void 0) { sitplan = false; }
         var mySVG = new SVGelement();
+        SVGSymbols.addSymbol('verbruiker');
+        SVGSymbols.addSymbol('bliksem');
         // Alles naar beneden schuiven als we het aantal laders boven het symbool willen plaatsen
         var shifty = 0;
         if (this.props.aantal > 1) {
@@ -6856,6 +7236,7 @@ var Wasmachine = /** @class */ (function (_super) {
     Wasmachine.prototype.toSVG = function (sitplan) {
         if (sitplan === void 0) { sitplan = false; }
         var mySVG = new SVGelement();
+        SVGSymbols.addSymbol('wasmachine');
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 59;
         mySVG.yup = 25;
@@ -6935,6 +7316,8 @@ var Zekering = /** @class */ (function (_super) {
     Zekering.prototype.toSVG = function () {
         var mySVG = new SVGelement();
         var outputstr = "";
+        SVGSymbols.addSymbol('zekering_automatisch_horizontaal');
+        SVGSymbols.addSymbol('zekering_smelt_horizontaal');
         mySVG.xleft = 1; // Links voldoende ruimte voor een eventuele kring voorzien
         mySVG.xright = 50;
         mySVG.yup = 25;
@@ -7098,6 +7481,7 @@ var Zeldzame_symbolen = /** @class */ (function (_super) {
     Zeldzame_symbolen.prototype.toSVG = function (sitplan) {
         if (sitplan === void 0) { sitplan = false; }
         var mySVG = new SVGelement();
+        SVGSymbols.addSymbol('deurslot');
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 59;
         mySVG.yup = 25;
@@ -7146,6 +7530,8 @@ var Zonnepaneel = /** @class */ (function (_super) {
     Zonnepaneel.prototype.toSVG = function (sitplan) {
         if (sitplan === void 0) { sitplan = false; }
         var mySVG = new SVGelement();
+        SVGSymbols.addSymbol('arrow');
+        SVGSymbols.addSymbol('zonnepaneel');
         mySVG.xleft = 1; // Links voldoende ruimte voor een eventuele kring voorzien
         mySVG.xright = 69;
         mySVG.yup = 35;
@@ -7180,9 +7566,121 @@ var Properties = /** @class */ (function () {
 var SVGSymbols = /** @class */ (function () {
     function SVGSymbols() {
     }
-    SVGSymbols.outputSVGSymbols = function () {
-        var output = "\n    <defs>\n    <pattern id=\"VerticalStripe\" x=\"5\" y=\"0\" width=\"5\" height=\"10\" patternUnits=\"userSpaceOnUse\" >\n      <line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"10\" stroke=\"black\" />\n    </pattern>\n    <g id=\"batterij\">\n      <rect x=\"0\" y=\"-12\" width=\"40\" height=\"27\" stroke=\"black\" fill=\"none\"/>\n      <rect x=\"5\" y=\"-15\" width=\"10\" height=\"3\" stroke=\"black\" fill=\"none\"/>\n      <rect x=\"25\" y=\"-15\" width=\"10\" height=\"3\" stroke=\"black\" fill=\"none\"/>\n      <line x1=\"8\" y1=\"-5\" x2=\"12\" y2=\"-5\" stroke=\"black\"/>\n      <line x1=\"10\" y1=\"-7\" x2=\"10\" y2=\"-3\" stroke=\"black\"/>\n      <line x1=\"28\" y1=\"-5\" x2=\"32\" y2=\"-5\" stroke=\"black\"/>\n    </g>\n    <g id=\"deurslot\">\n      <line x1=\"1\" y1=\"-15\" x2=\"31\" y2=\"-15\" stroke=\"black\"/>\n      <line x1=\"1\" y1=\"15\"  x2=\"46\" y2=\"15\" stroke=\"black\"/>\n      <line x1=\"1\" y1=\"-15\" x2=\"1\" y2=\"15\" stroke=\"black\"/>\n      <line x1=\"31\" y1=\"-15\" x2=\"46\" y2=\"15\" stroke=\"black\"/>\n      <path d=\"M 7 3 A 6 6 0 0 1 19 3 A 6 6 0 0 1 31 3\" stroke=\"black\" fill=\"none\" />\n    </g>\n    <g id=\"ster\">\n      <line x1=\"0\" y1=\"-5\" x2=\"0\" y2=\"5\" style=\"stroke:black\" />\n      <line x1=\"-4.33\" y1=\"-2.5\" x2=\"4.33\" y2=\"2.5\" style=\"stroke:black\" />\n      <line x1=\"-4.66\" y1=\"2.5\" x2=\"4.33\" y2=\"-2.5\" style=\"stroke:black\" />\n    </g>\n    <g id=\"EVlader\">\n      <rect x=\"0\" y=\"13\" width=\"40\" height=\"7\" fill=\"none\" style=\"stroke:black\" />\n      <line x1=\"0\" y1=\"0\" x2=\"7\" y2=\"0\" style=\"stroke:black\" />\n      <line x1=\"7\" y1=\"-20\" x2=\"7\" y2=\"13\" style=\"stroke:black\" />\n      <line x1=\"33\" y1=\"-20\" x2=\"33\" y2=\"13\" style=\"stroke:black\" />\n      <line x1=\"7\" y1=\"-20\" x2=\"33\" y2=\"-20\" style=\"stroke:black\" />\n      <rect x=\"10\" y=\"-17\" width=\"20\" height=\"8\" fill=\"none\" style=\"stroke:black\" />\n      <line x1=\"20\" y1=\"-6\" x2=\"20\" y2=\"10\" style=\"stroke:black\" />\n      <line x1=\"33\" y1=\"-6\" x2=\"36\" y2=\"-6\" style=\"stroke:black\" />\n      <line x1=\"36\" y1=\"-6\" x2=\"36\" y2=\"4\" style=\"stroke:black\" />\n      <line x1=\"36\" y1=\"4\" x2=\"39\" y2=\"4\" style=\"stroke:black\" />\n      <line x1=\"39\" y1=\"4\" x2=\"39\" y2=\"-15\" style=\"stroke:black\" />\n      <line x1=\"39\" y1=\"-6\" x2=\"39\" y2=\"-15\" style=\"stroke:black;stroke-width:2\" />\n      <text x=\"15\" y=\"1\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"6\">V</text>\n      <text x=\"25\" y=\"1\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"6\">E</text>\n      <text x=\"15\" y=\"9\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"6\">E</text>\n      <text x=\"25\" y=\"9\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"6\">V</text>\n    </g>\n    <g id=\"lamp\">\n      <line x1=\"-10.61\" y1=\"-10.61\" x2=\"10.61\" y2=\"10.61\" stroke=\"black\" stroke-width=\"2\" />\n      <line x1=\"-10.61\" y1=\"10.61\" x2=\"10.61\" y2=\"-10.61\" stroke=\"black\" stroke-width=\"2\" />\n    </g>\n    <g id=\"led\">\n      <line x1=\"0\" y1=\"-7\" x2=\"0\" y2=\"7\" stroke=\"black\" stroke-width=\"2\" />\n      <line x1=\"0\" y1=\"-7\" x2=\"12\" y2=\"0\" stroke=\"black\" stroke-width=\"2\" />\n      <line x1=\"0\" y1=\"7\" x2=\"12\" y2=\"0\" stroke=\"black\" stroke-width=\"2\" />\n      <line x1=\"12\" y1=\"-7\" x2=\"12\" y2=\"7\" stroke=\"black\" stroke-width=\"2\" />\n      <line x1=\"6\" y1=\"-6\" x2=\"7\" y2=\"-11\" stroke=\"black\" stroke-width=\"1\" />\n      <line x1=\"7\" y1=\"-11\" x2=\"8.11\" y2=\"-9.34\" stroke=\"black\" stroke-width=\"1\" />\n      <line x1=\"7\" y1=\"-11\" x2=\"5.34\" y2=\"-9.9\" stroke=\"black\" stroke-width=\"1\" />\n      <line x1=\"9\" y1=\"-6\" x2=\"10\" y2=\"-11\" stroke=\"black\" stroke-width=\"1\" />\n      <line x1=\"10\" y1=\"-11\" x2=\"11.11\" y2=\"-9.34\" stroke=\"black\" stroke-width=\"1\" />\n      <line x1=\"10\" y1=\"-11\" x2=\"8.34\" y2=\"-9.9\" stroke=\"black\" stroke-width=\"1\" />\n    </g>\n    <g id=\"luidspreker\">\n      <polygon points=\"0,-10 7,-10 17,-20 17,20 7,10 0,10\" fill=\"none\" stroke=\"black\"/>\n      <line x1=\"7\" y1=\"-10\" x2=\"7\" y2=\"10\" stroke=\"black\" stroke-width=\"1\" />\n    </g>\n    <g id=\"magneetcontact\">\n      <rect x=\"0\" y=\"-10\" width=\"20\" height=\"20\" fill=\"black\" stroke=\"black\"/>\n    </g>\n    <g id=\"sinus\">\n      <path d=\"M0,0 C2,-5 8,-5 10,0 S18,5 20,0\" style=\"stroke:black;fill:none\" />\n    </g>\n    <g id=\"spot\">\n      <path d=\"M0 0 A10 10 0 0 1 10 -10\" stroke=\"black\" fill=\"white\" stroke-width=\"1\" />\n      <path d=\"M0 0 A10 10 0 0 0 10 10\" stroke=\"black\" fill=\"white\" stroke-width=\"1\" />\n      <circle cx=\"10\" cy=\"0\" r=\"6\" style=\"stroke:black;fill:white\" />\n      <line x1=\"5.76\" x2=\"14.24\" y1=\"-4.24\" y2=\"4.24\" stroke=\"black\" stroke-width=\"1\" />\n      <line x1=\"5.76\" x2=\"14.24\" y1=\"4.24\" y2=\"-4.24\" stroke=\"black\" stroke-width=\"1\" />\n    </g>\n    <g id=\"noodlamp_decentraal\">\n      <rect x=\"-10.61\" y=\"-10.61\" width=\"21.22\" height=\"21.22\" fill=\"white\" stroke=\"black\" />\n      <circle cx=\"0\" cy=\"0\" r=\"5\" style=\"stroke:black;fill:black\" />\n      <line x1=\"-7\" y1=\"-7\" x2=\"7\" y2=\"7\" stroke=\"black\" stroke-width=\"2\" />\n      <line x1=\"-7\" y1=\"7\" x2=\"7\" y2=\"-7\" stroke=\"black\" stroke-width=\"2\" />\n    </g>\n    <g id=\"signalisatielamp\">\n      <circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n      <line x1=\"-3\" y1=\"-3\" x2=\"3\" y2=\"3\" stroke=\"black\" />\n      <line x1=\"-3\" y1=\"3\" x2=\"3\" y2=\"-3\" stroke=\"black\" />\n    </g>\n    <g id=\"schakelaar_enkel\">\n      <line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n      <circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n    </g>\n    <g id=\"schakelaar_klein\">\n      <line x1=\"0\" y1=\"0\" x2=\"6\" y2=\"-12\" stroke=\"black\" />\n      <line x1=\"6\" y1=\"-12\" x2=\"9\" y2=\"-10.5\" stroke=\"black\" />\n      <circle cx=\"0\" cy=\"0\" r=\"3\" fill=\"white\" stroke=\"black\" />\n    </g>\n    <g id=\"schakelaar_dubbel\">\n      <line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n      <line x1=\"8\" y1=\"-16\" x2=\"13\" y2=\"-13.5\" stroke=\"black\" />\n      <circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n    </g>\n    <g id=\"schakelaar_trippel\">\n      <line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n      <line x1=\"8\" y1=\"-16\" x2=\"13\" y2=\"-13.5\" stroke=\"black\" />\n      <line x1=\"6\" y1=\"-12\" x2=\"11\" y2=\"-9.5\" stroke=\"black\" />\n      <circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n    </g>\n    <g id=\"schakelaar_wissel_enkel\">\n      <line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n      <line x1=\"0\" y1=\"0\" x2=\"-10\" y2=\"20\" stroke=\"black\" />\n      <line x1=\"-10\" y1=\"20\" x2=\"-15\" y2=\"17.5\" stroke=\"black\" />\n      <circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n    </g>\n    <g id=\"schakelaar_rolluik\">\n      <line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n      <line x1=\"0\" y1=\"0\" x2=\"-10\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"-10\" y1=\"-20\" x2=\"-15\" y2=\"-17.5\" stroke=\"black\" />\n      <rect x=\"-8\" y=\"-8\" width=\"16\" height=\"16\" fill=\"white\" stroke=\"black\" />\n      <text x=\"0\" y=\"6\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"16\">S</text>\n    </g>\n    <g id=\"schakelaar_enkel_dim\">\n      <line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n      <circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n      <polygon points=\"-1,-8 11,-8 11,-15\" fill=\"black\" stroke=\"black\" />\n    </g>\n    <g id=\"schakelaar_wissel_dim\">\n      <line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n      <line x1=\"0\" y1=\"0\" x2=\"-10\" y2=\"20\" stroke=\"black\" />\n      <line x1=\"-10\" y1=\"20\" x2=\"-15\" y2=\"17.5\" stroke=\"black\" />\n      <circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n      <polygon points=\"-1,-8 11,-8 11,-15\" fill=\"black\" stroke=\"black\" />\n    </g>\n    <g id=\"schakelaar_kruis_enkel\">\n      <line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n      <line x1=\"0\" y1=\"0\" x2=\"-10\" y2=\"20\" stroke=\"black\" />\n      <line x1=\"-10\" y1=\"20\" x2=\"-15\" y2=\"17.5\" stroke=\"black\" />\n      <line x1=\"0\" y1=\"0\" x2=\"-10\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"-10\" y1=\"-20\" x2=\"-15\" y2=\"-17.5\" stroke=\"black\" />\n      <line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"20\" stroke=\"black\" />\n      <line x1=\"10\" y1=\"20\" x2=\"15\" y2=\"17.5\" stroke=\"black\" />\n      <circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n    </g>\n    <g id=\"schakelaar_dubbelaansteking\">\n      <line x1=\"0\" y1=\"0\" x2=\"-10\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"-10\" y1=\"-20\" x2=\"-15\" y2=\"-17.5\" stroke=\"black\" />\n      <line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n      <circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n    </g>\n    <g id=\"schakelaar_wissel_dubbel\">\n      <line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n      <line x1=\"8\" y1=\"-16\" x2=\"13\" y2=\"-13.5\" stroke=\"black\" />\n      <line x1=\"0\" y1=\"0\" x2=\"-10\" y2=\"20\" stroke=\"black\" />\n      <line x1=\"-10\" y1=\"20\" x2=\"-15\" y2=\"17.5\" stroke=\"black\" />\n      <line x1=\"-8\" y1=\"16\" x2=\"-13\" y2=\"13.5\" stroke=\"black\" />\n      <circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n    </g>\n    <g id=\"aansluitpunt\">\n      <circle cx=\"5\" cy=\"0\" r=\"5\" style=\"stroke:black;fill:none\" />\n    </g>\n    <g id=\"aftakdoos\">\n      <circle cx=\"15\" cy=\"0\" r=\"15\" style=\"stroke:black;fill:none\" />\n      <circle cx=\"15\" cy=\"0\" r=\"7.5\" style=\"stroke:black;fill:black\" />\n    </g>\n    <g id=\"bewegingsschakelaar\">\n      <rect x=\"0\" y=\"-13\" width=\"10\" height=\"26\" fill=\"none\" style=\"stroke:black\" />\n      <rect x=\"10\" y=\"-13\" width=\"30\" height=\"26\" fill=\"none\" style=\"stroke:black\" />\n      <line x1=\"10\" y1=\"13\" x2=\"40\" y2=\"-13\"  stroke=\"black\" />\n      <line x1=\"15\" y1=\"-5\" x2=\"20\" y2=\"-5\"  stroke=\"black\" />\n      <line x1=\"20\" y1=\"-10\" x2=\"20\" y2=\"-5\"  stroke=\"black\" />\n      <line x1=\"20\" y1=\"-10\" x2=\"25\" y2=\"-10\"  stroke=\"black\" />\n      <text x=\"22\" y=\"11\" style=\"text-anchor:start\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"10\">PIR</text>\n    </g>\n    <g id=\"schakelaar\">\n      <line x1=\"0\" y1=\"0\" x2=\"5\" y2=\"0\"  stroke=\"black\" />\n      <line x1=\"5\" y1=\"0\" x2=\"35\" y2=\"-10\"  stroke=\"black\" />\n      <line x1=\"35\" y1=\"0\" x2=\"40\" y2=\"0\"  stroke=\"black\" />\n    </g>\n    <g id=\"schemerschakelaar\">\n      <line x1=\"0\" y1=\"0\" x2=\"5\" y2=\"0\"  stroke=\"black\" />\n      <line x1=\"5\" y1=\"0\" x2=\"35\" y2=\"-10\"  stroke=\"black\" />\n      <line x1=\"35\" y1=\"0\" x2=\"40\" y2=\"0\"  stroke=\"black\" />\n      <use xlink:href=\"#arrow\" x=\"14\" y=\"-17\" transform=\"rotate(90 14 -17)\" />\n      <use xlink:href=\"#arrow\" x=\"18\" y=\"-17\" transform=\"rotate(90 18 -17)\" />\n    </g>\n    <g id=\"contactdoos\">\n      <path d=\"M20 0 A15 15 0 0 1 35 -15\" stroke=\"black\" fill=\"none\" stroke-width=\"2\" />\n      <path d=\"M20 0 A15 15 0 0 0 35 15\" stroke=\"black\" fill=\"none\" stroke-width=\"2\" />\n      <line x1=\"0\" y1=\"0\" x2=\"20\" y2=\"0\" stroke=\"black\" />\n    </g>\n    <g id=\"stoomoven\">\n      <rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n      <path d=\"M 6 -2 A 7 5 0 0 1 13 -7 A 7 5 0 0 1 27 -7 A 7 5 0 0 1 33 -2\" stroke=\"black\" fill=\"none\" />\n      <path d=\"M 6  5 A 7 5 0 0 1 13  0 A 7 5 0 0 1 27  0 A 7 5 0 0 1 33  5\" stroke=\"black\" fill=\"none\" />\n      <path d=\"M 6 12 A 7 5 0 0 1 13  7 A 7 5 0 0 1 27  7 A 7 5 0 0 1 33 12\" stroke=\"black\" fill=\"none\" />\n    </g>\n    <g id=\"contactdoos_aarding\">\n      <line x1=\"20\" y1=\"-15\" x2=\"20\" y2=\"15\"  stroke=\"black\" stroke-width=\"2\" />\n    </g>\n    <g id=\"contactdoos_kinderveilig\">\n      <line x1=\"35\" y1=\"-20\" x2=\"35\" y2=\"-14.1\"  stroke=\"black\" stroke-width=\"2\" />\n      <line x1=\"35\" y1=\"20\" x2=\"35\" y2=\"14.1\"  stroke=\"black\" stroke-width=\"2\" />\n    </g>\n    <g id=\"bel\">\n      <path d=\"M20 0 A15 15 0 0 1 0 15\" stroke=\"black\" fill=\"none\" stroke-width=\"2\" />\n      <path d=\"M20 0 A15 15 0 0 0 0 -15\" stroke=\"black\" fill=\"none\" stroke-width=\"2\" />\n      <line x1=\"0\" y1=\"15\" x2=\"0\" y2=\"-15\" stroke=\"black\" stroke-width=\"2\" />\n    </g>\n    <g id=\"boiler\">\n      <circle cx=\"20\" cy=\"0\" r=\"20\" style=\"stroke:black;fill:url(#VerticalStripe)\" />\n    </g>\n    <g id=\"boiler_accu\">\n      <circle cx=\"20\" cy=\"0\" r=\"20\" style=\"stroke:black;fill:none\" />\n      <circle cx=\"20\" cy=\"0\" r=\"15\" style=\"stroke:black;fill:url(#VerticalStripe)\" />\n    </g>\n    <g id=\"motor\">\n      <circle cx=\"20\" cy=\"0\" r=\"20\" style=\"stroke:black;fill:none\" />\n      <text x=\"20\" y=\"6\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"16\">M</text>\n    </g>\n    <g id=\"elektriciteitsmeter\">\n      <rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n      <line x1=\"0\" y1=\"-6\" x2=\"40\" y2=\"-6\" stroke=\"black\" stroke-width=\"1\" />\n      <text x=\"20\" y=\"10\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"12\">kWh</text>\n    </g>\n    <g id=\"diepvriezer\">\n      <rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n      <use xlink:href=\"#ster\" x=\"10\" y=\"0\" />\n      <use xlink:href=\"#ster\" x=\"20\" y=\"0\" />\n      <use xlink:href=\"#ster\" x=\"30\" y=\"0\" />\n    </g>\n    <g id=\"zonnepaneel\">\n      <rect x=\"0\" y=\"-20\" width=\"50\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n      <line x1=\"0\" y1=\"0\" x2=\"50\" y2=\"0\" stroke=\"black\" />\n      <use xlink:href=\"#arrow\" x=\"5\" y=\"-12\" transform=\"rotate(45 5 -10)\" />\n      <use xlink:href=\"#arrow\" x=\"10\" y=\"-14\" transform=\"rotate(45 10 -14)\" />\n    </g>\n    <g id=\"drukknop_klein\">\n      <circle cx=\"8\" cy=\"0\" r=\"7\" style=\"stroke:black;fill:none\" />\n      <circle cx=\"8\" cy=\"0\" r=\"4\" style=\"stroke:black;fill:none\" />\n    </g>\n    <g id=\"draadloos_klein\">\n      <path d=\"M 10 -7 A 10 10 0 0 1 10 7\" stroke=\"black\" fill=\"none\" /> \n      <path d=\"M 7 -5 A 8 8 0 0 1 7 5\" stroke=\"black\" fill=\"none\" /> \n      <path d=\"M 4 -3 A 6 6 0 0 1 4 3\" stroke=\"black\" fill=\"none\" /> \n    </g>\n    <g id=\"detectie_klein\">\n      <path d=\"M 10 -7 A 10 10 0 0 1 10 7\" stroke=\"black\" fill=\"none\" /> \n      <path d=\"M 5 -7 A 10 10 0 0 1 5 7\" stroke=\"black\" fill=\"none\" /> \n    </g>\n    <g id=\"drukknop\">\n      <circle cx=\"12\" cy=\"0\" r=\"12\" style=\"stroke:black;fill:none\" />\n      <circle cx=\"12\" cy=\"0\" r=\"7\" style=\"stroke:black;fill:none\" />\n    </g>\n    <g id=\"teleruptor\">\n      <rect x=\"0\" y=\"-13\" width=\"40\" height=\"26\" fill=\"none\" style=\"stroke:black\" />\n      <line x1=\"8\" y1=\"6\" x2=\"16\" y2=\"6\"  stroke=\"black\" />\n      <line x1=\"24\" y1=\"6\" x2=\"32\" y2=\"6\"  stroke=\"black\" />\n      <line x1=\"16\" y1=\"-6\" x2=\"16\" y2=\"6\"  stroke=\"black\" />\n      <line x1=\"24\" y1=\"-6\" x2=\"24\" y2=\"6\"  stroke=\"black\" />\n    </g>\n    <g id=\"dimmer\">\n      <rect x=\"0\" y=\"-13\" width=\"40\" height=\"26\" fill=\"none\" style=\"stroke:black\" />\n      <line x1=\"10\" y1=\"5\" x2=\"30\" y2=\"5\"  stroke=\"black\" />\n      <line x1=\"10\" y1=\"5\" x2=\"10\" y2=\"-5\"  stroke=\"black\" />\n      <line x1=\"10\" y1=\"-5\" x2=\"30\" y2=\"5\"  stroke=\"black\" />\n    </g>\n    <g id=\"relais\">\n      <rect x=\"0\" y=\"-13\" width=\"40\" height=\"26\" fill=\"none\" style=\"stroke:black\" />\n      <line x1=\"10\" y1=\"-13\" x2=\"30\" y2=\"13\"  stroke=\"black\" />\n    </g>\n    <g id=\"minuterie\">\n      <rect x=\"0\" y=\"-13\" width=\"40\" height=\"26\" fill=\"none\" style=\"stroke:black\" />\n      <text x=\"20\" y=\"6\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"16\">t</text>\n    </g>\n    <g id=\"thermostaat\">\n      <rect x=\"0\" y=\"-13\" width=\"40\" height=\"26\" fill=\"none\" style=\"stroke:black\" />\n      <circle cx=\"20\" cy=\"0\" r=\"8\" style=\"stroke:black;fill:none\" />\n      <line x1=\"12\" y1=\"0\" x2=\"28\" y2=\"0\"  stroke=\"black\" />\n    </g>\n    <g id=\"tijdschakelaar\">\n      <rect x=\"0\" y=\"-13\" width=\"40\" height=\"26\" fill=\"none\" style=\"stroke:black\" />\n      <circle cx=\"11\" cy=\"0\" r=\"8\" style=\"stroke:black;fill:none\" />\n      <line x1=\"10\" y1=\"0\"  x2=\"17\" y2=\"0\"  stroke=\"black\" />\n      <line x1=\"11\" y1=\"-6\" x2=\"11\" y2=\"1\"  stroke=\"black\" />\n      <line x1=\"21\" y1=\"0\"  x2=\"25\" y2=\"0\"  stroke=\"black\" />\n      <line x1=\"25\" y1=\"0\"  x2=\"31\" y2=\"-5\"  stroke=\"black\" />\n      <line x1=\"31\" y1=\"0\"  x2=\"36\" y2=\"0\"  stroke=\"black\" />\n    </g>\n    <g id=\"tijdschakelaar_klein\">\n      <circle cx=\"8\" cy=\"0\" r=\"7\" style=\"stroke:black;fill:none\" />\n      <line x1=\"7\" y1=\"0\"  x2=\"13\" y2=\"0\"  stroke=\"black\" />\n      <line x1=\"8\" y1=\"-5\" x2=\"8\" y2=\"1\"  stroke=\"black\" />\n    </g>\n    <g id=\"droogkast\">\n      <rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n      <circle cx=\"15\" cy=\"-7.5\" r=\"5\" style=\"stroke:black;fill:none\" />\n      <circle cx=\"25\" cy=\"-7.5\" r=\"5\" style=\"stroke:black;fill:none\" />\n      <circle cx=\"20\" cy=\"7.5\" r=\"3\" style=\"stroke:black;fill:black\" />\n    </g>\n    <g id=\"omvormer\">\n      <rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n      <line x1=\"0\" y1=\"20\" x2=\"40\" y2=\"-20\" stroke=\"black\" />\n      <use xlink:href=\"#sinus\" x=\"5\" y=\"-12\" />\"\n      <line x1=\"20\" y1=\"10\" x2=\"35\" y2=\"10\" stroke=\"black\" />\n      <line x1=\"20\" y1=\"13\" x2=\"35\" y2=\"13\" stroke=\"black\" stroke-dasharray=\"3\" />\n    </g>\n    <g id=\"overspanningsbeveiliging\">\n      <rect x=\"0\" y=\"-15\" width=\"15\" height=\"30\" fill=\"none\" style=\"stroke:black\" />\n      <line x1=\"7.5\" y1=\"-18\" x2=\"7.5\" y2=\"-5\" stroke=\"black\" />\n      <line x1=\"7.5\" y1=\"-5\" x2=\"4.5\" y2=\"-9\" stroke=\"black\" />\n      <line x1=\"7.5\" y1=\"-5\" x2=\"10.5\" y2=\"-9\" stroke=\"black\" />\n      <line x1=\"7.5\" y1=\"18\" x2=\"7.5\" y2=\"5\" stroke=\"black\" />\n      <line x1=\"7.5\" y1=\"5\" x2=\"4.5\" y2=\"9\" stroke=\"black\" />\n      <line x1=\"7.5\" y1=\"5\" x2=\"10.5\" y2=\"9\" stroke=\"black\" />\n    </g>\n    <g id=\"koelkast\">\n      <rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n      <use xlink:href=\"#ster\" x=\"20\" y=\"0\" />\"\n    </g>\n    <g id=\"kookfornuis\">\n      <rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n      <circle cx=\"10\" cy=\"10\" r=\"3\" style=\"stroke:black;fill:black\" />\n      <circle cx=\"30\" cy=\"10\" r=\"3\" style=\"stroke:black;fill:black\" />\n      <circle cx=\"30\" cy=\"-10\" r=\"3\" style=\"stroke:black;fill:black\" />\n    </g>\n    <g id=\"microgolf\">\n      <rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n      <use xlink:href=\"#sinus\" x=\"10\" y=\"-10\" />\"\n      <use xlink:href=\"#sinus\" x=\"10\" y=\"0\" />\"\n      <use xlink:href=\"#sinus\" x=\"10\" y=\"10\" />\"\n    </g>\n    <g id=\"oven\">\n      <rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n      <line x1=\"0\" y1=\"-5\" x2=\"40\" y2=\"-5\" stroke=\"black\" />\n      <circle cx=\"20\" cy=\"7.5\" r=\"3\" style=\"stroke:black;fill:black\" />\n    </g>\n    <g id=\"usblader\">\n      <rect x=\"0\" y=\"-15\" width=\"60\" height=\"30\" fill=\"none\" style=\"stroke:black\" />\n      <circle cx=\"12\" cy=\"-5\" r=\"5\" style=\"stroke:black;fill:none\" />\n      <circle cx=\"19\" cy=\"-5\" r=\"5\" style=\"stroke:black;fill:none\" />\n      <text x=\"15\" y=\"8\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"8\">AC/DC</text>\n      <text x=\"42\" y=\"4\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"11\">USB</text>\n    </g>\n    <g id=\"vaatwasmachine\">\n      <rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n      <line x1=\"0\" y1=\"-20\" x2=\"40\" y2=\"20\" style=\"stroke:black;fill:none\" />\n      <line x1=\"40\" y1=\"-20\" x2=\"0\" y2=\"20\" style=\"stroke:black;fill:none\" />\n      <circle cx=\"20\" cy=\"0\" r=\"8\" style=\"stroke:black;fill:white\" />\n    </g>\n    <g id=\"ventilator\">\n      <rect x=\"0\" y=\"-15\" width=\"30\" height=\"30\" fill=\"none\" style=\"stroke:black\" />\n      <circle cx=\"10\" cy=\"0\" r=\"5\" style=\"stroke:black;fill:none\" />\n      <circle cx=\"20\" cy=\"0\" r=\"5\" style=\"stroke:black;fill:none\" />\n    </g>\n    <g id=\"transformator\">\n      <circle cx=\"8\" cy=\"0\" r=\"8\" style=\"stroke:black;fill:none\" />\n      <circle cx=\"20\" cy=\"0\" r=\"8\" style=\"stroke:black;fill:none\" />\n    </g>\n    <g id=\"verwarmingstoestel\">\n      <rect x=\"0\" y=\"-15\" width=\"50\" height=\"30\" fill=\"url(#VerticalStripe)\" style=\"stroke:black\" />\n    </g>\n    <g id=\"verwarmingstoestel_accu\">\n      <rect x=\"0\" y=\"-15\" width=\"50\" height=\"30\" fill=\"none\" style=\"stroke:black\" />\n      <rect x=\"5\" y=\"-10\" width=\"40\" height=\"20\" fill=\"url(#VerticalStripe)\" style=\"stroke:black\" />\n    </g>\n    <g id=\"verwarmingstoestel_accu_ventilator\">\n      <rect x=\"0\" y=\"-15\" width=\"70\" height=\"30\" fill=\"none\" style=\"stroke:black\" />\n      <rect x=\"5\" y=\"-10\" width=\"35\" height=\"20\" fill=\"url(#VerticalStripe)\" style=\"stroke:black\" />\n      <circle cx=\"50\" cy=\"0\" r=\"5\" style=\"stroke:black;fill:none\" />\n      <circle cx=\"60\" cy=\"0\" r=\"5\" style=\"stroke:black;fill:none\" />\n    </g>\n    <g id=\"verbruiker\">\n      <rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n    </g>\n    <g id=\"wasmachine\">\n      <rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n      <circle cx=\"20\" cy=\"0\" r=\"3\" style=\"stroke:black;fill:black\" />\n      <circle cx=\"20\" cy=\"0\" r=\"15\" style=\"stroke:black;fill:none\" />\n    </g>\n    <g transform=\"rotate(-20)\" id=\"zekering_automatisch\">\n      <line x1=\"0\" y1=\"-30\" x2=\"0\" y2=\"0\"  stroke=\"black\" />\n      <rect x=\"-4\" y=\"-30\" width=\"4\" height=\"10\" style=\"fill:black\" />\n    </g>\n    <g transform=\"rotate(-20)\" id=\"zekering_automatisch_horizontaal\">\n      <line x1=\"0\" y1=\"0\" x2=\"30\" y2=\"0\"  stroke=\"black\" />\n      <rect x=\"20\" y=\"-4\" height=\"4\" width=\"10\" style=\"fill:black\" />\n    </g>\n    <g id=\"zekering_smelt\">\n      <rect x=\"-4\" y=\"-30\" width=\"8\" height=\"30\" style=\"stroke:black;fill:none\" />\n      <line x1=\"0\" y1=\"-30\" x2=\"0\" y2=\"0\" stroke=\"black\" />\n    </g>\n    <g id=\"zekering_smelt_horizontaal\">\n      <rect x=\"0\" y=\"-4\" height=\"8\" width=\"30\" style=\"stroke:black;fill:none\" />\n      <line x1=\"0\" y1=\"0\" x2=\"30\" y2=\"0\" stroke=\"black\" />\n    </g>\n    <g id=\"relais_kring\">\n      <rect x=\"-8\" y=\"-30\" width=\"16\" height=\"30\" style=\"stroke:black;fill:none\" />\n      <line x1=\"8\" y1=\"-22.5\" x2=\"-8\" y2=\"-7.5\" stroke=\"black\" />\n    </g>\n    <g id=\"overspanningsbeveiliging_inline\">   -> shift x -7.5  y -15\n      <rect x=\"-7.5\" y=\"-30\" width=\"15\" height=\"30\" fill=\"none\" style=\"stroke:black\" />\n      <line x1=\"0\" y1=\"-30\" x2=\"0\" y2=\"-20\" stroke=\"black\" />\n      <line x1=\"0\" y1=\"-20\" x2=\"-3\" y2=\"-24\" stroke=\"black\" />\n      <line x1=\"0\" y1=\"-20\" x2=\"3\" y2=\"-24\" stroke=\"black\" />\n      <line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-10\" stroke=\"black\" />\n      <line x1=\"0\" y1=\"-10\" x2=\"-3\" y2=\"-6\" stroke=\"black\" />\n      <line x1=\"0\" y1=\"-10\" x2=\"3\" y2=\"-6\" stroke=\"black\" />\n    </g>\n    <g transform=\"rotate(-20)\" id=\"zekering_empty\">\n      <line x1=\"0\" y1=\"-30\" x2=\"0\" y2=\"0\"  stroke=\"black\" />\n    </g>\n    <g id=\"arrow\">\n      <line x1=\"0\" y1=\"0\" x2=\"8\" y2=\"0\" stroke=\"black\" />\n      <line x1=\"8\" y1=\"0\" x2=\"5\" y2=\"-1\" stroke=\"black\" />\n      <line x1=\"8\" y1=\"0\" x2=\"5\" y2=\"1\" stroke=\"black\" />\n    </g>\n    <g id=\"gas_ventilator\">\n      <polygon points=\"-6,5.2 0,-5.2 6,5.2\" fill=\"black\" stroke=\"black\" />\n    </g>\n    <g id=\"gas_atmosferisch\">\n      <polygon points=\"-6,5.2 0,-5.2 6,5.2\" fill=\"white\" stroke=\"black\" />\n    </g>\n    <g id=\"bliksem\">\n      <line x1=\"0\" y1=\"-5.2\" x2=\"-3\" y2=\"0\" stroke=\"black\"/>\n      <line x1=\"-3\" y1=\"0\" x2=\"3\" y2=\"0\" stroke=\"black\"/>\n      <line x1=\"3\" y1=\"0\" x2=\"0\" y2=\"5.2\" stroke=\"black\"/>\n      <line x1=\"0\" y1=\"5.2\" x2=\"0\" y2=\"2.2\" stroke=\"black\"/>\n      <line x1=\"0\" y1=\"5.2\" x2=\"2.6\" y2=\"3.7\" stroke=\"black\"/>\n    </g>\n    <g id=\"moving_man\"\n       transform=\"matrix(0.0152987,0,0,0.01530866,0,0)\">\n       <path\n         d=\"M 710.7,10.1 C 904.8,5.2 908.6,261.4 730.9,278.4 637.5,287.3 566.3,181.5 603.8,90.8 623.4,43.4 668.7,12.9 711.4,10.1 c 1.1,-0.1 2.8,26.1 1.7,26.2 -31.4,2 -74.8,32.1 -89.1,74.7 -26.8,79.9 47,156.6 125.1,139.2 123.9,-27.6 114.1,-218.5 -36.3,-214 -0.7,0 -3.2,-26 -2.1,-26.1 z\"\n         id=\"path4\" stroke=\"black\" stroke-width=\"10\" />\n       <path\n         d=\"m 545.3,225.9 c -67.8,-5 -133.2,0 -199.7,0 -20.7,13.6 -115,100.7 -121.1,121.1 -5.7,19.1 6.2,31.9 12.1,40.4 60.1,18.3 96.7,-60.4 133.2,-88.8 29.6,0 59.2,0 88.8,0 -59.2,78.9 -190.7,169.9 -58.5,264.3 -27.6,31.6 -55.1,63.2 -82.7,94.8 -46.9,-14.7 -165.6,-41.3 -199.7,-18.2 -7,21 -4.8,32.1 6.1,48.4 34.1,10.3 205.5,53.2 232,36.3 34.3,-37.7 68.6,-75.3 102.9,-113 32.3,27.6 64.6,55.2 96.9,82.7 -1,62.6 -14.6,249.9 24.2,266.3 10.2,3 19.1,0.5 28.2,-2 5.4,-7.4 10.8,-14.8 16.1,-22.2 6.9,-27 0.3,-272.6 -6.1,-282.5 -37.7,-32.9 -75.3,-65.9 -113,-98.9 1.3,-1.3 2.7,-2.7 4,-4 45.7,-48.4 91.5,-96.9 137.2,-145.3 20.2,19.5 40.4,39 60.5,58.5 16.7,35.8 152.2,25.4 179.6,6.1 2,-8.1 4,-16.1 6.1,-24.2 -16,-40.1 -71.7,-31.8 -127.1,-30.3 C 741.8,384.3 590.6,253 545.5,225.7 c -1.7,-1 14.9,-23.3 15.4,-22.4 -2.2,-3.5 126,97.7 134.4,107.4 9.4,9.1 55.2,51.5 82.1,78.4 68.5,-2 122,-6.5 137.2,46.4 4.9,17.1 1.9,37.1 -8.1,50.4 -18.8,25.3 -156,39.1 -197.7,18.2 -20.2,-20.2 -40.4,-40.4 -60.5,-60.5 -18.8,18.2 -37.7,36.3 -56.5,54.5 -16.8,18.2 -33.6,36.3 -50.4,54.5 32.9,28.9 65.9,57.8 98.9,86.8 11.2,17.9 18.9,272.3 8.1,306.7 -4.8,15.2 -19.9,32.9 -34.3,38.3 C 498.3,1028.1 527.8,798.3 529.4,706 505.9,686.5 482.3,667 458.8,647.5 427.9,676.7 402,732.8 362,750.4 333.5,762.9 140.3,728.4 113.8,712.1 100.1,703.6 89.3,686 85.6,667.7 59.7,543.2 281.5,646 321.3,617.4 334.7,601.3 348.2,585.1 361.7,569 266.4,454.2 335.5,414.9 402.1,326.9 c 0,-0.7 0,-1.3 0,-2 -8.1,0 -16.1,0 -24.2,0 -26.3,36.3 -124.9,147 -173.5,64.6 -35.9,-60.8 103.6,-172.2 141.1,-189.8 56.7,-3.8 167.5,-11 215.9,4 0.8,0.7 -14.9,22.6 -16.1,22.2 z\"\n         id=\"path6\" stroke=\"black\" stroke-width=\"10\" /></g>\n    </defs>\n    ";
+    SVGSymbols.addSymbol = function (symbol) {
+        if (!this.neededSymbols.includes(symbol)) {
+            this.neededSymbols.push(symbol);
+        }
+    };
+    SVGSymbols.clearSymbols = function () {
+        this.neededSymbols = [];
+    };
+    SVGSymbols.getNeededSymbols = function () {
+        var output = '<defs>';
+        if (this.neededSymbols.includes('VerticalStripe')) {
+            output += '<pattern id="VerticalStripe" x="5" y="0" width="5" height="10" patternUnits="userSpaceOnUse" >' +
+                '<line x1="0" y1="0" x2="0" y2="10" stroke="black" />' +
+                '</pattern>';
+        }
+        for (var key in this.data) {
+            if (this.neededSymbols.includes(key)) {
+                output += "<g id=\"".concat(key, "\">").concat(this.data[key].replace(/\n/g, ''), "</g>");
+            }
+        }
+        output += '</defs>';
         return (output);
+    };
+    SVGSymbols.outputSVGSymbols = function () {
+        var output = '<defs>' +
+            '<pattern id="VerticalStripe" x="5" y="0" width="5" height="10" patternUnits="userSpaceOnUse" >' +
+            '<line x1="0" y1="0" x2="0" y2="10" stroke="black" />' +
+            '</pattern>';
+        for (var key in this.data) {
+            if (key != 'VerticalStripe')
+                output += "<g id=\"".concat(key, "\">").concat(this.data[key].replace(/\n/g, ''), "</g>");
+        }
+        output += '</defs>';
+        return (output);
+    };
+    SVGSymbols.neededSymbols = [];
+    SVGSymbols.data = {
+        batterij: "\n<rect x=\"0\" y=\"-12\" width=\"40\" height=\"27\" stroke=\"black\" fill=\"none\"/>\n<rect x=\"5\" y=\"-15\" width=\"10\" height=\"3\" stroke=\"black\" fill=\"none\"/>\n<rect x=\"25\" y=\"-15\" width=\"10\" height=\"3\" stroke=\"black\" fill=\"none\"/>\n<line x1=\"8\" y1=\"-5\" x2=\"12\" y2=\"-5\" stroke=\"black\"/>\n<line x1=\"10\" y1=\"-7\" x2=\"10\" y2=\"-3\" stroke=\"black\"/>\n<line x1=\"28\" y1=\"-5\" x2=\"32\" y2=\"-5\" stroke=\"black\"/>\n",
+        contactdoos: "\n<path d=\"M20 0 A15 15 0 0 1 35 -15\" stroke=\"black\" fill=\"none\" stroke-width=\"2\" />\n<path d=\"M20 0 A15 15 0 0 0 35 15\" stroke=\"black\" fill=\"none\" stroke-width=\"2\" />\n<line x1=\"0\" y1=\"0\" x2=\"20\" y2=\"0\" stroke=\"black\" />\n",
+        deurslot: "\n<line x1=\"1\" y1=\"-15\" x2=\"31\" y2=\"-15\" stroke=\"black\"/>\n<line x1=\"1\" y1=\"15\"  x2=\"46\" y2=\"15\" stroke=\"black\"/>\n<line x1=\"1\" y1=\"-15\" x2=\"1\" y2=\"15\" stroke=\"black\"/>\n<line x1=\"31\" y1=\"-15\" x2=\"46\" y2=\"15\" stroke=\"black\"/>\n<path d=\"M 7 3 A 6 6 0 0 1 19 3 A 6 6 0 0 1 31 3\" stroke=\"black\" fill=\"none\" />\n",
+        ster: "\n<line x1=\"0\" y1=\"-5\" x2=\"0\" y2=\"5\" style=\"stroke:black\" />\n<line x1=\"-4.33\" y1=\"-2.5\" x2=\"4.33\" y2=\"2.5\" style=\"stroke:black\" />\n<line x1=\"-4.66\" y1=\"2.5\" x2=\"4.33\" y2=\"-2.5\" style=\"stroke:black\" />\n",
+        EVlader: "\n<rect x=\"0\" y=\"13\" width=\"40\" height=\"7\" fill=\"none\" style=\"stroke:black\" />\n<line x1=\"0\" y1=\"0\" x2=\"7\" y2=\"0\" style=\"stroke:black\" />\n<line x1=\"7\" y1=\"-20\" x2=\"7\" y2=\"13\" style=\"stroke:black\" />\n<line x1=\"33\" y1=\"-20\" x2=\"33\" y2=\"13\" style=\"stroke:black\" />\n<line x1=\"7\" y1=\"-20\" x2=\"33\" y2=\"-20\" style=\"stroke:black\" />\n<rect x=\"10\" y=\"-17\" width=\"20\" height=\"8\" fill=\"none\" style=\"stroke:black\" />\n<line x1=\"20\" y1=\"-6\" x2=\"20\" y2=\"10\" style=\"stroke:black\" />\n<line x1=\"33\" y1=\"-6\" x2=\"36\" y2=\"-6\" style=\"stroke:black\" />\n<line x1=\"36\" y1=\"-6\" x2=\"36\" y2=\"4\" style=\"stroke:black\" />\n<line x1=\"36\" y1=\"4\" x2=\"39\" y2=\"4\" style=\"stroke:black\" />\n<line x1=\"39\" y1=\"4\" x2=\"39\" y2=\"-15\" style=\"stroke:black\" />\n<line x1=\"39\" y1=\"-6\" x2=\"39\" y2=\"-15\" style=\"stroke:black;stroke-width:2\" />\n<text x=\"15\" y=\"1\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"6\">V</text>\n<text x=\"25\" y=\"1\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"6\">E</text>\n<text x=\"15\" y=\"9\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"6\">E</text>\n<text x=\"25\" y=\"9\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"6\">V</text>\n",
+        lamp: "\n<line x1=\"-10.61\" y1=\"-10.61\" x2=\"10.61\" y2=\"10.61\" stroke=\"black\" stroke-width=\"2\" />\n<line x1=\"-10.61\" y1=\"10.61\" x2=\"10.61\" y2=\"-10.61\" stroke=\"black\" stroke-width=\"2\" />\n",
+        led: "\n<line x1=\"0\" y1=\"-7\" x2=\"0\" y2=\"7\" stroke=\"black\" stroke-width=\"2\" />\n<line x1=\"0\" y1=\"-7\" x2=\"12\" y2=\"0\" stroke=\"black\" stroke-width=\"2\" />\n<line x1=\"0\" y1=\"7\" x2=\"12\" y2=\"0\" stroke=\"black\" stroke-width=\"2\" />\n<line x1=\"12\" y1=\"-7\" x2=\"12\" y2=\"7\" stroke=\"black\" stroke-width=\"2\" />\n<line x1=\"6\" y1=\"-6\" x2=\"7\" y2=\"-11\" stroke=\"black\" stroke-width=\"1\" />\n<line x1=\"7\" y1=\"-11\" x2=\"8.11\" y2=\"-9.34\" stroke=\"black\" stroke-width=\"1\" />\n<line x1=\"7\" y1=\"-11\" x2=\"5.34\" y2=\"-9.9\" stroke=\"black\" stroke-width=\"1\" />\n<line x1=\"9\" y1=\"-6\" x2=\"10\" y2=\"-11\" stroke=\"black\" stroke-width=\"1\" />\n<line x1=\"10\" y1=\"-11\" x2=\"11.11\" y2=\"-9.34\" stroke=\"black\" stroke-width=\"1\" />\n<line x1=\"10\" y1=\"-11\" x2=\"8.34\" y2=\"-9.9\" stroke=\"black\" stroke-width=\"1\" />\n",
+        luidspreker: "\n<polygon points=\"0,-10 7,-10 17,-20 17,20 7,10 0,10\" fill=\"none\" stroke=\"black\"/>\n<line x1=\"7\" y1=\"-10\" x2=\"7\" y2=\"10\" stroke=\"black\" stroke-width=\"1\" />\n",
+        magneetcontact: "\n<rect x=\"0\" y=\"-10\" width=\"20\" height=\"20\" fill=\"black\" stroke=\"black\"/>\n",
+        sinus: "\n<path d=\"M0,0 C2,-5 8,-5 10,0 S18,5 20,0\" style=\"stroke:black;fill:none\" />\n",
+        spot: "\n<path d=\"M0 0 A10 10 0 0 1 10 -10\" stroke=\"black\" fill=\"white\" stroke-width=\"1\" />\n<path d=\"M0 0 A10 10 0 0 0 10 10\" stroke=\"black\" fill=\"white\" stroke-width=\"1\" />\n<circle cx=\"10\" cy=\"0\" r=\"6\" style=\"stroke:black;fill:white\" />\n<line x1=\"5.76\" x2=\"14.24\" y1=\"-4.24\" y2=\"4.24\" stroke=\"black\" stroke-width=\"1\" />\n<line x1=\"5.76\" x2=\"14.24\" y1=\"4.24\" y2=\"-4.24\" stroke=\"black\" stroke-width=\"1\" />\n",
+        noodlamp_decentraal: "\n<rect x=\"-10.61\" y=\"-10.61\" width=\"21.22\" height=\"21.22\" fill=\"white\" stroke=\"black\" />\n<circle cx=\"0\" cy=\"0\" r=\"5\" style=\"stroke:black;fill:black\" />\n<line x1=\"-7\" y1=\"-7\" x2=\"7\" y2=\"7\" stroke=\"black\" stroke-width=\"2\" />\n<line x1=\"-7\" y1=\"7\" x2=\"7\" y2=\"-7\" stroke=\"black\" stroke-width=\"2\" />\n",
+        signalisatielamp: "\n<circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n<line x1=\"-3\" y1=\"-3\" x2=\"3\" y2=\"3\" stroke=\"black\" />\n<line x1=\"-3\" y1=\"3\" x2=\"3\" y2=\"-3\" stroke=\"black\" />\n",
+        schakelaar_enkel: "\n<line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n<line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n<circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n",
+        schakelaar_klein: "\n<line x1=\"0\" y1=\"0\" x2=\"6\" y2=\"-12\" stroke=\"black\" />\n<line x1=\"6\" y1=\"-12\" x2=\"9\" y2=\"-10.5\" stroke=\"black\" />\n<circle cx=\"0\" cy=\"0\" r=\"3\" fill=\"white\" stroke=\"black\" />\n",
+        schakelaar_dubbel: "\n<line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n<line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n<line x1=\"8\" y1=\"-16\" x2=\"13\" y2=\"-13.5\" stroke=\"black\" />\n<circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n",
+        schakelaar_trippel: "\n<line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n<line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n<line x1=\"8\" y1=\"-16\" x2=\"13\" y2=\"-13.5\" stroke=\"black\" />\n<line x1=\"6\" y1=\"-12\" x2=\"11\" y2=\"-9.5\" stroke=\"black\" />\n<circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n",
+        schakelaar_wissel_enkel: "\n<line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n<line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n<line x1=\"0\" y1=\"0\" x2=\"-10\" y2=\"20\" stroke=\"black\" />\n<line x1=\"-10\" y1=\"20\" x2=\"-15\" y2=\"17.5\" stroke=\"black\" />\n<circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n",
+        schakelaar_rolluik: "\n<line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n<line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n<line x1=\"0\" y1=\"0\" x2=\"-10\" y2=\"-20\" stroke=\"black\" />\n<line x1=\"-10\" y1=\"-20\" x2=\"-15\" y2=\"-17.5\" stroke=\"black\" />\n<rect x=\"-8\" y=\"-8\" width=\"16\" height=\"16\" fill=\"white\" stroke=\"black\" />\n<text x=\"0\" y=\"6\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"16\">S</text>\n",
+        schakelaar_enkel_dim: "\n<line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n<line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n<circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n<polygon points=\"-1,-8 11,-8 11,-15\" fill=\"black\" stroke=\"black\" />\n",
+        schakelaar_wissel_dim: "\n<line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n<line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n<line x1=\"0\" y1=\"0\" x2=\"-10\" y2=\"20\" stroke=\"black\" />\n<line x1=\"-10\" y1=\"20\" x2=\"-15\" y2=\"17.5\" stroke=\"black\" />\n<circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n<polygon points=\"-1,-8 11,-8 11,-15\" fill=\"black\" stroke=\"black\" />\n",
+        schakelaar_kruis_enkel: "\n<line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n<line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n<line x1=\"0\" y1=\"0\" x2=\"-10\" y2=\"20\" stroke=\"black\" />\n<line x1=\"-10\" y1=\"20\" x2=\"-15\" y2=\"17.5\" stroke=\"black\" />\n<line x1=\"0\" y1=\"0\" x2=\"-10\" y2=\"-20\" stroke=\"black\" />\n<line x1=\"-10\" y1=\"-20\" x2=\"-15\" y2=\"-17.5\" stroke=\"black\" />\n<line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"20\" stroke=\"black\" />\n<line x1=\"10\" y1=\"20\" x2=\"15\" y2=\"17.5\" stroke=\"black\" />\n<circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n",
+        schakelaar_dubbelaansteking: "\n<line x1=\"0\" y1=\"0\" x2=\"-10\" y2=\"-20\" stroke=\"black\" />\n<line x1=\"-10\" y1=\"-20\" x2=\"-15\" y2=\"-17.5\" stroke=\"black\" />\n<line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n<line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n<circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n",
+        schakelaar_wissel_dubbel: "\n<line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n<line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n<line x1=\"8\" y1=\"-16\" x2=\"13\" y2=\"-13.5\" stroke=\"black\" />\n<line x1=\"0\" y1=\"0\" x2=\"-10\" y2=\"20\" stroke=\"black\" />\n<line x1=\"-10\" y1=\"20\" x2=\"-15\" y2=\"17.5\" stroke=\"black\" />\n<line x1=\"-8\" y1=\"16\" x2=\"-13\" y2=\"13.5\" stroke=\"black\" />\n<circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n",
+        aansluitpunt: "\n<circle cx=\"5\" cy=\"0\" r=\"5\" style=\"stroke:black;fill:none\" />\n",
+        aftakdoos: "\n<circle cx=\"15\" cy=\"0\" r=\"15\" style=\"stroke:black;fill:none\" />\n<circle cx=\"15\" cy=\"0\" r=\"7.5\" style=\"stroke:black;fill:black\" />\n",
+        bewegingsschakelaar: "\n<rect x=\"0\" y=\"-13\" width=\"10\" height=\"26\" fill=\"none\" style=\"stroke:black\" />\n<rect x=\"10\" y=\"-13\" width=\"30\" height=\"26\" fill=\"none\" style=\"stroke:black\" />\n<line x1=\"10\" y1=\"13\" x2=\"40\" y2=\"-13\"  stroke=\"black\" />\n<line x1=\"15\" y1=\"-5\" x2=\"20\" y2=\"-5\"  stroke=\"black\" />\n<line x1=\"20\" y1=\"-10\" x2=\"20\" y2=\"-5\"  stroke=\"black\" />\n<line x1=\"20\" y1=\"-10\" x2=\"25\" y2=\"-10\"  stroke=\"black\" />\n<text x=\"22\" y=\"11\" style=\"text-anchor:start\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"10\">PIR</text>\n",
+        schakelaar: "\n<line x1=\"0\" y1=\"0\" x2=\"5\" y2=\"0\"  stroke=\"black\" />\n<line x1=\"5\" y1=\"0\" x2=\"35\" y2=\"-10\"  stroke=\"black\" />\n<line x1=\"35\" y1=\"0\" x2=\"40\" y2=\"0\"  stroke=\"black\" />\n",
+        schemerschakelaar: "\n<line x1=\"0\" y1=\"0\" x2=\"5\" y2=\"0\"  stroke=\"black\" />\n<line x1=\"5\" y1=\"0\" x2=\"35\" y2=\"-10\"  stroke=\"black\" />\n<line x1=\"35\" y1=\"0\" x2=\"40\" y2=\"0\"  stroke=\"black\" />\n<use xlink:href=\"#arrow\" x=\"14\" y=\"-17\" transform=\"rotate(90 14 -17)\" />\n<use xlink:href=\"#arrow\" x=\"18\" y=\"-17\" transform=\"rotate(90 18 -17)\" />\n",
+        stoomoven: "\n<rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n<path d=\"M 6 -2 A 7 5 0 0 1 13 -7 A 7 5 0 0 1 27 -7 A 7 5 0 0 1 33 -2\" stroke=\"black\" fill=\"none\" />\n<path d=\"M 6  5 A 7 5 0 0 1 13  0 A 7 5 0 0 1 27  0 A 7 5 0 0 1 33  5\" stroke=\"black\" fill=\"none\" />\n<path d=\"M 6 12 A 7 5 0 0 1 13  7 A 7 5 0 0 1 27  7 A 7 5 0 0 1 33 12\" stroke=\"black\" fill=\"none\" />\n",
+        contactdoos_aarding: "\n<line x1=\"20\" y1=\"-15\" x2=\"20\" y2=\"15\"  stroke=\"black\" stroke-width=\"2\" />\n",
+        contactdoos_kinderveilig: "\n<line x1=\"35\" y1=\"-20\" x2=\"35\" y2=\"-14.1\"  stroke=\"black\" stroke-width=\"2\" />\n<line x1=\"35\" y1=\"20\" x2=\"35\" y2=\"14.1\"  stroke=\"black\" stroke-width=\"2\" />\n",
+        bel: "\n<path d=\"M20 0 A15 15 0 0 1 0 15\" stroke=\"black\" fill=\"none\" stroke-width=\"2\" />\n<path d=\"M20 0 A15 15 0 0 0 0 -15\" stroke=\"black\" fill=\"none\" stroke-width=\"2\" />\n<line x1=\"0\" y1=\"15\" x2=\"0\" y2=\"-15\" stroke=\"black\" stroke-width=\"2\" />\n",
+        boiler: "\n<circle cx=\"20\" cy=\"0\" r=\"20\" style=\"stroke:black;fill:url(#VerticalStripe)\" />\n",
+        boiler_accu: "\n<circle cx=\"20\" cy=\"0\" r=\"20\" style=\"stroke:black;fill:none\" />\n<circle cx=\"20\" cy=\"0\" r=\"15\" style=\"stroke:black;fill:url(#VerticalStripe)\" />\n",
+        motor: "\n<circle cx=\"20\" cy=\"0\" r=\"20\" style=\"stroke:black;fill:none\" />\n<text x=\"20\" y=\"6\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"16\">M</text>\n",
+        elektriciteitsmeter: "\n<rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n<line x1=\"0\" y1=\"-6\" x2=\"40\" y2=\"-6\" stroke=\"black\" stroke-width=\"1\" />\n<text x=\"20\" y=\"10\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"12\">kWh</text>\n",
+        diepvriezer: "\n<rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n<use xlink:href=\"#ster\" x=\"10\" y=\"0\" />\n<use xlink:href=\"#ster\" x=\"20\" y=\"0\" />\n<use xlink:href=\"#ster\" x=\"30\" y=\"0\" />\n",
+        zonnepaneel: "\n<rect x=\"0\" y=\"-20\" width=\"50\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n<line x1=\"0\" y1=\"0\" x2=\"50\" y2=\"0\" stroke=\"black\" />\n<use xlink:href=\"#arrow\" x=\"5\" y=\"-12\" transform=\"rotate(45 5 -10)\" />\n<use xlink:href=\"#arrow\" x=\"10\" y=\"-14\" transform=\"rotate(45 10 -14)\" />\n",
+        drukknop_klein: "\n<circle cx=\"8\" cy=\"0\" r=\"7\" style=\"stroke:black;fill:none\" />\n<circle cx=\"8\" cy=\"0\" r=\"4\" style=\"stroke:black;fill:none\" />\n",
+        draadloos_klein: "\n<path d=\"M 10 -7 A 10 10 0 0 1 10 7\" stroke=\"black\" fill=\"none\" /> \n<path d=\"M 7 -5 A 8 8 0 0 1 7 5\" stroke=\"black\" fill=\"none\" /> \n<path d=\"M 4 -3 A 6 6 0 0 1 4 3\" stroke=\"black\" fill=\"none\" /> \n",
+        detectie_klein: "\n<path d=\"M 10 -7 A 10 10 0 0 1 10 7\" stroke=\"black\" fill=\"none\" /> \n<path d=\"M 5 -7 A 10 10 0 0 1 5 7\" stroke=\"black\" fill=\"none\" /> \n",
+        drukknop: "\n<circle cx=\"12\" cy=\"0\" r=\"12\" style=\"stroke:black;fill:none\" />\n<circle cx=\"12\" cy=\"0\" r=\"7\" style=\"stroke:black;fill:none\" />\n",
+        teleruptor: "\n<rect x=\"0\" y=\"-13\" width=\"40\" height=\"26\" fill=\"none\" style=\"stroke:black\" />\n<line x1=\"8\" y1=\"6\" x2=\"16\" y2=\"6\"  stroke=\"black\" />\n<line x1=\"24\" y1=\"6\" x2=\"32\" y2=\"6\"  stroke=\"black\" />\n<line x1=\"16\" y1=\"-6\" x2=\"16\" y2=\"6\"  stroke=\"black\" />\n<line x1=\"24\" y1=\"-6\" x2=\"24\" y2=\"6\"  stroke=\"black\" />\n",
+        dimmer: "\n<rect x=\"0\" y=\"-13\" width=\"40\" height=\"26\" fill=\"none\" style=\"stroke:black\" />\n<line x1=\"10\" y1=\"5\" x2=\"30\" y2=\"5\"  stroke=\"black\" />\n<line x1=\"10\" y1=\"5\" x2=\"10\" y2=\"-5\"  stroke=\"black\" />\n<line x1=\"10\" y1=\"-5\" x2=\"30\" y2=\"5\"  stroke=\"black\" />\n",
+        relais: "\n<rect x=\"0\" y=\"-13\" width=\"40\" height=\"26\" fill=\"none\" style=\"stroke:black\" />\n<line x1=\"10\" y1=\"-13\" x2=\"30\" y2=\"13\"  stroke=\"black\" />\n",
+        minuterie: "\n<rect x=\"0\" y=\"-13\" width=\"40\" height=\"26\" fill=\"none\" style=\"stroke:black\" />\n<text x=\"20\" y=\"6\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"16\">t</text>\n",
+        thermostaat: "\n<rect x=\"0\" y=\"-13\" width=\"40\" height=\"26\" fill=\"none\" style=\"stroke:black\" />\n<circle cx=\"20\" cy=\"0\" r=\"8\" style=\"stroke:black;fill:none\" />\n<line x1=\"12\" y1=\"0\" x2=\"28\" y2=\"0\"  stroke=\"black\" />\n",
+        tijdschakelaar: "\n<rect x=\"0\" y=\"-13\" width=\"40\" height=\"26\" fill=\"none\" style=\"stroke:black\" />\n<circle cx=\"11\" cy=\"0\" r=\"8\" style=\"stroke:black;fill:none\" />\n<line x1=\"10\" y1=\"0\"  x2=\"17\" y2=\"0\"  stroke=\"black\" />\n<line x1=\"11\" y1=\"-6\" x2=\"11\" y2=\"1\"  stroke=\"black\" />\n<line x1=\"21\" y1=\"0\"  x2=\"25\" y2=\"0\"  stroke=\"black\" />\n<line x1=\"25\" y1=\"0\"  x2=\"31\" y2=\"-5\"  stroke=\"black\" />\n<line x1=\"31\" y1=\"0\"  x2=\"36\" y2=\"0\"  stroke=\"black\" />\n",
+        tijdschakelaar_klein: "\n<circle cx=\"8\" cy=\"0\" r=\"7\" style=\"stroke:black;fill:none\" />\n<line x1=\"7\" y1=\"0\"  x2=\"13\" y2=\"0\"  stroke=\"black\" />\n<line x1=\"8\" y1=\"-5\" x2=\"8\" y2=\"1\"  stroke=\"black\" />\n",
+        droogkast: "\n<rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n<circle cx=\"15\" cy=\"-7.5\" r=\"5\" style=\"stroke:black;fill:none\" />\n<circle cx=\"25\" cy=\"-7.5\" r=\"5\" style=\"stroke:black;fill:none\" />\n<circle cx=\"20\" cy=\"7.5\" r=\"3\" style=\"stroke:black;fill:black\" />\n",
+        omvormer: "\n<rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n<line x1=\"0\" y1=\"20\" x2=\"40\" y2=\"-20\" stroke=\"black\" />\n<use xlink:href=\"#sinus\" x=\"5\" y=\"-12\" />\"\n<line x1=\"20\" y1=\"10\" x2=\"35\" y2=\"10\" stroke=\"black\" />\n<line x1=\"20\" y1=\"13\" x2=\"35\" y2=\"13\" stroke=\"black\" stroke-dasharray=\"3\" />\n",
+        overspanningsbeveiliging: "\n<rect x=\"0\" y=\"-15\" width=\"15\" height=\"30\" fill=\"none\" style=\"stroke:black\" />\n<line x1=\"7.5\" y1=\"-18\" x2=\"7.5\" y2=\"-5\" stroke=\"black\" />\n<line x1=\"7.5\" y1=\"-5\" x2=\"4.5\" y2=\"-9\" stroke=\"black\" />\n<line x1=\"7.5\" y1=\"-5\" x2=\"10.5\" y2=\"-9\" stroke=\"black\" />\n<line x1=\"7.5\" y1=\"18\" x2=\"7.5\" y2=\"5\" stroke=\"black\" />\n<line x1=\"7.5\" y1=\"5\" x2=\"4.5\" y2=\"9\" stroke=\"black\" />\n<line x1=\"7.5\" y1=\"5\" x2=\"10.5\" y2=\"9\" stroke=\"black\" />\n",
+        koelkast: "\n<rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n<use xlink:href=\"#ster\" x=\"20\" y=\"0\" />\"\n",
+        kookfornuis: "\n<rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n<circle cx=\"10\" cy=\"10\" r=\"3\" style=\"stroke:black;fill:black\" />\n<circle cx=\"30\" cy=\"10\" r=\"3\" style=\"stroke:black;fill:black\" />\n<circle cx=\"30\" cy=\"-10\" r=\"3\" style=\"stroke:black;fill:black\" />\n",
+        microgolf: "\n<rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n<use xlink:href=\"#sinus\" x=\"10\" y=\"-10\" />\"\n<use xlink:href=\"#sinus\" x=\"10\" y=\"0\" />\"\n<use xlink:href=\"#sinus\" x=\"10\" y=\"10\" />\"\n",
+        oven: "\n<rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n<line x1=\"0\" y1=\"-5\" x2=\"40\" y2=\"-5\" stroke=\"black\" />\n<circle cx=\"20\" cy=\"7.5\" r=\"3\" style=\"stroke:black;fill:black\" />\n",
+        usblader: "\n<rect x=\"0\" y=\"-15\" width=\"60\" height=\"30\" fill=\"none\" style=\"stroke:black\" />\n<circle cx=\"12\" cy=\"-5\" r=\"5\" style=\"stroke:black;fill:none\" />\n<circle cx=\"19\" cy=\"-5\" r=\"5\" style=\"stroke:black;fill:none\" />\n<text x=\"15\" y=\"8\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"8\">AC/DC</text>\n<text x=\"42\" y=\"4\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"11\">USB</text>\n",
+        vaatwasmachine: "\n<rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n<line x1=\"0\" y1=\"-20\" x2=\"40\" y2=\"20\" style=\"stroke:black;fill:none\" />\n<line x1=\"40\" y1=\"-20\" x2=\"0\" y2=\"20\" style=\"stroke:black;fill:none\" />\n<circle cx=\"20\" cy=\"0\" r=\"8\" style=\"stroke:black;fill:white\" />\n",
+        ventilator: "\n<rect x=\"0\" y=\"-15\" width=\"30\" height=\"30\" fill=\"none\" style=\"stroke:black\" />\n<circle cx=\"10\" cy=\"0\" r=\"5\" style=\"stroke:black;fill:none\" />\n<circle cx=\"20\" cy=\"0\" r=\"5\" style=\"stroke:black;fill:none\" />\n",
+        transformator: "\n<circle cx=\"8\" cy=\"0\" r=\"8\" style=\"stroke:black;fill:none\" />\n<circle cx=\"20\" cy=\"0\" r=\"8\" style=\"stroke:black;fill:none\" />\n",
+        verwarmingstoestel: "\n<rect x=\"0\" y=\"-15\" width=\"50\" height=\"30\" fill=\"url(#VerticalStripe)\" style=\"stroke:black\" />\n",
+        verwarmingstoestel_accu: "\n<rect x=\"0\" y=\"-15\" width=\"50\" height=\"30\" fill=\"none\" style=\"stroke:black\" />\n<rect x=\"5\" y=\"-10\" width=\"40\" height=\"20\" fill=\"url(#VerticalStripe)\" style=\"stroke:black\" />\n",
+        verwarmingstoestel_accu_ventilator: "\n<rect x=\"0\" y=\"-15\" width=\"70\" height=\"30\" fill=\"none\" style=\"stroke:black\" />\n<rect x=\"5\" y=\"-10\" width=\"35\" height=\"20\" fill=\"url(#VerticalStripe)\" style=\"stroke:black\" />\n<circle cx=\"50\" cy=\"0\" r=\"5\" style=\"stroke:black;fill:none\" />\n<circle cx=\"60\" cy=\"0\" r=\"5\" style=\"stroke:black;fill:none\" />\n",
+        verbruiker: "\n<rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n",
+        wasmachine: "\n<rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n<circle cx=\"20\" cy=\"0\" r=\"3\" style=\"stroke:black;fill:black\" />\n<circle cx=\"20\" cy=\"0\" r=\"15\" style=\"stroke:black;fill:none\" />\n",
+        zekering_automatisch: "\n<g transform=\"rotate(-20)\">\n<line x1=\"0\" y1=\"-30\" x2=\"0\" y2=\"0\"  stroke=\"black\" />\n<rect x=\"-4\" y=\"-30\" width=\"4\" height=\"10\" style=\"fill:black\" />\n</g>\n",
+        zekering_automatisch_horizontaal: "\n<g transform=\"rotate(-20)\">\n<line x1=\"0\" y1=\"0\" x2=\"30\" y2=\"0\"  stroke=\"black\" />\n<rect x=\"20\" y=\"-4\" height=\"4\" width=\"10\" style=\"fill:black\" />\n</g>\n",
+        zekering_smelt: "\n<rect x=\"-4\" y=\"-30\" width=\"8\" height=\"30\" style=\"stroke:black;fill:none\" />\n<line x1=\"0\" y1=\"-30\" x2=\"0\" y2=\"0\" stroke=\"black\" />\n",
+        zekering_smelt_horizontaal: "\n<rect x=\"0\" y=\"-4\" height=\"8\" width=\"30\" style=\"stroke:black;fill:none\" />\n<line x1=\"0\" y1=\"0\" x2=\"30\" y2=\"0\" stroke=\"black\" />\n",
+        relais_kring: "\n<rect x=\"-8\" y=\"-30\" width=\"16\" height=\"30\" style=\"stroke:black;fill:none\" />\n<line x1=\"8\" y1=\"-22.5\" x2=\"-8\" y2=\"-7.5\" stroke=\"black\" />\n",
+        overspanningsbeveiliging_inline: "\n-> shift x -7.5  y -15\n<rect x=\"-7.5\" y=\"-30\" width=\"15\" height=\"30\" fill=\"none\" style=\"stroke:black\" />\n<line x1=\"0\" y1=\"-30\" x2=\"0\" y2=\"-20\" stroke=\"black\" />\n<line x1=\"0\" y1=\"-20\" x2=\"-3\" y2=\"-24\" stroke=\"black\" />\n<line x1=\"0\" y1=\"-20\" x2=\"3\" y2=\"-24\" stroke=\"black\" />\n<line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-10\" stroke=\"black\" />\n<line x1=\"0\" y1=\"-10\" x2=\"-3\" y2=\"-6\" stroke=\"black\" />\n<line x1=\"0\" y1=\"-10\" x2=\"3\" y2=\"-6\" stroke=\"black\" />\n",
+        zekering_empty: "\n<g transform=\"rotate(-20)\">\n<line x1=\"0\" y1=\"-30\" x2=\"0\" y2=\"0\"  stroke=\"black\" />\n</g>\n",
+        arrow: "\n<line x1=\"0\" y1=\"0\" x2=\"8\" y2=\"0\" stroke=\"black\" />\n<line x1=\"8\" y1=\"0\" x2=\"5\" y2=\"-1\" stroke=\"black\" />\n<line x1=\"8\" y1=\"0\" x2=\"5\" y2=\"1\" stroke=\"black\" />\n",
+        gas_ventilator: "\n<polygon points=\"-6,5.2 0,-5.2 6,5.2\" fill=\"black\" stroke=\"black\" />\n",
+        gas_atmosferisch: "\n<polygon points=\"-6,5.2 0,-5.2 6,5.2\" fill=\"white\" stroke=\"black\" />\n",
+        bliksem: "\n<line x1=\"0\" y1=\"-5.2\" x2=\"-3\" y2=\"0\" stroke=\"black\"/>\n<line x1=\"-3\" y1=\"0\" x2=\"3\" y2=\"0\" stroke=\"black\"/>\n<line x1=\"3\" y1=\"0\" x2=\"0\" y2=\"5.2\" stroke=\"black\"/>\n<line x1=\"0\" y1=\"5.2\" x2=\"0\" y2=\"2.2\" stroke=\"black\"/>\n<line x1=\"0\" y1=\"5.2\" x2=\"2.6\" y2=\"3.7\" stroke=\"black\"/>\n",
+        moving_man: "\n<g transform=\"matrix(0.0152987,0,0,0.01530866,0,0)\">\n<path d=\"M 710.7,10.1 C 904.8,5.2 908.6,261.4 730.9,278.4 637.5,287.3 566.3,181.5 603.8,90.8 623.4,43.4 668.7,12.9 711.4,10.1 c 1.1,-0.1 2.8,26.1 1.7,26.2 -31.4,2 -74.8,32.1 -89.1,74.7 -26.8,79.9 47,156.6 125.1,139.2 123.9,-27.6 114.1,-218.5 -36.3,-214 -0.7,0 -3.2,-26 -2.1,-26.1 z\" id=\"path4\" stroke=\"black\" stroke-width=\"10\" />\n<path d=\"m 545.3,225.9 c -67.8,-5 -133.2,0 -199.7,0 -20.7,13.6 -115,100.7 -121.1,121.1 -5.7,19.1 6.2,31.9 12.1,40.4 60.1,18.3 96.7,-60.4 133.2,-88.8 29.6,0 59.2,0 88.8,0 -59.2,78.9 -190.7,169.9 -58.5,264.3 -27.6,31.6 -55.1,63.2 -82.7,94.8 -46.9,-14.7 -165.6,-41.3 -199.7,-18.2 -7,21 -4.8,32.1 6.1,48.4 34.1,10.3 205.5,53.2 232,36.3 34.3,-37.7 68.6,-75.3 102.9,-113 32.3,27.6 64.6,55.2 96.9,82.7 -1,62.6 -14.6,249.9 24.2,266.3 10.2,3 19.1,0.5 28.2,-2 5.4,-7.4 10.8,-14.8 16.1,-22.2 6.9,-27 0.3,-272.6 -6.1,-282.5 -37.7,-32.9 -75.3,-65.9 -113,-98.9 1.3,-1.3 2.7,-2.7 4,-4 45.7,-48.4 91.5,-96.9 137.2,-145.3 20.2,19.5 40.4,39 60.5,58.5 16.7,35.8 152.2,25.4 179.6,6.1 2,-8.1 4,-16.1 6.1,-24.2 -16,-40.1 -71.7,-31.8 -127.1,-30.3 C 741.8,384.3 590.6,253 545.5,225.7 c -1.7,-1 14.9,-23.3 15.4,-22.4 -2.2,-3.5 126,97.7 134.4,107.4 9.4,9.1 55.2,51.5 82.1,78.4 68.5,-2 122,-6.5 137.2,46.4 4.9,17.1 1.9,37.1 -8.1,50.4 -18.8,25.3 -156,39.1 -197.7,18.2 -20.2,-20.2 -40.4,-40.4 -60.5,-60.5 -18.8,18.2 -37.7,36.3 -56.5,54.5 -16.8,18.2 -33.6,36.3 -50.4,54.5 32.9,28.9 65.9,57.8 98.9,86.8 11.2,17.9 18.9,272.3 8.1,306.7 -4.8,15.2 -19.9,32.9 -34.3,38.3 C 498.3,1028.1 527.8,798.3 529.4,706 505.9,686.5 482.3,667 458.8,647.5 427.9,676.7 402,732.8 362,750.4 333.5,762.9 140.3,728.4 113.8,712.1 100.1,703.6 89.3,686 85.6,667.7 59.7,543.2 281.5,646 321.3,617.4 334.7,601.3 348.2,585.1 361.7,569 266.4,454.2 335.5,414.9 402.1,326.9 c 0,-0.7 0,-1.3 0,-2 -8.1,0 -16.1,0 -24.2,0 -26.3,36.3 -124.9,147 -173.5,64.6 -35.9,-60.8 103.6,-172.2 141.1,-189.8 56.7,-3.8 167.5,-11 215.9,4 0.8,0.7 -14.9,22.6 -16.1,22.2 z\" id=\"path6\" stroke=\"black\" stroke-width=\"10\" />\n</g>\n"
     };
     return SVGSymbols;
 }());
@@ -7204,6 +7702,8 @@ var SVGSymbols = /** @class */ (function () {
       remove inactive members from the array.
     getOrdinalById(my_id: number) : number
       Returns the element in the array for a given ID
+    getElectroItemById(my_id: number) : Electro_Item
+        Returns the Electro_Item in the array for a given ID
     getNumChilds(parent_id: number) : number
       Returns the number of childs for a given parent ID
     getMaxNumChilds(parent_id: number) : number
@@ -7330,6 +7830,12 @@ var Hierarchical_List = /** @class */ (function () {
             if (this.id[i] == my_id)
                 return (i);
         }
+        return null;
+    };
+    Hierarchical_List.prototype.getElectroItemById = function (my_id) {
+        var ordinal = this.getOrdinalById(my_id);
+        if (ordinal !== null)
+            return this.data[ordinal];
         return null;
     };
     // -- Aantal actieve kinderen van id = parent_id --
@@ -8266,8 +8772,7 @@ function restart_all() {
     }
 }
 function toggleAppView(type) {
-    if ((['2col', 'draw'].includes(type)) && (['2col', 'draw'].includes(structure.properties.currentView)) && (type !== structure.properties.currentView))
-        undostruct.store();
+    var lastview = structure.properties.currentView;
     structure.properties.currentView = type;
     if (type === '2col') {
         document.getElementById("configsection").style.display = 'none';
@@ -8288,6 +8793,8 @@ function toggleAppView(type) {
         document.getElementById("ribbon").style.display = 'flex';
         document.getElementById("canvas_2col").style.display = 'none';
     }
+    if ((['2col', 'draw'].includes(type)) && (['2col', 'draw'].includes(lastview)) && (type !== lastview))
+        undostruct.store();
 }
 function load_example(nr) {
     switch (nr) {

@@ -23,7 +23,8 @@ class Kookfornuis extends Electro_Item {
 
     toSVG(sitplan = false) {
         let mySVG:SVGelement = new SVGelement();
-        let outputstr:string = "";
+
+        SVGSymbols.addSymbol('kookfornuis');
 
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 59;

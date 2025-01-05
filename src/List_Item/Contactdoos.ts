@@ -55,6 +55,10 @@ class Contactdoos extends Electro_Item {
     toSVG(sitplan: boolean = false, mirrortext: boolean = false): SVGelement {
         let mySVG:SVGelement = new SVGelement();
 
+        SVGSymbols.addSymbol('contactdoos');
+        SVGSymbols.addSymbol('contactdoos_aarding');
+        SVGSymbols.addSymbol('contactdoos_kinderveilig');
+        
         mySVG.xleft = 1; // Links voldoende ruimte voor een eventuele kring voorzien
         mySVG.xright = 20; // We starten met breedte 20 (leidings links) en vullen later aan in functie van wat moet getekend worden
         mySVG.yup = 25;

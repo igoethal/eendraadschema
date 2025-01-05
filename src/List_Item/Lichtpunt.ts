@@ -69,6 +69,8 @@ class Lichtpunt extends Electro_Item {
         switch (this.props.type_lamp) {
 
             case "led":
+                SVGSymbols.addSymbol('led');
+
                 // Teken led
                 mySVG.data += '<use xlink:href="#led" x="' + 30 + '" y="25" />';
       
@@ -122,6 +124,8 @@ class Lichtpunt extends Electro_Item {
                 break;
 
             case "spot":
+                SVGSymbols.addSymbol('spot');
+
                 // teken spot
                 mySVG.data += '<use xlink:href="#spot" x="' + 30 + '" y="25" />';
       
@@ -231,18 +235,21 @@ class Lichtpunt extends Electro_Item {
                 break;
                 
             default: //Normaal lichtpunt (kruisje)
-
+                
                 switch (this.props.type_noodverlichting) {
                     case "Centraal":
+                        SVGSymbols.addSymbol('lamp');
                         mySVG.data += '<use xlink:href="#lamp" x="' + 30 + '" y="25" />'
                                    +  '<circle cx="30" cy="25" r="5" style="stroke:black;fill:black" />';
                         if ( (this.heeftVerbruikerAlsKind()) && (!sitplan) ) mySVG.data += '<line x1="'+30+'" y1="25" x2="'+(30+11)+'" y2="25" stroke="black" />';
                         break;
                     case "Decentraal":
+                        SVGSymbols.addSymbol('noodlamp_decentraal');
                         mySVG.data += '<use xlink:href="#noodlamp_decentraal" x="' + 30 + '" y="25" />';
                         if (this.props.heeft_ingebouwde_schakelaar) mySVG.data += '<line x1="37" y1="18" x2="40" y2="15" stroke="black" stroke-width="2" />'; //Ingebouwde schakelaar
                         break;
                     default:
+                        SVGSymbols.addSymbol('lamp');
                         mySVG.data += '<use xlink:href="#lamp" x="' + 30 + '" y="25" />';
                         if ( (this.heeftVerbruikerAlsKind()) && (!sitplan) ) mySVG.data += '<line x1="'+30+'" y1="25" x2="'+(30+11)+'" y2="25" stroke="black" />';
                         break;

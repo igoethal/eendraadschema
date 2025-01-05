@@ -41,6 +41,8 @@ class Drukknop extends Electro_Item {
 
     toSVG(sitplan: boolean = false, mirrortext: boolean = false) {
         let mySVG:SVGelement = new SVGelement();
+
+        SVGSymbols.addSymbol('drukknop');
         
         mySVG.xleft = 1; // Links voldoende ruimte voor een eventuele kring voorzien
         mySVG.xright = 43; 

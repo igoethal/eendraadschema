@@ -36,9 +36,13 @@ class Boiler extends Electro_Item {
         mySVG.data = (sitplan? "" : '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>');
         switch (this.props.heeft_accumulatie) { //accumulatie
             case false:
+                SVGSymbols.addSymbol('VerticalStripe');
+                SVGSymbols.addSymbol('boiler');
                 mySVG.data += '<use xlink:href="#boiler" x="21" y="25"></use>';
                 break;
             case true:
+                SVGSymbols.addSymbol('VerticalStripe');
+                SVGSymbols.addSymbol('boiler_accu');
                 mySVG.data += '<use xlink:href="#boiler_accu" x="21" y="25"></use>';
                 break;
           }

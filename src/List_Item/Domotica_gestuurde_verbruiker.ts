@@ -52,6 +52,12 @@ class Domotica_gestuurde_verbruiker extends Electro_Item {
     toSVG(sitplan = false) {
         let mySVG:SVGelement = new SVGelement();
 
+        SVGSymbols.addSymbol('draadloos_klein');
+        SVGSymbols.addSymbol('drukknop_klein');
+        SVGSymbols.addSymbol('tijdschakelaar_klein');
+        SVGSymbols.addSymbol('detectie_klein');
+        SVGSymbols.addSymbol('schakelaar_klein');
+
         // Eerst de tekening van de aangestuurde verbruiker maken
 
         let childcounter = 0; // Variabele voor het aantal kinderen, op dit moment ondersteunt de tool slechts 1 kind

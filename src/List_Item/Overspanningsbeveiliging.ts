@@ -24,6 +24,8 @@ class Overspanningsbeveiliging extends Electro_Item {
     toSVG(sitplan = false) {
         let mySVG:SVGelement = new SVGelement();
 
+        SVGSymbols.addSymbol('overspanningsbeveiliging');
+
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 34;
         mySVG.yup = 25;

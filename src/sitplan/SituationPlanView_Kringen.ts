@@ -32,7 +32,7 @@ function SituationPlanView_Kringen(): any {
             let kringnaam:string = structure.findKringName(id).trim();
             if (kringnaam != '') {
                 let type:string = (structure.data[i] as Electro_Item).getType();
-                if (excludedTypes.indexOf(type) === -1) {
+                if ( (type != null) && (excludedTypes.indexOf(type) === -1) ) {
                     let adres:string = (structure.data[i] as Electro_Item).getReadableAdres();
                     output.alldata.push({id: id, kringnaam: kringnaam, adres:adres, type: type});
                 }

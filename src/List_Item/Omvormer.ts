@@ -24,6 +24,9 @@ class Omvormer extends Electro_Item {
     toSVG(sitplan = false) {
         let mySVG:SVGelement = new SVGelement();
 
+        SVGSymbols.addSymbol('sinus');
+        SVGSymbols.addSymbol('omvormer');
+
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 59;
         mySVG.yup = 25;

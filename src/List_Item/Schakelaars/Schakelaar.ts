@@ -26,6 +26,7 @@ class Schakelaar {
     }
 
     schakelaarAttributentoSVGString(endx: number, isdubbel: boolean = false) {
+        SVGSymbols.addSymbol('signalisatielamp');
         let outputstr:string = "";
         if (this.signalisatielamp) outputstr += '<use xlink:href="#signalisatielamp" x="' + (endx-10) + '" y="25" />';
         if (this.halfwaterdicht) {
@@ -49,6 +50,8 @@ class Schakelaar {
         let outputstr:string = "";
         let endx = startx + 30;
 
+        SVGSymbols.addSymbol('schakelaar_enkel');
+
         outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
                   +  '<use xlink:href="#schakelaar_enkel" x="' + endx + '" y="25" />'
                   + this.schakelaarAttributentoSVGString(endx);
@@ -59,6 +62,8 @@ class Schakelaar {
     dubbeltoDrawReturnObj(startx: number): drawReturnObj {
         let outputstr:string = "";
         let endx = startx + 30;
+
+        SVGSymbols.addSymbol('schakelaar_dubbel');
 
         outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
                   +  '<use xlink:href="#schakelaar_dubbel" x="' + endx + '" y="25" />'
@@ -71,6 +76,8 @@ class Schakelaar {
         let outputstr:string = "";
         let endx = startx + 30;
 
+        SVGSymbols.addSymbol('schakelaar_trippel');
+
         outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
                   +  '<use xlink:href="#schakelaar_trippel" x="' + endx + '" y="25" />'
                   + this.schakelaarAttributentoSVGString(endx,true);
@@ -81,6 +88,8 @@ class Schakelaar {
     dubbelaanstekingtoDrawReturnObj(startx: number): drawReturnObj {
         let outputstr:string = "";
         let endx = startx + 30;
+
+        SVGSymbols.addSymbol('schakelaar_dubbelaansteking');
 
         outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
                   +  '<use xlink:href="#schakelaar_dubbelaansteking" x="' + endx + '" y="25" />'
@@ -93,6 +102,8 @@ class Schakelaar {
         let outputstr:string = "";
         let endx = startx + 30;
 
+        SVGSymbols.addSymbol('schakelaar_wissel_enkel');
+
         outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
                   +  '<use xlink:href="#schakelaar_wissel_enkel" x="' + endx + '" y="25" />'
                   + this.schakelaarAttributentoSVGString(endx);
@@ -103,6 +114,8 @@ class Schakelaar {
     wissel_dubbeltoDrawReturnObj(startx: number): drawReturnObj {
         let outputstr:string = "";
         let endx = startx + 30;
+
+        SVGSymbols.addSymbol('schakelaar_wissel_dubbel');
 
         outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
                   +  '<use xlink:href="#schakelaar_wissel_dubbel" x="' + endx + '" y="25" />'
@@ -115,6 +128,8 @@ class Schakelaar {
         let outputstr:string = "";
         let endx = startx + 30;
 
+        SVGSymbols.addSymbol('schakelaar_kruis_enkel');
+
         outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
                   +  '<use xlink:href="#schakelaar_kruis_enkel" x="' + endx + '" y="25" />'
                   + this.schakelaarAttributentoSVGString(endx);
@@ -125,6 +140,8 @@ class Schakelaar {
     dimschakelaartoDrawReturnObj(startx: number): drawReturnObj {
         let outputstr:string = "";
         let endx = startx + 30;
+
+        SVGSymbols.addSymbol('schakelaar_enkel_dim');
 
         outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
                   +  '<use xlink:href="#schakelaar_enkel_dim" x="' + endx + '" y="25" />'
@@ -137,6 +154,8 @@ class Schakelaar {
         let outputstr:string = "";
         let endx = startx + 30;
 
+        SVGSymbols.addSymbol('schakelaar_wissel_dim');
+
         outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
                   +  '<use xlink:href="#schakelaar_wissel_dim" x="' + endx + '" y="25" />'
                   + this.schakelaarAttributentoSVGString(endx);
@@ -147,6 +166,10 @@ class Schakelaar {
     bewegingsschakelaartoDrawReturnObj(startx: number): drawReturnObj {
         let outputstr:string = "";
         let endx = startx + 20;
+
+        SVGSymbols.addSymbol('relais');
+        SVGSymbols.addSymbol('moving_man');
+        SVGSymbols.addSymbol('detectie_klein');
 
         outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
                   +  '<use xlink:href="#relais" x="' + endx + '" y="16" />'
@@ -162,6 +185,8 @@ class Schakelaar {
     rolluikschakelaartoDrawReturnObj(startx: number): drawReturnObj {
         let outputstr:string = "";
         let endx = startx + 30;
+
+        SVGSymbols.addSymbol('schakelaar_rolluik');
 
         outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
                   +  '<use xlink:href="#schakelaar_rolluik" x="' + endx + '" y="25" />';
@@ -181,6 +206,8 @@ class Schakelaar {
         let outputstr:string = "";
         let endx = startx + 20;
 
+        SVGSymbols.addSymbol('magneetcontact');
+
         // Alles naar beneden schuiven als we het aantal laders boven het symbool willen plaatsen
         if (this.aantal>1) {
             let textoptions = 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10"';
@@ -199,6 +226,8 @@ class Schakelaar {
     defaulttoDrawReturnObj(startx: number, symbol: string): drawReturnObj {
         let outputstr:string = "";
         let endx = startx + 20;
+
+        SVGSymbols.addSymbol(symbol);
 
         outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
                   +  '<use xlink:href="' + symbol + '" x="' + endx + '" y="25" />';
@@ -283,6 +312,7 @@ class Schakelaar {
                 endx += 40; 
                 break;
             case "schemerschakelaar": 
+                SVGSymbols.addSymbol('arrow'); // nodig voor de schemerschakelaar
                 ( {endx: endx, str: outputstr} = (this.defaulttoDrawReturnObj(startx,'#schemerschakelaar')) ); 
                 endx += 40; 
                 break;

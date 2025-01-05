@@ -25,6 +25,8 @@ class Batterij extends Electro_Item {
         let mySVG:SVGelement = new SVGelement();
         let outputstr:string = "";
 
+        SVGSymbols.addSymbol('batterij');
+
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 59;
         mySVG.yup = 25;

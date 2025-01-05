@@ -24,6 +24,8 @@ class EV_lader extends Electro_Item {
     toSVG(sitplan = false) {
         let mySVG:SVGelement = new SVGelement();
 
+        SVGSymbols.addSymbol('EVlader');
+
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 60;
         mySVG.yup = 25;

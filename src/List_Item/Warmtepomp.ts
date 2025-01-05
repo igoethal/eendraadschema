@@ -30,6 +30,9 @@ class Warmtepomp extends Electro_Item {
     toSVG(sitplan = false) {
         let mySVG:SVGelement = new SVGelement();
 
+        SVGSymbols.addSymbol('verbruiker');
+        SVGSymbols.addSymbol('bliksem');
+
         // Alles naar beneden schuiven als we het aantal laders boven het symbool willen plaatsen
         var shifty = 0;
         if (this.props.aantal>1) {

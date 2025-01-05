@@ -1,0 +1,29 @@
+{
+    "tsconfig": "./src/tsconfig.json",
+    "entryPoints": [
+        "src/general.ts",
+        "src/Session.ts",
+        "src/SVGelement.ts",
+        "src/print/*.ts",
+        "src/importExport.ts",
+        "src/undoRedo.ts",
+        "src/TopMenu.ts",
+        "src/documentation.ts",
+        "src/sitplan/*.ts",
+        "src/List_Item/List_Item.ts",
+        "src/List_Item/Electro_Item.ts",
+        "src/List_Item/Schakelaars/Schakelaar.ts",
+        "src/List_Item/Schakelaars/Schakelaars.ts",
+        "src/List_Item/Schakelaars/Lichtcircuit.ts",
+        "src/List_Item/*.ts",
+        "src/Properties.ts",
+        "src/SVGSymbols.ts",
+        "src/Hierarchical_List.ts",
+        "src/config.ts",
+        "prop/prop_scripts.ts",
+        "src/main.ts"
+      ],    
+    "out": "docs",                    // Output directory for the documentation
+    "exclude": ["node_modules"]
+}
+  

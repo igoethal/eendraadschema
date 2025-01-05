@@ -16,6 +16,8 @@
       remove inactive members from the array.
     getOrdinalById(my_id: number) : number
       Returns the element in the array for a given ID
+    getElectroItemById(my_id: number) : Electro_Item
+        Returns the Electro_Item in the array for a given ID
     getNumChilds(parent_id: number) : number
       Returns the number of childs for a given parent ID
     getMaxNumChilds(parent_id: number) : number
@@ -164,10 +166,16 @@ class Hierarchical_List {
 
     // -- Plaats in de array zoeken op basis van de id --
 
-    getOrdinalById(my_id: number) : number {
+    getOrdinalById(my_id: number) : number | null {
         for (let i = 0; i<this.length; i++) {
             if (this.id[i]==my_id) return(i);
         }
+        return null;
+    }
+
+    getElectroItemById(my_id: number) : Electro_Item | null {
+        let ordinal = this.getOrdinalById(my_id);
+        if (ordinal !== null) return(this.data[ordinal] as Electro_Item);
         return null;
     }
 

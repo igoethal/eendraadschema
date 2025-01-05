@@ -286,9 +286,8 @@ function restart_all() {
 }
 
 function toggleAppView(type: '2col' | 'config' | 'draw') {
-    if ( (['2col','draw'].includes(type)) && (['2col','draw'].includes(structure.properties.currentView)) && (type !== structure.properties.currentView) )
-        undostruct.store();
-
+    let lastview = structure.properties.currentView;
+    
     structure.properties.currentView = type;
     if (type === '2col') {  
         document.getElementById("configsection").style.display = 'none';
@@ -307,6 +306,10 @@ function toggleAppView(type: '2col' | 'config' | 'draw') {
         document.getElementById("ribbon").style.display = 'flex';
         document.getElementById("canvas_2col").style.display = 'none';
     }
+
+    if ( (['2col','draw'].includes(type)) && (['2col','draw'].includes(lastview)) && (type !== lastview) )
+        undostruct.store();
+
 }
 
 function load_example(nr: number) {

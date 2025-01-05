@@ -114,6 +114,12 @@ class Aansluiting extends Electro_Item {
     toSVG() {
         let mySVG:SVGelement = new SVGelement();
 
+        SVGSymbols.addSymbol('zekering_automatisch');
+        SVGSymbols.addSymbol('zekering_empty');
+        SVGSymbols.addSymbol('arrow');
+        SVGSymbols.addSymbol('zekering_smelt');
+        SVGSymbols.addSymbol('elekriciteitsmeter');
+
         // Indien er een kabeltype vóór de teller is schuiven we alles op
         let extrashift = 0;
         if (this.props.type_kabel_voor_teller != "") extrashift += 50;

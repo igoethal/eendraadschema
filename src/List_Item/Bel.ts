@@ -25,6 +25,8 @@ class Bel extends Electro_Item {
         let mySVG:SVGelement = new SVGelement();
         let outputstr:string = "";
 
+        SVGSymbols.addSymbol('bel');
+
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 40;
         mySVG.yup = 25;

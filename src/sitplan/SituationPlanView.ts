@@ -180,7 +180,7 @@ class SituationPlanView {
             SituationPlanView_ElementPropertiesPopup(null,
                 (id, adrestype, adres, adreslocation, labelfontsize, scale, rotate) => {
                     if (id != null) {
-                        let element = this.sitplan.addElectroItem(id, this.sitplan.activePage, 550, 300, 
+                        let element = this.sitplan.addElementFromElectroItem(id, this.sitplan.activePage, 550, 300, 
                                                                   adrestype, adres, adreslocation, labelfontsize,
                                                                   scale, rotate);
                         if (element != null) {
@@ -277,14 +277,33 @@ class SituationPlanView {
         }
     }
 
+    /**
+     * Send the selected box to the back of the z-index stack and reorder the elements of the situation plan accordingly
+     * so that after saving or during printing the elements are drawn in the same order.
+     * 
+     * @returns void
+     */
+
     sendToBack() {
         if (this.selectedBox) {
-            let boxes: NodeListOf<HTMLElement> = this.paper.querySelectorAll('.box');
-            let newzIndex = 0;
-            for (let box of Array.from(boxes)) { box.style.zIndex = ((parseInt(box.style.zIndex) || 0)+1).toString(); }
-            newzIndex--; 
-            this.selectedBox.style.zIndex = "0";           
+            for (let element of this.sitplan.elements) {
+                if (element.boxref != null) {
+                    let newzindex;
+
+                    if (element.boxref != this.selectedBox) {
+                        newzindex = (parseInt(element.boxref.style.zIndex) || 0)+1;
+                    } else { 
+                        newzindex = 0; }
+
+                    element.boxref.style.zIndex = newzindex.toString();
+                    if (element.boxlabelref != null) { 
+                        element.boxlabelref.style.zIndex = newzindex.toString(); }
+                    
+                }
+            }            
         }
+        this.sitplan.orderByZIndex();
+        undostruct.store();
     }
 
     private updateBoxPosition(box) {
@@ -301,8 +320,8 @@ class SituationPlanView {
         let spiegel = false;
         rotate = rotate % 360;
         if ( (rotate >= 90) && (rotate < 270) ) {
-            if (pic.needsTextMirroring()) spiegel = true;
-            if (pic.isEDSymbol()) rotate = rotate - 180;
+            if (pic.rotates360degrees()) spiegel = true;
+            if (pic.isEendraadschemaSymbool()) rotate = rotate - 180;
         }
 
         box.style.transform = `rotate(${rotate}deg)` + (spiegel ? ' scaleX(-1)' : '');
@@ -652,6 +671,7 @@ class SituationPlanView {
         document.getElementById('id_sitplanpage')!.onchange = (event: Event) => {
             const target = event.target as HTMLSelectElement;
             this.selectPage(Number(target.value));
+            undostruct.store();
         };
         
         document.getElementById('btn_sitplan_addpage')!.onclick = () => {
