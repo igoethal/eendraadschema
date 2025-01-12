@@ -291,18 +291,18 @@ function toggleAppView(type: '2col' | 'config' | 'draw') {
     structure.properties.currentView = type;
     if (type === '2col') {  
         document.getElementById("configsection").style.display = 'none';
-        document.getElementById("outerbox").style.display = 'none';
+        document.getElementById("outerdiv").style.display = 'none';
         document.getElementById("ribbon").style.display = 'flex';
         document.getElementById("canvas_2col").style.display = 'flex';
         structure.updateRibbon();
     } else if (type === 'config') {
         document.getElementById("configsection").style.display = 'block';
-        document.getElementById("outerbox").style.display = 'none';
+        document.getElementById("outerdiv").style.display = 'none';
         document.getElementById("ribbon").style.display = 'none';
         document.getElementById("canvas_2col").style.display = 'none';
     } else if (type === 'draw') {
         document.getElementById("configsection").style.display = 'none';
-        document.getElementById("outerbox").style.display = 'flex';
+        document.getElementById("outerdiv").style.display = 'flex';
         document.getElementById("ribbon").style.display = 'flex';
         document.getElementById("canvas_2col").style.display = 'none';
     }

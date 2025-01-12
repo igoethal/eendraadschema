@@ -525,11 +525,11 @@ class Hierarchical_List {
 
         // Plaats bovenaan de switch van editeer-mode (teken of verplaats) --
         output += `
-            <div class="icon" onclick="undoClicked()" ${(undostruct.undoStackSize() > 0 ? "" : "style=\"filter: opacity(45%)\"")}>
+            <div class="icon" ${(undostruct.undoStackSize() > 0 ? 'onclick="undoClicked()"' : "style=\"filter: opacity(45%)\"")}>
                 <img src="gif/undo.png" alt="Ongedaan maken" class="icon-image">
                 <span class="icon-text">Ongedaan maken</span>
             </div>
-            <div class="icon" onclick="redoClicked()" ${(undostruct.redoStackSize() > 0 ? "" : "style=\"filter: opacity(45%)\"")}>
+            <div class="icon" ${(undostruct.redoStackSize() > 0 ? 'onclick="redoClicked()"' : "style=\"filter: opacity(45%)\"")}>
                 <img src="gif/redo.png" alt="Opnieuw" class="icon-image">
                 <span class="icon-text">Opnieuw</span>
             </div>

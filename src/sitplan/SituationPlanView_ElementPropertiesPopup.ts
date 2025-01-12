@@ -81,8 +81,8 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanE
     const okButton = popupWindow.querySelector('#okButton') as HTMLButtonElement;
     const cancelButton = popupWindow.querySelector('#cancelButton') as HTMLButtonElement;  
     
-    let adressen = SituationPlanView_Kringen();
-    let kringnamen = adressen.getUniqueSortedKringnaam();
+    let adressen = new ElectroItemZoeker();
+    let kringnamen = adressen.getUniqueKringnaam();
     
     function selectBoxChanged() {
         let id = Number(textInput.value);
@@ -173,8 +173,8 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanE
         let electroItems = adressen.getElectroItemsByKring(KringSelect.value);
         let idx = Number(selectElectroItemBox.value);
         if (!isNaN(idx)) {
-            let item = electroItems[idx] as Electro_Item;
-            if (item != null) str = electroItems[idx].id;
+            let item = electroItems[idx];
+            if (item != null) str = electroItems[idx].id.toString();
         }
         textInput.value = str;
     }
@@ -254,7 +254,7 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanE
             fontSizeContainer.style.display = 'none';
             adresContainer.style.display = 'none';
         }
-        scaleInput.value = String(sitplanElement.scale*100);
+        scaleInput.value = String(sitplanElement.getscale()*100);
         rotationInput.value = String(sitplanElement.rotate);
     } else { // Form werd aangeroepen om een nieuw element te creëren
         selectBoxChanged();

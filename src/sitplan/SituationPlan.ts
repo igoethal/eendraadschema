@@ -3,7 +3,8 @@
  * Werd gebouwd voor gebruik in de browser maar is redelijk browser-agnostic.
  * De effectieve code om te interageren met de browser zelf zit in class SituationPlanView.
  * 
- * GLOBALS: structure
+ * Deze class refereert naar de volgende globale variabelen:
+ * - structure
  */
 
 
@@ -69,7 +70,7 @@ class SituationPlan {
      * @returns {SituationPlanElement} Het element dat is toegevoegd.
      */
     addElementFromElectroItem(electroItemId: number, page: number, posx: number, posy: number, adrestype: AdresType, adres:string, adreslocation: AdresLocation,
-                              labelfontsize: number, scale: number, rotate: number): SituationPlanElement | null{
+                              labelfontsize: number, scale: number, rotate: number): SituationPlanElement | null {
 
         const electroItem: Electro_Item = structure.getElectroItemById(electroItemId);
         if (!electroItem) return null;
@@ -98,6 +99,26 @@ class SituationPlan {
         if (element.boxref != null) element.boxref.remove();
         if (element.boxlabelref != null) element.boxlabelref.remove();
         this.removeElement(element); // Recurse in het geval er meerdere zouden zijn maar dit zou niet mogen gebeuren
+    }
+
+    /**
+     * Zorgt ervoor dat alle elementen in het situatieplan een link hebben naar
+     * het eendraadschema.
+     * 
+     * Als een element in het situatieplan verwijst naar een symbool dat niet langer in 
+     * het eendraadschema zit, wordt het element verwijderd uit het situatieplan.
+     */
+    syncToEendraadSchema() { 
+        for (let element of this.elements) {            
+            //Indien een symbool niet langer in het eendraadschema zit moet het ook uit het situatieplan verwijderd worden
+            //We kunnen hier niet de functie isEendraadSchemaSymbool of getElectroItemById gebruiken want die zorgen
+            //ervoor dat onderstaande altijd false geeft als de symbolen niet langer in het eendraadschema zitten waardoor
+            //de cleanup die nodig is niet gebeurd.
+            if (((element as any).electroItemId != null) && (structure.getElectroItemById(element.getElectroItemId()) == null)) {
+                this.removeElement(element); 
+                this.syncToEendraadSchema(); return; // Start opnieuw en stop na recursie
+            }
+        }
     }
 
     /**
@@ -164,45 +185,63 @@ class SituationPlan {
         return {numPages: this.numPages, activePage: this.activePage, elements: elements};
     }
 
+    /**
+     * Converteer het situatieplan naar een formaat dat gebruikt kan worden voor printen.
+     * 
+     * @param {boolean} fitToPage Indien `true` dan wordt de pagina automatisch aangepast om alle elementen te laten passen.
+     *                            Als `false` dan wordt de pagina in de originele grootte gebruikt.
+     * @returns {any} Het formaat van het situatieplan dat gebruikt kan worden voor printen.
+     *                Dit is een javascript object met structuur
+     *                  {
+     *                      numpages: number,
+     *                      pages: [
+     *                          {
+     *                              svg: string,
+     *                              minx: number,
+     *                              miny: number,
+     *                              maxx: number,
+     *                              maxy: number
+     *                          }
+     *                      ]
+     *                  }
+     */
 
-    toSitPlanPrint() {
-        this.orderByZIndex();
+    toSitPlanPrint(fitToPage: boolean = false): any {
+        this.syncToEendraadSchema(); // Om zeker te zijn dat we geen onbestaande elementen meer hebben
+        this.orderByZIndex(); // Sorteer de elementen op basis van de z-index zodat ze in de juiste volgorde worden geprint
 
         let outstruct:any = {};
-
         outstruct.numpages = (this.elements.length > 0 ? structure.sitplan.numPages : 0);
         outstruct.pages = [];
 
-        for (let i=0; i<outstruct.numpages; i++ ) {
-                
+        for (let i=0; i<outstruct.numpages; i++ ) {    
             let svgstr = '';
 
-            let pixelsPerMm = getPixelsPerMillimeter();
-
-            let maxx = pixelsPerMm * 277;
-            let maxy = pixelsPerMm * 150;
+            let maxx = getPixelsPerMillimeter() * 277;
+            let maxy = getPixelsPerMillimeter() * 150;
+            let minx = 0;
+            let miny = 0;
 
             for (let element of this.elements) {
                 if (element.page == (i+1)) {
-                    let fontsize = element.labelfontsize;
-                    if (fontsize == null) fontsize = 11;
+                    let fontsize = (element.labelfontsize != null) ? element.labelfontsize : 11; 
                     svgstr += element.getScaledSVG(true);
 
-                    let rotatedimgwidth = Math.max(element.sizex*element.scale * Math.cos(element.rotate*Math.PI/180), 
-                                                   element.sizey*element.scale * Math.sin(element.rotate*Math.PI/180));
-                    let rotatedimgheight = Math.max(element.sizex*element.scale * Math.sin(element.rotate*Math.PI/180), 
-                                                    element.sizey*element.scale * Math.cos(element.rotate*Math.PI/180));
-
-                    maxx = Math.max(maxx, element.posx + rotatedimgwidth/2);
-                    maxy = Math.max(maxy, element.posy + rotatedimgheight/2);
+                    if (fitToPage) {
+                        let boundingbox = getRotatedRectangleSize(element.sizex*element.getscale(), element.sizey*element.getscale(), element.rotate);
+                        maxx = Math.max(maxx, element.posx + boundingbox.width/2);
+                        maxy = Math.max(maxy, element.posy + boundingbox.height/2);
+                        minx = Math.min(minx, element.posx - boundingbox.width/2);
+                        miny = Math.min(miny, element.posy - boundingbox.height/2);
+                    }
 
                     svgstr += `<text x="${element.labelposx}" y="${element.labelposy}" font-size="${fontsize}" fill="black" text-anchor="middle" dominant-baseline="middle">${element.getAdres()}</text>`
                 }
             }
 
-            svgstr = `<svg xmlns="http://www.w3.org/2000/svg" width="${maxx}px" height="${maxy}px" viewBox="0 0 ${maxx} ${maxy}">${svgstr}</svg>`;
+            svgstr = `<svg xmlns="http://www.w3.org/2000/svg" width="${maxx-minx}px" height="${maxy-miny}px" viewBox="${minx} ${miny} ${maxx-minx} ${maxy-miny}">${svgstr}</svg>`;
 
-            outstruct.pages.push({sizex: maxx, sizey: maxy, svg: svgstr});
+            outstruct.pages.push({sizex: maxx-minx, sizey: maxy-miny, svg: svgstr});
         }
 
         return outstruct;

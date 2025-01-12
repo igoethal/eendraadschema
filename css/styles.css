@@ -2,6 +2,7 @@
 
 :root {
   --selectPadding: 2;
+  --paperPadding: 10px;
 
   --menu-height: 40px; 
   --ribbon-height: 68px; 
@@ -47,9 +48,6 @@ body {
 .loading .spinner {
     display: block;
 }
-
-
-
 
 button, select, select option, input[type="checkbox"] {
   cursor: pointer;
@@ -278,7 +276,7 @@ ul#minitabs a:hover {
   flex-direction: row; /* Ensure columns are side by side */
 }
 
-#outerbox {
+#outerdiv {
   display: flex;
   position: absolute;
   top: calc(var(--menu-height) + var(--ribbon-height)); 
@@ -292,8 +290,8 @@ ul#minitabs a:hover {
 }
 
 #paper {
-  top: 10px;
-  left: 10px;
+  top: var(--paperPadding);
+  left: var(--paperPadding);
   width: 277mm; /* Useful drawing area on A4 */
   height: 150mm; /* Useful drawing area on A4 */
   background-color: white;

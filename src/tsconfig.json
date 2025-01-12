@@ -9,6 +9,7 @@
     "general.ts",
     "Session.ts",
     "SVGelement.ts",
+    "EventManager.ts",
     "print/*.ts",
     "importExport.ts",
     "undoRedo.ts",

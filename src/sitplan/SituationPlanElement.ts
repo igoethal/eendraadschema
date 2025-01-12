@@ -4,7 +4,9 @@ type AdresType = 'auto'|'manueel';
 /**
  * Class SituationPlanElement
  * 
- * GLOBALS: structure, SITPLANVIEW_DEFAULT_SCALE
+ * Deze class refereert naar de volgende globale variabelen:
+ * - structure
+ * - SITPLANVIEW_DEFAULT_SCALE
  */
 
 class SituationPlanElement {
@@ -38,12 +40,15 @@ class SituationPlanElement {
     public sizey:number = 0; //hoogte
 
     public rotate:number = 0;
-    public scale:number = SITPLANVIEW_DEFAULT_SCALE;
+    private scale:number = SITPLANVIEW_DEFAULT_SCALE;
 
     // -- Positionering van het label --
     public labelposx = 0;
     public labelposy = 0;
     public labelfontsize = 11;
+
+    // -- Een vlag om de situationplanview te laten weten dat de box content moet geupdated worden
+    public needsViewUpdate = false;
 
     /**
      * Constructor 
@@ -51,6 +56,15 @@ class SituationPlanElement {
 
     constructor() {
         this.id = randomId("SP_");
+    }
+
+    public setscale(scale: number) {
+        this.scale = scale;
+        this.needsViewUpdate = true;
+    }
+
+    public getscale(): number {
+        return this.scale;
     }
 
     /**
@@ -183,10 +197,13 @@ class SituationPlanElement {
 
     updateElectroItemSVG(svg: string, width: number | undefined = undefined, height: number | undefined = undefined) { // Set the SVG string and update the size, this only works with an electro item
         if (this.isEendraadschemaSymbool()) {
-            this.svg = svg;
-            if (width != null) this.sizex = width;
-            if (height != null) this.sizey = height;
-            if (width == null || height == null) this.getSizeFromString();    
+            if (this.svg !== svg) { // This works because when saving to a file, svg is set to '' so an update will be triggered here
+                this.needsViewUpdate = true;
+                this.svg = svg;
+                if (width != null) this.sizex = width;
+                if (height != null) this.sizey = height;
+                if (width == null || height == null) this.getSizeFromString();
+            }    
         }
     }
 
@@ -402,5 +419,7 @@ class SituationPlanElement {
 
         this.svg = json.svg;
         this.electroItemId = json.electroItemId;
+
+        this.needsViewUpdate = true; // TODO: make this more efficient as it will always trigger redraws, even when not needed
     }
 }

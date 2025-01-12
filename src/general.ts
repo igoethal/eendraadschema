@@ -17,6 +17,24 @@ function deepClone (obj) {
   return _out;
 }
 
+/**
+ * Returns true if the current mode is a development mode.
+ * This is determined by the presence of a 'dev' parameter in the URL.
+ *
+ * @returns {boolean} True if this is a development mode, false otherwise.
+ */
+
+function isDevMode(): boolean {
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.has('dev');
+    } catch (error) {
+        console.error('Error checking for dev mode:', error);
+        return false;
+    }
+}
+
+
 // Function for length of a string in 8 bit bytes
 const byteSize = str => new Blob([str]).size;
 
@@ -35,22 +53,6 @@ function isInt(value) {
          !isNaN(parseInt(value, 10));
 }
 
-function getPixelsPerMillimeter() {
-  const div = document.createElement('div');
-  div.style.width = '10mm';
-  div.style.position = 'absolute';
-  document.body.appendChild(div);
-  const widthInPixels = div.offsetWidth;
-  document.body.removeChild(div);
-  const pixelsPerMillimeter = widthInPixels / 10;
-  return pixelsPerMillimeter;
-}
-
-// Example usage
-const pixelsPerMM = getPixelsPerMillimeter();
-console.log(`Your browser uses approximately ${pixelsPerMM} pixels per millimeter.`);
-
-
 function svgTextWidth(input:String, fontsize:Number = 10, options:String = '') {
     const div = document.createElement('div');
     div.innerHTML = '<svg width="1000" height="20"><text x="0" y="10" style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-size="' + Number(fontsize) + '" ' + options + '>' + input + '</text></svg>';
@@ -59,8 +61,8 @@ function svgTextWidth(input:String, fontsize:Number = 10, options:String = '') {
 
     /*if (document.getElementById("configsection").style.display === 'block') {
       tryoutdiv = document.getElementById("configsection") as HTMLElement;
-    } else if (document.getElementById("outerbox").style.display === 'block') {
-      tryoutdiv = document.getElementById("outerbox") as HTMLElement;
+    } else if (document.getElementById("outerdiv").style.display === 'block') {
+      tryoutdiv = document.getElementById("outerdiv") as HTMLElement;
     } else {
       tryoutdiv = document.getElementById("right_col_inner") as HTMLElement;
     }*/

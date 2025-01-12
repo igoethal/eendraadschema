@@ -4,6 +4,7 @@
         "src/general.ts",
         "src/Session.ts",
         "src/SVGelement.ts",
+        "src/EventManager.ts",
         "src/print/*.ts",
         "src/importExport.ts",
         "src/undoRedo.ts",

@@ -81,6 +81,22 @@ function deepClone(obj) {
     }
     return _out;
 }
+/**
+ * Returns true if the current mode is a development mode.
+ * This is determined by the presence of a 'dev' parameter in the URL.
+ *
+ * @returns {boolean} True if this is a development mode, false otherwise.
+ */
+function isDevMode() {
+    try {
+        var urlParams = new URLSearchParams(window.location.search);
+        return urlParams.has('dev');
+    }
+    catch (error) {
+        console.error('Error checking for dev mode:', error);
+        return false;
+    }
+}
 // Function for length of a string in 8 bit bytes
 var byteSize = function (str) { return new Blob([str]).size; };
 function contains(a, obj) {
@@ -96,19 +112,6 @@ function isInt(value) {
         parseInt(value) == value &&
         !isNaN(parseInt(value, 10));
 }
-function getPixelsPerMillimeter() {
-    var div = document.createElement('div');
-    div.style.width = '10mm';
-    div.style.position = 'absolute';
-    document.body.appendChild(div);
-    var widthInPixels = div.offsetWidth;
-    document.body.removeChild(div);
-    var pixelsPerMillimeter = widthInPixels / 10;
-    return pixelsPerMillimeter;
-}
-// Example usage
-var pixelsPerMM = getPixelsPerMillimeter();
-console.log("Your browser uses approximately ".concat(pixelsPerMM, " pixels per millimeter."));
 function svgTextWidth(input, fontsize, options) {
     if (fontsize === void 0) { fontsize = 10; }
     if (options === void 0) { options = ''; }
@@ -117,8 +120,8 @@ function svgTextWidth(input, fontsize, options) {
     var tryoutdiv = document.body;
     /*if (document.getElementById("configsection").style.display === 'block') {
       tryoutdiv = document.getElementById("configsection") as HTMLElement;
-    } else if (document.getElementById("outerbox").style.display === 'block') {
-      tryoutdiv = document.getElementById("outerbox") as HTMLElement;
+    } else if (document.getElementById("outerdiv").style.display === 'block') {
+      tryoutdiv = document.getElementById("outerdiv") as HTMLElement;
     } else {
       tryoutdiv = document.getElementById("right_col_inner") as HTMLElement;
     }*/
@@ -314,6 +317,49 @@ var SVGelement = /** @class */ (function () {
         this.ydown = 0;
     }
     return SVGelement;
+}());
+/**
+ * Manages the addition and removal of event listeners on HTML elements.
+ */
+var EventManager = /** @class */ (function () {
+    function EventManager() {
+        this.listeners = [];
+    }
+    /**
+     * Adds an event listener to a specified HTML element. If a listener of the same
+     * type already exists on the element, it is removed before adding the new one.
+     *
+     * @param element - The HTML element to attach the event listener to.
+     * @param type - The type of the event.
+     * @param listener - The event listener function or object.
+     */
+    EventManager.prototype.addEventListener = function (element, type, listener) {
+        var existingListenerIndex = this.listeners.findIndex(function (l) { return l.element === element && l.type === type; });
+        if (existingListenerIndex !== -1) {
+            var existingListener = this.listeners[existingListenerIndex];
+            element.removeEventListener(type, existingListener.listener);
+            this.listeners.splice(existingListenerIndex, 1);
+        }
+        this.listeners.push({ element: element, type: type, listener: listener });
+        element.addEventListener(type, listener);
+    };
+    /**
+     * Removes all event listeners managed by this EventManager instance.
+     */
+    EventManager.prototype.removeAllEventListeners = function () {
+        this.listeners.forEach(function (_a) {
+            var element = _a.element, type = _a.type, listener = _a.listener;
+            element.removeEventListener(type, listener);
+        });
+        this.listeners = [];
+    };
+    /**
+     * Disposes of the EventManager by removing all event listeners.
+     */
+    EventManager.prototype.dispose = function () {
+        this.removeAllEventListeners();
+    };
+    return EventManager;
 }());
 /**
  * A class to handle a list of potential page breaks or markers in the form {depth,xpos} with depth how nested
@@ -1537,6 +1583,7 @@ var undoRedo = /** @class */ (function () {
                 var element = _a[_i];
                 if (!element.isEendraadschemaSymbool())
                     element.svg = this.largeStrings.get(parseInt(element.svg));
+                element.needsViewUpdate = true;
             }
         }
     };
@@ -1676,11 +1723,181 @@ function showDocumentationPage() {
     document.getElementById('Btn_downloadManual').onclick = function () { window.open('Documentation/edsdoc.pdf', '_blank'); };
 }
 /**
+ * Class gebruikt in SituationPlanView om te zoeken naar electroitems op basis van de kringnaam.
+ * Dit laat toe items to selecteren uit het volledige eendraadschema en ze te plaatsen op het situatieschema.
+ *
+ * Deze class refereert naar de volgende globale variabelen:
+ * - structure
+ */
+var ElectroItemZoeker = /** @class */ (function () {
+    /**
+     * Constructor van de ElectroItemZoeker.
+     *
+     * Initialiseert de lijst van alle toegestane ElectroItems in het situatieplan.
+     */
+    function ElectroItemZoeker() {
+        this.excludedTypes = ['Aansluiting', 'Bord', 'Kring', 'Domotica', 'Domotica module (verticaal)',
+            'Domotica gestuurde verbruiker', 'Leiding', 'Splitsing', 'Verlenging',
+            'Vrije ruimte', 'Meerdere verbruikers'];
+        this.data = [];
+        this.reCalculate();
+    }
+    /**
+     * Geeft de lijst van alle toegestane ElectroItems in het situatieplan retour.
+     * @returns {Object[]} een lijst van objecten met de volgende structuur:
+     *                  {id: number, kringnaam: string, adres: string, type: string}
+     */
+    ElectroItemZoeker.prototype.getData = function () {
+        return this.data;
+    };
+    /**
+     * Geeft een lijst van alle unieke kringnamen retour uit de lijst van ElectroItems.
+     * @returns {string[]} een lijst van unieke kringnamen.
+     */
+    ElectroItemZoeker.prototype.getUniqueKringnaam = function () {
+        return Array.from(new Set(this.data.map(function (x) { return x.kringnaam; })));
+    };
+    /**
+     * Geeft een lijst van alle ElectroItems retour die behoren tot de kring met de naam 'kringnaam'.
+     * @param {string} kringnaam - de naam van de kring.
+     * @returns {Object[]} een lijst van objecten met de volgende structuur:
+     *                  {id: number, adres: string, type: string}
+     */
+    ElectroItemZoeker.prototype.getElectroItemsByKring = function (kringnaam) {
+        return this.data.filter(function (x) { return x.kringnaam === kringnaam; }).map(function (x) { return ({ id: x.id, adres: x.adres, type: x.type }); });
+    };
+    /**
+     * Rekent de lijst van alle toegestane ElectroItems opnieuw uit.
+     *
+     * Deze methode wordt gebruikt om de lijst van ElectroItems te vullen die in het situatieplan gebruikt mogen worden.
+     * De lijst wordt opnieuw uitgerekend door de volgende stappen:
+     * 1. Doorlopen alle actieve ElectroItems in de structuur.
+     * 2. Voor elke ElectroItem worden de kringnaam en het type bepaald.
+     * 3. Als de kringnaam niet leeg is en het type niet voorkomt in de lijst van uitgesloten types, dan wordt de ElectroItem toegevoegd aan de lijst.
+     * 4. De ElectroItem wordt toegevoegd met de volgende structuur: {id: number, kringnaam: string, adres: string, type: string}
+     */
+    ElectroItemZoeker.prototype.reCalculate = function () {
+        for (var i = 0; i < structure.length; i++) {
+            if (structure.active[i]) {
+                var id = structure.id[i];
+                var kringnaam = structure.findKringName(id).trim();
+                if (kringnaam != '') {
+                    var type = structure.data[i].getType();
+                    if ((type != null) && (this.excludedTypes.indexOf(type) === -1)) {
+                        var adres = structure.data[i].getReadableAdres();
+                        this.data.push({ id: id, kringnaam: kringnaam, adres: adres, type: type });
+                    }
+                }
+            }
+        }
+    };
+    return ElectroItemZoeker;
+}());
+/**
+ * Functie die de breedte en hoogte van een rechthoek als invoer neemt, evenals een rotatie rond het midden van de rechthoek.
+ * De functie retourneert de breedte en hoogte van de kleinste rechthoek die de geroteerde rechthoek omsluit met zijden langs de X- en Y-assen.
+ */
+function getRotatedRectangleSize(width, height, rotation) {
+    var rotationInRadians = rotation * Math.PI / 180;
+    var cos = Math.cos(rotationInRadians);
+    var sin = Math.sin(rotationInRadians);
+    var rotatedWidth = Math.abs(width * cos) + Math.abs(height * sin);
+    var rotatedHeight = Math.abs(width * sin) + Math.abs(height * cos);
+    return { width: rotatedWidth, height: rotatedHeight };
+}
+/**
+ * Functie die de breedte en hoogte van een rechthoek als invoer neemt, evenals een rotatie rond het midden van de rechthoek.
+ * De functie retourneert de breedte en hoogte van de rechthoek die voldoet aan de volgende eigenschappen:
+ * - De zijden zijn parallel aan de X-as en de Y-as.
+ * - De rechthoek snijdt de X-as en Y-as in dezelfde punten als de originele geroteerde rechthoek
+ *
+ * Deze functie kan gebruikt worden om de locatie van labels te bepalen.
+ */
+function getXYRectangleSize(width, height, rotation) {
+    rotation = Math.abs(rotation) % 180;
+    if (rotation > 90)
+        rotation = 180 - rotation;
+    var rotationInRadians = rotation * Math.PI / 180;
+    var cos = Math.cos(rotationInRadians);
+    var sin = Math.sin(rotationInRadians);
+    return { width: Math.min(width / cos, height / sin), height: Math.min(width / sin, height / cos) };
+}
+/**
+ * Cache het resultaat van getPixelsPerMillimeter() om de overhead van het maken en verwijderen van een DOM-element bij elke oproep te voorkomen.
+ */
+var cachedPixelsPerMillimeter = null;
+/**
+ * Berekent het aantal pixels in een millimeter op het huidige scherm.
+ * Maakt gebruik van een cache om de overhead van het maken en verwijderen van een DOM-element bij elke oproep te voorkomen.
+ * @returns {number} Het aantal pixels in een millimeter.
+ */
+function getPixelsPerMillimeter() {
+    if (cachedPixelsPerMillimeter === null) {
+        var div = document.createElement('div');
+        div.style.width = '10mm';
+        div.style.position = 'absolute';
+        document.body.appendChild(div);
+        var widthInPixels = div.offsetWidth;
+        document.body.removeChild(div);
+        cachedPixelsPerMillimeter = widthInPixels / 10;
+    }
+    return cachedPixelsPerMillimeter;
+}
+/**
+ * Class that helps with dragging a box on the situation plan view.
+ * It keeps track of the start position of the drag and the zoomfactor.
+ */
+var MouseDrag = /** @class */ (function () {
+    function MouseDrag() {
+        this.startDragx = 0;
+        this.startDragy = 0;
+        this.startOffsetLeft = 0;
+        this.startOffsetTop = 0;
+        this.zoomfactor = 1;
+    }
+    /**
+     * Start the drag.
+     * @param mousex The x position of the mouse when the drag starts.
+     * @param mousey The y position of the mouse when the drag starts.
+     * @param startOffsetLeft The left position of the box when the drag starts.
+     * @param startOffsetTop The top position of the box when the drag starts.
+     * @param zoomfactor The zoomfactor of the situation plan view when the drag starts.
+     */
+    MouseDrag.prototype.startDrag = function (mousex, mousey, startOffsetLeft, startOffsetTop, zoomfactor) {
+        if (mousex === void 0) { mousex = 0; }
+        if (mousey === void 0) { mousey = 0; }
+        if (startOffsetLeft === void 0) { startOffsetLeft = 0; }
+        if (startOffsetTop === void 0) { startOffsetTop = 0; }
+        if (zoomfactor === void 0) { zoomfactor = 1; }
+        this.startDragx = mousex;
+        this.startDragy = mousey;
+        this.startOffsetLeft = startOffsetLeft;
+        this.startOffsetTop = startOffsetTop;
+        this.zoomfactor = zoomfactor;
+    };
+    /**
+     * Return the new left and top position of the box based on the current mouse position.
+     * @param mousex The current x position of the mouse.
+     * @param mousey The current y position of the mouse.
+     * @returns An object with the new left and top position of the box.
+     */
+    MouseDrag.prototype.returnNewLeftTop = function (mousex, mousey) {
+        if (mousex === void 0) { mousex = 0; }
+        if (mousey === void 0) { mousey = 0; }
+        return ({
+            left: (mousex - this.startDragx) / this.zoomfactor + this.startOffsetLeft,
+            top: (mousey - this.startDragy) / this.zoomfactor + this.startOffsetTop
+        });
+    };
+    return MouseDrag;
+}());
+/**
  * Volledig overzicht van een situatieplan.
  * Werd gebouwd voor gebruik in de browser maar is redelijk browser-agnostic.
  * De effectieve code om te interageren met de browser zelf zit in class SituationPlanView.
  *
- * GLOBALS: structure
+ * Deze class refereert naar de volgende globale variabelen:
+ * - structure
  */
 var SituationPlan = /** @class */ (function () {
     function SituationPlan() {
@@ -1769,6 +1986,27 @@ var SituationPlan = /** @class */ (function () {
         this.removeElement(element); // Recurse in het geval er meerdere zouden zijn maar dit zou niet mogen gebeuren
     };
     /**
+     * Zorgt ervoor dat alle elementen in het situatieplan een link hebben naar
+     * het eendraadschema.
+     *
+     * Als een element in het situatieplan verwijst naar een symbool dat niet langer in
+     * het eendraadschema zit, wordt het element verwijderd uit het situatieplan.
+     */
+    SituationPlan.prototype.syncToEendraadSchema = function () {
+        for (var _i = 0, _a = this.elements; _i < _a.length; _i++) {
+            var element = _a[_i];
+            //Indien een symbool niet langer in het eendraadschema zit moet het ook uit het situatieplan verwijderd worden
+            //We kunnen hier niet de functie isEendraadSchemaSymbool of getElectroItemById gebruiken want die zorgen
+            //ervoor dat onderstaande altijd false geeft als de symbolen niet langer in het eendraadschema zitten waardoor
+            //de cleanup die nodig is niet gebeurd.
+            if ((element.electroItemId != null) && (structure.getElectroItemById(element.getElectroItemId()) == null)) {
+                this.removeElement(element);
+                this.syncToEendraadSchema();
+                return; // Start opnieuw en stop na recursie
+            }
+        }
+    };
+    /**
      * Sorteer de elementen in het situatieplan op basis van de z-index van hun boxref elementen in de DOM.
      * Elementen met een `null` `boxref` worden naar het einde van de lijst verplaatst.
      *
@@ -1832,32 +2070,56 @@ var SituationPlan = /** @class */ (function () {
         }
         return { numPages: this.numPages, activePage: this.activePage, elements: elements };
     };
-    SituationPlan.prototype.toSitPlanPrint = function () {
-        this.orderByZIndex();
+    /**
+     * Converteer het situatieplan naar een formaat dat gebruikt kan worden voor printen.
+     *
+     * @param {boolean} fitToPage Indien `true` dan wordt de pagina automatisch aangepast om alle elementen te laten passen.
+     *                            Als `false` dan wordt de pagina in de originele grootte gebruikt.
+     * @returns {any} Het formaat van het situatieplan dat gebruikt kan worden voor printen.
+     *                Dit is een javascript object met structuur
+     *                  {
+     *                      numpages: number,
+     *                      pages: [
+     *                          {
+     *                              svg: string,
+     *                              minx: number,
+     *                              miny: number,
+     *                              maxx: number,
+     *                              maxy: number
+     *                          }
+     *                      ]
+     *                  }
+     */
+    SituationPlan.prototype.toSitPlanPrint = function (fitToPage) {
+        if (fitToPage === void 0) { fitToPage = false; }
+        this.syncToEendraadSchema(); // Om zeker te zijn dat we geen onbestaande elementen meer hebben
+        this.orderByZIndex(); // Sorteer de elementen op basis van de z-index zodat ze in de juiste volgorde worden geprint
         var outstruct = {};
         outstruct.numpages = (this.elements.length > 0 ? structure.sitplan.numPages : 0);
         outstruct.pages = [];
         for (var i = 0; i < outstruct.numpages; i++) {
             var svgstr = '';
-            var pixelsPerMm = getPixelsPerMillimeter();
-            var maxx = pixelsPerMm * 277;
-            var maxy = pixelsPerMm * 150;
+            var maxx = getPixelsPerMillimeter() * 277;
+            var maxy = getPixelsPerMillimeter() * 150;
+            var minx = 0;
+            var miny = 0;
             for (var _i = 0, _a = this.elements; _i < _a.length; _i++) {
                 var element = _a[_i];
                 if (element.page == (i + 1)) {
-                    var fontsize = element.labelfontsize;
-                    if (fontsize == null)
-                        fontsize = 11;
+                    var fontsize = (element.labelfontsize != null) ? element.labelfontsize : 11;
                     svgstr += element.getScaledSVG(true);
-                    var rotatedimgwidth = Math.max(element.sizex * element.scale * Math.cos(element.rotate * Math.PI / 180), element.sizey * element.scale * Math.sin(element.rotate * Math.PI / 180));
-                    var rotatedimgheight = Math.max(element.sizex * element.scale * Math.sin(element.rotate * Math.PI / 180), element.sizey * element.scale * Math.cos(element.rotate * Math.PI / 180));
-                    maxx = Math.max(maxx, element.posx + rotatedimgwidth / 2);
-                    maxy = Math.max(maxy, element.posy + rotatedimgheight / 2);
+                    if (fitToPage) {
+                        var boundingbox = getRotatedRectangleSize(element.sizex * element.getscale(), element.sizey * element.getscale(), element.rotate);
+                        maxx = Math.max(maxx, element.posx + boundingbox.width / 2);
+                        maxy = Math.max(maxy, element.posy + boundingbox.height / 2);
+                        minx = Math.min(minx, element.posx - boundingbox.width / 2);
+                        miny = Math.min(miny, element.posy - boundingbox.height / 2);
+                    }
                     svgstr += "<text x=\"".concat(element.labelposx, "\" y=\"").concat(element.labelposy, "\" font-size=\"").concat(fontsize, "\" fill=\"black\" text-anchor=\"middle\" dominant-baseline=\"middle\">").concat(element.getAdres(), "</text>");
                 }
             }
-            svgstr = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"".concat(maxx, "px\" height=\"").concat(maxy, "px\" viewBox=\"0 0 ").concat(maxx, " ").concat(maxy, "\">").concat(svgstr, "</svg>");
-            outstruct.pages.push({ sizex: maxx, sizey: maxy, svg: svgstr });
+            svgstr = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"".concat(maxx - minx, "px\" height=\"").concat(maxy - miny, "px\" viewBox=\"").concat(minx, " ").concat(miny, " ").concat(maxx - minx, " ").concat(maxy - miny, "\">").concat(svgstr, "</svg>");
+            outstruct.pages.push({ sizex: maxx - minx, sizey: maxy - miny, svg: svgstr });
         }
         return outstruct;
     };
@@ -1866,7 +2128,9 @@ var SituationPlan = /** @class */ (function () {
 /**
  * Class SituationPlanElement
  *
- * GLOBALS: structure, SITPLANVIEW_DEFAULT_SCALE
+ * Deze class refereert naar de volgende globale variabelen:
+ * - structure
+ * - SITPLANVIEW_DEFAULT_SCALE
  */
 var SituationPlanElement = /** @class */ (function () {
     /**
@@ -1898,8 +2162,17 @@ var SituationPlanElement = /** @class */ (function () {
         this.labelposx = 0;
         this.labelposy = 0;
         this.labelfontsize = 11;
+        // -- Een vlag om de situationplanview te laten weten dat de box content moet geupdated worden
+        this.needsViewUpdate = false;
         this.id = randomId("SP_");
     }
+    SituationPlanElement.prototype.setscale = function (scale) {
+        this.scale = scale;
+        this.needsViewUpdate = true;
+    };
+    SituationPlanElement.prototype.getscale = function () {
+        return this.scale;
+    };
     /**
      * isEendraadschemaSymbool
      *
@@ -2007,13 +2280,16 @@ var SituationPlanElement = /** @class */ (function () {
         if (width === void 0) { width = undefined; }
         if (height === void 0) { height = undefined; }
         if (this.isEendraadschemaSymbool()) {
-            this.svg = svg;
-            if (width != null)
-                this.sizex = width;
-            if (height != null)
-                this.sizey = height;
-            if (width == null || height == null)
-                this.getSizeFromString();
+            if (this.svg !== svg) { // This works because when saving to a file, svg is set to '' so an update will be triggered here
+                this.needsViewUpdate = true;
+                this.svg = svg;
+                if (width != null)
+                    this.sizex = width;
+                if (height != null)
+                    this.sizey = height;
+                if (width == null || height == null)
+                    this.getSizeFromString();
+            }
         }
     };
     /**
@@ -2192,6 +2468,7 @@ var SituationPlanElement = /** @class */ (function () {
         this.scale = (json.scale != null) ? json.scale : SITPLANVIEW_DEFAULT_SCALE;
         this.svg = json.svg;
         this.electroItemId = json.electroItemId;
+        this.needsViewUpdate = true; // TODO: make this more efficient as it will always trigger redraws, even when not needed
     };
     /**
      * rotates360degrees
@@ -2209,105 +2486,35 @@ var SituationPlanElement = /** @class */ (function () {
     SituationPlanElement.ROTATES_360_DEGREES_TYPES = new Set(['Contactdoos', 'Lichtpunt', 'Drukknop', 'Media', 'Schakelaars', 'Lichtcircuit']);
     return SituationPlanElement;
 }());
-function isDevMode() {
-    var urlParams = new URLSearchParams(window.location.search);
-    return urlParams.has('dev');
-}
-function showSituationPlanPage() {
-    toggleAppView('draw');
-    if (!(structure.sitplan)) {
-        structure.sitplan = new SituationPlan();
-    }
-    ;
-    if (!(structure.sitplanview)) {
-        //First destroy all elements on the DOM with id starting with "SP_" to avoid any orphans being left from earlier exercises
-        var elements = document.querySelectorAll('[id^="SP_"]');
-        elements.forEach(function (e) { return e.remove(); });
-        //Then create the SituationPlanView
-        structure.sitplanview = new SituationPlanView(document.getElementById('outerbox'), document.getElementById('paper'), structure.sitplan);
-    }
-    ;
-    structure.sitplanview.updateRibbon();
-    var spinner = document.createElement('div');
-    spinner.classList.add('loading-spinner');
-    document.getElementById('outerbox').appendChild(spinner);
-    requestAnimationFrame(function () {
-        requestAnimationFrame(function () {
-            render();
-        });
-    });
-    function render() {
-        var start = performance.now();
-        //structure.sitplanview.zoomToFit();
-        structure.sitplanview.redraw();
-        var end = performance.now();
-        console.log("Update took ".concat(end - start, "ms"));
-        document.getElementById('outerbox').removeChild(spinner);
-    }
-}
-var MouseDrag = /** @class */ (function () {
-    function MouseDrag() {
-        this.zoomfactor = 1;
-    }
-    MouseDrag.prototype.startDrag = function (mousex, mousey, startOffsetLeft, startOffsetTop, zoomfactor) {
-        this.startDragx = mousex;
-        this.startDragy = mousey;
-        this.startOffsetLeft = startOffsetLeft;
-        this.startOffsetTop = startOffsetTop;
-        this.zoomfactor = zoomfactor;
-    };
-    MouseDrag.prototype.returnNewLeftTop = function (mousex, mousey) {
-        return ({
-            left: (mousex - this.startDragx) / this.zoomfactor + this.startOffsetLeft,
-            top: (mousey - this.startDragy) / this.zoomfactor + this.startOffsetTop
-        });
-    };
-    return MouseDrag;
-}());
-var EventManager = /** @class */ (function () {
-    function EventManager() {
-        this.listeners = [];
-    }
-    EventManager.prototype.addEventListener = function (element, type, listener) {
-        var existingListenerIndex = this.listeners.findIndex(function (l) { return l.element === element && l.type === type; });
-        if (existingListenerIndex !== -1) {
-            var existingListener = this.listeners[existingListenerIndex];
-            element.removeEventListener(type, existingListener.listener);
-            this.listeners.splice(existingListenerIndex, 1);
-        }
-        this.listeners.push({ element: element, type: type, listener: listener });
-        element.addEventListener(type, listener);
-    };
-    EventManager.prototype.removeAllEventListeners = function () {
-        this.listeners.forEach(function (_a) {
-            var element = _a.element, type = _a.type, listener = _a.listener;
-            element.removeEventListener(type, listener);
-        });
-        this.listeners = [];
-    };
-    EventManager.prototype.dispose = function () {
-        this.removeAllEventListeners();
-    };
-    return EventManager;
-}());
+/**
+ * Deze class behandelt het tekenen van het situatieplan.
+ *
+ * Er wordt regelmatig de terminologie Box gebruikt in de code. Een box is een sleepbaar element en kan zowel
+ * een eendraadschema symbool zijn als een ingelezen extern bestand.
+ */
 var SituationPlanView = /** @class */ (function () {
-    function SituationPlanView(outerbox, paper, sitplan) {
+    function SituationPlanView(outerdiv, paper, sitplan) {
         var _this = this;
         this.zoomfactor = 1;
-        this.currentBox = null;
-        this.selectedBox = null;
-        this.boxes = {};
+        /** Referentie naar meerdere DIV's waar het stuatieplan wordt weergegeven
+         *   - paper: hieronder hangen de reële elementen en dit stelt het printable gedeelte van het schema voor
+         *   - outerdiv: deze bevat paper en ook het niet printable gedeelte
+        */
+        this.outerdiv = null;
+        this.paper = null;
+        this.draggedBox = null; /** Box die op dit moment versleept wordt of null */
+        this.selectedBox = null; /** Geselelecteerde box of null */
         this.startDrag = function (event) {
             event.stopPropagation(); // Prevent body click event
             _this.clearSelection(); // Clears any existing selection
             _this.selectBox(event.target); // Selects the box we want to drag
-            _this.currentBox = event.target; // IS THIS NEEDED IF WE ALREADY HAVE SELECTEDBOX ????
+            _this.draggedBox = event.target; // IS THIS NEEDED IF WE ALREADY HAVE SELECTEDBOX ????
             if (event.type === 'mousedown') {
-                _this.mousedrag.startDrag(event.clientX, event.clientY, _this.currentBox.offsetLeft, _this.currentBox.offsetTop, _this.zoomfactor);
+                _this.mousedrag.startDrag(event.clientX, event.clientY, _this.draggedBox.offsetLeft, _this.draggedBox.offsetTop, _this.zoomfactor);
             }
             else if (event.type === 'touchstart') {
                 var touch = event.touches[0];
-                _this.mousedrag.startDrag(touch.clientX, touch.clientY, _this.currentBox.offsetLeft, _this.currentBox.offsetTop, _this.zoomfactor);
+                _this.mousedrag.startDrag(touch.clientX, touch.clientY, _this.draggedBox.offsetLeft, _this.draggedBox.offsetTop, _this.zoomfactor);
             }
             document.addEventListener('mousemove', _this.processDrag);
             document.addEventListener('touchmove', _this.processDrag, { passive: false });
@@ -2319,11 +2526,11 @@ var SituationPlanView = /** @class */ (function () {
             document.removeEventListener('touchmove', _this.processDrag);
             document.removeEventListener('mouseup', _this.stopDrag);
             document.removeEventListener('touchend', _this.stopDrag);
-            _this.currentBox = null;
+            _this.draggedBox = null;
             undostruct.store();
         };
         this.processDrag = function (event) {
-            if (_this.currentBox) {
+            if (_this.draggedBox) {
                 event.preventDefault();
                 var newLeftTop = void 0;
                 if (event.type === 'mousemove') {
@@ -2334,28 +2541,35 @@ var SituationPlanView = /** @class */ (function () {
                     newLeftTop = _this.mousedrag.returnNewLeftTop(touch.clientX, touch.clientY);
                 }
                 // Ensure the box stays within reasonable boundaries
-                newLeftTop.left = Math.max(-_this.currentBox.offsetWidth / 2, newLeftTop.left);
-                newLeftTop.top = Math.max(-_this.currentBox.offsetHeight / 2, newLeftTop.top);
-                _this.currentBox.picref.posx = newLeftTop.left + (_this.currentBox.offsetWidth / 2);
-                _this.currentBox.picref.posy = newLeftTop.top + (_this.currentBox.offsetHeight / 2);
-                _this.updateBoxPosition(_this.currentBox);
+                newLeftTop.left = Math.max(-_this.draggedBox.offsetWidth / 2, newLeftTop.left);
+                newLeftTop.top = Math.max(-_this.draggedBox.offsetHeight / 2, newLeftTop.top);
+                var pic = _this.draggedBox.sitPlanElementRef;
+                pic.posx = newLeftTop.left + (_this.draggedBox.offsetWidth / 2);
+                pic.posy = newLeftTop.top + (_this.draggedBox.offsetHeight / 2);
+                _this.updateSymbolAndLabelPosition(pic);
             }
         };
-        this.outerbox = outerbox;
+        this.outerdiv = outerdiv;
         this.paper = paper;
         this.sitplan = sitplan;
         this.paper.style.transformOrigin = 'top left'; // Keep the origin point consistent when scaling
-        this.reloadSitPlan();
         this.mousedrag = new MouseDrag();
-        this.zoomToFit();
         this.event_manager = new EventManager();
-        // Remove red border when clicking on the body
-        this.event_manager.addEventListener(outerbox, 'mousedown', function () { _this.clearSelection(); });
-        this.event_manager.addEventListener(outerbox, 'touchstart', function () { _this.clearSelection(); });
+        // Verwijder alle selecties wanneer we ergens anders klikken dan op een box
+        this.event_manager.addEventListener(outerdiv, 'mousedown', function () { _this.clearSelection(); });
+        this.event_manager.addEventListener(outerdiv, 'touchstart', function () { _this.clearSelection(); });
     }
+    /**
+     * Maakt deze instance ongedaan en verwijderd alle door deze instance aangemaakte elementen uit de DOM.
+     *
+     * Verwijderd eerst de eventmanager en daarna alle elementen in het situatieplan.
+     * Als een element een referentie naar een box heeft, wordt deze verwijderd uit de DOM.
+     * Als een element een referentie naar een label heeft, wordt deze verwijderd uit de DOM.
+     */
     SituationPlanView.prototype.dispose = function () {
+        //Verwijder de event manager
         this.event_manager.dispose();
-        //loop over all situationplanelements and remove the corresponding boxes from the DOM
+        //Ga over all situationplanelements and verwijder de bijhorende boxes uit the DOM
         for (var _i = 0, _a = this.sitplan.elements; _i < _a.length; _i++) {
             var element = _a[_i];
             if (element.boxref != null)
@@ -2363,6 +2577,286 @@ var SituationPlanView = /** @class */ (function () {
             if (element.boxlabelref != null)
                 element.boxlabelref.remove();
         }
+    };
+    /**
+     * Zorgt ervoor dat alle elementen in het situatieplan een link hebben naar
+     * het eendraadschema.
+     *
+     * Als een element in het situatieplan verwijst naar een symbool dat niet langer in
+     * het eendraadschema zit, wordt het element verwijderd uit het situatieplan.
+     *
+     * Deze functie zorgt er niet voor dat ook elk element effectief een box heeft in de DOM.
+     * Dit gebeurt pas in de redraw functie.
+     */
+    SituationPlanView.prototype.syncToSitPlan = function () {
+        this.sitplan.syncToEendraadSchema();
+    };
+    /**
+     * Stel de zoomfactor in zodat het paper-element volledig in het browser window wordt weergegeven
+     *
+     * @param paperPadding - De padding rond het papier in pixels. Dit wordt gebruikt
+     *   om te berekenen hoeveel ruimte beschikbaar is voor het papier. De standaard
+     *   is de CSS-waarde van --paperPadding.
+     */
+    SituationPlanView.prototype.zoomToFit = function (paperPadding) {
+        if (paperPadding === void 0) { paperPadding = parseFloat(getComputedStyle(this.paper).getPropertyValue('--paperPadding')); }
+        var scale = Math.min((this.outerdiv.offsetWidth - paperPadding * 2) / this.paper.offsetWidth, (this.outerdiv.offsetHeight - paperPadding * 2) / this.paper.offsetHeight);
+        this.setzoom(scale);
+    };
+    /**
+     * Stel de zoomfactor in.
+     * @param factor - De zoomfactor, standaard 1.
+     */
+    SituationPlanView.prototype.setzoom = function (factor) {
+        if (factor === void 0) { factor = 1; }
+        this.zoomfactor = factor;
+        this.paper.style.transform = "scale(".concat(factor, ")");
+    };
+    /**
+     * Verhoogt of verlaagt de zoomfactor met een bepaalde waarde.
+     *
+     * @param increment - De waarde waarmee de zoomfactor moet worden aangepast.
+     *   Een positieve waarde vergroot de zoom, terwijl een negatieve waarde de zoom verkleint.
+     *   Standaard is deze waarde 0, wat betekent dat er geen aanpassing is.
+     */
+    SituationPlanView.prototype.zoomIncrement = function (increment) {
+        if (increment === void 0) { increment = 0; }
+        this.setzoom(Math.min(SITPLANVIEW_ZOOMINTERVAL.MAX, Math.max(SITPLANVIEW_ZOOMINTERVAL.MIN, this.zoomfactor + increment)));
+    };
+    /**
+     * Maakt een box en een label op de DOM of in een document-fragmentaan voor een element in het situatieplan.
+     *
+     * Een box is een sleepbaar element en kan zowel een symbool van het eendraadschema
+     * zijn als een in te laden extern bestand.
+     *
+     * Event handlers voor het bewegen met muis of touch worden toegevoegd.
+     *
+     * Deze functie checkt om efficientie-redenen niet dat het situatieplanelement geldig is
+     * en verwijst naar een bestaand element in het eendraadschema. Deze check dient op
+     * voorhand te gebeuren, bijvoorbeeld door gebruik te maken van de functie syncToSitPlan.
+     *
+     * @param element - Het element in het situatieplan dat een box op de DOM nodig heeft.
+     */
+    SituationPlanView.prototype.makeBox = function (element, fragment) {
+        if (fragment === void 0) { fragment = null; }
+        // Box aanmaken op de DOM voor het symbool of in te laden externe figuur
+        // extra property sitPlanElementRef toegevoegd aan DOM zodat we later ons situatieplan element kunnen terugvinden
+        var box = document.createElement('div');
+        Object.assign(box, { id: element.id, className: "box", sitPlanElementRef: element });
+        element.boxref = box;
+        // Boxlabel aanmaken op de DOM voor de tekst bij het symbool
+        var boxlabel = document.createElement('div');
+        boxlabel.className = "boxlabel";
+        boxlabel.innerHTML = element.getAdres(); // is deze nodig? Wellicht reeds onderdeel van updateContent
+        element.boxlabelref = boxlabel;
+        // Content updaten en toevoegen aan de DOM
+        this.updateBoxContent(element); //content moet eerst updated worden om te weten hoe groot de box is
+        if (fragment)
+            fragment.append(box, boxlabel);
+        else
+            this.paper.append(box, boxlabel);
+        //this.updateSymbolAndLabelPosition(element); //pas als alles op de DOM zit kunnen we berekenen waar het label hoort
+        // Event handlers voor het bewegen met muis of touch
+        box.addEventListener('mousedown', this.startDrag);
+        box.addEventListener('touchstart', this.startDrag);
+        box.addEventListener('touchend', this.stopDrag);
+    };
+    /**
+     * Werk de content van het box-element en label-element van een situatieplanelement bij in de DOM.
+     *
+     * Deze functie controleert eerst of het box-element bestaat, zo-niet doet deze functie niets.
+     * Daarna wordt de SVG van het symbool van het element gegenereerd.  Indien dit verschilt van wat reeds op de DOM zit wordt de innerHTML van het het box-element gewijzigd.
+     * Daarnaast wordt de tekst van het label-element bijgewerkt en de fontsize ingesteld.
+     *
+     * TODO: de functie getScaledSVG wordt altijd uitgevoerd en is nodig om te weten of de DOM moet aangepast worden maar dit is minder efficient.
+     *       er zijn mogelijk betere manieren om de parameter sitPlanElement.needsViewUpdate te bepalen dan de SVG effectief genereren en te vergelijken met de bestaande SVG op de DOM,
+     *       bijvoorbeeld door een trigger op manipulatie in het ééndraadschema zelf.
+     *
+     * @param sitPlanElement - Het situatieplanelement dat aangepast moet worden.
+     */
+    SituationPlanView.prototype.updateBoxContent = function (sitPlanElement) {
+        var box = sitPlanElement.boxref;
+        var boxlabel = sitPlanElement.boxlabelref;
+        if (box == null)
+            return;
+        var svg = sitPlanElement.getScaledSVG(); // Deze call past ook viewUpdateNeeded aan en moet dus eerst gebeuren
+        if (sitPlanElement.needsViewUpdate) {
+            sitPlanElement.needsViewUpdate = false;
+            if (svg != null)
+                box.innerHTML = svg;
+            else
+                box.innerHTML = '';
+            if (boxlabel != null) {
+                var adres = sitPlanElement.getAdres();
+                if (sitPlanElement.labelfontsize != null)
+                    boxlabel.style.fontSize = String(sitPlanElement.labelfontsize) + 'px';
+                if (adres != null)
+                    boxlabel.innerHTML = adres;
+                else
+                    boxlabel.innerHTML = '';
+            }
+        }
+        ;
+    };
+    /**
+     * Berekent de positie van het label van een situationplanelement in functie vna de grootte van het situationplanelement.
+     * het situationplanelement moet daarvoor reeds een box hebben die aan de DOM werd toegevoegd om de grootte van deze box te kunnen bepalen.
+     *
+     * Wijzigt eveneens de grootte, en positie van het DIV-element dat het label van een situationplanelement bevat in de DOM.
+     * Controleert ook of het label op een zichtbare pagina staat en maakt het onzichtbaar indien nodig.
+     *
+     * @param sitPlanElement - Het situatieplanelement waarvoor de positie van het label moet worden berekend.
+     */
+    SituationPlanView.prototype.updateLabelPosition = function (sitPlanElement) {
+        if (!sitPlanElement)
+            return;
+        var boxlabel = sitPlanElement.boxlabelref;
+        if (!boxlabel)
+            return;
+        var scale = sitPlanElement.getscale();
+        var forbiddenLabelZone = getXYRectangleSize(sitPlanElement.sizex * scale + SITPLANVIEW_SELECT_PADDING, sitPlanElement.sizey * scale + SITPLANVIEW_SELECT_PADDING, sitPlanElement.rotate);
+        // Berekken de x/left positie van het label
+        var adreslocation = sitPlanElement.getAdresLocation();
+        switch (adreslocation) {
+            case 'links':
+                sitPlanElement.labelposx = sitPlanElement.posx - forbiddenLabelZone.width / 2 - boxlabel.offsetWidth / 2;
+                break;
+            case 'rechts':
+                sitPlanElement.labelposx = sitPlanElement.posx + forbiddenLabelZone.width / 2 + boxlabel.offsetWidth / 2;
+                break;
+            default: sitPlanElement.labelposx = sitPlanElement.posx;
+        }
+        var left = "".concat(sitPlanElement.labelposx - boxlabel.offsetWidth / 2, "px");
+        if (boxlabel.style.left != left)
+            boxlabel.style.left = left; // Vermijd aanpassingen DOM indien niet nodig
+        // Bereken de y/top positie van het label
+        // Deze bevat wat meer complexe trickery om alles min of meer overeen te doen komen tussen print en scherm
+        var top;
+        switch (adreslocation) {
+            case 'boven': {
+                top = "".concat(sitPlanElement.posy - forbiddenLabelZone.height / 2 - boxlabel.offsetHeight * 0.8, "px");
+                sitPlanElement.labelposy = sitPlanElement.posy - forbiddenLabelZone.height / 2 - boxlabel.offsetHeight * 0.5 / 2;
+                break;
+            }
+            case 'onder': {
+                top = "".concat(sitPlanElement.posy + forbiddenLabelZone.height / 2 - boxlabel.offsetHeight * 0.2, "px");
+                sitPlanElement.labelposy = sitPlanElement.posy + forbiddenLabelZone.height / 2 + boxlabel.offsetHeight * 0.7 / 2;
+                break;
+            }
+            default:
+                top = "".concat(sitPlanElement.posy - boxlabel.offsetHeight / 2, "px");
+                sitPlanElement.labelposy = sitPlanElement.posy + 1;
+        }
+        if (boxlabel.style.top != top)
+            boxlabel.style.top = top; // Vermijd aanpassingen DOM indien niet nodig
+        if (this.sitplan.activePage == sitPlanElement.page) {
+            if (boxlabel.classList.contains('hidden'))
+                boxlabel.classList.remove('hidden'); // Vermijd aanpassingen DOM indien niet nodig
+        }
+        else {
+            if (!boxlabel.classList.contains('hidden'))
+                boxlabel.classList.add('hidden'); // Vermijd aanpassingen DOM indien niet nodig
+        }
+    };
+    /**
+     * Wijzigt de grootte, positie en rotatietransformatie van het DIV-element dat een situationplanelement bevat in de DOM.
+     * Controleert ook of het symbool op een zichtbare pagina staat en maakt het onzichtbaar indien nodig.
+     *
+     * @param sitPlanElement Het situationplanelement dat aangepast moet worden.
+     */
+    SituationPlanView.prototype.updateSymbolPosition = function (sitPlanElement) {
+        function getRotationTransform(sitPlanElement) {
+            if (!sitPlanElement)
+                return '';
+            var rotation = sitPlanElement.rotate % 360;
+            var spiegel = false;
+            if ((rotation >= 90) && (rotation < 270)) {
+                if (sitPlanElement.rotates360degrees())
+                    spiegel = true;
+                if (sitPlanElement.isEendraadschemaSymbool())
+                    rotation -= 180;
+            }
+            return "rotate(".concat(rotation, "deg)") + (spiegel ? ' scaleX(-1)' : '');
+        }
+        if (!sitPlanElement)
+            return;
+        var div = sitPlanElement.boxref;
+        if (!div)
+            return;
+        var scale = sitPlanElement.getscale();
+        var contentwidth = sitPlanElement.sizex * scale;
+        var contentheight = sitPlanElement.sizey * scale;
+        var left = ((sitPlanElement.posx - contentwidth / 2 - SITPLANVIEW_SELECT_PADDING)).toString() + "px";
+        if (div.style.left != left)
+            div.style.left = left; // Vermijd aanpassingen DOM indien niet nodig
+        var top = ((sitPlanElement.posy - contentheight / 2 - SITPLANVIEW_SELECT_PADDING)).toString() + "px";
+        if (div.style.top != top)
+            div.style.top = top; // Vermijd aanpassingen DOM indien niet nodig
+        var width = ((contentwidth + SITPLANVIEW_SELECT_PADDING * 2)).toString() + "px";
+        if (div.style.width != width)
+            div.style.width = width; // Vermijd aanpassingen DOM indien niet nodig
+        var height = ((contentheight + SITPLANVIEW_SELECT_PADDING * 2)).toString() + "px";
+        if (div.style.height != height)
+            div.style.height = height; // Vermijd aanpassingen DOM indien niet nodig
+        var transform = getRotationTransform(sitPlanElement);
+        if (div.style.transform != transform)
+            div.style.transform = transform; // Vermijd aanpassingen DOM indien niet nodig
+        if (this.sitplan.activePage == sitPlanElement.page) {
+            if (div.classList.contains('hidden'))
+                div.classList.remove('hidden'); // Vermijd aanpassingen DOM indien niet nodig
+        }
+        else {
+            if (!div.classList.contains('hidden'))
+                div.classList.add('hidden'); // Vermijd aanpassingen DOM indien niet nodig
+        }
+    };
+    /**
+     * Werkt de positie van het symbool bij op de DOM indien nodig.
+     * Berekent de positie van het label en werkt deze bij op de DOM indien nodig
+     *     *
+     * @param sitPlanElement - Het situationplanelement
+     */
+    SituationPlanView.prototype.updateSymbolAndLabelPosition = function (sitPlanElement) {
+        if (!sitPlanElement)
+            return;
+        this.updateSymbolPosition(sitPlanElement); // Eerst content aanpassen anders kennen we de grootte van het symbool niet
+        this.updateLabelPosition(sitPlanElement);
+    };
+    /**
+     * Werkt de situatieplanweergave bij door elementen te synchroniseren met de onderliggende datastructuur.
+     *
+     * Deze functie zorgt er eerst voor dat alle elementen in het situatieplan een overeenkomstige box in de DOM hebben.
+     * Het creëert ontbrekende boxes en voegt deze toe aan het document. Vervolgens werkt het de positie en
+     * het label van elk symbool bij volgens de huidige staat. Daarna past het de weergave aan om de actieve pagina
+     * weer te geven en werkt het de UI-ribbon bij.
+     *
+     * Deze methode meet en logt de tijd die nodig is om de redraw-operatie te voltooien.
+     * Het gebruik van document fragments maakt de redraw aanzienlijk sneller in google chrome.
+     * In Firefox is deze ook snel zonder document fragments.
+     */
+    SituationPlanView.prototype.redraw = function () {
+        var start = performance.now();
+        this.syncToSitPlan();
+        var fragment = document.createDocumentFragment();
+        var appendNeeded = false;
+        for (var _i = 0, _a = this.sitplan.elements; _i < _a.length; _i++) {
+            var element = _a[_i];
+            if (!element.boxref) {
+                this.makeBox(element, fragment);
+                appendNeeded = true;
+            }
+        }
+        if (appendNeeded)
+            this.paper.append(fragment); // We moeten de boxes toevoegen aan de DOM alvorens de label positie te berekenen aangezien we de size van de labels moeten kennen
+        for (var _b = 0, _c = this.sitplan.elements; _b < _c.length; _b++) {
+            var element = _c[_b];
+            this.updateBoxContent(element);
+            this.updateSymbolAndLabelPosition(element);
+        }
+        this.selectPage(this.sitplan.activePage);
+        this.updateRibbon();
+        var end = performance.now();
+        console.log("Redraw took ".concat(end - start, "ms"));
     };
     SituationPlanView.prototype.attachDeleteButton = function (elem) {
         var _this = this;
@@ -2386,7 +2880,7 @@ var SituationPlanView = /** @class */ (function () {
     ;
     SituationPlanView.prototype.attachZoomButton = function (elem, increment) {
         var _this = this;
-        this.event_manager.addEventListener(elem, 'click', function () { _this.zoom(increment); });
+        this.event_manager.addEventListener(elem, 'click', function () { _this.zoomIncrement(increment); });
     };
     ;
     SituationPlanView.prototype.attachZoomToFitButton = function (elem) {
@@ -2399,10 +2893,11 @@ var SituationPlanView = /** @class */ (function () {
         this.event_manager.addEventListener(elem, 'click', function () { fileinput.click(); });
         this.event_manager.addEventListener(fileinput, 'change', function (event) {
             var element = _this.sitplan.addElementFromFile(event, _this.sitplan.activePage, 550, 300, (function () {
-                _this.reloadSitPlan();
+                _this.syncToSitPlan();
                 _this.clearSelection();
-                _this.selectBox(element.boxref);
+                element.needsViewUpdate = true;
                 _this.redraw();
+                _this.selectBox(element.boxref); // We moeten dit na redraw doen anders bestaat de box mogelijk nog niet
                 undostruct.store();
             }).bind(_this));
         });
@@ -2415,10 +2910,10 @@ var SituationPlanView = /** @class */ (function () {
                 if (id != null) {
                     var element = _this.sitplan.addElementFromElectroItem(id, _this.sitplan.activePage, 550, 300, adrestype, adres, adreslocation, labelfontsize, scale, rotate);
                     if (element != null) {
-                        _this.reloadSitPlan();
+                        _this.syncToSitPlan();
                         _this.clearSelection();
-                        _this.selectBox(element.boxref);
                         _this.redraw();
+                        _this.selectBox(element.boxref); // We moeten dit na redraw doen anders bestaat de box mogelijk nog niet
                         undostruct.store();
                     }
                 }
@@ -2433,63 +2928,47 @@ var SituationPlanView = /** @class */ (function () {
         this.event_manager.addEventListener(elem, 'click', function () {
             if (_this.selectedBox) {
                 var id = _this.selectedBox.id;
-                var pic_1 = _this.selectedBox.picref;
+                var pic_1 = _this.selectedBox.sitPlanElementRef;
                 SituationPlanView_ElementPropertiesPopup(pic_1, function (id, adrestype, adres, adreslocation, labelfontsize, scale, rotate) {
                     if (id != null) {
                         pic_1.setElectroItemId(id);
                         pic_1.setAdres(adrestype, adres, adreslocation);
                     }
                     pic_1.labelfontsize = labelfontsize;
-                    pic_1.scale = scale;
+                    pic_1.setscale(scale);
                     pic_1.rotate = rotate;
-                    _this.updateBoxContent(_this.selectedBox); //content needs to be updated first to know the size of the box
-                    _this.updateBoxPosition(_this.selectedBox);
+                    _this.updateBoxContent(pic_1); //content needs to be updated first to know the size of the box
+                    _this.updateSymbolAndLabelPosition(pic_1);
                     undostruct.store();
                 });
             }
         });
     };
-    SituationPlanView.prototype.makeBox = function (element) {
-        var box = document.createElement('div');
-        box.id = element.id;
-        box.className = "box";
-        box.picref = element; // We add an extra property to the DOM to be able to find back our data from within the browser
-        element.boxref = box;
-        var boxlabel = document.createElement('div');
-        boxlabel.className = "boxlabel";
-        boxlabel.innerHTML = element.getAdres();
-        element.boxlabelref = boxlabel;
-        this.paper.append(box);
-        this.paper.append(boxlabel);
-        this.updateBoxContent(box); //content needs to be updated first to know the size of the box
-        this.updateBoxPosition(box);
-        box.addEventListener('mousedown', this.startDrag);
-        box.addEventListener('touchstart', this.startDrag);
-        box.addEventListener('touchend', this.stopDrag);
-        return box;
-    };
     SituationPlanView.prototype.deleteBox = function () {
         if (this.selectedBox) {
             var id = this.selectedBox.id;
-            var picref = this.selectedBox.picref;
+            var sitPlanElementRef = this.selectedBox.sitPlanElementRef;
             this.selectedBox.remove();
-            if (picref.boxlabelref != null)
-                picref.boxlabelref.remove();
-            this.sitplan.removeElement(picref);
+            if (sitPlanElementRef.boxlabelref != null)
+                sitPlanElementRef.boxlabelref.remove();
+            this.sitplan.removeElement(sitPlanElementRef);
             this.selectedBox = null;
         }
     };
     SituationPlanView.prototype.scaleBox = function (increment) {
         if (this.selectedBox) {
-            this.selectedBox.picref.scale = Math.min(Math.max(0.1, this.selectedBox.picref.scale + increment), 1000);
-            this.updateBoxContent(this.selectedBox); //content needs to be updated first to know the size of the box
-            this.updateBoxPosition(this.selectedBox);
+            var pic = this.selectedBox.sitPlanElementRef;
+            if (pic == null)
+                return;
+            pic.setscale(Math.min(Math.max(0.1, pic.getscale() + increment), 1000));
+            this.updateBoxContent(pic); //content needs to be updated first to know the size of the box
+            this.updateSymbolAndLabelPosition(pic);
         }
     };
     SituationPlanView.prototype.rotateBox = function (degrees) {
         if (this.selectedBox) {
             var id = this.selectedBox.id;
-            var pic = this.selectedBox.picref;
+            var pic = this.selectedBox.sitPlanElementRef;
             pic.rotate = (pic.rotate + degrees) % 360;
             this.selectedBox.style.transform = "rotate(".concat(pic.rotate, "deg)");
         }
@@ -2522,103 +3001,6 @@ var SituationPlanView = /** @class */ (function () {
         this.sitplan.orderByZIndex();
         undostruct.store();
     };
-    SituationPlanView.prototype.updateBoxPosition = function (box) {
-        var pic = box.picref;
-        box.classList.remove('hidden');
-        box.style.left = ((pic.posx - pic.sizex * pic.scale / 2 - SITPLANVIEW_SELECT_PADDING)).toString() + "px";
-        box.style.top = ((pic.posy - pic.sizey * pic.scale / 2 - SITPLANVIEW_SELECT_PADDING)).toString() + "px";
-        box.style.width = ((pic.sizex * pic.scale + SITPLANVIEW_SELECT_PADDING * 2)).toString() + "px";
-        box.style.height = ((pic.sizey * pic.scale + SITPLANVIEW_SELECT_PADDING * 2)).toString() + "px";
-        var rotate = pic.rotate;
-        var spiegel = false;
-        rotate = rotate % 360;
-        if ((rotate >= 90) && (rotate < 270)) {
-            if (pic.rotates360degrees())
-                spiegel = true;
-            if (pic.isEendraadschemaSymbool())
-                rotate = rotate - 180;
-        }
-        box.style.transform = "rotate(".concat(rotate, "deg)") + (spiegel ? ' scaleX(-1)' : '');
-        if (pic != null) {
-            var boxlabel = pic.boxlabelref;
-            boxlabel.classList.remove('hidden');
-            if (boxlabel != null) {
-                pic.labelsizex = boxlabel.offsetWidth;
-                pic.labelsizey = boxlabel.offsetHeight;
-                switch (pic.adreslocation) {
-                    case 'links': {
-                        var rotate_1 = Math.abs(pic.rotate) % 180;
-                        if (rotate_1 > 90)
-                            rotate_1 = 180 - rotate_1;
-                        var offset1 = (pic.sizex / 2 * pic.scale + SITPLANVIEW_SELECT_PADDING) / (Math.cos(rotate_1 / 180 * Math.PI));
-                        var offset2 = (pic.sizey / 2 * pic.scale + SITPLANVIEW_SELECT_PADDING) / (Math.cos((90 - rotate_1) / 180 * Math.PI));
-                        var offset = Math.min(offset1, offset2);
-                        boxlabel.style.left = (pic.posx - offset - boxlabel.offsetWidth) + 'px';
-                        boxlabel.style.top = (pic.posy - boxlabel.offsetHeight / 2) + 'px';
-                        pic.labelposx = (pic.posx - offset - boxlabel.offsetWidth / 2);
-                        pic.labelposy = (pic.posy + 1);
-                        break;
-                    }
-                    case 'rechts': {
-                        var rotate_2 = Math.abs(pic.rotate) % 180;
-                        if (rotate_2 > 90)
-                            rotate_2 = 180 - rotate_2;
-                        var offset1 = (pic.sizex / 2 * pic.scale + SITPLANVIEW_SELECT_PADDING) / (Math.cos(rotate_2 / 180 * Math.PI));
-                        var offset2 = (pic.sizey / 2 * pic.scale + SITPLANVIEW_SELECT_PADDING) / (Math.cos((90 - rotate_2) / 180 * Math.PI));
-                        var offset = Math.min(offset1, offset2);
-                        boxlabel.style.left = (pic.posx + offset + 0) + 'px';
-                        boxlabel.style.top = ((pic.posy) - boxlabel.offsetHeight / 2) + 'px';
-                        pic.labelposx = (pic.posx + offset + boxlabel.offsetWidth / 2);
-                        pic.labelposy = (pic.posy + 1);
-                        break;
-                    }
-                    case 'boven': {
-                        var rotate_3 = Math.abs(pic.rotate) % 180;
-                        if (rotate_3 > 90)
-                            rotate_3 = 180 - rotate_3;
-                        var offset1 = (pic.sizey / 2 * pic.scale + SITPLANVIEW_SELECT_PADDING) / (Math.cos(rotate_3 / 180 * Math.PI));
-                        var offset2 = (pic.sizex / 2 * pic.scale + SITPLANVIEW_SELECT_PADDING) / (Math.cos((90 - rotate_3) / 180 * Math.PI));
-                        var offset = Math.min(offset1, offset2);
-                        boxlabel.style.left = ((pic.posx) - boxlabel.offsetWidth / 2) + 'px';
-                        boxlabel.style.top = ((pic.posy - offset) - boxlabel.offsetHeight * 0.8) + 'px';
-                        pic.labelposx = (pic.posx);
-                        pic.labelposy = (pic.posy - offset - boxlabel.offsetHeight * 0.5 / 2);
-                        break;
-                    }
-                    case 'onder': {
-                        var rotate_4 = Math.abs(pic.rotate) % 180;
-                        if (rotate_4 > 90)
-                            rotate_4 = 180 - rotate_4;
-                        var offset1 = (pic.sizey / 2 * pic.scale + SITPLANVIEW_SELECT_PADDING) / (Math.cos(rotate_4 / 180 * Math.PI));
-                        var offset2 = (pic.sizex / 2 * pic.scale + SITPLANVIEW_SELECT_PADDING) / (Math.cos((90 - rotate_4) / 180 * Math.PI));
-                        var offset = Math.min(offset1, offset2);
-                        boxlabel.style.left = ((pic.posx) - boxlabel.offsetWidth / 2) + 'px';
-                        boxlabel.style.top = ((pic.posy + offset) - boxlabel.offsetHeight * 0.2) + 'px';
-                        pic.labelposx = (pic.posx);
-                        pic.labelposy = (pic.posy + offset + boxlabel.offsetHeight * 0.7 / 2);
-                        break;
-                    }
-                }
-            }
-            if (this.sitplan.activePage != pic.page)
-                boxlabel.classList.add('hidden');
-        }
-        if (this.sitplan.activePage != pic.page)
-            box.classList.add('hidden');
-    };
-    SituationPlanView.prototype.updateBoxContent = function (box) {
-        var pic = box.picref;
-        var svg = pic.getScaledSVG();
-        if (svg != null)
-            box.innerHTML = pic.getScaledSVG();
-        if (pic.boxlabelref != null) {
-            var adres = pic.getAdres();
-            if (pic.labelfontsize != null)
-                pic.boxlabelref.style.fontSize = String(pic.labelfontsize) + 'px';
-            if (adres != null)
-                pic.boxlabelref.innerHTML = adres;
-        }
-    };
     SituationPlanView.prototype.clearSelection = function () {
         var boxes = document.querySelectorAll('.box');
         boxes.forEach(function (b) { return b.classList.remove('selected'); });
@@ -2627,32 +3009,6 @@ var SituationPlanView = /** @class */ (function () {
     SituationPlanView.prototype.selectBox = function (box) {
         box.classList.add('selected');
         this.selectedBox = box;
-    };
-    SituationPlanView.prototype.reloadSitPlan = function () {
-        for (var _i = 0, _a = this.sitplan.elements; _i < _a.length; _i++) {
-            var element = _a[_i];
-            if (element.electroItemId != null) {
-                var ordinal = structure.getOrdinalById(element.electroItemId);
-                if (ordinal == null) {
-                    this.sitplan.removeElement(element);
-                    this.reloadSitPlan(); // Go to the next element in the loop
-                    return;
-                }
-            }
-            if (this.boxes[element.id] === undefined) {
-                this.boxes[element.id] = this.makeBox(element);
-            }
-        }
-    };
-    SituationPlanView.prototype.redraw = function () {
-        this.selectPage(this.sitplan.activePage);
-        this.reloadSitPlan();
-        for (var _i = 0, _a = this.sitplan.elements; _i < _a.length; _i++) {
-            var element = _a[_i];
-            this.updateBoxContent(element.boxref); //content needs to be updated first to know the size of the box
-            this.updateBoxPosition(element.boxref);
-        }
-        this.updateRibbon();
     };
     SituationPlanView.prototype.selectPage = function (page) {
         this.sitplan.activePage = page;
@@ -2669,27 +3025,12 @@ var SituationPlanView = /** @class */ (function () {
         }
         this.updateRibbon();
     };
-    SituationPlanView.prototype.setzoom = function (factor) {
-        this.zoomfactor = Math.min(Math.max(SITPLANVIEW_ZOOMINTERVAL.MIN, factor), SITPLANVIEW_ZOOMINTERVAL.MAX);
-        this.paper.style.transform = "scale(".concat(this.zoomfactor, ")");
-    };
-    SituationPlanView.prototype.zoom = function (increment) {
-        this.setzoom(this.zoomfactor + increment);
-    };
-    SituationPlanView.prototype.zoomToFit = function () {
-        var paperwidth = this.paper.offsetWidth;
-        var paperheight = this.paper.offsetHeight;
-        var outerwidth = this.outerbox.offsetWidth;
-        var outerheight = this.outerbox.offsetHeight;
-        var zoomfactor = Math.min((outerwidth - 20) / (paperwidth), (outerheight - 20) / (paperheight));
-        this.setzoom(zoomfactor);
-    };
     SituationPlanView.prototype.updateRibbon = function () {
         var _this = this;
         var outputleft = "";
         var outputright = "";
         // -- Undo/redo buttons --
-        outputleft += "\n            <div class=\"icon\" onclick=\"undoClicked()\" ".concat((undostruct.undoStackSize() > 0 ? "" : "style=\"filter: opacity(45%)\""), ">\n                <img src=\"gif/undo.png\" alt=\"Ongedaan maken\" class=\"icon-image\">\n                <span class=\"icon-text\">Ongedaan maken</span>\n            </div>\n            <div class=\"icon\" onclick=\"redoClicked()\" ").concat((undostruct.redoStackSize() > 0 ? "" : "style=\"filter: opacity(45%)\""), ">\n                <img src=\"gif/redo.png\" alt=\"Opnieuw\" class=\"icon-image\">\n                <span class=\"icon-text\">Opnieuw</span>\n            </div>\n            <span style=\"display: inline-block; width: 30px;\"></span>\n        ");
+        outputleft += "\n            <div class=\"icon\" ".concat((undostruct.undoStackSize() > 0 ? 'onclick="undoClicked()"' : 'style="filter: opacity(45%)"'), ">\n                <img src=\"gif/undo.png\" alt=\"Ongedaan maken\" class=\"icon-image\">\n                <span class=\"icon-text\">Ongedaan maken</span>\n            </div>\n            <div class=\"icon\"  ").concat((undostruct.redoStackSize() > 0 ? 'onclick="redoClicked()"' : 'style=\"filter: opacity(45%)\"'), ">\n                <img src=\"gif/redo.png\" alt=\"Opnieuw\" class=\"icon-image\">\n                <span class=\"icon-text\">Opnieuw</span>\n            </div>\n            <span style=\"display: inline-block; width: 30px;\"></span>\n        ");
         // -- Visuals om items te laden of verwijderen --
         outputleft += '<span style="display: inline-block; width: 10px;"></span>';
         outputleft += "\n        <div class=\"icon\" id=\"button_Add\">\n            <span class=\"icon-image\" style=\"font-size:24px\">\u2795</span>\n            <span class=\"icon-text\">Uit bestand</span>\n        </div>\n        <div class=\"icon\" id=\"button_Add_electroItem\">\n            <span class=\"icon-image\" style=\"font-size:24px\">\u2795</span>\n            <span class=\"icon-text\">Uit schema</span>\n        </div>\n        <div class=\"icon\" id=\"button_Delete\">\n            <span class=\"icon-image\" style=\"font-size:24px\">\uD83D\uDDD1</span>\n            <span class=\"icon-text\">Verwijder</span>\n        </div>";
@@ -2756,6 +3097,35 @@ var SituationPlanView = /** @class */ (function () {
     };
     return SituationPlanView;
 }());
+function showSituationPlanPage() {
+    toggleAppView('draw');
+    if (!(structure.sitplan)) {
+        structure.sitplan = new SituationPlan();
+    }
+    ;
+    if (!(structure.sitplanview)) {
+        //First destroy all elements on the DOM with id starting with "SP_" to avoid any orphans being left from earlier exercises
+        var elements = document.querySelectorAll('[id^="SP_"]');
+        elements.forEach(function (e) { return e.remove(); });
+        //Then create the SituationPlanView
+        structure.sitplanview = new SituationPlanView(document.getElementById('outerdiv'), document.getElementById('paper'), structure.sitplan);
+        structure.sitplanview.zoomToFit();
+    }
+    ;
+    structure.sitplanview.updateRibbon();
+    var spinner = document.createElement('div');
+    spinner.classList.add('loading-spinner');
+    document.getElementById('outerdiv').appendChild(spinner);
+    //requestAnimationFrame(() => {
+    //    requestAnimationFrame(() => {
+    render();
+    //    });
+    //});
+    function render() {
+        structure.sitplanview.redraw();
+        //        document.getElementById('outerdiv').removeChild(spinner);    
+    }
+}
 function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK) {
     var div = document.createElement('div');
     div.innerHTML = "\n        <div id=\"popupOverlay\" style=\"position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; visibility: hidden; z-index: 9999;\">\n            <div id=\"popupWindow\" style=\"width: 400px; background-color: white; padding: 20px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); display: flex; flex-direction: column; justify-content: space-between;\">\n                <div id=\"selectKringContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block;\">Kring:</label>\n                    <select id=\"KringSelect\"></select>\n                </div>\n                <div id=\"selectElectroItemContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block;\">Kring:</label>\n                    <select id=\"selectElectroItemBox\"></select>\n                </div>\n                <div id=\"textContainer\" style=\"display: flex; margin-bottom: 30px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block;\">ID:</label>\n                    <input id=\"textInput\" style=\"width: 100px;\" type=\"number\" min=\"0\" step=\"1\" value=\"\">\n                    <div id=\"feedback\" style=\"margin-left: 10px; width: 100%; font-size: 12px\"></div>\n                </div>\n                <div id=\"selectContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block; white-space: nowrap;\">Label type:</label>\n                    <select id=\"selectBox\">\n                        <option value=\"auto\">Automatisch</option>\n                        <!--<option value=\"adres\">Uit schema: [Adres]</option>-->\n                        <option value=\"manueel\">Handmatig</option>\n                    </select>\n                </div>\n                <div id=\"adresContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block; white-space: nowrap;\">Label tekst:</label>\n                    <input id=\"adresInput\" style=\"width: 100%;\" type=\"text\" value=\"\">\n                    <select id=\"selectAdresLocation\" style=\"margin-left: 10px; display: inline-block;\">\n                        <option value=\"links\">Links</option>\n                        <option value=\"rechts\">Rechts</option>\n                        <option value=\"boven\">Boven</option>\n                        <option value=\"onder\">Onder</option>\n                    </select>\n                </div>\n                <div id=\"fontSizeContainer\" style=\"display: flex; margin-bottom: 30px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block; white-space: nowrap;\">Font grootte (px):</label>\n                    <input id=\"fontSizeInput\" style=\"width: 100px;\" type=\"number\" min=\"1\" max=\"72\" step=\"11\" value=\"11\">\n                </div> \n                <div style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block;\">Schaal (%):</label>\n                    <input id=\"scaleInput\" style=\"width: 100px;\" type=\"number\" min=\"10\" max=\"400\" step=\"10\" value=\"".concat(String(SITPLANVIEW_DEFAULT_SCALE * 100), "\">\n                </div>\n                <div style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block;\">Rotatie (\u00B0):</label>\n                    <input id=\"rotationInput\" style=\"width: 100px;\" type=\"number\" min=\"0\" max=\"360\" step=\"10\" value=\"0\">\n                </div>\n                <div style=\"display: flex; justify-content: space-between;\">\n                    <button id=\"okButton\">OK</button>\n                    <button id=\"cancelButton\">Cancel</button>\n                </div>\n            </div>\n        </div>");
@@ -2779,8 +3149,8 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK) {
     var rotationInput = popupWindow.querySelector('#rotationInput');
     var okButton = popupWindow.querySelector('#okButton');
     var cancelButton = popupWindow.querySelector('#cancelButton');
-    var adressen = SituationPlanView_Kringen();
-    var kringnamen = adressen.getUniqueSortedKringnaam();
+    var adressen = new ElectroItemZoeker();
+    var kringnamen = adressen.getUniqueKringnaam();
     function selectBoxChanged() {
         var id = Number(textInput.value);
         updateElectroType();
@@ -2865,7 +3235,7 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK) {
         if (!isNaN(idx)) {
             var item = electroItems[idx];
             if (item != null)
-                str = electroItems[idx].id;
+                str = electroItems[idx].id.toString();
         }
         textInput.value = str;
     }
@@ -2942,7 +3312,7 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK) {
             fontSizeContainer.style.display = 'none';
             adresContainer.style.display = 'none';
         }
-        scaleInput.value = String(sitplanElement.scale * 100);
+        scaleInput.value = String(sitplanElement.getscale() * 100);
         rotationInput.value = String(sitplanElement.rotate);
     }
     else { // Form werd aangeroepen om een nieuw element te creëren
@@ -2971,45 +3341,6 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK) {
     //selectBoxChanged(); 
     document.body.appendChild(div);
     showPopup();
-}
-function SituationPlanView_Kringen() {
-    var excludedTypes = ['Aansluiting', 'Bord', 'Kring', 'Domotica', 'Domotica module (verticaal)', 'Domotica gestuurde verbruiker',
-        'Leiding', 'Splitsing', 'Verlenging', 'Vrije ruimte', 'Meerdere verbruikers'];
-    // Aansluiting is wel toegelaten in Trikker en willen we wellicht later toelaten
-    var output = {};
-    output.alldata = [];
-    output.getUniqueSortedKringnaam = function () {
-        var uniqueKringnaamArray = [];
-        for (var i = 0; i < output.alldata.length; i++) {
-            if (uniqueKringnaamArray.indexOf(output.alldata[i].kringnaam) === -1)
-                uniqueKringnaamArray.push(output.alldata[i].kringnaam);
-        }
-        return uniqueKringnaamArray;
-    };
-    output.getElectroItemsByKring = function (kringnaam) {
-        var electroItemArray = [];
-        for (var i = 0; i < output.alldata.length; i++) {
-            if (output.alldata[i].kringnaam === kringnaam) {
-                electroItemArray.push({ id: output.alldata[i].id, adres: output.alldata[i].adres, type: output.alldata[i].type });
-            }
-            ;
-        }
-        return electroItemArray;
-    };
-    for (var i = 0; i < structure.length; i++) {
-        if (structure.active[i]) {
-            var id = structure.id[i];
-            var kringnaam = structure.findKringName(id).trim();
-            if (kringnaam != '') {
-                var type = structure.data[i].getType();
-                if ((type != null) && (excludedTypes.indexOf(type) === -1)) {
-                    var adres = structure.data[i].getReadableAdres();
-                    output.alldata.push({ id: id, kringnaam: kringnaam, adres: adres, type: type });
-                }
-            }
-        }
-    }
-    return output;
 }
 var List_Item = /** @class */ (function () {
     // -- Constructor --
@@ -8223,7 +8554,7 @@ var Hierarchical_List = /** @class */ (function () {
     Hierarchical_List.prototype.updateRibbon = function () {
         var output = "";
         // Plaats bovenaan de switch van editeer-mode (teken of verplaats) --
-        output += "\n            <div class=\"icon\" onclick=\"undoClicked()\" ".concat((undostruct.undoStackSize() > 0 ? "" : "style=\"filter: opacity(45%)\""), ">\n                <img src=\"gif/undo.png\" alt=\"Ongedaan maken\" class=\"icon-image\">\n                <span class=\"icon-text\">Ongedaan maken</span>\n            </div>\n            <div class=\"icon\" onclick=\"redoClicked()\" ").concat((undostruct.redoStackSize() > 0 ? "" : "style=\"filter: opacity(45%)\""), ">\n                <img src=\"gif/redo.png\" alt=\"Opnieuw\" class=\"icon-image\">\n                <span class=\"icon-text\">Opnieuw</span>\n            </div>\n            <span style=\"display: inline-block; width: 30px;\"></span>\n        ");
+        output += "\n            <div class=\"icon\" ".concat((undostruct.undoStackSize() > 0 ? 'onclick="undoClicked()"' : "style=\"filter: opacity(45%)\""), ">\n                <img src=\"gif/undo.png\" alt=\"Ongedaan maken\" class=\"icon-image\">\n                <span class=\"icon-text\">Ongedaan maken</span>\n            </div>\n            <div class=\"icon\" ").concat((undostruct.redoStackSize() > 0 ? 'onclick="redoClicked()"' : "style=\"filter: opacity(45%)\""), ">\n                <img src=\"gif/redo.png\" alt=\"Opnieuw\" class=\"icon-image\">\n                <span class=\"icon-text\">Opnieuw</span>\n            </div>\n            <span style=\"display: inline-block; width: 30px;\"></span>\n        ");
         output += '<p style="margin-top: 5px;margin-bottom: 5px;">';
         switch (this.mode) {
             case "edit":
@@ -8776,20 +9107,20 @@ function toggleAppView(type) {
     structure.properties.currentView = type;
     if (type === '2col') {
         document.getElementById("configsection").style.display = 'none';
-        document.getElementById("outerbox").style.display = 'none';
+        document.getElementById("outerdiv").style.display = 'none';
         document.getElementById("ribbon").style.display = 'flex';
         document.getElementById("canvas_2col").style.display = 'flex';
         structure.updateRibbon();
     }
     else if (type === 'config') {
         document.getElementById("configsection").style.display = 'block';
-        document.getElementById("outerbox").style.display = 'none';
+        document.getElementById("outerdiv").style.display = 'none';
         document.getElementById("ribbon").style.display = 'none';
         document.getElementById("canvas_2col").style.display = 'none';
     }
     else if (type === 'draw') {
         document.getElementById("configsection").style.display = 'none';
-        document.getElementById("outerbox").style.display = 'flex';
+        document.getElementById("outerdiv").style.display = 'flex';
         document.getElementById("ribbon").style.display = 'flex';
         document.getElementById("canvas_2col").style.display = 'none';
     }
