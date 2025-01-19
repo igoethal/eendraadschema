@@ -6609,10 +6609,10 @@ var Lichtpunt = /** @class */ (function (_super) {
         var print_str_upper = "";
         if (this.props.is_halfwaterdicht) {
             print_str_upper = "h";
-            if (parseInt(this.props.aantal) > 1)
+            if ((parseInt(this.props.aantal) > 1) && (!sitplan))
                 print_str_upper += ", x" + this.props.aantal; //Meer dan 1 lamp
         }
-        else if (parseInt(this.props.aantal) > 1)
+        else if ((parseInt(this.props.aantal) > 1) && (!sitplan))
             print_str_upper = "x" + this.props.aantal;
         switch (this.props.type_lamp) {
             case "led":

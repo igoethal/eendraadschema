@@ -61,8 +61,8 @@ class Lichtpunt extends Electro_Item {
         let print_str_upper = "";
         if (this.props.is_halfwaterdicht) {
             print_str_upper = "h";
-            if (parseInt(this.props.aantal) > 1) print_str_upper += ", x" + this.props.aantal; //Meer dan 1 lamp
-        } else if (parseInt(this.props.aantal) > 1)
+            if ((parseInt(this.props.aantal) > 1) && (!sitplan)) print_str_upper += ", x" + this.props.aantal; //Meer dan 1 lamp
+        } else if ((parseInt(this.props.aantal) > 1) && (!sitplan))
             print_str_upper = "x" + this.props.aantal;
 
 
