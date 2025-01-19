@@ -177,6 +177,16 @@ class Electro_Item extends List_Item {
     return(output);
   }
 
+  // -- Displays the Expand button for the Electro_item, in case the item is expandable --
+
+  toHTMLFooter() {
+    if (this.isExpandable()) {
+      return(` <button title="Meerdere schakelaars omzetten in indivuele schakelaars" style="background-color:lightblue;" onclick="HLExpand(${this.id})">Uitpakken</button>`);
+    } else {
+      return("");
+    }
+  }
+
   // -- This one will get called if the type of the Electro_Item has not yet been chosen --
 
   toHTML(mode: string) { return(this.toHTMLHeader(mode)); } // Implemented in the derived classes
@@ -248,6 +258,23 @@ class Electro_Item extends List_Item {
     let myElement = new SituationPlanElement();
     //this.updateSituationPlanElement(myElement); //Lijkt niet nodig aangezien dit zoiezo gebeurt in getScaledSVG bij iedere update
     return(myElement);
+  }
+
+
+/** 
+ * Functie geeft aan of een Electro_Item nog verder kan uitgesplitst worden in kleinere Items.
+ * Deze is vooral nuttig voor het situatieschema om groepen van schakelaars of een lichtcircuit te herkennen.
+ */
+  isExpandable() {
+    return false;
+  }
+
+  /**
+   * Deze functie splitst een Electro_Item verder uit in kleinere Items.  Dit is uiteraard enkel mogelijk indien isExpandable() true geeft.
+   * De aanpassing wordt direct op de sourcelist uitgevoerd.
+   */
+  expand() {
+    if (!this.isExpandable()) return;
   }
 
   /**

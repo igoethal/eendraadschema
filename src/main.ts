@@ -73,6 +73,17 @@ function HL_editmode() {
     HLRedrawTreeHTML();
 }
 
+function HLExpand(my_id: number ) {
+    let element: Electro_Item = structure.getElectroItemById(my_id) as Electro_Item;
+    if (element !== null) {
+        element.expand();
+    }
+    
+    structure.reSort();
+    undostruct.store();
+    HLRedrawTree();
+}
+
 function HL_changeparent(my_id: number) {
     // See what the new parentid is
     let str_newparentid = (document.getElementById("id_parent_change_"+my_id) as HTMLInputElement).value;
@@ -94,7 +105,6 @@ function HL_changeparent(my_id: number) {
 
     structure.reSort();
     undostruct.store();
-
     HLRedrawTree();
 }
 

@@ -81,6 +81,9 @@ class Schakelaars extends Electro_Item {
         }
 
         output += ", Adres/tekst: " + this.stringPropToHTML('adres',5);
+
+        output += this.toHTMLFooter();
+
         return(output);
     }
 
@@ -120,6 +123,86 @@ class Schakelaars extends Electro_Item {
                 break;
             case "driepolig":
                 tekenKeten.push(new Schakelaar("driepolig",this.props.is_halfwaterdicht,this.props.heeft_verklikkerlampje,this.props.heeft_signalisatielampje,this.props.is_trekschakelaar));
+                break;
+        }
+    }
+
+    isExpandable() {
+        switch (this.props.type_schakelaar) {
+            case "enkelpolig": case "dubbelpolig":
+                return (Number(this.props.aantal_schakelaars) > 1);
+            default:
+                return (false);
+        }
+    }
+
+    expand() {
+        switch (this.props.type_schakelaar) {
+            case "enkelpolig": 
+                if (Number(this.props.aantal_schakelaars) > 1) { // Er zijn er altijd 2 als er niet 1 is
+
+                    let adresGoesHere = Math.floor(this.props.aantal_schakelaars/2);
+
+                    let schakelaar1 = new Schakelaars(this.sourcelist);
+                    Object.assign(schakelaar1.props, this.props);
+                    schakelaar1.props.aantal_schakelaars = 1;
+                    schakelaar1.props.type_schakelaar = "wissel_enkel";
+                    schakelaar1.props.adres = "";
+                    this.sourcelist.insertItemBeforeId(schakelaar1,this.id);
+                    let lastschakelaar = schakelaar1;
+
+                    for (let i=0; i<Number(this.props.aantal_schakelaars)-2; ++i) {
+                        let schakelaar = new Schakelaars(this.sourcelist);
+                        Object.assign(schakelaar.props, this.props);
+                        schakelaar.props.aantal_schakelaars = 1;
+                        schakelaar.props.type_schakelaar = "kruis_enkel";
+                        if (adresGoesHere == i+1) {
+                            schakelaar.props.adres = this.props.adres;
+                        } else {
+                            schakelaar.props.adres = "";    
+                        }
+                        if (this.getParent().props.type === "Meerdere verbruikers") {    
+                            this.sourcelist.insertItemBeforeId(schakelaar,this.id);
+                        } else {
+                            this.sourcelist.insertChildAfterId(schakelaar,lastschakelaar.id);
+                            lastschakelaar = schakelaar;
+                        }
+                    }
+
+                    if (adresGoesHere == Number(this.props.aantal_schakelaars)-1) {
+                        this.props.adres = this.props.adres;
+                    } else {
+                        this.props.adres = "";
+                    }
+                    this.props.aantal_schakelaars = 1;
+                    this.props.type_schakelaar = "wissel_enkel"
+                
+                    if (this.getParent().props.type === "Meerdere verbruikers") {
+                        this.parent = this.getParent().id;
+                    } else {
+                        this.parent = lastschakelaar.id;
+                    }
+                }
+                break;
+                
+            case "dubbelpolig": 
+                if (Number(this.props.aantal_schakelaars) > 1) { // Er zijn er altijd 2 als er niet 1 is
+
+                    let schakelaar1 = new Schakelaars(this.sourcelist);
+                    Object.assign(schakelaar1.props, this.props);
+                    schakelaar1.props.aantal_schakelaars = 1;
+                    schakelaar1.props.type_schakelaar = "wissel_dubbel";
+                    schakelaar1.props.adres = "";
+                    this.sourcelist.insertItemBeforeId(schakelaar1,this.id);
+
+                    this.props.aantal_schakelaars = 1;
+                    this.props.type_schakelaar = "wissel_dubbel"
+                    if (this.getParent().props.type == "Meerdere verbruikers") {
+                        this.parent = this.getParent().id;
+                    } else {
+                        this.parent = schakelaar1.id;
+                    }
+                }
                 break;
         }
     }

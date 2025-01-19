@@ -3831,6 +3831,15 @@ var Electro_Item = /** @class */ (function (_super) {
         output += this.selectPropToHTML('type', consumerArray);
         return (output);
     };
+    // -- Displays the Expand button for the Electro_item, in case the item is expandable --
+    Electro_Item.prototype.toHTMLFooter = function () {
+        if (this.isExpandable()) {
+            return (" <button title=\"Meerdere schakelaars omzetten in indivuele schakelaars\" style=\"background-color:lightblue;\" onclick=\"HLExpand(".concat(this.id, ")\">Uitpakken</button>"));
+        }
+        else {
+            return ("");
+        }
+    };
     // -- This one will get called if the type of the Electro_Item has not yet been chosen --
     Electro_Item.prototype.toHTML = function (mode) { return (this.toHTMLHeader(mode)); }; // Implemented in the derived classes
     // -- Get the number of the Electro_Item, if it is not defined, ask the parent
@@ -3903,6 +3912,21 @@ var Electro_Item = /** @class */ (function (_super) {
         var myElement = new SituationPlanElement();
         //this.updateSituationPlanElement(myElement); //Lijkt niet nodig aangezien dit zoiezo gebeurt in getScaledSVG bij iedere update
         return (myElement);
+    };
+    /**
+     * Functie geeft aan of een Electro_Item nog verder kan uitgesplitst worden in kleinere Items.
+     * Deze is vooral nuttig voor het situatieschema om groepen van schakelaars of een lichtcircuit te herkennen.
+     */
+    Electro_Item.prototype.isExpandable = function () {
+        return false;
+    };
+    /**
+     * Deze functie splitst een Electro_Item verder uit in kleinere Items.  Dit is uiteraard enkel mogelijk indien isExpandable() true geeft.
+     * De aanpassing wordt direct op de sourcelist uitgevoerd.
+     */
+    Electro_Item.prototype.expand = function () {
+        if (!this.isExpandable())
+            return;
     };
     /**
      * Geeft de boundary's terug van het element in het situatieplan. Deze boundary's worden gebruikt om het element te positioneren en te clippen.
@@ -4349,6 +4373,7 @@ var Schakelaars = /** @class */ (function (_super) {
                 break;
         }
         output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
+        output += this.toHTMLFooter();
         return (output);
     };
     Schakelaars.prototype.bouwSchakelaarKeten = function (tekenKeten) {
@@ -4425,6 +4450,82 @@ var Schakelaars = /** @class */ (function (_super) {
                 break;
             case "driepolig":
                 tekenKeten.push(new Schakelaar("driepolig", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
+                break;
+        }
+    };
+    Schakelaars.prototype.isExpandable = function () {
+        switch (this.props.type_schakelaar) {
+            case "enkelpolig":
+            case "dubbelpolig":
+                return (Number(this.props.aantal_schakelaars) > 1);
+            default:
+                return (false);
+        }
+    };
+    Schakelaars.prototype.expand = function () {
+        switch (this.props.type_schakelaar) {
+            case "enkelpolig":
+                if (Number(this.props.aantal_schakelaars) > 1) { // Er zijn er altijd 2 als er niet 1 is
+                    var adresGoesHere = Math.floor(this.props.aantal_schakelaars / 2);
+                    var schakelaar1 = new Schakelaars(this.sourcelist);
+                    Object.assign(schakelaar1.props, this.props);
+                    schakelaar1.props.aantal_schakelaars = 1;
+                    schakelaar1.props.type_schakelaar = "wissel_enkel";
+                    schakelaar1.props.adres = "";
+                    this.sourcelist.insertItemBeforeId(schakelaar1, this.id);
+                    var lastschakelaar = schakelaar1;
+                    for (var i = 0; i < Number(this.props.aantal_schakelaars) - 2; ++i) {
+                        var schakelaar = new Schakelaars(this.sourcelist);
+                        Object.assign(schakelaar.props, this.props);
+                        schakelaar.props.aantal_schakelaars = 1;
+                        schakelaar.props.type_schakelaar = "kruis_enkel";
+                        if (adresGoesHere == i + 1) {
+                            schakelaar.props.adres = this.props.adres;
+                        }
+                        else {
+                            schakelaar.props.adres = "";
+                        }
+                        if (this.getParent().props.type === "Meerdere verbruikers") {
+                            this.sourcelist.insertItemBeforeId(schakelaar, this.id);
+                        }
+                        else {
+                            this.sourcelist.insertChildAfterId(schakelaar, lastschakelaar.id);
+                            lastschakelaar = schakelaar;
+                        }
+                    }
+                    if (adresGoesHere == Number(this.props.aantal_schakelaars) - 1) {
+                        this.props.adres = this.props.adres;
+                    }
+                    else {
+                        this.props.adres = "";
+                    }
+                    this.props.aantal_schakelaars = 1;
+                    this.props.type_schakelaar = "wissel_enkel";
+                    if (this.getParent().props.type === "Meerdere verbruikers") {
+                        this.parent = this.getParent().id;
+                    }
+                    else {
+                        this.parent = lastschakelaar.id;
+                    }
+                }
+                break;
+            case "dubbelpolig":
+                if (Number(this.props.aantal_schakelaars) > 1) { // Er zijn er altijd 2 als er niet 1 is
+                    var schakelaar1 = new Schakelaars(this.sourcelist);
+                    Object.assign(schakelaar1.props, this.props);
+                    schakelaar1.props.aantal_schakelaars = 1;
+                    schakelaar1.props.type_schakelaar = "wissel_dubbel";
+                    schakelaar1.props.adres = "";
+                    this.sourcelist.insertItemBeforeId(schakelaar1, this.id);
+                    this.props.aantal_schakelaars = 1;
+                    this.props.type_schakelaar = "wissel_dubbel";
+                    if (this.getParent().props.type == "Meerdere verbruikers") {
+                        this.parent = this.getParent().id;
+                    }
+                    else {
+                        this.parent = schakelaar1.id;
+                    }
+                }
                 break;
         }
     };
@@ -9254,6 +9355,15 @@ function HLInsertChild(my_id) {
 function HL_editmode() {
     structure.mode = document.getElementById("edit_mode").value;
     HLRedrawTreeHTML();
+}
+function HLExpand(my_id) {
+    var element = structure.getElectroItemById(my_id);
+    if (element !== null) {
+        element.expand();
+    }
+    structure.reSort();
+    undostruct.store();
+    HLRedrawTree();
 }
 function HL_changeparent(my_id) {
     // See what the new parentid is
