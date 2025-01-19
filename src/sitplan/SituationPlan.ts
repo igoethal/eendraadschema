@@ -13,6 +13,12 @@ class SituationPlan {
     private numPages: number = 1;
     private elements: SituationPlanElement[] = [];
 
+    public defaults = {
+        fontsize: 11,
+        scale: SITPLANVIEW_DEFAULT_SCALE,
+        rotate: 0
+    }
+
     /**
      * Workaround om de private variabele elements te kunnen gebruiken in friend classs
      * @returns {SituationPlanElement[]} De elementen van het situatieplan
@@ -46,7 +52,7 @@ class SituationPlan {
 
     addElementFromFile(event: InputEvent, page: number, posx: number, posy: number, callback: () => void): SituationPlanElement {
         let element: SituationPlanElement = new SituationPlanElement();
-        element.setVars({page: page, posx: posx, posy: posy});
+        element.setVars({page: page, posx: posx, posy: posy, labelfontsize: this.defaults.fontsize, scale: this.defaults.scale, rotate: this.defaults.rotate});
         element.importFromFile(event, callback);
         this.elements.push(element);
         return element;
@@ -160,6 +166,10 @@ class SituationPlan {
         } else {
             this.activePage = 1; }
 
+        if (json.defaults !== undefined) {
+            Object.assign(this.defaults, json.defaults);
+        }
+
         if (Array.isArray(json.elements)) {
             this.elements = json.elements.map((element: any) => {
                 const newElement = new SituationPlanElement();
@@ -170,19 +180,19 @@ class SituationPlan {
             this.elements = [];
         }
     }
-
-    /**
-     * Converteer het situatieplan naar een JSON-object.
-     * 
-     * @returns {any} Het JSON-object.
-     */
     
+    /**
+     * Converteer het situatieplan naar een JSON-object dat gebruikt kan worden
+     * voor opslaan in lokale storage of voor versturen naar de server.
+     * 
+     * @returns {any} Het JSON-object dat het situatieplan bevat.
+     */
     toJsonObject(): any {
         let elements = [];
         for (let element of this.elements) {
             elements.push(element.toJsonObject());
         }
-        return {numPages: this.numPages, activePage: this.activePage, elements: elements};
+        return {numPages: this.numPages, activePage: this.activePage, defaults: this.defaults, elements: elements};
     }
 
     /**

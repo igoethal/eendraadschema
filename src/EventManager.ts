@@ -22,6 +22,8 @@ class EventManager {
 
         this.listeners.push({ element, type, listener });
         element.addEventListener(type, listener);
+
+        this.cleanup(); // Before we proceed, remove all listeners for elements that no longer exist
     }
 
     /**
@@ -39,5 +41,18 @@ class EventManager {
      */
     dispose() {
         this.removeAllEventListeners();
+    }
+
+    /**
+     * Removes all listeners for which the HTML element no longer exists.
+     */
+    cleanup() {
+        this.listeners = this.listeners.filter(({ element, type, listener }) => {
+            if (!document.contains(element)) {
+                element.removeEventListener(type, listener);
+                return false;
+            }
+            return true;
+        });
     }
 }

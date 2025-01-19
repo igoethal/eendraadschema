@@ -33,7 +33,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
+        while (g && (g = 0, op[0] && (_ = 0)), _) try {
             if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
             if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
@@ -342,6 +342,7 @@ var EventManager = /** @class */ (function () {
         }
         this.listeners.push({ element: element, type: type, listener: listener });
         element.addEventListener(type, listener);
+        this.cleanup(); // Before we proceed, remove all listeners for elements that no longer exist
     };
     /**
      * Removes all event listeners managed by this EventManager instance.
@@ -358,6 +359,19 @@ var EventManager = /** @class */ (function () {
      */
     EventManager.prototype.dispose = function () {
         this.removeAllEventListeners();
+    };
+    /**
+     * Removes all listeners for which the HTML element no longer exists.
+     */
+    EventManager.prototype.cleanup = function () {
+        this.listeners = this.listeners.filter(function (_a) {
+            var element = _a.element, type = _a.type, listener = _a.listener;
+            if (!document.contains(element)) {
+                element.removeEventListener(type, listener);
+                return false;
+            }
+            return true;
+        });
     };
     return EventManager;
 }());
@@ -1583,7 +1597,6 @@ var undoRedo = /** @class */ (function () {
                 var element = _a[_i];
                 if (!element.isEendraadschemaSymbool())
                     element.svg = this.largeStrings.get(parseInt(element.svg));
-                element.needsViewUpdate = true;
             }
         }
     };
@@ -1904,6 +1917,11 @@ var SituationPlan = /** @class */ (function () {
         this.activePage = 1; // We houden deze bij in situationplan zodat ook wijzigingen van pagina's worden opgeslagen
         this.numPages = 1;
         this.elements = [];
+        this.defaults = {
+            fontsize: 11,
+            scale: SITPLANVIEW_DEFAULT_SCALE,
+            rotate: 0
+        };
     }
     /**
      * Workaround om de private variabele elements te kunnen gebruiken in friend classs
@@ -1933,7 +1951,7 @@ var SituationPlan = /** @class */ (function () {
      */
     SituationPlan.prototype.addElementFromFile = function (event, page, posx, posy, callback) {
         var element = new SituationPlanElement();
-        element.setVars({ page: page, posx: posx, posy: posy });
+        element.setVars({ page: page, posx: posx, posy: posy, labelfontsize: this.defaults.fontsize, scale: this.defaults.scale, rotate: this.defaults.rotate });
         element.importFromFile(event, callback);
         this.elements.push(element);
         return element;
@@ -2046,6 +2064,9 @@ var SituationPlan = /** @class */ (function () {
         else {
             this.activePage = 1;
         }
+        if (json.defaults !== undefined) {
+            Object.assign(this.defaults, json.defaults);
+        }
         if (Array.isArray(json.elements)) {
             this.elements = json.elements.map(function (element) {
                 var newElement = new SituationPlanElement();
@@ -2058,9 +2079,10 @@ var SituationPlan = /** @class */ (function () {
         }
     };
     /**
-     * Converteer het situatieplan naar een JSON-object.
+     * Converteer het situatieplan naar een JSON-object dat gebruikt kan worden
+     * voor opslaan in lokale storage of voor versturen naar de server.
      *
-     * @returns {any} Het JSON-object.
+     * @returns {any} Het JSON-object dat het situatieplan bevat.
      */
     SituationPlan.prototype.toJsonObject = function () {
         var elements = [];
@@ -2068,7 +2090,7 @@ var SituationPlan = /** @class */ (function () {
             var element = _a[_i];
             elements.push(element.toJsonObject());
         }
-        return { numPages: this.numPages, activePage: this.activePage, elements: elements };
+        return { numPages: this.numPages, activePage: this.activePage, defaults: this.defaults, elements: elements };
     };
     /**
      * Converteer het situatieplan naar een formaat dat gebruikt kan worden voor printen.
@@ -2504,31 +2526,59 @@ var SituationPlanView = /** @class */ (function () {
         this.paper = null;
         this.draggedBox = null; /** Box die op dit moment versleept wordt of null */
         this.selectedBox = null; /** Geselelecteerde box of null */
+        /**
+         * Start een sleepactie voor een box in het situatieplan.
+         *
+         * @param event - De gebeurtenis die de sleepactie activeert (muisklik of touchstart).
+         */
         this.startDrag = function (event) {
-            event.stopPropagation(); // Prevent body click event
-            _this.clearSelection(); // Clears any existing selection
-            _this.selectBox(event.target); // Selects the box we want to drag
-            _this.draggedBox = event.target; // IS THIS NEEDED IF WE ALREADY HAVE SELECTEDBOX ????
-            if (event.type === 'mousedown') {
-                _this.mousedrag.startDrag(event.clientX, event.clientY, _this.draggedBox.offsetLeft, _this.draggedBox.offsetTop, _this.zoomfactor);
+            event.stopPropagation(); // Voorkomt body klikgebeurtenis
+            _this.clearSelection(); // Wist bestaande selectie
+            _this.selectBox(event.target); // Selecteert de box die we willen slepen
+            _this.draggedBox = event.target; // Houdt de box die we aan het slepen zijn
+            switch (event.type) {
+                case 'mousedown':
+                    _this.mousedrag.startDrag(event.clientX, event.clientY, _this.draggedBox.offsetLeft, _this.draggedBox.offsetTop, _this.zoomfactor);
+                    document.addEventListener('mousemove', _this.processDrag);
+                    document.addEventListener('mouseup', _this.stopDrag);
+                    break;
+                case 'touchstart':
+                    var touch = event.touches[0];
+                    _this.mousedrag.startDrag(touch.clientX, touch.clientY, _this.draggedBox.offsetLeft, _this.draggedBox.offsetTop, _this.zoomfactor);
+                    document.addEventListener('touchmove', _this.processDrag, { passive: false });
+                    document.addEventListener('touchend', _this.stopDrag);
+                    break;
+                default:
+                    console.error('Ongeldige event voor startDrag functie');
             }
-            else if (event.type === 'touchstart') {
-                var touch = event.touches[0];
-                _this.mousedrag.startDrag(touch.clientX, touch.clientY, _this.draggedBox.offsetLeft, _this.draggedBox.offsetTop, _this.zoomfactor);
-            }
-            document.addEventListener('mousemove', _this.processDrag);
-            document.addEventListener('touchmove', _this.processDrag, { passive: false });
-            document.addEventListener('mouseup', _this.stopDrag);
-            document.addEventListener('touchend', _this.stopDrag);
         };
-        this.stopDrag = function () {
-            document.removeEventListener('mousemove', _this.processDrag);
-            document.removeEventListener('touchmove', _this.processDrag);
-            document.removeEventListener('mouseup', _this.stopDrag);
-            document.removeEventListener('touchend', _this.stopDrag);
+        /**
+         * Stopt de sleepactie van een box in het situatieplan en stopt de eventlisteners.
+         *
+         * @param event - De gebeurtenis die de sleepactie stopt (muisklik release of touchend).
+         */
+        this.stopDrag = function (event) {
+            event.stopPropagation();
+            switch (event.type) {
+                case 'mouseup':
+                    document.removeEventListener('mousemove', _this.processDrag);
+                    document.removeEventListener('mouseup', _this.stopDrag);
+                    break;
+                case 'touchend':
+                    document.removeEventListener('touchmove', _this.processDrag);
+                    document.removeEventListener('touchend', _this.stopDrag);
+                    break;
+                default:
+                    console.error('Ongeldige event voor stopDrag functie');
+            }
             _this.draggedBox = null;
             undostruct.store();
         };
+        /**
+         * Verwerkt een muisklik of touch event tijdens het slepen van een box in het situatieplan.
+         *
+         * @param event - De gebeurtenis die verwerkt wordt (muisklik of touchmove).
+         */
         this.processDrag = function (event) {
             if (_this.draggedBox) {
                 event.preventDefault();
@@ -2540,13 +2590,14 @@ var SituationPlanView = /** @class */ (function () {
                     var touch = event.touches[0];
                     newLeftTop = _this.mousedrag.returnNewLeftTop(touch.clientX, touch.clientY);
                 }
-                // Ensure the box stays within reasonable boundaries
+                // Zorg ervoor dat de box niet buiten redelijke grenzen van het canvas valt links-boven
+                // We doen deze controle niet rechts onder omdat het canvas daar gewoon kan groeien
                 newLeftTop.left = Math.max(-_this.draggedBox.offsetWidth / 2, newLeftTop.left);
                 newLeftTop.top = Math.max(-_this.draggedBox.offsetHeight / 2, newLeftTop.top);
-                var pic = _this.draggedBox.sitPlanElementRef;
-                pic.posx = newLeftTop.left + (_this.draggedBox.offsetWidth / 2);
-                pic.posy = newLeftTop.top + (_this.draggedBox.offsetHeight / 2);
-                _this.updateSymbolAndLabelPosition(pic);
+                var sitPlanElement = _this.draggedBox.sitPlanElementRef;
+                sitPlanElement.posx = newLeftTop.left + (_this.draggedBox.offsetWidth / 2);
+                sitPlanElement.posy = newLeftTop.top + (_this.draggedBox.offsetHeight / 2);
+                _this.updateSymbolAndLabelPosition(sitPlanElement);
             }
         };
         this.outerdiv = outerdiv;
@@ -2675,6 +2726,8 @@ var SituationPlanView = /** @class */ (function () {
      * @param sitPlanElement - Het situatieplanelement dat aangepast moet worden.
      */
     SituationPlanView.prototype.updateBoxContent = function (sitPlanElement) {
+        if (!sitPlanElement)
+            return;
         var box = sitPlanElement.boxref;
         var boxlabel = sitPlanElement.boxlabelref;
         if (box == null)
@@ -2848,130 +2901,53 @@ var SituationPlanView = /** @class */ (function () {
         }
         if (appendNeeded)
             this.paper.append(fragment); // We moeten de boxes toevoegen aan de DOM alvorens de label positie te berekenen aangezien we de size van de labels moeten kennen
+        this.showPage(this.sitplan.activePage);
         for (var _b = 0, _c = this.sitplan.elements; _b < _c.length; _b++) {
             var element = _c[_b];
-            this.updateBoxContent(element);
-            this.updateSymbolAndLabelPosition(element);
+            if (element.page == this.sitplan.activePage) {
+                this.updateBoxContent(element);
+                this.updateSymbolAndLabelPosition(element);
+            }
         }
-        this.selectPage(this.sitplan.activePage);
         this.updateRibbon();
         var end = performance.now();
         console.log("Redraw took ".concat(end - start, "ms"));
     };
-    SituationPlanView.prototype.attachDeleteButton = function (elem) {
-        var _this = this;
-        this.event_manager.addEventListener(elem, 'click', function () { _this.deleteBox(); undostruct.store(); });
+    /**
+     * Maakt de gegeven box de geselecteerde box.
+     *
+     * @param box - Het element dat geselecteerd moet worden.
+     */
+    SituationPlanView.prototype.selectBox = function (box) {
+        if (!box)
+            return;
+        box.classList.add('selected');
+        this.selectedBox = box;
     };
-    ;
-    SituationPlanView.prototype.attachScaleButton = function (elem, increment) {
-        var _this = this;
-        this.event_manager.addEventListener(elem, 'click', function () { _this.scaleBox(increment); undostruct.store(); });
+    /**
+     * Verwijdert de selectie van alle boxes.
+     */
+    SituationPlanView.prototype.clearSelection = function () {
+        var boxes = document.querySelectorAll('.box');
+        boxes.forEach(function (b) { return b.classList.remove('selected'); });
+        this.selectedBox = null;
     };
-    ;
-    SituationPlanView.prototype.attachRotateButton = function (elem, increment) {
-        var _this = this;
-        this.event_manager.addEventListener(elem, 'click', function () { _this.rotateBox(increment); undostruct.store(); });
-    };
-    ;
-    SituationPlanView.prototype.attachSendToBackButton = function (elem) {
-        var _this = this;
-        this.event_manager.addEventListener(elem, 'click', function () { _this.sendToBack(); });
-    };
-    ;
-    SituationPlanView.prototype.attachZoomButton = function (elem, increment) {
-        var _this = this;
-        this.event_manager.addEventListener(elem, 'click', function () { _this.zoomIncrement(increment); });
-    };
-    ;
-    SituationPlanView.prototype.attachZoomToFitButton = function (elem) {
-        var _this = this;
-        this.event_manager.addEventListener(elem, 'click', function () { _this.zoomToFit(); });
-    };
-    ;
-    SituationPlanView.prototype.attachAddElementFromFileButton = function (elem, fileinput) {
-        var _this = this;
-        this.event_manager.addEventListener(elem, 'click', function () { fileinput.click(); });
-        this.event_manager.addEventListener(fileinput, 'change', function (event) {
-            var element = _this.sitplan.addElementFromFile(event, _this.sitplan.activePage, 550, 300, (function () {
-                _this.syncToSitPlan();
-                _this.clearSelection();
-                element.needsViewUpdate = true;
-                _this.redraw();
-                _this.selectBox(element.boxref); // We moeten dit na redraw doen anders bestaat de box mogelijk nog niet
-                undostruct.store();
-            }).bind(_this));
-        });
-    };
-    SituationPlanView.prototype.attachAddElectroItemButton = function (elem) {
-        var _this = this;
-        this.event_manager.addEventListener(elem, 'click', function () {
-            // Display an html input dialog in the browser and ask for a number, return the number as variable id
-            SituationPlanView_ElementPropertiesPopup(null, function (id, adrestype, adres, adreslocation, labelfontsize, scale, rotate) {
-                if (id != null) {
-                    var element = _this.sitplan.addElementFromElectroItem(id, _this.sitplan.activePage, 550, 300, adrestype, adres, adreslocation, labelfontsize, scale, rotate);
-                    if (element != null) {
-                        _this.syncToSitPlan();
-                        _this.clearSelection();
-                        _this.redraw();
-                        _this.selectBox(element.boxref); // We moeten dit na redraw doen anders bestaat de box mogelijk nog niet
-                        undostruct.store();
-                    }
-                }
-                else {
-                    alert('Geen geldig ID ingegeven!');
-                }
-            });
-        });
-    };
-    SituationPlanView.prototype.attachEditButton = function (elem) {
-        var _this = this;
-        this.event_manager.addEventListener(elem, 'click', function () {
-            if (_this.selectedBox) {
-                var id = _this.selectedBox.id;
-                var pic_1 = _this.selectedBox.sitPlanElementRef;
-                SituationPlanView_ElementPropertiesPopup(pic_1, function (id, adrestype, adres, adreslocation, labelfontsize, scale, rotate) {
-                    if (id != null) {
-                        pic_1.setElectroItemId(id);
-                        pic_1.setAdres(adrestype, adres, adreslocation);
-                    }
-                    pic_1.labelfontsize = labelfontsize;
-                    pic_1.setscale(scale);
-                    pic_1.rotate = rotate;
-                    _this.updateBoxContent(pic_1); //content needs to be updated first to know the size of the box
-                    _this.updateSymbolAndLabelPosition(pic_1);
-                    undostruct.store();
-                });
-            }
-        });
-    };
-    SituationPlanView.prototype.deleteBox = function () {
-        if (this.selectedBox) {
-            var id = this.selectedBox.id;
-            var sitPlanElementRef = this.selectedBox.sitPlanElementRef;
-            this.selectedBox.remove();
-            if (sitPlanElementRef.boxlabelref != null)
-                sitPlanElementRef.boxlabelref.remove();
-            this.sitplan.removeElement(sitPlanElementRef);
-            this.selectedBox = null;
-        }
-    };
-    SituationPlanView.prototype.scaleBox = function (increment) {
-        if (this.selectedBox) {
-            var pic = this.selectedBox.sitPlanElementRef;
-            if (pic == null)
-                return;
-            pic.setscale(Math.min(Math.max(0.1, pic.getscale() + increment), 1000));
-            this.updateBoxContent(pic); //content needs to be updated first to know the size of the box
-            this.updateSymbolAndLabelPosition(pic);
-        }
-    };
-    SituationPlanView.prototype.rotateBox = function (degrees) {
-        if (this.selectedBox) {
-            var id = this.selectedBox.id;
-            var pic = this.selectedBox.sitPlanElementRef;
-            pic.rotate = (pic.rotate + degrees) % 360;
-            this.selectedBox.style.transform = "rotate(".concat(pic.rotate, "deg)");
-        }
+    /**
+     * Verwijdert de geselecteerde box en verwijdert deze ook uit het situatieplan.
+     * Verwijdert ook het bijhorende label.
+     */
+    SituationPlanView.prototype.deleteSelectedBox = function () {
+        if (this.selectedBox == null)
+            return;
+        var id = this.selectedBox.id;
+        var sitPlanElement = this.selectedBox.sitPlanElementRef;
+        if (sitPlanElement == null)
+            return;
+        this.selectedBox.remove();
+        if (sitPlanElement.boxlabelref != null)
+            sitPlanElement.boxlabelref.remove();
+        this.sitplan.removeElement(sitPlanElement);
+        this.selectedBox = null;
     };
     /**
      * Send the selected box to the back of the z-index stack and reorder the elements of the situation plan accordingly
@@ -2980,38 +2956,70 @@ var SituationPlanView = /** @class */ (function () {
      * @returns void
      */
     SituationPlanView.prototype.sendToBack = function () {
-        if (this.selectedBox) {
-            for (var _i = 0, _a = this.sitplan.elements; _i < _a.length; _i++) {
-                var element = _a[_i];
-                if (element.boxref != null) {
-                    var newzindex = void 0;
-                    if (element.boxref != this.selectedBox) {
-                        newzindex = (parseInt(element.boxref.style.zIndex) || 0) + 1;
-                    }
-                    else {
-                        newzindex = 0;
-                    }
-                    element.boxref.style.zIndex = newzindex.toString();
-                    if (element.boxlabelref != null) {
-                        element.boxlabelref.style.zIndex = newzindex.toString();
-                    }
+        if (this.selectedBox == null)
+            return;
+        for (var _i = 0, _a = this.sitplan.elements; _i < _a.length; _i++) {
+            var element = _a[_i];
+            if (element.boxref != null) {
+                var newzindex = void 0;
+                if (element.boxref != this.selectedBox) {
+                    newzindex = (parseInt(element.boxref.style.zIndex) || 0) + 1;
+                }
+                else {
+                    newzindex = 0;
+                }
+                element.boxref.style.zIndex = newzindex.toString();
+                if (element.boxlabelref != null) {
+                    element.boxlabelref.style.zIndex = newzindex.toString();
                 }
             }
         }
         this.sitplan.orderByZIndex();
         undostruct.store();
     };
-    SituationPlanView.prototype.clearSelection = function () {
-        var boxes = document.querySelectorAll('.box');
-        boxes.forEach(function (b) { return b.classList.remove('selected'); });
-        this.selectedBox = null;
+    /**
+     * Send the selected box to the front of the z-index stack and reorder the elements of the situation plan accordingly
+     * so that after saving or during printing the elements are drawn in the same order.
+     *
+     * @returns void
+     */
+    SituationPlanView.prototype.bringToFront = function () {
+        if (this.selectedBox == null)
+            return;
+        var newzindex = 0;
+        for (var _i = 0, _a = this.sitplan.elements; _i < _a.length; _i++) {
+            var element_1 = _a[_i];
+            if ((element_1.boxref != null) && (element_1.boxref != this.selectedBox)) {
+                newzindex = Math.max(newzindex, parseInt(element_1.boxref.style.zIndex) || 0);
+            }
+        }
+        newzindex += 1;
+        var element = this.selectedBox.sitPlanElementRef;
+        if (element == null) {
+            this.sitplan.syncToSitPlan();
+            return;
+        }
+        this.selectedBox.style.zIndex = newzindex.toString();
+        if (element.boxlabelref != null)
+            element.boxlabelref.style.zIndex = newzindex.toString();
+        this.sitplan.orderByZIndex();
+        undostruct.store();
     };
-    SituationPlanView.prototype.selectBox = function (box) {
-        box.classList.add('selected');
-        this.selectedBox = box;
-    };
+    /**
+     * Selecteer een pagina.
+     *
+     * @param page - Het nummer van de pagina die getoond moet worden.
+     */
     SituationPlanView.prototype.selectPage = function (page) {
         this.sitplan.activePage = page;
+        this.redraw();
+    };
+    /**
+     * Toont enkel de elementen die op de pagina staan die als parameter wordt meegegeven.
+     *
+     * @param page - Het nummer van de pagina die getoond moet worden.
+     */
+    SituationPlanView.prototype.showPage = function (page) {
         for (var _i = 0, _a = this.sitplan.elements; _i < _a.length; _i++) {
             var element = _a[_i];
             if (element.page != page) {
@@ -3025,35 +3033,163 @@ var SituationPlanView = /** @class */ (function () {
         }
         this.updateRibbon();
     };
+    /**
+     * Hangt een klik event listener aan het gegeven element met als doel de huidig geselecteerde box te verwijderen.
+     *
+     * @param elem - Het html element waar de listener wordt aan gehangen.
+     */
+    SituationPlanView.prototype.attachDeleteButton = function (elem) {
+        var _this = this;
+        this.event_manager.addEventListener(elem, 'click', function () { _this.deleteSelectedBox(); undostruct.store(); });
+    };
+    ;
+    /**
+     * Hangt een klik event listener aan het gegeven element met als doel de huidig geselecteerde box naar de achtergrond te sturen.
+     *
+     * @param elem - Het html element waar de listener wordt aan gehangen.
+     */
+    SituationPlanView.prototype.attachSendToBackButton = function (elem) {
+        var _this = this;
+        this.event_manager.addEventListener(elem, 'click', function () { _this.sendToBack(); });
+    };
+    ;
+    /**
+     * Hangt een klik event listener aan het gegeven element met als doel de huidig geselecteerde box naar de voorgrond te brengen.
+     *
+     * @param elem - Het html element waar de listener wordt aan gehangen.
+     */
+    SituationPlanView.prototype.attachBringToFrontButton = function (elem) {
+        var _this = this;
+        this.event_manager.addEventListener(elem, 'click', function () { _this.bringToFront(); });
+    };
+    ;
+    /**
+     * Hangt een klik event listener aan het gegeven element met als doel de zoomfactor aan te passen.
+     *
+     * @param elem - Het html element waar de listener wordt aan gehangen.
+     * @param increment - De waarde waarmee de zoomfactor wordt aangepast. Een positieve waarde vergroot de zoom,
+     *                    terwijl een negatieve waarde de zoom verkleint.
+     */
+    SituationPlanView.prototype.attachZoomButton = function (elem, increment) {
+        var _this = this;
+        this.event_manager.addEventListener(elem, 'click', function () { _this.zoomIncrement(increment); });
+    };
+    ;
+    /**
+     * Hangt een klik event listener aan het gegeven element met als doel het situatieplan
+     * aan te passen aan de beschikbare ruimte in het browservenster.
+     *
+     * @param elem - Het html element waar de listener wordt aan gehangen.
+     */
+    SituationPlanView.prototype.attachZoomToFitButton = function (elem) {
+        var _this = this;
+        this.event_manager.addEventListener(elem, 'click', function () { _this.zoomToFit(); });
+    };
+    ;
+    /**
+     * Hangt een klik event listener aan het gegeven element om een bestand te kiezen en een verandering event listener aan het invoerelement
+     * om een nieuw element vanuit een bestand aan het situatieplan toe te voegen.
+     *
+     * @param elem - Het HTML-element dat bij een klik een bestand moet openen.
+     * @param fileinput - Het invoerelement voor bestanden dat het bestand uploadt wanneer het verandert.
+     */
+    SituationPlanView.prototype.attachAddElementFromFileButton = function (elem, fileinput) {
+        var _this = this;
+        this.event_manager.addEventListener(elem, 'click', function () { fileinput.click(); });
+        this.event_manager.addEventListener(fileinput, 'change', function (event) {
+            var element = _this.sitplan.addElementFromFile(event, _this.sitplan.activePage, 550, 300, (function () {
+                _this.syncToSitPlan();
+                _this.clearSelection();
+                element.needsViewUpdate = true; // for an external SVG this is needed, for an electroItem it is automatically set (see next function)
+                _this.redraw();
+                _this.selectBox(element.boxref); // We moeten dit na redraw doen anders bestaat de box mogelijk nog niet
+                _this.bringToFront();
+                undostruct.store();
+                fileinput.value = ''; // Zorgt ervoor dat hetzelfde bestand twee keer kan worden gekozen en dit nog steeds een change triggert
+            }).bind(_this));
+        });
+    };
+    /**
+     * Hangt een klik event listener aan het gegeven element om een nieuw Electro_Item aan het situatieplan toe te voegen.
+     *
+     * @param elem - Het HTML-element dat bij een klik een nieuw element toevoegt.
+     */
+    SituationPlanView.prototype.attachAddElectroItemButton = function (elem) {
+        var _this = this;
+        this.event_manager.addEventListener(elem, 'click', function () {
+            SituationPlanView_ElementPropertiesPopup(null, function (id, adrestype, adres, adreslocation, labelfontsize, scale, rotate) {
+                if (id != null) {
+                    var element = _this.sitplan.addElementFromElectroItem(id, _this.sitplan.activePage, 550, 300, adrestype, adres, adreslocation, labelfontsize, scale, rotate);
+                    if (element != null) {
+                        _this.syncToSitPlan();
+                        _this.clearSelection();
+                        _this.redraw();
+                        _this.selectBox(element.boxref); // We moeten dit na redraw doen anders bestaat de box mogelijk nog niet
+                        _this.bringToFront();
+                        undostruct.store();
+                    }
+                }
+                else {
+                    alert('Geen geldig ID ingegeven!');
+                }
+            });
+        });
+    };
+    /**
+     * Hangt een klik event listener aan het gegeven element om een bestaand element in het situatieplan te bewerken.
+     *
+     * @param elem - Het HTML-element dat bij een klik een bestaand element in het situatieplan bewerkt.
+     */
+    SituationPlanView.prototype.attachEditButton = function (elem) {
+        var _this = this;
+        this.event_manager.addEventListener(elem, 'click', function () {
+            if (_this.selectedBox) {
+                var sitPlanElement_1 = _this.selectedBox.sitPlanElementRef;
+                if (!sitPlanElement_1)
+                    return;
+                SituationPlanView_ElementPropertiesPopup(sitPlanElement_1, function (electroid, adrestype, adres, adreslocation, labelfontsize, scale, rotate) {
+                    if (electroid != null) {
+                        sitPlanElement_1.setElectroItemId(electroid);
+                        sitPlanElement_1.setAdres(adrestype, adres, adreslocation);
+                    }
+                    sitPlanElement_1.labelfontsize = labelfontsize;
+                    sitPlanElement_1.setscale(scale);
+                    sitPlanElement_1.rotate = rotate;
+                    _this.updateBoxContent(sitPlanElement_1); //content needs to be updated first to know the size of the box
+                    _this.updateSymbolAndLabelPosition(sitPlanElement_1);
+                    undostruct.store();
+                });
+            }
+        });
+    };
+    /**
+     * Maakt de knoppen in de ribbon aan om onder andere pagina's te selecteren, elementen te laden of verwijderen en pagina's te zoomen.
+     * Deze functie wordt aangeroepen telkens er iets in de toestand verandert die mogelijk kan leiden tot aanpassingen in de ribbon.
+     *
+     * Deze functie hangt ook onclick events aan interne functies in deze class.
+     *
+     * TODO: Er zijn efficientiewinsten mogelijk door niet telkens de hele ribbon te hertekenen.
+     */
     SituationPlanView.prototype.updateRibbon = function () {
         var _this = this;
         var outputleft = "";
         var outputright = "";
         // -- Undo/redo buttons --
-        outputleft += "\n            <div class=\"icon\" ".concat((undostruct.undoStackSize() > 0 ? 'onclick="undoClicked()"' : 'style="filter: opacity(45%)"'), ">\n                <img src=\"gif/undo.png\" alt=\"Ongedaan maken\" class=\"icon-image\">\n                <span class=\"icon-text\">Ongedaan maken</span>\n            </div>\n            <div class=\"icon\"  ").concat((undostruct.redoStackSize() > 0 ? 'onclick="redoClicked()"' : 'style=\"filter: opacity(45%)\"'), ">\n                <img src=\"gif/redo.png\" alt=\"Opnieuw\" class=\"icon-image\">\n                <span class=\"icon-text\">Opnieuw</span>\n            </div>\n            <span style=\"display: inline-block; width: 30px;\"></span>\n        ");
+        outputleft += "\n            <div class=\"icon\" ".concat((undostruct.undoStackSize() > 0 ? 'onclick="undoClicked()"' : 'style="filter: opacity(45%)"'), ">\n                <img src=\"gif/undo.png\" alt=\"Ongedaan maken\" class=\"icon-image\">\n                <span class=\"icon-text\">Ongedaan maken</span>\n            </div>\n            <div class=\"icon\"  ").concat((undostruct.redoStackSize() > 0 ? 'onclick="redoClicked()"' : 'style=\"filter: opacity(45%)\"'), ">\n                <img src=\"gif/redo.png\" alt=\"Opnieuw\" class=\"icon-image\">\n                <span class=\"icon-text\">Opnieuw</span>\n            </div>");
         // -- Visuals om items te laden of verwijderen --
-        outputleft += '<span style="display: inline-block; width: 10px;"></span>';
-        outputleft += "\n        <div class=\"icon\" id=\"button_Add\">\n            <span class=\"icon-image\" style=\"font-size:24px\">\u2795</span>\n            <span class=\"icon-text\">Uit bestand</span>\n        </div>\n        <div class=\"icon\" id=\"button_Add_electroItem\">\n            <span class=\"icon-image\" style=\"font-size:24px\">\u2795</span>\n            <span class=\"icon-text\">Uit schema</span>\n        </div>\n        <div class=\"icon\" id=\"button_Delete\">\n            <span class=\"icon-image\" style=\"font-size:24px\">\uD83D\uDDD1</span>\n            <span class=\"icon-text\">Verwijder</span>\n        </div>";
+        outputleft += "\n            <span style=\"display: inline-block; width: 30px;\"></span>\n            <div class=\"icon\" id=\"button_Add\">\n                <span class=\"icon-image\" style=\"font-size:24px\">\u2795</span>\n                <span class=\"icon-text\">Uit bestand</span>\n            </div>\n            <div class=\"icon\" id=\"button_Add_electroItem\">\n                <span class=\"icon-image\" style=\"font-size:24px\">\u2795</span>\n                <span class=\"icon-text\">Uit schema</span>\n            </div>\n            <div class=\"icon\" id=\"button_Delete\">\n                <span class=\"icon-image\" style=\"font-size:24px\">\uD83D\uDDD1</span>\n                <span class=\"icon-text\">Verwijder</span>\n            </div>";
         // -- Visuals om items te bewerken --
-        outputleft += "\n        <span style=\"display: inline-block; width: 10px;\"></span>\n        <div class=\"icon\" id=\"button_edit\">\n            <span class=\"icon-image\" style=\"font-size:24px\">\uD83D\uDCDD</span>\n            <span class=\"icon-text\">Bewerk</span>\n        </div>\n        <!--<span style=\"display: inline-block; width: 10px;\"></span>\n        <div class=\"icon\" id=\"button_rotate_left_90\">\n            <span class=\"icon-image\" style=\"font-size:24px\">\u21BA</span>\n            <span class=\"icon-text\">-90\u00B0</span>\n        </div>\n        <div class=\"icon\" id=\"button_rotate_right_90\">\n            <span class=\"icon-image\" style=\"font-size:24px\">\u21BA</span>\n            <span class=\"icon-text\">+90\u00B0</span>\n        </div>\n        <div class=\"icon\" id=\"button_rotate_left_10\">\n            <span class=\"icon-image\" style=\"font-size:24px\">\u21BA</span>\n            <span class=\"icon-text\">-10\u00B0</span>\n        </div>\n        <div class=\"icon\" id=\"button_rotate_right_10\">\n            <span class=\"icon-image\" style=\"font-size:24px\">\u21BA</span>\n            <span class=\"icon-text\">+10\u00B0</span>\n        </div>\n        <span style=\"display: inline-block; width: 10px;\"></span>\n        <div class=\"icon\" id=\"scale_up_100\">\n            <img src=\"gif/scaleup.png\" alt=\"Scale up 100%\" class=\"icon-image\">\n            <span class=\"icon-text\">+100%</span>\n        </div>\n        <div class=\"icon\" id=\"scale_down_100\">\n            <img src=\"gif/scaledown.png\" alt=\"Scale down 100%\" class=\"icon-image\">\n            <span class=\"icon-text\">-100%</span>\n        </div>\n        <div class=\"icon\" id=\"scale_up_10\">\n            <img src=\"gif/scaleup.png\" alt=\"Scale up 100%\" class=\"icon-image\">\n            <span class=\"icon-text\">+10%</span>\n        </div>\n        <div class=\"icon\" id=\"scale_down_10\">\n            <img src=\"gif/scaledown.png\" alt=\"Scale down 100%\" class=\"icon-image\">\n            <span class=\"icon-text\">-10%</span>\n        </div>-->";
-        // -- Visuals om naar achteren te sturen --
-        outputleft += "\n        <span style=\"display: inline-block; width: 10px;\"></span>\n        <div class=\"icon\" id=\"sendBack\">\n            <span class=\"icon-image\" style=\"font-size:24px\">\u2B07\u2B07</span>\n            <span class=\"icon-text\">Naar achter</span>\n        </div>\n        <!--<button class=\"icon-button\" id=\"sendBack\">Naar achter</button>-->";
+        outputleft += "\n            <span style=\"display: inline-block; width: 10px;\"></span>\n            <div class=\"icon\" id=\"button_edit\">\n                <span class=\"icon-image\" style=\"font-size:24px\">\uD83D\uDCDD</span>\n                <span class=\"icon-text\">Bewerk</span>\n            </div>";
+        // -- Visuals om naar achteren of voren te sturen --
+        outputleft += "\n            <span style=\"display: inline-block; width: 10px;\"></span>\n            <div class=\"icon\" id=\"sendBack\">\n                <span class=\"icon-image\" style=\"font-size:24px\">\u2B07\u2B07</span>\n                <span class=\"icon-text\">Naar achter</span>\n            </div>\n            <div class=\"icon\" id=\"bringFront\">\n                <span class=\"icon-image\" style=\"font-size:24px\">\u2B06\u2B06</span>\n                <span class=\"icon-text\">Naar voor</span>\n            </div>";
         // -- Visuals om pagina te selecteren --
-        outputleft += '<span style="display: inline-block; width: 50px;"></span><div><center>Pagina '
-            + '<select id="id_sitplanpage">';
+        outputleft += "\n            <span style=\"display: inline-block; width: 50px;\"></span>\n            <div>\n                <center>\n                    Pagina \n                        <select id=\"id_sitplanpage\">";
         for (var i = 1; i <= this.sitplan.numPages; i++) {
             outputleft += '<option value="' + i + '"' + (i == this.sitplan.activePage ? ' selected' : '') + '>' + i + '</option>';
         }
-        outputleft += '</select><br>';
-        outputleft += '<button id="btn_sitplan_addpage"' +
-            (this.sitplan.activePage != this.sitplan.numPages ? ' disabled' : '')
-            + '>Nieuw</button>';
-        outputleft += '<button id="btn_sitplan_delpage" style="background-color:red;" ' + (this.sitplan.numPages <= 1 ? ' disabled' : '') + '>&#9851;</button>';
-        outputleft += '</center></div>';
+        outputleft += "\n                        </select><br>\n                        <button id=\"btn_sitplan_addpage\" ".concat((this.sitplan.activePage != this.sitplan.numPages ? ' disabled' : ''), ">Nieuw</button>\n                        <button id=\"btn_sitplan_delpage\" style=\"background-color:red;\" ").concat((this.sitplan.numPages <= 1 ? ' disabled' : ''), ">&#9851;</button>\n                </center>\n            </div>");
         // -- Visuals om pagina te zoomen --
-        outputright += '<span style="display: inline-block; width: 10px;"></span>';
-        outputright += "\n        <div class=\"icon\" id=\"button_zoomin\">\n            <span class=\"icon-image\" style=\"font-size: 24px;\">\uD83D\uDD0D</span>\n            <span class=\"icon-text\">In</span>\n        </div>\n        <div class=\"icon\" id=\"button_zoomout\">\n            <span class=\"icon-image\" style=\"font-size: 24px;\">\uD83C\uDF0D</span>\n            <span class=\"icon-text\">Uit</span>\n        </div>\n        <div class=\"icon\" id=\"button_zoomToFit\">\n            <span class=\"icon-image\" style=\"font-size: 24px;\">\uD83D\uDDA5\uFE0F</span>\n            <!--<img src=\"gif/scaleup.png\" alt=\"Schermvullend\" class=\"icon-image\">-->\n            <span class=\"icon-text\">Schermvullend</span>\n        </div>";
-        outputright += '<span style="display: inline-block; width: 10px;"></span>';
+        outputright += "\n            <span style=\"display: inline-block; width: 10px;\"></span>\n            <div class=\"icon\" id=\"button_zoomin\">\n                <span class=\"icon-image\" style=\"font-size: 24px;\">\uD83D\uDD0D</span>\n                <span class=\"icon-text\">In</span>\n            </div>\n            <div class=\"icon\" id=\"button_zoomout\">\n                <span class=\"icon-image\" style=\"font-size: 24px;\">\uD83C\uDF0D</span>\n                <span class=\"icon-text\">Uit</span>\n            </div>\n            <div class=\"icon\" id=\"button_zoomToFit\">\n                <span class=\"icon-image\" style=\"font-size: 24px;\">\uD83D\uDDA5\uFE0F</span>\n                <!--<img src=\"gif/scaleup.png\" alt=\"Schermvullend\" class=\"icon-image\">-->\n                <span class=\"icon-text\">Schermvullend</span>\n            </div>\n            <span style=\"display: inline-block; width: 10px;\"></span>";
         // -- Put everything in the ribbon --
         document.getElementById("ribbon").innerHTML = "<div id=\"left-icons\">".concat(outputleft, "</div><div id=\"right-icons\">").concat(outputright, "</div>");
         // -- Actions om pagina te selecteren --
@@ -3079,24 +3215,19 @@ var SituationPlanView = /** @class */ (function () {
         this.attachDeleteButton(document.getElementById('button_Delete'));
         // -- Actions om visuals te bewerken --
         this.attachEditButton(document.getElementById('button_edit'));
-        /*this.attachScaleButton(document.getElementById('scale_up_10'), 0.1);
-        this.attachScaleButton(document.getElementById('scale_down_10'), -0.1);
-        this.attachScaleButton(document.getElementById('scale_up_100'), 1);
-        this.attachScaleButton(document.getElementById('scale_down_100'), -1);
-
-        this.attachRotateButton(document.getElementById('button_rotate_left_90'), -90);
-        this.attachRotateButton(document.getElementById('button_rotate_right_90'), 90);
-        this.attachRotateButton(document.getElementById('button_rotate_left_10'), -10);
-        this.attachRotateButton(document.getElementById('button_rotate_right_10'), 10);*/
         // -- Actions om naar achteren te sturen --
         this.attachSendToBackButton(document.getElementById('sendBack'));
+        this.attachBringToFrontButton(document.getElementById('bringFront'));
         // -- Actions om pagina te zoomen --
         this.attachZoomButton(document.getElementById('button_zoomin'), 0.1);
         this.attachZoomButton(document.getElementById('button_zoomout'), -0.1);
         this.attachZoomToFitButton(document.getElementById('button_zoomToFit'));
     };
     return SituationPlanView;
-}());
+}()); // *** END CLASS ***
+/**
+ * Toon de pagina voor het situatieplan
+ */
 function showSituationPlanPage() {
     toggleAppView('draw');
     if (!(structure.sitplan)) {
@@ -3104,133 +3235,145 @@ function showSituationPlanPage() {
     }
     ;
     if (!(structure.sitplanview)) {
-        //First destroy all elements on the DOM with id starting with "SP_" to avoid any orphans being left from earlier exercises
+        //Verwijder eerst alle elementen op de DOM met id beginnend met "SP_" om eventuele wezen
+        //uit eerdere oefeningen te voorkomen
         var elements = document.querySelectorAll('[id^="SP_"]');
         elements.forEach(function (e) { return e.remove(); });
-        //Then create the SituationPlanView
+        //Maak dan de SituationPlanView
         structure.sitplanview = new SituationPlanView(document.getElementById('outerdiv'), document.getElementById('paper'), structure.sitplan);
         structure.sitplanview.zoomToFit();
     }
     ;
-    structure.sitplanview.updateRibbon();
-    var spinner = document.createElement('div');
-    spinner.classList.add('loading-spinner');
-    document.getElementById('outerdiv').appendChild(spinner);
-    //requestAnimationFrame(() => {
-    //    requestAnimationFrame(() => {
-    render();
-    //    });
-    //});
-    function render() {
-        structure.sitplanview.redraw();
-        //        document.getElementById('outerdiv').removeChild(spinner);    
-    }
+    structure.sitplanview.redraw();
 }
+/**
+ * Een serie functies om een formulier te tonen met edit-functionaliteiten voor symbolen in het situatieplan
+ *
+ * De volgorde van code en functies in deze file volgt de structuur van de popup.
+ *
+ * popupWindow
+ *  selectKringContainer
+ *      selectKring -- Keuze kringnaam, gedraagt zich als een filter.
+ *  selectElectroItemContainer
+ *      selectElectroItemBox -- Keuze electroItem.
+ *  textContainer
+ *      textInput -- Hier wordt het electroItemId ingevuld, ofwel door de gebruiker, ofwel door het programma
+ *      feedback -- Hier wordt weergegeven over welk soort item het gaat, bvb "Contactdoos"
+ *  selectContainer
+ *      selectAdresType -- Hier kan gekozen wat voor soort tekstlabel gebruikt wordt, automatisch of handmatig.
+ *  adresContainer
+ *      adresInput -- Het eigenlijke tekstlabel, kan automatisch ingevuld zijn ("automatisch") of handmatig door de gebruiker
+ *      selectAdresLocation -- Locatie van het label, boven, onder, links of rechts.
+ *  fontsizeContainer
+ *      fontsizeInput -- De fontsize van het label, kan automatisch ingevuld zijn ("automatisch") of handmatig door de gebruiker
+ *  Andere elementen
+ *      scale -- Schaalfactor van het symbool
+ *      rotation -- Eventuele rotatie van het symbool
+ *  buttons
+ *      OK, Cancel -- OK en Cancel knoppen
+ *
+ * @param {SituationPlanElement} sitplanElement Het element waarvoor de eigenschappen getoond moeten worden.
+ *                                              Indien null fungeert deze functie als Add in plaats van Edit.
+ * @param {function} callbackOK Een referentie naar de functie die moet worden uitgevoerd als op OK wordt geklikt.
+ */
 function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK) {
-    var div = document.createElement('div');
-    div.innerHTML = "\n        <div id=\"popupOverlay\" style=\"position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; visibility: hidden; z-index: 9999;\">\n            <div id=\"popupWindow\" style=\"width: 400px; background-color: white; padding: 20px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); display: flex; flex-direction: column; justify-content: space-between;\">\n                <div id=\"selectKringContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block;\">Kring:</label>\n                    <select id=\"KringSelect\"></select>\n                </div>\n                <div id=\"selectElectroItemContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block;\">Kring:</label>\n                    <select id=\"selectElectroItemBox\"></select>\n                </div>\n                <div id=\"textContainer\" style=\"display: flex; margin-bottom: 30px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block;\">ID:</label>\n                    <input id=\"textInput\" style=\"width: 100px;\" type=\"number\" min=\"0\" step=\"1\" value=\"\">\n                    <div id=\"feedback\" style=\"margin-left: 10px; width: 100%; font-size: 12px\"></div>\n                </div>\n                <div id=\"selectContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block; white-space: nowrap;\">Label type:</label>\n                    <select id=\"selectBox\">\n                        <option value=\"auto\">Automatisch</option>\n                        <!--<option value=\"adres\">Uit schema: [Adres]</option>-->\n                        <option value=\"manueel\">Handmatig</option>\n                    </select>\n                </div>\n                <div id=\"adresContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block; white-space: nowrap;\">Label tekst:</label>\n                    <input id=\"adresInput\" style=\"width: 100%;\" type=\"text\" value=\"\">\n                    <select id=\"selectAdresLocation\" style=\"margin-left: 10px; display: inline-block;\">\n                        <option value=\"links\">Links</option>\n                        <option value=\"rechts\">Rechts</option>\n                        <option value=\"boven\">Boven</option>\n                        <option value=\"onder\">Onder</option>\n                    </select>\n                </div>\n                <div id=\"fontSizeContainer\" style=\"display: flex; margin-bottom: 30px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block; white-space: nowrap;\">Font grootte (px):</label>\n                    <input id=\"fontSizeInput\" style=\"width: 100px;\" type=\"number\" min=\"1\" max=\"72\" step=\"11\" value=\"11\">\n                </div> \n                <div style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block;\">Schaal (%):</label>\n                    <input id=\"scaleInput\" style=\"width: 100px;\" type=\"number\" min=\"10\" max=\"400\" step=\"10\" value=\"".concat(String(SITPLANVIEW_DEFAULT_SCALE * 100), "\">\n                </div>\n                <div style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block;\">Rotatie (\u00B0):</label>\n                    <input id=\"rotationInput\" style=\"width: 100px;\" type=\"number\" min=\"0\" max=\"360\" step=\"10\" value=\"0\">\n                </div>\n                <div style=\"display: flex; justify-content: space-between;\">\n                    <button id=\"okButton\">OK</button>\n                    <button id=\"cancelButton\">Cancel</button>\n                </div>\n            </div>\n        </div>");
-    var popupOverlay = div.querySelector('#popupOverlay');
-    var popupWindow = popupOverlay.querySelector('#popupWindow');
-    var selectKringContainer = popupWindow.querySelector('#selectKringContainer');
-    var selectElectroItemContainer = popupWindow.querySelector('#selectElectroItemContainer');
-    var textContainer = popupWindow.querySelector('#textContainer');
-    var selectContainer = popupWindow.querySelector('#selectContainer');
-    var fontSizeContainer = popupWindow.querySelector('#fontSizeContainer');
-    var adresContainer = popupWindow.querySelector('#adresContainer');
-    var KringSelect = popupWindow.querySelector('#KringSelect');
-    var selectElectroItemBox = popupWindow.querySelector('#selectElectroItemBox');
-    var textInput = popupWindow.querySelector('#textInput');
-    var feedback = popupWindow.querySelector('#feedback');
-    var selectBox = popupWindow.querySelector('#selectBox');
-    var adresInput = popupWindow.querySelector('#adresInput');
-    var fontSizeInput = popupWindow.querySelector('#fontSizeInput');
-    var selectAdresLocation = popupWindow.querySelector('#selectAdresLocation');
-    var scaleInput = popupWindow.querySelector('#scaleInput');
-    var rotationInput = popupWindow.querySelector('#rotationInput');
-    var okButton = popupWindow.querySelector('#okButton');
-    var cancelButton = popupWindow.querySelector('#cancelButton');
+    // Interne variabelen voor alle subfuncties                                    
     var adressen = new ElectroItemZoeker();
     var kringnamen = adressen.getUniqueKringnaam();
-    function selectBoxChanged() {
-        var id = Number(textInput.value);
-        updateElectroType();
-        var element = structure.data[structure.getOrdinalById(id)];
-        switch (selectBox.value) {
-            case 'auto':
-                adresInput.value = (element != null ? element.getReadableAdres() : '');
-                adresInput.disabled = true;
-                break;
-            case 'adres':
-                adresInput.value = (element != null ? (element.props.adres != null ? 'Adres' : '') : '');
-                adresInput.disabled = true;
-                break;
-            case 'manueel':
-                adresInput.value = (element != null ? adresInput.value : '');
-                adresInput.disabled = false;
-                break;
-        }
-    }
-    //-- Select Kring --
+    /**
+     * Vul het select element voor de kringen met alle gekende info rond kringnamen
+     */
     function rePopulateKringSelect() {
-        KringSelect.innerHTML = ''; // Clear all options
+        selectKring.innerHTML = ''; // Alles wissen
         for (var _i = 0, kringnamen_1 = kringnamen; _i < kringnamen_1.length; _i++) {
             var kringnaam = kringnamen_1[_i];
             var option = document.createElement('option');
             option.value = kringnaam;
             option.text = kringnaam;
-            KringSelect.appendChild(option);
+            selectKring.appendChild(option);
         }
     }
-    function initKringSelect(id) {
-        if (id === void 0) { id = null; }
+    /**
+     * Initialiseer het select element voor de kringen.
+     *
+     * @param electroItemId Optioneel argument indien men wenst te initialiseren met een reeds gekozen electroItemId,
+     *                      zo-niet wordt sitplanElement gebruikt als initialisatie.
+     *
+     * Gebruikte variabelen: sitplanElement uit de hoofdfunctie is het element waarvoor we de eigenschappen wijzigen
+     */
+    function initKringSelect(electroItemId) {
+        if (electroItemId === void 0) { electroItemId = null; }
         rePopulateKringSelect();
-        if ((id == null) && (sitplanElement != null) && (sitplanElement.getElectroItemId() != null)) {
-            id = sitplanElement.getElectroItemId();
+        if ((electroItemId == null) && (sitplanElement != null) && (sitplanElement.getElectroItemId() != null)) {
+            electroItemId = sitplanElement.getElectroItemId();
         }
-        if (id != null)
-            KringSelect.value = structure.findKringName(id);
-        KringSelect.onchange = KringSelectChanged;
+        if (electroItemId != null)
+            selectKring.value = structure.findKringName(electroItemId);
+        selectKring.onchange = KringSelectChanged;
     }
+    /**
+     * Functies uit te voeren wanneer de kring gewijzigd is.
+     * - rePopulateElectroItemBox: laat toe alle electro-items te kiezen binnen een kring
+     * - selectElectroItemBoxChanged: selecteert de eerste electro-item in de lijst in past de andere velden in het formulier aan
+     */
     function KringSelectChanged() {
         rePopulateElectroItemBox();
         selectElectroItemBoxChanged();
     }
-    //-- Select ElectroItem --
+    /**
+     * Vul het select element voor electro-items met alle electro-items binnen de gekozen kring
+     */
     function rePopulateElectroItemBox() {
-        var electroItems = adressen.getElectroItemsByKring(KringSelect.value);
+        var electroItems = adressen.getElectroItemsByKring(selectKring.value);
         selectElectroItemBox.innerHTML = ''; //Clear all options
         for (var i = 0; i < electroItems.length; ++i) {
             var electroItem = electroItems[i];
             var option = document.createElement('option');
             option.value = String(i);
-            option.text = electroItems[i].adres + ' | ' + electroItems[i].type;
+            option.text = electroItem.adres + ' | ' + electroItem.type;
             selectElectroItemBox.appendChild(option);
         }
     }
-    function initElectroItemBox(id) {
-        if (id === void 0) { id = null; }
+    /**
+     * Initialiseer het select element voor de electro-items.
+     *
+     * @param electroItemId Optioneel argument indien men wenst te initialiseren met een reeds gekozen electroItemId,
+     *                      zo-niet wordt sitplanElement gebruikt als initialisatie.
+     *
+     * Gebruikte variabelen: sitplanElement uit de hoofdfunctie is het element waarvoor we de eigenschappen wijzigen
+     */
+    function initElectroItemBox(electroItemId) {
+        if (electroItemId === void 0) { electroItemId = null; }
         rePopulateElectroItemBox();
-        var electroItems = adressen.getElectroItemsByKring(KringSelect.value);
-        if ((id == null) && (sitplanElement != null) && (sitplanElement.getElectroItemId() != null)) {
-            id = sitplanElement.getElectroItemId();
+        var electroItems = adressen.getElectroItemsByKring(selectKring.value);
+        if ((electroItemId == null) && (sitplanElement != null) && (sitplanElement.getElectroItemId() != null)) {
+            electroItemId = sitplanElement.getElectroItemId();
         }
-        if (id != 0) {
+        if (electroItemId != 0) {
             for (var i = 0; i < electroItems.length; ++i) {
-                if (electroItems[i].id == id)
+                if (electroItems[i].id == electroItemId)
                     selectElectroItemBox.value = String(i);
             }
         }
         selectElectroItemBox.onchange = selectElectroItemBoxChanged;
     }
+    /**
+     * Functies uit te voeren wanneer het electroItem gewijzigd is.
+     * - rePopulateIdField: geef de id van het gekozen electro-item weer, alsook het type
+     * - zet het adrestype op "auto" telkens het electroItem wordt gewijzigd
+     * - Pas de rest van het formulier aan aan het feit dat het electroItem werd gewijzigd en het electroType op "auto" werd gezet
+     */
     function selectElectroItemBoxChanged() {
         rePopulateIdField();
-        selectBox.value = 'auto';
-        selectBoxChanged();
+        selectAdresType.value = 'auto';
+        selectAdresTypeChanged();
     }
-    //-- ID field --
+    /**
+     * Vul het Id-veld met de id van het gekozen electro-item in de bovenstaande twee velden (select-kring en select electro-item)
+     */
     function rePopulateIdField() {
         var str = '';
-        var electroItems = adressen.getElectroItemsByKring(KringSelect.value);
+        var electroItems = adressen.getElectroItemsByKring(selectKring.value);
         var idx = Number(selectElectroItemBox.value);
         if (!isNaN(idx)) {
             var item = electroItems[idx];
@@ -3239,6 +3382,11 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK) {
         }
         textInput.value = str;
     }
+    /**
+     * Initialiseer het Id-veld, ofwel met de id van het sitplanElement, ofwel met de id van het gekozen electro-item
+     *
+     * Gebruikte variabelen: sitplanElement uit de hoofdfunctie.
+     */
     function initIdField() {
         if (sitplanElement != null) {
             if (sitplanElement.getElectroItemId() != null)
@@ -3248,27 +3396,36 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK) {
             rePopulateIdField();
         textInput.oninput = IdFieldChanged;
     }
+    /**
+     * Wanneer het Id-veld gewijzigd wordt, wordt de rest van het formulier bijgewerkt.
+     * We verwijderen alle niet-cijfers uit de Id, en passen het volgende aan
+     * - veld waarin het type van het electroItem wordt gegeven
+     * - select element met te kiezen kringen, voorgeselecteerd op de kring waarin het element met id=id zich bevindt
+     * - idem als hierboven voor de selectie van het electroItem
+     */
     function IdFieldChanged() {
         if (textInput.value != null) {
             textInput.value = textInput.value.replace(/[^0-9]/g, '');
-            var id = Number(textInput.value);
+            var electroItemId = Number(textInput.value);
             updateElectroType();
-            if (structure.data[structure.getOrdinalById(id)] != null) {
-                initKringSelect(id);
-                initElectroItemBox(id);
-                selectBox.value = 'auto';
-                selectBoxChanged();
+            if (structure.getElectroItemById(electroItemId) != null) {
+                initKringSelect(electroItemId);
+                initElectroItemBox(electroItemId);
+                selectAdresType.value = 'auto';
+                selectAdresTypeChanged();
             }
         }
         ;
     }
-    // -- 
+    /**
+     * Toon het type verbruiker van het gekozen electro-item
+     */
     function updateElectroType() {
         if (textInput.value == null || textInput.value.trim() == '')
             feedback.innerHTML = '<span style="color: red;">Geen ID ingegeven</span>';
         else {
             var id = Number(textInput.value);
-            var element = structure.data[structure.getOrdinalById(id)];
+            var element = structure.getElectroItemById(id);
             if (element != null) {
                 feedback.innerHTML = '<span style="color:green;">' + element.getType() + '</span>';
             }
@@ -3277,32 +3434,100 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK) {
             }
         }
     }
-    // Function to show the popup
+    /**
+     * Wanneer het type adres gewijzigd wordt, wordt ook het adresveld zelf aangepast
+     */
+    function selectAdresTypeChanged() {
+        var id = Number(textInput.value);
+        updateElectroType();
+        var element = structure.getElectroItemById(id);
+        if (element == null) {
+            adresInput.value = '';
+            adresInput.disabled = true;
+            return;
+        }
+        switch (selectAdresType.value) {
+            case 'auto':
+                adresInput.value = (element != null ? element.getReadableAdres() : '');
+                adresInput.disabled = true;
+                break;
+            case 'manueel':
+                adresInput.value = (element != null ? adresInput.value : '');
+                adresInput.disabled = false;
+                break;
+        }
+    }
+    /**
+     * Toont de popup met alle opties voor het bewerken van een element
+     */
     function showPopup() {
         popupOverlay.style.visibility = 'visible';
         document.body.style.pointerEvents = 'none'; // Disable interactions with the background
         popupOverlay.style.pointerEvents = 'auto'; // Enable interactions with the popup
     }
-    // Function to close the popup
+    /**
+     * Sluit de popup, meestal omdat op OK of Cancel werd geklikt of Enter op het toetsenbord.
+     * Ter waarschuwing, er wordt geen verdere actie ondernomen zoals het plaatsen van het gekozen symbool
+     * in het situatieplan. Dit dient de gebruiker van deze set functies zelf nog te doen.
+     */
     function closePopup() {
         popupOverlay.style.visibility = 'hidden';
         document.body.style.pointerEvents = 'auto'; // Re-enable interactions with the background
         div.remove();
     }
+    /**
+     * We stellen het tikken van Enter in een veld gelijk aan het klikken op OK in het formulier
+     *
+     * @param event
+     */
     var handleEnterKey = function (event) {
         if (event.key === 'Enter')
             okButton.click();
     };
+    //--- HOOFDFUNCTIE ------------------------------------------------------------------------------------
+    /*
+     * Eerst maken we de pop-up
+     */
+    var div = document.createElement('div');
+    div.innerHTML = "\n        <div id=\"popupOverlay\" style=\"position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; visibility: hidden; z-index: 9999;\">\n            <div id=\"popupWindow\" style=\"width: 400px; background-color: white; padding: 20px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); display: flex; flex-direction: column; justify-content: space-between;\">\n                <div id=\"selectKringContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block;\">Kring:</label>\n                    <select id=\"selectKring\"></select>\n                </div>\n                <div id=\"selectElectroItemContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block;\">Element:</label>\n                    <select id=\"selectElectroItemBox\"></select>\n                </div>\n                <div id=\"textContainer\" style=\"display: flex; margin-bottom: 30px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block;\">ID:</label>\n                    <input id=\"textInput\" style=\"width: 100px;\" type=\"number\" min=\"0\" step=\"1\" value=\"\">\n                    <div id=\"feedback\" style=\"margin-left: 10px; width: 100%; font-size: 12px\"></div>\n                </div>\n                <div id=\"selectContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block; white-space: nowrap;\">Label type:</label>\n                    <select id=\"selectAdresType\">\n                        <option value=\"auto\">Automatisch</option>\n                        <option value=\"manueel\">Handmatig</option>\n                    </select>\n                </div>\n                <div id=\"adresContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block; white-space: nowrap;\">Label tekst:</label>\n                    <input id=\"adresInput\" style=\"width: 100%;\" type=\"text\" value=\"\">\n                    <select id=\"selectAdresLocation\" style=\"margin-left: 10px; display: inline-block;\">\n                        <option value=\"links\">Links</option>\n                        <option value=\"rechts\">Rechts</option>\n                        <option value=\"boven\">Boven</option>\n                        <option value=\"onder\">Onder</option>\n                    </select>\n                </div>\n                <div id=\"fontSizeContainer\" style=\"display: flex; margin-bottom: 30px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block; white-space: nowrap;\">Tekengrootte (px):</label>\n                    <input id=\"fontSizeInput\" style=\"width: 100px;\" type=\"number\" min=\"1\" max=\"72\" step=\"11\" value=\"11\">\n                </div> \n                <div style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block;\">Schaal (%):</label>\n                    <input id=\"scaleInput\" style=\"width: 100px;\" type=\"number\" min=\"10\" max=\"400\" step=\"10\" value=\"".concat(String(SITPLANVIEW_DEFAULT_SCALE * 100), "\">\n                </div>\n                <div style=\"display: flex; margin-bottom: 20px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block;\">Rotatie (\u00B0):</label>\n                    <input id=\"rotationInput\" style=\"width: 100px;\" type=\"number\" min=\"0\" max=\"360\" step=\"10\" value=\"0\">\n                </div>\n                <div id=\"setDefaultContainer\" style=\"display: flex; margin-bottom: 20px; align-items: flex-start;\">\n                    <input type=\"checkbox\" id=\"setDefaultCheckbox\">\n                    ").concat((sitplanElement == null) || ((sitplanElement != null) && (sitplanElement.getElectroItemId() != null))
+        ? "<label for=\"checkbox\" style=\"margin-left: 10px; flex-grow: 1; flex-wrap: wrap;\">Zet tekengrootte en schaal als standaard voor alle toekomstige nieuwe symbolen.</label>"
+        : "<label for=\"checkbox\" style=\"margin-left: 10px; flex-grow: 1; flex-wrap: wrap;\">Zet schaal als standaard voor alle toekomstige nieuwe symbolen.</label>", "            \n                </div>\n                <div style=\"display: flex; justify-content: center;\">\n                    <button id=\"okButton\" style=\"margin-right: 10px;\">OK</button>\n                    <button id=\"cancelButton\" style=\"margin-keft: 10px;\">Cancel</button>\n                </div>\n            </div>\n        </div>");
+    var popupOverlay = div.querySelector('#popupOverlay');
+    var popupWindow = popupOverlay.querySelector('#popupWindow');
+    var selectKringContainer = popupWindow.querySelector('#selectKringContainer');
+    var selectKring = popupWindow.querySelector('#selectKring');
+    var selectElectroItemContainer = popupWindow.querySelector('#selectElectroItemContainer');
+    var selectElectroItemBox = popupWindow.querySelector('#selectElectroItemBox');
+    var textContainer = popupWindow.querySelector('#textContainer');
+    var textInput = popupWindow.querySelector('#textInput');
+    var feedback = popupWindow.querySelector('#feedback');
+    var selectContainer = popupWindow.querySelector('#selectContainer');
+    var selectAdresType = popupWindow.querySelector('#selectAdresType');
+    var adresContainer = popupWindow.querySelector('#adresContainer');
+    var adresInput = popupWindow.querySelector('#adresInput');
+    var selectAdresLocation = popupWindow.querySelector('#selectAdresLocation');
+    var fontSizeContainer = popupWindow.querySelector('#fontSizeContainer');
+    var fontSizeInput = popupWindow.querySelector('#fontSizeInput');
+    var scaleInput = popupWindow.querySelector('#scaleInput');
+    var rotationInput = popupWindow.querySelector('#rotationInput');
+    var setDefaultCheckbox = popupWindow.querySelector('#setDefaultCheckbox');
+    var okButton = popupWindow.querySelector('#okButton');
+    var cancelButton = popupWindow.querySelector('#cancelButton');
+    /*
+     * Dan zoeken we de nodige informatie over de symbolen in het ééndraadschema.
+     * Indien sitPlanElement werd opgegeven worden de eigenschappen van dit element getoond.
+     * Zo-niet worden default waarden getoond.
+     */
     initKringSelect();
     initElectroItemBox();
     initIdField();
     if (sitplanElement != null) { // Form werd aangeroepen om een reeds bestaand element te editeren
         if (sitplanElement.getElectroItemId() != null) { // Het gaat over een bestaand Electro-item
-            selectBox.value = sitplanElement.getAdresType();
+            selectAdresType.value = sitplanElement.getAdresType();
             adresInput.value = sitplanElement.getAdres();
             fontSizeInput.value = String(sitplanElement.labelfontsize);
             selectAdresLocation.value = sitplanElement.getAdresLocation();
-            selectBoxChanged();
+            selectAdresTypeChanged();
         }
         else { // Het gaat over een geimporteerde CSV
             selectKringContainer.style.display = 'none';
@@ -3316,29 +3541,43 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK) {
         rotationInput.value = String(sitplanElement.rotate);
     }
     else { // Form werd aangeroepen om een nieuw element te creëren
-        selectBoxChanged();
-        fontSizeInput.value = '11';
-        scaleInput.value = String(SITPLANVIEW_DEFAULT_SCALE * 100);
-        rotationInput.value = '0';
+        selectAdresTypeChanged();
+        fontSizeInput.value = String(structure.sitplan.defaults.fontsize);
+        scaleInput.value = String(structure.sitplan.defaults.scale * 100);
         selectAdresLocation.value = 'rechts';
     }
+    /*
+     * Eventhandlers, enter op de tekst velden staat gelijk aan OK klikken
+     */
     textInput.onkeydown = handleEnterKey;
     adresInput.onkeydown = handleEnterKey;
     fontSizeInput.onkeydown = handleEnterKey;
     scaleInput.onkeydown = handleEnterKey;
     rotationInput.onkeydown = handleEnterKey;
-    textInput.onblur = selectBoxChanged;
-    selectBox.onchange = selectBoxChanged;
+    /*
+     * Eventhandlers, adres-text aanpassen triggert aanpassingen van adres-type
+     */
+    textInput.onblur = selectAdresTypeChanged;
+    selectAdresType.onchange = selectAdresTypeChanged;
+    /*
+     * Eventhandlers, OK en Cancel knoppen
+     */
     okButton.onclick = function () {
         var returnId = (textInput.value.trim() == '' ? null : Number(textInput.value));
+        if (setDefaultCheckbox.checked) {
+            if ((sitplanElement == null) || ((sitplanElement != null) && (sitplanElement.getElectroItemId() != null)))
+                structure.sitplan.defaults.fontsize = Number(fontSizeInput.value);
+            structure.sitplan.defaults.scale = Number(scaleInput.value) / 100;
+        }
         closePopup(); // We close the popup first to avoid that an error somewhere leaves it open
-        callbackOK(returnId, selectBox.value, adresInput.value, selectAdresLocation.value, Number(fontSizeInput.value), Number(scaleInput.value) / 100, Number(rotationInput.value));
+        callbackOK(returnId, selectAdresType.value, adresInput.value, selectAdresLocation.value, Number(fontSizeInput.value), Number(scaleInput.value) / 100, Number(rotationInput.value));
     };
     cancelButton.onclick = function () {
         closePopup();
     };
-    // Immediately invoke the select functions to set the initial state
-    //selectBoxChanged(); 
+    /*
+     * Het volledige formulier aan de body toevoegen en tonen
+     */
     document.body.appendChild(div);
     showPopup();
 }

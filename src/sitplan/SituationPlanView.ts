@@ -161,7 +161,9 @@ class SituationPlanView {
      * 
      * @param sitPlanElement - Het situatieplanelement dat aangepast moet worden.
      */
-    private updateBoxContent(sitPlanElement: SituationPlanElement) {
+    private updateBoxContent(sitPlanElement: SituationPlanElement | null) {
+        if (!sitPlanElement) return;
+
         const box = sitPlanElement.boxref;
         const boxlabel = sitPlanElement.boxlabelref;
         
@@ -192,7 +194,7 @@ class SituationPlanView {
      * @param sitPlanElement - Het situatieplanelement waarvoor de positie van het label moet worden berekend.
      */
 
-    private updateLabelPosition(sitPlanElement: SituationPlanElement) {
+    private updateLabelPosition(sitPlanElement: SituationPlanElement | null) {
         if (!sitPlanElement) return;
     
         const boxlabel = sitPlanElement.boxlabelref as HTMLElement | null;
@@ -249,7 +251,7 @@ class SituationPlanView {
      * @param sitPlanElement Het situationplanelement dat aangepast moet worden.
      */
     
-    private updateSymbolPosition(sitPlanElement: SituationPlanElement) {
+    private updateSymbolPosition(sitPlanElement: SituationPlanElement | null) {
 
         function getRotationTransform(sitPlanElement: SituationPlanElement | null): string {
             if (!sitPlanElement) return '';
@@ -303,178 +305,87 @@ class SituationPlanView {
      * @param sitPlanElement - Het situationplanelement
      */
 
-    private updateSymbolAndLabelPosition(sitPlanElement: SituationPlanElement) {
+    private updateSymbolAndLabelPosition(sitPlanElement: SituationPlanElement | null) {
         if (!sitPlanElement) return;
         this.updateSymbolPosition(sitPlanElement); // Eerst content aanpassen anders kennen we de grootte van het symbool niet
         this.updateLabelPosition(sitPlanElement);
     }
     
-/**
- * Werkt de situatieplanweergave bij door elementen te synchroniseren met de onderliggende datastructuur.
- *
- * Deze functie zorgt er eerst voor dat alle elementen in het situatieplan een overeenkomstige box in de DOM hebben.
- * Het creëert ontbrekende boxes en voegt deze toe aan het document. Vervolgens werkt het de positie en 
- * het label van elk symbool bij volgens de huidige staat. Daarna past het de weergave aan om de actieve pagina 
- * weer te geven en werkt het de UI-ribbon bij.
- *
- * Deze methode meet en logt de tijd die nodig is om de redraw-operatie te voltooien.
- * Het gebruik van document fragments maakt de redraw aanzienlijk sneller in google chrome.
- * In Firefox is deze ook snel zonder document fragments.
- */
+    /**
+     * Werkt de situatieplanweergave bij door elementen te synchroniseren met de onderliggende datastructuur.
+     *
+     * Deze functie zorgt er eerst voor dat alle elementen in het situatieplan een overeenkomstige box in de DOM hebben.
+     * Het creëert ontbrekende boxes en voegt deze toe aan het document. Vervolgens werkt het de positie en 
+     * het label van elk symbool bij volgens de huidige staat. Daarna past het de weergave aan om de actieve pagina 
+     * weer te geven en werkt het de UI-ribbon bij.
+     *
+     * Deze methode meet en logt de tijd die nodig is om de redraw-operatie te voltooien.
+     * Het gebruik van document fragments maakt de redraw aanzienlijk sneller in google chrome.
+     * In Firefox is deze ook snel zonder document fragments.
+     */
 
-redraw() {
-    const start = performance.now();
-    this.syncToSitPlan();
-    
-    const fragment: DocumentFragment = document.createDocumentFragment();
-
-    let appendNeeded = false;
-    for (let element of this.sitplan.elements) {
-        if (!element.boxref) { this.makeBox(element, fragment); appendNeeded = true; }
-    }
-    if (appendNeeded) this.paper.append(fragment); // We moeten de boxes toevoegen aan de DOM alvorens de label positie te berekenen aangezien we de size van de labels moeten kennen
-
-    for (let element of this.sitplan.elements) {
-        this.updateBoxContent(element);
-        this.updateSymbolAndLabelPosition(element);
-    }
-
-    this.selectPage(this.sitplan.activePage);
-    this.updateRibbon();
-    const end = performance.now();
-    console.log(`Redraw took ${end - start}ms`);
-}
-
-
-
-
-
-
-
-
-    attachDeleteButton(elem: HTMLElement) { 
-        this.event_manager.addEventListener(elem, 'click', () => { this.deleteBox(); undostruct.store(); } ); 
+    redraw() {
+        const start = performance.now();
+        this.syncToSitPlan();
         
-    };
+        const fragment: DocumentFragment = document.createDocumentFragment();
 
-    attachScaleButton(elem: HTMLElement, increment: number) { 
-        this.event_manager.addEventListener(elem, 'click', () => { this.scaleBox(increment); undostruct.store(); } ); 
-    };
+        let appendNeeded = false;
+        for (let element of this.sitplan.elements) {
+            if (!element.boxref) { this.makeBox(element, fragment); appendNeeded = true; }
+        }
+        if (appendNeeded) this.paper.append(fragment); // We moeten de boxes toevoegen aan de DOM alvorens de label positie te berekenen aangezien we de size van de labels moeten kennen
 
-    attachRotateButton(elem: HTMLElement, increment: number) { 
-        this.event_manager.addEventListener(elem, 'click', () => { this.rotateBox(increment); undostruct.store(); } ); 
-    };
-
-    attachSendToBackButton(elem: HTMLElement) { 
-        this.event_manager.addEventListener(elem, 'click', () => { this.sendToBack(); } ); 
-    };
-
-    attachZoomButton(elem: HTMLElement, increment: number) { 
-        this.event_manager.addEventListener(elem, 'click', () => { this.zoomIncrement(increment); } ); 
-    };
-
-    attachZoomToFitButton(elem: HTMLElement) { 
-        this.event_manager.addEventListener(elem, 'click', () => { this.zoomToFit(); } ); 
-    };
-
-    attachAddElementFromFileButton(elem: HTMLElement, fileinput: HTMLElement) {
-        this.event_manager.addEventListener(elem, 'click', () => { fileinput.click(); } );
-        this.event_manager.addEventListener(fileinput, 'change', (event) => { 
-            let element = this.sitplan.addElementFromFile(event, this.sitplan.activePage, 550, 300, 
-                (() => {
-                    this.syncToSitPlan();
-                    this.clearSelection();
-                    element.needsViewUpdate = true;
-                    this.redraw();
-                    this.selectBox(element.boxref); // We moeten dit na redraw doen anders bestaat de box mogelijk nog niet
-                    undostruct.store();
-                }).bind(this)
-            );
-        });
-    }
-
-    attachAddElectroItemButton(elem: HTMLElement) {
-        this.event_manager.addEventListener(elem, 'click', () => {
-            // Display an html input dialog in the browser and ask for a number, return the number as variable id
-            SituationPlanView_ElementPropertiesPopup(null,
-                (id, adrestype, adres, adreslocation, labelfontsize, scale, rotate) => {
-                    if (id != null) {
-                        let element = this.sitplan.addElementFromElectroItem(id, this.sitplan.activePage, 550, 300, 
-                                                                  adrestype, adres, adreslocation, labelfontsize,
-                                                                  scale, rotate);
-                        if (element != null) {
-                            this.syncToSitPlan();
-                            this.clearSelection();
-                            this.redraw();
-                            this.selectBox(element.boxref); // We moeten dit na redraw doen anders bestaat de box mogelijk nog niet
-                            undostruct.store();
-                        }
-                    } else {
-                        alert('Geen geldig ID ingegeven!');
-                    }
-                }
-            ); 
-        } );
-    }
-
-    attachEditButton(elem: HTMLElement) {
-        this.event_manager.addEventListener(elem, 'click', () => {
-            if (this.selectedBox) {
-                const id = this.selectedBox.id;
-                const pic = (this.selectedBox as any).sitPlanElementRef;
-                SituationPlanView_ElementPropertiesPopup(pic,
-                    (id, adrestype, adres, adreslocation, labelfontsize, scale, rotate) => {
-                        if (id != null) {
-                            pic.setElectroItemId(id);
-                            pic.setAdres(adrestype,adres,adreslocation);
-                        }
-                        pic.labelfontsize = labelfontsize;
-                        pic.setscale(scale);
-                        pic.rotate = rotate;
-                        
-                        this.updateBoxContent(pic); //content needs to be updated first to know the size of the box
-                        this.updateSymbolAndLabelPosition(pic);
-                        undostruct.store();
-                    }
-                );
+        this.showPage(this.sitplan.activePage);
+        for (let element of this.sitplan.elements) {
+            if (element.page == this.sitplan.activePage) {
+                this.updateBoxContent(element);
+                this.updateSymbolAndLabelPosition(element);
             }
-        } );
+        }
+
+        this.updateRibbon();
+        const end = performance.now();
+        console.log(`Redraw took ${end - start}ms`);
     }
 
-
-
-    deleteBox() {
-        if (this.selectedBox) {
-            let id = this.selectedBox.id;
-            let sitPlanElementRef = (this.selectedBox as any).sitPlanElementRef;
-
-            this.selectedBox.remove();
-            if (sitPlanElementRef.boxlabelref != null) sitPlanElementRef.boxlabelref.remove();
-
-            this.sitplan.removeElement(sitPlanElementRef);
-            this.selectedBox = null
-        }
+    /**
+     * Maakt de gegeven box de geselecteerde box.
+     * 
+     * @param box - Het element dat geselecteerd moet worden.
+     */
+    private selectBox(box: HTMLElement | null) {
+        if (!box) return;
+        box.classList.add('selected');
+        this.selectedBox = box;
     }
 
-    scaleBox(increment: number) {
-        if (this.selectedBox) {
-            let pic = (this.selectedBox as any).sitPlanElementRef;
-            if (pic==null) return;
-
-            pic.setscale(Math.min(Math.max(0.1,pic.getscale()+increment),1000));
-            
-            this.updateBoxContent(pic); //content needs to be updated first to know the size of the box
-            this.updateSymbolAndLabelPosition(pic);
-        }
+    /**
+     * Verwijdert de selectie van alle boxes.
+     */
+    clearSelection() {
+        let boxes = document.querySelectorAll('.box');
+        boxes.forEach(b => b.classList.remove('selected'));
+        this.selectedBox = null;
     }
 
-    rotateBox(degrees: number) {
-        if (this.selectedBox) {
-            let id = this.selectedBox.id;
-            let pic = (this.selectedBox as any).sitPlanElementRef;
-            pic.rotate = (pic.rotate + degrees) % 360;
-            this.selectedBox.style.transform = `rotate(${pic.rotate}deg)`;
-        }
+    /**
+     * Verwijdert de geselecteerde box en verwijdert deze ook uit het situatieplan.
+     * Verwijdert ook het bijhorende label.
+     */
+    deleteSelectedBox() {
+        if (this.selectedBox == null) return;
+        let id = this.selectedBox.id;
+        let sitPlanElement = (this.selectedBox as any).sitPlanElementRef;
+
+        if (sitPlanElement == null) return;
+
+        this.selectedBox.remove();
+        if (sitPlanElement.boxlabelref != null) sitPlanElement.boxlabelref.remove();
+
+        this.sitplan.removeElement(sitPlanElement);
+
+        this.selectedBox = null;
     }
 
     /**
@@ -483,65 +394,114 @@ redraw() {
      * 
      * @returns void
      */
-
     sendToBack() {
-        if (this.selectedBox) {
-            for (let element of this.sitplan.elements) {
-                if (element.boxref != null) {
-                    let newzindex;
+        if (this.selectedBox == null) return;
 
-                    if (element.boxref != this.selectedBox) {
-                        newzindex = (parseInt(element.boxref.style.zIndex) || 0)+1;
-                    } else { 
-                        newzindex = 0; }
+        for (let element of this.sitplan.elements) {
+            if (element.boxref != null) {
+                let newzindex;
 
-                    element.boxref.style.zIndex = newzindex.toString();
-                    if (element.boxlabelref != null) { 
-                        element.boxlabelref.style.zIndex = newzindex.toString(); }
-                    
-                }
-            }            
-        }
+                if (element.boxref != this.selectedBox) {
+                    newzindex = (parseInt(element.boxref.style.zIndex) || 0)+1;
+                } else { 
+                    newzindex = 0; }
+
+                element.boxref.style.zIndex = newzindex.toString();
+                if (element.boxlabelref != null) { 
+                    element.boxlabelref.style.zIndex = newzindex.toString(); }
+                
+            }
+        }            
+        
         this.sitplan.orderByZIndex();
         undostruct.store();
     }
 
+    /**
+     * Send the selected box to the front of the z-index stack and reorder the elements of the situation plan accordingly
+     * so that after saving or during printing the elements are drawn in the same order.
+     * 
+     * @returns void
+     */
+    bringToFront() {
+        if (this.selectedBox == null) return;
 
+        let newzindex = 0;
+        for (let element of this.sitplan.elements) {
+            if ( (element.boxref != null) && (element.boxref != this.selectedBox) ) {
+                newzindex = Math.max(newzindex, parseInt(element.boxref.style.zIndex) || 0);
+            } 
+        }
+        newzindex += 1;            
+        
+        let element = (this.selectedBox as any).sitPlanElementRef;
+        if (element == null) { this.sitplan.syncToSitPlan(); return; } 
 
-    clearSelection() {
-        let boxes = document.querySelectorAll('.box');
-        boxes.forEach(b => b.classList.remove('selected'));
-        this.selectedBox = null;
+        this.selectedBox.style.zIndex = newzindex.toString();
+        if (element.boxlabelref != null) element.boxlabelref.style.zIndex = newzindex.toString();
+
+        this.sitplan.orderByZIndex();
+        undostruct.store();
     }
 
+    /**
+     * Start een sleepactie voor een box in het situatieplan.
+     * 
+     * @param event - De gebeurtenis die de sleepactie activeert (muisklik of touchstart).
+     */
     private startDrag = (event) => {
-        event.stopPropagation();   // Prevent body click event
-        this.clearSelection();          // Clears any existing selection
-        this.selectBox(event.target);   // Selects the box we want to drag
-        this.draggedBox = event.target;   // IS THIS NEEDED IF WE ALREADY HAVE SELECTEDBOX ????
-        
-        if (event.type === 'mousedown') {
-            this.mousedrag.startDrag(event.clientX, event.clientY, this.draggedBox.offsetLeft, this.draggedBox.offsetTop, this.zoomfactor);
-        } else if (event.type === 'touchstart') {
-            const touch = event.touches[0];
-            this.mousedrag.startDrag(touch.clientX, touch.clientY, this.draggedBox.offsetLeft, this.draggedBox.offsetTop, this.zoomfactor);
+        event.stopPropagation();   // Voorkomt body klikgebeurtenis
+        this.clearSelection();     // Wist bestaande selectie
+        this.selectBox(event.target); // Selecteert de box die we willen slepen
+        this.draggedBox = event.target; // Houdt de box die we aan het slepen zijn
+
+        switch (event.type) {
+            case 'mousedown':
+                this.mousedrag.startDrag(event.clientX, event.clientY, this.draggedBox.offsetLeft, this.draggedBox.offsetTop, this.zoomfactor);
+                document.addEventListener('mousemove', this.processDrag);
+                document.addEventListener('mouseup', this.stopDrag);
+                break;
+            case 'touchstart':
+                const touch = event.touches[0];
+                this.mousedrag.startDrag(touch.clientX, touch.clientY, this.draggedBox.offsetLeft, this.draggedBox.offsetTop, this.zoomfactor);
+                document.addEventListener('touchmove', this.processDrag, { passive: false });
+                document.addEventListener('touchend', this.stopDrag);
+                break;
+            default:
+                console.error('Ongeldige event voor startDrag functie');
+        }        
+    }
+
+    /**
+     * Stopt de sleepactie van een box in het situatieplan en stopt de eventlisteners.
+     * 
+     * @param event - De gebeurtenis die de sleepactie stopt (muisklik release of touchend).
+     */
+    private stopDrag = (event) => {
+        event.stopPropagation();
+
+        switch (event.type) {
+            case 'mouseup':
+                document.removeEventListener('mousemove', this.processDrag);
+                document.removeEventListener('mouseup', this.stopDrag);
+                break;
+            case 'touchend':
+                document.removeEventListener('touchmove', this.processDrag);
+                document.removeEventListener('touchend', this.stopDrag);
+                break;
+            default:
+                console.error('Ongeldige event voor stopDrag functie');
         }
 
-        document.addEventListener('mousemove', this.processDrag);
-        document.addEventListener('touchmove', this.processDrag, { passive: false });
-        document.addEventListener('mouseup', this.stopDrag);
-        document.addEventListener('touchend', this.stopDrag);
-    }
-
-    private stopDrag = () => {
-        document.removeEventListener('mousemove', this.processDrag);
-        document.removeEventListener('touchmove', this.processDrag);
-        document.removeEventListener('mouseup', this.stopDrag);
-        document.removeEventListener('touchend', this.stopDrag);
         this.draggedBox = null;
         undostruct.store();
     }
 
+    /**
+     * Verwerkt een muisklik of touch event tijdens het slepen van een box in het situatieplan.
+     * 
+     * @param event - De gebeurtenis die verwerkt wordt (muisklik of touchmove).
+     */
     private processDrag = (event) => {
         if (this.draggedBox) {
             event.preventDefault();
@@ -554,30 +514,35 @@ redraw() {
                 newLeftTop = this.mousedrag.returnNewLeftTop(touch.clientX,touch.clientY);
             }
     
-            // Ensure the box stays within reasonable boundaries
+            // Zorg ervoor dat de box niet buiten redelijke grenzen van het canvas valt links-boven
+            // We doen deze controle niet rechts onder omdat het canvas daar gewoon kan groeien
             newLeftTop.left = Math.max(- this.draggedBox.offsetWidth/2, newLeftTop.left);
             newLeftTop.top = Math.max(- this.draggedBox.offsetHeight/2, newLeftTop.top);
 
-            const pic = (this.draggedBox as any).sitPlanElementRef;
-            pic.posx = newLeftTop.left + (this.draggedBox.offsetWidth/2);
-            pic.posy = newLeftTop.top + (this.draggedBox.offsetHeight/2);
+            const sitPlanElement = (this.draggedBox as any).sitPlanElementRef;
+            sitPlanElement.posx = newLeftTop.left + (this.draggedBox.offsetWidth/2);
+            sitPlanElement.posy = newLeftTop.top + (this.draggedBox.offsetHeight/2);
 
-            this.updateSymbolAndLabelPosition(pic);
+            this.updateSymbolAndLabelPosition(sitPlanElement);
         }
-    }
+    } 
 
-    private selectBox(box) {
-        box.classList.add('selected');
-        this.selectedBox = box;
-    }
-
-
-
-
-
+    /**
+     * Selecteer een pagina.
+     * 
+     * @param page - Het nummer van de pagina die getoond moet worden.
+     */
     selectPage(page: number) {
         this.sitplan.activePage = page;
+        this.redraw();
+    }
 
+    /**
+     * Toont enkel de elementen die op de pagina staan die als parameter wordt meegegeven.
+     * 
+     * @param page - Het nummer van de pagina die getoond moet worden.
+     */
+    showPage(page: number) {
         for (let element of this.sitplan.elements) {
             if (element.page != page) {
                 element.boxref.classList.add('hidden');
@@ -587,16 +552,149 @@ redraw() {
                 element.boxlabelref.classList.remove('hidden');
             }
         }
-
         this.updateRibbon();
     }
 
+    /**
+     * Hangt een klik event listener aan het gegeven element met als doel de huidig geselecteerde box te verwijderen.
+     * 
+     * @param elem - Het html element waar de listener wordt aan gehangen.
+     */
+    attachDeleteButton(elem: HTMLElement) { 
+        this.event_manager.addEventListener(elem, 'click', () => { this.deleteSelectedBox(); undostruct.store(); } );      
+    };
 
-    
+    /**
+     * Hangt een klik event listener aan het gegeven element met als doel de huidig geselecteerde box naar de achtergrond te sturen.
+     * 
+     * @param elem - Het html element waar de listener wordt aan gehangen.
+     */
+    attachSendToBackButton(elem: HTMLElement) { 
+        this.event_manager.addEventListener(elem, 'click', () => { this.sendToBack(); } ); 
+    };
 
+    /**
+     * Hangt een klik event listener aan het gegeven element met als doel de huidig geselecteerde box naar de voorgrond te brengen.
+     * 
+     * @param elem - Het html element waar de listener wordt aan gehangen.
+     */
+    attachBringToFrontButton(elem: HTMLElement) { 
+        this.event_manager.addEventListener(elem, 'click', () => { this.bringToFront(); } ); 
+    };
 
+    /**
+     * Hangt een klik event listener aan het gegeven element met als doel de zoomfactor aan te passen.
+     * 
+     * @param elem - Het html element waar de listener wordt aan gehangen.
+     * @param increment - De waarde waarmee de zoomfactor wordt aangepast. Een positieve waarde vergroot de zoom,
+     *                    terwijl een negatieve waarde de zoom verkleint.
+     */
+    attachZoomButton(elem: HTMLElement, increment: number) { 
+        this.event_manager.addEventListener(elem, 'click', () => { this.zoomIncrement(increment); } ); 
+    };
 
+    /**
+     * Hangt een klik event listener aan het gegeven element met als doel het situatieplan
+     * aan te passen aan de beschikbare ruimte in het browservenster.
+     * 
+     * @param elem - Het html element waar de listener wordt aan gehangen.
+     */
+    attachZoomToFitButton(elem: HTMLElement) { 
+        this.event_manager.addEventListener(elem, 'click', () => { this.zoomToFit(); } ); 
+    };
 
+    /**
+     * Hangt een klik event listener aan het gegeven element om een bestand te kiezen en een verandering event listener aan het invoerelement
+     * om een nieuw element vanuit een bestand aan het situatieplan toe te voegen.
+     * 
+     * @param elem - Het HTML-element dat bij een klik een bestand moet openen.
+     * @param fileinput - Het invoerelement voor bestanden dat het bestand uploadt wanneer het verandert.
+     */
+    attachAddElementFromFileButton(elem: HTMLElement, fileinput: HTMLElement) {
+        this.event_manager.addEventListener(elem, 'click', () => { fileinput.click(); } );
+        this.event_manager.addEventListener(fileinput, 'change', (event) => { 
+            let element = this.sitplan.addElementFromFile(event, this.sitplan.activePage, 550, 300, 
+                (() => {
+                    this.syncToSitPlan();
+                    this.clearSelection();
+                    element.needsViewUpdate = true; // for an external SVG this is needed, for an electroItem it is automatically set (see next function)
+                    this.redraw();
+                    this.selectBox(element.boxref); // We moeten dit na redraw doen anders bestaat de box mogelijk nog niet
+                    this.bringToFront();
+                    undostruct.store();
+                    (fileinput as HTMLInputElement).value = ''; // Zorgt ervoor dat hetzelfde bestand twee keer kan worden gekozen en dit nog steeds een change triggert
+                }).bind(this)
+            );
+        });
+    }
+
+    /**
+     * Hangt een klik event listener aan het gegeven element om een nieuw Electro_Item aan het situatieplan toe te voegen.
+     * 
+     * @param elem - Het HTML-element dat bij een klik een nieuw element toevoegt.
+     */
+    attachAddElectroItemButton(elem: HTMLElement) {
+        this.event_manager.addEventListener(elem, 'click', () => {
+            SituationPlanView_ElementPropertiesPopup(null,
+                (id, adrestype, adres, adreslocation, labelfontsize, scale, rotate) => {
+                    if (id != null) {
+                        let element = this.sitplan.addElementFromElectroItem(id, this.sitplan.activePage, 550, 300, 
+                                                                  adrestype, adres, adreslocation, labelfontsize,
+                                                                  scale, rotate);
+                        if (element != null) {
+                            this.syncToSitPlan();
+                            this.clearSelection();
+                            this.redraw();
+                            this.selectBox(element.boxref); // We moeten dit na redraw doen anders bestaat de box mogelijk nog niet
+                            this.bringToFront();
+                            undostruct.store();
+                        }
+                    } else {
+                        alert('Geen geldig ID ingegeven!');
+                    }
+                }
+            ); 
+        });
+    }
+
+    /**
+     * Hangt een klik event listener aan het gegeven element om een bestaand element in het situatieplan te bewerken.
+     * 
+     * @param elem - Het HTML-element dat bij een klik een bestaand element in het situatieplan bewerkt.
+     */
+    attachEditButton(elem: HTMLElement) {
+        this.event_manager.addEventListener(elem, 'click', () => {
+            if (this.selectedBox) {
+                const sitPlanElement = (this.selectedBox as any).sitPlanElementRef;
+                if (!sitPlanElement) return;
+
+                SituationPlanView_ElementPropertiesPopup(sitPlanElement,
+                    (electroid, adrestype, adres, adreslocation, labelfontsize, scale, rotate) => {
+                        if (electroid != null) {
+                            sitPlanElement.setElectroItemId(electroid);
+                            sitPlanElement.setAdres(adrestype,adres,adreslocation);
+                        }
+                        sitPlanElement.labelfontsize = labelfontsize;
+                        sitPlanElement.setscale(scale);
+                        sitPlanElement.rotate = rotate;
+                        
+                        this.updateBoxContent(sitPlanElement); //content needs to be updated first to know the size of the box
+                        this.updateSymbolAndLabelPosition(sitPlanElement);
+                        undostruct.store();
+                    }
+                );
+            }
+        } );
+    }
+
+    /**
+     * Maakt de knoppen in de ribbon aan om onder andere pagina's te selecteren, elementen te laden of verwijderen en pagina's te zoomen.
+     * Deze functie wordt aangeroepen telkens er iets in de toestand verandert die mogelijk kan leiden tot aanpassingen in de ribbon.
+     * 
+     * Deze functie hangt ook onclick events aan interne functies in deze class.
+     * 
+     * TODO: Er zijn efficientiewinsten mogelijk door niet telkens de hele ribbon te hertekenen.
+     */
     updateRibbon() {
         let outputleft: string = "";
         let outputright: string = "";
@@ -611,119 +709,88 @@ redraw() {
             <div class="icon"  ${(undostruct.redoStackSize() > 0 ? 'onclick="redoClicked()"' : 'style=\"filter: opacity(45%)\"')}>
                 <img src="gif/redo.png" alt="Opnieuw" class="icon-image">
                 <span class="icon-text">Opnieuw</span>
-            </div>
-            <span style="display: inline-block; width: 30px;"></span>
-        `
+            </div>`
 
         // -- Visuals om items te laden of verwijderen --
 
-        outputleft += '<span style="display: inline-block; width: 10px;"></span>';
         outputleft += `
-        <div class="icon" id="button_Add">
-            <span class="icon-image" style="font-size:24px">➕</span>
-            <span class="icon-text">Uit bestand</span>
-        </div>
-        <div class="icon" id="button_Add_electroItem">
-            <span class="icon-image" style="font-size:24px">➕</span>
-            <span class="icon-text">Uit schema</span>
-        </div>
-        <div class="icon" id="button_Delete">
-            <span class="icon-image" style="font-size:24px">🗑</span>
-            <span class="icon-text">Verwijder</span>
-        </div>`;
+            <span style="display: inline-block; width: 30px;"></span>
+            <div class="icon" id="button_Add">
+                <span class="icon-image" style="font-size:24px">➕</span>
+                <span class="icon-text">Uit bestand</span>
+            </div>
+            <div class="icon" id="button_Add_electroItem">
+                <span class="icon-image" style="font-size:24px">➕</span>
+                <span class="icon-text">Uit schema</span>
+            </div>
+            <div class="icon" id="button_Delete">
+                <span class="icon-image" style="font-size:24px">🗑</span>
+                <span class="icon-text">Verwijder</span>
+            </div>`;
 
         // -- Visuals om items te bewerken --
 
         outputleft += `
-        <span style="display: inline-block; width: 10px;"></span>
-        <div class="icon" id="button_edit">
-            <span class="icon-image" style="font-size:24px">📝</span>
-            <span class="icon-text">Bewerk</span>
-        </div>
-        <!--<span style="display: inline-block; width: 10px;"></span>
-        <div class="icon" id="button_rotate_left_90">
-            <span class="icon-image" style="font-size:24px">↺</span>
-            <span class="icon-text">-90°</span>
-        </div>
-        <div class="icon" id="button_rotate_right_90">
-            <span class="icon-image" style="font-size:24px">↺</span>
-            <span class="icon-text">+90°</span>
-        </div>
-        <div class="icon" id="button_rotate_left_10">
-            <span class="icon-image" style="font-size:24px">↺</span>
-            <span class="icon-text">-10°</span>
-        </div>
-        <div class="icon" id="button_rotate_right_10">
-            <span class="icon-image" style="font-size:24px">↺</span>
-            <span class="icon-text">+10°</span>
-        </div>
-        <span style="display: inline-block; width: 10px;"></span>
-        <div class="icon" id="scale_up_100">
-            <img src="gif/scaleup.png" alt="Scale up 100%" class="icon-image">
-            <span class="icon-text">+100%</span>
-        </div>
-        <div class="icon" id="scale_down_100">
-            <img src="gif/scaledown.png" alt="Scale down 100%" class="icon-image">
-            <span class="icon-text">-100%</span>
-        </div>
-        <div class="icon" id="scale_up_10">
-            <img src="gif/scaleup.png" alt="Scale up 100%" class="icon-image">
-            <span class="icon-text">+10%</span>
-        </div>
-        <div class="icon" id="scale_down_10">
-            <img src="gif/scaledown.png" alt="Scale down 100%" class="icon-image">
-            <span class="icon-text">-10%</span>
-        </div>-->`;
+            <span style="display: inline-block; width: 10px;"></span>
+            <div class="icon" id="button_edit">
+                <span class="icon-image" style="font-size:24px">📝</span>
+                <span class="icon-text">Bewerk</span>
+            </div>`;
 
-        // -- Visuals om naar achteren te sturen --
+        // -- Visuals om naar achteren of voren te sturen --
 
         outputleft += `
-        <span style="display: inline-block; width: 10px;"></span>
-        <div class="icon" id="sendBack">
-            <span class="icon-image" style="font-size:24px">⬇⬇</span>
-            <span class="icon-text">Naar achter</span>
-        </div>
-        <!--<button class="icon-button" id="sendBack">Naar achter</button>-->`
+            <span style="display: inline-block; width: 10px;"></span>
+            <div class="icon" id="sendBack">
+                <span class="icon-image" style="font-size:24px">⬇⬇</span>
+                <span class="icon-text">Naar achter</span>
+            </div>
+            <div class="icon" id="bringFront">
+                <span class="icon-image" style="font-size:24px">⬆⬆</span>
+                <span class="icon-text">Naar voor</span>
+            </div>`
 
         // -- Visuals om pagina te selecteren --
 
-        outputleft  += '<span style="display: inline-block; width: 50px;"></span><div><center>Pagina '
-        +  '<select id="id_sitplanpage">';
+        outputleft  += `
+            <span style="display: inline-block; width: 50px;"></span>
+            <div>
+                <center>
+                    Pagina 
+                        <select id="id_sitplanpage">`;
         
-        for (let i=1; i<= this.sitplan.numPages; i++) {
-            outputleft += '<option value="' + i + '"' + (i == this.sitplan.activePage ? ' selected' : '') + '>' + i + '</option>';
-        }
+                            for (let i=1; i<= this.sitplan.numPages; i++) {
+                                outputleft += '<option value="' + i + '"' + (i == this.sitplan.activePage ? ' selected' : '') + '>' + i + '</option>';
+                            }
 
-        outputleft += '</select><br>';
-        outputleft += '<button id="btn_sitplan_addpage"' +
-                  (this.sitplan.activePage != this.sitplan.numPages ? ' disabled' : '')      
-               +  '>Nieuw</button>';
-
-        outputleft += '<button id="btn_sitplan_delpage" style="background-color:red;" ' + (this.sitplan.numPages <= 1 ? ' disabled' : '') + '>&#9851;</button>';
-
-        outputleft += '</center></div>';
+        outputleft +=  `
+                        </select><br>
+                        <button id="btn_sitplan_addpage" ${(this.sitplan.activePage != this.sitplan.numPages ? ' disabled' : '')}>Nieuw</button>
+                        <button id="btn_sitplan_delpage" style="background-color:red;" ${(this.sitplan.numPages <= 1 ? ' disabled' : '')}>&#9851;</button>
+                </center>
+            </div>`;
  
         // -- Visuals om pagina te zoomen --
 
-        outputright += '<span style="display: inline-block; width: 10px;"></span>';
         outputright += `
-        <div class="icon" id="button_zoomin">
-            <span class="icon-image" style="font-size: 24px;">🔍</span>
-            <span class="icon-text">In</span>
-        </div>
-        <div class="icon" id="button_zoomout">
-            <span class="icon-image" style="font-size: 24px;">🌍</span>
-            <span class="icon-text">Uit</span>
-        </div>
-        <div class="icon" id="button_zoomToFit">
-            <span class="icon-image" style="font-size: 24px;">🖥️</span>
-            <!--<img src="gif/scaleup.png" alt="Schermvullend" class="icon-image">-->
-            <span class="icon-text">Schermvullend</span>
-        </div>`
-
-        outputright += '<span style="display: inline-block; width: 10px;"></span>';
+            <span style="display: inline-block; width: 10px;"></span>
+            <div class="icon" id="button_zoomin">
+                <span class="icon-image" style="font-size: 24px;">🔍</span>
+                <span class="icon-text">In</span>
+            </div>
+            <div class="icon" id="button_zoomout">
+                <span class="icon-image" style="font-size: 24px;">🌍</span>
+                <span class="icon-text">Uit</span>
+            </div>
+            <div class="icon" id="button_zoomToFit">
+                <span class="icon-image" style="font-size: 24px;">🖥️</span>
+                <!--<img src="gif/scaleup.png" alt="Schermvullend" class="icon-image">-->
+                <span class="icon-text">Schermvullend</span>
+            </div>
+            <span style="display: inline-block; width: 10px;"></span>`;
         
         // -- Put everything in the ribbon --
+
         document.getElementById("ribbon").innerHTML = `<div id="left-icons">${outputleft}</div><div id="right-icons">${outputright}</div>`;
 
         // -- Actions om pagina te selecteren --
@@ -757,19 +824,10 @@ redraw() {
 
         this.attachEditButton(document.getElementById('button_edit'));
 
-        /*this.attachScaleButton(document.getElementById('scale_up_10'), 0.1);
-        this.attachScaleButton(document.getElementById('scale_down_10'), -0.1);
-        this.attachScaleButton(document.getElementById('scale_up_100'), 1);
-        this.attachScaleButton(document.getElementById('scale_down_100'), -1);
-
-        this.attachRotateButton(document.getElementById('button_rotate_left_90'), -90);
-        this.attachRotateButton(document.getElementById('button_rotate_right_90'), 90);
-        this.attachRotateButton(document.getElementById('button_rotate_left_10'), -10);
-        this.attachRotateButton(document.getElementById('button_rotate_right_10'), 10);*/
-
         // -- Actions om naar achteren te sturen --
 
         this.attachSendToBackButton(document.getElementById('sendBack'));
+        this.attachBringToFrontButton(document.getElementById('bringFront'));
 
         // -- Actions om pagina te zoomen --
 
@@ -779,18 +837,55 @@ redraw() {
         
     }
 
-}
+    /*  
 
+    scaleBox(increment: number) {
+        if (this.selectedBox) {
+            let pic = (this.selectedBox as any).sitPlanElementRef;
+            if (pic==null) return;
 
+            pic.setscale(Math.min(Math.max(0.1,pic.getscale()+increment),1000));
+            
+            this.updateBoxContent(pic); //content needs to be updated first to know the size of the box
+            this.updateSymbolAndLabelPosition(pic);
+        }
+    }
+
+    rotateBox(degrees: number) {
+        if (this.selectedBox) {
+            let id = this.selectedBox.id;
+            let pic = (this.selectedBox as any).sitPlanElementRef;
+            pic.rotate = (pic.rotate + degrees) % 360;
+            this.selectedBox.style.transform = `rotate(${pic.rotate}deg)`;
+        }
+    }
+
+    attachScaleButton(elem: HTMLElement, increment: number) { 
+        this.event_manager.addEventListener(elem, 'click', () => { this.scaleBox(increment); undostruct.store(); } ); 
+    };
+
+    attachRotateButton(elem: HTMLElement, increment: number) { 
+        this.event_manager.addEventListener(elem, 'click', () => { this.rotateBox(increment); undostruct.store(); } ); 
+    };
+    
+    */
+
+} // *** END CLASS ***
+
+/**
+ * Toon de pagina voor het situatieplan
+ */
 function showSituationPlanPage() {
     toggleAppView('draw');
 
     if (!(structure.sitplan)) { structure.sitplan = new SituationPlan() };
+
     if (!(structure.sitplanview)) {
-        //First destroy all elements on the DOM with id starting with "SP_" to avoid any orphans being left from earlier exercises
+        //Verwijder eerst alle elementen op de DOM met id beginnend met "SP_" om eventuele wezen
+        //uit eerdere oefeningen te voorkomen
         let elements = document.querySelectorAll('[id^="SP_"]');
         elements.forEach(e => e.remove());
-        //Then create the SituationPlanView
+        //Maak dan de SituationPlanView
         structure.sitplanview = new SituationPlanView(
             document.getElementById('outerdiv'), 
             document.getElementById('paper'), 
@@ -798,21 +893,6 @@ function showSituationPlanPage() {
 
         structure.sitplanview.zoomToFit();
     };
-
-    structure.sitplanview.updateRibbon();
     
-    const spinner = document.createElement('div');
-    spinner.classList.add('loading-spinner');
-    document.getElementById('outerdiv').appendChild(spinner);
-
-    //requestAnimationFrame(() => {
-    //    requestAnimationFrame(() => {
-            render();
-    //    });
-    //});
-
-    function render() {
-        structure.sitplanview.redraw();      
-//        document.getElementById('outerdiv').removeChild(spinner);    
-    }
+    structure.sitplanview.redraw();      
 }
