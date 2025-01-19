@@ -3904,6 +3904,15 @@ var Electro_Item = /** @class */ (function (_super) {
         //this.updateSituationPlanElement(myElement); //Lijkt niet nodig aangezien dit zoiezo gebeurt in getScaledSVG bij iedere update
         return (myElement);
     };
+    /**
+     * Geeft de boundary's terug van het element in het situatieplan. Deze boundary's worden gebruikt om het element te positioneren en te clippen.
+     *
+     * @returns {Object} Een object met de volgende properties:
+     *   - clipleft: de afstand die links wordt weggesneden op de standaard tekening van het Electro_Item. Vaak zit hier 20 nutteloze pixels waar in het eendraadschema een stukje leiding en het nummer staat.
+     *   - addright: een eventuele afstand die rechts dient toegevoegd te worden, of (indien negatief) een clipping aan de rechter kant.
+     *   - cliptop: zelfs als clipleft maar aan de bovenkant.
+     *   - addbottom: zelfde als addright maar aan de onderkant.
+     */
     Electro_Item.prototype.getSitPlanBoundaries = function () {
         return {
             clipleft: 12,
@@ -3912,6 +3921,16 @@ var Electro_Item = /** @class */ (function (_super) {
             addbottom: 0
         };
     };
+    /**
+     * Genereert de SVG voor gebruik in het Situatieplan.  Deze wordt gegenereerd op basis van de standaard SVG in het eendraadschema
+     * maar met extra aanpassingen:
+     * - de getSVG functies van het Electro_Item worden aangeroepen met een flag dat het hier over een situatieplan symbool gaat.  Dit zal er vaak toe leiden dat het stukje leiding links niet getekend wordt.
+     *   ook is het in dat geval niet altijd nodig om alle tekst rond de symbolen te zetten.
+     * - er kunnen clipping operaties plaats vinden omdat de bounding box van het SVG element geoptimaliseerd werd voor gebruik in het eendraadschema en dit is niet noodzakelijk handig
+     *   voor gebruik in het situatieplan.
+     *
+     * @param myElement - Het SituationPlanElement waarvoor de SVG gecreëerd moet worden.
+     */
     Electro_Item.prototype.updateSituationPlanElement = function (myElement) {
         var spiegeltext = false;
         var rotate = myElement.rotate % 360;
@@ -6595,6 +6614,42 @@ var Lichtpunt = /** @class */ (function (_super) {
             + ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
+    /**
+     * Berekent de grenzen voor het sitplan-element op basis van het type lamp.
+     *
+     * @returns Een object met de grensverrekeningen: clipleft, addright, cliptop en addbottom.
+     *          De waarde van clipleft wordt kleiner gezet voor standaardlampen omdat die tekening iets meer naar links ligt.
+     */
+    Lichtpunt.prototype.getSitPlanBoundaries = function () {
+        var clipleft;
+        var addright = 0;
+        var cliptop = 0;
+        var addbottom = 0;
+        switch (this.props.type_lamp) {
+            case "led":
+                clipleft = 14;
+                break;
+            case "TL":
+                clipleft = 20;
+                if (+this.props.aantal_buizen_indien_TL > 3) {
+                    cliptop = -1;
+                    addbottom = 1;
+                }
+                break;
+            case "spot":
+                clipleft = 17;
+                break;
+            case "standaard":
+                clipleft = 10;
+                break;
+        }
+        return {
+            clipleft: clipleft,
+            addright: addright,
+            cliptop: cliptop,
+            addbottom: addbottom
+        };
+    };
     Lichtpunt.prototype.toSVG = function (sitplan, mirrortext) {
         if (sitplan === void 0) { sitplan = false; }
         if (mirrortext === void 0) { mirrortext = false; }
@@ -6770,7 +6825,7 @@ var Lichtpunt = /** @class */ (function (_super) {
                 }
                 // Verdere uitlijning en adres onderaan
                 mySVG.xright = 90;
-                mySVG.data += (sitplan ? "" : this.addAddressToSVG(mySVG, endy + 13, Math.max(mySVG.ydown, endy + 18 - 25), 2));
+                mySVG.data += (sitplan ? "" : this.addAddressToSVG(mySVG, endy + 13, Math.max(0, endy - 25 - 5), 2));
                 break;
             default: //Normaal lichtpunt (kruisje)
                 switch (this.props.type_noodverlichting) {

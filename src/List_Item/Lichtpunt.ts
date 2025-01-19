@@ -46,6 +46,43 @@ class Lichtpunt extends Electro_Item {
         return(output);
     }
 
+/**
+ * Berekent de grenzen voor het sitplan-element op basis van het type lamp.
+ * 
+ * @returns Een object met de grensverrekeningen: clipleft, addright, cliptop en addbottom.
+ *          De waarde van clipleft wordt kleiner gezet voor standaardlampen omdat die tekening iets meer naar links ligt.
+ */
+    getSitPlanBoundaries() {
+        let clipleft;
+        let addright = 0;
+        let cliptop = 0;
+        let addbottom = 0;
+        switch (this.props.type_lamp) {
+            case "led":
+                clipleft = 14;
+                break;
+            case "TL":
+                clipleft = 20;
+                if (+this.props.aantal_buizen_indien_TL > 3) {
+                    cliptop = -1;
+                    addbottom = 1;    
+                }
+                break;
+            case "spot":
+                clipleft = 17;
+                break;
+            case "standaard":
+                clipleft = 10;
+                break;
+        }
+        return {
+          clipleft: clipleft,
+          addright: addright,
+          cliptop: cliptop,
+          addbottom: addbottom
+        }
+      }
+
     toSVG(sitplan: boolean = false, mirrortext = false) {
         let mySVG:SVGelement = new SVGelement();
 
@@ -231,7 +268,7 @@ class Lichtpunt extends Electro_Item {
 
                 // Verdere uitlijning en adres onderaan
                 mySVG.xright = 90;
-                mySVG.data += (sitplan? "" : this.addAddressToSVG(mySVG,endy+13,Math.max(mySVG.ydown,endy+18-25),2));
+                mySVG.data += (sitplan? "" : this.addAddressToSVG(mySVG,endy+13,Math.max(0,endy-25-5),2));
                 break;
                 
             default: //Normaal lichtpunt (kruisje)

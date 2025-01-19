@@ -250,6 +250,15 @@ class Electro_Item extends List_Item {
     return(myElement);
   }
 
+  /**
+   * Geeft de boundary's terug van het element in het situatieplan. Deze boundary's worden gebruikt om het element te positioneren en te clippen.
+   * 
+   * @returns {Object} Een object met de volgende properties:
+   *   - clipleft: de afstand die links wordt weggesneden op de standaard tekening van het Electro_Item. Vaak zit hier 20 nutteloze pixels waar in het eendraadschema een stukje leiding en het nummer staat.
+   *   - addright: een eventuele afstand die rechts dient toegevoegd te worden, of (indien negatief) een clipping aan de rechter kant.
+   *   - cliptop: zelfs als clipleft maar aan de bovenkant.
+   *   - addbottom: zelfde als addright maar aan de onderkant.
+   */
   getSitPlanBoundaries() {
     return {
       clipleft: 12,
@@ -259,6 +268,16 @@ class Electro_Item extends List_Item {
     }
   }
 
+  /**
+   * Genereert de SVG voor gebruik in het Situatieplan.  Deze wordt gegenereerd op basis van de standaard SVG in het eendraadschema
+   * maar met extra aanpassingen:
+   * - de getSVG functies van het Electro_Item worden aangeroepen met een flag dat het hier over een situatieplan symbool gaat.  Dit zal er vaak toe leiden dat het stukje leiding links niet getekend wordt.
+   *   ook is het in dat geval niet altijd nodig om alle tekst rond de symbolen te zetten.
+   * - er kunnen clipping operaties plaats vinden omdat de bounding box van het SVG element geoptimaliseerd werd voor gebruik in het eendraadschema en dit is niet noodzakelijk handig
+   *   voor gebruik in het situatieplan.
+   * 
+   * @param myElement - Het SituationPlanElement waarvoor de SVG gecreëerd moet worden.
+   */
   updateSituationPlanElement(myElement: SituationPlanElement) {
     
     let spiegeltext = false;
