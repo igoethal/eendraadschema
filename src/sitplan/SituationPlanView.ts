@@ -756,17 +756,18 @@ class SituationPlanView {
             <span style="display: inline-block; width: 50px;"></span>
             <div>
                 <center>
-                    Pagina 
+                    <span style="display: inline-block; white-space: nowrap;">Pagina
                         <select id="id_sitplanpage">`;
-        
                             for (let i=1; i<= this.sitplan.numPages; i++) {
                                 outputleft += '<option value="' + i + '"' + (i == this.sitplan.activePage ? ' selected' : '') + '>' + i + '</option>';
                             }
 
         outputleft +=  `
-                        </select><br>
+                        </select>
+                    </span><br><span style="display: inline-block; white-space: nowrap;">
                         <button id="btn_sitplan_addpage" ${(this.sitplan.activePage != this.sitplan.numPages ? ' disabled' : '')}>Nieuw</button>
                         <button id="btn_sitplan_delpage" style="background-color:red;" ${(this.sitplan.numPages <= 1 ? ' disabled' : '')}>&#9851;</button>
+                    </span>
                 </center>
             </div>`;
  
