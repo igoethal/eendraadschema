@@ -250,6 +250,15 @@ class Electro_Item extends List_Item {
     return(myElement);
   }
 
+  getSitPlanBoundaries() {
+    return {
+      clipleft: 12,
+      addright: 0,
+      cliptop: 0,
+      addbottom: 0
+    }
+  }
+
   updateSituationPlanElement(myElement: SituationPlanElement) {
     
     let spiegeltext = false;
@@ -262,20 +271,19 @@ class Electro_Item extends List_Item {
     let sizex = mySVGElement.xright + mySVGElement.xleft + 10;
     let sizey = mySVGElement.yup + mySVGElement.ydown;
    
-    let clipleft = 0;
-    if (['Contactdoos','Bel'].includes(this.getType())) {
-      clipleft = 0;
-    } else {
-      clipleft = 12;
+    let boundaries = this.getSitPlanBoundaries();
+    
+    switch (this.getType()) {
+      case 'Contactdoos': case 'Bel':
+        boundaries.clipleft = 0;
+        break;
     }
 
-    let addright = 0;
-
-    let width = sizex-clipleft+addright;
-    let height = sizey;
+    let width = sizex-boundaries.clipleft+boundaries.addright;
+    let height = sizey-boundaries.cliptop+boundaries.addbottom;
 
     myElement.updateElectroItemSVG( '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" transform="scale(1,1)" ' +
-                                    `viewBox="${clipleft} 0 ${sizex-clipleft} ${sizey}" width="${width}" height="${height}">` +
+                                    `viewBox="${boundaries.clipleft} ${boundaries.cliptop} ${sizex-boundaries.clipleft+boundaries.addright} ${sizey-boundaries.cliptop+boundaries.addbottom}" width="${width}" height="${height}">` +
                                         SVGSymbols.getNeededSymbols() + // enkel de symbolen die nodig zijn voor dit element
                                         mySVGElement.data +
                                     '</svg>',width,height); 

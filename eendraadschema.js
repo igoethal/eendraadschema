@@ -33,7 +33,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
-        while (g && (g = 0, op[0] && (_ = 0)), _) try {
+        while (_) try {
             if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
             if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
@@ -3904,6 +3904,14 @@ var Electro_Item = /** @class */ (function (_super) {
         //this.updateSituationPlanElement(myElement); //Lijkt niet nodig aangezien dit zoiezo gebeurt in getScaledSVG bij iedere update
         return (myElement);
     };
+    Electro_Item.prototype.getSitPlanBoundaries = function () {
+        return {
+            clipleft: 12,
+            addright: 0,
+            cliptop: 0,
+            addbottom: 0
+        };
+    };
     Electro_Item.prototype.updateSituationPlanElement = function (myElement) {
         var spiegeltext = false;
         var rotate = myElement.rotate % 360;
@@ -3913,18 +3921,17 @@ var Electro_Item = /** @class */ (function (_super) {
         var mySVGElement = this.toSVG(true, spiegeltext);
         var sizex = mySVGElement.xright + mySVGElement.xleft + 10;
         var sizey = mySVGElement.yup + mySVGElement.ydown;
-        var clipleft = 0;
-        if (['Contactdoos', 'Bel'].includes(this.getType())) {
-            clipleft = 0;
+        var boundaries = this.getSitPlanBoundaries();
+        switch (this.getType()) {
+            case 'Contactdoos':
+            case 'Bel':
+                boundaries.clipleft = 0;
+                break;
         }
-        else {
-            clipleft = 12;
-        }
-        var addright = 0;
-        var width = sizex - clipleft + addright;
-        var height = sizey;
+        var width = sizex - boundaries.clipleft + boundaries.addright;
+        var height = sizey - boundaries.cliptop + boundaries.addbottom;
         myElement.updateElectroItemSVG('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" transform="scale(1,1)" ' +
-            "viewBox=\"".concat(clipleft, " 0 ").concat(sizex - clipleft, " ").concat(sizey, "\" width=\"").concat(width, "\" height=\"").concat(height, "\">") +
+            "viewBox=\"".concat(boundaries.clipleft, " ").concat(boundaries.cliptop, " ").concat(sizex - boundaries.clipleft + boundaries.addright, " ").concat(sizey - boundaries.cliptop + boundaries.addbottom, "\" width=\"").concat(width, "\" height=\"").concat(height, "\">") +
             SVGSymbols.getNeededSymbols() + // enkel de symbolen die nodig zijn voor dit element
             mySVGElement.data +
             '</svg>', width, height);
@@ -6827,7 +6834,7 @@ var Media = /** @class */ (function (_super) {
         this.props.symbool = "";
     };
     Media.prototype.overrideKeys = function () {
-        if (this.props.symbool == 'luidspreker') {
+        if (['luidspreker', 'intercom'].includes(this.props.symbool)) {
             if (this.props.aantal < 1)
                 this.props.aantal = 1;
             if (this.props.aantal > 20)
@@ -6841,8 +6848,8 @@ var Media = /** @class */ (function (_super) {
         this.overrideKeys();
         var output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml()
-            + "Symbool: " + this.selectPropToHTML('symbool', ["", "luidspreker"]);
-        if (this.props.symbool == 'luidspreker') {
+            + "Symbool: " + this.selectPropToHTML('symbool', ["", "luidspreker", "intercom"]);
+        if (['luidspreker', 'intercom'].includes(this.props.symbool)) {
             output += ", Aantal: " + this.selectPropToHTML('aantal', ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"]);
         }
         output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
@@ -6854,9 +6861,17 @@ var Media = /** @class */ (function (_super) {
         SVGSymbols.addSymbol('luidspreker');
         // Alles naar beneden schuiven als we het aantal laders boven het symbool willen plaatsen
         var shifty = 0;
-        if (this.props.aantal > 1) {
-            shifty = 15;
-            mySVG.data += '<text x="31" y="12" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">x' + htmlspecialchars(this.props.aantal) + '</text>';
+        if ((this.props.aantal > 1) && (!sitplan) && (['luidspreker', 'intercom'].includes(this.props.symbool))) {
+            switch (this.props.symbool) {
+                case "luidspreker":
+                    shifty = 15;
+                    mySVG.data += '<text x="31" y="12" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">x' + htmlspecialchars(this.props.aantal) + '</text>';
+                    break;
+                case "intercom":
+                    shifty = 5;
+                    mySVG.data += '<text x="36" y="12" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">x' + htmlspecialchars(this.props.aantal) + '</text>';
+                    break;
+            }
         }
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 59;
@@ -6864,10 +6879,24 @@ var Media = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         switch (this.props.symbool) {
             case "luidspreker":
-                mySVG.data += (sitplan ? '' : '<line x1="1" y1="' + (25 + shifty) + '" x2="21" y2="' + (25 + shifty) + '" stroke="black"></line>');
-                mySVG.data += '<use xlink:href="#luidspreker" x="21" y="' + (25 + shifty) + '"></use>';
+                mySVG.data += (sitplan ? '' : '<line x1="1" y1="' + (25 + shifty) + '" x2="21" y2="' + (25 + shifty) + '" stroke="black" />');
+                mySVG.data += '<use xlink:href="#luidspreker" x="21" y="' + (25 + shifty) + '" />';
                 mySVG.xright = 36;
                 mySVG.data += (sitplan ? '' : this.addAddressToSVG(mySVG, 60 + shifty, 15, 0));
+                break;
+            case "intercom":
+                mySVG.data += (sitplan ? '' : '<line x1="1" y1="' + (25 + shifty) + '" x2="21" y2="' + (25 + shifty) + '" stroke="black" />');
+                mySVG.data += "<rect x=\"21\" y=\"".concat((15 + shifty), "\" width=\"30\" height=\"20\" stroke=\"black\" fill=\"none\" />");
+                mySVG.data += "<rect x=\"36\" y=\"".concat((20 + shifty), "\" width=\"4\" height=\"10\" stroke=\"black\" fill=\"none\" />");
+                mySVG.data += "<line x1=\"40\" y1=\"".concat((20 + shifty), "\" x2=\"51\" y2=\"").concat((15 + shifty), "\" stroke=\"black\" />");
+                mySVG.data += "<line x1=\"40\" y1=\"".concat((30 + shifty), "\" x2=\"51\" y2=\"").concat((35 + shifty), "\" stroke=\"black\" />");
+                mySVG.data += "<line x1=\"46\" y1=\"".concat((25 + shifty), "\" x2=\"56\" y2=\"").concat((25 + shifty), "\" stroke=\"black\" stroke-width=\"2\" />");
+                mySVG.data += "<line x1=\"46\" y1=\"".concat((25 + shifty), "\" x2=\"48\" y2=\"").concat((23 + shifty), "\" stroke=\"black\" stroke-width=\"1\" stroke-linecap=\"round\" />");
+                mySVG.data += "<line x1=\"46\" y1=\"".concat((25 + shifty), "\" x2=\"48\" y2=\"").concat((27 + shifty), "\" stroke=\"black\" stroke-width=\"1\" stroke-linecap=\"round\" />");
+                mySVG.data += "<line x1=\"56\" y1=\"".concat((25 + shifty), "\" x2=\"54\" y2=\"").concat((23 + shifty), "\" stroke=\"black\" stroke-width=\"1\" stroke-linecap=\"round\" />");
+                mySVG.data += "<line x1=\"56\" y1=\"".concat((25 + shifty), "\" x2=\"54\" y2=\"").concat((27 + shifty), "\" stroke=\"black\" stroke-width=\"1\" stroke-linecap=\"round\" />");
+                mySVG.xright = 54;
+                mySVG.data += (sitplan ? '' : this.addAddressToSVG(mySVG, 50 + shifty, 5, -3));
                 break;
             default:
                 mySVG.data += (sitplan ? '' : '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>');
@@ -6875,6 +6904,22 @@ var Media = /** @class */ (function (_super) {
                 break;
         }
         return (mySVG);
+    };
+    Media.prototype.getSitPlanBoundaries = function () {
+        var clipleft = 12;
+        var addright = 0;
+        var cliptop = 0;
+        var addbottom = 0;
+        switch (this.props.symbool) {
+            case 'luidspreker':
+                break;
+            case 'intercom':
+                addright = -5;
+                cliptop = 5;
+                addbottom = -5;
+                break;
+        }
+        return ({ clipleft: clipleft, addright: addright, cliptop: cliptop, addbottom: addbottom });
     };
     return Media;
 }(Electro_Item));
