@@ -42,7 +42,67 @@ class Lichtcircuit extends Schakelaars {
 
         output += ", Aantal lichtpunten: " + this.selectPropToHTML('aantal_lichtpunten',["0","1","2","3","4","5","6","7","8","9","10"]);
         output += ", Adres/tekst: " + this.stringPropToHTML('adres',5);
+
+        output += this.toHTMLFooter();
+
         return(output);
+    }
+
+    countExpandableElements(): number {
+        let countExpandableElements = (this.props.aantal_lichtpunten == "0") ? 0 : 1;
+        switch (this.props.type_schakelaar) {
+            case "enkelpolig": case "dubbelpolig":
+                countExpandableElements += (+this.props.aantal_schakelaars);
+                break;
+            default:
+                countExpandableElements += 1;
+        }
+        return countExpandableElements;
+    }
+
+    isExpandable() {
+        return this.countExpandableElements() > 1;
+    }
+
+    expand() {
+
+        //Nieuwe schakelaars maken, alle eigenschappen kopieren behalve type en aantal_lichtpunten
+        //Het adres nemen we over van het this element
+        let schakelaars = new Schakelaars(this.sourcelist);
+        const {type, aantal_lichtpunten, ...rest} = this.props; 
+        Object.assign(schakelaars.props, rest);
+        schakelaars.props.adres = this.props.adres;
+
+        if (+(this.props.aantal_lichtpunten) > 0) { // Er is minstens 1 lichtpunt
+
+            // Eerst schakelaars in het schema hangen vlak voor het this element zodat ze een id krijgen
+            this.sourcelist.insertItemBeforeId(schakelaars,this.id); 
+
+            // Dan het this element door een nieuw lichtpunt vervangen
+            let lichtpunt = new Lichtpunt(this.sourcelist);
+            lichtpunt.props.aantal = this.props.aantal_lichtpunten;
+            lichtpunt.props.is_halfwaterdicht = this.props.is_halfwaterdicht;
+            lichtpunt.id = this.id;
+            if (this.getParent().props.type == "Meerdere verbruikers") {
+                lichtpunt.parent = this.getParent().id;
+            } else {
+                lichtpunt.parent = schakelaars.id;
+            }
+            let ordinal = this.sourcelist.getOrdinalById(this.id); // Deze kan hier pas komen want de ordinal is gewijzigd door het invoegen van de schakelaars
+            this.sourcelist.data[ordinal] = lichtpunt;
+
+        } else { // enkel schakelaars
+
+            // Het this element door de schakelaars vervangen
+            schakelaars.id = this.id;
+            schakelaars.parent = this.getParent().id;
+            let ordinal = this.sourcelist.getOrdinalById(this.id);
+            this.sourcelist.data[ordinal] = schakelaars;
+
+        }
+        
+        // schakelaars uitpakken in elementen
+        schakelaars.expand();
     }
 
     toSVG(sitplan: boolean = false, mirrortext: boolean = false) {
@@ -65,7 +125,7 @@ class Lichtcircuit extends Schakelaars {
 
         if (this.props.aantal_lichtpunten >= 1) { //1 of meerdere lampen
             // Teken de lamp
-            endx = startx + 30;
+            endx = startx + 29;
             mySVG.data += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
                     +  '<use xlink:href="#lamp" x="' + endx + '" y="25" />';
 
@@ -86,6 +146,7 @@ class Lichtcircuit extends Schakelaars {
             }
 
             // Teken een leiding achter de lamp indien er nog kinderen zijn
+            endx++;
             if (this.heeftVerbruikerAlsKind()) mySVG.data += '<line x1="'+endx+'" y1="25" x2="'+(endx+10)+'" y2="25" stroke="black" />';
                 
             // Bepaal finale Bounding Box om het geheel te tekenen

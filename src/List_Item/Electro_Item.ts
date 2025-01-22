@@ -181,7 +181,7 @@ class Electro_Item extends List_Item {
 
   toHTMLFooter() {
     if (this.isExpandable()) {
-      return(` <button title="Meerdere schakelaars omzetten in indivuele schakelaars" style="background-color:lightblue;" onclick="HLExpand(${this.id})">Uitpakken</button>`);
+      return(` <button title="Meerdere elementen (bvb schakelaars) omzetten in indivuele elementen" style="background-color:lightblue;" onclick="HLExpand(${this.id})">Uitpakken</button>`);
     } else {
       return("");
     }

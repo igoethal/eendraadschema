@@ -69,6 +69,17 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 function deepClone(obj) {
     var _out = new obj.constructor;
     var getType = function (n) {
@@ -3834,7 +3845,7 @@ var Electro_Item = /** @class */ (function (_super) {
     // -- Displays the Expand button for the Electro_item, in case the item is expandable --
     Electro_Item.prototype.toHTMLFooter = function () {
         if (this.isExpandable()) {
-            return (" <button title=\"Meerdere schakelaars omzetten in indivuele schakelaars\" style=\"background-color:lightblue;\" onclick=\"HLExpand(".concat(this.id, ")\">Uitpakken</button>"));
+            return (" <button title=\"Meerdere elementen (bvb schakelaars) omzetten in indivuele elementen\" style=\"background-color:lightblue;\" onclick=\"HLExpand(".concat(this.id, ")\">Uitpakken</button>"));
         }
         else {
             return ("");
@@ -4611,7 +4622,57 @@ var Lichtcircuit = /** @class */ (function (_super) {
         }
         output += ", Aantal lichtpunten: " + this.selectPropToHTML('aantal_lichtpunten', ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]);
         output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
+        output += this.toHTMLFooter();
         return (output);
+    };
+    Lichtcircuit.prototype.countExpandableElements = function () {
+        var countExpandableElements = (this.props.aantal_lichtpunten == "0") ? 0 : 1;
+        switch (this.props.type_schakelaar) {
+            case "enkelpolig":
+            case "dubbelpolig":
+                countExpandableElements += (+this.props.aantal_schakelaars);
+                break;
+            default:
+                countExpandableElements += 1;
+        }
+        return countExpandableElements;
+    };
+    Lichtcircuit.prototype.isExpandable = function () {
+        return this.countExpandableElements() > 1;
+    };
+    Lichtcircuit.prototype.expand = function () {
+        //Nieuwe schakelaars maken, alle eigenschappen kopieren behalve type en aantal_lichtpunten
+        //Het adres nemen we over van het this element
+        var schakelaars = new Schakelaars(this.sourcelist);
+        var _a = this.props, type = _a.type, aantal_lichtpunten = _a.aantal_lichtpunten, rest = __rest(_a, ["type", "aantal_lichtpunten"]);
+        Object.assign(schakelaars.props, rest);
+        schakelaars.props.adres = this.props.adres;
+        if (+(this.props.aantal_lichtpunten) > 0) { // Er is minstens 1 lichtpunt
+            // Eerst schakelaars in het schema hangen vlak voor het this element zodat ze een id krijgen
+            this.sourcelist.insertItemBeforeId(schakelaars, this.id);
+            // Dan het this element door een nieuw lichtpunt vervangen
+            var lichtpunt = new Lichtpunt(this.sourcelist);
+            lichtpunt.props.aantal = this.props.aantal_lichtpunten;
+            lichtpunt.props.is_halfwaterdicht = this.props.is_halfwaterdicht;
+            lichtpunt.id = this.id;
+            if (this.getParent().props.type == "Meerdere verbruikers") {
+                lichtpunt.parent = this.getParent().id;
+            }
+            else {
+                lichtpunt.parent = schakelaars.id;
+            }
+            var ordinal = this.sourcelist.getOrdinalById(this.id); // Deze kan hier pas komen want de ordinal is gewijzigd door het invoegen van de schakelaars
+            this.sourcelist.data[ordinal] = lichtpunt;
+        }
+        else { // enkel schakelaars
+            // Het this element door de schakelaars vervangen
+            schakelaars.id = this.id;
+            schakelaars.parent = this.getParent().id;
+            var ordinal = this.sourcelist.getOrdinalById(this.id);
+            this.sourcelist.data[ordinal] = schakelaars;
+        }
+        // schakelaars uitpakken in elementen
+        schakelaars.expand();
     };
     Lichtcircuit.prototype.toSVG = function (sitplan, mirrortext) {
         var _a;
@@ -4633,7 +4694,7 @@ var Lichtcircuit = /** @class */ (function (_super) {
         }
         if (this.props.aantal_lichtpunten >= 1) { //1 of meerdere lampen
             // Teken de lamp
-            endx = startx + 30;
+            endx = startx + 29;
             mySVG.data += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
                 + '<use xlink:href="#lamp" x="' + endx + '" y="25" />';
             // Teken aantal lampen en symbool 'h' voor halfwaterdicht
@@ -4654,6 +4715,7 @@ var Lichtcircuit = /** @class */ (function (_super) {
                     mySVG.data += "<text transform=\"scale(-1,1) translate(".concat(-2 * endx, ",0)\" x=\"").concat(endx, "\" y=\"10\" ").concat(textoptions, ">").concat(htmlspecialchars(print_str_upper), "</text>");
             }
             // Teken een leiding achter de lamp indien er nog kinderen zijn
+            endx++;
             if (this.heeftVerbruikerAlsKind())
                 mySVG.data += '<line x1="' + endx + '" y1="25" x2="' + (endx + 10) + '" y2="25" stroke="black" />';
             // Bepaal finale Bounding Box om het geheel te tekenen
