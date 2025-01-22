@@ -1801,6 +1801,7 @@ var ElectroItemZoeker = /** @class */ (function () {
      * 4. De ElectroItem wordt toegevoegd met de volgende structuur: {id: number, kringnaam: string, adres: string, type: string}
      */
     ElectroItemZoeker.prototype.reCalculate = function () {
+        this.data = [];
         for (var i = 0; i < structure.length; i++) {
             if (structure.active[i]) {
                 var id = structure.id[i];
@@ -3428,20 +3429,43 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK) {
         }
         ;
     }
+    function handleExpandButton(electroItemId) {
+        if (electroItemId === void 0) { electroItemId = null; }
+        if (electroItemId == null)
+            return;
+        var element = structure.getElectroItemById(electroItemId);
+        if (element == null)
+            return;
+        element.expand();
+        adressen.reCalculate();
+        kringnamen = adressen.getUniqueKringnaam();
+        IdFieldChanged();
+    }
     /**
      * Toon het type verbruiker van het gekozen electro-item
      */
     function updateElectroType() {
-        if (textInput.value == null || textInput.value.trim() == '')
+        if (textInput.value == null || textInput.value.trim() == '') {
             feedback.innerHTML = '<span style="color: red;">Geen ID ingegeven</span>';
+            expandButton.style.display = 'none';
+        }
         else {
-            var id = Number(textInput.value);
-            var element = structure.getElectroItemById(id);
+            var electroItemId_1 = Number(textInput.value);
+            var element = structure.getElectroItemById(electroItemId_1);
             if (element != null) {
+                var type = element.getType();
                 feedback.innerHTML = '<span style="color:green;">' + element.getType() + '</span>';
+                if (element.isExpandable()) {
+                    expandButton.style.display = 'block';
+                    feedback.innerHTML += '<br><span style="color: black;">Klik op uitpakken indien u de onderliggende elementen in het situatieschema wil kunnen plaatsen.</span>';
+                    expandButton.onclick = function () { handleExpandButton(electroItemId_1); };
+                }
+                else
+                    expandButton.style.display = 'none';
             }
             else {
                 feedback.innerHTML = '<span style="color: red;">Element niet gevonden</span>';
+                expandButton.style.display = 'none';
             }
         }
     }
@@ -3500,7 +3524,7 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK) {
      * Eerst maken we de pop-up
      */
     var div = document.createElement('div');
-    div.innerHTML = "\n        <div id=\"popupOverlay\" style=\"position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; visibility: hidden; z-index: 9999;\">\n            <div id=\"popupWindow\" style=\"width: 400px; background-color: white; padding: 20px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); display: flex; flex-direction: column; justify-content: space-between;\">\n                <div id=\"selectKringContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block;\">Kring:</label>\n                    <select id=\"selectKring\"></select>\n                </div>\n                <div id=\"selectElectroItemContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block;\">Element:</label>\n                    <select id=\"selectElectroItemBox\"></select>\n                </div>\n                <div id=\"textContainer\" style=\"display: flex; margin-bottom: 30px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block;\">ID:</label>\n                    <input id=\"textInput\" style=\"width: 100px;\" type=\"number\" min=\"0\" step=\"1\" value=\"\">\n                    <div id=\"feedback\" style=\"margin-left: 10px; width: 100%; font-size: 12px\"></div>\n                </div>\n                <div id=\"selectContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block; white-space: nowrap;\">Label type:</label>\n                    <select id=\"selectAdresType\">\n                        <option value=\"auto\">Automatisch</option>\n                        <option value=\"manueel\">Handmatig</option>\n                    </select>\n                </div>\n                <div id=\"adresContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block; white-space: nowrap;\">Label tekst:</label>\n                    <input id=\"adresInput\" style=\"width: 100%;\" type=\"text\" value=\"\">\n                    <select id=\"selectAdresLocation\" style=\"margin-left: 10px; display: inline-block;\">\n                        <option value=\"links\">Links</option>\n                        <option value=\"rechts\">Rechts</option>\n                        <option value=\"boven\">Boven</option>\n                        <option value=\"onder\">Onder</option>\n                    </select>\n                </div>\n                <div id=\"fontSizeContainer\" style=\"display: flex; margin-bottom: 30px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block; white-space: nowrap;\">Tekengrootte (px):</label>\n                    <input id=\"fontSizeInput\" style=\"width: 100px;\" type=\"number\" min=\"1\" max=\"72\" step=\"11\" value=\"11\">\n                </div> \n                <div style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block;\">Schaal (%):</label>\n                    <input id=\"scaleInput\" style=\"width: 100px;\" type=\"number\" min=\"10\" max=\"400\" step=\"10\" value=\"".concat(String(SITPLANVIEW_DEFAULT_SCALE * 100), "\">\n                </div>\n                <div style=\"display: flex; margin-bottom: 20px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block;\">Rotatie (\u00B0):</label>\n                    <input id=\"rotationInput\" style=\"width: 100px;\" type=\"number\" min=\"0\" max=\"360\" step=\"10\" value=\"0\">\n                </div>\n                <div id=\"setDefaultContainer\" style=\"display: flex; margin-bottom: 20px; align-items: flex-start;\">\n                    <input type=\"checkbox\" id=\"setDefaultCheckbox\">\n                    ").concat((sitplanElement == null) || ((sitplanElement != null) && (sitplanElement.getElectroItemId() != null))
+    div.innerHTML = "\n        <div id=\"popupOverlay\" style=\"position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; visibility: hidden; z-index: 9999;\">\n            <div id=\"popupWindow\" style=\"width: 500px; background-color: white; padding: 20px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); display: flex; flex-direction: column; justify-content: space-between;\">\n                <div id=\"selectKringContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block;\">Kring:</label>\n                    <select id=\"selectKring\"></select>\n                </div>\n                <div id=\"selectElectroItemContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block;\">Element:</label>\n                    <select id=\"selectElectroItemBox\"></select><span style=\"display: inline-block; width: 10px;\"></span>\n                    <button id=\"expandButton\" title=\"Omzetten in indivuele elementen\" style=\"background-color:lightblue;\">Uitpakken</button>\n                </div>\n                <div id=\"textContainer\" style=\"display: flex; margin-bottom: 30px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block;\">ID:</label>\n                    <input id=\"textInput\" style=\"width: 100px;\" type=\"number\" min=\"0\" step=\"1\" value=\"\">\n                    <div id=\"feedback\" style=\"margin-left: 10px; width: 100%; font-size: 12px\"></div>\n                </div>\n                <div id=\"selectContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block; white-space: nowrap;\">Label type:</label>\n                    <select id=\"selectAdresType\">\n                        <option value=\"auto\">Automatisch</option>\n                        <option value=\"manueel\">Handmatig</option>\n                    </select>\n                </div>\n                <div id=\"adresContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block; white-space: nowrap;\">Label tekst:</label>\n                    <input id=\"adresInput\" style=\"width: 100%;\" type=\"text\" value=\"\">\n                    <select id=\"selectAdresLocation\" style=\"margin-left: 10px; display: inline-block;\">\n                        <option value=\"links\">Links</option>\n                        <option value=\"rechts\">Rechts</option>\n                        <option value=\"boven\">Boven</option>\n                        <option value=\"onder\">Onder</option>\n                    </select>\n                </div>\n                <div id=\"fontSizeContainer\" style=\"display: flex; margin-bottom: 30px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block; white-space: nowrap;\">Tekengrootte (px):</label>\n                    <input id=\"fontSizeInput\" style=\"width: 100px;\" type=\"number\" min=\"1\" max=\"72\" step=\"11\" value=\"11\">\n                </div> \n                <div style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block;\">Schaal (%):</label>\n                    <input id=\"scaleInput\" style=\"width: 100px;\" type=\"number\" min=\"10\" max=\"400\" step=\"10\" value=\"".concat(String(SITPLANVIEW_DEFAULT_SCALE * 100), "\">\n                </div>\n                <div style=\"display: flex; margin-bottom: 20px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block;\">Rotatie (\u00B0):</label>\n                    <input id=\"rotationInput\" style=\"width: 100px;\" type=\"number\" min=\"0\" max=\"360\" step=\"10\" value=\"0\">\n                </div>\n                <div id=\"setDefaultContainer\" style=\"display: flex; margin-bottom: 20px; align-items: flex-start;\">\n                    <input type=\"checkbox\" id=\"setDefaultCheckbox\">\n                    ").concat((sitplanElement == null) || ((sitplanElement != null) && (sitplanElement.getElectroItemId() != null))
         ? "<label for=\"checkbox\" style=\"margin-left: 10px; flex-grow: 1; flex-wrap: wrap;\">Zet tekengrootte en schaal als standaard voor alle toekomstige nieuwe symbolen.</label>"
         : "<label for=\"checkbox\" style=\"margin-left: 10px; flex-grow: 1; flex-wrap: wrap;\">Zet schaal als standaard voor alle toekomstige nieuwe symbolen.</label>", "            \n                </div>\n                <div style=\"display: flex; justify-content: center;\">\n                    <button id=\"okButton\" style=\"margin-right: 10px;\">OK</button>\n                    <button id=\"cancelButton\" style=\"margin-keft: 10px;\">Cancel</button>\n                </div>\n            </div>\n        </div>");
     var popupOverlay = div.querySelector('#popupOverlay');
@@ -3509,6 +3533,7 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK) {
     var selectKring = popupWindow.querySelector('#selectKring');
     var selectElectroItemContainer = popupWindow.querySelector('#selectElectroItemContainer');
     var selectElectroItemBox = popupWindow.querySelector('#selectElectroItemBox');
+    var expandButton = popupWindow.querySelector('#expandButton');
     var textContainer = popupWindow.querySelector('#textContainer');
     var textInput = popupWindow.querySelector('#textInput');
     var feedback = popupWindow.querySelector('#feedback');

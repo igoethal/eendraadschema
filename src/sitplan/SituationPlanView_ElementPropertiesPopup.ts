@@ -177,19 +177,41 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanE
         }; 
     }
 
+    function handleExpandButton(electroItemId: number = null) {
+        if (electroItemId == null) return;
+
+        let element = structure.getElectroItemById(electroItemId);
+        if (element == null) return;
+
+        element.expand();
+
+        adressen.reCalculate();
+        kringnamen = adressen.getUniqueKringnaam();
+
+        IdFieldChanged();
+    }  
+
     /**
      * Toon het type verbruiker van het gekozen electro-item
      */
     function updateElectroType() {
-        if (textInput.value == null || textInput.value.trim() == '') 
+        if (textInput.value == null || textInput.value.trim() == '') {
             feedback.innerHTML = '<span style="color: red;">Geen ID ingegeven</span>';
-        else {
-            let id = Number(textInput.value);
-            let element = structure.getElectroItemById(id) as Electro_Item;
+            expandButton.style.display = 'none';
+        } else {
+            let electroItemId = Number(textInput.value);
+            let element = structure.getElectroItemById(electroItemId) as Electro_Item;
             if (element != null) {
+                const type = element.getType();
                 feedback.innerHTML = '<span style="color:green;">' + element.getType() + '</span>';
+                if (element.isExpandable()) {
+                    expandButton.style.display = 'block';
+                    feedback.innerHTML += '<br><span style="color: black;">Klik op uitpakken indien u de onderliggende elementen in het situatieschema wil kunnen plaatsen.</span>';
+                    expandButton.onclick = () => { handleExpandButton(electroItemId) };
+                } else expandButton.style.display = 'none';
             } else {
                 feedback.innerHTML = '<span style="color: red;">Element niet gevonden</span>';
+                expandButton.style.display = 'none';
             }
         }
     }
@@ -258,14 +280,15 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanE
 
     div.innerHTML = `
         <div id="popupOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; visibility: hidden; z-index: 9999;">
-            <div id="popupWindow" style="width: 400px; background-color: white; padding: 20px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); display: flex; flex-direction: column; justify-content: space-between;">
+            <div id="popupWindow" style="width: 500px; background-color: white; padding: 20px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); display: flex; flex-direction: column; justify-content: space-between;">
                 <div id="selectKringContainer" style="display: flex; margin-bottom: 10px; align-items: center;">
                     <label style="margin-right: 10px; display: inline-block;">Kring:</label>
                     <select id="selectKring"></select>
                 </div>
                 <div id="selectElectroItemContainer" style="display: flex; margin-bottom: 10px; align-items: center;">
                     <label style="margin-right: 10px; display: inline-block;">Element:</label>
-                    <select id="selectElectroItemBox"></select>
+                    <select id="selectElectroItemBox"></select><span style="display: inline-block; width: 10px;"></span>
+                    <button id="expandButton" title="Omzetten in indivuele elementen" style="background-color:lightblue;">Uitpakken</button>
                 </div>
                 <div id="textContainer" style="display: flex; margin-bottom: 30px; align-items: center;">
                     <label style="margin-right: 10px; display: inline-block;">ID:</label>
@@ -321,6 +344,7 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanE
                 const selectKring = popupWindow.querySelector('#selectKring') as HTMLSelectElement;
             const selectElectroItemContainer = popupWindow.querySelector('#selectElectroItemContainer') as HTMLSelectElement;
                 const selectElectroItemBox = popupWindow.querySelector('#selectElectroItemBox') as HTMLSelectElement;
+                const expandButton = popupWindow.querySelector('#expandButton') as HTMLButtonElement;
             const textContainer = popupWindow.querySelector('#textContainer') as HTMLElement;
                 const textInput = popupWindow.querySelector('#textInput') as HTMLInputElement;
                 const feedback = popupWindow.querySelector('#feedback') as HTMLElement;

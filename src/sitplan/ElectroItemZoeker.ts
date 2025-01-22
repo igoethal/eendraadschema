@@ -66,6 +66,7 @@ class ElectroItemZoeker {
      */
 
     reCalculate() {
+        this.data = [];
         for (let i = 0; i<structure.length; i++) {
             if (structure.active[i]) {
                 let id:number = structure.id[i];
