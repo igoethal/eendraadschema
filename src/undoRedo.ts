@@ -122,7 +122,7 @@ class undoRedo {
         switch (structure.properties.currentView) {
             case 'draw': topMenu.selectMenuItemByOrdinal(3); showSituationPlanPage(); break;
             case '2col': topMenu.selectMenuItemByOrdinal(2); HLRedrawTree(); break;
-            case 'config': topMenu.selectMenuItemByOrdinal((isDevMode() ? 4 : 3)); printsvg(); break;
+            case 'config': topMenu.selectMenuItemByOrdinal(4); printsvg(); break;
         }
     }
 

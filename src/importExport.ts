@@ -289,7 +289,7 @@ function json_to_structure(text: string, version = 0, redraw = true) {
     structure.reSort();
 
     // Draw the structure
-    if (redraw == true) topMenu.selectMenuItemByName(isDevMode() ? 'Eéndraadschema' : 'Bewerken'); // Ga naar het bewerken scherm, dat zal automatisch voor hertekenen zorgen.
+    if (redraw == true) topMenu.selectMenuItemByName('Eéndraadschema'); // Ga naar het bewerken scherm, dat zal automatisch voor hertekenen zorgen.
 
 }
 

@@ -208,7 +208,7 @@ function reset_all() {
     if (structure != null) structure.dispose();
     structure = new Hierarchical_List();
     buildNewStructure(structure);
-    topMenu.selectMenuItemByName(isDevMode() ? 'Eéndraadschema' : 'Bewerken');
+    topMenu.selectMenuItemByName('Eéndraadschema');
     undostruct.clear();
     undostruct.store();
 }
@@ -264,9 +264,7 @@ function changeAddressParams() {
 
 function openContactForm() {
     var strleft: string = PROP_Contact_Text;
-    if (isDevMode()) {
-        strleft = strleft.replace(/Bewerken/g, "Eéndraadschema");
-    }
+    strleft = strleft.replace(/Bewerken/g, "Eéndraadschema");
 
     document.getElementById("configsection").innerHTML = strleft;
     toggleAppView('config');
@@ -416,26 +414,16 @@ var appDocStorage = new MultiLevelStorage<any>('appDocStorage', {});
 // Build the menu
 
 let menuItems: MenuItem[]
-if (isDevMode()) {
-    menuItems = [
-        { name: 'Nieuw', callback: restart_all },
-        { name: 'Bestand', callback: showFilePage },
-        { name: 'Eéndraadschema', callback: HLRedrawTree },
-        { name: 'Situatieschema', callback: showSituationPlanPage },
-        { name: 'Print', callback: printsvg },
-        { name: 'Documentatie', callback: showDocumentationPage },
-        { name: 'Info/Contact', callback: openContactForm }
-    ];
-} else {
-    menuItems = [
-        { name: 'Nieuw', callback: restart_all },
-        { name: 'Bestand', callback: showFilePage },
-        { name: 'Bewerken', callback: HLRedrawTree },
-        { name: 'Print', callback: printsvg },
-        { name: 'Documentatie', callback: showDocumentationPage },
-        { name: 'Info/Contact', callback: openContactForm }
-    ];
-}
+
+menuItems = [
+    { name: 'Nieuw', callback: restart_all },
+    { name: 'Bestand', callback: showFilePage },
+    { name: 'Eéndraadschema', callback: HLRedrawTree },
+    { name: 'Situatieschema', callback: showSituationPlanPage },
+    { name: 'Print', callback: printsvg },
+    { name: 'Documentatie', callback: showDocumentationPage },
+    { name: 'Info/Contact', callback: openContactForm }
+];
 
 PROP_edit_menu(menuItems);
 

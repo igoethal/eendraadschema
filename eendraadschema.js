@@ -1361,7 +1361,7 @@ function json_to_structure(text, version, redraw) {
     structure.reSort();
     // Draw the structure
     if (redraw == true)
-        topMenu.selectMenuItemByName(isDevMode() ? 'Eéndraadschema' : 'Bewerken'); // Ga naar het bewerken scherm, dat zal automatisch voor hertekenen zorgen.
+        topMenu.selectMenuItemByName('Eéndraadschema'); // Ga naar het bewerken scherm, dat zal automatisch voor hertekenen zorgen.
 }
 /* FUNCTION import_to_structure
    
@@ -1655,7 +1655,7 @@ var undoRedo = /** @class */ (function () {
                 HLRedrawTree();
                 break;
             case 'config':
-                topMenu.selectMenuItemByOrdinal((isDevMode() ? 4 : 3));
+                topMenu.selectMenuItemByOrdinal(4);
                 printsvg();
                 break;
         }
@@ -9783,7 +9783,7 @@ function reset_all() {
         structure.dispose();
     structure = new Hierarchical_List();
     buildNewStructure(structure);
-    topMenu.selectMenuItemByName(isDevMode() ? 'Eéndraadschema' : 'Bewerken');
+    topMenu.selectMenuItemByName('Eéndraadschema');
     undostruct.clear();
     undostruct.store();
 }
@@ -9831,9 +9831,7 @@ function changeAddressParams() {
 }
 function openContactForm() {
     var strleft = PROP_Contact_Text;
-    if (isDevMode()) {
-        strleft = strleft.replace(/Bewerken/g, "Eéndraadschema");
-    }
+    strleft = strleft.replace(/Bewerken/g, "Eéndraadschema");
     document.getElementById("configsection").innerHTML = strleft;
     toggleAppView('config');
 }
@@ -9944,27 +9942,15 @@ var undostruct = new undoRedo(100);
 var appDocStorage = new MultiLevelStorage('appDocStorage', {});
 // Build the menu
 var menuItems;
-if (isDevMode()) {
-    menuItems = [
-        { name: 'Nieuw', callback: restart_all },
-        { name: 'Bestand', callback: showFilePage },
-        { name: 'Eéndraadschema', callback: HLRedrawTree },
-        { name: 'Situatieschema', callback: showSituationPlanPage },
-        { name: 'Print', callback: printsvg },
-        { name: 'Documentatie', callback: showDocumentationPage },
-        { name: 'Info/Contact', callback: openContactForm }
-    ];
-}
-else {
-    menuItems = [
-        { name: 'Nieuw', callback: restart_all },
-        { name: 'Bestand', callback: showFilePage },
-        { name: 'Bewerken', callback: HLRedrawTree },
-        { name: 'Print', callback: printsvg },
-        { name: 'Documentatie', callback: showDocumentationPage },
-        { name: 'Info/Contact', callback: openContactForm }
-    ];
-}
+menuItems = [
+    { name: 'Nieuw', callback: restart_all },
+    { name: 'Bestand', callback: showFilePage },
+    { name: 'Eéndraadschema', callback: HLRedrawTree },
+    { name: 'Situatieschema', callback: showSituationPlanPage },
+    { name: 'Print', callback: printsvg },
+    { name: 'Documentatie', callback: showDocumentationPage },
+    { name: 'Info/Contact', callback: openContactForm }
+];
 PROP_edit_menu(menuItems);
 var topMenu = new TopMenu('minitabs', 'menu-item', menuItems);
 // Download a default structure
