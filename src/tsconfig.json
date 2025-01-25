@@ -14,8 +14,9 @@
     "importExport.ts",
     "undoRedo.ts",
     "TopMenu.ts",
-    "documentation.ts",
+    "documentation/*.ts",
     "sitplan/*.ts",
+    "storage/*.ts",
     "List_Item/List_Item.ts",
     "List_Item/Electro_Item.ts",
     "List_Item/Schakelaars/Schakelaar.ts",
@@ -28,5 +29,5 @@
     "config.ts",
     "../prop/prop_scripts.ts",
     "main.ts"
-  ]
+, "documentation/HelperTip.ts"  ]
 }

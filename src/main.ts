@@ -411,6 +411,8 @@ var session = new Session();
 var structure: Hierarchical_List;
 var undostruct: undoRedo = new undoRedo(100);
 
+var appDocStorage = new MultiLevelStorage<any>('appDocStorage', {});
+
 // Build the menu
 
 let menuItems: MenuItem[]

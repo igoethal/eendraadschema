@@ -54,6 +54,17 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
@@ -1735,16 +1746,117 @@ var TopMenu = /** @class */ (function () {
     };
     return TopMenu;
 }());
+var HelperTip = /** @class */ (function () {
+    function HelperTip(storage, storagePrefix) {
+        if (storagePrefix === void 0) { storagePrefix = 'helpertip'; }
+        this.storage = storage;
+        this.storagePrefix = storagePrefix;
+    }
+    // Show the helper tip if it hasn't been dismissed before
+    HelperTip.prototype.show = function (key, htmlContent) {
+        var _this = this;
+        var neverDisplayKey = "".concat(this.storagePrefix, ".").concat(key, ".neverDisplay");
+        var displayedInThisSessionKey = "".concat(this.storagePrefix, ".").concat(key, ".displayedInThisSession");
+        // Check if the tip was dismissed before
+        if ((this.storage.get(neverDisplayKey) === true) || (this.storage.get(displayedInThisSessionKey) === true)) {
+            return; // Do nothing if the tip was dismissed or already shown
+        }
+        // Create the popup
+        var popupOverlay = document.createElement('div');
+        popupOverlay.id = 'popupOverlay';
+        popupOverlay.style.position = 'fixed';
+        popupOverlay.style.top = '0';
+        popupOverlay.style.left = '0';
+        popupOverlay.style.width = '100%';
+        popupOverlay.style.height = '100%';
+        popupOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+        popupOverlay.style.display = 'flex';
+        popupOverlay.style.justifyContent = 'center';
+        popupOverlay.style.alignItems = 'center';
+        popupOverlay.style.visibility = 'hidden';
+        popupOverlay.style.zIndex = '9999';
+        var popup = document.createElement('div');
+        popup.style.position = 'fixed';
+        popup.style.top = '50%';
+        popup.style.left = '50%';
+        popup.style.transform = 'translate(-50%, -50%)';
+        popup.style.backgroundColor = 'white';
+        popup.style.padding = '5px 20px 20px';
+        popup.style.border = '1px solid #ccc';
+        popup.style.borderRadius = '8px';
+        popup.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
+        popup.style.zIndex = '1000';
+        // Add the HTML content
+        popup.innerHTML = htmlContent;
+        // Style the title
+        var title = popup.querySelector('h3');
+        if (title) {
+            title.style.color = '#06F'; // Similar blue as the OK button
+        }
+        // Create the "Never display again" checkbox
+        var checkboxLabel = document.createElement('label');
+        checkboxLabel.style.display = 'block';
+        checkboxLabel.style.marginTop = '10px';
+        var checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkboxLabel.appendChild(checkbox);
+        var checkboxText = document.createTextNode(' Deze tekst niet meer weergeven');
+        var italicText = document.createElement('i');
+        italicText.appendChild(checkboxText);
+        checkboxLabel.appendChild(italicText);
+        popup.appendChild(checkboxLabel);
+        // Create the "OK" button
+        var okButton = document.createElement('button');
+        okButton.textContent = 'OK';
+        okButton.style.marginTop = '10px';
+        okButton.style.padding = '10px 20px';
+        okButton.style.cursor = 'pointer';
+        okButton.style.backgroundColor = '#3399FF'; // Lighter blue hue
+        okButton.style.color = 'white';
+        okButton.style.border = 'none';
+        okButton.style.borderRadius = '5px'; // Rounded corners
+        okButton.style.display = 'block';
+        okButton.style.marginLeft = 'auto';
+        okButton.style.marginRight = 'auto';
+        okButton.style.width = '100px'; // Wider button
+        // Add hover effect
+        okButton.addEventListener('mouseover', function () {
+            okButton.style.backgroundColor = '#06F'; // Darker blue on hover
+        });
+        okButton.addEventListener('mouseout', function () {
+            okButton.style.backgroundColor = '#3399FF'; // Lighter blue when not hovering
+        });
+        okButton.addEventListener('click', function () {
+            // Set the neverdisplay flag if the checkbox is checked
+            _this.storage.set(displayedInThisSessionKey, true, true);
+            if (checkbox.checked) {
+                _this.storage.set(neverDisplayKey, true);
+            }
+            // Remove the popup
+            document.body.removeChild(popupOverlay);
+            document.body.style.pointerEvents = 'auto';
+        });
+        popup.appendChild(okButton);
+        // Add the popup to the document body
+        popupOverlay.appendChild(popup);
+        document.body.appendChild(popupOverlay);
+        popupOverlay.style.visibility = 'visible';
+        document.body.style.pointerEvents = 'none'; // Disable interactions with the background
+        popupOverlay.style.pointerEvents = 'auto'; // Enable interactions with the popup
+    };
+    return HelperTip;
+}());
 /* FUNCTION showFilePage
    
    Shows the Documentation-Page.
 
 */
 function showDocumentationPage() {
-    var strleft = "\n    <table border=\"1px\" style=\"border-collapse:collapse\" align=\"center\" width=\"100%\">\n      <tr>\n        <td width=\"100%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Handleiding</b>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"100%\" align=\"left\">\n            <table border=0>\n              <tr>\n                <td width=100 style=\"vertical-align:top;padding:5px\">\n                  <button style=\"font-size:14px\" id=\"Btn_downloadManual\">Download</button>\n                </td>\n                <td style=\"vertical-align:top;padding:7px\">\n                  Een volledige handleiding is beschikbaar in PDF formaat.\n                  Click link op \"Download\" om deze in een ander venster te openen.\n                  <br>\n                  Het programma is in volle ontwikkeling dus delen van de handleiding zijn\n                  mogelijk ietwat verouderd.  \n                </td>\n              </tr>\n            </table>\n        </td>\n      </tr>\n    </table>";
+    var strleft = "\n    <table border=\"1px\" style=\"border-collapse:collapse\" align=\"center\" width=\"100%\">\n      <tr>\n        <td width=\"100%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Handleiding</b>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"100%\" align=\"left\">\n            <table border=0>\n              <tr>\n                <td width=100 style=\"vertical-align:top;padding:5px\">\n                  <button style=\"font-size:14px\" id=\"Btn_downloadManual\">E\u00E9ndraadschema</button>\n                </td>\n                <td style=\"vertical-align:top;padding:7px\">\n                  Een volledige handleiding is beschikbaar in PDF formaat.\n                  Klik links om deze in een ander venster te openen.\n                  <br>\n                  Het programma is in volle ontwikkeling dus delen van de handleiding zijn\n                  mogelijk ietwat verouderd.  \n                </td>\n              </tr>\n              <tr>\n                <td width=100 style=\"vertical-align:top;padding:5px\">\n                  <button style=\"font-size:14px\" id=\"Btn_downloadSitPlanManual\">Situatieschema</button>\n                </td>\n                <td style=\"vertical-align:top;padding:7px\">\n                  Specifiek voor het werken met het situatieschema werd een ander korter document opgesteld.\n                  Klik link om deze in een ander venster te openen.\n                </td>\n              </tr>\n            </table>\n        </td>\n      </tr>\n    </table>";
     document.getElementById("configsection").innerHTML = strleft;
     toggleAppView('config');
     document.getElementById('Btn_downloadManual').onclick = function () { window.open('Documentation/edsdoc.pdf', '_blank'); };
+    document.getElementById('Btn_downloadSitPlanManual').onclick = function () { window.open('Documentation/sitplandoc.pdf', '_blank'); };
 }
 /**
  * Class gebruikt in SituationPlanView om te zoeken naar electroitems op basis van de kringnaam.
@@ -3257,6 +3369,9 @@ function showSituationPlanPage() {
     }
     ;
     structure.sitplanview.redraw();
+    // Initialize the HelperTip with the storage
+    var helperTip = new HelperTip(appDocStorage);
+    helperTip.show('sitplan.introductie', "<h3>Situatieschema</h3>\n    <p>Op deze pagina kan u een situatieschema tekenen</p>\n    <p>Laad een plattegrond met de knop \"Uit bestand\" en voeg symbolen toe met de knop \"Uit schema\".</p>\n    <p>Klik <a href=\"Documentation/sitplandoc.pdf\" target=\"_blank\" rel=\"noopener noreferrer\">hier</a> om in een nieuw venster de documentatie te bekijken.</p>\n    <p>Het situatieschema werd recent toegevoegd aan het programma en zal nog verder ontwikkeld worden over de komende weken. Opmerkingen zijn welkom in het \"contact\"-formulier.</p>");
 }
 /**
  * Een serie functies om een formulier te tonen met edit-functionaliteiten voor symbolen in het situatieplan
@@ -3617,6 +3732,103 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK) {
     document.body.appendChild(div);
     showPopup();
 }
+var MultiLevelStorage = /** @class */ (function () {
+    function MultiLevelStorage(storageKey, initialData) {
+        this.storageKey = storageKey;
+        // Load data from storage or initialize with default data
+        this.data = this.loadFromStorage() || deepClone(initialData);
+        this.memoryData = deepClone(initialData);
+    }
+    // Load data from localStorage
+    MultiLevelStorage.prototype.loadFromStorage = function () {
+        var storedData = localStorage.getItem(this.storageKey);
+        return storedData ? JSON.parse(storedData) : null;
+    };
+    // Save data to localStorage
+    MultiLevelStorage.prototype.saveToStorage = function () {
+        localStorage.setItem(this.storageKey, JSON.stringify(this.data));
+    };
+    // Get a value at a specific path (e.g., "user.profile.name")
+    MultiLevelStorage.prototype.get = function (path) {
+        var keys = path.split('.');
+        var current = this.memoryData;
+        for (var _i = 0, keys_1 = keys; _i < keys_1.length; _i++) {
+            var key = keys_1[_i];
+            if (current && typeof current === 'object' && key in current) {
+                current = current[key];
+            }
+            else {
+                current = undefined;
+                break;
+            }
+        }
+        if (current !== undefined) {
+            return current;
+        }
+        current = this.data;
+        for (var _a = 0, keys_2 = keys; _a < keys_2.length; _a++) {
+            var key = keys_2[_a];
+            if (current && typeof current === 'object' && key in current) {
+                current = current[key];
+            }
+            else {
+                return undefined; // Path not found
+            }
+        }
+        return current;
+    };
+    // Set a value at a specific path (e.g., "user.profile.name", "John Doe")
+    MultiLevelStorage.prototype.set = function (path, value, inMemory) {
+        if (inMemory === void 0) { inMemory = false; }
+        var keys = path.split('.');
+        var current = inMemory ? this.memoryData : this.data;
+        for (var i = 0; i < keys.length - 1; i++) {
+            var key = keys[i];
+            if (!current[key] || typeof current[key] !== 'object') {
+                current[key] = {}; // Create nested objects if they don't exist
+            }
+            current = current[key];
+        }
+        current[keys[keys.length - 1]] = value; // Set the value at the final key
+        if (!inMemory) {
+            this.saveToStorage(); // Save updated data to storage
+        }
+    };
+    // Delete a node at a specific path (e.g., "user.profile.name")
+    MultiLevelStorage.prototype.delete = function (path) {
+        var keys = path.split('.');
+        var current = this.memoryData;
+        for (var i = 0; i < keys.length - 1; i++) {
+            var key = keys[i];
+            if (!current[key] || typeof current[key] !== 'object') {
+                break; // Path not found, nothing to delete
+            }
+            current = current[key];
+        }
+        delete current[keys[keys.length - 1]]; // Delete the key
+        current = this.data;
+        for (var i = 0; i < keys.length - 1; i++) {
+            var key = keys[i];
+            if (!current[key] || typeof current[key] !== 'object') {
+                return; // Path not found, nothing to delete
+            }
+            current = current[key];
+        }
+        delete current[keys[keys.length - 1]]; // Delete the key
+        this.saveToStorage(); // Save updated data to storage
+    };
+    // Get the entire data object
+    MultiLevelStorage.prototype.getAll = function () {
+        return __assign(__assign({}, this.data), this.memoryData);
+    };
+    // Clear the entire data and storage
+    MultiLevelStorage.prototype.clear = function () {
+        this.data = {};
+        this.memoryData = {};
+        localStorage.removeItem(this.storageKey);
+    };
+    return MultiLevelStorage;
+}());
 var List_Item = /** @class */ (function () {
     // -- Constructor --
     function List_Item(mylist) {
@@ -9729,6 +9941,7 @@ var CONF_upload_OK = "ask"; //can be "ask", "yes", "no"; //before uploading, we 
 var session = new Session();
 var structure;
 var undostruct = new undoRedo(100);
+var appDocStorage = new MultiLevelStorage('appDocStorage', {});
 // Build the menu
 var menuItems;
 if (isDevMode()) {

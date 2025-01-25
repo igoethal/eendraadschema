@@ -896,4 +896,13 @@ function showSituationPlanPage() {
     };
     
     structure.sitplanview.redraw();      
+
+    // Initialize the HelperTip with the storage
+    const helperTip = new HelperTip(appDocStorage);
+    helperTip.show('sitplan.introductie',
+    `<h3>Situatieschema</h3>
+    <p>Op deze pagina kan u een situatieschema tekenen</p>
+    <p>Laad een plattegrond met de knop "Uit bestand" en voeg symbolen toe met de knop "Uit schema".</p>
+    <p>Klik <a href="Documentation/sitplandoc.pdf" target="_blank" rel="noopener noreferrer">hier</a> om in een nieuw venster de documentatie te bekijken.</p>
+    <p>Het situatieschema werd recent toegevoegd aan het programma en zal nog verder ontwikkeld worden over de komende weken. Opmerkingen zijn welkom in het "contact"-formulier.</p>`);
 }
