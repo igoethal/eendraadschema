@@ -8494,7 +8494,7 @@ var SVGSymbols = /** @class */ (function () {
         contactdoos_aarding: "\n<line x1=\"20\" y1=\"-15\" x2=\"20\" y2=\"15\"  stroke=\"black\" stroke-width=\"2\" />\n",
         contactdoos_kinderveilig: "\n<line x1=\"35\" y1=\"-20\" x2=\"35\" y2=\"-14.1\"  stroke=\"black\" stroke-width=\"2\" />\n<line x1=\"35\" y1=\"20\" x2=\"35\" y2=\"14.1\"  stroke=\"black\" stroke-width=\"2\" />\n",
         bel: "\n<path d=\"M20 0 A15 15 0 0 1 0 15\" stroke=\"black\" fill=\"none\" stroke-width=\"2\" />\n<path d=\"M20 0 A15 15 0 0 0 0 -15\" stroke=\"black\" fill=\"none\" stroke-width=\"2\" />\n<line x1=\"0\" y1=\"15\" x2=\"0\" y2=\"-15\" stroke=\"black\" stroke-width=\"2\" />\n",
-        boiler: "\n<circle cx=\"20\" cy=\"0\" r=\"20\" style=\"stroke:black;fill:url(#VerticalStripe)\" />\n",
+        boiler: "\n<circle cx=\"20\" cy=\"0\" r=\"20\" style=\"stroke:black; fill:url(#VerticalStripe);\" />\n",
         boiler_accu: "\n<circle cx=\"20\" cy=\"0\" r=\"20\" style=\"stroke:black;fill:none\" />\n<circle cx=\"20\" cy=\"0\" r=\"15\" style=\"stroke:black;fill:url(#VerticalStripe)\" />\n",
         motor: "\n<circle cx=\"20\" cy=\"0\" r=\"20\" style=\"stroke:black;fill:none\" />\n<text x=\"20\" y=\"6\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"16\">M</text>\n",
         elektriciteitsmeter: "\n<rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n<line x1=\"0\" y1=\"-6\" x2=\"40\" y2=\"-6\" stroke=\"black\" stroke-width=\"1\" />\n<text x=\"20\" y=\"10\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"12\">kWh</text>\n",
@@ -9507,7 +9507,7 @@ function HLRedrawTreeHTMLLight() {
 }
 function HLRedrawTreeSVG() {
     var str = '<b>Tekening: </b>Ga naar het print-menu om de tekening af te printen of te exporteren als SVG vector graphics.<br><br>'
-        + flattenSVGfromString(structure.toSVG(0, "horizontal").data, 10)
+        + '<div id="EDS">' + flattenSVGfromString(structure.toSVG(0, "horizontal").data, 10) + '</div>'
         + '<h2>Legende:</h2>'
         + '<button style="background-color:green;">&#9650;</button> Item hierboven invoegen (zelfde niveau)<br>'
         + '<button style="background-color:green;">&#9660;</button> Item hieronder invoegen (zelfde niveau)<br>'
@@ -9642,6 +9642,7 @@ function toggleAppView(type) {
     var lastview = structure.properties.currentView;
     structure.properties.currentView = type;
     if (type === '2col') {
+        document.getElementById("configsection").innerHTML = '';
         document.getElementById("configsection").style.display = 'none';
         document.getElementById("outerdiv").style.display = 'none';
         document.getElementById("ribbon").style.display = 'flex';
@@ -9651,13 +9652,20 @@ function toggleAppView(type) {
     else if (type === 'config') {
         document.getElementById("configsection").style.display = 'block';
         document.getElementById("outerdiv").style.display = 'none';
+        document.getElementById("ribbon").innerHTML = ''; // Voor performance redenen
         document.getElementById("ribbon").style.display = 'none';
+        document.getElementById("left_col_inner").innerHTML = ''; // Voor performance redenen
+        // We zetten bewist het SVG element EDS niet op nul want is nodig voor het print-voorbeeld
         document.getElementById("canvas_2col").style.display = 'none';
     }
     else if (type === 'draw') {
+        document.getElementById("configsection").innerHTML = "";
         document.getElementById("configsection").style.display = 'none';
         document.getElementById("outerdiv").style.display = 'flex';
         document.getElementById("ribbon").style.display = 'flex';
+        document.getElementById("left_col_inner").innerHTML = ''; // Voor performance redenen
+        if (document.getElementById("EDS") !== null)
+            document.getElementById("EDS").innerHTML = ''; // Deze is nodig anders wil het situatieschema het patroon VerticalStripe niet laden wegens dubbel gedefinieerd
         document.getElementById("canvas_2col").style.display = 'none';
     }
     if ((['2col', 'draw'].includes(type)) && (['2col', 'draw'].includes(lastview)) && (type !== lastview))

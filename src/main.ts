@@ -142,7 +142,7 @@ function HLRedrawTreeHTMLLight() {
 
 function HLRedrawTreeSVG() {
     let str:string = '<b>Tekening: </b>Ga naar het print-menu om de tekening af te printen of te exporteren als SVG vector graphics.<br><br>'
-                   +  flattenSVGfromString(structure.toSVG(0,"horizontal").data,10)
+                   + '<div id="EDS">' + flattenSVGfromString(structure.toSVG(0,"horizontal").data,10) + '</div>'
                    + '<h2>Legende:</h2>'
                    + '<button style="background-color:green;">&#9650;</button> Item hierboven invoegen (zelfde niveau)<br>'
                    + '<button style="background-color:green;">&#9660;</button> Item hieronder invoegen (zelfde niveau)<br>'
@@ -300,20 +300,39 @@ function toggleAppView(type: '2col' | 'config' | 'draw') {
     
     structure.properties.currentView = type;
     if (type === '2col') {  
+        document.getElementById("configsection").innerHTML = '';
         document.getElementById("configsection").style.display = 'none';
+
         document.getElementById("outerdiv").style.display = 'none';
+
         document.getElementById("ribbon").style.display = 'flex';
         document.getElementById("canvas_2col").style.display = 'flex';
         structure.updateRibbon();
     } else if (type === 'config') {
         document.getElementById("configsection").style.display = 'block';
+        
         document.getElementById("outerdiv").style.display = 'none';
+
+        document.getElementById("ribbon").innerHTML = ''; // Voor performance redenen
         document.getElementById("ribbon").style.display = 'none';
+
+        document.getElementById("left_col_inner").innerHTML = ''; // Voor performance redenen
+
+        // We zetten bewist het SVG element EDS niet op nul want is nodig voor het print-voorbeeld
+
         document.getElementById("canvas_2col").style.display = 'none';
     } else if (type === 'draw') {
+        document.getElementById("configsection").innerHTML = "";
         document.getElementById("configsection").style.display = 'none';
+
         document.getElementById("outerdiv").style.display = 'flex';
         document.getElementById("ribbon").style.display = 'flex';
+
+        document.getElementById("left_col_inner").innerHTML = ''; // Voor performance redenen
+
+        if (document.getElementById("EDS") !== null)
+            document.getElementById("EDS").innerHTML = ''; // Deze is nodig anders wil het situatieschema het patroon VerticalStripe niet laden wegens dubbel gedefinieerd
+
         document.getElementById("canvas_2col").style.display = 'none';
     }
 

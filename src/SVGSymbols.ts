@@ -20,7 +20,7 @@ class SVGSymbols {
                             '<line x1="0" y1="0" x2="0" y2="10" stroke="black" />' +
                       '</pattern>';
         }
-      
+     
         for (let key in this.data) {
             if (this.neededSymbols.includes(key)) {
                 output += `<g id="${key}">${this.data[key].replace(/\n/g, '')}</g>`;
@@ -257,7 +257,7 @@ bel: `
 <line x1="0" y1="15" x2="0" y2="-15" stroke="black" stroke-width="2" />
 `,
 boiler: `
-<circle cx="20" cy="0" r="20" style="stroke:black;fill:url(#VerticalStripe)" />
+<circle cx="20" cy="0" r="20" style="stroke:black; fill:url(#VerticalStripe);" />
 `,
 boiler_accu: `
 <circle cx="20" cy="0" r="20" style="stroke:black;fill:none" />
