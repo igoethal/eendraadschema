@@ -163,7 +163,7 @@ function flattenSVG(SVGstruct, shiftx, shifty, node, overflowright) {
         }
         if (node <= 0) {
             if (outstruct.attributes.getNamedItem("width")) { // make SVG a 0,0 element
-                str = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" transform="scale(1,1)" width="' + (parseInt(outstruct.attributes.getNamedItem("width").nodeValue) + overflowright) +
+                str = '<svg id="EDSSVG" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" transform="scale(1,1)" width="' + (parseInt(outstruct.attributes.getNamedItem("width").nodeValue) + overflowright) +
                     '" height="' + (outstruct.attributes.getNamedItem("height").nodeValue) + '">' + str + '</svg>';
             }
             else {
@@ -9664,8 +9664,9 @@ function toggleAppView(type) {
         document.getElementById("outerdiv").style.display = 'flex';
         document.getElementById("ribbon").style.display = 'flex';
         document.getElementById("left_col_inner").innerHTML = ''; // Voor performance redenen
-        if (document.getElementById("EDS") !== null)
-            document.getElementById("EDS").innerHTML = ''; // Deze is nodig anders wil het situatieschema het patroon VerticalStripe niet laden wegens dubbel gedefinieerd
+        if (document.getElementById("EDSSVG") !== null)
+            document.getElementById("EDSSVG").innerHTML = ''; // Deze is nodig anders wil het situatieschema het patroon VerticalStripe niet laden wegens dubbel gedefinieerd
+        // We maken de EDSSVG leeg en niet de EDS-DIV want anders onthoudt de browser de positie van de scrollbars niet
         document.getElementById("canvas_2col").style.display = 'none';
     }
     if ((['2col', 'draw'].includes(type)) && (['2col', 'draw'].includes(lastview)) && (type !== lastview))

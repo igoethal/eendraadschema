@@ -97,7 +97,7 @@ function flattenSVG(SVGstruct,shiftx,shifty,node,overflowright=0) {
     }
     if (node <= 0) {
       if (outstruct.attributes.getNamedItem("width")) { // make SVG a 0,0 element
-        str = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" transform="scale(1,1)" width="' + (parseInt(outstruct.attributes.getNamedItem("width").nodeValue)+overflowright)  +
+        str = '<svg id="EDSSVG" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" transform="scale(1,1)" width="' + (parseInt(outstruct.attributes.getNamedItem("width").nodeValue)+overflowright)  +
                     '" height="' + (outstruct.attributes.getNamedItem("height").nodeValue) + '">' + str + '</svg>';
       } else {
         str = '<svg>' + str + '</svg>';

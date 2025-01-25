@@ -330,8 +330,9 @@ function toggleAppView(type: '2col' | 'config' | 'draw') {
 
         document.getElementById("left_col_inner").innerHTML = ''; // Voor performance redenen
 
-        if (document.getElementById("EDS") !== null)
-            document.getElementById("EDS").innerHTML = ''; // Deze is nodig anders wil het situatieschema het patroon VerticalStripe niet laden wegens dubbel gedefinieerd
+        if (document.getElementById("EDSSVG") !== null)
+            document.getElementById("EDSSVG").innerHTML = ''; // Deze is nodig anders wil het situatieschema het patroon VerticalStripe niet laden wegens dubbel gedefinieerd
+                                                             // We maken de EDSSVG leeg en niet de EDS-DIV want anders onthoudt de browser de positie van de scrollbars niet
 
         document.getElementById("canvas_2col").style.display = 'none';
     }
