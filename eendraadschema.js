@@ -3208,6 +3208,10 @@ var SituationPlanView = /** @class */ (function () {
                     case 'ArrowDown':
                         sitPlanElement.posy += 1;
                         break;
+                    case 'Delete':
+                        _this.deleteSelectedBox();
+                        undostruct.store();
+                        break;
                     default:
                         return;
                 }
@@ -3222,7 +3226,12 @@ var SituationPlanView = /** @class */ (function () {
      */
     SituationPlanView.prototype.attachDeleteButton = function (elem) {
         var _this = this;
-        this.event_manager.addEventListener(elem, 'click', function () { _this.deleteSelectedBox(); undostruct.store(); });
+        this.event_manager.addEventListener(elem, 'click', function () {
+            _this.deleteSelectedBox();
+            undostruct.store();
+            var helperTip = new HelperTip(appDocStorage);
+            helperTip.show('sitplan.deletekey', "<h3>Tip: Symbolen verwijderen</h3>\n            <p>Bespaar tijd en gebruik de 'Delete' toets op het toetsenbord om symbolen te verwijderen.</p>", true);
+        });
     };
     ;
     /**

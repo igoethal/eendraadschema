@@ -600,6 +600,10 @@ class SituationPlanView {
                     case 'ArrowDown':
                         sitPlanElement.posy += 1;
                         break;
+                    case 'Delete':
+                        this.deleteSelectedBox();
+                        undostruct.store();
+                        break;
                     default:
                         return;
                 }
@@ -614,7 +618,14 @@ class SituationPlanView {
      * @param elem - Het html element waar de listener wordt aan gehangen.
      */
     attachDeleteButton(elem: HTMLElement) { 
-        this.event_manager.addEventListener(elem, 'click', () => { this.deleteSelectedBox(); undostruct.store(); } );      
+        this.event_manager.addEventListener(elem, 'click', () => { 
+            this.deleteSelectedBox(); 
+            undostruct.store(); 
+            const helperTip = new HelperTip(appDocStorage);
+            helperTip.show('sitplan.deletekey',
+            `<h3>Tip: Symbolen verwijderen</h3>
+            <p>Bespaar tijd en gebruik de 'Delete' toets op het toetsenbord om symbolen te verwijderen.</p>`,true);
+        } );      
     };
 
     /**
