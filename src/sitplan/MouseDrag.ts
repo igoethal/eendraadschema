@@ -10,6 +10,8 @@ class MouseDrag {
     private startOffsetTop: number = 0;
     private zoomfactor: number = 1;
 
+    public hassMoved: boolean = false;
+
     /**
      * Start the drag.
      * @param mousex The x position of the mouse when the drag starts.
@@ -26,6 +28,7 @@ class MouseDrag {
         this.startOffsetLeft = startOffsetLeft;
         this.startOffsetTop = startOffsetTop;
         this.zoomfactor = zoomfactor;
+        this.hassMoved = false;
     }
 
     /**
@@ -35,6 +38,7 @@ class MouseDrag {
      * @returns An object with the new left and top position of the box.
      */
     returnNewLeftTop(mousex: number = 0, mousey: number = 0) {
+        if (mousex != this.startDragx || mousey != this.startDragy) this.hassMoved = true;
         return ( {
             left: (mousex - this.startDragx) / this.zoomfactor + this.startOffsetLeft,
             top: (mousey - this.startDragy) / this.zoomfactor + this.startOffsetTop});

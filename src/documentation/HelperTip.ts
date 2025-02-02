@@ -8,7 +8,7 @@ class HelperTip {
     }
   
     // Show the helper tip if it hasn't been dismissed before
-    show(key: string, htmlContent: string): void {
+    show(key: string, htmlContent: string, checked: boolean = false): void {
       const neverDisplayKey = `${this.storagePrefix}.${key}.neverDisplay`;
       const displayedInThisSessionKey = `${this.storagePrefix}.${key}.displayedInThisSession`;
   
@@ -60,9 +60,10 @@ class HelperTip {
   
       const checkbox = document.createElement('input');
       checkbox.type = 'checkbox';
+      checkbox.checked = checked;
       checkboxLabel.appendChild(checkbox);
   
-      const checkboxText = document.createTextNode(' Deze tekst niet meer weergeven');
+      const checkboxText = document.createTextNode(' Deze tekst nooit meer weergeven in deze browser.');
       const italicText = document.createElement('i');
       italicText.appendChild(checkboxText);
       checkboxLabel.appendChild(italicText);

@@ -126,6 +126,8 @@ class Lichtcircuit extends Schakelaars {
         if (this.props.aantal_lichtpunten >= 1) { //1 of meerdere lampen
             // Teken de lamp
             endx = startx + 29;
+            
+            SVGSymbols.addSymbol('lamp');
             mySVG.data += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
                     +  '<use xlink:href="#lamp" x="' + endx + '" y="25" />';
 

@@ -36,6 +36,9 @@ class SituationPlanView {
         // Verwijder alle selecties wanneer we ergens anders klikken dan op een box
         this.event_manager.addEventListener(outerdiv, 'mousedown', () => { this.clearSelection(); } );
         this.event_manager.addEventListener(outerdiv, 'touchstart', () => { this.clearSelection(); } );
+
+        // Voegt event handlers toe voor de pijltjestoesten
+        this.attachArrowKeys();
     }
 
     /**
@@ -256,11 +259,13 @@ class SituationPlanView {
         function getRotationTransform(sitPlanElement: SituationPlanElement | null): string {
             if (!sitPlanElement) return '';
 
-            let rotation: number = sitPlanElement.rotate % 360;
+            let rotation: number = sitPlanElement.rotate;
+            while (rotation < 0) rotation += 360;
+            rotation = rotation % 360;
             let spiegel: boolean = false;
 
             if ((rotation >= 90) && (rotation < 270)) {
-                if (sitPlanElement.rotates360degrees()) spiegel = true;
+                if (sitPlanElement.isEDSSymbolAndRotates360degrees()) spiegel = true;
                 if (sitPlanElement.isEendraadschemaSymbool()) rotation -= 180;
             }
 
@@ -478,16 +483,25 @@ class SituationPlanView {
      * @param event - De gebeurtenis die de sleepactie stopt (muisklik release of touchend).
      */
     private stopDrag = (event) => {
+        function showArrowHelp() {
+            const helperTip = new HelperTip(appDocStorage);
+            helperTip.show('sitplan.arrowdrag',
+            `<h3>Tip: Symbolen verplaatsen</h3>
+            <p>Voor fijnere controle tijdens het verschuiven van symbolen kan u ook de pijltjes op het toetsenbord gebruiken.</p>`,true);
+        }
+
         event.stopPropagation();
 
         switch (event.type) {
             case 'mouseup':
                 document.removeEventListener('mousemove', this.processDrag);
                 document.removeEventListener('mouseup', this.stopDrag);
+                if (this.mousedrag.hassMoved) showArrowHelp();
                 break;
             case 'touchend':
                 document.removeEventListener('touchmove', this.processDrag);
                 document.removeEventListener('touchend', this.stopDrag);
+                if (this.mousedrag.hassMoved) showArrowHelp();
                 break;
             default:
                 console.error('Ongeldige event voor stopDrag functie');
@@ -553,6 +567,45 @@ class SituationPlanView {
             }
         }
         this.updateRibbon();
+    }
+
+    /**
+     * Voegt eventlisteners toe om pijltjestoetsen te hanteren.
+     * 
+     * Wanneer een pijltjestoets wordt ingedrukt, en er is een box geselecteerd, dan wordt de positie van de box aangepast.
+     * De positie van de box wordt aangepast door de posx of posy van het element in het situatieplan te veranderen.
+     * Daarna wordt de functie updateSymbolAndLabelPosition aangeroepen om de positie van het symbool en het label van de box te updaten.
+     */
+    attachArrowKeys() {
+        
+        this.event_manager.addEventListener(document, 'keydown', (event) => {
+            if (this.outerdiv.style.display == 'none') return; // Check if we are really in the situationplan, if not, the default scrolling action will be executed by the browser
+            if (document.getElementById('popupOverlay') != null) return; // We need the keys when editing symbol properties.
+
+            if (this.selectedBox) { // Check if we have a selected box, if not, the default scrolling action will be executed by the browser
+                event.preventDefault();
+                const sitPlanElement = (this.selectedBox as any).sitPlanElementRef;
+                if (!sitPlanElement) return;
+
+                switch (event.key) {
+                    case 'ArrowLeft':
+                        sitPlanElement.posx -= 1;
+                        break;
+                    case 'ArrowRight':
+                        sitPlanElement.posx += 1;
+                        break;
+                    case 'ArrowUp':
+                        sitPlanElement.posy -= 1;
+                        break;
+                    case 'ArrowDown':
+                        sitPlanElement.posy += 1;
+                        break;
+                    default:
+                        return;
+                }
+                this.updateSymbolAndLabelPosition(sitPlanElement);
+            }
+        });
     }
 
     /**
@@ -900,8 +953,8 @@ function showSituationPlanPage() {
     // Initialize the HelperTip with the storage
     const helperTip = new HelperTip(appDocStorage);
     helperTip.show('sitplan.introductie',
-    `<h3>Situatieschema</h3>
-    <p>Op deze pagina kan u een situatieschema tekenen</p>
+    `<h3>Situatieschema tekenen</h3>
+    <p>Op deze pagina kan u een situatieschema tekenen.</p>
     <p>Laad een plattegrond met de knop "Uit bestand" en voeg symbolen toe met de knop "Uit schema".</p>
     <p>Klik <a href="Documentation/sitplandoc.pdf" target="_blank" rel="noopener noreferrer">hier</a> om in een nieuw venster de documentatie te bekijken.</p>
     <p>Het situatieschema werd recent toegevoegd aan het programma en zal nog verder ontwikkeld worden over de komende weken. Opmerkingen zijn welkom in het "contact"-formulier.</p>`);

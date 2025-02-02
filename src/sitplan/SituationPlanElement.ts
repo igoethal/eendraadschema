@@ -99,7 +99,7 @@ class SituationPlanElement {
 
     private static readonly ROTATES_360_DEGREES_TYPES = new Set(['Contactdoos','Lichtpunt','Drukknop','Media','Schakelaars','Lichtcircuit']);
 
-    rotates360degrees(): boolean {
+    isEDSSymbolAndRotates360degrees(): boolean {
         if (this.isEendraadschemaSymbool()) {
             let electroElement: Electro_Item = structure.getElectroItemById(this.electroItemId);
             if (electroElement != null) {
@@ -108,7 +108,7 @@ class SituationPlanElement {
             }
             return false;
         }
-        return true;
+        return false;
     }
 
     /**
@@ -254,7 +254,7 @@ class SituationPlanElement {
             let spiegel = false;
             
             if ( (rotate >= 90) && (rotate < 270) ) {
-                if (this.rotates360degrees()) spiegel = true;
+                if (this.isEDSSymbolAndRotates360degrees()) spiegel = true;
                 if (this.isEendraadschemaSymbool()) rotate = rotate + 180;
             }
 

@@ -227,7 +227,7 @@ class Schakelaar {
         let outputstr:string = "";
         let endx = startx + 20;
 
-        SVGSymbols.addSymbol(symbol);
+        SVGSymbols.addSymbol(symbol.substring(1));
 
         outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
                   +  '<use xlink:href="' + symbol + '" x="' + endx + '" y="25" />';

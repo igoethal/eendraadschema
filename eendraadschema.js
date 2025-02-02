@@ -1753,8 +1753,9 @@ var HelperTip = /** @class */ (function () {
         this.storagePrefix = storagePrefix;
     }
     // Show the helper tip if it hasn't been dismissed before
-    HelperTip.prototype.show = function (key, htmlContent) {
+    HelperTip.prototype.show = function (key, htmlContent, checked) {
         var _this = this;
+        if (checked === void 0) { checked = false; }
         var neverDisplayKey = "".concat(this.storagePrefix, ".").concat(key, ".neverDisplay");
         var displayedInThisSessionKey = "".concat(this.storagePrefix, ".").concat(key, ".displayedInThisSession");
         // Check if the tip was dismissed before
@@ -1799,8 +1800,9 @@ var HelperTip = /** @class */ (function () {
         checkboxLabel.style.marginTop = '10px';
         var checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
+        checkbox.checked = checked;
         checkboxLabel.appendChild(checkbox);
-        var checkboxText = document.createTextNode(' Deze tekst niet meer weergeven');
+        var checkboxText = document.createTextNode(' Deze tekst nooit meer weergeven in deze browser.');
         var italicText = document.createElement('i');
         italicText.appendChild(checkboxText);
         checkboxLabel.appendChild(italicText);
@@ -1991,6 +1993,7 @@ var MouseDrag = /** @class */ (function () {
         this.startOffsetLeft = 0;
         this.startOffsetTop = 0;
         this.zoomfactor = 1;
+        this.hassMoved = false;
     }
     /**
      * Start the drag.
@@ -2011,6 +2014,7 @@ var MouseDrag = /** @class */ (function () {
         this.startOffsetLeft = startOffsetLeft;
         this.startOffsetTop = startOffsetTop;
         this.zoomfactor = zoomfactor;
+        this.hassMoved = false;
     };
     /**
      * Return the new left and top position of the box based on the current mouse position.
@@ -2021,6 +2025,8 @@ var MouseDrag = /** @class */ (function () {
     MouseDrag.prototype.returnNewLeftTop = function (mousex, mousey) {
         if (mousex === void 0) { mousex = 0; }
         if (mousey === void 0) { mousey = 0; }
+        if (mousex != this.startDragx || mousey != this.startDragy)
+            this.hassMoved = true;
         return ({
             left: (mousex - this.startDragx) / this.zoomfactor + this.startOffsetLeft,
             top: (mousey - this.startDragy) / this.zoomfactor + this.startOffsetTop
@@ -2333,7 +2339,7 @@ var SituationPlanElement = /** @class */ (function () {
         }
         return false;
     };
-    SituationPlanElement.prototype.rotates360degrees = function () {
+    SituationPlanElement.prototype.isEDSSymbolAndRotates360degrees = function () {
         if (this.isEendraadschemaSymbool()) {
             var electroElement = structure.getElectroItemById(this.electroItemId);
             if (electroElement != null) {
@@ -2342,7 +2348,7 @@ var SituationPlanElement = /** @class */ (function () {
             }
             return false;
         }
-        return true;
+        return false;
     };
     /**
      * setAdres
@@ -2482,7 +2488,7 @@ var SituationPlanElement = /** @class */ (function () {
             rotate = rotate % 360;
             var spiegel = false;
             if ((rotate >= 90) && (rotate < 270)) {
-                if (_this.rotates360degrees())
+                if (_this.isEDSSymbolAndRotates360degrees())
                     spiegel = true;
                 if (_this.isEendraadschemaSymbool())
                     rotate = rotate + 180;
@@ -2682,15 +2688,23 @@ var SituationPlanView = /** @class */ (function () {
          * @param event - De gebeurtenis die de sleepactie stopt (muisklik release of touchend).
          */
         this.stopDrag = function (event) {
+            function showArrowHelp() {
+                var helperTip = new HelperTip(appDocStorage);
+                helperTip.show('sitplan.arrowdrag', "<h3>Tip: Symbolen verplaatsen</h3>\n            <p>Voor fijnere controle tijdens het verschuiven van symbolen kan u ook de pijltjes op het toetsenbord gebruiken.</p>", true);
+            }
             event.stopPropagation();
             switch (event.type) {
                 case 'mouseup':
                     document.removeEventListener('mousemove', _this.processDrag);
                     document.removeEventListener('mouseup', _this.stopDrag);
+                    if (_this.mousedrag.hassMoved)
+                        showArrowHelp();
                     break;
                 case 'touchend':
                     document.removeEventListener('touchmove', _this.processDrag);
                     document.removeEventListener('touchend', _this.stopDrag);
+                    if (_this.mousedrag.hassMoved)
+                        showArrowHelp();
                     break;
                 default:
                     console.error('Ongeldige event voor stopDrag functie');
@@ -2733,6 +2747,8 @@ var SituationPlanView = /** @class */ (function () {
         // Verwijder alle selecties wanneer we ergens anders klikken dan op een box
         this.event_manager.addEventListener(outerdiv, 'mousedown', function () { _this.clearSelection(); });
         this.event_manager.addEventListener(outerdiv, 'touchstart', function () { _this.clearSelection(); });
+        // Voegt event handlers toe voor de pijltjestoesten
+        this.attachArrowKeys();
     }
     /**
      * Maakt deze instance ongedaan en verwijderd alle door deze instance aangemaakte elementen uit de DOM.
@@ -2945,10 +2961,13 @@ var SituationPlanView = /** @class */ (function () {
         function getRotationTransform(sitPlanElement) {
             if (!sitPlanElement)
                 return '';
-            var rotation = sitPlanElement.rotate % 360;
+            var rotation = sitPlanElement.rotate;
+            while (rotation < 0)
+                rotation += 360;
+            rotation = rotation % 360;
             var spiegel = false;
             if ((rotation >= 90) && (rotation < 270)) {
-                if (sitPlanElement.rotates360degrees())
+                if (sitPlanElement.isEDSSymbolAndRotates360degrees())
                     spiegel = true;
                 if (sitPlanElement.isEendraadschemaSymbool())
                     rotation -= 180;
@@ -3156,6 +3175,45 @@ var SituationPlanView = /** @class */ (function () {
             }
         }
         this.updateRibbon();
+    };
+    /**
+     * Voegt eventlisteners toe om pijltjestoetsen te hanteren.
+     *
+     * Wanneer een pijltjestoets wordt ingedrukt, en er is een box geselecteerd, dan wordt de positie van de box aangepast.
+     * De positie van de box wordt aangepast door de posx of posy van het element in het situatieplan te veranderen.
+     * Daarna wordt de functie updateSymbolAndLabelPosition aangeroepen om de positie van het symbool en het label van de box te updaten.
+     */
+    SituationPlanView.prototype.attachArrowKeys = function () {
+        var _this = this;
+        this.event_manager.addEventListener(document, 'keydown', function (event) {
+            if (_this.outerdiv.style.display == 'none')
+                return; // Check if we are really in the situationplan, if not, the default scrolling action will be executed by the browser
+            if (document.getElementById('popupOverlay') != null)
+                return; // We need the keys when editing symbol properties.
+            if (_this.selectedBox) { // Check if we have a selected box, if not, the default scrolling action will be executed by the browser
+                event.preventDefault();
+                var sitPlanElement = _this.selectedBox.sitPlanElementRef;
+                if (!sitPlanElement)
+                    return;
+                switch (event.key) {
+                    case 'ArrowLeft':
+                        sitPlanElement.posx -= 1;
+                        break;
+                    case 'ArrowRight':
+                        sitPlanElement.posx += 1;
+                        break;
+                    case 'ArrowUp':
+                        sitPlanElement.posy -= 1;
+                        break;
+                    case 'ArrowDown':
+                        sitPlanElement.posy += 1;
+                        break;
+                    default:
+                        return;
+                }
+                _this.updateSymbolAndLabelPosition(sitPlanElement);
+            }
+        });
     };
     /**
      * Hangt een klik event listener aan het gegeven element met als doel de huidig geselecteerde box te verwijderen.
@@ -3371,7 +3429,7 @@ function showSituationPlanPage() {
     structure.sitplanview.redraw();
     // Initialize the HelperTip with the storage
     var helperTip = new HelperTip(appDocStorage);
-    helperTip.show('sitplan.introductie', "<h3>Situatieschema</h3>\n    <p>Op deze pagina kan u een situatieschema tekenen</p>\n    <p>Laad een plattegrond met de knop \"Uit bestand\" en voeg symbolen toe met de knop \"Uit schema\".</p>\n    <p>Klik <a href=\"Documentation/sitplandoc.pdf\" target=\"_blank\" rel=\"noopener noreferrer\">hier</a> om in een nieuw venster de documentatie te bekijken.</p>\n    <p>Het situatieschema werd recent toegevoegd aan het programma en zal nog verder ontwikkeld worden over de komende weken. Opmerkingen zijn welkom in het \"contact\"-formulier.</p>");
+    helperTip.show('sitplan.introductie', "<h3>Situatieschema tekenen</h3>\n    <p>Op deze pagina kan u een situatieschema tekenen.</p>\n    <p>Laad een plattegrond met de knop \"Uit bestand\" en voeg symbolen toe met de knop \"Uit schema\".</p>\n    <p>Klik <a href=\"Documentation/sitplandoc.pdf\" target=\"_blank\" rel=\"noopener noreferrer\">hier</a> om in een nieuw venster de documentatie te bekijken.</p>\n    <p>Het situatieschema werd recent toegevoegd aan het programma en zal nog verder ontwikkeld worden over de komende weken. Opmerkingen zijn welkom in het \"contact\"-formulier.</p>");
 }
 /**
  * Een serie functies om een formulier te tonen met edit-functionaliteiten voor symbolen in het situatieplan
@@ -4402,7 +4460,7 @@ var Schakelaar = /** @class */ (function () {
     Schakelaar.prototype.defaulttoDrawReturnObj = function (startx, symbol) {
         var outputstr = "";
         var endx = startx + 20;
-        SVGSymbols.addSymbol(symbol);
+        SVGSymbols.addSymbol(symbol.substring(1));
         outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
             + '<use xlink:href="' + symbol + '" x="' + endx + '" y="25" />';
         return ({ endx: endx, str: outputstr, lowerbound: null });
@@ -4932,6 +4990,7 @@ var Lichtcircuit = /** @class */ (function (_super) {
         if (this.props.aantal_lichtpunten >= 1) { //1 of meerdere lampen
             // Teken de lamp
             endx = startx + 29;
+            SVGSymbols.addSymbol('lamp');
             mySVG.data += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
                 + '<use xlink:href="#lamp" x="' + endx + '" y="25" />';
             // Teken aantal lampen en symbool 'h' voor halfwaterdicht
