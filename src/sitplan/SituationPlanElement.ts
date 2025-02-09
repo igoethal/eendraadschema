@@ -125,6 +125,17 @@ class SituationPlanElement {
         if (this.adrestype === 'manueel') this.adres = adres; else this.adres = null;
     }
 
+    /**
+     * setAdresLocation
+     * 
+     * @param adreslocation string: 'rechts' of 'links' of 'boven' of 'onder'
+     */
+
+
+    setAdresLocation(adreslocation: AdresLocation) {
+        this.adreslocation = adreslocation;
+    }
+
     /** 
      * getAdresType
      * 

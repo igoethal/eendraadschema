@@ -309,6 +309,7 @@ class Print_Table {
 
     insertHTMLselectPaperSize(div: HTMLElement, redrawCallBack: RedrawCallBackFunction): void {
         var select: HTMLSelectElement = document.createElement('select');
+        select.id = 'select_papersize_input';
               
         var optionA4: HTMLOptionElement = document.createElement('option');
         optionA4.value = 'A4';
@@ -342,6 +343,7 @@ class Print_Table {
 
     insertHTMLselectdpi(div: HTMLElement, redrawCallBack: RedrawCallBackFunction): void {
         var select: HTMLSelectElement = document.createElement('select');
+        select.id = "select_dpi_input";
               
         var option300: HTMLOptionElement = document.createElement('option');
         option300.value = '300';

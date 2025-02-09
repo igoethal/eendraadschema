@@ -295,6 +295,7 @@ function restart_all() {
 
 function toggleAppView(type: '2col' | 'config' | 'draw') {
     let lastview = structure.properties.currentView;
+    if ((structure.sitplanview != null) && (structure.sitplanview.contextMenu != null)) structure.sitplanview.contextMenu.hide();
     
     structure.properties.currentView = type;
     if (type === '2col') {  
@@ -354,10 +355,12 @@ function load_example(nr: number) {
 }
 
 function undoClicked() {
+    if ((structure.sitplanview != null) && (structure.sitplanview.contextMenu != null)) structure.sitplanview.contextMenu.hide();
     undostruct.undo();    
 }
 
 function redoClicked() {
+    if ((structure.sitplanview != null) && (structure.sitplanview.contextMenu != null)) structure.sitplanview.contextMenu.hide();
     undostruct.redo();    
 }
 

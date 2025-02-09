@@ -28,12 +28,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g = Object.create((typeof Iterator === "function" ? Iterator : Object).prototype);
+    return g.next = verb(0), g["throw"] = verb(1), g["return"] = verb(2), typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
+        while (g && (g = 0, op[0] && (_ = 0)), _) try {
             if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
             if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
@@ -722,6 +722,7 @@ var Print_Table = /** @class */ (function () {
     Print_Table.prototype.insertHTMLselectPaperSize = function (div, redrawCallBack) {
         var _this = this;
         var select = document.createElement('select');
+        select.id = 'select_papersize_input';
         var optionA4 = document.createElement('option');
         optionA4.value = 'A4';
         optionA4.textContent = 'A4';
@@ -750,6 +751,7 @@ var Print_Table = /** @class */ (function () {
      */
     Print_Table.prototype.insertHTMLselectdpi = function (div, redrawCallBack) {
         var select = document.createElement('select');
+        select.id = "select_dpi_input";
         var option300 = document.createElement('option');
         option300.value = '300';
         option300.textContent = '300dpi (standaard)';
@@ -1860,6 +1862,108 @@ function showDocumentationPage() {
     document.getElementById('Btn_downloadManual').onclick = function () { window.open('Documentation/edsdoc.pdf', '_blank'); };
     document.getElementById('Btn_downloadSitPlanManual').onclick = function () { window.open('Documentation/sitplandoc.pdf', '_blank'); };
 }
+var ContextMenu = /** @class */ (function () {
+    /**
+     * Constructor voor het initialiseren van het contextmenu-element.
+     * @param div - Het HTML-element waaraan het contextmenu wordt toegevoegd.
+     */
+    function ContextMenu(div) {
+        if (div === void 0) { div = document.body; }
+        this.menuItems = [];
+        this.menuElement = null;
+        this.menuElement = document.createElement('div');
+        this.menuElement.className = 'context-menu';
+        div.appendChild(this.menuElement);
+    }
+    /**
+     * Wis alle menu-items.
+     */
+    ContextMenu.prototype.clearMenu = function () {
+        this.menuItems = [];
+        if (this.menuElement) {
+            this.menuElement.innerHTML = '';
+        }
+    };
+    /**
+     * Voeg een menu-item toe met een optionele sneltoets.
+     * @param label - De tekstlabel van het menu-item.
+     * @param callback - De functie die wordt aangeroepen bij het klikken op het menu-item.
+     * @param shortcut - De optionele sneltoets voor het menu-item.
+     */
+    ContextMenu.prototype.addMenuItem = function (label, callback, shortcut) {
+        this.menuItems.push({ label: label, shortcut: shortcut, callback: callback });
+    };
+    /**
+     * Voeg een scheidingslijn toe aan het menu.
+     */
+    ContextMenu.prototype.addLine = function () {
+        this.menuItems.push({ label: 'separator', callback: function () { } });
+    };
+    /**
+     * Render de menu-items.
+     */
+    ContextMenu.prototype.renderMenu = function () {
+        var _this = this;
+        if (this.menuElement) {
+            this.menuElement.innerHTML = '';
+            this.menuItems.forEach(function (item, index) {
+                if (item.label === 'separator') {
+                    var separator = document.createElement('hr');
+                    separator.className = 'context-menu-separator';
+                    _this.menuElement.appendChild(separator);
+                }
+                else {
+                    var menuItem = document.createElement('div');
+                    menuItem.className = 'context-menu-item';
+                    var labelElement = document.createElement('span');
+                    labelElement.textContent = item.label;
+                    var shortcutElement = document.createElement('span');
+                    shortcutElement.textContent = item.shortcut || '';
+                    shortcutElement.className = 'context-menu-shortcut';
+                    menuItem.appendChild(labelElement);
+                    menuItem.appendChild(shortcutElement);
+                    menuItem.addEventListener('click', function () {
+                        item.callback();
+                        _this.hide();
+                    });
+                    _this.menuElement.appendChild(menuItem);
+                }
+            });
+        }
+    };
+    /**
+     * Toon het contextmenu op de locatie van de muisklik.
+     * @param event - Het muisgebeurtenisobject.
+     */
+    ContextMenu.prototype.show = function (event) {
+        if (this.menuElement) {
+            this.renderMenu();
+            this.menuElement.style.display = 'block';
+            var clientX = event.clientX, clientY = event.clientY;
+            var innerWidth_1 = window.innerWidth, innerHeight_1 = window.innerHeight;
+            var _a = this.menuElement, offsetWidth = _a.offsetWidth, offsetHeight = _a.offsetHeight;
+            var left = clientX;
+            var top_1 = clientY;
+            if (left + offsetWidth > innerWidth_1) {
+                left = innerWidth_1 - offsetWidth;
+            }
+            if (top_1 + offsetHeight > innerHeight_1) {
+                top_1 = innerHeight_1 - offsetHeight;
+            }
+            this.menuElement.style.left = "".concat(left, "px");
+            this.menuElement.style.top = "".concat(top_1, "px");
+        }
+    };
+    /**
+     * Verberg het contextmenu.
+     */
+    ContextMenu.prototype.hide = function () {
+        if (this.menuElement) {
+            this.menuElement.style.display = 'none';
+        }
+    };
+    return ContextMenu;
+}());
 /**
  * Class gebruikt in SituationPlanView om te zoeken naar electroitems op basis van de kringnaam.
  * Dit laat toe items to selecteren uit het volledige eendraadschema en ze te plaatsen op het situatieschema.
@@ -2366,6 +2470,14 @@ var SituationPlanElement = /** @class */ (function () {
             this.adres = null;
     };
     /**
+     * setAdresLocation
+     *
+     * @param adreslocation string: 'rechts' of 'links' of 'boven' of 'onder'
+     */
+    SituationPlanElement.prototype.setAdresLocation = function (adreslocation) {
+        this.adreslocation = adreslocation;
+    };
+    /**
      * getAdresType
      *
      * @returns string : 'auto' of 'manueel'
@@ -2654,14 +2766,33 @@ var SituationPlanView = /** @class */ (function () {
         */
         this.outerdiv = null;
         this.paper = null;
+        this.contextMenu = null;
         this.draggedBox = null; /** Box die op dit moment versleept wordt of null */
         this.selectedBox = null; /** Geselelecteerde box of null */
+        /**
+         * Toont het contextmenu op de locatie van de muis.
+         *
+         * @param event - De muisgebeurtenis die het menu opent (right click).
+         */
+        this.showContextMenu = function (event) {
+            event.preventDefault();
+            _this.contextMenu.clearMenu();
+            _this.contextMenu.addMenuItem('Draai rechts', function () { _this.rotateSelectedBox(90, true); }, 'Ctrl →');
+            _this.contextMenu.addMenuItem('Draai links', function () { _this.rotateSelectedBox(-90, true); }, 'Ctrl ←');
+            _this.contextMenu.addLine();
+            _this.contextMenu.addMenuItem('Bewerk', _this.editSelectedBox.bind(_this), 'Enter');
+            _this.contextMenu.addLine();
+            _this.contextMenu.addMenuItem('Verwijder', _this.deleteSelectedBox.bind(_this), 'Del');
+            //this.contextMenu.addMenuItem('Item 3', () => alert('Item 3 clicked'));
+            _this.contextMenu.show(event);
+        };
         /**
          * Start een sleepactie voor een box in het situatieplan.
          *
          * @param event - De gebeurtenis die de sleepactie activeert (muisklik of touchstart).
          */
         this.startDrag = function (event) {
+            _this.contextMenu.hide();
             event.stopPropagation(); // Voorkomt body klikgebeurtenis
             _this.clearSelection(); // Wist bestaande selectie
             _this.selectBox(event.target); // Selecteert de box die we willen slepen
@@ -2738,15 +2869,41 @@ var SituationPlanView = /** @class */ (function () {
                 _this.updateSymbolAndLabelPosition(sitPlanElement);
             }
         };
+        /**
+         * Toont een popup met de eigenschappen van het geselecteerde element en maakt het mogelijk om deze te bewerken.
+         */
+        this.editSelectedBox = function () {
+            _this.contextMenu.hide();
+            _this.unattachArrowKeys();
+            if (_this.selectedBox) {
+                var sitPlanElement_1 = _this.selectedBox.sitPlanElementRef;
+                if (!sitPlanElement_1)
+                    return;
+                SituationPlanView_ElementPropertiesPopup(sitPlanElement_1, function (electroid, adrestype, adres, adreslocation, labelfontsize, scale, rotate) {
+                    if (electroid != null) {
+                        sitPlanElement_1.setElectroItemId(electroid);
+                        sitPlanElement_1.setAdres(adrestype, adres, adreslocation);
+                    }
+                    sitPlanElement_1.labelfontsize = labelfontsize;
+                    sitPlanElement_1.setscale(scale);
+                    sitPlanElement_1.rotate = rotate;
+                    _this.updateBoxContent(sitPlanElement_1); //content needs to be updated first to know the size of the box
+                    _this.updateSymbolAndLabelPosition(sitPlanElement_1);
+                    undostruct.store();
+                });
+            }
+            _this.attachArrowKeys();
+        };
         this.outerdiv = outerdiv;
         this.paper = paper;
+        this.contextMenu = new ContextMenu();
         this.sitplan = sitplan;
         this.paper.style.transformOrigin = 'top left'; // Keep the origin point consistent when scaling
         this.mousedrag = new MouseDrag();
         this.event_manager = new EventManager();
         // Verwijder alle selecties wanneer we ergens anders klikken dan op een box
-        this.event_manager.addEventListener(outerdiv, 'mousedown', function () { _this.clearSelection(); });
-        this.event_manager.addEventListener(outerdiv, 'touchstart', function () { _this.clearSelection(); });
+        this.event_manager.addEventListener(outerdiv, 'mousedown', function () { _this.contextMenu.hide(); _this.clearSelection(); });
+        this.event_manager.addEventListener(outerdiv, 'touchstart', function () { _this.contextMenu.hide(); _this.clearSelection(); });
         // Voegt event handlers toe voor de pijltjestoesten
         this.attachArrowKeys();
     }
@@ -2851,6 +3008,7 @@ var SituationPlanView = /** @class */ (function () {
         box.addEventListener('mousedown', this.startDrag);
         box.addEventListener('touchstart', this.startDrag);
         box.addEventListener('touchend', this.stopDrag);
+        box.addEventListener('contextmenu', this.showContextMenu);
     };
     /**
      * Werk de content van het box-element en label-element van een situatieplanelement bij in de DOM.
@@ -3177,6 +3335,48 @@ var SituationPlanView = /** @class */ (function () {
         this.updateRibbon();
     };
     /**
+     * Roteert de geselecteerde box met het opgegeven aantal graden.
+     * De box wordt geroteerd rond zijn middelpunt.
+     * De rotatie wordt cumulatief uitgevoerd, d.w.z. de nieuwe rotatie wordt toegevoegd aan de vorige.
+     * De rotatie is beperkt tot het bereik [0, 360) graden.
+     * Deze functie slaat de status op, zodat het aanroepen van undo() deze actie ongedaan maakt.
+     * @param degrees - Het aantal graden waarmee de box moet worden gedraaid.
+     */
+    SituationPlanView.prototype.rotateSelectedBox = function (degrees, rotateLabelToo) {
+        if (rotateLabelToo === void 0) { rotateLabelToo = false; }
+        /**
+         * Roteert het label.
+         *
+         * Het label can de volgende locaties hebben, 'boven', 'rechts','onder', 'links'.
+         *
+         * @param cycle - Het aantal keren dat het label met 90 graden moet worden gedraaid.
+         *                1 is een draaing van 90 graden naar rechts, -1 is een draaing van 90 graden naar links.
+         */
+        function rotateLabel(cycle) {
+            var locations = ['boven', 'rechts', 'onder', 'links'];
+            var pic = this.selectedBox.sitPlanElementRef;
+            if (pic == null)
+                return;
+            var index = locations.indexOf(pic.getAdresLocation());
+            pic.setAdresLocation(locations[(index + cycle + 4) % 4]);
+        }
+        ;
+        if (this.selectedBox) {
+            if (rotateLabelToo) {
+                rotateLabel.bind(this)(Math.round(degrees / 90));
+            }
+            var id = this.selectedBox.id;
+            var pic = this.selectedBox.sitPlanElementRef;
+            pic.rotate = (pic.rotate + degrees) % 360;
+            this.updateBoxContent(pic);
+            this.updateSymbolAndLabelPosition(pic);
+            undostruct.store();
+        }
+    };
+    SituationPlanView.prototype.unattachArrowKeys = function () {
+        this.event_manager.addEventListener(document, 'keydown', function () { });
+    };
+    /**
      * Voegt eventlisteners toe om pijltjestoetsen te hanteren.
      *
      * Wanneer een pijltjestoets wordt ingedrukt, en er is een box geselecteerd, dan wordt de positie van de box aangepast.
@@ -3186,6 +3386,7 @@ var SituationPlanView = /** @class */ (function () {
     SituationPlanView.prototype.attachArrowKeys = function () {
         var _this = this;
         this.event_manager.addEventListener(document, 'keydown', function (event) {
+            _this.contextMenu.hide();
             if (_this.outerdiv.style.display == 'none')
                 return; // Check if we are really in the situationplan, if not, the default scrolling action will be executed by the browser
             if (document.getElementById('popupOverlay') != null)
@@ -3197,10 +3398,22 @@ var SituationPlanView = /** @class */ (function () {
                     return;
                 switch (event.key) {
                     case 'ArrowLeft':
-                        sitPlanElement.posx -= 1;
+                        if (event.ctrlKey) {
+                            _this.rotateSelectedBox(-90, true);
+                            return;
+                        }
+                        else {
+                            sitPlanElement.posx -= 1;
+                        }
                         break;
                     case 'ArrowRight':
-                        sitPlanElement.posx += 1;
+                        if (event.ctrlKey) {
+                            _this.rotateSelectedBox(90, true);
+                            return;
+                        }
+                        else {
+                            sitPlanElement.posx += 1;
+                        }
                         break;
                     case 'ArrowUp':
                         sitPlanElement.posy -= 1;
@@ -3208,6 +3421,9 @@ var SituationPlanView = /** @class */ (function () {
                     case 'ArrowDown':
                         sitPlanElement.posy += 1;
                         break;
+                    case 'Enter':
+                        _this.editSelectedBox();
+                        return;
                     case 'Delete':
                         _this.deleteSelectedBox();
                         undostruct.store();
@@ -3227,6 +3443,7 @@ var SituationPlanView = /** @class */ (function () {
     SituationPlanView.prototype.attachDeleteButton = function (elem) {
         var _this = this;
         this.event_manager.addEventListener(elem, 'click', function () {
+            _this.contextMenu.hide();
             _this.deleteSelectedBox();
             undostruct.store();
             var helperTip = new HelperTip(appDocStorage);
@@ -3241,7 +3458,7 @@ var SituationPlanView = /** @class */ (function () {
      */
     SituationPlanView.prototype.attachSendToBackButton = function (elem) {
         var _this = this;
-        this.event_manager.addEventListener(elem, 'click', function () { _this.sendToBack(); });
+        this.event_manager.addEventListener(elem, 'click', function () { _this.contextMenu.hide(); _this.sendToBack(); });
     };
     ;
     /**
@@ -3251,7 +3468,7 @@ var SituationPlanView = /** @class */ (function () {
      */
     SituationPlanView.prototype.attachBringToFrontButton = function (elem) {
         var _this = this;
-        this.event_manager.addEventListener(elem, 'click', function () { _this.bringToFront(); });
+        this.event_manager.addEventListener(elem, 'click', function () { _this.contextMenu.hide(); _this.bringToFront(); });
     };
     ;
     /**
@@ -3263,7 +3480,7 @@ var SituationPlanView = /** @class */ (function () {
      */
     SituationPlanView.prototype.attachZoomButton = function (elem, increment) {
         var _this = this;
-        this.event_manager.addEventListener(elem, 'click', function () { _this.zoomIncrement(increment); });
+        this.event_manager.addEventListener(elem, 'click', function () { _this.contextMenu.hide(); _this.zoomIncrement(increment); });
     };
     ;
     /**
@@ -3274,7 +3491,7 @@ var SituationPlanView = /** @class */ (function () {
      */
     SituationPlanView.prototype.attachZoomToFitButton = function (elem) {
         var _this = this;
-        this.event_manager.addEventListener(elem, 'click', function () { _this.zoomToFit(); });
+        this.event_manager.addEventListener(elem, 'click', function () { _this.contextMenu.hide(); _this.zoomToFit(); });
     };
     ;
     /**
@@ -3286,7 +3503,7 @@ var SituationPlanView = /** @class */ (function () {
      */
     SituationPlanView.prototype.attachAddElementFromFileButton = function (elem, fileinput) {
         var _this = this;
-        this.event_manager.addEventListener(elem, 'click', function () { fileinput.click(); });
+        this.event_manager.addEventListener(elem, 'click', function () { _this.contextMenu.hide(); fileinput.click(); });
         this.event_manager.addEventListener(fileinput, 'change', function (event) {
             var element = _this.sitplan.addElementFromFile(event, _this.sitplan.activePage, 550, 300, (function () {
                 _this.syncToSitPlan();
@@ -3308,6 +3525,8 @@ var SituationPlanView = /** @class */ (function () {
     SituationPlanView.prototype.attachAddElectroItemButton = function (elem) {
         var _this = this;
         this.event_manager.addEventListener(elem, 'click', function () {
+            _this.contextMenu.hide();
+            _this.unattachArrowKeys();
             SituationPlanView_ElementPropertiesPopup(null, function (id, adrestype, adres, adreslocation, labelfontsize, scale, rotate) {
                 if (id != null) {
                     var element = _this.sitplan.addElementFromElectroItem(id, _this.sitplan.activePage, 550, 300, adrestype, adres, adreslocation, labelfontsize, scale, rotate);
@@ -3324,6 +3543,7 @@ var SituationPlanView = /** @class */ (function () {
                     alert('Geen geldig ID ingegeven!');
                 }
             });
+            _this.attachArrowKeys();
         });
     };
     /**
@@ -3332,26 +3552,7 @@ var SituationPlanView = /** @class */ (function () {
      * @param elem - Het HTML-element dat bij een klik een bestaand element in het situatieplan bewerkt.
      */
     SituationPlanView.prototype.attachEditButton = function (elem) {
-        var _this = this;
-        this.event_manager.addEventListener(elem, 'click', function () {
-            if (_this.selectedBox) {
-                var sitPlanElement_1 = _this.selectedBox.sitPlanElementRef;
-                if (!sitPlanElement_1)
-                    return;
-                SituationPlanView_ElementPropertiesPopup(sitPlanElement_1, function (electroid, adrestype, adres, adreslocation, labelfontsize, scale, rotate) {
-                    if (electroid != null) {
-                        sitPlanElement_1.setElectroItemId(electroid);
-                        sitPlanElement_1.setAdres(adrestype, adres, adreslocation);
-                    }
-                    sitPlanElement_1.labelfontsize = labelfontsize;
-                    sitPlanElement_1.setscale(scale);
-                    sitPlanElement_1.rotate = rotate;
-                    _this.updateBoxContent(sitPlanElement_1); //content needs to be updated first to know the size of the box
-                    _this.updateSymbolAndLabelPosition(sitPlanElement_1);
-                    undostruct.store();
-                });
-            }
-        });
+        this.event_manager.addEventListener(elem, 'click', this.editSelectedBox);
     };
     /**
      * Maakt de knoppen in de ribbon aan om onder andere pagina's te selecteren, elementen te laden of verwijderen en pagina's te zoomen.
@@ -3385,15 +3586,18 @@ var SituationPlanView = /** @class */ (function () {
         document.getElementById("ribbon").innerHTML = "<div id=\"left-icons\">".concat(outputleft, "</div><div id=\"right-icons\">").concat(outputright, "</div>");
         // -- Actions om pagina te selecteren --
         document.getElementById('id_sitplanpage').onchange = function (event) {
+            _this.contextMenu.hide();
             var target = event.target;
             _this.selectPage(Number(target.value));
             undostruct.store();
         };
         document.getElementById('btn_sitplan_addpage').onclick = function () {
+            _this.contextMenu.hide();
             _this.sitplan.numPages++;
             _this.selectPage(_this.sitplan.numPages);
         };
         document.getElementById('btn_sitplan_delpage').onclick = function () {
+            _this.contextMenu.hide();
             var userConfirmation = confirm('Pagina ' + _this.sitplan.activePage + ' volledig verwijderen?');
             if (userConfirmation) {
                 _this.sitplan.numPages--;
@@ -3698,17 +3902,20 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK) {
      * @param event
      */
     var handleEnterKey = function (event) {
-        if (event.key === 'Enter')
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            event.stopPropagation();
             okButton.click();
+        }
     };
     //--- HOOFDFUNCTIE ------------------------------------------------------------------------------------
     /*
      * Eerst maken we de pop-up
      */
     var div = document.createElement('div');
-    div.innerHTML = "\n        <div id=\"popupOverlay\" style=\"position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; visibility: hidden; z-index: 9999;\">\n            <div id=\"popupWindow\" style=\"width: 500px; background-color: white; padding: 20px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); display: flex; flex-direction: column; justify-content: space-between;\">\n                <div id=\"selectKringContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block;\">Kring:</label>\n                    <select id=\"selectKring\"></select>\n                </div>\n                <div id=\"selectElectroItemContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block;\">Element:</label>\n                    <select id=\"selectElectroItemBox\"></select><span style=\"display: inline-block; width: 10px;\"></span>\n                    <button id=\"expandButton\" title=\"Omzetten in indivuele elementen\" style=\"background-color:lightblue;\">Uitpakken</button>\n                </div>\n                <div id=\"textContainer\" style=\"display: flex; margin-bottom: 30px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block;\">ID:</label>\n                    <input id=\"textInput\" style=\"width: 100px;\" type=\"number\" min=\"0\" step=\"1\" value=\"\">\n                    <div id=\"feedback\" style=\"margin-left: 10px; width: 100%; font-size: 12px\"></div>\n                </div>\n                <div id=\"selectContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block; white-space: nowrap;\">Label type:</label>\n                    <select id=\"selectAdresType\">\n                        <option value=\"auto\">Automatisch</option>\n                        <option value=\"manueel\">Handmatig</option>\n                    </select>\n                </div>\n                <div id=\"adresContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block; white-space: nowrap;\">Label tekst:</label>\n                    <input id=\"adresInput\" style=\"width: 100%;\" type=\"text\" value=\"\">\n                    <select id=\"selectAdresLocation\" style=\"margin-left: 10px; display: inline-block;\">\n                        <option value=\"links\">Links</option>\n                        <option value=\"rechts\">Rechts</option>\n                        <option value=\"boven\">Boven</option>\n                        <option value=\"onder\">Onder</option>\n                    </select>\n                </div>\n                <div id=\"fontSizeContainer\" style=\"display: flex; margin-bottom: 30px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block; white-space: nowrap;\">Tekengrootte (px):</label>\n                    <input id=\"fontSizeInput\" style=\"width: 100px;\" type=\"number\" min=\"1\" max=\"72\" step=\"11\" value=\"11\">\n                </div> \n                <div style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block;\">Schaal (%):</label>\n                    <input id=\"scaleInput\" style=\"width: 100px;\" type=\"number\" min=\"10\" max=\"400\" step=\"10\" value=\"".concat(String(SITPLANVIEW_DEFAULT_SCALE * 100), "\">\n                </div>\n                <div style=\"display: flex; margin-bottom: 20px; align-items: center;\">\n                    <label style=\"margin-right: 10px; display: inline-block;\">Rotatie (\u00B0):</label>\n                    <input id=\"rotationInput\" style=\"width: 100px;\" type=\"number\" min=\"0\" max=\"360\" step=\"10\" value=\"0\">\n                </div>\n                <div id=\"setDefaultContainer\" style=\"display: flex; margin-bottom: 20px; align-items: flex-start;\">\n                    <input type=\"checkbox\" id=\"setDefaultCheckbox\">\n                    ").concat((sitplanElement == null) || ((sitplanElement != null) && (sitplanElement.getElectroItemId() != null))
-        ? "<label for=\"checkbox\" style=\"margin-left: 10px; flex-grow: 1; flex-wrap: wrap;\">Zet tekengrootte en schaal als standaard voor alle toekomstige nieuwe symbolen.</label>"
-        : "<label for=\"checkbox\" style=\"margin-left: 10px; flex-grow: 1; flex-wrap: wrap;\">Zet schaal als standaard voor alle toekomstige nieuwe symbolen.</label>", "            \n                </div>\n                <div style=\"display: flex; justify-content: center;\">\n                    <button id=\"okButton\" style=\"margin-right: 10px;\">OK</button>\n                    <button id=\"cancelButton\" style=\"margin-keft: 10px;\">Cancel</button>\n                </div>\n            </div>\n        </div>");
+    div.innerHTML = "\n        <div id=\"popupOverlay\" style=\"position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; visibility: hidden; z-index: 9999;\">\n            <div id=\"popupWindow\" style=\"width: 500px; background-color: white; padding: 20px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); display: flex; flex-direction: column; justify-content: space-between;\">\n                <div id=\"selectKringContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label for=\"selectKring\" style=\"margin-right: 10px; display: inline-block;\">Kring:</label>\n                    <select id=\"selectKring\"></select>\n                </div>\n                <div id=\"selectElectroItemContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label for=\"selectElectroItemBox\" style=\"margin-right: 10px; display: inline-block;\">Element:</label>\n                    <select id=\"selectElectroItemBox\"></select><span style=\"display: inline-block; width: 10px;\"></span>\n                    <button id=\"expandButton\" title=\"Omzetten in indivuele elementen\" style=\"background-color:lightblue;\">Uitpakken</button>\n                </div>\n                <div id=\"textContainer\" style=\"display: flex; margin-bottom: 30px; align-items: center;\">\n                    <label for=\"textInput\" style=\"margin-right: 10px; display: inline-block;\">ID:</label>\n                    <input id=\"textInput\" style=\"width: 100px;\" type=\"number\" min=\"0\" step=\"1\" value=\"\">\n                    <div id=\"feedback\" style=\"margin-left: 10px; width: 100%; font-size: 12px\"></div>\n                </div>\n                <div id=\"selectContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label for=\"selectAdresType\" style=\"margin-right: 10px; display: inline-block; white-space: nowrap;\">Label type:</label>\n                    <select id=\"selectAdresType\">\n                        <option value=\"auto\">Automatisch</option>\n                        <option value=\"manueel\">Handmatig</option>\n                    </select>\n                </div>\n                <div id=\"adresContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label for=\"adresInput\" style=\"margin-right: 10px; display: inline-block; white-space: nowrap;\">Label tekst:</label>\n                    <input id=\"adresInput\" style=\"width: 100%;\" type=\"text\" value=\"\">\n                    <select id=\"selectAdresLocation\" style=\"margin-left: 10px; display: inline-block;\">\n                        <option value=\"links\">Links</option>\n                        <option value=\"rechts\">Rechts</option>\n                        <option value=\"boven\">Boven</option>\n                        <option value=\"onder\">Onder</option>\n                    </select>\n                </div>\n                <div id=\"fontSizeContainer\" style=\"display: flex; margin-bottom: 30px; align-items: center;\">\n                    <label for=\"fontSizeInput\" style=\"margin-right: 10px; display: inline-block; white-space: nowrap;\">Tekengrootte (px):</label>\n                    <input id=\"fontSizeInput\" style=\"width: 100px;\" type=\"number\" min=\"1\" max=\"72\" step=\"11\" value=\"11\">\n                </div> \n                <div style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label for=\"scaleInput\" style=\"margin-right: 10px; display: inline-block;\">Schaal (%):</label>\n                    <input id=\"scaleInput\" style=\"width: 100px;\" type=\"number\" min=\"10\" max=\"400\" step=\"10\" value=\"".concat(String(SITPLANVIEW_DEFAULT_SCALE * 100), "\">\n                </div>\n                <div style=\"display: flex; margin-bottom: 20px; align-items: center;\">\n                    <label for=\"rotationInput\" style=\"margin-right: 10px; display: inline-block;\">Rotatie (\u00B0):</label>\n                    <input id=\"rotationInput\" style=\"width: 100px;\" type=\"number\" min=\"0\" max=\"360\" step=\"10\" value=\"0\">\n                </div>\n                <div id=\"setDefaultContainer\" style=\"display: flex; margin-bottom: 20px; align-items: flex-start;\">\n                    <input type=\"checkbox\" id=\"setDefaultCheckbox\">\n                    ").concat((sitplanElement == null) || ((sitplanElement != null) && (sitplanElement.getElectroItemId() != null))
+        ? "<label for=\"setDefaultCheckbox\" style=\"margin-left: 10px; flex-grow: 1; flex-wrap: wrap;\">Zet tekengrootte en schaal als standaard voor alle toekomstige nieuwe symbolen.</label>"
+        : "<label for=\"setDefaultCheckbox\" style=\"margin-left: 10px; flex-grow: 1; flex-wrap: wrap;\">Zet schaal als standaard voor alle toekomstige nieuwe symbolen.</label>", "            \n                </div>\n                <div style=\"display: flex; justify-content: center;\">\n                    <button id=\"okButton\" style=\"margin-right: 10px;\">OK</button>\n                    <button id=\"cancelButton\" style=\"margin-keft: 10px;\">Cancel</button>\n                </div>\n            </div>\n        </div>");
     var popupOverlay = div.querySelector('#popupOverlay');
     var popupWindow = popupOverlay.querySelector('#popupWindow');
     var selectKringContainer = popupWindow.querySelector('#selectKringContainer');
@@ -9918,6 +10125,8 @@ function restart_all() {
 }
 function toggleAppView(type) {
     var lastview = structure.properties.currentView;
+    if ((structure.sitplanview != null) && (structure.sitplanview.contextMenu != null))
+        structure.sitplanview.contextMenu.hide();
     structure.properties.currentView = type;
     if (type === '2col') {
         document.getElementById("configsection").innerHTML = '';
@@ -9963,9 +10172,13 @@ function load_example(nr) {
     }
 }
 function undoClicked() {
+    if ((structure.sitplanview != null) && (structure.sitplanview.contextMenu != null))
+        structure.sitplanview.contextMenu.hide();
     undostruct.undo();
 }
 function redoClicked() {
+    if ((structure.sitplanview != null) && (structure.sitplanview.contextMenu != null))
+        structure.sitplanview.contextMenu.hide();
     undostruct.redo();
 }
 function download(type) {

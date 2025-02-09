@@ -398,3 +398,38 @@ table {
   transform: translate(-50%, -50%);
   pointer-events: none; /* Allow clicks to pass through the SVG */
 }
+
+.context-menu {
+  position: absolute;
+  display: none;
+  border: 1px solid #aaa;
+  background-color: #f0f0f0;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  z-index: 999999999; /* Try to always be on top */
+  font-size: 12px;
+  line-height: 1.0;
+}
+
+.context-menu-item {
+  padding: 4px 6px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.context-menu-item:hover {
+  background-color: #e0e0e0;
+}
+
+.context-menu-shortcut {
+  margin-left: 16px;
+  color: #888;
+}
+
+.context-menu-separator {
+  border: none;
+  border-top: 1px solid #ddd;
+  margin: 2px 0;
+}
+

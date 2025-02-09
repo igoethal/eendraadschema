@@ -267,7 +267,11 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanE
      */
 
     const handleEnterKey = (event: KeyboardEvent) => {
-        if (event.key === 'Enter') okButton.click();
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            event.stopPropagation();
+            okButton.click();
+        }
     };
 
     //--- HOOFDFUNCTIE ------------------------------------------------------------------------------------
@@ -282,28 +286,28 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanE
         <div id="popupOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; visibility: hidden; z-index: 9999;">
             <div id="popupWindow" style="width: 500px; background-color: white; padding: 20px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); display: flex; flex-direction: column; justify-content: space-between;">
                 <div id="selectKringContainer" style="display: flex; margin-bottom: 10px; align-items: center;">
-                    <label style="margin-right: 10px; display: inline-block;">Kring:</label>
+                    <label for="selectKring" style="margin-right: 10px; display: inline-block;">Kring:</label>
                     <select id="selectKring"></select>
                 </div>
                 <div id="selectElectroItemContainer" style="display: flex; margin-bottom: 10px; align-items: center;">
-                    <label style="margin-right: 10px; display: inline-block;">Element:</label>
+                    <label for="selectElectroItemBox" style="margin-right: 10px; display: inline-block;">Element:</label>
                     <select id="selectElectroItemBox"></select><span style="display: inline-block; width: 10px;"></span>
                     <button id="expandButton" title="Omzetten in indivuele elementen" style="background-color:lightblue;">Uitpakken</button>
                 </div>
                 <div id="textContainer" style="display: flex; margin-bottom: 30px; align-items: center;">
-                    <label style="margin-right: 10px; display: inline-block;">ID:</label>
+                    <label for="textInput" style="margin-right: 10px; display: inline-block;">ID:</label>
                     <input id="textInput" style="width: 100px;" type="number" min="0" step="1" value="">
                     <div id="feedback" style="margin-left: 10px; width: 100%; font-size: 12px"></div>
                 </div>
                 <div id="selectContainer" style="display: flex; margin-bottom: 10px; align-items: center;">
-                    <label style="margin-right: 10px; display: inline-block; white-space: nowrap;">Label type:</label>
+                    <label for="selectAdresType" style="margin-right: 10px; display: inline-block; white-space: nowrap;">Label type:</label>
                     <select id="selectAdresType">
                         <option value="auto">Automatisch</option>
                         <option value="manueel">Handmatig</option>
                     </select>
                 </div>
                 <div id="adresContainer" style="display: flex; margin-bottom: 10px; align-items: center;">
-                    <label style="margin-right: 10px; display: inline-block; white-space: nowrap;">Label tekst:</label>
+                    <label for="adresInput" style="margin-right: 10px; display: inline-block; white-space: nowrap;">Label tekst:</label>
                     <input id="adresInput" style="width: 100%;" type="text" value="">
                     <select id="selectAdresLocation" style="margin-left: 10px; display: inline-block;">
                         <option value="links">Links</option>
@@ -313,22 +317,22 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanE
                     </select>
                 </div>
                 <div id="fontSizeContainer" style="display: flex; margin-bottom: 30px; align-items: center;">
-                    <label style="margin-right: 10px; display: inline-block; white-space: nowrap;">Tekengrootte (px):</label>
+                    <label for="fontSizeInput" style="margin-right: 10px; display: inline-block; white-space: nowrap;">Tekengrootte (px):</label>
                     <input id="fontSizeInput" style="width: 100px;" type="number" min="1" max="72" step="11" value="11">
                 </div> 
                 <div style="display: flex; margin-bottom: 10px; align-items: center;">
-                    <label style="margin-right: 10px; display: inline-block;">Schaal (%):</label>
+                    <label for="scaleInput" style="margin-right: 10px; display: inline-block;">Schaal (%):</label>
                     <input id="scaleInput" style="width: 100px;" type="number" min="10" max="400" step="10" value="${String(SITPLANVIEW_DEFAULT_SCALE*100)}">
                 </div>
                 <div style="display: flex; margin-bottom: 20px; align-items: center;">
-                    <label style="margin-right: 10px; display: inline-block;">Rotatie (°):</label>
+                    <label for="rotationInput" style="margin-right: 10px; display: inline-block;">Rotatie (°):</label>
                     <input id="rotationInput" style="width: 100px;" type="number" min="0" max="360" step="10" value="0">
                 </div>
                 <div id="setDefaultContainer" style="display: flex; margin-bottom: 20px; align-items: flex-start;">
                     <input type="checkbox" id="setDefaultCheckbox">
                     ${ (sitplanElement == null) || ( (sitplanElement != null) && (sitplanElement.getElectroItemId() != null) )
-                        ? `<label for="checkbox" style="margin-left: 10px; flex-grow: 1; flex-wrap: wrap;">Zet tekengrootte en schaal als standaard voor alle toekomstige nieuwe symbolen.</label>`
-                        : `<label for="checkbox" style="margin-left: 10px; flex-grow: 1; flex-wrap: wrap;">Zet schaal als standaard voor alle toekomstige nieuwe symbolen.</label>`
+                        ? `<label for="setDefaultCheckbox" style="margin-left: 10px; flex-grow: 1; flex-wrap: wrap;">Zet tekengrootte en schaal als standaard voor alle toekomstige nieuwe symbolen.</label>`
+                        : `<label for="setDefaultCheckbox" style="margin-left: 10px; flex-grow: 1; flex-wrap: wrap;">Zet schaal als standaard voor alle toekomstige nieuwe symbolen.</label>`
                     }            
                 </div>
                 <div style="display: flex; justify-content: center;">
