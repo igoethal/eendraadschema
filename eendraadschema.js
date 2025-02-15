@@ -1,22 +1,76 @@
-//=========================================================================//
-//
-//  Eendraadschema tekenen (https://eendraadschema.goethals-jacobs.be/)
-//  Copyright (C) 2019-2023 Ivan Goethals
-//
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-//
-//=========================================================================//
+/*** Eendraadschema ***
+
+=== Community edition ===
+
+Copyright (C) 2019-2025  Ivan Goethals GPLv3
+
+This program is free software: you can redistribute it and/or modify it 
+under the terms of the GNU General Public License as published by the 
+Free Software Foundation, either version 3 of the License, or (at your option)
+any later version.
+
+This program is distributed in the hope that it will be useful, but 
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for 
+more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see http://www.gnu.org/licenses/.
+
+The source code of this community edition is hosted on Github at
+https://github.com/igoethal/eendraadschema.
+
+=== Exclusive license ===
+
+Notwithstanding the above, the original and sole author of this edition, 
+Ivan Goethals, reserves the exclusive right to create derivative works of 
+this software and distribute them under different licensing terms, including
+but not limited to proprietary licenses. This includes the ability to develop
+and offer a hosted edition with additional features not available in the
+community edition. This right does not extend to derivative works produced by
+others based on this community edition.
+
+=== Embedded content ===
+
+== Pako.js ==
+
+This program uses the Pako.js entropy coding library. Pako is released under 
+an MIT license by Andrey Tupitsin and Vitaly Puzrin. For more information on 
+Pako and the full license text, please visit https://github.com/nodeca/pako
+
+== Zlib ==
+
+Pako implements ZLib in javascript. Zlib is released under the ZLIB License.
+See https://www.zlib.net/zlib_license.html
+
+== jsPDF ==
+
+This program uses the jsPDF library to transform SVG images into PDF files.
+The jsPDF license is as follows
+
+Copyright
+(c) 2010-2021 James Hall, https://github.com/MrRio/jsPDF
+(c) 2015-2021 yWorks GmbH, https://www.yworks.com/
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
 
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -33,7 +87,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
+        while (g && (g = 0, op[0] && (_ = 0)), _) try {
             if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
             if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
@@ -1485,7 +1539,7 @@ function download_by_blob(text, filename, mimeType) {
         element.style.display = 'none';
         document.body.appendChild(element);
         element.click();
-        document.body.removeChild(element);
+        setTimeout(function () { return document.body.removeChild(element); }, 1000); // 1-second delay
     }
     else {
         this.location.go("".concat(mimeType, ",").concat(encodeURIComponent(text)));
@@ -10001,7 +10055,7 @@ function HLRedrawTreeSVG() {
         + '<button style="background-color:green;">&#9654;</button> Afhankelijk item hieronder toevoegen (niveau dieper)<br>'
         + '<button style="background-color:red;">&#9851;</button> Item verwijderen<br>'
         + '<i><br><small>Versie: ' + CONF_builddate
-        + ' (C) Ivan Goethals -- <a href="license.html" target="popup" onclick="window.open(\'license.html\',\'popup\',\'width=800,height=600\'); return false;">GPLv3</a></small></i><br><br>';
+        + ' (C) Ivan Goethals -- <a href="license.html" target="popup" onclick="window.open(\'license.html\',\'popup\',\'width=800,height=600\'); return false;">Terms</a></small></i><br><br>';
     document.getElementById("right_col_inner").innerHTML = str;
 }
 function HLRedrawTree() {

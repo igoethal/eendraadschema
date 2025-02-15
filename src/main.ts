@@ -149,7 +149,7 @@ function HLRedrawTreeSVG() {
                    + '<button style="background-color:green;">&#9654;</button> Afhankelijk item hieronder toevoegen (niveau dieper)<br>'
                    + '<button style="background-color:red;">&#9851;</button> Item verwijderen<br>'
                    + '<i><br><small>Versie: ' + CONF_builddate
-                   + ' (C) Ivan Goethals -- <a href="license.html" target="popup" onclick="window.open(\'license.html\',\'popup\',\'width=800,height=600\'); return false;">GPLv3</a></small></i><br><br>';
+                   + ' (C) Ivan Goethals -- <a href="license.html" target="popup" onclick="window.open(\'license.html\',\'popup\',\'width=800,height=600\'); return false;">Terms</a></small></i><br><br>';
 
     document.getElementById("right_col_inner").innerHTML = str;
 }
