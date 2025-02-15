@@ -1,13 +1,13 @@
-****************************************************
+********************************
 Eendraadschema Community edition
-****************************************************
+********************************
 
-=== Purpose ===
+## Purpose
 
 Design and draw a one-wire diagram as enforced by the Belgian AREI legislation.
 Source code written in Typescript, transpiled to Javascript and run in a browser.
 
-=== Build / Compile ===
+## Build / Compile 
 
 Below description is valid for a linux terminal with bash- or sh-shell.
 With some extra tweaks, compilation on other systems should be possible as well.
@@ -17,7 +17,7 @@ With some extra tweaks, compilation on other systems should be possible as well.
 - Run the ./compile -script from the dedicated folder.
 - Open index.html with a modern browser
 
-=== General Public License ===
+## General Public License
 
 Copyright (C) 2019-2025  Ivan Goethals GPLv3
 
@@ -37,7 +37,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/.
 The source code of this community edition is hosted on Github at
 https://github.com/igoethal/eendraadschema.
 
-=== Exclusive license ===
+## Exclusive license
 
 Notwithstanding the above, the original and sole author of this edition, 
 Ivan Goethals, reserves the exclusive right to create derivative works of 
@@ -46,5 +46,3 @@ but not limited to proprietary licenses. This includes the ability to develop
 and offer a hosted edition with additional features not available in the
 community edition. This right does not extend to derivative works produced by
 others based on this community edition.
-
-=== End of Document ===
