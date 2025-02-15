@@ -7,6 +7,16 @@ Eendraadschema Community edition
 Design and draw a one-wire diagram as enforced by the Belgian AREI legislation.
 Source code written in Typescript, transpiled to Javascript and run in a browser.
 
+=== Build / Compile ===
+
+Below description is valid for a linux terminal with bash- or sh-shell.
+With some extra tweaks, compilation on other systems should be possible as well.
+
+- Extract all files and directories in a dedicated folder.
+- Ensure you have a typescript compiler installed that can be called by the name "tsc"
+- Run the ./compile -script from the dedicated folder.
+- Open index.html with a modern browser
+
 === General Public License ===
 
 Copyright (C) 2019-2025  Ivan Goethals GPLv3
@@ -36,15 +46,5 @@ but not limited to proprietary licenses. This includes the ability to develop
 and offer a hosted edition with additional features not available in the
 community edition. This right does not extend to derivative works produced by
 others based on this community edition.
-
-=== Build / Compile ===
-
-Below description is valid for a linux terminal with bash- or sh-shell.
-With some extra tweaks, compilation on other systems should be possible as well.
-
-- Extract all files and directories in a dedicated folder.
-- Ensure you have a typescript compiler installed that can be called by the name "tsc"
-- Run the ./compile -script from the dedicated folder.
-- Open index.html with a modern browser
 
 === End of Document ===
