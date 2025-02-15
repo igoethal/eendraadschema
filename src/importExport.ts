@@ -431,7 +431,7 @@ function download_by_blob(text, filename, mimeType): void {
         element.style.display = 'none';
         document.body.appendChild(element);
         element.click();
-        document.body.removeChild(element);
+        setTimeout(() => document.body.removeChild(element), 1000); // 1-second delay
     } else {
         this.location.go(`${mimeType},${encodeURIComponent(text)}`);
     }
