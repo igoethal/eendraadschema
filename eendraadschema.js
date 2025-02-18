@@ -2914,10 +2914,17 @@ var SituationPlanView = /** @class */ (function () {
                     var touch = event.touches[0];
                     newLeftTop = _this.mousedrag.returnNewLeftTop(touch.clientX, touch.clientY);
                 }
+                //get paperpadding from css
+                var paperPadding = parseFloat(getComputedStyle(_this.paper).getPropertyValue('--paperPadding'));
+                //return topleft of the scrolled this.outerdiv
+                var minLeft = (_this.canvas.scrollLeft - paperPadding) / _this.zoomfactor;
+                var minTop = (_this.canvas.scrollTop - paperPadding) / _this.zoomfactor;
+                var maxRight = minLeft + (_this.canvas.offsetWidth) / _this.zoomfactor;
+                var maxBottom = minTop + (_this.canvas.offsetHeight) / _this.zoomfactor;
                 // Zorg ervoor dat de box niet buiten redelijke grenzen van het canvas valt links-boven
                 // We doen deze controle niet rechts onder omdat het canvas daar gewoon kan groeien
-                newLeftTop.left = Math.max(-_this.draggedBox.offsetWidth / 2, newLeftTop.left);
-                newLeftTop.top = Math.max(-_this.draggedBox.offsetHeight / 2, newLeftTop.top);
+                newLeftTop.left = Math.min(maxRight - _this.draggedBox.offsetWidth / 2, Math.max(minLeft - _this.draggedBox.offsetWidth / 2, newLeftTop.left));
+                newLeftTop.top = Math.min(maxBottom - _this.draggedBox.offsetHeight / 2, Math.max(minTop - _this.draggedBox.offsetHeight / 2, newLeftTop.top));
                 var sitPlanElement = _this.draggedBox.sitPlanElementRef;
                 sitPlanElement.posx = newLeftTop.left + (_this.draggedBox.offsetWidth / 2);
                 sitPlanElement.posy = newLeftTop.top + (_this.draggedBox.offsetHeight / 2);

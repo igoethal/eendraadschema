@@ -566,11 +566,20 @@ class SituationPlanView {
                 const touch = event.touches[0];
                 newLeftTop = this.mousedrag.returnNewLeftTop(touch.clientX,touch.clientY);
             }
+
+            //get paperpadding from css
+            const paperPadding = parseFloat(getComputedStyle(this.paper).getPropertyValue('--paperPadding'));
+
+            //return topleft of the scrolled this.outerdiv
+            const minLeft = (this.canvas.scrollLeft - paperPadding) / this.zoomfactor;
+            const minTop = (this.canvas.scrollTop - paperPadding) / this.zoomfactor;
+            const maxRight = minLeft + (this.canvas.offsetWidth) / this.zoomfactor;
+            const maxBottom = minTop + (this.canvas.offsetHeight) / this.zoomfactor;
     
             // Zorg ervoor dat de box niet buiten redelijke grenzen van het canvas valt links-boven
             // We doen deze controle niet rechts onder omdat het canvas daar gewoon kan groeien
-            newLeftTop.left = Math.max(- this.draggedBox.offsetWidth/2, newLeftTop.left);
-            newLeftTop.top = Math.max(- this.draggedBox.offsetHeight/2, newLeftTop.top);
+            newLeftTop.left = Math.min(maxRight - this.draggedBox.offsetWidth/2, Math.max(minLeft - this.draggedBox.offsetWidth/2, newLeftTop.left)); 
+            newLeftTop.top = Math.min(maxBottom - this.draggedBox.offsetHeight/2, Math.max(minTop - this.draggedBox.offsetHeight/2, newLeftTop.top));
 
             const sitPlanElement = (this.draggedBox as any).sitPlanElementRef;
             sitPlanElement.posx = newLeftTop.left + (this.draggedBox.offsetWidth/2);
