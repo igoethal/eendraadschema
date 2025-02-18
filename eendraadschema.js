@@ -87,7 +87,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
+        while (g && (g = 0, op[0] && (_ = 0)), _) try {
             if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
             if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
@@ -2811,15 +2811,16 @@ var SituationPlanElement = /** @class */ (function () {
  * een eendraadschema symbool zijn als een ingelezen extern bestand.
  */
 var SituationPlanView = /** @class */ (function () {
-    function SituationPlanView(outerdiv, paper, sitplan) {
+    function SituationPlanView(canvas, paper, sitplan) {
         var _this = this;
         this.zoomfactor = 1;
         /** Referentie naar meerdere DIV's waar het stuatieplan wordt weergegeven
          *   - paper: hieronder hangen de reële elementen en dit stelt het printable gedeelte van het schema voor
-         *   - outerdiv: deze bevat paper en ook het niet printable gedeelte
+         *   - canvas: deze bevat paper en ook het niet printable gedeelte
         */
-        this.outerdiv = null;
+        this.canvas = null;
         this.paper = null;
+        this.sideBar = new SituationPlanView_SideBar(document.getElementById('sidebar'));
         this.contextMenu = null;
         this.draggedBox = null; /** Box die op dit moment versleept wordt of null */
         this.selectedBox = null; /** Geselelecteerde box of null */
@@ -2924,6 +2925,35 @@ var SituationPlanView = /** @class */ (function () {
             }
         };
         /**
+         * Voegt een ElectroItem toe aan het situatieplan.
+         *
+         * @param id - Het ID van het ElectroItem dat moet worden toegevoegd.
+         * @param adrestype - Het type adres van het ElectroItem.
+         * @param adres - Het adres van het ElectroItem.
+         * @param adreslocation - De locatie van het adres van het ElectroItem.
+         * @param labelfontsize - De grootte van het lettertype van het label van het ElectroItem.
+         * @param scale - De schaal van het ElectroItem.
+         * @param rotate - De rotatie van het ElectroItem.
+         */
+        this.addElectroItem = function (id, adrestype, adres, adreslocation, labelfontsize, scale, rotate, posx, posy) {
+            if (posx === void 0) { posx = 550; }
+            if (posy === void 0) { posy = 300; }
+            if (id != null) {
+                var element = _this.sitplan.addElementFromElectroItem(id, _this.sitplan.activePage, posx, posy, adrestype, adres, adreslocation, labelfontsize, scale, rotate);
+                if (element != null) {
+                    _this.syncToSitPlan();
+                    _this.clearSelection();
+                    _this.redraw();
+                    _this.selectBox(element.boxref); // We moeten dit na redraw doen anders bestaat de box mogelijk nog niet
+                    _this.bringToFront();
+                    undostruct.store();
+                }
+            }
+            else {
+                alert('Geen geldig ID ingegeven!');
+            }
+        };
+        /**
          * Toont een popup met de eigenschappen van het geselecteerde element en maakt het mogelijk om deze te bewerken.
          */
         this.editSelectedBox = function () {
@@ -2948,7 +2978,7 @@ var SituationPlanView = /** @class */ (function () {
             }
             _this.attachArrowKeys();
         };
-        this.outerdiv = outerdiv;
+        this.canvas = canvas;
         this.paper = paper;
         this.contextMenu = new ContextMenu();
         this.sitplan = sitplan;
@@ -2956,8 +2986,8 @@ var SituationPlanView = /** @class */ (function () {
         this.mousedrag = new MouseDrag();
         this.event_manager = new EventManager();
         // Verwijder alle selecties wanneer we ergens anders klikken dan op een box
-        this.event_manager.addEventListener(outerdiv, 'mousedown', function () { _this.contextMenu.hide(); _this.clearSelection(); });
-        this.event_manager.addEventListener(outerdiv, 'touchstart', function () { _this.contextMenu.hide(); _this.clearSelection(); });
+        this.event_manager.addEventListener(canvas, 'mousedown', function () { _this.contextMenu.hide(); _this.clearSelection(); });
+        this.event_manager.addEventListener(canvas, 'touchstart', function () { _this.contextMenu.hide(); _this.clearSelection(); });
         // Voegt event handlers toe voor de pijltjestoesten
         this.attachArrowKeys();
     }
@@ -3002,8 +3032,16 @@ var SituationPlanView = /** @class */ (function () {
      */
     SituationPlanView.prototype.zoomToFit = function (paperPadding) {
         if (paperPadding === void 0) { paperPadding = parseFloat(getComputedStyle(this.paper).getPropertyValue('--paperPadding')); }
-        var scale = Math.min((this.outerdiv.offsetWidth - paperPadding * 2) / this.paper.offsetWidth, (this.outerdiv.offsetHeight - paperPadding * 2) / this.paper.offsetHeight);
+        var sideBarWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sideBarWidth'));
+        var scale = Math.min((this.canvas.offsetWidth - paperPadding * 2) / this.paper.offsetWidth, (this.canvas.offsetHeight - paperPadding * 2) / this.paper.offsetHeight);
         this.setzoom(scale);
+    };
+    /**
+     * Geeft de huidige zoomfactor terug.
+     * @returns De huidige zoomfactor.
+     */
+    SituationPlanView.prototype.getZoomFactor = function () {
+        return this.zoomfactor;
     };
     /**
      * Stel de zoomfactor in.
@@ -3265,6 +3303,7 @@ var SituationPlanView = /** @class */ (function () {
             }
         }
         this.updateRibbon();
+        this.sideBar.render();
         var end = performance.now();
         console.log("Redraw took ".concat(end - start, "ms"));
     };
@@ -3441,7 +3480,7 @@ var SituationPlanView = /** @class */ (function () {
         var _this = this;
         this.event_manager.addEventListener(document, 'keydown', function (event) {
             _this.contextMenu.hide();
-            if (_this.outerdiv.style.display == 'none')
+            if (document.getElementById('outerdiv').style.display == 'none')
                 return; // Check if we are really in the situationplan, if not, the default scrolling action will be executed by the browser
             if (document.getElementById('popupOverlay') != null)
                 return; // We need the keys when editing symbol properties.
@@ -3581,22 +3620,7 @@ var SituationPlanView = /** @class */ (function () {
         this.event_manager.addEventListener(elem, 'click', function () {
             _this.contextMenu.hide();
             _this.unattachArrowKeys();
-            SituationPlanView_ElementPropertiesPopup(null, function (id, adrestype, adres, adreslocation, labelfontsize, scale, rotate) {
-                if (id != null) {
-                    var element = _this.sitplan.addElementFromElectroItem(id, _this.sitplan.activePage, 550, 300, adrestype, adres, adreslocation, labelfontsize, scale, rotate);
-                    if (element != null) {
-                        _this.syncToSitPlan();
-                        _this.clearSelection();
-                        _this.redraw();
-                        _this.selectBox(element.boxref); // We moeten dit na redraw doen anders bestaat de box mogelijk nog niet
-                        _this.bringToFront();
-                        undostruct.store();
-                    }
-                }
-                else {
-                    alert('Geen geldig ID ingegeven!');
-                }
-            });
+            SituationPlanView_ElementPropertiesPopup(null, _this.addElectroItem);
             _this.attachArrowKeys();
         });
     };
@@ -3689,7 +3713,7 @@ function showSituationPlanPage() {
         var elements = document.querySelectorAll('[id^="SP_"]');
         elements.forEach(function (e) { return e.remove(); });
         //Maak dan de SituationPlanView
-        structure.sitplanview = new SituationPlanView(document.getElementById('outerdiv'), document.getElementById('paper'), structure.sitplan);
+        structure.sitplanview = new SituationPlanView(document.getElementById('canvas'), document.getElementById('paper'), structure.sitplan);
         structure.sitplanview.zoomToFit();
     }
     ;
@@ -4059,6 +4083,17 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK) {
      */
     document.body.appendChild(div);
     showPopup();
+}
+var SituationPlanView_SideBar = /** @class */ (function () {
+    function SituationPlanView_SideBar(div) {
+    }
+    SituationPlanView_SideBar.prototype.renderSymbols = function () {
+    };
+    SituationPlanView_SideBar.prototype.render = function () {
+    };
+    return SituationPlanView_SideBar;
+}());
+function HLInsertSymbol(event, id) {
 }
 var MultiLevelStorage = /** @class */ (function () {
     function MultiLevelStorage(storageKey, initialData) {

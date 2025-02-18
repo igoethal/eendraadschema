@@ -10,23 +10,25 @@ class SituationPlanView {
 
     /** Referentie naar meerdere DIV's waar het stuatieplan wordt weergegeven 
      *   - paper: hieronder hangen de reële elementen en dit stelt het printable gedeelte van het schema voor
-     *   - outerdiv: deze bevat paper en ook het niet printable gedeelte
+     *   - canvas: deze bevat paper en ook het niet printable gedeelte
     */
-    private outerdiv: HTMLElement = null;
+    private canvas: HTMLElement = null;
     private paper: HTMLElement = null;
+    private sideBar: SituationPlanView_SideBar = new SituationPlanView_SideBar(document.getElementById('sidebar'));
+
     public  contextMenu: ContextMenu = null;
     
     private draggedBox:HTMLElement = null; /** Box die op dit moment versleept wordt of null */
     private selectedBox:HTMLElement = null; /** Geselelecteerde box of null */
 
     private mousedrag: MouseDrag; /** behandelt het verslepen van een box */
-
+    
     private sitplan;
-
+    
     private event_manager;
 
-    constructor(outerdiv: HTMLElement, paper: HTMLElement, sitplan: SituationPlan) {
-        this.outerdiv = outerdiv;
+    constructor(canvas: HTMLElement, paper: HTMLElement, sitplan: SituationPlan) {
+        this.canvas = canvas;
         this.paper = paper;
         this.contextMenu = new ContextMenu();
 
@@ -37,8 +39,8 @@ class SituationPlanView {
         this.event_manager = new EventManager();
         
         // Verwijder alle selecties wanneer we ergens anders klikken dan op een box
-        this.event_manager.addEventListener(outerdiv, 'mousedown', () => { this.contextMenu.hide(); this.clearSelection(); } );
-        this.event_manager.addEventListener(outerdiv, 'touchstart', () => { this.contextMenu.hide(); this.clearSelection(); } );
+        this.event_manager.addEventListener(canvas, 'mousedown', () => { this.contextMenu.hide(); this.clearSelection(); } );
+        this.event_manager.addEventListener(canvas, 'touchstart', () => { this.contextMenu.hide(); this.clearSelection(); } );
 
         // Voegt event handlers toe voor de pijltjestoesten
         this.attachArrowKeys();
@@ -84,12 +86,22 @@ class SituationPlanView {
      */
     zoomToFit(paperPadding: number = parseFloat(getComputedStyle(this.paper).getPropertyValue('--paperPadding'))) {
 
+        const sideBarWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sideBarWidth'));
+
         const scale = Math.min(
-            (this.outerdiv.offsetWidth - paperPadding * 2) / this.paper.offsetWidth,
-            (this.outerdiv.offsetHeight - paperPadding * 2) / this.paper.offsetHeight,
+            (this.canvas.offsetWidth - paperPadding * 2) / this.paper.offsetWidth,
+            (this.canvas.offsetHeight - paperPadding * 2) / this.paper.offsetHeight,
         );
 
         this.setzoom(scale);
+    }
+
+    /**
+     * Geeft de huidige zoomfactor terug.
+     * @returns De huidige zoomfactor.
+     */
+    getZoomFactor() {
+        return this.zoomfactor;
     }
 
     /**
@@ -373,6 +385,8 @@ class SituationPlanView {
         }
 
         this.updateRibbon();
+        this.sideBar.render();
+
         const end = performance.now();
         console.log(`Redraw took ${end - start}ms`);
     }
@@ -647,7 +661,7 @@ class SituationPlanView {
         
         this.event_manager.addEventListener(document, 'keydown', (event) => {
             this.contextMenu.hide();
-            if (this.outerdiv.style.display == 'none') return; // Check if we are really in the situationplan, if not, the default scrolling action will be executed by the browser
+            if (document.getElementById('outerdiv').style.display == 'none') return; // Check if we are really in the situationplan, if not, the default scrolling action will be executed by the browser
             if (document.getElementById('popupOverlay') != null) return; // We need the keys when editing symbol properties.
 
             if (this.selectedBox) { // Check if we have a selected box, if not, the default scrolling action will be executed by the browser
@@ -773,6 +787,35 @@ class SituationPlanView {
             );
         });
     }
+    
+    /**
+     * Voegt een ElectroItem toe aan het situatieplan.
+     * 
+     * @param id - Het ID van het ElectroItem dat moet worden toegevoegd.
+     * @param adrestype - Het type adres van het ElectroItem.
+     * @param adres - Het adres van het ElectroItem.
+     * @param adreslocation - De locatie van het adres van het ElectroItem.
+     * @param labelfontsize - De grootte van het lettertype van het label van het ElectroItem.
+     * @param scale - De schaal van het ElectroItem.
+     * @param rotate - De rotatie van het ElectroItem.
+     */
+    addElectroItem = (id: number | null, adrestype: AdresType, adres: string, adreslocation: AdresLocation, labelfontsize: number, scale: number, rotate: number, posx = 550, posy = 300) => {
+        if (id != null) {
+            let element = this.sitplan.addElementFromElectroItem(id, this.sitplan.activePage, posx, posy, 
+                                                      adrestype, adres, adreslocation, labelfontsize,
+                                                      scale, rotate);
+            if (element != null) {
+                this.syncToSitPlan();
+                this.clearSelection();
+                this.redraw();
+                this.selectBox(element.boxref); // We moeten dit na redraw doen anders bestaat de box mogelijk nog niet
+                this.bringToFront();
+                undostruct.store();
+            }
+        } else {
+            alert('Geen geldig ID ingegeven!');
+        }
+    }
 
     /**
      * Hangt een klik event listener aan het gegeven element om een nieuw Electro_Item aan het situatieplan toe te voegen.
@@ -783,28 +826,12 @@ class SituationPlanView {
         this.event_manager.addEventListener(elem, 'click', () => {
             this.contextMenu.hide();
             this.unattachArrowKeys();
-            SituationPlanView_ElementPropertiesPopup(null,
-                (id, adrestype, adres, adreslocation, labelfontsize, scale, rotate) => {
-                    if (id != null) {
-                        let element = this.sitplan.addElementFromElectroItem(id, this.sitplan.activePage, 550, 300, 
-                                                                  adrestype, adres, adreslocation, labelfontsize,
-                                                                  scale, rotate);
-                        if (element != null) {
-                            this.syncToSitPlan();
-                            this.clearSelection();
-                            this.redraw();
-                            this.selectBox(element.boxref); // We moeten dit na redraw doen anders bestaat de box mogelijk nog niet
-                            this.bringToFront();
-                            undostruct.store();
-                        }
-                    } else {
-                        alert('Geen geldig ID ingegeven!');
-                    }
-                }
-            ); 
+            SituationPlanView_ElementPropertiesPopup(null, this.addElectroItem);
             this.attachArrowKeys();
         });
     }
+
+    
 
     /**
      * Toont een popup met de eigenschappen van het geselecteerde element en maakt het mogelijk om deze te bewerken.
@@ -1041,7 +1068,7 @@ function showSituationPlanPage() {
         elements.forEach(e => e.remove());
         //Maak dan de SituationPlanView
         structure.sitplanview = new SituationPlanView(
-            document.getElementById('outerdiv'), 
+            document.getElementById('canvas'), 
             document.getElementById('paper'), 
             structure.sitplan);
 

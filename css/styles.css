@@ -7,6 +7,9 @@
   --menu-height: 40px; 
   --ribbon-height: 68px; 
   --status-bar-height: 0px; 
+
+  --sideBarWidth: 0px; /* Can be overwritte in propstyles */
+
   --total-offset: calc(var(--menu-height) + var(--ribbon-height) + var(--status-bar-height));
 }
 
@@ -219,6 +222,9 @@ ul#minitabs a:hover {
   cursor: pointer;
   box-sizing: border-box; /* Include border in size calculation */
   transform: rotate(0deg);
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE 10 and IE 11 */
 }
 
 .boxlabel {
@@ -281,6 +287,26 @@ ul#minitabs a:hover {
   position: absolute;
   top: calc(var(--menu-height) + var(--ribbon-height)); 
   left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: none; 
+  background-color: #ffffff; /* Optional: Background color for visibility */
+  padding: 0; /* Padding to create the empty border effect */
+  flex-direction: row; /* Ensure columns are side by side */
+}
+
+#sidebar {
+  top: 0;
+  left: 0;
+  width: var(--sideBarWidth); /* Useful drawing area on A4 */
+  height: 100%;
+}
+
+#canvas {
+  display: flex;
+  position: absolute;
+  top: 0; 
+  left: var(--sideBarWidth);
   right: 0;
   bottom: 0;
   overflow: auto; /* Add scrollbars if content overflows */
