@@ -171,7 +171,7 @@ class SituationPlanView {
         // Boxlabel aanmaken op de DOM voor de tekst bij het symbool
         let boxlabel = document.createElement('div');
         boxlabel.className = "boxlabel";
-        boxlabel.innerHTML = element.getAdres(); // is deze nodig? Wellicht reeds onderdeel van updateContent
+        boxlabel.innerHTML = htmlspecialchars(element.getAdres()); // is deze nodig? Wellicht reeds onderdeel van updateContent
         element.boxlabelref = boxlabel;
 
         // Content updaten en toevoegen aan de DOM
@@ -217,7 +217,7 @@ class SituationPlanView {
             if (boxlabel != null) {
                 let adres = sitPlanElement.getAdres();
                 if (sitPlanElement.labelfontsize != null) boxlabel.style.fontSize = String(sitPlanElement.labelfontsize) + 'px';
-                if (adres != null) boxlabel.innerHTML = adres; else boxlabel.innerHTML = '';
+                if (adres != null) boxlabel.innerHTML = htmlspecialchars(adres); else boxlabel.innerHTML = '';
             }
         };
     }
@@ -782,16 +782,30 @@ class SituationPlanView {
     attachAddElementFromFileButton(elem: HTMLElement, fileinput: HTMLElement) {
         this.event_manager.addEventListener(elem, 'click', () => { this.contextMenu.hide(); fileinput.click(); } );
         this.event_manager.addEventListener(fileinput, 'change', (event) => { 
-            let element = this.sitplan.addElementFromFile(event, this.sitplan.activePage, 550, 300, 
+            let element = this.sitplan.addElementFromFile(event, this.sitplan.activePage, this.paper.offsetWidth/2, this.paper.offsetHeight/2, 
                 (() => {
                     this.syncToSitPlan();
                     this.clearSelection();
                     element.needsViewUpdate = true; // for an external SVG this is needed, for an electroItem it is automatically set (see next function)
+
+                    const lastscale = element.scale;
+                    element.scaleSelectedBoxToPaperIfNeeded(this.paper.offsetWidth*0.995,this.paper.offsetHeight*0.995,this.sitplan.defaults.scale);
+
                     this.redraw();
                     this.selectBox(element.boxref); // We moeten dit na redraw doen anders bestaat de box mogelijk nog niet
                     this.bringToFront();
                     undostruct.store();
                     (fileinput as HTMLInputElement).value = ''; // Zorgt ervoor dat hetzelfde bestand twee keer kan worden gekozen en dit nog steeds een change triggert
+
+                    if (element.scale != lastscale) {
+                        //Use the built in help top to display a text that the image was scaled
+                        const helperTip = new HelperTip(appDocStorage);
+                        helperTip.show('sitplan.scaledImageToFit',
+                        '<h3>Mededeling</h3>'+
+                        '<p>Deze afbeelding werd automatisch verkleind om binnen de tekenzone te blijven.</p>'+
+                        '<p>Kies "Bewerk" in het menu om de schaalfactor verder aan te passen indien gewenst.</p>',true);
+                    }
+                    
                 }).bind(this)
             );
         });
@@ -808,7 +822,7 @@ class SituationPlanView {
      * @param scale - De schaal van het ElectroItem.
      * @param rotate - De rotatie van het ElectroItem.
      */
-    addElectroItem = (id: number | null, adrestype: AdresType, adres: string, adreslocation: AdresLocation, labelfontsize: number, scale: number, rotate: number, posx = 550, posy = 300) => {
+    addElectroItem = (id: number | null, adrestype: AdresType, adres: string, adreslocation: AdresLocation, labelfontsize: number, scale: number, rotate: number, posx = this.paper.offsetWidth/2, posy = this.paper.offsetHeight/2) => {
         if (id != null) {
             let element = this.sitplan.addElementFromElectroItem(id, this.sitplan.activePage, posx, posy, 
                                                       adrestype, adres, adreslocation, labelfontsize,
@@ -879,6 +893,29 @@ class SituationPlanView {
     attachEditButton(elem: HTMLElement) {
         this.event_manager.addEventListener(elem, 'click', this.editSelectedBox );
     }
+
+
+    /**
+     * Verwijdert alle elementen van de pagina met het gegeven nummer.
+     * 
+     * @param page - Het nummer van de pagina die leeg gemaakt moet worden.
+     */
+    wipePage(page: number) {
+        for (let i=0; i<this.sitplan.elements.length; i++) {
+            let element = this.sitplan.elements[i];
+            if (element.page == this.sitplan.activePage) {
+                let boxref = element.boxref;
+                if (boxref != null) {
+                    this.selectBox(boxref);
+                    this.deleteSelectedBox();
+                    this.wipePage(page); // Need to call again to avoid loop going in error as length changes
+                    return;
+                }
+            }
+        }    
+    }
+
+    
 
     /**
      * Maakt de knoppen in de ribbon aan om onder andere pagina's te selecteren, elementen te laden of verwijderen en pagina's te zoomen.
@@ -1006,8 +1043,15 @@ class SituationPlanView {
             this.contextMenu.hide();
             const userConfirmation = confirm('Pagina '+this.sitplan.activePage+' volledig verwijderen?'); 
             if (userConfirmation) {
-                this.sitplan.numPages--;
-                this.selectPage(Math.min(this.sitplan.activePage,this.sitplan.numPages));
+                this.wipePage(this.sitplan.activePage);
+                //set page of all sitplan.elements with page>page one lower
+                this.sitplan.elements.forEach(element => {
+                    if (element.page > this.sitplan.activePage) {
+                        element.page--;
+                    }
+                });
+                if (this.sitplan.numPages>1) this.sitplan.numPages--;
+                this.selectPage(Math.min(this.sitplan.activePage,this.sitplan.numPages))
             }
         };
 

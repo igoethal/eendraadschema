@@ -2425,7 +2425,8 @@ var SituationPlan = /** @class */ (function () {
                         minx = Math.min(minx, element.posx - boundingbox.width / 2);
                         miny = Math.min(miny, element.posy - boundingbox.height / 2);
                     }
-                    svgstr += "<text x=\"".concat(element.labelposx, "\" y=\"").concat(element.labelposy, "\" font-size=\"").concat(fontsize, "\" fill=\"black\" text-anchor=\"middle\" dominant-baseline=\"middle\">").concat(element.getAdres(), "</text>");
+                    var str = element.getAdres();
+                    svgstr += "<text x=\"".concat(element.labelposx, "\" y=\"").concat(element.labelposy, "\" font-size=\"").concat(fontsize, "\" fill=\"black\" text-anchor=\"middle\" dominant-baseline=\"middle\">").concat(htmlspecialchars(str), "</text>");
                 }
             }
             svgstr = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"".concat(maxx - minx, "px\" height=\"").concat(maxy - miny, "px\" viewBox=\"").concat(minx, " ").concat(miny, " ").concat(maxx - minx, " ").concat(maxy - miny, "\">").concat(svgstr, "</svg>");
@@ -2699,6 +2700,22 @@ var SituationPlanElement = /** @class */ (function () {
         }
     };
     /**
+     * Scalet het selecteerde element naar het papier als dat nodig is
+     *
+     * @param {number} maxx - Maximale breedte van het canvas
+     * @param {number} maxy - Maximale hoogte van het canvas
+     */
+    SituationPlanElement.prototype.scaleSelectedBoxToPaperIfNeeded = function (maxx, maxy, defaultscale) {
+        if (defaultscale === void 0) { defaultscale = 1; }
+        //get the width and hight of the sitplanelement
+        var width = this.sizex;
+        var height = this.sizey;
+        //calculate the maximum allowed scaling for a canvas of 550x300
+        var maxScale = Math.min(defaultscale, maxx / width, maxy / height);
+        //scale the element to the maximum allowed scaling
+        this.scale = Math.floor(maxScale * 10000) / 10000;
+    };
+    /**
      * Leest de inhoud van een situatieplanelement uit een image bestand
      * Enkel image bestanden ondersteund door de browser worden ondersteund
      *
@@ -2943,8 +2960,8 @@ var SituationPlanView = /** @class */ (function () {
          * @param rotate - De rotatie van het ElectroItem.
          */
         this.addElectroItem = function (id, adrestype, adres, adreslocation, labelfontsize, scale, rotate, posx, posy) {
-            if (posx === void 0) { posx = 550; }
-            if (posy === void 0) { posy = 300; }
+            if (posx === void 0) { posx = _this.paper.offsetWidth / 2; }
+            if (posy === void 0) { posy = _this.paper.offsetHeight / 2; }
             if (id != null) {
                 var element = _this.sitplan.addElementFromElectroItem(id, _this.sitplan.activePage, posx, posy, adrestype, adres, adreslocation, labelfontsize, scale, rotate);
                 if (element != null) {
@@ -3094,7 +3111,7 @@ var SituationPlanView = /** @class */ (function () {
         // Boxlabel aanmaken op de DOM voor de tekst bij het symbool
         var boxlabel = document.createElement('div');
         boxlabel.className = "boxlabel";
-        boxlabel.innerHTML = element.getAdres(); // is deze nodig? Wellicht reeds onderdeel van updateContent
+        boxlabel.innerHTML = htmlspecialchars(element.getAdres()); // is deze nodig? Wellicht reeds onderdeel van updateContent
         element.boxlabelref = boxlabel;
         // Content updaten en toevoegen aan de DOM
         this.updateBoxContent(element); //content moet eerst updated worden om te weten hoe groot de box is
@@ -3141,7 +3158,7 @@ var SituationPlanView = /** @class */ (function () {
                 if (sitPlanElement.labelfontsize != null)
                     boxlabel.style.fontSize = String(sitPlanElement.labelfontsize) + 'px';
                 if (adres != null)
-                    boxlabel.innerHTML = adres;
+                    boxlabel.innerHTML = htmlspecialchars(adres);
                 else
                     boxlabel.innerHTML = '';
             }
@@ -3605,15 +3622,24 @@ var SituationPlanView = /** @class */ (function () {
         var _this = this;
         this.event_manager.addEventListener(elem, 'click', function () { _this.contextMenu.hide(); fileinput.click(); });
         this.event_manager.addEventListener(fileinput, 'change', function (event) {
-            var element = _this.sitplan.addElementFromFile(event, _this.sitplan.activePage, 550, 300, (function () {
+            var element = _this.sitplan.addElementFromFile(event, _this.sitplan.activePage, _this.paper.offsetWidth / 2, _this.paper.offsetHeight / 2, (function () {
                 _this.syncToSitPlan();
                 _this.clearSelection();
                 element.needsViewUpdate = true; // for an external SVG this is needed, for an electroItem it is automatically set (see next function)
+                var lastscale = element.scale;
+                element.scaleSelectedBoxToPaperIfNeeded(_this.paper.offsetWidth * 0.995, _this.paper.offsetHeight * 0.995, _this.sitplan.defaults.scale);
                 _this.redraw();
                 _this.selectBox(element.boxref); // We moeten dit na redraw doen anders bestaat de box mogelijk nog niet
                 _this.bringToFront();
                 undostruct.store();
                 fileinput.value = ''; // Zorgt ervoor dat hetzelfde bestand twee keer kan worden gekozen en dit nog steeds een change triggert
+                if (element.scale != lastscale) {
+                    //Use the built in help top to display a text that the image was scaled
+                    var helperTip = new HelperTip(appDocStorage);
+                    helperTip.show('sitplan.scaledImageToFit', '<h3>Mededeling</h3>' +
+                        '<p>Deze afbeelding werd automatisch verkleind om binnen de tekenzone te blijven.</p>' +
+                        '<p>Kies "Bewerk" in het menu om de schaalfactor verder aan te passen indien gewenst.</p>', true);
+                }
             }).bind(_this));
         });
     };
@@ -3638,6 +3664,25 @@ var SituationPlanView = /** @class */ (function () {
      */
     SituationPlanView.prototype.attachEditButton = function (elem) {
         this.event_manager.addEventListener(elem, 'click', this.editSelectedBox);
+    };
+    /**
+     * Verwijdert alle elementen van de pagina met het gegeven nummer.
+     *
+     * @param page - Het nummer van de pagina die leeg gemaakt moet worden.
+     */
+    SituationPlanView.prototype.wipePage = function (page) {
+        for (var i = 0; i < this.sitplan.elements.length; i++) {
+            var element = this.sitplan.elements[i];
+            if (element.page == this.sitplan.activePage) {
+                var boxref = element.boxref;
+                if (boxref != null) {
+                    this.selectBox(boxref);
+                    this.deleteSelectedBox();
+                    this.wipePage(page); // Need to call again to avoid loop going in error as length changes
+                    return;
+                }
+            }
+        }
     };
     /**
      * Maakt de knoppen in de ribbon aan om onder andere pagina's te selecteren, elementen te laden of verwijderen en pagina's te zoomen.
@@ -3685,7 +3730,15 @@ var SituationPlanView = /** @class */ (function () {
             _this.contextMenu.hide();
             var userConfirmation = confirm('Pagina ' + _this.sitplan.activePage + ' volledig verwijderen?');
             if (userConfirmation) {
-                _this.sitplan.numPages--;
+                _this.wipePage(_this.sitplan.activePage);
+                //set page of all sitplan.elements with page>page one lower
+                _this.sitplan.elements.forEach(function (element) {
+                    if (element.page > _this.sitplan.activePage) {
+                        element.page--;
+                    }
+                });
+                if (_this.sitplan.numPages > 1)
+                    _this.sitplan.numPages--;
                 _this.selectPage(Math.min(_this.sitplan.activePage, _this.sitplan.numPages));
             }
         };
@@ -3953,13 +4006,14 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK) {
             return;
         }
         switch (selectAdresType.value) {
-            case 'auto':
-                adresInput.value = (element != null ? element.getReadableAdres() : '');
-                adresInput.disabled = true;
-                break;
             case 'manueel':
                 adresInput.value = (element != null ? adresInput.value : '');
                 adresInput.disabled = false;
+                break;
+            case 'auto':
+            default:
+                adresInput.value = (element != null ? element.getReadableAdres() : '');
+                adresInput.disabled = true;
                 break;
         }
     }
@@ -4073,7 +4127,14 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK) {
      * Eventhandlers, OK en Cancel knoppen
      */
     okButton.onclick = function () {
+        function isNumeric(value) {
+            return /^-?\d+(\.\d+)?$/.test(value);
+        }
         var returnId = (textInput.value.trim() == '' ? null : Number(textInput.value));
+        if (!(isNumeric(scaleInput.value)))
+            scaleInput.value = String(structure.sitplan.defaults.scale * 100);
+        if (!(isNumeric(rotationInput.value)))
+            rotationInput.value = String(0);
         if (setDefaultCheckbox.checked) {
             if ((sitplanElement == null) || ((sitplanElement != null) && (sitplanElement.getElectroItemId() != null)))
                 structure.sitplan.defaults.fontsize = Number(fontSizeInput.value);
@@ -7358,6 +7419,11 @@ var Lichtpunt = /** @class */ (function (_super) {
         this.props.is_halfwaterdicht = this.getLegacyKey(mykeys, 20);
         this.props.heeft_ingebouwde_schakelaar = this.getLegacyKey(mykeys, 21);
     };
+    Lichtpunt.prototype.overrideKeys = function () {
+        if ((this.props.type_lamp == null) && (this.props.type_lamp == "")) {
+            this.props.type_lamp = "standaard";
+        }
+    };
     Lichtpunt.prototype.resetProps = function () {
         this.clearProps();
         this.props.type = "Lichtpunt";
@@ -7371,6 +7437,7 @@ var Lichtpunt = /** @class */ (function (_super) {
         this.props.heeft_ingebouwde_schakelaar = false;
     };
     Lichtpunt.prototype.toHTML = function (mode) {
+        this.overrideKeys();
         var output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml()
             + "Type: " + this.selectPropToHTML('type_lamp', ["standaard", "TL", "spot", "led" /*, "Spot", "Led", "Signalisatielamp" */]) + ", ";
@@ -7392,7 +7459,7 @@ var Lichtpunt = /** @class */ (function (_super) {
      *          De waarde van clipleft wordt kleiner gezet voor standaardlampen omdat die tekening iets meer naar links ligt.
      */
     Lichtpunt.prototype.getSitPlanBoundaries = function () {
-        var clipleft;
+        var clipleft = 0;
         var addright = 0;
         var cliptop = 0;
         var addbottom = 0;
@@ -7411,6 +7478,7 @@ var Lichtpunt = /** @class */ (function (_super) {
                 clipleft = 17;
                 break;
             case "standaard":
+            default:
                 clipleft = 10;
                 break;
         }
@@ -7593,6 +7661,8 @@ var Lichtpunt = /** @class */ (function (_super) {
                             + '<line x1="' + (noodxpos - 5.6) + '" y1="' + (noodypos - 5.6) + '" x2="' + (noodxpos + 5.6) + '" y2="' + (noodypos + 5.6) + '" style="stroke:black;fill:black" />'
                             + '<line x1="' + (noodxpos + 5.6) + '" y1="' + (noodypos - 5.6) + '" x2="' + (noodxpos - 5.6) + '" y2="' + (noodypos + 5.6) + '" style="stroke:black;fill:black" />';
                         break;
+                    default:
+                    //Do nothing
                 }
                 // Verdere uitlijning en adres onderaan
                 mySVG.xright = 90;
@@ -7697,6 +7767,8 @@ var Media = /** @class */ (function (_super) {
                     shifty = 5;
                     mySVG.data += '<text x="36" y="12" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">x' + htmlspecialchars(this.props.aantal) + '</text>';
                     break;
+                default:
+                //Do nothing
             }
         }
         mySVG.xleft = 1; // foresee at least some space for the conductor
@@ -7743,6 +7815,8 @@ var Media = /** @class */ (function (_super) {
                 addright = -5;
                 cliptop = 5;
                 addbottom = -5;
+                break;
+            default:
                 break;
         }
         return ({ clipleft: clipleft, addright: addright, cliptop: cliptop, addbottom: addbottom });

@@ -59,6 +59,7 @@ function printPDF(svg, print_table, properties, pages=[1], filename="eendraadsch
             const png = canvas.toDataURL('image/png');
             callback(png,scale);
             URL.revokeObjectURL(url);
+            canvas.remove(); // remove the canvas element when we are done with it
         };
         img.src = url;
     }

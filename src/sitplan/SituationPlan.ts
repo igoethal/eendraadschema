@@ -245,7 +245,8 @@ class SituationPlan {
                         miny = Math.min(miny, element.posy - boundingbox.height/2);
                     }
 
-                    svgstr += `<text x="${element.labelposx}" y="${element.labelposy}" font-size="${fontsize}" fill="black" text-anchor="middle" dominant-baseline="middle">${element.getAdres()}</text>`
+                    let str = element.getAdres();
+                    svgstr += `<text x="${element.labelposx}" y="${element.labelposy}" font-size="${fontsize}" fill="black" text-anchor="middle" dominant-baseline="middle">${htmlspecialchars(str)}</text>`
                 }
             }
 

@@ -229,13 +229,14 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanE
             return;
         }
         switch (selectAdresType.value) {
-            case 'auto':
-                adresInput.value = (element != null ? element.getReadableAdres() : ''); 
-                adresInput.disabled = true;
-                break;
             case 'manueel':
                 adresInput.value = (element != null ? adresInput.value : '');
                 adresInput.disabled = false;
+                break;
+            case 'auto':
+            default:
+                adresInput.value = (element != null ? element.getReadableAdres() : ''); 
+                adresInput.disabled = true;
                 break;
         }
     }
@@ -421,13 +422,20 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanE
      */
 
     okButton.onclick = () => {
+        function isNumeric(value) {
+            return /^-?\d+(\.\d+)?$/.test(value);
+        }
         let returnId = (textInput.value.trim() == '' ? null : Number(textInput.value));
+        if (!(isNumeric(scaleInput.value))) scaleInput.value = String(structure.sitplan.defaults.scale*100);
+        if (!(isNumeric(rotationInput.value))) rotationInput.value = String(0);
+        
         if (setDefaultCheckbox.checked) {
             if ( (sitplanElement == null) || ( (sitplanElement != null) && (sitplanElement.getElectroItemId() != null) ) )
                 structure.sitplan.defaults.fontsize = Number(fontSizeInput.value);
             structure.sitplan.defaults.scale = Number(scaleInput.value)/100;
         }
         closePopup(); // We close the popup first to avoid that an error somewhere leaves it open
+
         callbackOK(returnId, selectAdresType.value, adresInput.value, selectAdresLocation.value, Number(fontSizeInput.value), Number(scaleInput.value)/100, Number(rotationInput.value));
     };
 

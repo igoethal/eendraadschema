@@ -54,6 +54,8 @@ class Media extends Electro_Item {
                     shifty = 5; 
                     mySVG.data += '<text x="36" y="12" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">x' + htmlspecialchars(this.props.aantal) + '</text>'
                     break;
+                default:
+                    //Do nothing
             }
             
         }
@@ -105,6 +107,8 @@ class Media extends Electro_Item {
                 addright = -5;
                 cliptop = 5;
                 addbottom = -5;
+                break;
+            default:
                 break;
         }
         return({clipleft: clipleft, addright: addright, cliptop: cliptop, addbottom: addbottom});

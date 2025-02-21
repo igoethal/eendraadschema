@@ -11,7 +11,13 @@ class Lichtpunt extends Electro_Item {
         this.props.is_wandlamp                 = this.getLegacyKey(mykeys,19);
         this.props.is_halfwaterdicht           = this.getLegacyKey(mykeys,20);
         this.props.heeft_ingebouwde_schakelaar = this.getLegacyKey(mykeys,21);
-    }    
+    }   
+    
+    overrideKeys() {
+        if ( ( this.props.type_lamp == null ) && (this.props.type_lamp == "") ) {
+            this.props.type_lamp = "standaard";
+        }
+    }
 
     resetProps() {
         this.clearProps();
@@ -27,6 +33,7 @@ class Lichtpunt extends Electro_Item {
     }
 
     toHTML(mode: string) {
+        this.overrideKeys();
         let output = this.toHTMLHeader(mode);
 
         output += "&nbsp;" + this.nrToHtml() 
@@ -53,7 +60,7 @@ class Lichtpunt extends Electro_Item {
  *          De waarde van clipleft wordt kleiner gezet voor standaardlampen omdat die tekening iets meer naar links ligt.
  */
     getSitPlanBoundaries() {
-        let clipleft;
+        let clipleft = 0;
         let addright = 0;
         let cliptop = 0;
         let addbottom = 0;
@@ -72,6 +79,7 @@ class Lichtpunt extends Electro_Item {
                 clipleft = 17;
                 break;
             case "standaard":
+            default:
                 clipleft = 10;
                 break;
         }
@@ -263,7 +271,9 @@ class Lichtpunt extends Electro_Item {
                                    +  '<circle cx="' + noodxpos + '" cy="' + noodypos + '" r="2.5" style="stroke:black;fill:black" />'
                                    +  '<line x1="' + (noodxpos-5.6) + '" y1="' + (noodypos-5.6) + '" x2="' + (noodxpos+5.6) + '" y2="' + (noodypos+5.6) + '" style="stroke:black;fill:black" />'
                                    +  '<line x1="' + (noodxpos+5.6) + '" y1="' + (noodypos-5.6) + '" x2="' + (noodxpos-5.6) + '" y2="' + (noodypos+5.6) + '" style="stroke:black;fill:black" />';
-                      break;
+                        break;
+                    default:
+                        //Do nothing
                 }
 
                 // Verdere uitlijning en adres onderaan

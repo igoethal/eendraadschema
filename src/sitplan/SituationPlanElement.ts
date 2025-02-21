@@ -322,6 +322,22 @@ class SituationPlanElement {
     }
 
     /**
+     * Scalet het selecteerde element naar het papier als dat nodig is
+     * 
+     * @param {number} maxx - Maximale breedte van het canvas
+     * @param {number} maxy - Maximale hoogte van het canvas
+     */
+    scaleSelectedBoxToPaperIfNeeded(maxx: number,maxy: number,defaultscale: number = 1) {
+        //get the width and hight of the sitplanelement
+        const width = this.sizex;
+        const height = this.sizey;
+        //calculate the maximum allowed scaling for a canvas of 550x300
+        const maxScale = Math.min(defaultscale, maxx / width, maxy / height);
+        //scale the element to the maximum allowed scaling
+        this.scale = Math.floor(maxScale*10000)/10000;
+    }
+
+    /**
      * Leest de inhoud van een situatieplanelement uit een image bestand
      * Enkel image bestanden ondersteund door de browser worden ondersteund
      * 
