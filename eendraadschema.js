@@ -2960,8 +2960,13 @@ var SituationPlanView = /** @class */ (function () {
          * @param rotate - De rotatie van het ElectroItem.
          */
         this.addElectroItem = function (id, adrestype, adres, adreslocation, labelfontsize, scale, rotate, posx, posy) {
-            if (posx === void 0) { posx = _this.paper.offsetWidth / 2; }
-            if (posy === void 0) { posy = _this.paper.offsetHeight / 2; }
+            if (posx === void 0) { posx = null; }
+            if (posy === void 0) { posy = null; }
+            var paperPos = _this.canvasPosToPaperPos(50, 50);
+            if (posx == null)
+                posx = paperPos.x;
+            if (posy == null)
+                posy = paperPos.y;
             if (id != null) {
                 var element = _this.sitplan.addElementFromElectroItem(id, _this.sitplan.activePage, posx, posy, adrestype, adres, adreslocation, labelfontsize, scale, rotate);
                 if (element != null) {
@@ -2980,7 +2985,7 @@ var SituationPlanView = /** @class */ (function () {
         /**
          * Toont een popup met de eigenschappen van het geselecteerde element en maakt het mogelijk om deze te bewerken.
          */
-        this.editSelectedBox = function () {
+        this.editSelectedBox = function (cancelCallback) {
             _this.contextMenu.hide();
             _this.unattachArrowKeys();
             if (_this.selectedBox) {
@@ -2998,7 +3003,7 @@ var SituationPlanView = /** @class */ (function () {
                     _this.updateBoxContent(sitPlanElement_1); //content needs to be updated first to know the size of the box
                     _this.updateSymbolAndLabelPosition(sitPlanElement_1);
                     undostruct.store();
-                });
+                }, cancelCallback);
             }
             _this.attachArrowKeys();
         };
@@ -3015,6 +3020,25 @@ var SituationPlanView = /** @class */ (function () {
         // Voegt event handlers toe voor de pijltjestoesten
         this.attachArrowKeys();
     }
+    /**
+     * Converteert een punt van de coöordinaat van het zichtbare deel van het canvas (scherm-coordinaten die starten links boven het canvas)
+     * naar een coördinaat op het papier.
+     *
+     * De coördinatentransformatie steunt op het volgende
+     *   canvasx = paperx * zoomfactor - canvas.scrollLeft  + paperPadding
+     *   canvasy = papery * zoomfactor  - canvas.scrollTop + paperPadding
+     *
+     * @param {number} canvasx - De x-co ordinaat in het canvas.
+     * @param {number} canvasy - De y-co ordinaat in het canvas.
+     * @returns {Object} Object met de x-coördinaat en y-coördinaat op het paper.
+     */
+    SituationPlanView.prototype.canvasPosToPaperPos = function (canvasx, canvasy) {
+        var paperPadding = parseFloat(getComputedStyle(this.paper).getPropertyValue('--paperPadding'));
+        return {
+            x: (canvasx + this.canvas.scrollLeft - paperPadding) / this.zoomfactor,
+            y: (canvasy + this.canvas.scrollTop - paperPadding) / this.zoomfactor
+        };
+    };
     /**
      * Maakt deze instance ongedaan en verwijderd alle door deze instance aangemaakte elementen uit de DOM.
      *
@@ -3153,17 +3177,16 @@ var SituationPlanView = /** @class */ (function () {
                 box.innerHTML = svg;
             else
                 box.innerHTML = '';
-            if (boxlabel != null) {
-                var adres = sitPlanElement.getAdres();
-                if (sitPlanElement.labelfontsize != null)
-                    boxlabel.style.fontSize = String(sitPlanElement.labelfontsize) + 'px';
-                if (adres != null)
-                    boxlabel.innerHTML = htmlspecialchars(adres);
-                else
-                    boxlabel.innerHTML = '';
-            }
         }
         ;
+        if (boxlabel != null) {
+            var adres = sitPlanElement.getAdres();
+            if (sitPlanElement.labelfontsize != null)
+                boxlabel.style.fontSize = String(sitPlanElement.labelfontsize) + 'px';
+            var newadres = (adres != null ? htmlspecialchars(adres) : '');
+            if (newadres != boxlabel.innerHTML)
+                boxlabel.innerHTML = newadres;
+        }
     };
     /**
      * Berekent de positie van het label van een situationplanelement in functie vna de grootte van het situationplanelement.
@@ -3653,7 +3676,7 @@ var SituationPlanView = /** @class */ (function () {
         this.event_manager.addEventListener(elem, 'click', function () {
             _this.contextMenu.hide();
             _this.unattachArrowKeys();
-            SituationPlanView_ElementPropertiesPopup(null, _this.addElectroItem);
+            SituationPlanView_ElementPropertiesPopup(null, _this.addElectroItem.bind(_this));
             _this.attachArrowKeys();
         });
     };
@@ -3812,8 +3835,9 @@ function showSituationPlanPage() {
  *                                              Indien null fungeert deze functie als Add in plaats van Edit.
  * @param {function} callbackOK Een referentie naar de functie die moet worden uitgevoerd als op OK wordt geklikt.
  */
-function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK) {
+function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK, callbackCancel) {
     // Interne variabelen voor alle subfuncties                                    
+    if (callbackCancel === void 0) { callbackCancel = function () { }; }
     var adressen = new ElectroItemZoeker();
     var kringnamen = adressen.getUniqueKringnaam();
     /**
@@ -3964,6 +3988,7 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK) {
         adressen.reCalculate();
         kringnamen = adressen.getUniqueKringnaam();
         IdFieldChanged();
+        structure.sitplanview.redraw();
     }
     /**
      * Toon het type verbruiker van het gekozen electro-item
@@ -4131,7 +4156,7 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK) {
             return /^-?\d+(\.\d+)?$/.test(value);
         }
         var returnId = (textInput.value.trim() == '' ? null : Number(textInput.value));
-        if (!(isNumeric(scaleInput.value)))
+        if (!(isNumeric(scaleInput.value)) || (Number(scaleInput.value) <= 0))
             scaleInput.value = String(structure.sitplan.defaults.scale * 100);
         if (!(isNumeric(rotationInput.value)))
             rotationInput.value = String(0);
@@ -4145,6 +4170,7 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK) {
     };
     cancelButton.onclick = function () {
         closePopup();
+        callbackCancel();
     };
     /*
      * Het volledige formulier aan de body toevoegen en tonen
@@ -10391,6 +10417,11 @@ var session = new Session();
 var structure;
 var undostruct = new undoRedo(100);
 var appDocStorage = new MultiLevelStorage('appDocStorage', {});
+// Configure the app-zone in the HTML
+document.getElementById('svgdefs').innerHTML =
+    '<pattern id="VerticalStripe" x="5" y="0" width="5" height="10" patternUnits="userSpaceOnUse" >' +
+        '<line x1="0" y1="0" x2="0" y2="10" stroke="black" />' +
+        '</pattern>';
 // Build the menu
 var menuItems;
 menuItems = [

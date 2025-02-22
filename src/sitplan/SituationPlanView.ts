@@ -14,7 +14,8 @@ class SituationPlanView {
     */
     private canvas: HTMLElement = null;
     private paper: HTMLElement = null;
-    private sideBar: SituationPlanView_SideBar = new SituationPlanView_SideBar(document.getElementById('sidebar'));
+
+    public sideBar: SituationPlanView_SideBar = new SituationPlanView_SideBar(document.getElementById('sidebar'));
 
     public  contextMenu: ContextMenu = null;
     
@@ -44,6 +45,27 @@ class SituationPlanView {
 
         // Voegt event handlers toe voor de pijltjestoesten
         this.attachArrowKeys();
+    }
+
+    /**
+     * Converteert een punt van de coöordinaat van het zichtbare deel van het canvas (scherm-coordinaten die starten links boven het canvas)
+     * naar een coördinaat op het papier.
+     * 
+     * De coördinatentransformatie steunt op het volgende
+     *   canvasx = paperx * zoomfactor - canvas.scrollLeft  + paperPadding
+     *   canvasy = papery * zoomfactor  - canvas.scrollTop + paperPadding
+     * 
+     * @param {number} canvasx - De x-co ordinaat in het canvas.
+     * @param {number} canvasy - De y-co ordinaat in het canvas.
+     * @returns {Object} Object met de x-coördinaat en y-coördinaat op het paper.
+     */
+    canvasPosToPaperPos(canvasx: number, canvasy: number) {
+        const paperPadding = parseFloat(getComputedStyle(this.paper).getPropertyValue('--paperPadding'));
+
+        return {
+            x: (canvasx + this.canvas.scrollLeft - paperPadding) / this.zoomfactor,
+            y: (canvasy + this.canvas.scrollTop - paperPadding) / this.zoomfactor
+        };
     }
 
     /**
@@ -213,13 +235,14 @@ class SituationPlanView {
             sitPlanElement.needsViewUpdate = false;
 
             if (svg != null) box.innerHTML = svg; else box.innerHTML = '';
-
-            if (boxlabel != null) {
-                let adres = sitPlanElement.getAdres();
-                if (sitPlanElement.labelfontsize != null) boxlabel.style.fontSize = String(sitPlanElement.labelfontsize) + 'px';
-                if (adres != null) boxlabel.innerHTML = htmlspecialchars(adres); else boxlabel.innerHTML = '';
-            }
         };
+
+        if (boxlabel != null) {
+            let adres = sitPlanElement.getAdres();
+            if (sitPlanElement.labelfontsize != null) boxlabel.style.fontSize = String(sitPlanElement.labelfontsize) + 'px';
+            let newadres = (adres != null ? htmlspecialchars(adres) : '');
+            if (newadres != boxlabel.innerHTML) boxlabel.innerHTML = newadres;
+        }
     }
 
     /**
@@ -822,7 +845,13 @@ class SituationPlanView {
      * @param scale - De schaal van het ElectroItem.
      * @param rotate - De rotatie van het ElectroItem.
      */
-    addElectroItem = (id: number | null, adrestype: AdresType, adres: string, adreslocation: AdresLocation, labelfontsize: number, scale: number, rotate: number, posx = this.paper.offsetWidth/2, posy = this.paper.offsetHeight/2) => {
+    addElectroItem = (id: number | null, adrestype: AdresType, adres: string, adreslocation: AdresLocation, labelfontsize: number, scale: number, rotate: number, posx: number = null, posy: number = null) => {
+
+        let paperPos = this.canvasPosToPaperPos(50, 50);
+
+        if (posx == null) posx = paperPos.x;
+        if (posy == null) posy = paperPos.y;
+
         if (id != null) {
             let element = this.sitplan.addElementFromElectroItem(id, this.sitplan.activePage, posx, posy, 
                                                       adrestype, adres, adreslocation, labelfontsize,
@@ -849,17 +878,15 @@ class SituationPlanView {
         this.event_manager.addEventListener(elem, 'click', () => {
             this.contextMenu.hide();
             this.unattachArrowKeys();
-            SituationPlanView_ElementPropertiesPopup(null, this.addElectroItem);
+            SituationPlanView_ElementPropertiesPopup(null, this.addElectroItem.bind(this));
             this.attachArrowKeys();
         });
     }
 
-    
-
     /**
      * Toont een popup met de eigenschappen van het geselecteerde element en maakt het mogelijk om deze te bewerken.
      */
-    editSelectedBox = () => {
+    editSelectedBox = (cancelCallback?: () => void) => {
         this.contextMenu.hide();
         this.unattachArrowKeys();
         if (this.selectedBox) {
@@ -879,7 +906,7 @@ class SituationPlanView {
                     this.updateBoxContent(sitPlanElement); //content needs to be updated first to know the size of the box
                     this.updateSymbolAndLabelPosition(sitPlanElement);
                     undostruct.store();
-                }
+                }, cancelCallback
             );
         }
         this.attachArrowKeys();

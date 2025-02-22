@@ -414,6 +414,13 @@ var undostruct: undoRedo = new undoRedo(100);
 
 var appDocStorage = new MultiLevelStorage<any>('appDocStorage', {});
 
+// Configure the app-zone in the HTML
+
+document.getElementById('svgdefs').innerHTML = 
+    '<pattern id="VerticalStripe" x="5" y="0" width="5" height="10" patternUnits="userSpaceOnUse" >' +
+    '<line x1="0" y1="0" x2="0" y2="10" stroke="black" />' +
+    '</pattern>';
+
 // Build the menu
 
 let menuItems: MenuItem[]

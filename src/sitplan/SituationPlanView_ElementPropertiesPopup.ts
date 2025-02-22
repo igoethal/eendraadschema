@@ -31,7 +31,8 @@
 
 function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanElement, 
                          callbackOK: (id: number, adresType: string, adres: string, selectAdresLocation: string,
-                                      labelfontsize: number, scale: number, rotation: number) => void) {
+                                      labelfontsize: number, scale: number, rotation: number) => void,
+                         callbackCancel: () => void = () => {}) {
 
     // Interne variabelen voor alle subfuncties                                    
 
@@ -189,6 +190,8 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanE
         kringnamen = adressen.getUniqueKringnaam();
 
         IdFieldChanged();
+
+        structure.sitplanview.redraw();
     }  
 
     /**
@@ -426,7 +429,7 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanE
             return /^-?\d+(\.\d+)?$/.test(value);
         }
         let returnId = (textInput.value.trim() == '' ? null : Number(textInput.value));
-        if (!(isNumeric(scaleInput.value))) scaleInput.value = String(structure.sitplan.defaults.scale*100);
+        if (!(isNumeric(scaleInput.value)) || (Number(scaleInput.value) <= 0)) scaleInput.value = String(structure.sitplan.defaults.scale*100);
         if (!(isNumeric(rotationInput.value))) rotationInput.value = String(0);
         
         if (setDefaultCheckbox.checked) {
@@ -435,12 +438,12 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanE
             structure.sitplan.defaults.scale = Number(scaleInput.value)/100;
         }
         closePopup(); // We close the popup first to avoid that an error somewhere leaves it open
-
         callbackOK(returnId, selectAdresType.value, adresInput.value, selectAdresLocation.value, Number(fontSizeInput.value), Number(scaleInput.value)/100, Number(rotationInput.value));
     };
 
     cancelButton.onclick = () => {
         closePopup();
+        callbackCancel();
     };
 
     /*
