@@ -192,7 +192,7 @@ class SituationPlanView {
 
         // Boxlabel aanmaken op de DOM voor de tekst bij het symbool
         let boxlabel = document.createElement('div');
-        boxlabel.className = "boxlabel";
+        Object.assign(boxlabel, {id: element.id + '_label', className: "boxlabel", sitPlanElementRef: element});
         boxlabel.innerHTML = htmlspecialchars(element.getAdres()); // is deze nodig? Wellicht reeds onderdeel van updateContent
         element.boxlabelref = boxlabel;
 
@@ -204,7 +204,8 @@ class SituationPlanView {
         // Event handlers voor het bewegen met muis of touch
         box.addEventListener('mousedown', this.startDrag);
         box.addEventListener('touchstart', this.startDrag);
-        box.addEventListener('touchend', this.stopDrag);
+        boxlabel.addEventListener('mousedown', this.startDrag);
+        boxlabel.addEventListener('touchstart', this.startDrag);
         box.addEventListener('contextmenu', this.showContextMenu);
     }
 
@@ -517,10 +518,25 @@ class SituationPlanView {
     private startDrag = (event) => {
         this.contextMenu.hide();
 
+        if (event == null) return;
+
+        let box:HTMLElement = null;
+
+        //check if the classname is a box or a boxlabel
+        if (event.target.classList.contains('box')) {
+            box = event.target;
+        } else if (event.target.classList.contains('boxlabel')) {
+            let sitPlanElement = event.target.sitPlanElementRef;
+            if (sitPlanElement == null) return;
+            box = sitPlanElement.boxref;
+        };
+
+        if (box == null) return;
+
         event.stopPropagation();   // Voorkomt body klikgebeurtenis
         this.clearSelection();     // Wist bestaande selectie
-        this.selectBox(event.target); // Selecteert de box die we willen slepen
-        this.draggedBox = event.target; // Houdt de box die we aan het slepen zijn
+        this.selectBox(box); // Selecteert de box die we willen slepen
+        this.draggedBox = box; // Houdt de box die we aan het slepen zijn
 
         switch (event.type) {
             case 'mousedown':

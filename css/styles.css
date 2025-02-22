@@ -232,7 +232,7 @@ ul#minitabs a:hover {
   font-size: 11px;
   background-color: rgba(192, 192, 192, 0);
   border: 0px solid #000;
-  /* cursor: pointer; */
+  cursor: pointer;
   box-sizing: border-box; /* Include border in size calculation */
   transform: rotate(0deg);
   display: inline-block;
