@@ -196,7 +196,9 @@ ul#minitabs a:hover {
 .icon-image {
   width: 32px;
   height: 32px;
-  display: block;
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
   margin: 0 auto;
 }
 

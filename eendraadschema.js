@@ -2864,11 +2864,15 @@ var SituationPlanView = /** @class */ (function () {
          * @param event - De gebeurtenis die de sleepactie activeert (muisklik of touchstart).
          */
         this.startDrag = function (event) {
+            //Indien de middelste knop werd gebruikt doen we niets
+            if (event.button == 1)
+                return;
+            //Verbergen van de contextmenu, en enkele controles
             _this.contextMenu.hide();
             if (event == null)
                 return;
             var box = null;
-            //check if the classname is a box or a boxlabel
+            //Juiste box identificeren. Hou er rekening mee dat ook op een boxlabel kan geklikt zijn
             if (event.target.classList.contains('box')) {
                 box = event.target;
             }
@@ -2881,9 +2885,14 @@ var SituationPlanView = /** @class */ (function () {
             ;
             if (box == null)
                 return;
+            //Nu gaan we de box selecteren. Dit moet zowel voor de linker als de rechter muisknop
             event.stopPropagation(); // Voorkomt body klikgebeurtenis
             _this.clearSelection(); // Wist bestaande selectie
             _this.selectBox(box); // Selecteert de box die we willen slepen
+            //Indien de rechter muisknop werd gebruikt gaan we niet verder
+            if (event.button == 2)
+                return;
+            //OK, het is een touch event of de linkse knop dus we gaan verder met slepen
             _this.draggedBox = box; // Houdt de box die we aan het slepen zijn
             switch (event.type) {
                 case 'mousedown':
@@ -3033,26 +3042,71 @@ var SituationPlanView = /** @class */ (function () {
         // Verwijder alle selecties wanneer we ergens anders klikken dan op een box
         this.event_manager.addEventListener(canvas, 'mousedown', function () { _this.contextMenu.hide(); _this.clearSelection(); });
         this.event_manager.addEventListener(canvas, 'touchstart', function () { _this.contextMenu.hide(); _this.clearSelection(); });
+        // Control wieltje om te zoomen
+        this.event_manager.addEventListener(canvas, 'wheel', function (event) {
+            if (!event.ctrlKey && !event.metaKey)
+                return;
+            event.preventDefault();
+            var zoom = -event.deltaY / 1000;
+            if (Math.abs(zoom) >= 0.01) {
+                var menuHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--menu-height'));
+                var ribbonHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ribbon-height'));
+                var sideBarWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sideBarWidth'));
+                var canvasx = event.clientX - sideBarWidth;
+                var canvasy = event.clientY - menuHeight - ribbonHeight;
+                _this.zoomIncrement(-event.deltaY / 2000, canvasx, canvasy);
+            }
+        }, { passive: false });
         // Voegt event handlers toe voor de pijltjestoesten
         this.attachArrowKeys();
     }
     /**
-     * Converteert een punt van de coöordinaat van het zichtbare deel van het canvas (scherm-coordinaten die starten links boven het canvas)
+     * Converteert een coördinaat van het zichtbare deel van het canvas (scherm-coordinaten die starten links boven het canvas)
      * naar een coördinaat op het papier.
      *
      * De coördinatentransformatie steunt op het volgende
-     *   canvasx = paperx * zoomfactor - canvas.scrollLeft  + paperPadding
+     *   canvasx = paperx * zoomfactor - canvas.scrollLeft + paperPadding
      *   canvasy = papery * zoomfactor  - canvas.scrollTop + paperPadding
      *
      * @param {number} canvasx - De x-co ordinaat in het canvas.
      * @param {number} canvasy - De y-co ordinaat in het canvas.
-     * @returns {Object} Object met de x-coördinaat en y-coördinaat op het paper.
+     * @returns {Object} Object {x,y} met de x-coördinaat en y-coördinaat op het paper.
      */
     SituationPlanView.prototype.canvasPosToPaperPos = function (canvasx, canvasy) {
         var paperPadding = parseFloat(getComputedStyle(this.paper).getPropertyValue('--paperPadding'));
         return {
             x: (canvasx + this.canvas.scrollLeft - paperPadding) / this.zoomfactor,
             y: (canvasy + this.canvas.scrollTop - paperPadding) / this.zoomfactor
+        };
+    };
+    /**
+     * Converteert een punt oöordinaat op het papier naar een coördinaat op het canvas (omgekeerde van hierboven).
+     *
+     * @param {number} paperx - De x-coördinaat op het paper.
+     * @param {number} papery - De y-coördinaat op het papier.
+     * @returns {Object} Object {x,y} met de x-coördinaat en y-coördinaat op het canvas.
+     */
+    SituationPlanView.prototype.paperPosToCanvasPos = function (paperx, papery) {
+        var paperPadding = parseFloat(getComputedStyle(this.paper).getPropertyValue('--paperPadding'));
+        return {
+            x: paperx * this.zoomfactor - this.canvas.scrollLeft + paperPadding,
+            y: papery * this.zoomfactor - this.canvas.scrollTop + paperPadding
+        };
+    };
+    /**
+     * Indien een gewenste coördinaat op zowel het canvas als het papier gegeven zijn, hoe moeten we dan scrollen?
+     *
+     * @param {number} canvasx - De x-co ordinaat in het canvas.
+     * @param {number} canvasy - De y-co ordinaat in het canvas.
+     * @param {number} paperx - De x-coördinaat op het paper.
+     * @param {number} papery - De y-coördinaat op het papier.
+     * @returns {Object} Object {x,y} met de gewenste scrollLeft en scrollTop.
+     */
+    SituationPlanView.prototype.canvasAndPaperPosToScrollPos = function (canvasx, canvasy, paperx, papery) {
+        var paperPadding = parseFloat(getComputedStyle(this.paper).getPropertyValue('--paperPadding'));
+        return {
+            x: paperx * this.zoomfactor - canvasx + paperPadding + 0.5,
+            y: papery * this.zoomfactor - canvasy + paperPadding + 0.5
         };
     };
     /**
@@ -3123,9 +3177,19 @@ var SituationPlanView = /** @class */ (function () {
      *   Een positieve waarde vergroot de zoom, terwijl een negatieve waarde de zoom verkleint.
      *   Standaard is deze waarde 0, wat betekent dat er geen aanpassing is.
      */
-    SituationPlanView.prototype.zoomIncrement = function (increment) {
+    SituationPlanView.prototype.zoomIncrement = function (increment, canvasx, canvasy) {
         if (increment === void 0) { increment = 0; }
-        this.setzoom(Math.min(SITPLANVIEW_ZOOMINTERVAL.MAX, Math.max(SITPLANVIEW_ZOOMINTERVAL.MIN, this.zoomfactor + increment)));
+        if (canvasx === void 0) { canvasx = this.canvas.offsetWidth / 2; }
+        if (canvasy === void 0) { canvasy = this.canvas.offsetHeight / 2; }
+        var menuHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--menu-height'));
+        var ribbonHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ribbon-height'));
+        var sideBarWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sideBarWidth'));
+        var paperPadding = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--paperPadding'));
+        var mousePosOnPaper = this.canvasPosToPaperPos(canvasx, canvasy);
+        this.setzoom(Math.min(SITPLANVIEW_ZOOMINTERVAL.MAX, Math.max(SITPLANVIEW_ZOOMINTERVAL.MIN, this.zoomfactor * (1 + increment))));
+        var scrollPos = this.canvasAndPaperPosToScrollPos(canvasx, canvasy, mousePosOnPaper.x, mousePosOnPaper.y);
+        this.canvas.scrollLeft = scrollPos.x;
+        this.canvas.scrollTop = scrollPos.y;
     };
     /**
      * Maakt een box en een label op de DOM of in een document-fragmentaan voor een element in het situatieplan.
@@ -3741,7 +3805,7 @@ var SituationPlanView = /** @class */ (function () {
         // -- Visuals om items te laden of verwijderen --
         outputleft += "\n            <span style=\"display: inline-block; width: 30px;\"></span>\n            <div class=\"icon\" id=\"button_Add\">\n                <span class=\"icon-image\" style=\"font-size:24px\">\u2795</span>\n                <span class=\"icon-text\">Uit bestand</span>\n            </div>\n            <div class=\"icon\" id=\"button_Add_electroItem\">\n                <span class=\"icon-image\" style=\"font-size:24px\">\u2795</span>\n                <span class=\"icon-text\">Uit schema</span>\n            </div>\n            <div class=\"icon\" id=\"button_Delete\">\n                <span class=\"icon-image\" style=\"font-size:24px\">\uD83D\uDDD1</span>\n                <span class=\"icon-text\">Verwijder</span>\n            </div>";
         // -- Visuals om items te bewerken --
-        outputleft += "\n            <span style=\"display: inline-block; width: 10px;\"></span>\n            <div class=\"icon\" id=\"button_edit\">\n                <span class=\"icon-image\" style=\"font-size:24px\">\uD83D\uDCDD</span>\n                <span class=\"icon-text\">Bewerk</span>\n            </div>";
+        outputleft += "\n            <span style=\"display: inline-block; width: 10px;\"></span>\n            <div class=\"icon\" id=\"button_edit\">\n                <span class=\"icon-image\" style=\"font-size:24px\">&#x2699;</span>\n                <span class=\"icon-text\">Bewerk</span>\n            </div>";
         // -- Visuals om naar achteren of voren te sturen --
         outputleft += "\n            <span style=\"display: inline-block; width: 10px;\"></span>\n            <div class=\"icon\" id=\"sendBack\">\n                <span class=\"icon-image\" style=\"font-size:24px\">\u2B07\u2B07</span>\n                <span class=\"icon-text\">Naar achter</span>\n            </div>\n            <div class=\"icon\" id=\"bringFront\">\n                <span class=\"icon-image\" style=\"font-size:24px\">\u2B06\u2B06</span>\n                <span class=\"icon-text\">Naar voor</span>\n            </div>";
         // -- Visuals om pagina te selecteren --
