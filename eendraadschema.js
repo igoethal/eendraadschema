@@ -3767,7 +3767,8 @@ var SituationPlanView = /** @class */ (function () {
      * @param elem - Het HTML-element dat bij een klik een bestaand element in het situatieplan bewerkt.
      */
     SituationPlanView.prototype.attachEditButton = function (elem) {
-        this.event_manager.addEventListener(elem, 'click', this.editSelectedBox);
+        var _this = this;
+        this.event_manager.addEventListener(elem, 'click', function () { _this.editSelectedBox(); });
     };
     /**
      * Verwijdert alle elementen van de pagina met het gegeven nummer.
@@ -9867,7 +9868,7 @@ var Hierarchical_List = /** @class */ (function () {
             return ("<tr>\n                        <td bgcolor=\"#8AB2E4\" onclick=\"HLCollapseExpand(".concat(this.data[ordinal].id, ")\" valign= \"top\">&#x229E;</td>\n                        <td width=\"100%\">").concat(this.data[ordinal].toHTML(structure.mode), "<br></td>\n                    </tr>"));
         }
         else {
-            return ("<tr>\n                       <td bgcolor=\"C0C0C0\" onclick=\"HLCollapseExpand(".concat(this.data[ordinal].id, ")\" valign= \"top\">&#x229E;</td>\n                       <td width=\"100%\">").concat(this.data[ordinal].toHTML(structure.mode), "<br>").concat(this.toHTML(this.id[ordinal]), "</td>\n                    </tr>"));
+            return ("<tr>\n                       <td bgcolor=\"C0C0C0\" onclick=\"HLCollapseExpand(".concat(this.data[ordinal].id, ")\" valign= \"top\">&#x229F;</td>\n                       <td width=\"100%\">").concat(this.data[ordinal].toHTML(structure.mode), "<br>").concat(this.toHTML(this.id[ordinal]), "</td>\n                    </tr>"));
         }
     };
     Hierarchical_List.prototype.updateHTMLinner = function (id) {

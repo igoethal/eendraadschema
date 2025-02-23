@@ -585,7 +585,7 @@ class Hierarchical_List {
                     </tr>`);
         } else {
             return(`<tr>
-                       <td bgcolor="C0C0C0" onclick="HLCollapseExpand(${this.data[ordinal].id})" valign= "top">&#x229E;</td>
+                       <td bgcolor="C0C0C0" onclick="HLCollapseExpand(${this.data[ordinal].id})" valign= "top">&#x229F;</td>
                        <td width="100%">${this.data[ordinal].toHTML(structure.mode)}<br>${this.toHTML(this.id[ordinal])}</td>
                     </tr>`);
         }

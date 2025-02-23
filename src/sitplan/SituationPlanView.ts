@@ -1000,7 +1000,7 @@ class SituationPlanView {
      * @param elem - Het HTML-element dat bij een klik een bestaand element in het situatieplan bewerkt.
      */
     attachEditButton(elem: HTMLElement) {
-        this.event_manager.addEventListener(elem, 'click', this.editSelectedBox );
+        this.event_manager.addEventListener(elem, 'click', () => {this.editSelectedBox()} );
     }
 
 
