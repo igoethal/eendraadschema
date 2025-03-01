@@ -2036,6 +2036,7 @@ var ElectroItemZoeker = /** @class */ (function () {
             'Domotica gestuurde verbruiker', 'Leiding', 'Splitsing', 'Verlenging',
             'Vrije ruimte', 'Meerdere verbruikers'];
         this.data = [];
+        this.borden = [];
         this.reCalculate();
     }
     /**
@@ -2045,6 +2046,16 @@ var ElectroItemZoeker = /** @class */ (function () {
      */
     ElectroItemZoeker.prototype.getData = function () {
         return this.data;
+    };
+    /**
+    * Geeft de lijst van alle Borden in het eendraadschema.
+    * @returns {Object[]} een lijst van objecten met de volgende structuur:
+    *                  {id: number, naam: string}
+    *
+    * Indien de originele naam null is of enkel uit spaties bestaat wordt als naam "Bord" meegegeven
+    */
+    ElectroItemZoeker.prototype.getBorden = function () {
+        return this.borden;
     };
     /**
      * Geeft een lijst van alle unieke kringnamen retour uit de lijst van ElectroItems.
@@ -2071,18 +2082,32 @@ var ElectroItemZoeker = /** @class */ (function () {
      * 2. Voor elke ElectroItem worden de kringnaam en het type bepaald.
      * 3. Als de kringnaam niet leeg is en het type niet voorkomt in de lijst van uitgesloten types, dan wordt de ElectroItem toegevoegd aan de lijst.
      * 4. De ElectroItem wordt toegevoegd met de volgende structuur: {id: number, kringnaam: string, adres: string, type: string}
+     *
+     * Er wordt eveneens een lijst van borden gemaakt.
      */
     ElectroItemZoeker.prototype.reCalculate = function () {
         this.data = [];
+        this.borden = [];
         for (var i = 0; i < structure.length; i++) {
             if (structure.active[i]) {
                 var id = structure.id[i];
-                var kringnaam = structure.findKringName(id).trim();
-                if (kringnaam != '') {
-                    var type = structure.data[i].getType();
-                    if ((type != null) && (this.excludedTypes.indexOf(type) === -1)) {
-                        var adres = structure.data[i].getReadableAdres();
-                        this.data.push({ id: id, kringnaam: kringnaam, adres: adres, type: type });
+                var electroItem = structure.data[i];
+                if (electroItem == null)
+                    continue;
+                var type = electroItem.getType();
+                if (type == 'Bord') {
+                    var myName = electroItem.props.naam;
+                    if ((myName == null) || (myName.trim() == ''))
+                        myName = 'Bord';
+                    this.borden.push({ id: id, naam: myName });
+                }
+                else {
+                    var kringnaam = structure.findKringName(id).trim();
+                    if (kringnaam != '') {
+                        if ((type != null) && (this.excludedTypes.indexOf(type) === -1)) {
+                            var adres = electroItem.getReadableAdres();
+                            this.data.push({ id: id, kringnaam: kringnaam, adres: adres, type: type });
+                        }
                     }
                 }
             }
@@ -2818,7 +2843,7 @@ var SituationPlanElement = /** @class */ (function () {
      *
      * TODO: functie verplaatsen naar Electro_Item
      */
-    SituationPlanElement.ROTATES_360_DEGREES_TYPES = new Set(['Contactdoos', 'Lichtpunt', 'Drukknop', 'Media', 'Schakelaars', 'Lichtcircuit']);
+    SituationPlanElement.ROTATES_360_DEGREES_TYPES = new Set(['Contactdoos', 'Lichtpunt', 'Drukknop', 'Media', 'Schakelaars', 'Lichtcircuit', 'Bord']);
     return SituationPlanElement;
 }());
 /**
@@ -4194,6 +4219,12 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK, ca
     initIdField();
     if (sitplanElement != null) { // Form werd aangeroepen om een reeds bestaand element te editeren
         if (sitplanElement.getElectroItemId() != null) { // Het gaat over een bestaand Electro-item
+            var electroItem = structure.getElectroItemById(sitplanElement.getElectroItemId());
+            if ((electroItem != null) && (electroItem.getType() == 'Bord')) {
+                selectKringContainer.style.display = 'none';
+                selectElectroItemContainer.style.display = 'none';
+                textContainer.style.display = 'none';
+            }
             selectAdresType.value = sitplanElement.getAdresType();
             adresInput.value = sitplanElement.getAdres();
             fontSizeInput.value = String(sitplanElement.labelfontsize);
@@ -4648,14 +4679,22 @@ var Electro_Item = /** @class */ (function (_super) {
     };
     // -- Get readable address of the Electro_Item, if it is not defined, ask the parent --
     Electro_Item.prototype.getReadableAdres = function () {
-        var kringname = structure.findKringName(this.id).trim();
-        var nr = this.getnr().trim();
-        if (kringname == "")
-            return nr;
-        else if (nr == "")
-            return kringname;
-        else
-            return kringname + "." + nr;
+        if (this.getType() == "Bord") {
+            var str = this.props.naam;
+            if (str == null)
+                str = "";
+            return str;
+        }
+        else {
+            var kringname = structure.findKringName(this.id).trim();
+            var nr = this.getnr().trim();
+            if (kringname == "")
+                return nr;
+            else if (nr == "")
+                return kringname;
+            else
+                return kringname + "." + nr;
+        }
     };
     // -- Display the number in the html tree view, but only if it is displayable
     Electro_Item.prototype.nrToHtml = function () {
@@ -4755,6 +4794,7 @@ var Electro_Item = /** @class */ (function (_super) {
         switch (this.getType()) {
             case 'Contactdoos':
             case 'Bel':
+            case 'Bord':
                 boundaries.clipleft = 0;
                 break;
         }
@@ -6079,8 +6119,37 @@ var Bord = /** @class */ (function (_super) {
             + "Geaard: " + this.checkboxPropToHTML('is_geaard');
         return (output);
     };
-    Bord.prototype.toSVG = function () {
+    Bord.prototype.toSitPlanSVG = function (mirrortext) {
+        if (mirrortext === void 0) { mirrortext = false; }
+        //let str = this.props.naam;
+        //if ((str == null) || (str.trim() == "")) {
+        //    str = '';
+        //}
+        var minheight = 60; //Math.max(60,svgTextWidth(htmlspecialchars(str),16,'') + 20); //15 padding
+        var shift = (minheight - 60) / 2;
+        var mySVG = new SVGelement();
+        mySVG.xleft = 0;
+        mySVG.xright = 41 - 10; // the 10 is added again by another routine
+        mySVG.yup = 0;
+        mySVG.ydown = minheight;
+        mySVG.data += "<rect y=\"5\" x=\"8\" height=\"".concat(minheight - 10, "\" width=\"24\" stroke=\"black\" stroke-width=\"1\" fill=\"none\" />");
+        mySVG.data += "<line y1=\"".concat(minheight / 2, "\" x1=\"0\" y2=\"").concat(minheight / 2, "\" x2=\"8\" stroke=\"black\" stroke-width=\"1\" />");
+        for (var i = 0; i < 5; i++) {
+            mySVG.data += "<line y1=\"".concat(10 + shift + i * 10, "\" x1=\"32\" y2=\"").concat(10 + shift + i * 10, "\" x2=\"40\" stroke=\"black\" stroke-width=\"1\" />");
+        }
+        /*mySVG.data += '<text x="' + (15) + '" ' + 'y="' + (minheight/2) + '" '
+                   +  `transform="${mirrortext ? `translate(${44},0) scale(-1,1) `: ''} rotate(90 18,${(minheight/2)})" `
+                   + 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="16"' + '>'
+                   + htmlspecialchars(str) + '</text>';*/
+        return mySVG;
+    };
+    Bord.prototype.toSVG = function (sitplan, mirrortext) {
+        if (sitplan === void 0) { sitplan = false; }
+        if (mirrortext === void 0) { mirrortext = false; }
         var mySVG; // = new SVGelement();
+        if (sitplan) {
+            return this.toSitPlanSVG(mirrortext);
+        }
         // Maak een tekening van alle kinderen
         mySVG = this.sourcelist.toSVG(this.id, "horizontal");
         if (mySVG.yup == 0)

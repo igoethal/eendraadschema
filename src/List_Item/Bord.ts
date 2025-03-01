@@ -32,8 +32,38 @@ class Bord extends Electro_Item {
         return(output);
     }
 
-    toSVG() {
+    toSitPlanSVG(mirrortext: boolean = false) {
+        //let str = this.props.naam;
+        //if ((str == null) || (str.trim() == "")) {
+        //    str = '';
+        //}
+        let minheight = 60; //Math.max(60,svgTextWidth(htmlspecialchars(str),16,'') + 20); //15 padding
+        let shift = (minheight-60)/2;
+
+        let mySVG:SVGelement = new SVGelement();
+        mySVG.xleft = 0;
+        mySVG.xright = 41 - 10; // the 10 is added again by another routine
+        mySVG.yup = 0;
+        mySVG.ydown = minheight;
+        mySVG.data += `<rect y="5" x="8" height="${minheight-10}" width="24" stroke="black" stroke-width="1" fill="none" />`;
+        mySVG.data += `<line y1="${minheight/2}" x1="0" y2="${minheight/2}" x2="8" stroke="black" stroke-width="1" />`;
+        for (let i=0; i<5; i++) {
+            mySVG.data += `<line y1="${10+shift+i*10}" x1="32" y2="${10+shift+i*10}" x2="40" stroke="black" stroke-width="1" />`;
+        }
+        /*mySVG.data += '<text x="' + (15) + '" ' + 'y="' + (minheight/2) + '" '
+                   +  `transform="${mirrortext ? `translate(${44},0) scale(-1,1) `: ''} rotate(90 18,${(minheight/2)})" `
+                   + 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="16"' + '>'
+                   + htmlspecialchars(str) + '</text>';*/
+
+        return mySVG;
+    }
+
+    toSVG(sitplan: boolean = false, mirrortext: boolean = false) {
         let mySVG:SVGelement; // = new SVGelement();
+
+        if (sitplan) {
+            return this.toSitPlanSVG(mirrortext);
+        }
 
         // Maak een tekening van alle kinderen
         mySVG = this.sourcelist.toSVG(this.id,"horizontal");

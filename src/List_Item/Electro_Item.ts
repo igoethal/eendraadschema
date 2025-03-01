@@ -211,12 +211,18 @@ class Electro_Item extends List_Item {
   // -- Get readable address of the Electro_Item, if it is not defined, ask the parent --
 
   getReadableAdres() {
-      let kringname:string = structure.findKringName(this.id).trim();
-      let nr:string = this.getnr().trim();
+      if (this.getType() == "Bord") {
+          let str = this.props.naam;
+          if (str == null) str = "";
+          return str;
+      } else {
+        let kringname:string = structure.findKringName(this.id).trim();
+        let nr:string = this.getnr().trim();
 
-      if (kringname == "") return nr;
-      else if (nr == "") return kringname
-      else return kringname + "." + nr;
+        if (kringname == "") return nr;
+        else if (nr == "") return kringname
+        else return kringname + "." + nr;
+      }
   }
 
   // -- Display the number in the html tree view, but only if it is displayable
@@ -320,7 +326,7 @@ class Electro_Item extends List_Item {
     let boundaries = this.getSitPlanBoundaries();
     
     switch (this.getType()) {
-      case 'Contactdoos': case 'Bel':
+      case 'Contactdoos': case 'Bel': case 'Bord':
         boundaries.clipleft = 0;
         break;
     }

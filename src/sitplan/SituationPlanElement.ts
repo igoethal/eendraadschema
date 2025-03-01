@@ -97,7 +97,7 @@ class SituationPlanElement {
      * TODO: functie verplaatsen naar Electro_Item
      */
 
-    private static readonly ROTATES_360_DEGREES_TYPES = new Set(['Contactdoos','Lichtpunt','Drukknop','Media','Schakelaars','Lichtcircuit']);
+    private static readonly ROTATES_360_DEGREES_TYPES = new Set(['Contactdoos','Lichtpunt','Drukknop','Media','Schakelaars','Lichtcircuit','Bord']);
 
     isEDSSymbolAndRotates360degrees(): boolean {
         if (this.isEendraadschemaSymbool()) {

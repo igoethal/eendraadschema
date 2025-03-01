@@ -13,6 +13,7 @@ class ElectroItemZoeker {
                              'Vrije ruimte','Meerdere verbruikers'];
 
     private data: {id: number, kringnaam: string, adres: string, type: string}[] = [];
+    private borden: {id: number, naam: string}[] = [];
 
     /**
      * Constructor van de ElectroItemZoeker.
@@ -32,6 +33,18 @@ class ElectroItemZoeker {
 
     getData() {
         return this.data;
+    }
+
+     /**
+     * Geeft de lijst van alle Borden in het eendraadschema.
+     * @returns {Object[]} een lijst van objecten met de volgende structuur:
+     *                  {id: number, naam: string}
+     * 
+     * Indien de originele naam null is of enkel uit spaties bestaat wordt als naam "Bord" meegegeven
+     */   
+
+    getBorden() {
+        return this.borden;
     }
 
     /**
@@ -63,19 +76,30 @@ class ElectroItemZoeker {
      * 2. Voor elke ElectroItem worden de kringnaam en het type bepaald.
      * 3. Als de kringnaam niet leeg is en het type niet voorkomt in de lijst van uitgesloten types, dan wordt de ElectroItem toegevoegd aan de lijst.
      * 4. De ElectroItem wordt toegevoegd met de volgende structuur: {id: number, kringnaam: string, adres: string, type: string}
+     * 
+     * Er wordt eveneens een lijst van borden gemaakt.
      */
 
     reCalculate() {
         this.data = [];
+        this.borden = [];
         for (let i = 0; i<structure.length; i++) {
             if (structure.active[i]) {
                 let id:number = structure.id[i];
-                let kringnaam:string = structure.findKringName(id).trim();
-                if (kringnaam != '') {
-                    let type:string = (structure.data[i] as Electro_Item).getType();
-                    if ( (type != null) && (this.excludedTypes.indexOf(type) === -1) ) {
-                        let adres:string = (structure.data[i] as Electro_Item).getReadableAdres();
-                        this.data.push({id: id, kringnaam: kringnaam, adres:adres, type: type});
+                let electroItem = structure.data[i] as Electro_Item;
+                if (electroItem == null) continue;
+                let type:string = electroItem.getType();
+                if (type == 'Bord') {
+                    let myName = electroItem.props.naam;
+                    if ( (myName == null) || (myName.trim() == '') ) myName = 'Bord';
+                    this.borden.push({id: id, naam: myName})
+                } else {
+                    let kringnaam:string = structure.findKringName(id).trim();
+                    if (kringnaam != '') {
+                        if ( (type != null) && (this.excludedTypes.indexOf(type) === -1) ) {
+                            let adres:string = electroItem.getReadableAdres();
+                            this.data.push({id: id, kringnaam: kringnaam, adres:adres, type: type});
+                        }
                     }
                 }
             }

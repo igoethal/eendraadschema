@@ -381,6 +381,12 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanE
 
     if (sitplanElement != null) { // Form werd aangeroepen om een reeds bestaand element te editeren
         if (sitplanElement.getElectroItemId() != null) { // Het gaat over een bestaand Electro-item
+            let electroItem = structure.getElectroItemById(sitplanElement.getElectroItemId());
+            if ( (electroItem != null) && (electroItem.getType() == 'Bord') ) {
+                selectKringContainer.style.display = 'none';
+                selectElectroItemContainer.style.display = 'none';    
+                textContainer.style.display = 'none';
+            }
             selectAdresType.value = sitplanElement.getAdresType();
             adresInput.value = sitplanElement.getAdres();
             fontSizeInput.value = String(sitplanElement.labelfontsize);
