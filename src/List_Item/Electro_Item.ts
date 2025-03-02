@@ -324,12 +324,6 @@ class Electro_Item extends List_Item {
     let sizey = mySVGElement.yup + mySVGElement.ydown;
    
     let boundaries = this.getSitPlanBoundaries();
-    
-    switch (this.getType()) {
-      case 'Contactdoos': case 'Bel': case 'Bord':
-        boundaries.clipleft = 0;
-        break;
-    }
 
     let width = sizex-boundaries.clipleft+boundaries.addright;
     let height = sizey-boundaries.cliptop+boundaries.addbottom;

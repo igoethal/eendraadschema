@@ -4964,13 +4964,6 @@ var Electro_Item = /** @class */ (function (_super) {
         var sizex = mySVGElement.xright + mySVGElement.xleft + 10;
         var sizey = mySVGElement.yup + mySVGElement.ydown;
         var boundaries = this.getSitPlanBoundaries();
-        switch (this.getType()) {
-            case 'Contactdoos':
-            case 'Bel':
-            case 'Bord':
-                boundaries.clipleft = 0;
-                break;
-        }
         var width = sizex - boundaries.clipleft + boundaries.addright;
         var height = sizey - boundaries.cliptop + boundaries.addbottom;
         myElement.updateElectroItemSVG('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" transform="scale(1,1)" ' +
@@ -6210,6 +6203,23 @@ var Bel = /** @class */ (function (_super) {
         mySVG.data += this.addAddressToSVG(mySVG, 60, 15);
         return (mySVG);
     };
+    /**
+     * Geeft de boundary's terug van het element in het situatieplan. Deze boundary's worden gebruikt om het element te positioneren en te clippen.
+     *
+     * @returns {Object} Een object met de volgende properties:
+     *   - clipleft: de afstand die links wordt weggesneden op de standaard tekening van het Electro_Item. Vaak zit hier 20 nutteloze pixels waar in het eendraadschema een stukje leiding en het nummer staat.
+     *   - addright: een eventuele afstand die rechts dient toegevoegd te worden, of (indien negatief) een clipping aan de rechter kant.
+     *   - cliptop: zelfs als clipleft maar aan de bovenkant.
+     *   - addbottom: zelfde als addright maar aan de onderkant.
+     */
+    Bel.prototype.getSitPlanBoundaries = function () {
+        return {
+            clipleft: 0,
+            addright: 0,
+            cliptop: 0,
+            addbottom: 0
+        };
+    };
     return Bel;
 }(Electro_Item));
 var Boiler = /** @class */ (function (_super) {
@@ -6371,6 +6381,23 @@ var Bord = /** @class */ (function (_super) {
                 + '<line x1="' + (mintextsize + 5) + '" y1="' + (mySVG.yup + 46) + '" x2="' + (mintextsize + 15) + '" y2="' + (mySVG.yup + 46) + '" stroke="black" />';
         return (mySVG);
     };
+    /**
+     * Geeft de boundary's terug van het element in het situatieplan. Deze boundary's worden gebruikt om het element te positioneren en te clippen.
+     *
+     * @returns {Object} Een object met de volgende properties:
+     *   - clipleft: de afstand die links wordt weggesneden op de standaard tekening van het Electro_Item. Vaak zit hier 20 nutteloze pixels waar in het eendraadschema een stukje leiding en het nummer staat.
+     *   - addright: een eventuele afstand die rechts dient toegevoegd te worden, of (indien negatief) een clipping aan de rechter kant.
+     *   - cliptop: zelfs als clipleft maar aan de bovenkant.
+     *   - addbottom: zelfde als addright maar aan de onderkant.
+     */
+    Bord.prototype.getSitPlanBoundaries = function () {
+        return {
+            clipleft: 0,
+            addright: 0,
+            cliptop: 0,
+            addbottom: 0
+        };
+    };
     return Bord;
 }(Electro_Item));
 var Contactdoos = /** @class */ (function (_super) {
@@ -6506,6 +6533,23 @@ var Contactdoos = /** @class */ (function (_super) {
         // Adres helemaal onderaan plaatsen
         mySVG.data += (sitplan ? "" : this.addAddressToSVG(mySVG, 60, 15));
         return (mySVG);
+    };
+    /**
+     * Geeft de boundary's terug van het element in het situatieplan. Deze boundary's worden gebruikt om het element te positioneren en te clippen.
+     *
+     * @returns {Object} Een object met de volgende properties:
+     *   - clipleft: de afstand die links wordt weggesneden op de standaard tekening van het Electro_Item. Vaak zit hier 20 nutteloze pixels waar in het eendraadschema een stukje leiding en het nummer staat.
+     *   - addright: een eventuele afstand die rechts dient toegevoegd te worden, of (indien negatief) een clipping aan de rechter kant.
+     *   - cliptop: zelfs als clipleft maar aan de bovenkant.
+     *   - addbottom: zelfde als addright maar aan de onderkant.
+     */
+    Contactdoos.prototype.getSitPlanBoundaries = function () {
+        return {
+            clipleft: 0,
+            addright: 0,
+            cliptop: 0,
+            addbottom: 0
+        };
     };
     return Contactdoos;
 }(Electro_Item));
@@ -8999,6 +9043,21 @@ var Vrije_tekst = /** @class */ (function (_super) {
                 break;
         }
         return (mySVG);
+    };
+    /**
+     * Geeft de boundary's terug van het element in het situatieplan. Deze boundary's worden gebruikt om het element te positioneren en te clippen.
+     *
+     * @returns {Object} Een object met de volgende properties:
+     *   - clipleft: de afstand die links wordt weggesneden op de standaard tekening van het Electro_Item. Vaak zit hier 20 nutteloze pixels waar in het eendraadschema een stukje leiding en het nummer staat.
+     *   - addright: een eventuele afstand die rechts dient toegevoegd te worden, of (indien negatief) een clipping aan de rechter kant.
+     *   - cliptop: zelfs als clipleft maar aan de bovenkant.
+     *   - addbottom: zelfde als addright maar aan de onderkant.
+     */
+    Vrije_tekst.prototype.getSitPlanBoundaries = function () {
+        switch (this.props.vrije_tekst_type) {
+            case "zonder kader": return { clipleft: 0, addright: -8, cliptop: 10, addbottom: -10 };
+            default: return { clipleft: 12, addright: 0, cliptop: 0, addbottom: 0 }; //Wegens compatibiliteit met oudere versies van de software is het ontbreken van eender welke parameter een "met kader"
+        }
     };
     return Vrije_tekst;
 }(Electro_Item));

@@ -40,4 +40,23 @@ class Bel extends Electro_Item {
         return(mySVG);
     }
 
+    /**
+     * Geeft de boundary's terug van het element in het situatieplan. Deze boundary's worden gebruikt om het element te positioneren en te clippen.
+     * 
+     * @returns {Object} Een object met de volgende properties:
+     *   - clipleft: de afstand die links wordt weggesneden op de standaard tekening van het Electro_Item. Vaak zit hier 20 nutteloze pixels waar in het eendraadschema een stukje leiding en het nummer staat.
+     *   - addright: een eventuele afstand die rechts dient toegevoegd te worden, of (indien negatief) een clipping aan de rechter kant.
+     *   - cliptop: zelfs als clipleft maar aan de bovenkant.
+     *   - addbottom: zelfde als addright maar aan de onderkant.
+     */
+
+    getSitPlanBoundaries() {
+        return {
+            clipleft: 0,
+            addright: 0,
+            cliptop: 0,
+            addbottom: 0
+        }
+    }
+
 }
