@@ -79,7 +79,7 @@ var CONFIGPAGE_RIGHT:string = `
         </td>
         <td width="25%" align="center">
           <br>
-          <button onclick="importclicked()">Verdergaan met deze optie</button>
+          <button onclick="loadClicked()">Verdergaan met deze optie</button>
           <br><br>
         </td>
       </tr>

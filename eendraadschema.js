@@ -1146,7 +1146,7 @@ var importExportUsingFileAPI = /** @class */ (function () {
                         this.filename = file.name;
                         structure.properties.filename = file.name;
                         this.setSaveNeeded(false);
-                        this.updateLastSaved(); // Needed because import_to_structure whipes everything   
+                        this.updateLastSaved(); // Needed because EDStoStructure whipes everything   
                         return [2 /*return*/, contents];
                 }
             });
@@ -1227,15 +1227,24 @@ var importjson = function (event) {
     var reader = new FileReader();
     var text = "";
     reader.onload = function () {
-        import_to_structure(reader.result.toString());
+        EDStoStructure(reader.result.toString());
     };
     reader.readAsText(input.files[0]);
 };
-/* FUNCTION importclicked()
+var appendjson = function (event) {
+    var input = event.target;
+    var reader = new FileReader();
+    var text = "";
+    reader.onload = function () {
+        importToAppend(reader.result.toString());
+    };
+    reader.readAsText(input.files[0]);
+};
+/* FUNCTION loadClicked()
 
    Gets called when a user wants to open a file.  Checks if the fileAPI is available in the browser.
    If so, the fileAPI is used.  If not, the legacy function importjson is called */
-function importclicked() {
+function loadClicked() {
     return __awaiter(this, void 0, void 0, function () {
         var data;
         return __generator(this, function (_a) {
@@ -1245,7 +1254,7 @@ function importclicked() {
                     return [4 /*yield*/, fileAPIobj.readFile()];
                 case 1:
                     data = _a.sent();
-                    import_to_structure(data);
+                    EDStoStructure(data);
                     return [3 /*break*/, 3];
                 case 2:
                     document.getElementById('importfile').click();
@@ -1253,6 +1262,21 @@ function importclicked() {
                     _a.label = 3;
                 case 3: return [2 /*return*/];
             }
+        });
+    });
+}
+/**
+ * function importToAppendClicked()
+ *
+ * Vraagt om een EDS bestand op de machine te kiezen en voegt de inhoud toe aan het reeds geopende schema.
+ * We gebruiken hier bewust niet de fileAPI aangezien die reeds gebruikt wordt voor het reeds geopende schema.
+ */
+function importToAppendClicked() {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            document.getElementById('appendfile').click();
+            document.getElementById('appendfile').value = "";
+            return [2 /*return*/];
         });
     });
 }
@@ -1326,120 +1350,126 @@ function upgrade_version(mystructure, version) {
 }
 /* FUNCTION json_to_structure
 
-   Takes a string in pure json and puts the content in the javascript structure called "structure".
-   Will redraw everything if the redraw flag is set.
+   Takes a string in pure json and puts the content in a hierarchical list that is returned.
+   The function can take an old structure that is to be cleaned as input (optional)
+    
    Will perform a version upgrade in case the json is from an earlier version of the eendraadschema tool but this version upgrade will not be performed
    if version is set to 0.  If version is not set to 0 it should be set to the verson of the json.
     
 */
-function json_to_structure(text, version, redraw) {
+function json_to_structure(text, oldstruct, version) {
+    if (oldstruct === void 0) { oldstruct = null; }
     if (version === void 0) { version = 0; }
-    if (redraw === void 0) { redraw = true; }
     // If a structure exists, clear it
-    if (structure != null)
-        structure.dispose(); // Clear the structure
+    if (oldstruct != null)
+        oldstruct.dispose(); // Clear the structure
     /* Read all data from disk in a javascript structure mystructure.
-        * Afterwards we will gradually copy elements from this one into the official structure
+        * Afterwards we will gradually copy elements from this one into the official outstruct
         */
     var mystructure = JSON.parse(text);
     // upgrade if needed
     if (version != 0)
         upgrade_version(mystructure, version);
-    /* We starten met het kopieren van data naar de eigenlijke structure.
+    /* We starten met het kopieren van data naar de eigenlijke outstruct.
     * Ook hier houden we er rekening mee dat in oude saves mogelijk niet alle info voorhanden was */
-    structure = new Hierarchical_List();
+    var outstruct = new Hierarchical_List();
     // Kopieren van hoofd-eigenschappen
     if (typeof mystructure.properties != 'undefined') {
         if (typeof mystructure.properties.filename != "undefined")
-            structure.properties.filename = mystructure.properties.filename;
+            outstruct.properties.filename = mystructure.properties.filename;
         if (typeof mystructure.properties.owner != "undefined")
-            structure.properties.owner = mystructure.properties.owner;
+            outstruct.properties.owner = mystructure.properties.owner;
         if (typeof mystructure.properties.control != "undefined")
-            structure.properties.control = mystructure.properties.control;
+            outstruct.properties.control = mystructure.properties.control;
         if (typeof mystructure.properties.installer != "undefined")
-            structure.properties.installer = mystructure.properties.installer;
+            outstruct.properties.installer = mystructure.properties.installer;
         if (typeof mystructure.properties.info != "undefined")
-            structure.properties.info = mystructure.properties.info;
+            outstruct.properties.info = mystructure.properties.info;
         if (typeof mystructure.properties.info != "undefined")
-            structure.properties.dpi = mystructure.properties.dpi;
+            outstruct.properties.dpi = mystructure.properties.dpi;
         if (typeof mystructure.properties.currentView != "undefined")
-            structure.properties.currentView = mystructure.properties.currentView;
+            outstruct.properties.currentView = mystructure.properties.currentView;
     }
     // Kopieren van de paginatie voor printen
     if (typeof mystructure.print_table != "undefined") {
-        structure.print_table.setHeight(mystructure.print_table.height);
-        structure.print_table.setMaxWidth(mystructure.print_table.maxwidth);
-        structure.print_table.setPaperSize(mystructure.print_table.papersize);
-        structure.print_table.setModeVertical(mystructure.print_table.modevertical);
-        structure.print_table.setstarty(mystructure.print_table.starty);
-        structure.print_table.setstopy(mystructure.print_table.stopy);
+        outstruct.print_table.setHeight(mystructure.print_table.height);
+        outstruct.print_table.setMaxWidth(mystructure.print_table.maxwidth);
+        outstruct.print_table.setPaperSize(mystructure.print_table.papersize);
+        outstruct.print_table.setModeVertical(mystructure.print_table.modevertical);
+        outstruct.print_table.setstarty(mystructure.print_table.starty);
+        outstruct.print_table.setstopy(mystructure.print_table.stopy);
         if (typeof mystructure.print_table.enableAutopage != "undefined") {
-            structure.print_table.enableAutopage = mystructure.print_table.enableAutopage;
+            outstruct.print_table.enableAutopage = mystructure.print_table.enableAutopage;
         }
         else {
-            structure.print_table.enableAutopage = false;
+            outstruct.print_table.enableAutopage = false;
         }
         for (var i = 0; i < mystructure.print_table.pages.length; i++) {
             if (i != 0)
-                this.structure.print_table.addPage();
-            this.structure.print_table.pages[i].height = mystructure.print_table.pages[i].height;
-            this.structure.print_table.pages[i].start = mystructure.print_table.pages[i].start;
-            this.structure.print_table.pages[i].stop = mystructure.print_table.pages[i].stop;
+                outstruct.print_table.addPage();
+            outstruct.print_table.pages[i].height = mystructure.print_table.pages[i].height;
+            outstruct.print_table.pages[i].start = mystructure.print_table.pages[i].start;
+            outstruct.print_table.pages[i].stop = mystructure.print_table.pages[i].stop;
         }
     }
     // Kopieren van de situatieplannen
     if (typeof mystructure.sitplanjson != "undefined") {
-        structure.sitplan = new SituationPlan();
-        structure.sitplan.fromJsonObject(mystructure.sitplanjson);
+        outstruct.sitplan = new SituationPlan();
+        outstruct.sitplan.fromJsonObject(mystructure.sitplanjson);
     }
     /* Kopieren van de eigenschappen van elk element.
     * Keys voor versies 1 en 2 en props voor versie 3
     */
     for (var i = 0; i < mystructure.length; i++) {
         if ((version != 0) && (version < 3)) {
-            structure.addItem(mystructure.data[i].keys[0][2]);
-            structure.data[i].convertLegacyKeys(mystructure.data[i].keys);
+            outstruct.addItem(mystructure.data[i].keys[0][2]);
+            outstruct.data[i].convertLegacyKeys(mystructure.data[i].keys);
         }
         else {
-            structure.addItem(mystructure.data[i].props.type);
-            Object.assign(structure.data[i].props, mystructure.data[i].props);
+            outstruct.addItem(mystructure.data[i].props.type);
+            Object.assign(outstruct.data[i].props, mystructure.data[i].props);
         }
-        structure.data[i].parent = mystructure.data[i].parent;
-        structure.active[i] = mystructure.active[i];
-        structure.id[i] = mystructure.id[i];
-        structure.data[i].id = mystructure.data[i].id;
-        structure.data[i].indent = mystructure.data[i].indent;
-        structure.data[i].collapsed = mystructure.data[i].collapsed;
+        outstruct.data[i].parent = mystructure.data[i].parent;
+        outstruct.active[i] = mystructure.active[i];
+        outstruct.id[i] = mystructure.id[i];
+        outstruct.data[i].id = mystructure.data[i].id;
+        outstruct.data[i].indent = mystructure.data[i].indent;
+        outstruct.data[i].collapsed = mystructure.data[i].collapsed;
     }
     // As we re-read the structure and it might be shorter then it once was (due to deletions) but we might still have the old high ID's, always take over the curid from the file
-    structure.curid = mystructure.curid;
+    outstruct.curid = mystructure.curid;
     // Sort the entire new structure
-    structure.reSort();
-    // Draw the structure
+    outstruct.reSort();
+    // Return the result
+    return outstruct;
+}
+function loadFromText(text, version, redraw) {
+    if (redraw === void 0) { redraw = true; }
+    structure = json_to_structure(text, structure, version);
     if (redraw == true)
         topMenu.selectMenuItemByName('Eéndraadschema'); // Ga naar het bewerken scherm, dat zal automatisch voor hertekenen zorgen.
 }
-/* FUNCTION import_to_structure
-   
-   Starts from a string that can be loaded from disk or from a file and is in EDS-format.
-   puts the content in the javascript structure called "structure".
-   Will redraw everything if the redraw flag is set.
-
-*/
-function import_to_structure(mystring, redraw) {
-    if (redraw === void 0) { redraw = true; }
+/**
+ * Converteert een string in EDS formaat naar een json string.
+ * De string kan eventueel eerst entropy gecodeerd en base64 encoded zijn.
+ * De string kan ook een header hebben met een versie en een identificatie.
+ *
+ * @param {string} mystring - De string die uit een bestand of een json string is geladen.
+ * @returns {Object} - Een object met twee attributen: text en version. Text is de json string en version is de versie van de string.
+ */
+function EDStoJson(mystring) {
     var text = "";
     var version;
     /* If first 3 bytes read "EDS", it is an entropy coded file
-    * The first 3 bytes are EDS, the next 3 bytes indicate the version
-    * The next 4 bytes are decimal zeroes "0000"
-    * thereafter is a base64 encoded data-structure
-    *
-    * If the first 3 bytes read "TXT", it is not entropy coded, nor base64
-    * The next 7 bytes are the same as above.
-    *
-    * If there is no identifier, it is treated as a version 1 TXT
-    * */
+        * The first 3 bytes are EDS, the next 3 bytes indicate the version
+        * The next 4 bytes are decimal zeroes "0000"
+        * thereafter is a base64 encoded data-structure
+        *
+        * If the first 3 bytes read "TXT", it is not entropy coded, nor base64
+        * The next 7 bytes are the same as above.
+        *
+        * If there is no identifier, it is treated as a version 1 TXT
+        * */
     if ((mystring.charCodeAt(0) == 69) && (mystring.charCodeAt(1) == 68) && (mystring.charCodeAt(2) == 83)) { //recognize as EDS
         /* Determine versioning
         * < 16/12/2023: Version 1, original key based implementation
@@ -1478,8 +1508,21 @@ function import_to_structure(mystring, redraw) {
         text = mystring;
         version = 1;
     }
+    //Return an object with the text and the version
+    return { text: text, version: version };
+}
+/* FUNCTION EDStoStructure
+   
+   Starts from a string that can be loaded from disk or from a file and is in EDS-format.
+   puts the content in the javascript structure called "structure".
+   Will redraw everything if the redraw flag is set.
+
+*/
+function EDStoStructure(mystring, redraw) {
+    if (redraw === void 0) { redraw = true; }
+    var JSONdata = EDStoJson(mystring);
     // Dump the json in into the structure and redraw if needed
-    json_to_structure(text, version, redraw);
+    loadFromText(JSONdata.text, JSONdata.version, redraw);
     // Clear the undo stack and push this one on top
     undostruct.clear();
     undostruct.store();
@@ -1495,6 +1538,66 @@ function import_to_structure(mystring, redraw) {
         rightelem.scrollLeft = 0;
     }
 }
+function importToAppend(mystring, redraw) {
+    if (redraw === void 0) { redraw = true; }
+    var JSONdata = EDStoJson(mystring);
+    var structureToAppend = json_to_structure(JSONdata.text, null, JSONdata.version);
+    //get the Maximal ID in array structure.id and call it maxID
+    var maxID = 0;
+    for (var i = 0; i < structure.id.length; i++) {
+        if (structure.id[i] > maxID)
+            maxID = structure.id[i];
+    }
+    //then increase the ID's in structureToAppend accordingly
+    for (var i = 0; i < structureToAppend.id.length; i++) {
+        structureToAppend.id[i] += maxID;
+        structureToAppend.data[i].id += maxID;
+        if (structureToAppend.data[i].parent != 0) {
+            structureToAppend.data[i].parent += maxID;
+        }
+    }
+    structure.curid += structureToAppend.curid;
+    //then merge information for the eendraadschema
+    structure.length = structure.length + structureToAppend.length;
+    structure.active = structure.active.concat(structureToAppend.active);
+    structure.id = structure.id.concat(structureToAppend.id);
+    structure.data = structure.data.concat(structureToAppend.data);
+    //update the sourcelist
+    structure.data.forEach(function (item) {
+        item.sourcelist = structure;
+    });
+    //then set the printer to autopage
+    structure.print_table.enableAutopage = true;
+    //then merge the situation plans but only if both exist
+    if (structure.sitplan != null) {
+        if (structureToAppend.sitplan != null) {
+            // Eerst oude situationplanview leeg maken, anders blijven oude div's hangen
+            if (structure.sitplanview != null)
+                structure.sitplanview.dispose();
+            // dan nieuw situationplan maken en bij openen van het schema zal automatisch een nieuw situationplanview gecreëerd wordne
+            structure.sitplanjson = structure.sitplan.toJsonObject();
+            structureToAppend.sitplanjson = structureToAppend.sitplan.toJsonObject();
+            for (var i = 0; i < structureToAppend.sitplanjson.elements.length; i++) {
+                if (structureToAppend.sitplanjson.elements[i].electroItemId != null)
+                    structureToAppend.sitplanjson.elements[i].electroItemId += maxID;
+                structureToAppend.sitplanjson.elements[i].page += structure.sitplanjson.numPages;
+            }
+            if ((structure.sitplanjson != null) && (structureToAppend.sitplanjson != null)) {
+                structure.sitplanjson.numPages += structureToAppend.sitplanjson.numPages;
+                structure.sitplanjson.elements = structure.sitplanjson.elements.concat(structureToAppend.sitplanjson.elements);
+            }
+            structure.sitplan.fromJsonObject(structure.sitplanjson);
+            structure.sitplanjson = null;
+        }
+    }
+    structure.reSort();
+    undostruct.store();
+    //then remove the pointer from structureToAppend and let the garbage collector do its work
+    structureToAppend = null;
+    //redraw if needed
+    if (redraw)
+        topMenu.selectMenuItemByName('Eéndraadschema');
+}
 function structure_to_json() {
     // Remove some unneeded data members that would only inflate the size of the output file
     for (var _i = 0, _a = structure.data; _i < _a.length; _i++) {
@@ -1505,7 +1608,8 @@ function structure_to_json() {
     var swap2 = structure.sitplan;
     var swap3 = structure.sitplanview;
     structure.print_table.pagemarkers = null;
-    structure.sitplanjson = structure.sitplan.toJsonObject();
+    if (structure.sitplan != null)
+        structure.sitplanjson = structure.sitplan.toJsonObject();
     structure.sitplan = null;
     structure.sitplanview = null;
     // Create the output structure in uncompressed form
@@ -1518,6 +1622,8 @@ function structure_to_json() {
     structure.print_table.pagemarkers = swap;
     structure.sitplan = swap2;
     structure.sitplanview = swap3;
+    // Remove sitplanjson again
+    structure.sitplanjson = null;
     return (text);
 }
 /** FUNCTION download_by_blob
@@ -1552,7 +1658,7 @@ function download_by_blob(text, filename, mimeType) {
 */
 function showFilePage() {
     var strleft = '<span id="exportscreen"></span>'; //We need the id to check elsewhere that the screen is open
-    strleft += "\n    <table border=\"1px\" style=\"border-collapse:collapse\" align=\"center\" width=\"100%\">\n      <tr>\n        <td width=\"100%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Openen</b>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"100%\" align=\"left\">\n            <table border=0>\n              <tr>\n                <td width=350 style=\"vertical-align:top;padding:5px\">\n                  <button style=\"font-size:14px\" onclick=\"importclicked()\">Openen</button>\n                </td>\n                <td style=\"vertical-align:top;padding:7px\">\n                  Click op \"openen\" en selecteer een eerder opgeslagen EDS bestand.\n                </td>\n              </tr>\n            </table>\n        </td>\n      </tr>\n    </table><br>\n    <table border=\"1px\" style=\"border-collapse:collapse\" align=\"center\" width=\"100%\">\n      <tr>\n        <td width=\"100%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Opslaan</b>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"100%\" align=\"left\">\n    ";
+    strleft += "\n    <table border=\"1px\" style=\"border-collapse:collapse\" align=\"center\" width=\"100%\">\n      <tr>\n        <td width=\"100%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Openen</b>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"100%\" align=\"left\">\n            <table border=0>\n              <tr>\n                <td width=350 style=\"vertical-align:top;padding:5px\">\n                  <button style=\"font-size:14px\" onclick=\"loadClicked()\">Openen</button>\n                </td>\n                <td style=\"vertical-align:top;padding:7px\">\n                  Click op \"openen\" en selecteer een eerder opgeslagen EDS bestand.\n                </td>\n              </tr>\n            </table>\n        </td>\n      </tr>\n    </table><br>\n    <table border=\"1px\" style=\"border-collapse:collapse\" align=\"center\" width=\"100%\">\n      <tr>\n        <td width=\"100%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Opslaan</b>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"100%\" align=\"left\">\n    ";
     if (window.showOpenFilePicker) { // Use fileAPI
         strleft += '<table border=0><tr><td width=350 style="vertical-align:top;padding:5px">';
         if (fileAPIobj.filename != null) {
@@ -1582,10 +1688,9 @@ function showFilePage() {
         strleft += '</td></tr>';
         strleft += PROP_GDPR(); //Function returns empty for GIT version, returns GDPR notice when used online.
         strleft += '</table>';
-        // Plaats input box voor naam van het schema bovenaan --
-        //strleft += '<br>';    
     }
-    strleft += "\n        </td>\n      </tr>\n    </table>    \n    ";
+    strleft += "\n        </td>\n      </tr>\n    </table><br>    \n    ";
+    strleft += "\n    <table border=\"1px\" style=\"border-collapse:collapse\" align=\"center\" width=\"100%\">\n      <tr>\n        <td width=\"100%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Samenvoegen</b>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"100%\" align=\"left\">\n            <table border=0>\n              <tr>\n                <td width=350 style=\"vertical-align:top;padding:5px\">\n                  <button style=\"font-size:14px\" onclick=\"importToAppendClicked()\">Samenvoegen (Expert!)</button>\n                </td>\n                <td style=\"vertical-align:top;padding:7px\">\n                  Open een tweede EDS bestand en voeg de inhoud toe aan het huidige EDS bestand.<br>\n                  Voegt de \u00E9\u00E9ndraadschema's samen en voegt eveneens pagina's toe aan het situatieschema als dat nodig is.<br><br>\n                  <span style=\"color:red;font-weight:bold\">Opgelet!</span> Het is aanbevolen uw werk op te slaan alvorens deze functie te gebruiken!\n                </td>\n              </tr>\n            </table>\n        </td>\n      </tr>\n    </table>";
     document.getElementById("configsection").innerHTML = strleft;
     toggleAppView('config');
 }
@@ -1693,7 +1798,7 @@ var undoRedo = /** @class */ (function () {
         var lastmode = structure.mode;
         var text = this.history.undo();
         if (text != null)
-            json_to_structure(text, 0, false);
+            loadFromText(text, 0, false);
         // We replace the references to the large string store by the actual SVGs
         this.replaceStringStoreBySVGs();
         // We need to resort and clean the structure to avoid bad references
@@ -1721,7 +1826,7 @@ var undoRedo = /** @class */ (function () {
         var lastmode = structure.mode;
         var text = this.history.redo();
         if (text != null)
-            json_to_structure(text, 0, false);
+            loadFromText(text, 0, false);
         // We replace the references to the large string store by the actual SVGs
         this.replaceStringStoreBySVGs();
         // We need to resort and clean the structure to avoid bad references
@@ -2237,6 +2342,20 @@ var SituationPlan = /** @class */ (function () {
         };
     }
     /**
+     * Reset alle waarden van het situatieplan naar hun default waarde.
+     * Gebruik deze functie om alle data te wissen en het situatieplan opnieuw te beginnen.
+     */
+    SituationPlan.prototype.dispose = function () {
+        this.elements = [];
+        this.numPages = 1;
+        this.activePage = 1;
+        this.defaults = {
+            fontsize: 11,
+            scale: SITPLANVIEW_DEFAULT_SCALE,
+            rotate: 0
+        };
+    };
+    /**
      * Workaround om de private variabele elements te kunnen gebruiken in friend classs
      * @returns {SituationPlanElement[]} De elementen van het situatieplan
      */
@@ -2347,12 +2466,11 @@ var SituationPlan = /** @class */ (function () {
      * @returns {void}
      */
     SituationPlan.prototype.orderByZIndex = function () {
+        //if (structure.sitplanview == null) return;
         this.elements.sort(function (a, b) {
-            if (a.boxref == null)
-                return 1;
-            if (b.boxref == null)
-                return -1;
-            return parseInt(a.boxref.style.zIndex) - parseInt(b.boxref.style.zIndex);
+            var asort = (((a.boxref == null) || (a.boxref.style.zIndex === "")) ? 0 : parseInt(a.boxref.style.zIndex));
+            var bsort = (((b.boxref == null) || (b.boxref.style.zIndex === "")) ? 0 : parseInt(b.boxref.style.zIndex));
+            return asort - bsort;
         });
     };
     /**
@@ -2365,6 +2483,7 @@ var SituationPlan = /** @class */ (function () {
      * @returns {void}
      */
     SituationPlan.prototype.fromJsonObject = function (json) {
+        this.dispose();
         if (json.numPages !== undefined) {
             this.numPages = json.numPages;
         }
@@ -2398,6 +2517,7 @@ var SituationPlan = /** @class */ (function () {
      * @returns {any} Het JSON-object dat het situatieplan bevat.
      */
     SituationPlan.prototype.toJsonObject = function () {
+        this.orderByZIndex();
         var elements = [];
         for (var _i = 0, _a = this.elements; _i < _a.length; _i++) {
             var element = _a[_i];
@@ -2500,6 +2620,8 @@ var SituationPlanElement = /** @class */ (function () {
         this.labelfontsize = 11;
         // -- Een vlag om de situationplanview te laten weten dat de box content moet geupdated worden
         this.needsViewUpdate = false;
+        // -- Een vlag voor verplaatsbaarheid
+        this.movable = true;
         this.id = randomId("SP_");
     }
     SituationPlanElement.prototype.setscale = function (scale) {
@@ -2803,6 +2925,7 @@ var SituationPlanElement = /** @class */ (function () {
             adreslocation: this.adreslocation,
             rotate: this.rotate,
             scale: this.scale,
+            movable: this.movable,
             svg: (this.isEendraadschemaSymbool() ? '' : this.svg),
             electroItemId: this.electroItemId
         };
@@ -2829,6 +2952,7 @@ var SituationPlanElement = /** @class */ (function () {
         this.svg = json.svg;
         this.electroItemId = json.electroItemId;
         this.needsViewUpdate = true; // TODO: make this more efficient as it will always trigger redraws, even when not needed
+        this.movable = (json.movable != null) ? json.movable : true;
     };
     /**
      * rotates360degrees
@@ -2879,6 +3003,21 @@ var SituationPlanView = /** @class */ (function () {
             _this.contextMenu.addLine();
             _this.contextMenu.addMenuItem('Bewerk', _this.editSelectedBox.bind(_this), 'Enter');
             _this.contextMenu.addLine();
+            if (_this.selectedBox != null) {
+                var sitPlanElement = _this.selectedBox.sitPlanElementRef;
+                if (sitPlanElement != null) {
+                    switch (sitPlanElement.movable) {
+                        case true:
+                            _this.contextMenu.addMenuItem('Vergrendel', _this.toggleSelectedBoxMovable.bind(_this), 'Ctrl L');
+                            _this.contextMenu.addLine();
+                            break;
+                        case false:
+                            _this.contextMenu.addMenuItem('Ontgrendel', _this.toggleSelectedBoxMovable.bind(_this), 'Ctrl L');
+                            _this.contextMenu.addLine();
+                            break;
+                    }
+                }
+            }
             _this.contextMenu.addMenuItem('Verwijder', _this.deleteSelectedBox.bind(_this), 'Del');
             //this.contextMenu.addMenuItem('Item 3', () => alert('Item 3 clicked'));
             _this.contextMenu.show(event);
@@ -2917,7 +3056,9 @@ var SituationPlanView = /** @class */ (function () {
             //Indien de rechter muisknop werd gebruikt gaan we niet verder
             if (event.button == 2)
                 return;
-            //OK, het is een touch event of de linkse knop dus we gaan verder met slepen
+            //OK, het is een touch event of de linkse knop dus we gaan verder met slepen maar controlleren eerst of we dat wel mogen
+            if (box.getAttribute('movable') == "false")
+                return;
             _this.draggedBox = box; // Houdt de box die we aan het slepen zijn
             switch (event.type) {
                 case 'mousedown':
@@ -3217,6 +3358,32 @@ var SituationPlanView = /** @class */ (function () {
         this.canvas.scrollTop = scrollPos.y;
     };
     /**
+     * Verwisselt de movable property van het geselecteerde box-element.
+     *
+     * Als het geselecteerde box-element bestaat, wordt de movable property
+     * verwisseld van waar naar onwaar of van onwaar naar waar.
+     * Daarnaast wordt de movable-attribute van het box-element aangepast.
+     */
+    SituationPlanView.prototype.toggleSelectedBoxMovable = function () {
+        if (this.selectedBox != null) {
+            var sitPlanElement = this.selectedBox.sitPlanElementRef;
+            if (sitPlanElement != null) {
+                switch (sitPlanElement.movable) {
+                    case true:
+                        sitPlanElement.movable = false;
+                        this.selectedBox.setAttribute('movable', 'false');
+                        break;
+                    case false:
+                    default:
+                        sitPlanElement.movable = true;
+                        this.selectedBox.setAttribute('movable', 'true');
+                        break;
+                }
+            }
+        }
+        undostruct.store();
+    };
+    /**
      * Maakt een box en een label op de DOM of in een document-fragmentaan voor een element in het situatieplan.
      *
      * Een box is een sleepbaar element en kan zowel een symbool van het eendraadschema
@@ -3236,6 +3403,7 @@ var SituationPlanView = /** @class */ (function () {
         // extra property sitPlanElementRef toegevoegd aan DOM zodat we later ons situatieplan element kunnen terugvinden
         var box = document.createElement('div');
         Object.assign(box, { id: element.id, className: "box", sitPlanElementRef: element });
+        box.setAttribute('movable', (element.movable ? 'true' : 'false'));
         element.boxref = box;
         // Boxlabel aanmaken op de DOM voor de tekst bij het symbool
         var boxlabel = document.createElement('div');
@@ -3567,6 +3735,7 @@ var SituationPlanView = /** @class */ (function () {
      * @param page - Het nummer van de pagina die getoond moet worden.
      */
     SituationPlanView.prototype.showPage = function (page) {
+        this.clearSelection();
         for (var _i = 0, _a = this.sitplan.elements; _i < _a.length; _i++) {
             var element = _a[_i];
             if (element.page != page) {
@@ -3674,6 +3843,10 @@ var SituationPlanView = /** @class */ (function () {
                         _this.deleteSelectedBox();
                         undostruct.store();
                         break;
+                    case 'l':
+                        if (event.ctrlKey) {
+                            _this.toggleSelectedBoxMovable();
+                        }
                     default:
                         return;
                 }
@@ -9550,148 +9723,148 @@ var Hierarchical_List = /** @class */ (function () {
         var tempval;
         switch (electroType) {
             case 'Aansluiting':
-                tempval = new Aansluiting(structure);
+                tempval = new Aansluiting(this);
                 break;
             case 'Aansluitpunt':
             case 'Leeg':
-                tempval = new Aansluitpunt(structure);
+                tempval = new Aansluitpunt(this);
                 break;
             case 'Aftakdoos':
-                tempval = new Aftakdoos(structure);
+                tempval = new Aftakdoos(this);
                 break;
             case 'Batterij':
-                tempval = new Batterij(structure);
+                tempval = new Batterij(this);
                 break;
             case 'Bel':
-                tempval = new Bel(structure);
+                tempval = new Bel(this);
                 break;
             case 'Boiler':
-                tempval = new Boiler(structure);
+                tempval = new Boiler(this);
                 break;
             case 'Bord':
-                tempval = new Bord(structure);
+                tempval = new Bord(this);
                 break;
             case 'Diepvriezer':
-                tempval = new Diepvriezer(structure);
+                tempval = new Diepvriezer(this);
                 break;
             case 'Domotica':
-                tempval = new Domotica(structure);
+                tempval = new Domotica(this);
                 break;
             case 'Domotica module (verticaal)':
-                tempval = new Domotica_verticaal(structure);
+                tempval = new Domotica_verticaal(this);
                 break;
             case 'Domotica gestuurde verbruiker':
-                tempval = new Domotica_gestuurde_verbruiker(structure);
+                tempval = new Domotica_gestuurde_verbruiker(this);
                 break;
             case 'Droogkast':
-                tempval = new Droogkast(structure);
+                tempval = new Droogkast(this);
                 break;
             case 'Drukknop':
-                tempval = new Drukknop(structure);
+                tempval = new Drukknop(this);
                 break;
             case 'Elektriciteitsmeter':
-                tempval = new Elektriciteitsmeter(structure);
+                tempval = new Elektriciteitsmeter(this);
                 break;
             case 'Elektrische oven':
-                tempval = new Elektrische_oven(structure);
+                tempval = new Elektrische_oven(this);
                 break;
             case 'EV lader':
-                tempval = new EV_lader(structure);
+                tempval = new EV_lader(this);
                 break;
             case 'Ketel':
-                tempval = new Ketel(structure);
+                tempval = new Ketel(this);
                 break;
             case 'Koelkast':
-                tempval = new Koelkast(structure);
+                tempval = new Koelkast(this);
                 break;
             case 'Kookfornuis':
-                tempval = new Kookfornuis(structure);
+                tempval = new Kookfornuis(this);
                 break;
             case 'Kring':
-                tempval = new Kring(structure);
+                tempval = new Kring(this);
                 break;
             case 'Leiding':
-                tempval = new Leiding(structure);
+                tempval = new Leiding(this);
                 break;
             case 'Lichtcircuit':
-                tempval = new Lichtcircuit(structure);
+                tempval = new Lichtcircuit(this);
                 break;
             case 'Lichtpunt':
-                tempval = new Lichtpunt(structure);
+                tempval = new Lichtpunt(this);
                 break;
             case 'Meerdere verbruikers':
-                tempval = new Meerdere_verbruikers(structure);
+                tempval = new Meerdere_verbruikers(this);
                 break;
             case 'Media':
-                tempval = new Media(structure);
+                tempval = new Media(this);
                 break;
             case 'Microgolfoven':
-                tempval = new Microgolfoven(structure);
+                tempval = new Microgolfoven(this);
                 break;
             case 'Motor':
-                tempval = new Motor(structure);
+                tempval = new Motor(this);
                 break;
             case 'Omvormer':
-                tempval = new Omvormer(structure);
+                tempval = new Omvormer(this);
                 break;
             case 'Overspanningsbeveiliging':
-                tempval = new Overspanningsbeveiliging(structure);
+                tempval = new Overspanningsbeveiliging(this);
                 break;
             case 'Schakelaars':
-                tempval = new Schakelaars(structure);
+                tempval = new Schakelaars(this);
                 break;
             case 'Splitsing':
-                tempval = new Splitsing(structure);
+                tempval = new Splitsing(this);
                 break;
             case 'Stoomoven':
-                tempval = new Stoomoven(structure);
+                tempval = new Stoomoven(this);
                 break;
             case 'Contactdoos':
-                tempval = new Contactdoos(structure);
+                tempval = new Contactdoos(this);
                 break;
             case 'Transformator':
-                tempval = new Transformator(structure);
+                tempval = new Transformator(this);
                 break;
             case 'USB lader':
-                tempval = new USB_lader(structure);
+                tempval = new USB_lader(this);
                 break;
             case 'Vaatwasmachine':
-                tempval = new Vaatwasmachine(structure);
+                tempval = new Vaatwasmachine(this);
                 break;
             case 'Ventilator':
-                tempval = new Ventilator(structure);
+                tempval = new Ventilator(this);
                 break;
             case 'Verbruiker':
-                tempval = new Verbruiker(structure);
+                tempval = new Verbruiker(this);
                 break;
             case 'Verlenging':
-                tempval = new Verlenging(structure);
+                tempval = new Verlenging(this);
                 break;
             case 'Verwarmingstoestel':
-                tempval = new Verwarmingstoestel(structure);
+                tempval = new Verwarmingstoestel(this);
                 break;
             case 'Vrije ruimte':
-                tempval = new Vrije_ruimte(structure);
+                tempval = new Vrije_ruimte(this);
                 break;
             case 'Vrije tekst':
-                tempval = new Vrije_tekst(structure);
+                tempval = new Vrije_tekst(this);
                 break;
             case 'Warmtepomp/airco':
-                tempval = new Warmtepomp(structure);
+                tempval = new Warmtepomp(this);
                 break;
             case 'Wasmachine':
-                tempval = new Wasmachine(structure);
+                tempval = new Wasmachine(this);
                 break;
             case 'Zeldzame symbolen':
-                tempval = new Zeldzame_symbolen(structure);
+                tempval = new Zeldzame_symbolen(this);
                 break;
             case 'Zekering/differentieel':
-                tempval = new Zekering(structure);
+                tempval = new Zekering(this);
                 break;
             case 'Zonnepaneel':
-                tempval = new Zonnepaneel(structure);
+                tempval = new Zonnepaneel(this);
                 break;
-            default: tempval = new Electro_Item(structure);
+            default: tempval = new Electro_Item(this);
         }
         // Then set the correct identifyer
         tempval.id = this.curid;
@@ -10149,7 +10322,7 @@ var SITPLANVIEW_SELECT_PADDING = parseInt(getComputedStyle(document.documentElem
 var SITPLANVIEW_ZOOMINTERVAL = { MIN: 0.1, MAX: 1000 };
 var SITPLANVIEW_DEFAULT_SCALE = 0.7;
 var CONFIGPAGE_LEFT = "\n    <table border=\"1px\" style=\"border-collapse:collapse;\" align=\"center\" width=\"100%\"><tr><td style=\"padding-top: 0; padding-right: 10px; padding-bottom: 10px; padding-left: 10px;\">\n        <p><font size=\"+2\">\n          <b>Welkom op \u00E9\u00E9ndraadschema</b>\n        </font></p>\n      <p><font size=\"+1\">  \n           Kies \u00E9\u00E9n van onderstaande voorbeelden om van te starten of start van een leeg schema (optie 3).\n      </font></p>\n      <font size=\"+1\">\n        <i>\n          <b>Tip: </b>Om de mogelijkheden van het programma te leren kennen is het vaak beter eerst een voorbeeldschema te\n          bekijken alvorens van een leeg schema te vertrekken.\n        </i>\n      </font>\n    </td></tr></table>\n    <br>\n    <table border=\"1px\" style=\"border-collapse:collapse\" align=\"center\" width=\"100%\">\n      <tr>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Voorbeeld 1</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Voorbeeld 2</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Leeg schema</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Openen</b>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/example000.svg\" height=\"300px\"><br><br>\n          Eenvoudig schema, enkel contactdozen en lichtpunten.\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/example001.svg\" height=\"300px\"><br><br>\n          Iets complexer schema met teleruptoren, verbruikers achter contactdozen en gesplitste kringen.\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/gear.svg\" height=\"100px\"><br><br>\n";
-var CONFIGPAGE_RIGHT = "\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/import_icon.svg\" height=\"100px\"><br><br>\n          Open een schema dat u eerder heeft opgeslagen op uw computer (EDS-bestand). Enkel bestanden aangemaakt na 12 juli 2019 worden herkend.\n          <br><br>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"load_example(0)\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"load_example(1)\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"read_settings()\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"importclicked()\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n      </tr>\n    </table>\n  ";
+var CONFIGPAGE_RIGHT = "\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/import_icon.svg\" height=\"100px\"><br><br>\n          Open een schema dat u eerder heeft opgeslagen op uw computer (EDS-bestand). Enkel bestanden aangemaakt na 12 juli 2019 worden herkend.\n          <br><br>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"load_example(0)\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"load_example(1)\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"read_settings()\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"loadClicked()\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n      </tr>\n    </table>\n  ";
 var CONFIGPRINTPAGE = "\n<div>\n</div>\n<br>\n";
 var EXAMPLE0 = "EDS0040000eJztWe9r6zYU/VeMv84rjp2kaxhjbQdv422f3qMblIdRrBtHtSwF2Un6g+5v35HsxM5emiVpB68QKCWRda+uzjmSjuInX5LKqqk/6l0EPmcV80e3T77gaAj8GTOkKn8UBr5QfPUx1VKyWUnoM2GyJPQzelb6oydfGX/k/yImEz/wq4cZ4dslU6Wci0qoDI2MqYrJZKYxLB5GaBpTmU7JFLbDyOcIJjuqIJI2oJiRYZnN1A+brEnOxiQTxZKKpCQ7ZnTfG+LpRnTCSVYs6WSIQ5uCcUOo1l9l2xwSFeNBOjcLSti80gVjVd15M7kok5Ikpfg2WQORa1O52S4wIZ25OcYIVYwVnRHr+hdam3YG/nPgl3puUpKixIhqLuVzUFMRtVT0Wip6/01FS8OVNhzfUHVGjOHzqDJz6la2hmVHIVYkq0qitpLokEo+mjeXAlr+urny4g9RMNhHBTaY8rLhtWZD6pQhAE1lxRR3GB0okDoRIBYqGc9FuYbiFcpZ5wRcS3oU2TqiYc6ttl3aCTviuWg5i1+nns0i9pTPeUc94UvyqXX5avXU1FQCbZvaibZq5/qa7a+froA+0jxHCV/L6DflLSGkl0S0TUPXW0VUA/K2GtpY/Je7OBt+C5y5zf0FznqHc3ZDRop02pxJ75e4q13ExZ3Vdn7Quu+11F1rUJZWXOty2+mBhtwmBhxCtuXVRDeZOsdtI4AJK8nCxAWppCAyaLDBGzvvlGhSoVNGYz1fckogCpaTxON12Rh+yuRkySoy3BLafdJJ3DTWKYHRlrFXcSoBBxxMjfV6m9sBcj86FuToBPLeIPeOBTk+gbw3yOGxIPdPIO8LcnxxLMiDE8h7KzluQe53bin9QxzvjRF35NWGoTUOf9pZ5TrHjS3wF7ZL4h4lTdSjtsB7OeOux1Qb8WjZkpTgdJfiTtVGJ0VBhuo+DoCO86FkjEe8+vdVpG0dhjXvC9oAF66k7LqKfRx51Ntu7/rfjL07wpJfMZ6zwqH7fr3d9U7aOrYj6vwkMDiZuzfcSKL+0Sif3N3+KF8cjXLH3v1ua0+FSbHSWpjaCZcd6W/g4PP5GCsRu5bIOlB/mgnK3M9O9ZQxQ8VQvN1HJHaeO9oDwjoUaORS5Dg0vg7EKZBvYaUp311SZ3NVuV2jt/OXuc49fXjsbe+tQXw/6J0fi150GHrRVvRI5e8YvDg6Frw3Wb/vFLwv6A2nsEDaW7fl/2//MJKl6bYXREHvIoDNOw+GQXwewBzjao2LH64lMM3YfOErcOhhR8Z2gjURR18sZULB4LKxJEscKfvpEv5o5rxXfVxNSWQWwMEQYijY/VJw+1Kp/0PfmqRyJtlD3d3dMjPL0e3TZhROLlO/YCqR28VakGzvghmwUNbIIb/mBHIqkboTkklJ9mh1CR7WGR6avDMGm1iKR/cyqm+5sCK04eSUOBHwq7CLVkr3IFpSGIZnxG1KvVTu5cyN1sb6Mu8SxJL7+OPY/PSpMvCIXmg/Iyj0UCpB/GQbPpMced/FkYf21Z9t//Dpj1X75gP6vmACMYtmsDO2HuxnrgsS6mxM1kIozLR5ayQ4Fda0wmMYbcGwiVyfibbbjXfvRXF44/09CL1fH+3k4W/dJWlQ42hnzbHknv8BXkCfFg==";
 var EXAMPLE1 = "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";
@@ -10172,7 +10345,7 @@ function PROP_development_options() {
 }
 function loadFileFromText() {
     var str = document.getElementById('HL_loadfromtext').value;
-    import_to_structure(str);
+    EDStoStructure(str);
     fileAPIobj.clear();
 }
 /// --- END OF DEVELOPMENT OPTIONS ---
@@ -10509,11 +10682,11 @@ function toggleAppView(type) {
 function load_example(nr) {
     switch (nr) {
         case 0:
-            import_to_structure(EXAMPLE0);
+            EDStoStructure(EXAMPLE0);
             fileAPIobj.clear();
             break;
         case 1:
-            import_to_structure(EXAMPLE1);
+            EDStoStructure(EXAMPLE1);
             fileAPIobj.clear();
             break;
     }
@@ -10587,7 +10760,7 @@ menuItems = [
 PROP_edit_menu(menuItems);
 var topMenu = new TopMenu('minitabs', 'menu-item', menuItems);
 // Download a default structure
-import_to_structure(EXAMPLE_DEFAULT, false); //Just in case the user doesn't select a scheme and goes to drawing immediately, there should be something there
+EDStoStructure(EXAMPLE_DEFAULT, false); //Just in case the user doesn't select a scheme and goes to drawing immediately, there should be something there
 // Now add handlers for everything that changes in the left column
 document.querySelector('#left_col_inner').addEventListener('change', function (event) {
     function propUpdate(my_id, item, type, value) {

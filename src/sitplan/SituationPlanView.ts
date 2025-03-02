@@ -209,18 +209,63 @@ class SituationPlanView {
     }
 
     /**
+     * Verwisselt de movable property van het geselecteerde box-element.
+     * 
+     * Als het geselecteerde box-element bestaat, wordt de movable property
+     * verwisseld van waar naar onwaar of van onwaar naar waar.
+     * Daarnaast wordt de movable-attribute van het box-element aangepast.
+     */
+    private toggleSelectedBoxMovable() {
+        if (this.selectedBox != null) {
+            let sitPlanElement:SituationPlanElement = (this.selectedBox as any).sitPlanElementRef;
+            if (sitPlanElement != null) {
+                switch (sitPlanElement.movable) {
+                    case true:
+                        sitPlanElement.movable = false; 
+                        this.selectedBox.setAttribute('movable', 'false');
+                        break;
+                    case false: default:
+                        sitPlanElement.movable = true; 
+                        this.selectedBox.setAttribute('movable', 'true');
+                        break;
+                }
+            }
+        }     
+        undostruct.store();
+    }
+
+    /**
      * Toont het contextmenu op de locatie van de muis.
      * 
      * @param event - De muisgebeurtenis die het menu opent (right click).
      */
     private showContextMenu = (event: MouseEvent) => {
         event.preventDefault();
+
         this.contextMenu.clearMenu();
         this.contextMenu.addMenuItem('Draai rechts', () => { this.rotateSelectedBox(90, true) }, 'Ctrl →');
         this.contextMenu.addMenuItem('Draai links', () => { this.rotateSelectedBox(-90, true) }, 'Ctrl ←');
         this.contextMenu.addLine();
         this.contextMenu.addMenuItem('Bewerk', this.editSelectedBox.bind(this), 'Enter');
         this.contextMenu.addLine();
+
+        if (this.selectedBox != null) {
+            let sitPlanElement:SituationPlanElement = (this.selectedBox as any).sitPlanElementRef;
+            if (sitPlanElement != null) {
+                switch (sitPlanElement.movable) {
+                    case true:
+                        this.contextMenu.addMenuItem('Vergrendel', this.toggleSelectedBoxMovable.bind(this), 'Ctrl L');
+                        this.contextMenu.addLine();
+                        break;
+                    case false:
+                        this.contextMenu.addMenuItem('Ontgrendel', this.toggleSelectedBoxMovable.bind(this), 'Ctrl L');
+                        this.contextMenu.addLine();
+                        break;
+                }
+            }
+        }
+        
+
         this.contextMenu.addMenuItem('Verwijder', this.deleteSelectedBox.bind(this), 'Del');
         
         //this.contextMenu.addMenuItem('Item 3', () => alert('Item 3 clicked'));
@@ -246,6 +291,7 @@ class SituationPlanView {
         // extra property sitPlanElementRef toegevoegd aan DOM zodat we later ons situatieplan element kunnen terugvinden
         let box = document.createElement('div'); 
         Object.assign(box, {id: element.id, className: "box", sitPlanElementRef: element}); 
+        box.setAttribute('movable', (element.movable ? 'true' : 'false'));
         element.boxref = box;
 
         // Boxlabel aanmaken op de DOM voor de tekst bij het symbool
@@ -597,11 +643,12 @@ class SituationPlanView {
         event.stopPropagation();   // Voorkomt body klikgebeurtenis
         this.clearSelection();     // Wist bestaande selectie
         this.selectBox(box); // Selecteert de box die we willen slepen
-
+       
         //Indien de rechter muisknop werd gebruikt gaan we niet verder
         if (event.button == 2) return;
 
-        //OK, het is een touch event of de linkse knop dus we gaan verder met slepen
+        //OK, het is een touch event of de linkse knop dus we gaan verder met slepen maar controlleren eerst of we dat wel mogen
+        if (box.getAttribute('movable') == "false") return;
         this.draggedBox = box; // Houdt de box die we aan het slepen zijn
 
         switch (event.type) {
@@ -710,6 +757,7 @@ class SituationPlanView {
      * @param page - Het nummer van de pagina die getoond moet worden.
      */
     showPage(page: number) {
+        this.clearSelection();
         for (let element of this.sitplan.elements) {
             if (element.page != page) {
                 element.boxref.classList.add('hidden');
@@ -813,6 +861,10 @@ class SituationPlanView {
                         this.deleteSelectedBox();
                         undostruct.store();
                         break;
+                    case 'l':
+                        if (event.ctrlKey) {
+                            this.toggleSelectedBoxMovable();
+                        }    
                     default:
                         return;
                 }

@@ -51,7 +51,7 @@ class importExportUsingFileAPI {
 
         this.setSaveNeeded(false);
 
-        this.updateLastSaved(); // Needed because import_to_structure whipes everything   
+        this.updateLastSaved(); // Needed because EDStoStructure whipes everything   
 
         return contents;
     }
@@ -102,26 +102,52 @@ var importjson = function(event) {
     var text:string = "";
 
     reader.onload = function(){
-        import_to_structure(reader.result.toString());
+        EDStoStructure(reader.result.toString());
     };
 
     reader.readAsText(input.files[0]);
 };
 
-/* FUNCTION importclicked()
+var appendjson = function(event) {
+    var input = event.target;
+    var reader = new FileReader();
+    var text:string = "";
+
+    reader.onload = function(){
+        importToAppend(reader.result.toString());
+    };
+
+    reader.readAsText(input.files[0]);
+};
+
+
+/* FUNCTION loadClicked()
 
    Gets called when a user wants to open a file.  Checks if the fileAPI is available in the browser.
    If so, the fileAPI is used.  If not, the legacy function importjson is called */
 
-async function importclicked() {
+async function loadClicked() {
     if ((window as any).showOpenFilePicker) { // Use fileAPI
         let data = await fileAPIobj.readFile();
-        import_to_structure(data);
+        EDStoStructure(data);
     } else { // Legacy
         document.getElementById('importfile').click();
         (document.getElementById('importfile') as HTMLInputElement).value = "";
     }
 }
+
+
+/**
+ * function importToAppendClicked() 
+ * 
+ * Vraagt om een EDS bestand op de machine te kiezen en voegt de inhoud toe aan het reeds geopende schema.
+ * We gebruiken hier bewust niet de fileAPI aangezien die reeds gebruikt wordt voor het reeds geopende schema.
+ */
+async function importToAppendClicked() {
+    document.getElementById('appendfile').click();
+    (document.getElementById('appendfile') as HTMLInputElement).value = "";
+}
+
 
 /* FUNCTION upgrade_version
 
@@ -195,71 +221,72 @@ function upgrade_version(mystructure, version) {
 
 /* FUNCTION json_to_structure
 
-   Takes a string in pure json and puts the content in the javascript structure called "structure".
-   Will redraw everything if the redraw flag is set.
+   Takes a string in pure json and puts the content in a hierarchical list that is returned.
+   The function can take an old structure that is to be cleaned as input (optional)
+    
    Will perform a version upgrade in case the json is from an earlier version of the eendraadschema tool but this version upgrade will not be performed
    if version is set to 0.  If version is not set to 0 it should be set to the verson of the json.
     
 */
 
-function json_to_structure(text: string, version = 0, redraw = true) {
+function json_to_structure(text: string, oldstruct: Hierarchical_List = null, version = 0): Hierarchical_List {
 
     // If a structure exists, clear it
-    if (structure != null) structure.dispose(); // Clear the structure
+    if (oldstruct != null) oldstruct.dispose(); // Clear the structure
 
     /* Read all data from disk in a javascript structure mystructure.
-        * Afterwards we will gradually copy elements from this one into the official structure
+        * Afterwards we will gradually copy elements from this one into the official outstruct
         */
     let mystructure = JSON.parse(text);
 
     // upgrade if needed
     if (version != 0) upgrade_version(mystructure, version);
 
-    /* We starten met het kopieren van data naar de eigenlijke structure.
+    /* We starten met het kopieren van data naar de eigenlijke outstruct.
     * Ook hier houden we er rekening mee dat in oude saves mogelijk niet alle info voorhanden was */
 
-    structure = new Hierarchical_List();
+    let outstruct = new Hierarchical_List();
 
     // Kopieren van hoofd-eigenschappen
 
     if (typeof mystructure.properties != 'undefined') {
-        if (typeof mystructure.properties.filename != "undefined") structure.properties.filename = mystructure.properties.filename;
-        if (typeof mystructure.properties.owner != "undefined") structure.properties.owner = mystructure.properties.owner;
-        if (typeof mystructure.properties.control != "undefined") structure.properties.control = mystructure.properties.control;
-        if (typeof mystructure.properties.installer != "undefined") structure.properties.installer = mystructure.properties.installer;
-        if (typeof mystructure.properties.info != "undefined") structure.properties.info = mystructure.properties.info;
-        if (typeof mystructure.properties.info != "undefined") structure.properties.dpi = mystructure.properties.dpi;
-        if (typeof mystructure.properties.currentView != "undefined") structure.properties.currentView = mystructure.properties.currentView;
+        if (typeof mystructure.properties.filename != "undefined") outstruct.properties.filename = mystructure.properties.filename;
+        if (typeof mystructure.properties.owner != "undefined") outstruct.properties.owner = mystructure.properties.owner;
+        if (typeof mystructure.properties.control != "undefined") outstruct.properties.control = mystructure.properties.control;
+        if (typeof mystructure.properties.installer != "undefined") outstruct.properties.installer = mystructure.properties.installer;
+        if (typeof mystructure.properties.info != "undefined") outstruct.properties.info = mystructure.properties.info;
+        if (typeof mystructure.properties.info != "undefined") outstruct.properties.dpi = mystructure.properties.dpi;
+        if (typeof mystructure.properties.currentView != "undefined") outstruct.properties.currentView = mystructure.properties.currentView;
     }    
 
     // Kopieren van de paginatie voor printen
 
     if (typeof mystructure.print_table != "undefined") {
-        structure.print_table.setHeight(mystructure.print_table.height);
-        structure.print_table.setMaxWidth(mystructure.print_table.maxwidth);
-        structure.print_table.setPaperSize(mystructure.print_table.papersize);
-        structure.print_table.setModeVertical(mystructure.print_table.modevertical);
-        structure.print_table.setstarty(mystructure.print_table.starty);
-        structure.print_table.setstopy(mystructure.print_table.stopy);
+        outstruct.print_table.setHeight(mystructure.print_table.height);
+        outstruct.print_table.setMaxWidth(mystructure.print_table.maxwidth);
+        outstruct.print_table.setPaperSize(mystructure.print_table.papersize);
+        outstruct.print_table.setModeVertical(mystructure.print_table.modevertical);
+        outstruct.print_table.setstarty(mystructure.print_table.starty);
+        outstruct.print_table.setstopy(mystructure.print_table.stopy);
         if (typeof mystructure.print_table.enableAutopage != "undefined") {
-            structure.print_table.enableAutopage = mystructure.print_table.enableAutopage;
+            outstruct.print_table.enableAutopage = mystructure.print_table.enableAutopage;
         } else {
-            structure.print_table.enableAutopage = false;
+            outstruct.print_table.enableAutopage = false;
         }
 
         for (let i=0; i<mystructure.print_table.pages.length; i++) {
-            if (i != 0) this.structure.print_table.addPage();
-            this.structure.print_table.pages[i].height = mystructure.print_table.pages[i].height;
-            this.structure.print_table.pages[i].start = mystructure.print_table.pages[i].start;
-            this.structure.print_table.pages[i].stop = mystructure.print_table.pages[i].stop;
+            if (i != 0) outstruct.print_table.addPage();
+            outstruct.print_table.pages[i].height = mystructure.print_table.pages[i].height;
+            outstruct.print_table.pages[i].start = mystructure.print_table.pages[i].start;
+            outstruct.print_table.pages[i].stop = mystructure.print_table.pages[i].stop;
         }
     }
 
     // Kopieren van de situatieplannen
 
     if (typeof mystructure.sitplanjson != "undefined") {
-        structure.sitplan = new SituationPlan();
-        structure.sitplan.fromJsonObject(mystructure.sitplanjson);
+        outstruct.sitplan = new SituationPlan();
+        outstruct.sitplan.fromJsonObject(mystructure.sitplanjson);
     }
 
     /* Kopieren van de eigenschappen van elk element.
@@ -268,55 +295,59 @@ function json_to_structure(text: string, version = 0, redraw = true) {
 
     for (let i = 0; i < mystructure.length; i++) {
         if ( (version != 0) && (version < 3) ) {
-            structure.addItem(mystructure.data[i].keys[0][2]);
-            (structure.data[i] as Electro_Item).convertLegacyKeys(mystructure.data[i].keys);
+            outstruct.addItem(mystructure.data[i].keys[0][2]);
+            (outstruct.data[i] as Electro_Item).convertLegacyKeys(mystructure.data[i].keys);
         } else {
-            structure.addItem(mystructure.data[i].props.type);
-            (Object as any).assign(structure.data[i].props,mystructure.data[i].props);
+            outstruct.addItem(mystructure.data[i].props.type);
+            (Object as any).assign(outstruct.data[i].props,mystructure.data[i].props);
         }
-        structure.data[i].parent = mystructure.data[i].parent;
-        structure.active[i] = mystructure.active[i];
-        structure.id[i] = mystructure.id[i];
-        structure.data[i].id = mystructure.data[i].id;
-        structure.data[i].indent = mystructure.data[i].indent;
-        structure.data[i].collapsed = mystructure.data[i].collapsed;
+        outstruct.data[i].parent = mystructure.data[i].parent;
+        outstruct.active[i] = mystructure.active[i];
+        outstruct.id[i] = mystructure.id[i];
+        outstruct.data[i].id = mystructure.data[i].id;
+        outstruct.data[i].indent = mystructure.data[i].indent;
+        outstruct.data[i].collapsed = mystructure.data[i].collapsed;
     }
 
     // As we re-read the structure and it might be shorter then it once was (due to deletions) but we might still have the old high ID's, always take over the curid from the file
-    structure.curid = mystructure.curid;
+    outstruct.curid = mystructure.curid;
 
     // Sort the entire new structure
-    structure.reSort();
+    outstruct.reSort();
 
-    // Draw the structure
-    if (redraw == true) topMenu.selectMenuItemByName('Eéndraadschema'); // Ga naar het bewerken scherm, dat zal automatisch voor hertekenen zorgen.
-
+    // Return the result
+    return outstruct;
 }
 
-/* FUNCTION import_to_structure
-   
-   Starts from a string that can be loaded from disk or from a file and is in EDS-format.
-   puts the content in the javascript structure called "structure".
-   Will redraw everything if the redraw flag is set.
+function loadFromText(text: string, version: number, redraw = true) {
+    structure = json_to_structure(text, structure, version);
+    if (redraw == true) topMenu.selectMenuItemByName('Eéndraadschema'); // Ga naar het bewerken scherm, dat zal automatisch voor hertekenen zorgen.
+}
 
-*/
+/**
+ * Converteert een string in EDS formaat naar een json string.
+ * De string kan eventueel eerst entropy gecodeerd en base64 encoded zijn.
+ * De string kan ook een header hebben met een versie en een identificatie.
+ * 
+ * @param {string} mystring - De string die uit een bestand of een json string is geladen.
+ * @returns {Object} - Een object met twee attributen: text en version. Text is de json string en version is de versie van de string.
+ */
+function EDStoJson(mystring: string) {
 
-function import_to_structure(mystring: string, redraw = true) {
-
-    var text:string = "";
-    var version;
+    let text:string = "";
+    let version: number;
 
     /* If first 3 bytes read "EDS", it is an entropy coded file
-    * The first 3 bytes are EDS, the next 3 bytes indicate the version
-    * The next 4 bytes are decimal zeroes "0000"
-    * thereafter is a base64 encoded data-structure 
-    * 
-    * If the first 3 bytes read "TXT", it is not entropy coded, nor base64
-    * The next 7 bytes are the same as above.
-    * 
-    * If there is no identifier, it is treated as a version 1 TXT
-    * */
-    
+        * The first 3 bytes are EDS, the next 3 bytes indicate the version
+        * The next 4 bytes are decimal zeroes "0000"
+        * thereafter is a base64 encoded data-structure 
+        * 
+        * If the first 3 bytes read "TXT", it is not entropy coded, nor base64
+        * The next 7 bytes are the same as above.
+        * 
+        * If there is no identifier, it is treated as a version 1 TXT
+        * */
+        
     if ( (mystring.charCodeAt(0)==69) && (mystring.charCodeAt(1)==68) && (mystring.charCodeAt(2)==83) ) { //recognize as EDS
 
         /* Determine versioning
@@ -347,7 +378,7 @@ function import_to_structure(mystring: string, redraw = true) {
             }
         }
     } else if ( (mystring.charCodeAt(0)==84) && (mystring.charCodeAt(1)==88) && (mystring.charCodeAt(2)==84) ) { //recognize as TXT
- 
+
         version = Number(mystring.substring(3,6));
         if (isNaN(version)) version = 3;
 
@@ -359,8 +390,24 @@ function import_to_structure(mystring: string, redraw = true) {
         version = 1;
     }
 
+    //Return an object with the text and the version
+    return {text:text, version:version};
+}
+
+/* FUNCTION EDStoStructure
+   
+   Starts from a string that can be loaded from disk or from a file and is in EDS-format.
+   puts the content in the javascript structure called "structure".
+   Will redraw everything if the redraw flag is set.
+
+*/
+
+function EDStoStructure(mystring: string, redraw = true) {
+
+    let JSONdata = EDStoJson(mystring);
+    
     // Dump the json in into the structure and redraw if needed
-    json_to_structure(text, version, redraw);
+    loadFromText(JSONdata.text, JSONdata.version, redraw);
 
     // Clear the undo stack and push this one on top
     undostruct.clear();
@@ -381,6 +428,77 @@ function import_to_structure(mystring: string, redraw = true) {
 
 }
 
+function importToAppend(mystring: string, redraw = true) {
+    let JSONdata = EDStoJson(mystring);
+    let structureToAppend = json_to_structure(JSONdata.text, null, JSONdata.version);
+
+    //get the Maximal ID in array structure.id and call it maxID
+    let maxID = 0;
+    for (let i = 0; i < structure.id.length; i++) {
+        if (structure.id[i] > maxID) maxID = structure.id[i];
+    }
+    
+    //then increase the ID's in structureToAppend accordingly
+    for (let i = 0; i < structureToAppend.id.length; i++) {
+        structureToAppend.id[i] += maxID;
+        structureToAppend.data[i].id += maxID;
+        if (structureToAppend.data[i].parent != 0) {
+            structureToAppend.data[i].parent += maxID;
+        }
+    }
+    structure.curid += structureToAppend.curid;
+
+    //then merge information for the eendraadschema
+    structure.length = structure.length + structureToAppend.length;
+    structure.active = structure.active.concat(structureToAppend.active);
+    structure.id = structure.id.concat(structureToAppend.id);
+    structure.data = structure.data.concat(structureToAppend.data);
+
+    //update the sourcelist
+    structure.data.forEach((item) => {
+        item.sourcelist = structure;
+    });
+
+    //then set the printer to autopage
+    structure.print_table.enableAutopage = true;
+
+    //then merge the situation plans but only if both exist
+    if (structure.sitplan != null) {
+        if (structureToAppend.sitplan != null) {
+
+            // Eerst oude situationplanview leeg maken, anders blijven oude div's hangen
+            if (structure.sitplanview != null) structure.sitplanview.dispose(); 
+
+            // dan nieuw situationplan maken en bij openen van het schema zal automatisch een nieuw situationplanview gecreëerd wordne
+            structure.sitplanjson = structure.sitplan.toJsonObject();
+            structureToAppend.sitplanjson = structureToAppend.sitplan.toJsonObject();
+            
+            for (let i = 0; i < structureToAppend.sitplanjson.elements.length; i++) {
+                if (structureToAppend.sitplanjson.elements[i].electroItemId != null)
+                    structureToAppend.sitplanjson.elements[i].electroItemId += maxID;
+                structureToAppend.sitplanjson.elements[i].page += structure.sitplanjson.numPages;
+            }
+
+            if ( (structure.sitplanjson != null) && (structureToAppend.sitplanjson != null) ) {
+                structure.sitplanjson.numPages += structureToAppend.sitplanjson.numPages;
+                structure.sitplanjson.elements = structure.sitplanjson.elements.concat(structureToAppend.sitplanjson.elements);
+            }
+            structure.sitplan.fromJsonObject(structure.sitplanjson);
+            
+            structure.sitplanjson = null;
+        }
+    }
+    
+    structure.reSort();
+    undostruct.store();
+
+    //then remove the pointer from structureToAppend and let the garbage collector do its work
+    structureToAppend = null;   
+
+    //redraw if needed
+    if (redraw) topMenu.selectMenuItemByName('Eéndraadschema');
+}
+
 function structure_to_json() {
 
     // Remove some unneeded data members that would only inflate the size of the output file
@@ -392,7 +510,7 @@ function structure_to_json() {
     let swap3:SituationPlanView = structure.sitplanview;
     
     structure.print_table.pagemarkers = null;
-    structure.sitplanjson = structure.sitplan.toJsonObject();
+    if (structure.sitplan != null) structure.sitplanjson = structure.sitplan.toJsonObject();
     structure.sitplan = null;
     structure.sitplanview = null;
     
@@ -406,6 +524,9 @@ function structure_to_json() {
     structure.print_table.pagemarkers = swap;
     structure.sitplan = swap2;
     structure.sitplanview = swap3;
+
+    // Remove sitplanjson again
+    structure.sitplanjson = null;    
 
     return(text);
 
@@ -460,7 +581,7 @@ function showFilePage() {
             <table border=0>
               <tr>
                 <td width=350 style="vertical-align:top;padding:5px">
-                  <button style="font-size:14px" onclick="importclicked()">Openen</button>
+                  <button style="font-size:14px" onclick="loadClicked()">Openen</button>
                 </td>
                 <td style="vertical-align:top;padding:7px">
                   Click op "openen" en selecteer een eerder opgeslagen EDS bestand.
@@ -511,16 +632,38 @@ function showFilePage() {
         strleft += PROP_GDPR(); //Function returns empty for GIT version, returns GDPR notice when used online.
     
         strleft += '</table>';
-    
-        // Plaats input box voor naam van het schema bovenaan --
-        //strleft += '<br>';    
     }
 
     strleft += `
         </td>
       </tr>
-    </table>    
+    </table><br>    
     `;
+
+    strleft += `
+    <table border="1px" style="border-collapse:collapse" align="center" width="100%">
+      <tr>
+        <td width="100%" align="center" bgcolor="LightGrey">
+          <b>Samenvoegen</b>
+        </td>
+      </tr>
+      <tr>
+        <td width="100%" align="left">
+            <table border=0>
+              <tr>
+                <td width=350 style="vertical-align:top;padding:5px">
+                  <button style="font-size:14px" onclick="importToAppendClicked()">Samenvoegen (Expert!)</button>
+                </td>
+                <td style="vertical-align:top;padding:7px">
+                  Open een tweede EDS bestand en voeg de inhoud toe aan het huidige EDS bestand.<br>
+                  Voegt de ééndraadschema's samen en voegt eveneens pagina's toe aan het situatieschema als dat nodig is.<br><br>
+                  <span style="color:red;font-weight:bold">Opgelet!</span> Het is aanbevolen uw werk op te slaan alvorens deze functie te gebruiken!
+                </td>
+              </tr>
+            </table>
+        </td>
+      </tr>
+    </table>`
     
     document.getElementById("configsection").innerHTML = strleft;
     toggleAppView('config');

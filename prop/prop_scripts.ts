@@ -35,7 +35,7 @@ function PROP_development_options() {
 
 function loadFileFromText() {
   let str:string = (document.getElementById('HL_loadfromtext') as HTMLInputElement).value;
-  import_to_structure(str);
+  EDStoStructure(str);
   fileAPIobj.clear();
 }
 

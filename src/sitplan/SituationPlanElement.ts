@@ -50,6 +50,9 @@ class SituationPlanElement {
     // -- Een vlag om de situationplanview te laten weten dat de box content moet geupdated worden
     public needsViewUpdate = false;
 
+    // -- Een vlag voor verplaatsbaarheid
+    public movable = true;
+
     /**
      * Constructor 
      */
@@ -411,6 +414,8 @@ class SituationPlanElement {
 
             rotate: this.rotate, 
             scale: this.scale,
+
+            movable: this.movable,
             
             svg: (this.isEendraadschemaSymbool() ? '' : this.svg), 
             electroItemId: this.electroItemId
@@ -448,5 +453,7 @@ class SituationPlanElement {
         this.electroItemId = json.electroItemId;
 
         this.needsViewUpdate = true; // TODO: make this more efficient as it will always trigger redraws, even when not needed
+
+        this.movable = (json.movable != null) ? json.movable : true;
     }
 }

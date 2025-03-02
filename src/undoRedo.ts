@@ -110,7 +110,7 @@ class undoRedo {
         let lastView = structure.properties.currentView;
         let lastmode = structure.mode;
         let text:string = this.history.undo();
-        if (text != null) json_to_structure(text, 0, false);
+        if (text != null) loadFromText(text, 0, false);
         
         // We replace the references to the large string store by the actual SVGs
         this.replaceStringStoreBySVGs();
@@ -130,7 +130,7 @@ class undoRedo {
         let lastView = structure.properties.currentView;
         let lastmode = structure.mode;
         let text:string = this.history.redo();
-        if (text != null) json_to_structure(text, 0, false);
+        if (text != null) loadFromText(text, 0, false);
         
         // We replace the references to the large string store by the actual SVGs
         this.replaceStringStoreBySVGs();

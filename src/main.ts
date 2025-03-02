@@ -344,11 +344,11 @@ function toggleAppView(type: '2col' | 'config' | 'draw') {
 function load_example(nr: number) {
     switch (nr) {
         case 0:
-            import_to_structure(EXAMPLE0);
+            EDStoStructure(EXAMPLE0);
             fileAPIobj.clear();
             break;
         case 1:
-            import_to_structure(EXAMPLE1);
+            EDStoStructure(EXAMPLE1);
             fileAPIobj.clear();
             break;
     }
@@ -441,7 +441,7 @@ const topMenu = new TopMenu('minitabs', 'menu-item', menuItems);
 
 // Download a default structure
 
-import_to_structure(EXAMPLE_DEFAULT,false); //Just in case the user doesn't select a scheme and goes to drawing immediately, there should be something there
+EDStoStructure(EXAMPLE_DEFAULT,false); //Just in case the user doesn't select a scheme and goes to drawing immediately, there should be something there
 
 // Now add handlers for everything that changes in the left column
 

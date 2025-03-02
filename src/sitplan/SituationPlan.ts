@@ -20,6 +20,21 @@ class SituationPlan {
     }
 
     /**
+     * Reset alle waarden van het situatieplan naar hun default waarde.
+     * Gebruik deze functie om alle data te wissen en het situatieplan opnieuw te beginnen.
+     */
+    dispose() {
+        this.elements = [];
+        this.numPages = 1;
+        this.activePage = 1;
+        this.defaults = {
+            fontsize: 11,
+            scale: SITPLANVIEW_DEFAULT_SCALE,
+            rotate: 0
+        }
+    }
+
+    /**
      * Workaround om de private variabele elements te kunnen gebruiken in friend classs
      * @returns {SituationPlanElement[]} De elementen van het situatieplan
      */
@@ -138,10 +153,11 @@ class SituationPlan {
      */
 
     orderByZIndex() {
+        //if (structure.sitplanview == null) return;
         this.elements.sort((a, b) => {
-            if (a.boxref == null) return 1;
-            if (b.boxref == null) return -1;
-            return parseInt(a.boxref.style.zIndex) - parseInt(b.boxref.style.zIndex);
+            let asort = ( ((a.boxref == null) || (a.boxref.style.zIndex === "")) ? 0 : parseInt(a.boxref.style.zIndex));
+            let bsort = ( ((b.boxref == null) || (b.boxref.style.zIndex === "")) ? 0 : parseInt(b.boxref.style.zIndex));
+            return asort - bsort;
         });
     }
 
@@ -156,6 +172,7 @@ class SituationPlan {
      */
 
     fromJsonObject(json: any) {
+        this.dispose();
         if (json.numPages !== undefined) {
             this.numPages = json.numPages;
         } else {
@@ -188,6 +205,7 @@ class SituationPlan {
      * @returns {any} Het JSON-object dat het situatieplan bevat.
      */
     toJsonObject(): any {
+        this.orderByZIndex();
         let elements = [];
         for (let element of this.elements) {
             elements.push(element.toJsonObject());

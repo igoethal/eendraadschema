@@ -247,8 +247,12 @@ ul#minitabs a:hover {
 
 .boxlabel.hidden { display: none; }
 
-.box.selected {
+.box.selected[movable="false"] {
   border: calc(var(--selectPadding) * 1px) solid red;
+}
+
+.box.selected {
+  border: calc(var(--selectPadding) * 1px) solid green;
 }
 
 .box.hidden { display: none; }
