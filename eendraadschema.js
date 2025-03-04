@@ -2967,7 +2967,7 @@ var SituationPlanElement = /** @class */ (function () {
      *
      * TODO: functie verplaatsen naar Electro_Item
      */
-    SituationPlanElement.ROTATES_360_DEGREES_TYPES = new Set(['Contactdoos', 'Lichtpunt', 'Drukknop', 'Media', 'Schakelaars', 'Lichtcircuit', 'Bord']);
+    SituationPlanElement.ROTATES_360_DEGREES_TYPES = new Set(['Contactdoos', 'Lichtpunt', 'Drukknop', 'Media', 'Schakelaars', 'Lichtcircuit', 'Bord', 'Bel']);
     return SituationPlanElement;
 }());
 /**
@@ -3423,6 +3423,7 @@ var SituationPlanView = /** @class */ (function () {
         boxlabel.addEventListener('mousedown', this.startDrag);
         boxlabel.addEventListener('touchstart', this.startDrag);
         box.addEventListener('contextmenu', this.showContextMenu);
+        boxlabel.addEventListener('contextmenu', this.showContextMenu);
     };
     /**
      * Werk de content van het box-element en label-element van een situatieplanelement bij in de DOM.
@@ -9750,15 +9751,12 @@ var Hierarchical_List = /** @class */ (function () {
     };
     // -- Plaats in de array zoeken op basis van de id --
     Hierarchical_List.prototype.getOrdinalById = function (my_id) {
-        for (var i = 0; i < this.length; i++) {
-            if (this.id[i] == my_id)
-                return (i);
-        }
-        return null;
+        var ordinal = this.id.indexOf(my_id);
+        return (ordinal == -1 ? null : ordinal);
     };
     Hierarchical_List.prototype.getElectroItemById = function (my_id) {
-        var ordinal = this.getOrdinalById(my_id);
-        if (ordinal !== null)
+        var ordinal = this.id.indexOf(my_id);
+        if (ordinal != -1)
             return this.data[ordinal];
         return null;
     };
