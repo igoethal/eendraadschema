@@ -311,6 +311,7 @@ class SituationPlanView {
         boxlabel.addEventListener('mousedown', this.startDrag);
         boxlabel.addEventListener('touchstart', this.startDrag);
         box.addEventListener('contextmenu', this.showContextMenu);
+        boxlabel.addEventListener('contextmenu', this.showContextMenu);
     }
 
     /**
