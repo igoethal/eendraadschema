@@ -167,15 +167,13 @@ class Hierarchical_List {
     // -- Plaats in de array zoeken op basis van de id --
 
     getOrdinalById(my_id: number) : number | null {
-        for (let i = 0; i<this.length; i++) {
-            if (this.id[i]==my_id) return(i);
-        }
-        return null;
+        let ordinal = this.id.indexOf(my_id);
+        return (ordinal == -1 ? null : ordinal); 
     }
 
     getElectroItemById(my_id: number) : Electro_Item | null {
-        let ordinal = this.getOrdinalById(my_id);
-        if (ordinal !== null) return(this.data[ordinal] as Electro_Item);
+        let ordinal = this.id.indexOf(my_id);
+        if (ordinal != -1) return(this.data[ordinal] as Electro_Item);
         return null;
     }
 
