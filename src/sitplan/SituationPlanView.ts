@@ -219,14 +219,17 @@ class SituationPlanView {
         if (this.selectedBox != null) {
             let sitPlanElement:SituationPlanElement = (this.selectedBox as any).sitPlanElementRef;
             if (sitPlanElement != null) {
+                let boxlabel = sitPlanElement.boxlabelref as HTMLElement | null;
                 switch (sitPlanElement.movable) {
                     case true:
                         sitPlanElement.movable = false; 
                         this.selectedBox.setAttribute('movable', 'false');
+                        if (boxlabel != null) boxlabel.setAttribute('movable', 'false');
                         break;
                     case false: default:
                         sitPlanElement.movable = true; 
                         this.selectedBox.setAttribute('movable', 'true');
+                        if (boxlabel != null) boxlabel.setAttribute('movable', 'true');
                         break;
                 }
             }
@@ -297,6 +300,7 @@ class SituationPlanView {
         // Boxlabel aanmaken op de DOM voor de tekst bij het symbool
         let boxlabel = document.createElement('div');
         Object.assign(boxlabel, {id: element.id + '_label', className: "boxlabel", sitPlanElementRef: element});
+        boxlabel.setAttribute('movable', (element.movable ? 'true' : 'false'));
         boxlabel.innerHTML = htmlspecialchars(element.getAdres()); // is deze nodig? Wellicht reeds onderdeel van updateContent
         element.boxlabelref = boxlabel;
 
@@ -654,13 +658,13 @@ class SituationPlanView {
 
         switch (event.type) {
             case 'mousedown':
-                this.mousedrag.startDrag(event.clientX, event.clientY, this.draggedBox.offsetLeft, this.draggedBox.offsetTop, this.zoomfactor);
+                this.mousedrag.startDrag(event.clientX, event.clientY, this.draggedBox.offsetLeft, this.draggedBox.offsetTop);
                 document.addEventListener('mousemove', this.processDrag);
                 document.addEventListener('mouseup', this.stopDrag);
                 break;
             case 'touchstart':
                 const touch = event.touches[0];
-                this.mousedrag.startDrag(touch.clientX, touch.clientY, this.draggedBox.offsetLeft, this.draggedBox.offsetTop, this.zoomfactor);
+                this.mousedrag.startDrag(touch.clientX, touch.clientY, this.draggedBox.offsetLeft, this.draggedBox.offsetTop);
                 document.addEventListener('touchmove', this.processDrag, { passive: false });
                 document.addEventListener('touchend', this.stopDrag);
                 break;

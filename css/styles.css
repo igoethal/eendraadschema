@@ -229,6 +229,10 @@ ul#minitabs a:hover {
   -ms-user-select: none; /* IE 10 and IE 11 */
 }
 
+.box[movable="false"] {
+  cursor: default;
+}
+
 .boxlabel {
   position: absolute;
   font-size: 11px;
@@ -243,6 +247,10 @@ ul#minitabs a:hover {
   -webkit-user-select: none; /* Safari */
   -moz-user-select: none; /* Firefox */
   -ms-user-select: none; /* IE 10 and IE 11 */
+}
+
+.boxlabel[movable="false"] {
+  cursor: default;
 }
 
 .boxlabel.hidden { display: none; }

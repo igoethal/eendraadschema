@@ -2276,48 +2276,48 @@ function getPixelsPerMillimeter() {
  */
 var MouseDrag = /** @class */ (function () {
     function MouseDrag() {
-        this.startDragx = 0;
-        this.startDragy = 0;
         this.startOffsetLeft = 0;
         this.startOffsetTop = 0;
-        this.zoomfactor = 1;
         this.hassMoved = false;
     }
     /**
      * Start the drag.
-     * @param mousex The x position of the mouse when the drag starts.
-     * @param mousey The y position of the mouse when the drag starts.
+     * @param mouseX The x position of the mouse when the drag starts.
+     * @param mouseY The y position of the mouse when the drag starts.
      * @param startOffsetLeft The left position of the box when the drag starts.
      * @param startOffsetTop The top position of the box when the drag starts.
-     * @param zoomfactor The zoomfactor of the situation plan view when the drag starts.
      */
-    MouseDrag.prototype.startDrag = function (mousex, mousey, startOffsetLeft, startOffsetTop, zoomfactor) {
-        if (mousex === void 0) { mousex = 0; }
-        if (mousey === void 0) { mousey = 0; }
+    MouseDrag.prototype.startDrag = function (mouseX, mouseY, startOffsetLeft, startOffsetTop) {
+        if (mouseX === void 0) { mouseX = 0; }
+        if (mouseY === void 0) { mouseY = 0; }
         if (startOffsetLeft === void 0) { startOffsetLeft = 0; }
         if (startOffsetTop === void 0) { startOffsetTop = 0; }
-        if (zoomfactor === void 0) { zoomfactor = 1; }
-        this.startDragx = mousex;
-        this.startDragy = mousey;
         this.startOffsetLeft = startOffsetLeft;
         this.startOffsetTop = startOffsetTop;
-        this.zoomfactor = zoomfactor;
         this.hassMoved = false;
+        var menuHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--menu-height'));
+        var ribbonHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ribbon-height'));
+        var sideBarWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sideBarWidth'));
+        this.startPaperPos = structure.sitplanview.canvasPosToPaperPos(mouseX - sideBarWidth, mouseY - menuHeight - ribbonHeight);
     };
     /**
      * Return the new left and top position of the box based on the current mouse position.
-     * @param mousex The current x position of the mouse.
-     * @param mousey The current y position of the mouse.
+     * @param mouseX The current x position of the mouse.
+     * @param mouseY The current y position of the mouse.
      * @returns An object with the new left and top position of the box.
      */
     MouseDrag.prototype.returnNewLeftTop = function (mousex, mousey) {
         if (mousex === void 0) { mousex = 0; }
         if (mousey === void 0) { mousey = 0; }
-        if (mousex != this.startDragx || mousey != this.startDragy)
+        var menuHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--menu-height'));
+        var ribbonHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ribbon-height'));
+        var sideBarWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sideBarWidth'));
+        var stopPaperPos = structure.sitplanview.canvasPosToPaperPos(mousex - sideBarWidth, mousey - menuHeight - ribbonHeight);
+        if (stopPaperPos.x != this.startPaperPos.x || stopPaperPos.y != this.startPaperPos.y)
             this.hassMoved = true;
         return ({
-            left: (mousex - this.startDragx) / this.zoomfactor + this.startOffsetLeft,
-            top: (mousey - this.startDragy) / this.zoomfactor + this.startOffsetTop
+            left: (stopPaperPos.x - this.startPaperPos.x) + this.startOffsetLeft,
+            top: (stopPaperPos.y - this.startPaperPos.y) + this.startOffsetTop
         });
     };
     return MouseDrag;
@@ -3062,13 +3062,13 @@ var SituationPlanView = /** @class */ (function () {
             _this.draggedBox = box; // Houdt de box die we aan het slepen zijn
             switch (event.type) {
                 case 'mousedown':
-                    _this.mousedrag.startDrag(event.clientX, event.clientY, _this.draggedBox.offsetLeft, _this.draggedBox.offsetTop, _this.zoomfactor);
+                    _this.mousedrag.startDrag(event.clientX, event.clientY, _this.draggedBox.offsetLeft, _this.draggedBox.offsetTop);
                     document.addEventListener('mousemove', _this.processDrag);
                     document.addEventListener('mouseup', _this.stopDrag);
                     break;
                 case 'touchstart':
                     var touch = event.touches[0];
-                    _this.mousedrag.startDrag(touch.clientX, touch.clientY, _this.draggedBox.offsetLeft, _this.draggedBox.offsetTop, _this.zoomfactor);
+                    _this.mousedrag.startDrag(touch.clientX, touch.clientY, _this.draggedBox.offsetLeft, _this.draggedBox.offsetTop);
                     document.addEventListener('touchmove', _this.processDrag, { passive: false });
                     document.addEventListener('touchend', _this.stopDrag);
                     break;
@@ -3368,15 +3368,20 @@ var SituationPlanView = /** @class */ (function () {
         if (this.selectedBox != null) {
             var sitPlanElement = this.selectedBox.sitPlanElementRef;
             if (sitPlanElement != null) {
+                var boxlabel = sitPlanElement.boxlabelref;
                 switch (sitPlanElement.movable) {
                     case true:
                         sitPlanElement.movable = false;
                         this.selectedBox.setAttribute('movable', 'false');
+                        if (boxlabel != null)
+                            boxlabel.setAttribute('movable', 'false');
                         break;
                     case false:
                     default:
                         sitPlanElement.movable = true;
                         this.selectedBox.setAttribute('movable', 'true');
+                        if (boxlabel != null)
+                            boxlabel.setAttribute('movable', 'true');
                         break;
                 }
             }
@@ -3408,6 +3413,7 @@ var SituationPlanView = /** @class */ (function () {
         // Boxlabel aanmaken op de DOM voor de tekst bij het symbool
         var boxlabel = document.createElement('div');
         Object.assign(boxlabel, { id: element.id + '_label', className: "boxlabel", sitPlanElementRef: element });
+        boxlabel.setAttribute('movable', (element.movable ? 'true' : 'false'));
         boxlabel.innerHTML = htmlspecialchars(element.getAdres()); // is deze nodig? Wellicht reeds onderdeel van updateContent
         element.boxlabelref = boxlabel;
         // Content updaten en toevoegen aan de DOM
