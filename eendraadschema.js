@@ -1708,6 +1708,14 @@ var jsonStore = /** @class */ (function () {
         this.undoStack.push(text);
         this.redoStack = []; // Clear the redo stack whenever a new store is made
     };
+    jsonStore.prototype.replace = function (text) {
+        if (this.undoStack.length > 0) {
+            this.undoStack[this.undoStack.length - 1] = text;
+        }
+        else {
+            this.store(text);
+        }
+    };
     //Always call store before undo otherwise there is nothing to put on the redo stack !!
     jsonStore.prototype.undo = function () {
         if (this.undoStack.length <= 1) {
@@ -1763,7 +1771,9 @@ var undoRedo = /** @class */ (function () {
     function undoRedo(maxSteps) {
         if (maxSteps === void 0) { maxSteps = 100; }
         this.largeStrings = new LargeStringStore();
-        this.history = new jsonStore(maxSteps);
+        this.samenVoegSleutel = null; // Indien de store functie wordt opgeroepen met deze string wordt geen nieuwe undo stap gecreëerd maar de vorige aangepast
+        this.historyEds = new jsonStore(maxSteps);
+        this.historyOptions = new jsonStore(maxSteps);
     }
     undoRedo.prototype.replaceSVGsByStringStore = function () {
         if (structure.sitplan != null) {
@@ -1783,20 +1793,42 @@ var undoRedo = /** @class */ (function () {
             }
         }
     };
-    undoRedo.prototype.store = function () {
+    undoRedo.prototype.getOptions = function () {
+        var options = {};
+        if (structure.sitplanview != null) {
+            options.selectedBoxOrdinal = structure.sitplanview.getSelectedBoxOrdinal();
+            if (structure.sitplanview.sideBar.getUndoRedoOptions != null) {
+                Object.assign(options, structure.sitplanview.sideBar.getUndoRedoOptions());
+            }
+        }
+        return (JSON.stringify(options));
+    };
+    undoRedo.prototype.store = function (sleutel) {
+        if (sleutel === void 0) { sleutel = null; }
+        var overschrijfVorige = false;
+        if ((sleutel != null) && (sleutel == this.samenVoegSleutel))
+            overschrijfVorige = true;
+        this.samenVoegSleutel = sleutel;
         // We store the current state of the structure in the history but we replace the SVGs by a reference to a large string store
         this.replaceSVGsByStringStore();
-        this.history.store(structure_to_json());
+        if (!overschrijfVorige) {
+            this.historyEds.store(structure_to_json());
+            this.historyOptions.store(this.getOptions());
+        }
+        else {
+            this.historyEds.replace(structure_to_json());
+            this.historyOptions.replace(this.getOptions());
+        }
         this.replaceStringStoreBySVGs();
         if ((structure.properties.currentView == 'draw') && (structure.sitplanview != null))
             structure.sitplanview.updateRibbon();
         else if (structure.properties.currentView == '2col')
             structure.updateRibbon();
     };
-    undoRedo.prototype.undo = function () {
+    undoRedo.prototype.reload = function (text, options) {
+        this.samenVoegSleutel = null;
         var lastView = structure.properties.currentView;
         var lastmode = structure.mode;
-        var text = this.history.undo();
         if (text != null)
             loadFromText(text, 0, false);
         // We replace the references to the large string store by the actual SVGs
@@ -1810,6 +1842,14 @@ var undoRedo = /** @class */ (function () {
             case 'draw':
                 topMenu.selectMenuItemByOrdinal(3);
                 showSituationPlanPage();
+                if (structure.sitplanview.sideBar.setUndoRedoOptions != null)
+                    structure.sitplanview.sideBar.setUndoRedoOptions(options);
+                var htmlId = structure.sitplan.getElements()[options.selectedBoxOrdinal].id;
+                if (htmlId == null)
+                    break;
+                var div = document.getElementById(htmlId);
+                if (div != null)
+                    structure.sitplanview.selectBox(div);
                 break;
             case '2col':
                 topMenu.selectMenuItemByOrdinal(2);
@@ -1821,35 +1861,27 @@ var undoRedo = /** @class */ (function () {
                 break;
         }
     };
+    undoRedo.prototype.undo = function () {
+        var text = this.historyEds.undo();
+        var optionsString = this.historyOptions.undo();
+        var options = optionsString ? JSON.parse(optionsString) : {};
+        this.reload(text, options);
+    };
     undoRedo.prototype.redo = function () {
-        var lastView = structure.properties.currentView;
-        var lastmode = structure.mode;
-        var text = this.history.redo();
-        if (text != null)
-            loadFromText(text, 0, false);
-        // We replace the references to the large string store by the actual SVGs
-        this.replaceStringStoreBySVGs();
-        // We need to resort and clean the structure to avoid bad references
-        structure.reSort();
-        structure.mode = lastmode;
-        if (structure.properties.currentView != lastView)
-            toggleAppView(structure.properties.currentView);
-        if (structure.properties.currentView == 'draw') {
-            topMenu.selectMenuItemByOrdinal(3);
-            showSituationPlanPage();
-        }
-        else if (structure.properties.currentView == '2col') {
-            topMenu.selectMenuItemByOrdinal(2);
-            HLRedrawTree();
-        }
+        var text = this.historyEds.redo();
+        var optionsString = this.historyOptions.redo();
+        var options = optionsString ? JSON.parse(optionsString) : {};
+        this.reload(text, options);
     };
     undoRedo.prototype.clear = function () {
-        this.history.clear();
+        this.samenVoegSleutel = null;
+        this.historyEds.clear();
+        this.historyOptions.clear();
         this.largeStrings.clear();
         structure.updateRibbon();
     };
-    undoRedo.prototype.undoStackSize = function () { return (this.history.undoStackSize()); };
-    undoRedo.prototype.redoStackSize = function () { return (this.history.redoStackSize()); };
+    undoRedo.prototype.undoStackSize = function () { return (this.historyEds.undoStackSize()); };
+    undoRedo.prototype.redoStackSize = function () { return (this.historyEds.redoStackSize()); };
     return undoRedo;
 }());
 var TopMenu = /** @class */ (function () {
@@ -3091,20 +3123,23 @@ var SituationPlanView = /** @class */ (function () {
                 case 'mouseup':
                     document.removeEventListener('mousemove', _this.processDrag);
                     document.removeEventListener('mouseup', _this.stopDrag);
-                    if (_this.mousedrag.hassMoved)
+                    if (_this.mousedrag.hassMoved) {
                         showArrowHelp();
+                        undostruct.store();
+                    }
                     break;
                 case 'touchend':
                     document.removeEventListener('touchmove', _this.processDrag);
                     document.removeEventListener('touchend', _this.stopDrag);
-                    if (_this.mousedrag.hassMoved)
+                    if (_this.mousedrag.hassMoved) {
                         showArrowHelp();
+                        undostruct.store();
+                    }
                     break;
                 default:
                     console.error('Ongeldige event voor stopDrag functie');
             }
             _this.draggedBox = null;
-            undostruct.store();
         };
         /**
          * Verwerkt een muisklik of touch event tijdens het slepen van een box in het situatieplan.
@@ -3165,8 +3200,7 @@ var SituationPlanView = /** @class */ (function () {
                     _this.clearSelection();
                     _this.redraw();
                     _this.selectBox(element.boxref); // We moeten dit na redraw doen anders bestaat de box mogelijk nog niet
-                    _this.bringToFront();
-                    undostruct.store();
+                    _this.bringToFront(); // Deze slaat ook automatisch undo informatie op dus we moeten geen undostruct.store() meer doen.
                 }
             }
             else {
@@ -3636,6 +3670,17 @@ var SituationPlanView = /** @class */ (function () {
         console.log("Redraw took ".concat(end - start, "ms"));
     };
     /**
+     * Geeft de ordinal van het geselecteerde element terug in de array van het situatieplan.
+     *
+     * @returns {string | null} De id van de geselecteerde box, of null.
+     */
+    SituationPlanView.prototype.getSelectedBoxOrdinal = function () {
+        var _this = this;
+        if (this.selectedBox == null)
+            return null;
+        return this.sitplan.elements.findIndex(function (e) { return e.boxref == _this.selectedBox; });
+    };
+    /**
      * Maakt de gegeven box de geselecteerde box.
      *
      * @param box - Het element dat geselecteerd moet worden.
@@ -3813,49 +3858,74 @@ var SituationPlanView = /** @class */ (function () {
                 return; // Check if we are really in the situationplan, if not, the default scrolling action will be executed by the browser
             if (document.getElementById('popupOverlay') != null)
                 return; // We need the keys when editing symbol properties.
+            if (event.ctrlKey) {
+                switch (event.key) {
+                    case 'z':
+                        event.preventDefault();
+                        undostruct.undo();
+                        return;
+                    case 'y':
+                        event.preventDefault();
+                        undostruct.redo();
+                        return;
+                    case 'r':
+                        event.preventDefault();
+                        var helperTip = new HelperTip(appDocStorage);
+                        helperTip.show('sitplan.Ctrl_r_key', "<h3>Ctrl-r genegeerd</h3>\n                        <p>Om te vermijden dat u per ongeluk de pagina ververst en uw werk verliest is de refresh sneltoets uitgeschakeld in het situatieschema.</p>", true);
+                        return;
+                    default:
+                    //do nothing as we also have ctrl + arrow keys here below.
+                }
+            }
             if (_this.selectedBox) { // Check if we have a selected box, if not, the default scrolling action will be executed by the browser
                 event.preventDefault();
                 var sitPlanElement = _this.selectedBox.sitPlanElementRef;
                 if (!sitPlanElement)
                     return;
-                switch (event.key) {
-                    case 'ArrowLeft':
-                        if (event.ctrlKey) {
+                if (event.ctrlKey) {
+                    switch (event.key) {
+                        case 'ArrowLeft':
                             _this.rotateSelectedBox(-90, true);
                             return;
-                        }
-                        else {
-                            sitPlanElement.posx -= 1;
-                        }
-                        break;
-                    case 'ArrowRight':
-                        if (event.ctrlKey) {
+                        case 'ArrowRight':
                             _this.rotateSelectedBox(90, true);
                             return;
-                        }
-                        else {
-                            sitPlanElement.posx += 1;
-                        }
-                        break;
-                    case 'ArrowUp':
-                        sitPlanElement.posy -= 1;
-                        break;
-                    case 'ArrowDown':
-                        sitPlanElement.posy += 1;
-                        break;
-                    case 'Enter':
-                        _this.editSelectedBox();
-                        return;
-                    case 'Delete':
-                        _this.deleteSelectedBox();
-                        undostruct.store();
-                        break;
-                    case 'l':
-                        if (event.ctrlKey) {
+                        case 'l':
                             _this.toggleSelectedBoxMovable();
-                        }
-                    default:
-                        return;
+                            undostruct.store();
+                            return;
+                        default:
+                            return;
+                    }
+                }
+                else {
+                    switch (event.key) {
+                        case 'ArrowLeft':
+                            sitPlanElement.posx -= 1;
+                            undostruct.store('arrowMove' + sitPlanElement.id);
+                            break;
+                        case 'ArrowRight':
+                            sitPlanElement.posx += 1;
+                            undostruct.store('arrowMove' + sitPlanElement.id);
+                            break;
+                        case 'ArrowUp':
+                            sitPlanElement.posy -= 1;
+                            undostruct.store('arrowMove' + sitPlanElement.id);
+                            break;
+                        case 'ArrowDown':
+                            sitPlanElement.posy += 1;
+                            undostruct.store('arrowMove' + sitPlanElement.id);
+                            break;
+                        case 'Enter':
+                            _this.editSelectedBox();
+                            return;
+                        case 'Delete':
+                            _this.deleteSelectedBox();
+                            undostruct.store();
+                            break;
+                        default:
+                            return;
+                    }
                 }
                 _this.updateSymbolAndLabelPosition(sitPlanElement);
             }
@@ -3939,8 +4009,7 @@ var SituationPlanView = /** @class */ (function () {
                 element.scaleSelectedBoxToPaperIfNeeded(_this.paper.offsetWidth * 0.995, _this.paper.offsetHeight * 0.995, _this.sitplan.defaults.scale);
                 _this.redraw();
                 _this.selectBox(element.boxref); // We moeten dit na redraw doen anders bestaat de box mogelijk nog niet
-                _this.bringToFront();
-                undostruct.store();
+                _this.bringToFront(); // Deze slaat ook automatisch undo informatie op dus we moeten geen undostruct.store() meer doen.
                 fileinput.value = ''; // Zorgt ervoor dat hetzelfde bestand twee keer kan worden gekozen en dit nog steeds een change triggert
                 if (element.scale != lastscale) {
                     //Use the built in help top to display a text that the image was scaled
