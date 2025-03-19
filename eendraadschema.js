@@ -9518,27 +9518,43 @@ var Zonnepaneel = /** @class */ (function (_super) {
         this.props.type = "Zonnepaneel";
         this.props.aantal = "1";
         this.props.adres = "";
+        this.props.symbool = "driehoek";
+    };
+    Zonnepaneel.prototype.overrideKeys = function () {
+        if (this.props.symbool == null)
+            this.props.symbool = "driehoek";
     };
     Zonnepaneel.prototype.toHTML = function (mode) {
+        this.overrideKeys();
         var output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml()
             + " Aantal: " + this.selectPropToHTML('aantal', ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20",
             "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40"])
+            + ', Symbool: ' + this.selectPropToHTML('symbool', ["driehoek", "pijltjes"])
             + ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
     };
     Zonnepaneel.prototype.toSVG = function (sitplan) {
         if (sitplan === void 0) { sitplan = false; }
         var mySVG = new SVGelement();
-        SVGSymbols.addSymbol('arrow');
-        SVGSymbols.addSymbol('zonnepaneel');
         mySVG.xleft = 1; // Links voldoende ruimte voor een eventuele kring voorzien
         mySVG.xright = 69;
         mySVG.yup = 35;
         mySVG.ydown = 25;
-        mySVG.data += (sitplan ? "" : '<line x1="1" y1="35" x2="21" y2="35" stroke="black"></line>')
-            + '<use xlink:href="#zonnepaneel" x="21" y="35"></use>'
-            + '<text x="45" y="9" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' + htmlspecialchars(this.props.aantal) + 'x</text>';
+        mySVG.data += (sitplan ? "" : '<line x1="1" y1="35" x2="21" y2="35" stroke="black"></line>');
+        switch (this.props.symbool) {
+            case "driehoek":
+                mySVG.data += '<use xlink:href="#zonnepaneel_driehoek" x="21" y="35"></use>';
+                SVGSymbols.addSymbol('zonnepaneel_driehoek');
+                break;
+            case "pijltjes":
+            default:
+                mySVG.data += '<use xlink:href="#zonnepaneel" x="21" y="35"></use>';
+                SVGSymbols.addSymbol('arrow');
+                SVGSymbols.addSymbol('zonnepaneel');
+                break;
+        }
+        mySVG.data += '<text x="45" y="9" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' + htmlspecialchars(this.props.aantal) + 'x</text>';
         // Adres helemaal onderaan plaatsen
         mySVG.data += (sitplan ? "" : this.addAddressToSVG(mySVG, 70, 15));
         return (mySVG);
@@ -9642,6 +9658,7 @@ var SVGSymbols = /** @class */ (function () {
         elektriciteitsmeter: "\n<rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n<line x1=\"0\" y1=\"-6\" x2=\"40\" y2=\"-6\" stroke=\"black\" stroke-width=\"1\" />\n<text x=\"20\" y=\"10\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"12\">kWh</text>\n",
         diepvriezer: "\n<rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n<use xlink:href=\"#ster\" x=\"10\" y=\"0\" />\n<use xlink:href=\"#ster\" x=\"20\" y=\"0\" />\n<use xlink:href=\"#ster\" x=\"30\" y=\"0\" />\n",
         zonnepaneel: "\n<rect x=\"0\" y=\"-20\" width=\"50\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n<line x1=\"0\" y1=\"0\" x2=\"50\" y2=\"0\" stroke=\"black\" />\n<use xlink:href=\"#arrow\" x=\"5\" y=\"-12\" transform=\"rotate(45 5 -10)\" />\n<use xlink:href=\"#arrow\" x=\"10\" y=\"-14\" transform=\"rotate(45 10 -14)\" />\n",
+        zonnepaneel_driehoek: "\n<rect x=\"0\" y=\"-20\" width=\"50\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n<line x1=\"0\" y1=\"-20\" x2=\"20\" y2=\"0\" stroke=\"black\" />\n<line x1=\"0\" y1=\"20\" x2=\"20\" y2=\"0\" stroke=\"black\" />\n",
         drukknop_klein: "\n<circle cx=\"8\" cy=\"0\" r=\"7\" style=\"stroke:black;fill:none\" />\n<circle cx=\"8\" cy=\"0\" r=\"4\" style=\"stroke:black;fill:none\" />\n",
         draadloos_klein: "\n<path d=\"M 10 -7 A 10 10 0 0 1 10 7\" stroke=\"black\" fill=\"none\" /> \n<path d=\"M 7 -5 A 8 8 0 0 1 7 5\" stroke=\"black\" fill=\"none\" /> \n<path d=\"M 4 -3 A 6 6 0 0 1 4 3\" stroke=\"black\" fill=\"none\" /> \n",
         detectie_klein: "\n<path d=\"M 10 -7 A 10 10 0 0 1 10 7\" stroke=\"black\" fill=\"none\" /> \n<path d=\"M 5 -7 A 10 10 0 0 1 5 7\" stroke=\"black\" fill=\"none\" /> \n",

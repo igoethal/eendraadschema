@@ -284,6 +284,11 @@ zonnepaneel: `
 <use xlink:href="#arrow" x="5" y="-12" transform="rotate(45 5 -10)" />
 <use xlink:href="#arrow" x="10" y="-14" transform="rotate(45 10 -14)" />
 `,
+zonnepaneel_driehoek: `
+<rect x="0" y="-20" width="50" height="40" fill="none" style="stroke:black" />
+<line x1="0" y1="-20" x2="20" y2="0" stroke="black" />
+<line x1="0" y1="20" x2="20" y2="0" stroke="black" />
+`,
 drukknop_klein: `
 <circle cx="8" cy="0" r="7" style="stroke:black;fill:none" />
 <circle cx="8" cy="0" r="4" style="stroke:black;fill:none" />
