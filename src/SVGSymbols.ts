@@ -12,7 +12,7 @@ class SVGSymbols {
         this.neededSymbols = [];
     }
 
-    static getNeededSymbols() {
+    static getNeededSymbols(sidebar: boolean = false) {
         let output: string =  '<defs>';
       
         if (this.neededSymbols.includes('VerticalStripe')) {
@@ -23,9 +23,16 @@ class SVGSymbols {
      
         for (let key in this.data) {
             if (this.neededSymbols.includes(key)) {
-                output += `<g id="${key}">${this.data[key].replace(/\n/g, '')}</g>`;
+                if (!sidebar)
+                    output += `<g id="${key}">${this.data[key].replace(/\n/g, '')}</g>`;
+                else {
+                    let str = this.data[key].replace(/fill="white"/g, 'fill="#e8e8e8"');
+                    str = str.replace(/<use xlink:href="#/g, '<use xlink:href="#SB_');
+                    output += `<g id="SB_${key}">${str.replace(/\n/g, '')}</g>`;
+                }
             }
         }
+
         output += '</defs>';
         return(output);
     }

@@ -247,6 +247,47 @@ class SituationPlanElement {
         }
     }
 
+
+    /**
+     * berekenAfbeeldingsRotatieEnSpiegeling
+     * 
+     * Deze functie berekent de rotatie en spiegeling voor een afbeelding.
+     * 
+     * @returns {[number, boolean]} - Een array met de rotatiehoek en een boolean die aangeeft of de afbeelding gespiegeld moet worden.
+     */
+    public berekenAfbeeldingsRotatieEnSpiegeling = (): [number, boolean] => {
+
+        // Eerst testen we of het een schakelaar is die we niet in legacy afbeelden
+        if (structure.properties.legacySchakelaars == false) {
+            if (this.isEendraadschemaSymbool()) {
+                let electroItem = structure.getElectroItemById(this.electroItemId);
+                if (electroItem != null) {
+                    if ( (electroItem.props.type == 'Schakelaars') && 
+                        ( (electroItem.props.aantal_schakelaars == 1) || (electroItem.props.aantal_schakelaars == null) ) ) {
+                            if (['enkelpolig','dubbelpolig','driepolig','dubbelaansteking',
+                                 'wissel_enkel','wissel_dubbel','kruis_enkel',
+                                 'dimschakelaar','dimschakelaar wissel','rolluikschakelaar'].includes(electroItem.props.type_schakelaar))
+                                    return [this.rotate, false];
+                    }
+                }
+            }
+        }
+
+        // Zo-niet volgen we de oude code, schakelaars zullen hier mogelijk links/rechts gespiegeld worden
+        let rotate = this.rotate;
+        while (rotate < 0) rotate = rotate + 360;
+        rotate = rotate % 360;
+        
+        let spiegel = false;
+        
+        if ( (rotate >= 90) && (rotate < 270) ) {
+            if (this.isEDSSymbolAndRotates360degrees()) spiegel = true;
+            if (this.isEendraadschemaSymbool()) rotate = rotate + 180;
+        }
+
+        return [rotate, spiegel];
+    }
+
     /**
      * getScaledSVG
      * 
@@ -258,22 +299,6 @@ class SituationPlanElement {
      */
 
     getScaledSVG(positioned: boolean = false): string {
-
-        const berekenAfbeeldingsRotatieEnSpiegeling = (): [number, boolean] => {
-
-            let rotate = this.rotate;
-            while (rotate < 0) rotate = rotate + 360;
-            rotate = rotate % 360;
-            
-            let spiegel = false;
-            
-            if ( (rotate >= 90) && (rotate < 270) ) {
-                if (this.isEDSSymbolAndRotates360degrees()) spiegel = true;
-                if (this.isEendraadschemaSymbool()) rotate = rotate + 180;
-            }
-
-            return [rotate, spiegel];
-        }
 
         if (this.isEendraadschemaSymbool()) {
             let electroItem = structure.getElectroItemById(this.electroItemId);
@@ -287,7 +312,7 @@ class SituationPlanElement {
             
             posinfo = `x="${this.posx-this.sizex/2*this.scale}" y="${this.posy-this.sizey/2*this.scale}"`;
             
-            const [rotate, spiegel] = berekenAfbeeldingsRotatieEnSpiegeling();
+            const [rotate, spiegel] = this.berekenAfbeeldingsRotatieEnSpiegeling();
            
             transform = `transform="rotate(${rotate} ${this.posx} ${this.posy})${(spiegel ? ` scale(-1,1) translate(${-this.posx * 2} 0)` : '')}"`;
 

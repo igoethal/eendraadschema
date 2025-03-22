@@ -6,6 +6,7 @@ class Properties {
   info: string;
   dpi: number;
   currentView: string;
+  legacySchakelaars: boolean | null; // true als we geisoleerde schakelaars met een streepje moeten tekenen, null als we het moeten vragen
 
   constructor() {
     this.filename = "eendraadschema.eds";
@@ -15,6 +16,7 @@ class Properties {
     this.dpi = 300;
     this.info = "1 x 230V + N ~50 Hz";
     this.currentView = 'config';
+    this.legacySchakelaars = null;
   };
 
   setFilename(name) {

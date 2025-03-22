@@ -257,6 +257,10 @@ function json_to_structure(text: string, oldstruct: Hierarchical_List = null, ve
         if (typeof mystructure.properties.info != "undefined") outstruct.properties.info = mystructure.properties.info;
         if (typeof mystructure.properties.info != "undefined") outstruct.properties.dpi = mystructure.properties.dpi;
         if (typeof mystructure.properties.currentView != "undefined") outstruct.properties.currentView = mystructure.properties.currentView;
+        if (typeof mystructure.properties.legacySchakelaars != "undefined") 
+            outstruct.properties.legacySchakelaars = mystructure.properties.legacySchakelaars;
+        else
+            outstruct.properties.legacySchakelaars = null;
     }    
 
     // Kopieren van de paginatie voor printen

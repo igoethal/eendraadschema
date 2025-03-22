@@ -1096,6 +1096,118 @@ function printsvg() {
     renderPrintSVG(outSVG);
     toggleAppView('config');
 }
+var AskLegacySchakelaar = /** @class */ (function () {
+    function AskLegacySchakelaar() {
+    }
+    // Show the helper tip if it hasn't been dismissed before
+    AskLegacySchakelaar.prototype.show = function () {
+        // Create the popup
+        var popupOverlay = document.createElement('div');
+        popupOverlay.id = 'popupOverlay';
+        Object.assign(popupOverlay.style, {
+            position: 'fixed', top: '0', left: '0',
+            width: '100%', height: '100%',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex', justifyContent: 'center', alignItems: 'center',
+            visibility: 'hidden', zIndex: '9999'
+        });
+        var popup = document.createElement('div');
+        Object.assign(popup.style, {
+            position: 'fixed', top: '50%', left: '50%',
+            transform: 'translate(-50%, -50%)', backgroundColor: 'white',
+            padding: '5px 20px 20px', border: '1px solid #ccc', borderRadius: '8px',
+            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)', zIndex: '1000'
+        });
+        // Add the HTML content
+        popup.innerHTML = "<h3>Aanpassing symbolen schakelaars</h3>" +
+            "<p>Beste gebruiker. Uw situatieschema bevat symbolen voor schakelaars. " +
+            "Tot nogtoe werden die altijd afgebeeld met een klein lijntje (leiding) aan de zijkant.</p>" +
+            '<table border="0" style="border-collapse:collapse"><tr><td>' +
+            "<svg style=\"padding: 0px; margin: 0px; display:block\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" transform=\"scale(1,1)\" viewBox=\"12 0 38 40\" width=\"38\" height=\"40\"><defs><g id=\"signalisatielamp\"><circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\"></circle><line x1=\"-3\" y1=\"-3\" x2=\"3\" y2=\"3\" stroke=\"black\"></line><line x1=\"-3\" y1=\"3\" x2=\"3\" y2=\"-3\" stroke=\"black\"></line></g><g id=\"schakelaar_enkel\"><line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\"></line><line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\"></line><circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\"></circle></g></defs><line x1=\"1\" x2=\"31\" y1=\"25\" y2=\"25\" stroke=\"black\"></line><use xlink:href=\"#schakelaar_enkel\" x=\"31\" y=\"25\"></use></svg>" +
+            '</td><td>' +
+            "<svg style=\"padding: 0px; margin: 0px; display:block\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" transform=\"scale(1,1)\" viewBox=\"12 0 38 40\" width=\"38\" height=\"40\"><defs><g id=\"signalisatielamp\"><circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\"></circle><line x1=\"-3\" y1=\"-3\" x2=\"3\" y2=\"3\" stroke=\"black\"></line><line x1=\"-3\" y1=\"3\" x2=\"3\" y2=\"-3\" stroke=\"black\"></line></g><g id=\"schakelaar_enkel\"><line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\"></line><line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\"></line><circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\"></circle></g></defs><use xlink:href=\"#schakelaar_enkel\" x=\"31\" y=\"25\"></use></svg>" +
+            '</td></tr></table>' +
+            "<p>Op terechte vraag van enkele gebruikers zal dat voor toekomstige schema's niet meer het geval zijn en zullen de " +
+            "symbolen getekend worden zoals gangbaar in de meeste andere tekenprogramma's.</p>" +
+            "<p>Doorgaans zal het dan ook niet langer noodzakelijk zijn om dergelijke schakelaars te roteren.</p>" +
+            "<p>Voor dit schema kan u zelf nog kiezen hoe u de symbolen wenst weer te geven.</p>";
+        // Style the title
+        var title = popup.querySelector('h3');
+        if (title)
+            title.style.color = '#06F'; // Similar blue as the OK button
+        // Create the radioButtons
+        var radioButtons = document.createElement('div');
+        radioButtons.style.display = 'flex';
+        radioButtons.style.flexDirection = 'column';
+        radioButtons.style.marginTop = '10px';
+        var radioButton1 = document.createElement('input');
+        radioButton1.type = 'radio';
+        radioButton1.name = 'symbolChoice';
+        radioButton1.id = 'keepLegacy';
+        radioButton1.checked = true;
+        var label1 = document.createElement('label');
+        label1.htmlFor = 'keepLegacy';
+        label1.style.display = 'flex';
+        label1.style.alignItems = 'start';
+        label1.style.marginBottom = '10px';
+        label1.appendChild(radioButton1);
+        label1.appendChild(document.createTextNode('U behoudt de symbolen zoals voorheen voor dit schema.'));
+        radioButtons.appendChild(label1);
+        var radioButton2 = document.createElement('input');
+        radioButton2.type = 'radio';
+        radioButton2.name = 'symbolChoice';
+        radioButton2.id = 'dropLegacy';
+        var label2 = document.createElement('label');
+        label2.htmlFor = 'dropLegacy';
+        label2.style.display = 'flex';
+        label2.style.alignItems = 'start';
+        label2.style.marginBottom = '10px';
+        label2.appendChild(radioButton2);
+        label2.appendChild(document.createTextNode('U gebruikt de nieuwe symbolen zonder lijntje. De oorspronkelijke rotatie wordt hersteld. Mogelijk zal u bepaalde symbolen zelf opnieuw moeten roteren.'));
+        radioButtons.appendChild(label2);
+        popup.appendChild(radioButtons);
+        // Create the "OK" button
+        var okButton = document.createElement('button');
+        okButton.textContent = 'OK';
+        Object.assign(okButton.style, {
+            marginTop: '10px', padding: '10px 20px', cursor: 'pointer',
+            backgroundColor: '#3399FF', // Lighter blue hue color: 'white',
+            border: 'none', borderRadius: '5px', // Rounded corners display: 'block',
+            marginLeft: 'auto', marginRight: 'auto', width: '100px' // Wider button
+        });
+        // Add hover effect
+        okButton.addEventListener('mouseover', function () {
+            okButton.style.backgroundColor = '#06F'; // Darker blue on hover
+        });
+        okButton.addEventListener('mouseout', function () {
+            okButton.style.backgroundColor = '#3399FF'; // Lighter blue when not hovering
+        });
+        popup.appendChild(okButton);
+        // Add the popup to the document body
+        popupOverlay.appendChild(popup);
+        document.body.appendChild(popupOverlay);
+        popupOverlay.style.visibility = 'visible';
+        document.body.style.pointerEvents = 'none'; // Disable interactions with the background
+        popupOverlay.style.pointerEvents = 'auto'; // Enable interactions with the popup
+        return new Promise(function (resolve) {
+            okButton.addEventListener('click', function () {
+                var symbolChoice = document.querySelector('input[name="symbolChoice"]:checked');
+                if (symbolChoice && symbolChoice.id === 'keepLegacy') {
+                    structure.properties.legacySchakelaars = true;
+                }
+                else if (symbolChoice && symbolChoice.id === 'dropLegacy') {
+                    structure.properties.legacySchakelaars = false;
+                    structure.sitplan.dropLegacySchakelaars();
+                }
+                // Remove the popup
+                document.body.removeChild(popupOverlay);
+                document.body.style.pointerEvents = 'auto';
+                resolve("OK clicked!");
+            }, { once: true });
+        });
+    };
+    return AskLegacySchakelaar;
+}());
 var importExportUsingFileAPI = /** @class */ (function () {
     function importExportUsingFileAPI() {
         this.clear();
@@ -1389,6 +1501,10 @@ function json_to_structure(text, oldstruct, version) {
             outstruct.properties.dpi = mystructure.properties.dpi;
         if (typeof mystructure.properties.currentView != "undefined")
             outstruct.properties.currentView = mystructure.properties.currentView;
+        if (typeof mystructure.properties.legacySchakelaars != "undefined")
+            outstruct.properties.legacySchakelaars = mystructure.properties.legacySchakelaars;
+        else
+            outstruct.properties.legacySchakelaars = null;
     }
     // Kopieren van de paginatie voor printen
     if (typeof mystructure.print_table != "undefined") {
@@ -2394,6 +2510,37 @@ var SituationPlan = /** @class */ (function () {
     SituationPlan.prototype.getElements = function () {
         return this.elements;
     };
+    SituationPlan.prototype.heeftEenzameSchakelaars = function () {
+        var schakelaars = this.elements.filter(function (element) {
+            if (element.isEendraadschemaSymbool()) {
+                var electroItem = structure.getElectroItemById(element.getElectroItemId());
+                if (electroItem != null) {
+                    if (electroItem.props.type == "Schakelaars") {
+                        if ((electroItem.props.aantal_schakelaars == 1) || (electroItem.props.aantal_schakelaars == null)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        });
+        return schakelaars.length > 1;
+    };
+    SituationPlan.prototype.dropLegacySchakelaars = function () {
+        for (var _i = 0, _a = this.elements; _i < _a.length; _i++) {
+            var element = _a[_i];
+            if (element.isEendraadschemaSymbool()) {
+                var electroItem = structure.getElectroItemById(element.getElectroItemId());
+                if (electroItem != null) {
+                    if (electroItem.props.type == "Schakelaars") {
+                        if ((electroItem.props.aantal_schakelaars == 1) || (electroItem.props.aantal_schakelaars == null)) {
+                            element.rotate = 0;
+                        }
+                    }
+                }
+            }
+        }
+        ;
+    };
     /**
      * SituationPlanElement toevoegen aan het situatieplan
      * @param element
@@ -2625,6 +2772,7 @@ var SituationPlanElement = /** @class */ (function () {
      * Constructor
      */
     function SituationPlanElement() {
+        var _this = this;
         this.electroItemId = null; // Referentie naar het electro-element in de datastructuur indien van toepassing
         // -- Basis eigenschappen van het element zelf --
         this.boxref = null; // Referentie naar het DIV document in de browser waar het element wordt afgebeeld
@@ -2654,6 +2802,43 @@ var SituationPlanElement = /** @class */ (function () {
         this.needsViewUpdate = false;
         // -- Een vlag voor verplaatsbaarheid
         this.movable = true;
+        /**
+         * berekenAfbeeldingsRotatieEnSpiegeling
+         *
+         * Deze functie berekent de rotatie en spiegeling voor een afbeelding.
+         *
+         * @returns {[number, boolean]} - Een array met de rotatiehoek en een boolean die aangeeft of de afbeelding gespiegeld moet worden.
+         */
+        this.berekenAfbeeldingsRotatieEnSpiegeling = function () {
+            // Eerst testen we of het een schakelaar is die we niet in legacy afbeelden
+            if (structure.properties.legacySchakelaars == false) {
+                if (_this.isEendraadschemaSymbool()) {
+                    var electroItem = structure.getElectroItemById(_this.electroItemId);
+                    if (electroItem != null) {
+                        if ((electroItem.props.type == 'Schakelaars') &&
+                            ((electroItem.props.aantal_schakelaars == 1) || (electroItem.props.aantal_schakelaars == null))) {
+                            if (['enkelpolig', 'dubbelpolig', 'driepolig', 'dubbelaansteking',
+                                'wissel_enkel', 'wissel_dubbel', 'kruis_enkel',
+                                'dimschakelaar', 'dimschakelaar wissel', 'rolluikschakelaar'].includes(electroItem.props.type_schakelaar))
+                                return [_this.rotate, false];
+                        }
+                    }
+                }
+            }
+            // Zo-niet volgen we de oude code, schakelaars zullen hier mogelijk links/rechts gespiegeld worden
+            var rotate = _this.rotate;
+            while (rotate < 0)
+                rotate = rotate + 360;
+            rotate = rotate % 360;
+            var spiegel = false;
+            if ((rotate >= 90) && (rotate < 270)) {
+                if (_this.isEDSSymbolAndRotates360degrees())
+                    spiegel = true;
+                if (_this.isEendraadschemaSymbool())
+                    rotate = rotate + 180;
+            }
+            return [rotate, spiegel];
+        };
         this.id = randomId("SP_");
     }
     SituationPlanElement.prototype.setscale = function (scale) {
@@ -2825,22 +3010,7 @@ var SituationPlanElement = /** @class */ (function () {
      * TODO: kan nog efficienter indien we een flag "updated" hebben in het element zodat we weten wanneer we alles moeten hertekenen
      */
     SituationPlanElement.prototype.getScaledSVG = function (positioned) {
-        var _this = this;
         if (positioned === void 0) { positioned = false; }
-        var berekenAfbeeldingsRotatieEnSpiegeling = function () {
-            var rotate = _this.rotate;
-            while (rotate < 0)
-                rotate = rotate + 360;
-            rotate = rotate % 360;
-            var spiegel = false;
-            if ((rotate >= 90) && (rotate < 270)) {
-                if (_this.isEDSSymbolAndRotates360degrees())
-                    spiegel = true;
-                if (_this.isEendraadschemaSymbool())
-                    rotate = rotate + 180;
-            }
-            return [rotate, spiegel];
-        };
         if (this.isEendraadschemaSymbool()) {
             var electroItem = structure.getElectroItemById(this.electroItemId);
             if (electroItem != null)
@@ -2850,7 +3020,7 @@ var SituationPlanElement = /** @class */ (function () {
         var transform = '';
         if (positioned) { // Indien we de SVG willen positioneren en roteren, bvb voor gebruik in een print
             posinfo = "x=\"".concat(this.posx - this.sizex / 2 * this.scale, "\" y=\"").concat(this.posy - this.sizey / 2 * this.scale, "\"");
-            var _a = berekenAfbeeldingsRotatieEnSpiegeling(), rotate = _a[0], spiegel = _a[1];
+            var _a = this.berekenAfbeeldingsRotatieEnSpiegeling(), rotate = _a[0], spiegel = _a[1];
             transform = "transform=\"rotate(".concat(rotate, " ").concat(this.posx, " ").concat(this.posy, ")").concat((spiegel ? " scale(-1,1) translate(".concat(-this.posx * 2, " 0)") : ''), "\"");
             return "<g ".concat(transform, ">\n                    <svg ").concat(posinfo, " width=\"").concat(this.sizex * this.scale, "px\" height=\"").concat(this.sizey * this.scale, "px\" viewBox=\"0 0 ").concat(this.sizex, " ").concat(this.sizey, "\">").concat(this.svg, "</svg>\n                    </g>");
         }
@@ -3573,17 +3743,7 @@ var SituationPlanView = /** @class */ (function () {
         function getRotationTransform(sitPlanElement) {
             if (!sitPlanElement)
                 return '';
-            var rotation = sitPlanElement.rotate;
-            while (rotation < 0)
-                rotation += 360;
-            rotation = rotation % 360;
-            var spiegel = false;
-            if ((rotation >= 90) && (rotation < 270)) {
-                if (sitPlanElement.isEDSSymbolAndRotates360degrees())
-                    spiegel = true;
-                if (sitPlanElement.isEendraadschemaSymbool())
-                    rotation -= 180;
-            }
+            var _a = sitPlanElement.berekenAfbeeldingsRotatieEnSpiegeling(), rotation = _a[0], spiegel = _a[1];
             return "rotate(".concat(rotation, "deg)") + (spiegel ? ' scaleX(-1)' : '');
         }
         if (!sitPlanElement)
@@ -4156,10 +4316,21 @@ function showSituationPlanPage() {
         structure.sitplanview.zoomToFit();
     }
     ;
+    if (structure.properties.legacySchakelaars == null) {
+        if (structure.sitplan.heeftEenzameSchakelaars()) {
+            var askLegacySchakelaar = new AskLegacySchakelaar();
+            askLegacySchakelaar.show().then(function () {
+                structure.sitplanview.redraw();
+            });
+            return;
+        }
+        else {
+            structure.properties.legacySchakelaars = false; // We gaan dadelijk naar de nieuwe situatie
+        }
+    }
     structure.sitplanview.redraw();
-    // Initialize the HelperTip with the storage
     var helperTip = new HelperTip(appDocStorage);
-    helperTip.show('sitplan.introductie', "<h3>Situatieschema tekenen</h3>\n    <p>Op deze pagina kan u een situatieschema tekenen.</p>\n    <p>Laad een plattegrond met de knop \"Uit bestand\" en voeg symbolen toe met de knop \"Uit schema\".</p>\n    <p>Klik <a href=\"Documentation/sitplandoc.pdf\" target=\"_blank\" rel=\"noopener noreferrer\">hier</a> om in een nieuw venster de documentatie te bekijken.</p>\n    <p>Het situatieschema werd recent toegevoegd aan het programma en zal nog verder ontwikkeld worden over de komende weken. Opmerkingen zijn welkom in het \"contact\"-formulier.</p>");
+    helperTip.show('sitplan.introductie', "<h3>Situatieschema tekenen</h3>\n    <p>Op deze pagina kan u een situatieschema tekenen.</p>\n    <p>Laad een plattegrond met de knop \"Uit bestand\" en voeg symbolen toe met de knop \"Uit schema\".</p>\n    <p>Klik <a href=\"Documentation/sitplandoc.pdf\" target=\"_blank\" rel=\"noopener noreferrer\">hier</a> om in een nieuw venster de documentatie te bekijken.</p>\n    <p>We werken elke dag om dit programma beter te maken. Opmerkingen en idee\u00EBn zijn welkom in het \"contact\"-formulier.</p>");
 }
 /**
  * Een serie functies om een formulier te tonen met edit-functionaliteiten voor symbolen in het situatieplan
@@ -5035,6 +5206,14 @@ var Electro_Item = /** @class */ (function (_super) {
         var rotate = myElement.rotate % 360;
         if ((rotate >= 90) && (rotate < 270))
             spiegeltext = true;
+        // als we een enkelvoudige schakelaar hebben die niet legacy is, dan spiegelen we niet
+        if (this.props.type == "Schakelaars") {
+            if (structure.properties.legacySchakelaars == false) {
+                if ((this.props.aantal_schakelaars == 1) || (this.props.aantal_schakelaars == null)) {
+                    spiegeltext = false;
+                }
+            }
+        }
         SVGSymbols.clearSymbols(); // We gaan enkel de symbolen gebruiken die nodig zijn voor dit element
         var mySVGElement = this.toSVG(true, spiegeltext);
         var sizex = mySVGElement.xright + mySVGElement.xleft + 10;
@@ -5613,6 +5792,15 @@ var Schakelaars = /** @class */ (function (_super) {
             var islast = ((i == tekenKeten.length - 1) && (!this.heeftVerbruikerAlsKind()));
             var str = void 0;
             (_a = tekenKeten[i].toSVGString(startx, islast, sitplan, mirrortext), startx = _a.endx, str = _a.str, lowerbound = _a.lowerbound);
+            // Als we geen legacy schakelaars tekenen halen we links het lijntje van de eerste schakelaar weg
+            if (sitplan) {
+                if ((structure.properties.legacySchakelaars == false) && (i == 0) && (tekenKeten.length == 1)) {
+                    if (str.startsWith('<line')) {
+                        var idx = str.indexOf('>');
+                        str = str.substring(idx + 1);
+                    }
+                }
+            }
             mySVG.data += str;
         }
         // Voor bepaalde symbolen moet wat extra ruimte rechts voorzien worden om te vermijden dat de tekening door de volgende kring loopt
@@ -9572,6 +9760,7 @@ var Properties = /** @class */ (function () {
         this.dpi = 300;
         this.info = "1 x 230V + N ~50 Hz";
         this.currentView = 'config';
+        this.legacySchakelaars = null;
     }
     ;
     Properties.prototype.setFilename = function (name) {
@@ -9590,7 +9779,8 @@ var SVGSymbols = /** @class */ (function () {
     SVGSymbols.clearSymbols = function () {
         this.neededSymbols = [];
     };
-    SVGSymbols.getNeededSymbols = function () {
+    SVGSymbols.getNeededSymbols = function (sidebar) {
+        if (sidebar === void 0) { sidebar = false; }
         var output = '<defs>';
         if (this.neededSymbols.includes('VerticalStripe')) {
             output += '<pattern id="VerticalStripe" x="5" y="0" width="5" height="10" patternUnits="userSpaceOnUse" >' +
@@ -9599,7 +9789,13 @@ var SVGSymbols = /** @class */ (function () {
         }
         for (var key in this.data) {
             if (this.neededSymbols.includes(key)) {
-                output += "<g id=\"".concat(key, "\">").concat(this.data[key].replace(/\n/g, ''), "</g>");
+                if (!sidebar)
+                    output += "<g id=\"".concat(key, "\">").concat(this.data[key].replace(/\n/g, ''), "</g>");
+                else {
+                    var str = this.data[key].replace(/fill="white"/g, 'fill="#e8e8e8"');
+                    str = str.replace(/<use xlink:href="#/g, '<use xlink:href="#SB_');
+                    output += "<g id=\"SB_".concat(key, "\">").concat(str.replace(/\n/g, ''), "</g>");
+                }
             }
         }
         output += '</defs>';

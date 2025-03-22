@@ -43,6 +43,38 @@ class SituationPlan {
         return this.elements;
     }
 
+
+    heeftEenzameSchakelaars() {
+        var schakelaars = this.elements.filter(function (element) {
+            if (element.isEendraadschemaSymbool()) {
+                let electroItem = structure.getElectroItemById(element.getElectroItemId());
+                if (electroItem != null) {
+                    if (electroItem.props.type == "Schakelaars") {
+                        if ( (electroItem.props.aantal_schakelaars == 1) || (electroItem.props.aantal_schakelaars == null) ) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        });
+        return schakelaars.length > 1;
+    }
+
+    dropLegacySchakelaars() {
+        for (let element of this.elements) {
+            if (element.isEendraadschemaSymbool()) {
+                let electroItem = structure.getElectroItemById(element.getElectroItemId());
+                if (electroItem != null) {
+                    if (electroItem.props.type == "Schakelaars") {
+                        if ( (electroItem.props.aantal_schakelaars == 1) || (electroItem.props.aantal_schakelaars == null) ) {
+                            element.rotate = 0;
+                        }
+                    }
+                }
+            }
+        };
+    }
+
     /**
      * SituationPlanElement toevoegen aan het situatieplan
      * @param element

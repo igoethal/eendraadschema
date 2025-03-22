@@ -317,6 +317,15 @@ class Electro_Item extends List_Item {
     let rotate = myElement.rotate % 360;
     if ( (rotate >= 90) && (rotate < 270) ) spiegeltext = true;
 
+    // als we een enkelvoudige schakelaar hebben die niet legacy is, dan spiegelen we niet
+    if (this.props.type == "Schakelaars") {
+      if (structure.properties.legacySchakelaars == false) {
+        if ( (this.props.aantal_schakelaars == 1) || (this.props.aantal_schakelaars == null) ) {
+          spiegeltext = false;
+        }
+      }
+    }
+
     SVGSymbols.clearSymbols(); // We gaan enkel de symbolen gebruiken die nodig zijn voor dit element
 
     let mySVGElement:SVGelement = this.toSVG(true, spiegeltext);

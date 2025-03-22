@@ -221,7 +221,18 @@ class Schakelaars extends Electro_Item {
 
         for (let i=0; i<tekenKeten.length; i++ ) {
             let islast: boolean = ( (i == tekenKeten.length-1) && (!this.heeftVerbruikerAlsKind()) );
-            let str:string; ( {endx: startx, str: str, lowerbound: lowerbound} = tekenKeten[i].toSVGString(startx,islast,sitplan,mirrortext) ); mySVG.data += str;
+            let str:string; 
+            ( {endx: startx, str: str, lowerbound: lowerbound} = tekenKeten[i].toSVGString(startx,islast,sitplan,mirrortext) ); 
+            // Als we geen legacy schakelaars tekenen halen we links het lijntje van de eerste schakelaar weg
+            if (sitplan) {
+                if ( (structure.properties.legacySchakelaars == false) && (i == 0 ) && (tekenKeten.length == 1) ) {
+                    if (str.startsWith('<line')) {
+                        let idx = str.indexOf('>');
+                        str = str.substring(idx+1);
+                    }
+                }
+            }
+            mySVG.data += str;
         }
         // Voor bepaalde symbolen moet wat extra ruimte rechts voorzien worden om te vermijden dat de tekening door de volgende kring loopt
         if ( (!this.heeftVerbruikerAlsKind()) || (sitplan) ) {

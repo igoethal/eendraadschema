@@ -11,7 +11,7 @@
     "SVGelement.ts",
     "EventManager.ts",
     "print/*.ts",
-    "importExport.ts",
+    "importExport/*.ts",
     "undoRedo.ts",
     "TopMenu.ts",
     "documentation/*.ts",
