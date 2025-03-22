@@ -47,16 +47,32 @@ function printPDF(svg, print_table, properties, pages=[1], filename="eendraadsch
                     + '" viewBox="0 0 ' + sizex + ' ' + sizey + '" xmlns="http://www.w3.org/2000/svg">'
                     + svg + '</svg>';
 
-        const svgBlob = new Blob([scaledsvg], { type: 'image/svg+xml;charset=utf-8' });
-        const url = URL.createObjectURL(svgBlob);
+        //--- Old code giving problems with tainting ---
+        //const svgBlob = new Blob([scaledsvg], { type: 'image/svg+xml;charset=utf-8' });
+        //const url = URL.createObjectURL(svgBlob);
+        
+        //--- New code under review
+        const url = 'data:image/svg+xml; charset=utf8, ' + encodeURIComponent(scaledsvg);
+
         const img = new Image();
         img.onload = function() {
             const canvas = document.createElement('canvas');
             canvas.width = img.width;
             canvas.height = img.height;
+            canvas.crossOrigin = 'anonymous';
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0);
-            const png = canvas.toDataURL('image/png');
+            let png = null;
+            try {
+                png = canvas.toDataURL('image/png');
+            } catch (e) {
+                if (img.complete) {
+                    alert("Er is een element in het situatieschema dat verwijst naar een andere website en dit veroorzaakt een security-error in deze browser. Dit kan bijvoorbeeld gebeuren indien u een plattegrond gemaakt heeft met online tools zoals draw.io. Probeer uw plattegrond op te slaan in een ander formaat. Indien het probleem blijft aanhouden, contacteer ons dan via het contactformulier.");
+                } else {
+                    alert("Het genereren van de PDF is om onduidelijke redenen vastgelopen. Contacteer ons via het contactformulier.");
+                }
+                return;
+            }
             callback(png,scale);
             URL.revokeObjectURL(url);
             canvas.remove(); // remove the canvas element when we are done with it
