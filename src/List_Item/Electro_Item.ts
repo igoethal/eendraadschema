@@ -284,6 +284,16 @@ class Electro_Item extends List_Item {
   }
 
   /**
+   * Geeft het maximum aantal elementen dat een Electro_Item kan hebben in een situatieplan.
+   * 
+   * @returns {number} Het maximum aantal elementen dat een Electro_Item kan hebben in een situatieplan.
+   */
+
+  maxSituationPlanElements() {
+    return 1;
+  }
+
+  /**
    * Geeft de boundary's terug van het element in het situatieplan. Deze boundary's worden gebruikt om het element te positioneren en te clippen.
    * 
    * @returns {Object} Een object met de volgende properties:

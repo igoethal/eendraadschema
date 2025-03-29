@@ -246,6 +246,16 @@ class SituationPlan {
     }
 
     /**
+     * Tel het aantal elementen in het situatieplan dat overeenkomt met het gegeven electroItemId.
+     * 
+     * @param {number} electroItemId - Het ID van het Electro_Item waarvan de elementen geteld moeten worden.
+     * @returns {number} Het aantal elementen met het gegeven electroItemId.
+     */
+    countByElectroItemId(electroItemId: number): number {
+        return this.elements.filter(element => element.getElectroItemId() === electroItemId).length;
+    }
+
+    /**
      * Converteer het situatieplan naar een formaat dat gebruikt kan worden voor printen.
      * 
      * @param {boolean} fitToPage Indien `true` dan wordt de pagina automatisch aangepast om alle elementen te laten passen.

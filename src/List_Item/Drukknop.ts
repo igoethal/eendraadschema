@@ -24,6 +24,16 @@ class Drukknop extends Electro_Item {
         this.props.heeft_verklikkerlampje = false;
     }
 
+  /**
+   * Geeft het maximum aantal elementen dat een Electro_Item kan hebben in een situatieplan.
+   * 
+   * @returns {number} Het maximum aantal elementen dat een Electro_Item kan hebben in een situatieplan.
+   */
+
+  maxSituationPlanElements() {
+    return this.props.aantal;
+  }
+
     toHTML(mode: string) {
         let output = this.toHTMLHeader(mode);
 
@@ -73,7 +83,7 @@ class Drukknop extends Electro_Item {
         // Plaats tekst voor "h" en/of aantal armaturen onderaan
         var printstr:string = "";
         if (this.props.is_halfwaterdicht) printstr += 'h';
-        if (aantal_knoppen > 1) {
+        if ((aantal_knoppen > 1) && (!sitplan)) {
           if (printstr != '') { printstr += ', ' }
           printstr += 'x' + aantal_knoppen;
         }

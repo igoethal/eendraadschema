@@ -2705,6 +2705,15 @@ var SituationPlan = /** @class */ (function () {
         return { numPages: this.numPages, activePage: this.activePage, defaults: this.defaults, elements: elements };
     };
     /**
+     * Tel het aantal elementen in het situatieplan dat overeenkomt met het gegeven electroItemId.
+     *
+     * @param {number} electroItemId - Het ID van het Electro_Item waarvan de elementen geteld moeten worden.
+     * @returns {number} Het aantal elementen met het gegeven electroItemId.
+     */
+    SituationPlan.prototype.countByElectroItemId = function (electroItemId) {
+        return this.elements.filter(function (element) { return element.getElectroItemId() === electroItemId; }).length;
+    };
+    /**
      * Converteer het situatieplan naar een formaat dat gebruikt kan worden voor printen.
      *
      * @param {boolean} fitToPage Indien `true` dan wordt de pagina automatisch aangepast om alle elementen te laten passen.
@@ -3875,6 +3884,7 @@ var SituationPlanView = /** @class */ (function () {
             sitPlanElement.boxlabelref.remove();
         this.sitplan.removeElement(sitPlanElement);
         this.selectedBox = null;
+        this.sideBar.render();
     };
     /**
      * Send the selected box to the back of the z-index stack and reorder the elements of the situation plan accordingly
@@ -5173,6 +5183,14 @@ var Electro_Item = /** @class */ (function (_super) {
     Electro_Item.prototype.expand = function () {
         if (!this.isExpandable())
             return;
+    };
+    /**
+     * Geeft het maximum aantal elementen dat een Electro_Item kan hebben in een situatieplan.
+     *
+     * @returns {number} Het maximum aantal elementen dat een Electro_Item kan hebben in een situatieplan.
+     */
+    Electro_Item.prototype.maxSituationPlanElements = function () {
+        return 1;
     };
     /**
      * Geeft de boundary's terug van het element in het situatieplan. Deze boundary's worden gebruikt om het element te positioneren en te clippen.
@@ -7169,6 +7187,14 @@ var Drukknop = /** @class */ (function (_super) {
         this.props.is_halfwaterdicht = false;
         this.props.heeft_verklikkerlampje = false;
     };
+    /**
+     * Geeft het maximum aantal elementen dat een Electro_Item kan hebben in een situatieplan.
+     *
+     * @returns {number} Het maximum aantal elementen dat een Electro_Item kan hebben in een situatieplan.
+     */
+    Drukknop.prototype.maxSituationPlanElements = function () {
+        return this.props.aantal;
+    };
     Drukknop.prototype.toHTML = function (mode) {
         var output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml()
@@ -7211,7 +7237,7 @@ var Drukknop = /** @class */ (function (_super) {
         var printstr = "";
         if (this.props.is_halfwaterdicht)
             printstr += 'h';
-        if (aantal_knoppen > 1) {
+        if ((aantal_knoppen > 1) && (!sitplan)) {
             if (printstr != '') {
                 printstr += ', ';
             }
@@ -8093,6 +8119,14 @@ var Lichtpunt = /** @class */ (function (_super) {
         this.props.is_wandlamp = false;
         this.props.is_halfwaterdicht = false;
         this.props.heeft_ingebouwde_schakelaar = false;
+    };
+    /**
+     * Geeft het maximum aantal elementen dat een Electro_Item kan hebben in een situatieplan.
+     *
+     * @returns {number} Het maximum aantal elementen dat een Electro_Item kan hebben in een situatieplan.
+     */
+    Lichtpunt.prototype.maxSituationPlanElements = function () {
+        return this.props.aantal;
     };
     Lichtpunt.prototype.toHTML = function (mode) {
         this.overrideKeys();

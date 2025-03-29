@@ -564,6 +564,8 @@ class SituationPlanView {
         this.sitplan.removeElement(sitPlanElement);
 
         this.selectedBox = null;
+
+        this.sideBar.render();
     }
 
     /**

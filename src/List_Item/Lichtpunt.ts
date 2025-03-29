@@ -32,6 +32,16 @@ class Lichtpunt extends Electro_Item {
         this.props.heeft_ingebouwde_schakelaar = false;
     }
 
+    /**
+     * Geeft het maximum aantal elementen dat een Electro_Item kan hebben in een situatieplan.
+     * 
+     * @returns {number} Het maximum aantal elementen dat een Electro_Item kan hebben in een situatieplan.
+     */
+
+    maxSituationPlanElements() {
+        return this.props.aantal;
+    }
+
     toHTML(mode: string) {
         this.overrideKeys();
         let output = this.toHTMLHeader(mode);
