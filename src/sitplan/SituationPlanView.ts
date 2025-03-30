@@ -626,7 +626,7 @@ class SituationPlanView {
      * 
      * @returns void
      */
-    bringToFront() {
+    bringToFront(undoStore: boolean = true) {
         if (this.selectedBox == null) return;
 
         let newzindex = 0;
@@ -644,7 +644,7 @@ class SituationPlanView {
         if (element.boxlabelref != null) element.boxlabelref.style.zIndex = newzindex.toString();
 
         this.sitplan.orderByZIndex();
-        undostruct.store();
+        if (undoStore) undostruct.store();
     }
 
     /**
@@ -939,11 +939,12 @@ class SituationPlanView {
                                     this.selectPage(newPage);
                                     this.selectBox(box); //keep the selection active
                                     if (newPage != oldPage) {
-                                        this.bringToFront();
+                                        this.bringToFront(false);
                                     }
                                 } else {
                                     this.selectPage(newPage);
                                 }
+                                undostruct.store();
                             }
                             break;
                         case 'PageUp':
@@ -957,11 +958,12 @@ class SituationPlanView {
                                     this.selectPage(newPage);
                                     this.selectBox(box); //keep the selection active
                                     if (newPage != oldPage) {
-                                        this.bringToFront();
+                                        this.bringToFront(false);
                                     }
                                 } else {
                                     this.selectPage(newPage);
                                 }
+                                undostruct.store();
                             } 
                             break;
                         case 'Escape':
@@ -987,6 +989,7 @@ class SituationPlanView {
                         {
                             let newPage = (this.sitplan.activePage + 1);
                             if (newPage > this.sitplan.numPages) newPage = 1;
+                            if (newPage != this.sitplan.activePage) undostruct.store("changePage");
                             this.selectPage(newPage);
                         }
                         break;
@@ -994,6 +997,7 @@ class SituationPlanView {
                         {
                             let newPage = (this.sitplan.activePage - 1);
                             if (newPage < 1) newPage = this.sitplan.numPages;
+                            if (newPage != this.sitplan.activePage) undostruct.store("changePage");
                             this.selectPage(newPage);
                         } 
                         break;
@@ -1319,7 +1323,7 @@ class SituationPlanView {
             this.contextMenu.hide();
             const target = event.target as HTMLSelectElement;
             this.selectPage(Number(target.value));
-            undostruct.store();
+            undostruct.store("changePage");
         };
         
         document.getElementById('btn_sitplan_addpage')!.onclick = () => {
@@ -1342,6 +1346,7 @@ class SituationPlanView {
                 });
                 if (this.sitplan.numPages>1) this.sitplan.numPages--;
                 this.selectPage(Math.min(this.sitplan.activePage,this.sitplan.numPages))
+                undostruct.store();
             }
         };
 

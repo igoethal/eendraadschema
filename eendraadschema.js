@@ -4033,7 +4033,8 @@ var SituationPlanView = /** @class */ (function () {
      *
      * @returns void
      */
-    SituationPlanView.prototype.bringToFront = function () {
+    SituationPlanView.prototype.bringToFront = function (undoStore) {
+        if (undoStore === void 0) { undoStore = true; }
         if (this.selectedBox == null)
             return;
         var newzindex = 0;
@@ -4053,7 +4054,8 @@ var SituationPlanView = /** @class */ (function () {
         if (element.boxlabelref != null)
             element.boxlabelref.style.zIndex = newzindex.toString();
         this.sitplan.orderByZIndex();
-        undostruct.store();
+        if (undoStore)
+            undostruct.store();
     };
     /**
      * Selecteer een pagina.
@@ -4213,12 +4215,13 @@ var SituationPlanView = /** @class */ (function () {
                                     _this.selectPage(newPage);
                                     _this.selectBox(box); //keep the selection active
                                     if (newPage != oldPage) {
-                                        _this.bringToFront();
+                                        _this.bringToFront(false);
                                     }
                                 }
                                 else {
                                     _this.selectPage(newPage);
                                 }
+                                undostruct.store();
                             }
                             break;
                         case 'PageUp':
@@ -4233,12 +4236,13 @@ var SituationPlanView = /** @class */ (function () {
                                     _this.selectPage(newPage);
                                     _this.selectBox(box); //keep the selection active
                                     if (newPage != oldPage) {
-                                        _this.bringToFront();
+                                        _this.bringToFront(false);
                                     }
                                 }
                                 else {
                                     _this.selectPage(newPage);
                                 }
+                                undostruct.store();
                             }
                             break;
                         case 'Escape':
@@ -4265,6 +4269,8 @@ var SituationPlanView = /** @class */ (function () {
                             var newPage = (_this.sitplan.activePage + 1);
                             if (newPage > _this.sitplan.numPages)
                                 newPage = 1;
+                            if (newPage != _this.sitplan.activePage)
+                                undostruct.store("changePage");
                             _this.selectPage(newPage);
                         }
                         break;
@@ -4273,6 +4279,8 @@ var SituationPlanView = /** @class */ (function () {
                             var newPage = (_this.sitplan.activePage - 1);
                             if (newPage < 1)
                                 newPage = _this.sitplan.numPages;
+                            if (newPage != _this.sitplan.activePage)
+                                undostruct.store("changePage");
                             _this.selectPage(newPage);
                         }
                         break;
@@ -4447,7 +4455,7 @@ var SituationPlanView = /** @class */ (function () {
             _this.contextMenu.hide();
             var target = event.target;
             _this.selectPage(Number(target.value));
-            undostruct.store();
+            undostruct.store("changePage");
         };
         document.getElementById('btn_sitplan_addpage').onclick = function () {
             _this.contextMenu.hide();
@@ -4469,6 +4477,7 @@ var SituationPlanView = /** @class */ (function () {
                 if (_this.sitplan.numPages > 1)
                     _this.sitplan.numPages--;
                 _this.selectPage(Math.min(_this.sitplan.activePage, _this.sitplan.numPages));
+                undostruct.store();
             }
         };
         // -- Actions om elementen toe te voegen of verwijderen --
