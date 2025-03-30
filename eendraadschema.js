@@ -351,6 +351,80 @@ var randomId = (function () {
         return "".concat(prefix).concat(value.toString());
     };
 })();
+/**
+ * Toont een popup met een vraag en een dropdown lijst met opties.
+ * De gebruiker kan kiezen tussen "OK" of "Annuleer".
+ *
+ * @param question - De vraag om af te beelden in de popup.
+ * @param options - An array van strings met de opties in de dropdown lijst.
+ * @returns A promise that resolves to the selected option string, or null if cancelled.
+ */
+function showSelectPopup(question, options) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            return [2 /*return*/, new Promise(function (resolve) {
+                    var popupOverlay = document.createElement("div");
+                    Object.assign(popupOverlay.style, {
+                        position: 'fixed',
+                        top: 0, left: 0, width: '100%', height: '100%',
+                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                        display: 'flex',
+                        justifyContent: 'center', alignItems: 'center',
+                        visibility: 'hidden',
+                        zIndex: 9999
+                    });
+                    document.body.appendChild(popupOverlay);
+                    var popup = document.createElement("div");
+                    Object.assign(popup.style, {
+                        backgroundColor: "white", border: "1px solid #ccc", padding: "20px", boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)"
+                    });
+                    popupOverlay.appendChild(popup);
+                    var questionAndSelect = document.createElement("div");
+                    questionAndSelect.style.display = "flex";
+                    questionAndSelect.style.alignItems = "center";
+                    var questionElem = document.createElement("p");
+                    questionElem.textContent = question;
+                    questionAndSelect.appendChild(questionElem);
+                    var selectElem = document.createElement("select");
+                    options.forEach(function (option) {
+                        var optionElem = document.createElement("option");
+                        optionElem.value = option;
+                        optionElem.textContent = option;
+                        selectElem.appendChild(optionElem);
+                    });
+                    selectElem.style.marginLeft = "10px";
+                    questionAndSelect.appendChild(selectElem);
+                    popup.appendChild(questionAndSelect);
+                    var buttonBar = document.createElement("div");
+                    Object.assign(buttonBar.style, {
+                        display: "flex", justifyContent: "center", marginTop: "10px"
+                    });
+                    var okButton = document.createElement("button");
+                    okButton.textContent = "OK";
+                    okButton.style.marginRight = "10px";
+                    buttonBar.appendChild(okButton);
+                    var cancelButton = document.createElement("button");
+                    cancelButton.textContent = "Annuleren";
+                    buttonBar.appendChild(cancelButton);
+                    popup.appendChild(buttonBar);
+                    okButton.addEventListener("click", function () {
+                        var selectedValue = selectElem.value;
+                        popupOverlay.style.visibility = 'hidden';
+                        popupOverlay.removeChild(popup);
+                        document.body.removeChild(popupOverlay);
+                        resolve(selectedValue);
+                    });
+                    cancelButton.addEventListener("click", function () {
+                        popupOverlay.style.visibility = 'hidden';
+                        popupOverlay.removeChild(popup);
+                        document.body.removeChild(popupOverlay);
+                        resolve(null);
+                    });
+                    popupOverlay.style.visibility = 'visible';
+                })];
+        });
+    });
+}
 var Session = /** @class */ (function () {
     function Session() {
         this.sessionKey = 'SessionJS';
@@ -3038,6 +3112,14 @@ var SituationPlanElement = /** @class */ (function () {
         }
     };
     /**
+     * Wijzigt de pagina van het element
+     *
+     * @param {number} page - Het nummer van de pagina
+     */
+    SituationPlanElement.prototype.changePage = function (page) {
+        this.page = page;
+    };
+    /**
      * getSizeFromString
      *
      * Haal de grootte van het SVG element uit de SVG string
@@ -3207,6 +3289,11 @@ var SituationPlanView = /** @class */ (function () {
          * @param event - De muisgebeurtenis die het menu opent (right click).
          */
         this.showContextMenu = function (event) {
+            if (_this.selectedBox == null)
+                return;
+            var sitPlanElement = _this.selectedBox.sitPlanElementRef;
+            if (sitPlanElement == null)
+                return;
             event.preventDefault();
             _this.contextMenu.clearMenu();
             _this.contextMenu.addMenuItem('Draai rechts', function () { _this.rotateSelectedBox(90, true); }, 'Ctrl →');
@@ -3214,23 +3301,21 @@ var SituationPlanView = /** @class */ (function () {
             _this.contextMenu.addLine();
             _this.contextMenu.addMenuItem('Bewerk', _this.editSelectedBox.bind(_this), 'Enter');
             _this.contextMenu.addLine();
-            if (_this.selectedBox != null) {
-                var sitPlanElement = _this.selectedBox.sitPlanElementRef;
-                if (sitPlanElement != null) {
-                    switch (sitPlanElement.movable) {
-                        case true:
-                            _this.contextMenu.addMenuItem('Vergrendel', _this.toggleSelectedBoxMovable.bind(_this), 'Ctrl L');
-                            _this.contextMenu.addLine();
-                            break;
-                        case false:
-                            _this.contextMenu.addMenuItem('Ontgrendel', _this.toggleSelectedBoxMovable.bind(_this), 'Ctrl L');
-                            _this.contextMenu.addLine();
-                            break;
-                    }
-                }
+            switch (sitPlanElement.movable) {
+                case true:
+                    _this.contextMenu.addMenuItem('Vergrendel', _this.toggleSelectedBoxMovable.bind(_this), 'Ctrl L');
+                    _this.contextMenu.addLine();
+                    break;
+                case false:
+                    _this.contextMenu.addMenuItem('Ontgrendel', _this.toggleSelectedBoxMovable.bind(_this), 'Ctrl L');
+                    _this.contextMenu.addLine();
+                    break;
             }
             _this.contextMenu.addMenuItem('Verwijder', _this.deleteSelectedBox.bind(_this), 'Del');
-            //this.contextMenu.addMenuItem('Item 3', () => alert('Item 3 clicked'));
+            if ((_this.sitplan.numPages > 1) && (sitPlanElement.movable)) {
+                _this.contextMenu.addLine();
+                _this.contextMenu.addMenuItem('Naar pagina..', _this.changePageSelectedBox.bind(_this), 'PgUp/PgDn');
+            }
             _this.contextMenu.show(event);
         };
         /**
@@ -3600,6 +3685,34 @@ var SituationPlanView = /** @class */ (function () {
             }
         }
         undostruct.store();
+    };
+    SituationPlanView.prototype.changePageSelectedBox = function () {
+        var _this = this;
+        if (this.selectedBox != null) {
+            var pages_1 = Array.from({ length: this.sitplan.numPages }, function (_, i) { return String(i + 1); }).filter(function (page) { return page !== String(_this.sitplan.activePage); });
+            (function () { return __awaiter(_this, void 0, void 0, function () {
+                var result, sitPlanElement;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, showSelectPopup("Nieuwe pagina:", pages_1)];
+                        case 1:
+                            result = _a.sent();
+                            if (result !== null) {
+                                sitPlanElement = this.selectedBox.sitPlanElementRef;
+                                if (sitPlanElement != null) {
+                                    sitPlanElement.changePage(+result);
+                                    this.selectPage(+result);
+                                    undostruct.store();
+                                }
+                            }
+                            else {
+                                //console.log("Selection canceled.");
+                            }
+                            return [2 /*return*/];
+                    }
+                });
+            }); })();
+        }
     };
     /**
      * Maakt een box en een label op de DOM of in een document-fragmentaan voor een element in het situatieplan.
@@ -4028,6 +4141,7 @@ var SituationPlanView = /** @class */ (function () {
                 return; // Check if we are really in the situationplan, if not, the default scrolling action will be executed by the browser
             if (document.getElementById('popupOverlay') != null)
                 return; // We need the keys when editing symbol properties.
+            // Loop enkel voor undo-redo, andere acties beneden
             if (event.ctrlKey) {
                 switch (event.key) {
                     case 'z':
@@ -4047,6 +4161,7 @@ var SituationPlanView = /** @class */ (function () {
                     //do nothing as we also have ctrl + arrow keys here below.
                 }
             }
+            // Loop indien box geselecteerd
             if (_this.selectedBox) { // Check if we have a selected box, if not, the default scrolling action will be executed by the browser
                 event.preventDefault();
                 var sitPlanElement = _this.selectedBox.sitPlanElementRef;
@@ -4086,6 +4201,49 @@ var SituationPlanView = /** @class */ (function () {
                             sitPlanElement.posy += 1;
                             undostruct.store('arrowMove' + sitPlanElement.id);
                             break;
+                        case 'PageDown':
+                            {
+                                var oldPage = sitPlanElement.page;
+                                var newPage = (sitPlanElement.page + 1);
+                                if (newPage > _this.sitplan.numPages)
+                                    newPage = 1;
+                                if (sitPlanElement.movable) {
+                                    sitPlanElement.changePage(newPage);
+                                    var box = _this.selectedBox;
+                                    _this.selectPage(newPage);
+                                    _this.selectBox(box); //keep the selection active
+                                    if (newPage != oldPage) {
+                                        _this.bringToFront();
+                                    }
+                                }
+                                else {
+                                    _this.selectPage(newPage);
+                                }
+                            }
+                            break;
+                        case 'PageUp':
+                            {
+                                var oldPage = sitPlanElement.page;
+                                var newPage = (sitPlanElement.page - 1);
+                                if (newPage < 1)
+                                    newPage = _this.sitplan.numPages;
+                                if (sitPlanElement.movable) {
+                                    sitPlanElement.changePage(newPage);
+                                    var box = _this.selectedBox;
+                                    _this.selectPage(newPage);
+                                    _this.selectBox(box); //keep the selection active
+                                    if (newPage != oldPage) {
+                                        _this.bringToFront();
+                                    }
+                                }
+                                else {
+                                    _this.selectPage(newPage);
+                                }
+                            }
+                            break;
+                        case 'Escape':
+                            _this.clearSelection();
+                            break;
                         case 'Enter':
                             _this.editSelectedBox();
                             return;
@@ -4098,6 +4256,27 @@ var SituationPlanView = /** @class */ (function () {
                     }
                 }
                 _this.updateSymbolAndLabelPosition(sitPlanElement);
+                // Loop indien geen box geselecteerd
+            }
+            else {
+                switch (event.key) {
+                    case 'PageDown':
+                        {
+                            var newPage = (_this.sitplan.activePage + 1);
+                            if (newPage > _this.sitplan.numPages)
+                                newPage = 1;
+                            _this.selectPage(newPage);
+                        }
+                        break;
+                    case 'PageUp':
+                        {
+                            var newPage = (_this.sitplan.activePage - 1);
+                            if (newPage < 1)
+                                newPage = _this.sitplan.numPages;
+                            _this.selectPage(newPage);
+                        }
+                        break;
+                }
             }
         });
     };
@@ -4274,6 +4453,7 @@ var SituationPlanView = /** @class */ (function () {
             _this.contextMenu.hide();
             _this.sitplan.numPages++;
             _this.selectPage(_this.sitplan.numPages);
+            undostruct.store();
         };
         document.getElementById('btn_sitplan_delpage').onclick = function () {
             _this.contextMenu.hide();
@@ -4564,18 +4744,18 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK, ca
         var element = structure.getElectroItemById(id);
         if (element == null) {
             adresInput.value = '';
-            adresInput.disabled = true;
+            adresInput.readOnly = true;
             return;
         }
         switch (selectAdresType.value) {
             case 'manueel':
                 adresInput.value = (element != null ? adresInput.value : '');
-                adresInput.disabled = false;
+                adresInput.readOnly = false;
                 break;
             case 'auto':
             default:
                 adresInput.value = (element != null ? element.getReadableAdres() : '');
-                adresInput.disabled = true;
+                adresInput.readOnly = true;
                 break;
         }
     }
@@ -4616,7 +4796,7 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK, ca
     var div = document.createElement('div');
     div.innerHTML = "\n        <div id=\"popupOverlay\" style=\"position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; visibility: hidden; z-index: 9999;\">\n            <div id=\"popupWindow\" style=\"width: 500px; background-color: white; padding: 20px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); display: flex; flex-direction: column; justify-content: space-between;\">\n                <div id=\"selectKringContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label for=\"selectKring\" style=\"margin-right: 10px; display: inline-block;\">Kring:</label>\n                    <select id=\"selectKring\"></select>\n                </div>\n                <div id=\"selectElectroItemContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label for=\"selectElectroItemBox\" style=\"margin-right: 10px; display: inline-block;\">Element:</label>\n                    <select id=\"selectElectroItemBox\"></select><span style=\"display: inline-block; width: 10px;\"></span>\n                    <button id=\"expandButton\" title=\"Omzetten in indivuele elementen\" style=\"background-color:lightblue;\">Uitpakken</button>\n                </div>\n                <div id=\"textContainer\" style=\"display: flex; margin-bottom: 30px; align-items: center;\">\n                    <label for=\"textInput\" style=\"margin-right: 10px; display: inline-block;\">ID:</label>\n                    <input id=\"textInput\" style=\"width: 100px;\" type=\"number\" min=\"0\" step=\"1\" value=\"\">\n                    <div id=\"feedback\" style=\"margin-left: 10px; width: 100%; font-size: 12px\"></div>\n                </div>\n                <div id=\"selectContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label for=\"selectAdresType\" style=\"margin-right: 10px; display: inline-block; white-space: nowrap;\">Label type:</label>\n                    <select id=\"selectAdresType\">\n                        <option value=\"auto\">Automatisch</option>\n                        <option value=\"manueel\">Handmatig</option>\n                    </select>\n                </div>\n                <div id=\"adresContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label for=\"adresInput\" style=\"margin-right: 10px; display: inline-block; white-space: nowrap;\">Label tekst:</label>\n                    <input id=\"adresInput\" style=\"width: 100%;\" type=\"text\" value=\"\">\n                    <select id=\"selectAdresLocation\" style=\"margin-left: 10px; display: inline-block;\">\n                        <option value=\"links\">Links</option>\n                        <option value=\"rechts\">Rechts</option>\n                        <option value=\"boven\">Boven</option>\n                        <option value=\"onder\">Onder</option>\n                    </select>\n                </div>\n                <div id=\"fontSizeContainer\" style=\"display: flex; margin-bottom: 30px; align-items: center;\">\n                    <label for=\"fontSizeInput\" style=\"margin-right: 10px; display: inline-block; white-space: nowrap;\">Tekengrootte (px):</label>\n                    <input id=\"fontSizeInput\" style=\"width: 100px;\" type=\"number\" min=\"1\" max=\"72\" step=\"11\" value=\"11\">\n                </div> \n                <div style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label for=\"scaleInput\" style=\"margin-right: 10px; display: inline-block;\">Schaal (%):</label>\n                    <input id=\"scaleInput\" style=\"width: 100px;\" type=\"number\" min=\"10\" max=\"400\" step=\"10\" value=\"".concat(String(SITPLANVIEW_DEFAULT_SCALE * 100), "\">\n                </div>\n                <div style=\"display: flex; margin-bottom: 20px; align-items: center;\">\n                    <label for=\"rotationInput\" style=\"margin-right: 10px; display: inline-block;\">Rotatie (\u00B0):</label>\n                    <input id=\"rotationInput\" style=\"width: 100px;\" type=\"number\" min=\"0\" max=\"360\" step=\"10\" value=\"0\">\n                </div>\n                <div id=\"setDefaultContainer\" style=\"display: flex; margin-bottom: 20px; align-items: flex-start;\">\n                    <input type=\"checkbox\" id=\"setDefaultCheckbox\">\n                    ").concat((sitplanElement == null) || ((sitplanElement != null) && (sitplanElement.getElectroItemId() != null))
         ? "<label for=\"setDefaultCheckbox\" style=\"margin-left: 10px; flex-grow: 1; flex-wrap: wrap;\">Zet tekengrootte en schaal als standaard voor alle toekomstige nieuwe symbolen.</label>"
-        : "<label for=\"setDefaultCheckbox\" style=\"margin-left: 10px; flex-grow: 1; flex-wrap: wrap;\">Zet schaal als standaard voor alle toekomstige nieuwe symbolen.</label>", "            \n                </div>\n                <div style=\"display: flex; justify-content: center;\">\n                    <button id=\"okButton\" style=\"margin-right: 10px;\">OK</button>\n                    <button id=\"cancelButton\" style=\"margin-keft: 10px;\">Cancel</button>\n                </div>\n            </div>\n        </div>");
+        : "<label for=\"setDefaultCheckbox\" style=\"margin-left: 10px; flex-grow: 1; flex-wrap: wrap;\">Zet schaal als standaard voor alle toekomstige nieuwe symbolen.</label>", "            \n                </div>\n                <div style=\"display: flex; justify-content: center;\">\n                    <button id=\"okButton\" style=\"margin-right: 5px;\">OK</button>\n                    <button id=\"cancelButton\" style=\"margin-left: 5px;\">Annuleren</button>\n                </div>\n            </div>\n        </div>");
     var popupOverlay = div.querySelector('#popupOverlay');
     var popupWindow = popupOverlay.querySelector('#popupWindow');
     var selectKringContainer = popupWindow.querySelector('#selectKringContainer');
@@ -4691,6 +4871,14 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK, ca
      */
     textInput.onblur = selectAdresTypeChanged;
     selectAdresType.onchange = selectAdresTypeChanged;
+    adresInput.onclick = function () {
+        Array.from(selectAdresType.options).forEach(function (option) {
+            if (option.text === "Handmatig") {
+                option.selected = true;
+            }
+        });
+        adresInput.readOnly = false;
+    };
     /*
      * Eventhandlers, OK en Cancel knoppen
      */

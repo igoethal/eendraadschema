@@ -237,12 +237,37 @@ class SituationPlanView {
         undostruct.store();
     }
 
+    private changePageSelectedBox() {
+        if (this.selectedBox != null) {
+            const pages = Array.from({length: this.sitplan.numPages}, (_, i) => String(i + 1)).filter(page => page !== String(this.sitplan.activePage));
+            (async () => {
+                const result = await showSelectPopup("Nieuwe pagina:", pages);
+                if (result !== null) {
+                    let sitPlanElement:SituationPlanElement = (this.selectedBox as any).sitPlanElementRef;
+                    if (sitPlanElement != null) {
+                        sitPlanElement.changePage(+result);
+                        this.selectPage(+result);
+                        undostruct.store();
+                    }
+                } else {
+                    //console.log("Selection canceled.");
+                }
+            })();
+            
+        }
+    }
+
     /**
      * Toont het contextmenu op de locatie van de muis.
      * 
      * @param event - De muisgebeurtenis die het menu opent (right click).
      */
     private showContextMenu = (event: MouseEvent) => {
+        if (this.selectedBox == null) return;
+
+        let sitPlanElement:SituationPlanElement = (this.selectedBox as any).sitPlanElementRef;
+        if (sitPlanElement == null) return;
+
         event.preventDefault();
 
         this.contextMenu.clearMenu();
@@ -251,27 +276,25 @@ class SituationPlanView {
         this.contextMenu.addLine();
         this.contextMenu.addMenuItem('Bewerk', this.editSelectedBox.bind(this), 'Enter');
         this.contextMenu.addLine();
-
-        if (this.selectedBox != null) {
-            let sitPlanElement:SituationPlanElement = (this.selectedBox as any).sitPlanElementRef;
-            if (sitPlanElement != null) {
-                switch (sitPlanElement.movable) {
-                    case true:
-                        this.contextMenu.addMenuItem('Vergrendel', this.toggleSelectedBoxMovable.bind(this), 'Ctrl L');
-                        this.contextMenu.addLine();
-                        break;
-                    case false:
-                        this.contextMenu.addMenuItem('Ontgrendel', this.toggleSelectedBoxMovable.bind(this), 'Ctrl L');
-                        this.contextMenu.addLine();
-                        break;
-                }
-            }
+    
+        switch (sitPlanElement.movable) {
+            case true:
+                this.contextMenu.addMenuItem('Vergrendel', this.toggleSelectedBoxMovable.bind(this), 'Ctrl L');
+                this.contextMenu.addLine();
+                break;
+            case false:
+                this.contextMenu.addMenuItem('Ontgrendel', this.toggleSelectedBoxMovable.bind(this), 'Ctrl L');
+                this.contextMenu.addLine();
+                break;
         }
-        
-
+            
         this.contextMenu.addMenuItem('Verwijder', this.deleteSelectedBox.bind(this), 'Del');
         
-        //this.contextMenu.addMenuItem('Item 3', () => alert('Item 3 clicked'));
+        if ( (this.sitplan.numPages > 1) && (sitPlanElement.movable) ) {
+            this.contextMenu.addLine();
+            this.contextMenu.addMenuItem('Naar pagina..', this.changePageSelectedBox.bind(this), 'PgUp/PgDn');
+        }
+
         this.contextMenu.show(event);
     }
 
@@ -843,6 +866,7 @@ class SituationPlanView {
             if (document.getElementById('outerdiv').style.display == 'none') return; // Check if we are really in the situationplan, if not, the default scrolling action will be executed by the browser
             if (document.getElementById('popupOverlay') != null) return; // We need the keys when editing symbol properties.
 
+            // Loop enkel voor undo-redo, andere acties beneden
             if (event.ctrlKey) {
                 switch (event.key) {
                     case 'z':
@@ -862,9 +886,10 @@ class SituationPlanView {
                         return;
                     default:
                         //do nothing as we also have ctrl + arrow keys here below.
-                }
+                } 
             }
 
+            // Loop indien box geselecteerd
             if (this.selectedBox) { // Check if we have a selected box, if not, the default scrolling action will be executed by the browser
                 event.preventDefault();
                 const sitPlanElement = (this.selectedBox as any).sitPlanElementRef;
@@ -884,7 +909,7 @@ class SituationPlanView {
                             return;
                         default:
                             return;
-                    }
+                    }  
                 } else {
                     switch (event.key) {
                         case 'ArrowLeft':
@@ -903,6 +928,45 @@ class SituationPlanView {
                             sitPlanElement.posy += 1;
                             undostruct.store('arrowMove' + sitPlanElement.id);
                             break;
+                        case 'PageDown':
+                            {
+                                let oldPage = sitPlanElement.page;
+                                let newPage = (sitPlanElement.page + 1);
+                                if (newPage > this.sitplan.numPages) newPage = 1;
+                                if (sitPlanElement.movable) {
+                                    sitPlanElement.changePage(newPage);
+                                    const box = this.selectedBox;
+                                    this.selectPage(newPage);
+                                    this.selectBox(box); //keep the selection active
+                                    if (newPage != oldPage) {
+                                        this.bringToFront();
+                                    }
+                                } else {
+                                    this.selectPage(newPage);
+                                }
+                            }
+                            break;
+                        case 'PageUp':
+                            {
+                                let oldPage = sitPlanElement.page;
+                                let newPage = (sitPlanElement.page - 1);
+                                if (newPage < 1) newPage = this.sitplan.numPages;
+                                if (sitPlanElement.movable) {
+                                    sitPlanElement.changePage(newPage);
+                                    const box = this.selectedBox;
+                                    this.selectPage(newPage);
+                                    this.selectBox(box); //keep the selection active
+                                    if (newPage != oldPage) {
+                                        this.bringToFront();
+                                    }
+                                } else {
+                                    this.selectPage(newPage);
+                                }
+                            } 
+                            break;
+                        case 'Escape':
+                            this.clearSelection();
+                            break;
                         case 'Enter':
                             this.editSelectedBox();
                             return;
@@ -915,6 +979,25 @@ class SituationPlanView {
                     }
                 }
                 this.updateSymbolAndLabelPosition(sitPlanElement);
+
+            // Loop indien geen box geselecteerd
+            } else {
+                switch (event.key) {
+                    case 'PageDown':
+                        {
+                            let newPage = (this.sitplan.activePage + 1);
+                            if (newPage > this.sitplan.numPages) newPage = 1;
+                            this.selectPage(newPage);
+                        }
+                        break;
+                    case 'PageUp':
+                        {
+                            let newPage = (this.sitplan.activePage - 1);
+                            if (newPage < 1) newPage = this.sitplan.numPages;
+                            this.selectPage(newPage);
+                        } 
+                        break;
+                }
             }
         });
     }
@@ -1243,6 +1326,7 @@ class SituationPlanView {
             this.contextMenu.hide();
             this.sitplan.numPages++;
             this.selectPage(this.sitplan.numPages);
+            undostruct.store();
         };
 
         document.getElementById('btn_sitplan_delpage')!.onclick = () => {

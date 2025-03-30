@@ -228,18 +228,18 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanE
         let element = structure.getElectroItemById(id) as Electro_Item;
         if (element == null) {
             adresInput.value = '';
-            adresInput.disabled = true;
+            adresInput.readOnly = true;
             return;
         }
         switch (selectAdresType.value) {
             case 'manueel':
                 adresInput.value = (element != null ? adresInput.value : '');
-                adresInput.disabled = false;
+                adresInput.readOnly = false;
                 break;
             case 'auto':
             default:
                 adresInput.value = (element != null ? element.getReadableAdres() : ''); 
-                adresInput.disabled = true;
+                adresInput.readOnly = true;
                 break;
         }
     }
@@ -340,8 +340,8 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanE
                     }            
                 </div>
                 <div style="display: flex; justify-content: center;">
-                    <button id="okButton" style="margin-right: 10px;">OK</button>
-                    <button id="cancelButton" style="margin-keft: 10px;">Cancel</button>
+                    <button id="okButton" style="margin-right: 5px;">OK</button>
+                    <button id="cancelButton" style="margin-left: 5px;">Annuleren</button>
                 </div>
             </div>
         </div>`;
@@ -425,6 +425,15 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanE
 
     textInput.onblur = selectAdresTypeChanged;
     selectAdresType.onchange = selectAdresTypeChanged; 
+
+    adresInput.onclick = () => {
+        Array.from(selectAdresType.options).forEach(option => {
+            if (option.text === "Handmatig") {
+                option.selected = true;
+            }
+        });
+        adresInput.readOnly = false;
+    }
 
     /*
      * Eventhandlers, OK en Cancel knoppen

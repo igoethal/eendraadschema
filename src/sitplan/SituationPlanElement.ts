@@ -327,6 +327,16 @@ class SituationPlanElement {
     }
 
     /**
+     * Wijzigt de pagina van het element
+     * 
+     * @param {number} page - Het nummer van de pagina
+     */
+
+    public changePage(page: number) {
+        this.page = page;
+    }
+
+    /**
      * getSizeFromString
      * 
      * Haal de grootte van het SVG element uit de SVG string

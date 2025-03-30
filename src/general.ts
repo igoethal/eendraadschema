@@ -223,3 +223,91 @@ const randomId = (() => {
       return `${prefix}${value.toString()}`;
   };
 })();
+
+/**
+ * Toont een popup met een vraag en een dropdown lijst met opties.
+ * De gebruiker kan kiezen tussen "OK" of "Annuleer".
+ * 
+ * @param question - De vraag om af te beelden in de popup.
+ * @param options - An array van strings met de opties in de dropdown lijst.
+ * @returns A promise that resolves to the selected option string, or null if cancelled.
+ */
+
+async function showSelectPopup(
+  question: string,
+  options: string[]
+): Promise<string | null> {
+  return new Promise((resolve) => {
+    const popupOverlay = document.createElement("div");
+    Object.assign(popupOverlay.style, {
+      position: 'fixed',
+      top: 0, left: 0, width: '100%', height: '100%',
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      display: 'flex',
+      justifyContent: 'center', alignItems: 'center',
+      visibility: 'hidden',
+      zIndex: 9999
+    });
+    document.body.appendChild(popupOverlay);
+
+    const popup = document.createElement("div");
+    Object.assign(popup.style, {
+      backgroundColor: "white", border: "1px solid #ccc", padding: "20px", boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)"
+    });
+    popupOverlay.appendChild(popup);
+
+    const questionAndSelect = document.createElement("div");
+    questionAndSelect.style.display = "flex";
+    questionAndSelect.style.alignItems = "center";
+
+    const questionElem = document.createElement("p");
+    questionElem.textContent = question;
+    questionAndSelect.appendChild(questionElem);
+
+    const selectElem = document.createElement("select");
+    options.forEach((option) => {
+      const optionElem = document.createElement("option");
+      optionElem.value = option;
+      optionElem.textContent = option;
+      selectElem.appendChild(optionElem);
+    });
+    selectElem.style.marginLeft = "10px";
+    questionAndSelect.appendChild(selectElem);
+
+    popup.appendChild(questionAndSelect);
+
+    const buttonBar = document.createElement("div");
+    Object.assign(buttonBar.style, {
+      display: "flex", justifyContent: "center", marginTop: "10px"
+    });
+
+    const okButton = document.createElement("button");
+    okButton.textContent = "OK";
+    okButton.style.marginRight = "10px";
+    buttonBar.appendChild(okButton);
+
+    const cancelButton = document.createElement("button");
+    cancelButton.textContent = "Annuleren";
+    buttonBar.appendChild(cancelButton);
+
+    popup.appendChild(buttonBar);
+
+    okButton.addEventListener("click", () => {
+      const selectedValue = selectElem.value;
+      popupOverlay.style.visibility = 'hidden';
+      popupOverlay.removeChild(popup);
+      document.body.removeChild(popupOverlay);
+      resolve(selectedValue);
+    });
+
+    cancelButton.addEventListener("click", () => {
+      popupOverlay.style.visibility = 'hidden';
+      popupOverlay.removeChild(popup);
+      document.body.removeChild(popupOverlay);
+      resolve(null);
+    });
+
+    popupOverlay.style.visibility = 'visible';
+  });
+}
+
