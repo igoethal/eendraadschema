@@ -232,9 +232,9 @@ class SituationPlanView {
                         if (boxlabel != null) boxlabel.setAttribute('movable', 'true');
                         break;
                 }
+                undostruct.store();
             }
         }     
-        undostruct.store();
     }
 
     private changePageSelectedBox() {
@@ -905,7 +905,6 @@ class SituationPlanView {
                             return;
                         case 'l':
                             this.toggleSelectedBoxMovable();
-                            undostruct.store();
                             return;
                         default:
                             return;
@@ -944,7 +943,7 @@ class SituationPlanView {
                                 } else {
                                     this.selectPage(newPage);
                                 }
-                                undostruct.store();
+                                if (newPage != oldPage) undostruct.store();
                             }
                             break;
                         case 'PageUp':
@@ -963,7 +962,7 @@ class SituationPlanView {
                                 } else {
                                     this.selectPage(newPage);
                                 }
-                                undostruct.store();
+                                if (newPage != oldPage) undostruct.store();
                             } 
                             break;
                         case 'Escape':
@@ -973,8 +972,10 @@ class SituationPlanView {
                             this.editSelectedBox();
                             return;
                         case 'Delete':
-                            this.deleteSelectedBox();
-                            undostruct.store();
+                            if (this.selectedBox != null) {    
+                                this.deleteSelectedBox();
+                                undostruct.store();
+                            }
                             break;
                         default:
                             return;
@@ -986,19 +987,21 @@ class SituationPlanView {
             } else {
                 switch (event.key) {
                     case 'PageDown':
-                        {
-                            let newPage = (this.sitplan.activePage + 1);
+                        {   
+                            let oldPage = this.sitplan.activePage;
+                            let newPage = (oldPage + 1);
                             if (newPage > this.sitplan.numPages) newPage = 1;
-                            if (newPage != this.sitplan.activePage) undostruct.store("changePage");
                             this.selectPage(newPage);
+                            if (newPage != oldPage) undostruct.store("changePage");
                         }
                         break;
                     case 'PageUp':
                         {
-                            let newPage = (this.sitplan.activePage - 1);
+                            let oldPage = this.sitplan.activePage;
+                            let newPage = (oldPage - 1);
                             if (newPage < 1) newPage = this.sitplan.numPages;
-                            if (newPage != this.sitplan.activePage) undostruct.store("changePage");
                             this.selectPage(newPage);
+                            if (newPage != this.sitplan.activePage) undostruct.store("changePage");
                         } 
                         break;
                 }
@@ -1014,12 +1017,14 @@ class SituationPlanView {
     attachDeleteButton(elem: HTMLElement) { 
         this.event_manager.addEventListener(elem, 'click', () => { 
             this.contextMenu.hide();
-            this.deleteSelectedBox(); 
-            undostruct.store(); 
-            const helperTip = new HelperTip(appDocStorage);
-            helperTip.show('sitplan.deletekey',
-            `<h3>Tip: Symbolen verwijderen</h3>
-            <p>Bespaar tijd en gebruik de 'Delete' toets op het toetsenbord om symbolen te verwijderen.</p>`,true);
+            if (this.selectedBox != null) {
+                this.deleteSelectedBox(); 
+                const helperTip = new HelperTip(appDocStorage);
+                helperTip.show('sitplan.deletekey',
+                `<h3>Tip: Symbolen verwijderen</h3>
+                <p>Bespaar tijd en gebruik de 'Delete' toets op het toetsenbord om symbolen te verwijderen.</p>`,true);
+                undostruct.store();
+            }
         } );      
     };
 
@@ -1372,33 +1377,6 @@ class SituationPlanView {
         this.attachZoomToFitButton(document.getElementById('button_zoomToFit'));
         
     }
-
-    /*  
-
-    scaleBox(increment: number) {
-        if (this.selectedBox) {
-            let pic = (this.selectedBox as any).sitPlanElementRef;
-            if (pic==null) return;
-
-            pic.setscale(Math.min(Math.max(0.1,pic.getscale()+increment),1000));
-            
-            this.updateBoxContent(pic); //content needs to be updated first to know the size of the box
-            this.updateSymbolAndLabelPosition(pic);
-        }
-    }*/
-
-
-
-    /*attachScaleButton(elem: HTMLElement, increment: number) { 
-        this.event_manager.addEventListener(elem, 'click', () => { this.scaleBox(increment); undostruct.store(); } ); 
-    };
-
-    attachRotateButton(elem: HTMLElement, increment: number) { 
-        this.event_manager.addEventListener(elem, 'click', () => { this.rotateBox(increment); undostruct.store(); } ); 
-    };
-    
-    */
-
 } // *** END CLASS ***
 
 /**
