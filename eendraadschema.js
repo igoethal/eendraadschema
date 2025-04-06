@@ -3682,9 +3682,9 @@ var SituationPlanView = /** @class */ (function () {
                             boxlabel.setAttribute('movable', 'true');
                         break;
                 }
+                undostruct.store();
             }
         }
-        undostruct.store();
     };
     SituationPlanView.prototype.changePageSelectedBox = function () {
         var _this = this;
@@ -4179,7 +4179,6 @@ var SituationPlanView = /** @class */ (function () {
                             return;
                         case 'l':
                             _this.toggleSelectedBoxMovable();
-                            undostruct.store();
                             return;
                         default:
                             return;
@@ -4221,7 +4220,8 @@ var SituationPlanView = /** @class */ (function () {
                                 else {
                                     _this.selectPage(newPage);
                                 }
-                                undostruct.store();
+                                if (newPage != oldPage)
+                                    undostruct.store();
                             }
                             break;
                         case 'PageUp':
@@ -4242,7 +4242,8 @@ var SituationPlanView = /** @class */ (function () {
                                 else {
                                     _this.selectPage(newPage);
                                 }
-                                undostruct.store();
+                                if (newPage != oldPage)
+                                    undostruct.store();
                             }
                             break;
                         case 'Escape':
@@ -4252,8 +4253,10 @@ var SituationPlanView = /** @class */ (function () {
                             _this.editSelectedBox();
                             return;
                         case 'Delete':
-                            _this.deleteSelectedBox();
-                            undostruct.store();
+                            if (_this.selectedBox != null) {
+                                _this.deleteSelectedBox();
+                                undostruct.store();
+                            }
                             break;
                         default:
                             return;
@@ -4266,22 +4269,24 @@ var SituationPlanView = /** @class */ (function () {
                 switch (event.key) {
                     case 'PageDown':
                         {
-                            var newPage = (_this.sitplan.activePage + 1);
+                            var oldPage = _this.sitplan.activePage;
+                            var newPage = (oldPage + 1);
                             if (newPage > _this.sitplan.numPages)
                                 newPage = 1;
-                            if (newPage != _this.sitplan.activePage)
-                                undostruct.store("changePage");
                             _this.selectPage(newPage);
+                            if (newPage != oldPage)
+                                undostruct.store("changePage");
                         }
                         break;
                     case 'PageUp':
                         {
-                            var newPage = (_this.sitplan.activePage - 1);
+                            var oldPage = _this.sitplan.activePage;
+                            var newPage = (oldPage - 1);
                             if (newPage < 1)
                                 newPage = _this.sitplan.numPages;
+                            _this.selectPage(newPage);
                             if (newPage != _this.sitplan.activePage)
                                 undostruct.store("changePage");
-                            _this.selectPage(newPage);
                         }
                         break;
                 }
@@ -4297,10 +4302,12 @@ var SituationPlanView = /** @class */ (function () {
         var _this = this;
         this.event_manager.addEventListener(elem, 'click', function () {
             _this.contextMenu.hide();
-            _this.deleteSelectedBox();
-            undostruct.store();
-            var helperTip = new HelperTip(appDocStorage);
-            helperTip.show('sitplan.deletekey', "<h3>Tip: Symbolen verwijderen</h3>\n            <p>Bespaar tijd en gebruik de 'Delete' toets op het toetsenbord om symbolen te verwijderen.</p>", true);
+            if (_this.selectedBox != null) {
+                _this.deleteSelectedBox();
+                var helperTip = new HelperTip(appDocStorage);
+                helperTip.show('sitplan.deletekey', "<h3>Tip: Symbolen verwijderen</h3>\n                <p>Bespaar tijd en gebruik de 'Delete' toets op het toetsenbord om symbolen te verwijderen.</p>", true);
+                undostruct.store();
+            }
         });
     };
     ;
@@ -7796,6 +7803,7 @@ var Kring = /** @class */ (function (_super) {
         this.props.differentieel_is_selectief = this.getLegacyKey(mykeys, 20);
         this.props.kortsluitvermogen = this.getLegacyKey(mykeys, 22);
         this.props.huishoudelijk = true;
+        this.props.fase = '';
         switch (this.props.bescherming) {
             case "differentieel":
                 this.props.type_differentieel = this.getLegacyKey(mykeys, 17);
@@ -7826,6 +7834,7 @@ var Kring = /** @class */ (function (_super) {
         this.props.differentieel_is_selectief = false;
         this.props.kortsluitvermogen = "";
         this.props.huishoudelijk = true;
+        this.props.fase = '';
         //Bepalen of er per default een kabel aanwezig is en of we zekeringen plaatsen
         var parent = this.getParent();
         if (parent == null) {
@@ -7876,6 +7885,8 @@ var Kring = /** @class */ (function (_super) {
             this.props.differentieel_is_selectief = false;
         if (typeof (this.props.huishoudelijk) == 'undefined')
             this.props.huishoudelijk = true;
+        if (!["automatisch", "differentieel", "differentieelautomaat"].includes(this.props.bescherming))
+            this.props.fase = '';
     };
     Kring.prototype.toHTML = function (mode) {
         this.overrideKeys();
@@ -7891,18 +7902,21 @@ var Kring = /** @class */ (function (_super) {
                 output += ", \u0394 " + this.stringPropToHTML('differentieel_delta_amperage', 3) + "mA"
                     + ", Type:" + this.selectPropToHTML('type_differentieel', ["", "A", "B"])
                     + ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen', 3) + "kA"
-                    + ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief');
+                    + ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief')
+                    + ", Fase: " + this.selectPropToHTML('fase', ["", "L1", "L2", "L3"]);
                 break;
             case "automatisch":
                 output += ", Curve:" + this.selectPropToHTML('curve_automaat', ["", "B", "C", "D"])
-                    + ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen', 3) + "kA";
+                    + ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen', 3) + "kA"
+                    + ", Fase: " + this.selectPropToHTML('fase', ["", "L1", "L2", "L3"]);
                 break;
             case "differentieelautomaat":
                 output += ", \u0394 " + this.stringPropToHTML('differentieel_delta_amperage', 3) + "mA"
                     + ", Curve:" + this.selectPropToHTML('curve_automaat', ["", "B", "C", "D"])
                     + ", Type:" + this.selectPropToHTML('type_differentieel', ["", "A", "B"])
                     + ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen', 3) + "kA"
-                    + ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief');
+                    + ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief')
+                    + ", Fase: " + this.selectPropToHTML('fase', ["", "L1", "L2", "L3"]);
                 break;
         }
         // Eigenschappen van de kabel
@@ -8037,6 +8051,14 @@ var Kring = /** @class */ (function (_super) {
                             + htmlspecialchars("" + (this.props.kortsluitvermogen)) + "kA</text>";
                     }
                 }
+                // Code om fase toe te voegen
+                if (['L1', 'L2', 'L3'].includes(this.props.fase)) {
+                    numlines = numlines + (this.props.huishoudelijk ? 1.3 : 1.0);
+                    mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
+                        + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
+                        + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
+                        + htmlspecialchars(this.props.fase) + "</text>";
+                }
                 // Genoeg plaats voorzien aan de rechterkant en eindigen
                 mySVG.xright = Math.max(mySVG.xright, 20 + 11 * (numlines - 1));
                 break;
@@ -8079,6 +8101,14 @@ var Kring = /** @class */ (function (_super) {
                             + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
                             + htmlspecialchars("" + (this.props.kortsluitvermogen)) + "kA</text>";
                     }
+                }
+                // Code om fase toe te voegen
+                if (['L1', 'L2', 'L3'].includes(this.props.fase)) {
+                    numlines = numlines + (this.props.huishoudelijk ? 1.3 : 1.0);
+                    mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
+                        + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
+                        + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
+                        + htmlspecialchars(this.props.fase) + "</text>";
                 }
                 // genoeg plaats voorzien aan de rechterkant en eindigen
                 mySVG.xright = Math.max(mySVG.xright, 20 + 11 * (numlines - 1));
@@ -8130,6 +8160,14 @@ var Kring = /** @class */ (function (_super) {
                             + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
                             + htmlspecialchars("" + (this.props.kortsluitvermogen)) + "kA</text>";
                     }
+                }
+                // Code om fase toe te voegen
+                if (['L1', 'L2', 'L3'].includes(this.props.fase)) {
+                    numlines = numlines + (this.props.huishoudelijk ? 1.3 : 1.0);
+                    mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
+                        + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
+                        + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
+                        + htmlspecialchars(this.props.fase) + "</text>";
                 }
                 // genoeg plaats voorzien aan de rechterkant en eindigen
                 mySVG.xright = Math.max(mySVG.xright, 20 + 11 * (numlines - 1));

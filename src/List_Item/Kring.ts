@@ -15,6 +15,7 @@ class Kring extends Electro_Item {
         this.props.differentieel_is_selectief           = this.getLegacyKey(mykeys,20);
         this.props.kortsluitvermogen                    = this.getLegacyKey(mykeys,22);
         this.props.huishoudelijk                        = true;
+        this.props.fase                                 = '';
         switch (this.props.bescherming) {
             case "differentieel":
                 this.props.type_differentieel = this.getLegacyKey(mykeys,17);
@@ -46,6 +47,7 @@ class Kring extends Electro_Item {
         this.props.differentieel_is_selectief = false;
         this.props.kortsluitvermogen = "";
         this.props.huishoudelijk = true;
+        this.props.fase = '';
 
         //Bepalen of er per default een kabel aanwezig is en of we zekeringen plaatsen
         let parent = this.getParent();
@@ -94,6 +96,7 @@ class Kring extends Electro_Item {
         if (this.props.kabel_locatie == "Luchtleiding") this.props.kabel_is_in_buis = false; //Indien luchtleiding nooit een buis tekenen
         if ( (this.props.bescherming != "differentieel") && (this.props.bescherming != "differentieelautomaat") ) this.props.differentieel_is_selectief = false;
         if (typeof(this.props.huishoudelijk) == 'undefined') this.props.huishoudelijk = true;
+        if (!["automatisch", "differentieel", "differentieelautomaat"].includes(this.props.bescherming)) this.props.fase = '';
     }
 
     toHTML(mode: string) {
@@ -116,12 +119,14 @@ class Kring extends Electro_Item {
                 output += ", \u0394 " + this.stringPropToHTML('differentieel_delta_amperage',3) + "mA"
                        +  ", Type:" + this.selectPropToHTML('type_differentieel',["","A","B"])
                        +  ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen',3) + "kA"
-                       +  ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief');
+                       +  ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief')
+                       +  ", Fase: " + this.selectPropToHTML('fase',["","L1","L2","L3"]);
                 break;
 
             case "automatisch":
                 output += ", Curve:" + this.selectPropToHTML('curve_automaat',["","B","C","D"])
-                       +  ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen',3) + "kA";               
+                       +  ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen',3) + "kA"
+                       +  ", Fase: " + this.selectPropToHTML('fase',["","L1","L2","L3"]);
                 break;
 
             case "differentieelautomaat":
@@ -129,13 +134,13 @@ class Kring extends Electro_Item {
                        +  ", Curve:" + this.selectPropToHTML('curve_automaat',["","B","C","D"])
                        +  ", Type:" + this.selectPropToHTML('type_differentieel',["","A","B"])
                        +  ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen',3) + "kA"
-                       +  ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief');
+                       +  ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief')
+                       +  ", Fase: " + this.selectPropToHTML('fase',["","L1","L2","L3"]);
                 break;
 
         }
 
         // Eigenschappen van de kabel
-
         output += ", Kabel: " + this.checkboxPropToHTML('kabel_is_aanwezig');
         if (this.props.kabel_is_aanwezig) { // Kabel aanwezig
             output += ", Type: " + this.stringPropToHTML('type_kabel',10)
@@ -296,6 +301,15 @@ class Kring extends Electro_Item {
                     }
                 }
 
+                // Code om fase toe te voegen
+                if (['L1','L2','L3'].includes(this.props.fase)) {
+                    numlines = numlines + (this.props.huishoudelijk ? 1.3 : 1.0);
+                    mySVG.data += "<text x=\"" + (mySVG.xleft+15+11*(numlines-1)) + "\" y=\"" + (mySVG.yup-10) + "\"" 
+                            +  " transform=\"rotate(-90 " + (mySVG.xleft+15+11*(numlines-1)) + "," + (mySVG.yup-10) + ")" 
+                            +  "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" 
+                            +  htmlspecialchars(this.props.fase) + "</text>";
+                }
+
                 // Genoeg plaats voorzien aan de rechterkant en eindigen
                 mySVG.xright = Math.max(mySVG.xright,20+11*(numlines-1));
                 break;  
@@ -343,6 +357,15 @@ class Kring extends Electro_Item {
                                 +  "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" 
                                 +  htmlspecialchars("" + (this.props.kortsluitvermogen)) + "kA</text>";
                     }
+                }
+
+                // Code om fase toe te voegen
+                if (['L1','L2','L3'].includes(this.props.fase)) {
+                    numlines = numlines + (this.props.huishoudelijk ? 1.3 : 1.0);
+                    mySVG.data += "<text x=\"" + (mySVG.xleft+15+11*(numlines-1)) + "\" y=\"" + (mySVG.yup-10) + "\"" 
+                            +  " transform=\"rotate(-90 " + (mySVG.xleft+15+11*(numlines-1)) + "," + (mySVG.yup-10) + ")" 
+                            +  "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" 
+                            +  htmlspecialchars(this.props.fase) + "</text>";
                 }
 
                 // genoeg plaats voorzien aan de rechterkant en eindigen
@@ -400,6 +423,15 @@ class Kring extends Electro_Item {
                                 +  "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" 
                                 +  htmlspecialchars("" + (this.props.kortsluitvermogen)) + "kA</text>";
                     }
+                }
+
+                // Code om fase toe te voegen
+                if (['L1','L2','L3'].includes(this.props.fase)) {
+                    numlines = numlines + (this.props.huishoudelijk ? 1.3 : 1.0);
+                    mySVG.data += "<text x=\"" + (mySVG.xleft+15+11*(numlines-1)) + "\" y=\"" + (mySVG.yup-10) + "\"" 
+                            +  " transform=\"rotate(-90 " + (mySVG.xleft+15+11*(numlines-1)) + "," + (mySVG.yup-10) + ")" 
+                            +  "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" 
+                            +  htmlspecialchars(this.props.fase) + "</text>";
                 }
 
                 // genoeg plaats voorzien aan de rechterkant en eindigen
