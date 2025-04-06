@@ -158,6 +158,19 @@ class Kring extends Electro_Item {
     }
 
     toSVG() {
+
+        function addFase(startNumlines:number, mySVG:SVGelement): number {
+            let numlines = startNumlines;
+            if (['L1','L2','L3'].includes(this.props.fase)) {
+                numlines = numlines + (this.props.huishoudelijk ? 1.3 : 1.0);
+                mySVG.data += "<text x=\"" + (mySVG.xleft+15+11*(numlines-1)) + "\" y=\"" + (mySVG.yup-10) + "\"" 
+                        +  " transform=\"rotate(-90 " + (mySVG.xleft+15+11*(numlines-1)) + "," + (mySVG.yup-10) + ")" 
+                        +  "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" 
+                        +  htmlspecialchars(this.props.fase) + "</text>";
+            }
+            return numlines;
+        }
+
         let mySVG:SVGelement = new SVGelement();
 
         SVGSymbols.addSymbol('zekering_automatisch');
@@ -302,13 +315,7 @@ class Kring extends Electro_Item {
                 }
 
                 // Code om fase toe te voegen
-                if (['L1','L2','L3'].includes(this.props.fase)) {
-                    numlines = numlines + (this.props.huishoudelijk ? 1.3 : 1.0);
-                    mySVG.data += "<text x=\"" + (mySVG.xleft+15+11*(numlines-1)) + "\" y=\"" + (mySVG.yup-10) + "\"" 
-                            +  " transform=\"rotate(-90 " + (mySVG.xleft+15+11*(numlines-1)) + "," + (mySVG.yup-10) + ")" 
-                            +  "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" 
-                            +  htmlspecialchars(this.props.fase) + "</text>";
-                }
+                numlines = addFase.bind(this)(numlines, mySVG);
 
                 // Genoeg plaats voorzien aan de rechterkant en eindigen
                 mySVG.xright = Math.max(mySVG.xright,20+11*(numlines-1));
@@ -360,13 +367,7 @@ class Kring extends Electro_Item {
                 }
 
                 // Code om fase toe te voegen
-                if (['L1','L2','L3'].includes(this.props.fase)) {
-                    numlines = numlines + (this.props.huishoudelijk ? 1.3 : 1.0);
-                    mySVG.data += "<text x=\"" + (mySVG.xleft+15+11*(numlines-1)) + "\" y=\"" + (mySVG.yup-10) + "\"" 
-                            +  " transform=\"rotate(-90 " + (mySVG.xleft+15+11*(numlines-1)) + "," + (mySVG.yup-10) + ")" 
-                            +  "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" 
-                            +  htmlspecialchars(this.props.fase) + "</text>";
-                }
+                numlines = addFase.bind(this)(numlines, mySVG);
 
                 // genoeg plaats voorzien aan de rechterkant en eindigen
                 mySVG.xright = Math.max(mySVG.xright,20+11*(numlines-1));
@@ -426,13 +427,7 @@ class Kring extends Electro_Item {
                 }
 
                 // Code om fase toe te voegen
-                if (['L1','L2','L3'].includes(this.props.fase)) {
-                    numlines = numlines + (this.props.huishoudelijk ? 1.3 : 1.0);
-                    mySVG.data += "<text x=\"" + (mySVG.xleft+15+11*(numlines-1)) + "\" y=\"" + (mySVG.yup-10) + "\"" 
-                            +  " transform=\"rotate(-90 " + (mySVG.xleft+15+11*(numlines-1)) + "," + (mySVG.yup-10) + ")" 
-                            +  "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" 
-                            +  htmlspecialchars(this.props.fase) + "</text>";
-                }
+                numlines = addFase.bind(this)(numlines, mySVG);
 
                 // genoeg plaats voorzien aan de rechterkant en eindigen
                 mySVG.xright = Math.max(mySVG.xright,20+11*(numlines-1));

@@ -14,6 +14,7 @@ class Aansluiting extends Electro_Item {
         this.props.naam                                 = this.getLegacyKey(mykeys,23);
         this.props.type_kabel_voor_teller               = this.getLegacyKey(mykeys,24);
         this.props.huishoudelijk                        = true;
+        this.props.fase                                 = '';
         switch (this.props.bescherming) {
             case "differentieel":
                 this.props.type_differentieel = this.getLegacyKey(mykeys,17);
@@ -44,6 +45,7 @@ class Aansluiting extends Electro_Item {
         this.props.naam = "";
         this.props.type_kabel_voor_teller = "";
         this.props.huishoudelijk = true;
+        this.props.fase = '';
     }
 
     allowedChilds() : Array<string> { // returns an array with the type-names of allowed childs
@@ -61,6 +63,7 @@ class Aansluiting extends Electro_Item {
     overrideKeys() {
         if ( ( (this.props.aantal_polen as number) < 1 ) || ( (this.props.aantal_polen as number) > 4 ) ) this.props.aantal_polen = "2"; //Test dat aantal polen bestaat
         if (typeof(this.props.huishoudelijk) == 'undefined') this.props.huishoudelijk = true;
+        if (!["automatisch", "differentieel", "differentieelautomaat"].includes(this.props.bescherming)) this.props.fase = '';
     }
 
     toHTML(mode: string) {
@@ -81,12 +84,14 @@ class Aansluiting extends Electro_Item {
                 output += ", \u0394 " + this.stringPropToHTML('differentieel_delta_amperage',3) + "mA"
                         +  ", Type:" + this.selectPropToHTML('type_differentieel',["","A","B"])
                         +  ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen',3) + "kA"
-                        +  ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief');
+                        +  ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief')
+                        +  ", Fase: " + this.selectPropToHTML('fase',["","L1","L2","L3"]);
                 break;
 
             case "automatisch":
                 output += ", Curve:" + this.selectPropToHTML('curve_automaat',["","B","C","D"])
-                        +  ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen',3) + "kA";               
+                        +  ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen',3) + "kA"
+                        +  ", Fase: " + this.selectPropToHTML('fase',["","L1","L2","L3"]);
                 break;
 
             case "differentieelautomaat":
@@ -94,7 +99,8 @@ class Aansluiting extends Electro_Item {
                         +  ", Curve:" + this.selectPropToHTML('curve_automaat',["","B","C","D"])
                         +  ", Type:" + this.selectPropToHTML('type_differentieel',["","A","B"])
                         +  ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen',3) + "kA"
-                        +  ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief');
+                        +  ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief')
+                        +  ", Fase: " + this.selectPropToHTML('fase',["","L1","L2","L3"]);
                 break;
 
         }
@@ -112,6 +118,19 @@ class Aansluiting extends Electro_Item {
     }
 
     toSVG() {
+
+        function addFase(startNumlines:number, mySVG:SVGelement): number {
+            let numlines = startNumlines;
+            if (['L1','L2','L3'].includes(this.props.fase)) {
+                numlines = numlines + (this.props.huishoudelijk ? 1.3 : 1.0);
+                mySVG.data += "<text x=\"" + (mySVG.xleft+15+11*(numlines-1)) + "\" y=\"" + (mySVG.yup-10) + "\"" 
+                        +  " transform=\"rotate(-90 " + (mySVG.xleft+15+11*(numlines-1)) + "," + (mySVG.yup-10) + ")" 
+                        +  "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" 
+                        +  htmlspecialchars(this.props.fase) + "</text>";
+            }
+            return numlines;
+        }
+
         let mySVG:SVGelement = new SVGelement();
 
         SVGSymbols.addSymbol('zekering_automatisch');
@@ -177,6 +196,9 @@ class Aansluiting extends Electro_Item {
                     }
                 }
 
+                // Code om fase toe te voegen
+                numlines = addFase.bind(this)(numlines, mySVG);
+
                 // Genoeg plaats voorzien aan de rechterkant en eindigen
                 mySVG.xright = Math.max(mySVG.xright,20+11*(numlines-1));
                 break;
@@ -234,6 +256,9 @@ class Aansluiting extends Electro_Item {
                                 +  htmlspecialchars("" + (this.props.kortsluitvermogen)) + "kA</text>";
                     }
                 }
+
+                // Code om fase toe te voegen
+                numlines = addFase.bind(this)(numlines, mySVG);
 
                 // genoeg plaats voorzien aan de rechterkant en eindigen
                 mySVG.xright = Math.max(mySVG.xright,20+11*(numlines-1));
@@ -300,6 +325,9 @@ class Aansluiting extends Electro_Item {
                                 +  htmlspecialchars("" + (this.props.kortsluitvermogen)) + "kA</text>";
                     }
                 }
+
+                // Code om fase toe te voegen
+                numlines = addFase.bind(this)(numlines, mySVG);
 
                 // genoeg plaats voorzien aan de rechterkant en eindigen
                 mySVG.xright = Math.max(mySVG.xright,20+11*(numlines-1));

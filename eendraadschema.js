@@ -6228,6 +6228,7 @@ var Aansluiting = /** @class */ (function (_super) {
         this.props.naam = this.getLegacyKey(mykeys, 23);
         this.props.type_kabel_voor_teller = this.getLegacyKey(mykeys, 24);
         this.props.huishoudelijk = true;
+        this.props.fase = '';
         switch (this.props.bescherming) {
             case "differentieel":
                 this.props.type_differentieel = this.getLegacyKey(mykeys, 17);
@@ -6257,6 +6258,7 @@ var Aansluiting = /** @class */ (function (_super) {
         this.props.naam = "";
         this.props.type_kabel_voor_teller = "";
         this.props.huishoudelijk = true;
+        this.props.fase = '';
     };
     Aansluiting.prototype.allowedChilds = function () {
         return ["", "Bord", "Kring", "Splitsing"];
@@ -6273,6 +6275,8 @@ var Aansluiting = /** @class */ (function (_super) {
             this.props.aantal_polen = "2"; //Test dat aantal polen bestaat
         if (typeof (this.props.huishoudelijk) == 'undefined')
             this.props.huishoudelijk = true;
+        if (!["automatisch", "differentieel", "differentieelautomaat"].includes(this.props.bescherming))
+            this.props.fase = '';
     };
     Aansluiting.prototype.toHTML = function (mode) {
         this.overrideKeys();
@@ -6288,18 +6292,21 @@ var Aansluiting = /** @class */ (function (_super) {
                 output += ", \u0394 " + this.stringPropToHTML('differentieel_delta_amperage', 3) + "mA"
                     + ", Type:" + this.selectPropToHTML('type_differentieel', ["", "A", "B"])
                     + ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen', 3) + "kA"
-                    + ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief');
+                    + ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief')
+                    + ", Fase: " + this.selectPropToHTML('fase', ["", "L1", "L2", "L3"]);
                 break;
             case "automatisch":
                 output += ", Curve:" + this.selectPropToHTML('curve_automaat', ["", "B", "C", "D"])
-                    + ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen', 3) + "kA";
+                    + ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen', 3) + "kA"
+                    + ", Fase: " + this.selectPropToHTML('fase', ["", "L1", "L2", "L3"]);
                 break;
             case "differentieelautomaat":
                 output += ", \u0394 " + this.stringPropToHTML('differentieel_delta_amperage', 3) + "mA"
                     + ", Curve:" + this.selectPropToHTML('curve_automaat', ["", "B", "C", "D"])
                     + ", Type:" + this.selectPropToHTML('type_differentieel', ["", "A", "B"])
                     + ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen', 3) + "kA"
-                    + ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief');
+                    + ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief')
+                    + ", Fase: " + this.selectPropToHTML('fase', ["", "L1", "L2", "L3"]);
                 break;
         }
         output += ", Kabeltype na teller: " + this.stringPropToHTML('type_kabel_na_teller', 10)
@@ -6311,6 +6318,17 @@ var Aansluiting = /** @class */ (function (_super) {
         return (output);
     };
     Aansluiting.prototype.toSVG = function () {
+        function addFase(startNumlines, mySVG) {
+            var numlines = startNumlines;
+            if (['L1', 'L2', 'L3'].includes(this.props.fase)) {
+                numlines = numlines + (this.props.huishoudelijk ? 1.3 : 1.0);
+                mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
+                    + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
+                    + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
+                    + htmlspecialchars(this.props.fase) + "</text>";
+            }
+            return numlines;
+        }
         var mySVG = new SVGelement();
         SVGSymbols.addSymbol('zekering_automatisch');
         SVGSymbols.addSymbol('zekering_empty');
@@ -6365,6 +6383,8 @@ var Aansluiting = /** @class */ (function (_super) {
                             + htmlspecialchars("" + (this.props.kortsluitvermogen)) + "kA</text>";
                     }
                 }
+                // Code om fase toe te voegen
+                numlines = addFase.bind(this)(numlines, mySVG);
                 // Genoeg plaats voorzien aan de rechterkant en eindigen
                 mySVG.xright = Math.max(mySVG.xright, 20 + 11 * (numlines - 1));
                 break;
@@ -6416,6 +6436,8 @@ var Aansluiting = /** @class */ (function (_super) {
                             + htmlspecialchars("" + (this.props.kortsluitvermogen)) + "kA</text>";
                     }
                 }
+                // Code om fase toe te voegen
+                numlines = addFase.bind(this)(numlines, mySVG);
                 // genoeg plaats voorzien aan de rechterkant en eindigen
                 mySVG.xright = Math.max(mySVG.xright, 20 + 11 * (numlines - 1));
                 break;
@@ -6475,6 +6497,8 @@ var Aansluiting = /** @class */ (function (_super) {
                             + htmlspecialchars("" + (this.props.kortsluitvermogen)) + "kA</text>";
                     }
                 }
+                // Code om fase toe te voegen
+                numlines = addFase.bind(this)(numlines, mySVG);
                 // genoeg plaats voorzien aan de rechterkant en eindigen
                 mySVG.xright = Math.max(mySVG.xright, 20 + 11 * (numlines - 1));
                 break;
@@ -7934,6 +7958,17 @@ var Kring = /** @class */ (function (_super) {
         return (output);
     };
     Kring.prototype.toSVG = function () {
+        function addFase(startNumlines, mySVG) {
+            var numlines = startNumlines;
+            if (['L1', 'L2', 'L3'].includes(this.props.fase)) {
+                numlines = numlines + (this.props.huishoudelijk ? 1.3 : 1.0);
+                mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
+                    + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
+                    + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
+                    + htmlspecialchars(this.props.fase) + "</text>";
+            }
+            return numlines;
+        }
         var mySVG = new SVGelement();
         SVGSymbols.addSymbol('zekering_automatisch');
         SVGSymbols.addSymbol('zekering_empty');
@@ -8052,13 +8087,7 @@ var Kring = /** @class */ (function (_super) {
                     }
                 }
                 // Code om fase toe te voegen
-                if (['L1', 'L2', 'L3'].includes(this.props.fase)) {
-                    numlines = numlines + (this.props.huishoudelijk ? 1.3 : 1.0);
-                    mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
-                        + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
-                        + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
-                        + htmlspecialchars(this.props.fase) + "</text>";
-                }
+                numlines = addFase.bind(this)(numlines, mySVG);
                 // Genoeg plaats voorzien aan de rechterkant en eindigen
                 mySVG.xright = Math.max(mySVG.xright, 20 + 11 * (numlines - 1));
                 break;
@@ -8103,13 +8132,7 @@ var Kring = /** @class */ (function (_super) {
                     }
                 }
                 // Code om fase toe te voegen
-                if (['L1', 'L2', 'L3'].includes(this.props.fase)) {
-                    numlines = numlines + (this.props.huishoudelijk ? 1.3 : 1.0);
-                    mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
-                        + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
-                        + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
-                        + htmlspecialchars(this.props.fase) + "</text>";
-                }
+                numlines = addFase.bind(this)(numlines, mySVG);
                 // genoeg plaats voorzien aan de rechterkant en eindigen
                 mySVG.xright = Math.max(mySVG.xright, 20 + 11 * (numlines - 1));
                 break;
@@ -8162,13 +8185,7 @@ var Kring = /** @class */ (function (_super) {
                     }
                 }
                 // Code om fase toe te voegen
-                if (['L1', 'L2', 'L3'].includes(this.props.fase)) {
-                    numlines = numlines + (this.props.huishoudelijk ? 1.3 : 1.0);
-                    mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
-                        + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
-                        + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
-                        + htmlspecialchars(this.props.fase) + "</text>";
-                }
+                numlines = addFase.bind(this)(numlines, mySVG);
                 // genoeg plaats voorzien aan de rechterkant en eindigen
                 mySVG.xright = Math.max(mySVG.xright, 20 + 11 * (numlines - 1));
                 break;
@@ -9724,6 +9741,7 @@ var Zekering = /** @class */ (function (_super) {
         this.props.differentieel_is_selectief = false;
         this.props.kortsluitvermogen = "";
         this.props.huishoudelijk = true;
+        this.props.fase = '';
     };
     Zekering.prototype.overrideKeys = function () {
         if ((this.props.aantal_polen < 1) || (this.props.aantal_polen > 4))
@@ -9734,6 +9752,8 @@ var Zekering = /** @class */ (function (_super) {
             this.props.nr = "";
         if (typeof (this.props.huishoudelijk) == 'undefined')
             this.props.huishoudelijk = true;
+        if (!["automatisch", "differentieel", "differentieelautomaat"].includes(this.props.bescherming))
+            this.props.fase = '';
     };
     Zekering.prototype.toHTML = function (mode) {
         this.overrideKeys();
@@ -9751,18 +9771,21 @@ var Zekering = /** @class */ (function (_super) {
                 output += ", \u0394 " + this.stringPropToHTML('differentieel_delta_amperage', 3) + "mA"
                     + ", Type:" + this.selectPropToHTML('type_differentieel', ["", "A", "B"])
                     + ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen', 3) + "kA"
-                    + ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief');
+                    + ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief')
+                    + ", Fase: " + this.selectPropToHTML('fase', ["", "L1", "L2", "L3"]);
                 break;
             case "automatisch":
                 output += ", Curve:" + this.selectPropToHTML('curve_automaat', ["", "B", "C", "D"])
-                    + ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen', 3) + "kA";
+                    + ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen', 3) + "kA"
+                    + ", Fase: " + this.selectPropToHTML('fase', ["", "L1", "L2", "L3"]);
                 break;
             case "differentieelautomaat":
                 output += ", \u0394 " + this.stringPropToHTML('differentieel_delta_amperage', 3) + "mA"
                     + ", Curve:" + this.selectPropToHTML('curve_automaat', ["", "B", "C", "D"])
                     + ", Type:" + this.selectPropToHTML('type_differentieel', ["", "A", "B"])
                     + ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen', 3) + "kA"
-                    + ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief');
+                    + ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief')
+                    + ", Fase: " + this.selectPropToHTML('fase', ["", "L1", "L2", "L3"]);
                 break;
         }
         if ((this.props.kortsluitvermogen != '') && (['differentieel', 'automatisch', 'differentieelautomaat'].includes(this.props.bescherming))) {
@@ -9771,6 +9794,16 @@ var Zekering = /** @class */ (function (_super) {
         return (output);
     };
     Zekering.prototype.toSVG = function () {
+        function addFase(startNumlines, mySVG) {
+            var numlines = startNumlines;
+            if (['L1', 'L2', 'L3'].includes(this.props.fase)) {
+                numlines = numlines + (this.props.huishoudelijk ? 1.3 : 1.0);
+                mySVG.data += '<text x="' + (21 + 10) + '" y="' + (25 + 15 + (numlines - 1) * 11) + '" '
+                    + 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">'
+                    + htmlspecialchars(this.props.fase) + '</text>';
+            }
+            return numlines;
+        }
         var mySVG = new SVGelement();
         var outputstr = "";
         SVGSymbols.addSymbol('zekering_automatisch_horizontaal');
@@ -9813,6 +9846,8 @@ var Zekering = /** @class */ (function (_super) {
                             + htmlspecialchars("" + (this.props.kortsluitvermogen)) + 'kA</text>';
                     }
                 }
+                // Code om fase toe te voegen
+                numlines = addFase.bind(this)(numlines, mySVG);
                 break;
             case "differentieel":
                 numlines = 2; // Hier houden we het aantal lijnen tekst bij
@@ -9848,6 +9883,8 @@ var Zekering = /** @class */ (function (_super) {
                             + htmlspecialchars("" + (this.props.kortsluitvermogen)) + 'kA</text>';
                     }
                 }
+                // Code om fase toe te voegen
+                numlines = addFase.bind(this)(numlines, mySVG);
                 break;
             case "differentieelautomaat":
                 numlines = 2; // Hier houden we het aantal lijnen tekst bij
@@ -9890,6 +9927,8 @@ var Zekering = /** @class */ (function (_super) {
                             + htmlspecialchars("" + (this.props.kortsluitvermogen)) + 'kA</text>';
                     }
                 }
+                // Code om fase toe te voegen
+                numlines = addFase.bind(this)(numlines, mySVG);
                 break;
             case "smelt":
                 mySVG.data += '<use xlink:href="#zekering_smelt_horizontaal" x="21" y="25" />'

@@ -15,6 +15,7 @@ class Zekering extends Electro_Item {
         this.props.differentieel_is_selectief = false;
         this.props.kortsluitvermogen = "";
         this.props.huishoudelijk = true;
+        this.props.fase = '';
     }
 
     overrideKeys() {
@@ -22,6 +23,7 @@ class Zekering extends Electro_Item {
         if ( (this.props.bescherming != "differentieel") && (this.props.bescherming != "differentieelautomaat") ) this.props.differentieel_is_selectief = false;
         if (!this.isChildOf("Kring")) this.props.nr = "";
         if (typeof(this.props.huishoudelijk) == 'undefined') this.props.huishoudelijk = true;
+        if (!["automatisch", "differentieel", "differentieelautomaat"].includes(this.props.bescherming)) this.props.fase = '';
     }
 
     toHTML(mode: string) {
@@ -44,12 +46,14 @@ class Zekering extends Electro_Item {
                 output += ", \u0394 " + this.stringPropToHTML('differentieel_delta_amperage',3) + "mA"
                        +  ", Type:" + this.selectPropToHTML('type_differentieel',["","A","B"])
                        +  ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen',3) + "kA"
-                       +  ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief');
+                       +  ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief')
+                       +  ", Fase: " + this.selectPropToHTML('fase',["","L1","L2","L3"]);
                 break;
 
             case "automatisch":
                 output += ", Curve:" + this.selectPropToHTML('curve_automaat',["","B","C","D"])
-                       +  ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen',3) + "kA";               
+                       +  ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen',3) + "kA"
+                       +  ", Fase: " + this.selectPropToHTML('fase',["","L1","L2","L3"]);           
                 break;
 
             case "differentieelautomaat":
@@ -57,7 +61,8 @@ class Zekering extends Electro_Item {
                        +  ", Curve:" + this.selectPropToHTML('curve_automaat',["","B","C","D"])
                        +  ", Type:" + this.selectPropToHTML('type_differentieel',["","A","B"])
                        +  ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen',3) + "kA"
-                       +  ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief');
+                       +  ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief')
+                       +  ", Fase: " + this.selectPropToHTML('fase',["","L1","L2","L3"]);
                 break;
 
         }
@@ -70,6 +75,18 @@ class Zekering extends Electro_Item {
     }
 
     toSVG() {
+
+        function addFase(startNumlines:number, mySVG:SVGelement): number {
+            let numlines = startNumlines;
+            if (['L1','L2','L3'].includes(this.props.fase)) {
+                numlines = numlines + (this.props.huishoudelijk ? 1.3 : 1.0);
+                mySVG.data += '<text x="' + (21+10) + '" y="' + (25+15+(numlines-1)*11) + '" ' 
+                        +  'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' 
+                        +  htmlspecialchars(this.props.fase) + '</text>';
+            }
+            return numlines;
+        }
+
         let mySVG:SVGelement = new SVGelement();
         let outputstr:string = "";
 
@@ -120,6 +137,10 @@ class Zekering extends Electro_Item {
                                     +  htmlspecialchars("" + (this.props.kortsluitvermogen)) + 'kA</text>';
                     }
                 }
+
+                // Code om fase toe te voegen
+                numlines = addFase.bind(this)(numlines, mySVG);
+
                 break;                          
 
             case "differentieel":
@@ -159,6 +180,10 @@ class Zekering extends Electro_Item {
                                     +  htmlspecialchars("" + (this.props.kortsluitvermogen)) + 'kA</text>';
                     }
                 }
+
+                // Code om fase toe te voegen
+                numlines = addFase.bind(this)(numlines, mySVG);
+
                 break;
 
             case "differentieelautomaat":
@@ -207,6 +232,10 @@ class Zekering extends Electro_Item {
                                     +  htmlspecialchars("" + (this.props.kortsluitvermogen)) + 'kA</text>';
                     }
                 }
+
+                // Code om fase toe te voegen
+                numlines = addFase.bind(this)(numlines, mySVG);
+
                 break;
 
             case "smelt":
