@@ -7,16 +7,56 @@
  * - structure
  */
 
+import { SITPLANVIEW_DEFAULT_SCALE } from "../config";
+import { htmlspecialchars } from "../general";
+import { getPixelsPerMillimeter, getRotatedRectangleSize } from "./GeometricFunctions";
+import { type AdresLocation, type AdresType, SituationPlanElement } from "./SituationPlanElement";
 
-class SituationPlan {
+export interface ISituationPlan {
+    activePage: number;
+    numPages: number;
+    elements: SituationPlanElement[];
+    defaults: {
+        fontsize: number;
+        scale: number;
+        rotate: number;
+    };
+    dispose(): void;
+    getElements(): SituationPlanElement[];
+    addElement(element: SituationPlanElement): void;
+    addElementFromFile(event: InputEvent, page: number, posx: number, posy: number, callback: () => void): SituationPlanElement;
+    addElementFromElectroItem(electroItemId: number, page: number, posx: number, posy: number, adrestype: AdresType, adres: string, adreslocation: AdresLocation,
+        labelfontsize: number, scale: number, rotate: number): SituationPlanElement | null;
+    removeElement(element: SituationPlanElement): void;
+    syncToEendraadSchema(): void;
+    orderByZIndex(): void;
+    fromJsonObject(json: any): void;
+    toJsonObject(): any;
+    toSitPlanPrint(fitToPage: boolean): any;
+}
+
+
+export class SituationPlan implements ISituationPlan {
     public activePage: number = 1; // We houden deze bij in situationplan zodat ook wijzigingen van pagina's worden opgeslagen
-    private numPages: number = 1;
-    private elements: SituationPlanElement[] = [];
+    public numPages: number = 1;
+    public elements: SituationPlanElement[] = [];
 
     public defaults = {
         fontsize: 11,
         scale: SITPLANVIEW_DEFAULT_SCALE,
         rotate: 0
+    }
+
+    constructor(sitplan: SituationPlan | undefined) {
+        if (sitplan !== undefined) {
+            this.activePage = sitplan.activePage;
+            this.numPages = sitplan.numPages;
+            this.elements = sitplan.elements.map((element: SituationPlanElement) => {
+                const newElement = new SituationPlanElement();
+                newElement.fromJsonObject(element.toJsonObject());
+                return newElement;
+            });
+        }
     }
 
     /**
@@ -67,7 +107,7 @@ class SituationPlan {
 
     addElementFromFile(event: InputEvent, page: number, posx: number, posy: number, callback: () => void): SituationPlanElement {
         let element: SituationPlanElement = new SituationPlanElement();
-        element.setVars({page: page, posx: posx, posy: posy, labelfontsize: this.defaults.fontsize, scale: this.defaults.scale, rotate: this.defaults.rotate});
+        element.setVars({ page: page, posx: posx, posy: posy, labelfontsize: this.defaults.fontsize, scale: this.defaults.scale, rotate: this.defaults.rotate });
         element.importFromFile(event, callback);
         this.elements.push(element);
         return element;
@@ -90,16 +130,16 @@ class SituationPlan {
      * @param {number} rotate De rotatie van het element.
      * @returns {SituationPlanElement} Het element dat is toegevoegd.
      */
-    addElementFromElectroItem(electroItemId: number, page: number, posx: number, posy: number, adrestype: AdresType, adres:string, adreslocation: AdresLocation,
-                              labelfontsize: number, scale: number, rotate: number): SituationPlanElement | null {
+    addElementFromElectroItem(electroItemId: number, page: number, posx: number, posy: number, adrestype: AdresType, adres: string, adreslocation: AdresLocation,
+        labelfontsize: number, scale: number, rotate: number): SituationPlanElement | null {
 
-        const electroItem: Electro_Item = structure.getElectroItemById(electroItemId);
+        const electroItem = window.global_structure.getElectroItemById(electroItemId);
         if (!electroItem) return null;
-        
+
         const element: SituationPlanElement = electroItem.toSituationPlanElement();
-        Object.assign(element, {page, posx, posy, labelfontsize, scale, rotate});
+        Object.assign(element, { page, posx, posy, labelfontsize, scale, rotate });
         element.setElectroItemId(electroItemId);
-        element.setAdres(adrestype,adres,adreslocation);
+        element.setAdres(adrestype, adres, adreslocation);
         this.elements.push(element)
         return element;
     }
@@ -129,14 +169,15 @@ class SituationPlan {
      * Als een element in het situatieplan verwijst naar een symbool dat niet langer in 
      * het eendraadschema zit, wordt het element verwijderd uit het situatieplan.
      */
-    syncToEendraadSchema() { 
-        for (let element of this.elements) {            
+    syncToEendraadSchema() {
+        for (let element of this.elements) {
             //Indien een symbool niet langer in het eendraadschema zit moet het ook uit het situatieplan verwijderd worden
             //We kunnen hier niet de functie isEendraadSchemaSymbool of getElectroItemById gebruiken want die zorgen
             //ervoor dat onderstaande altijd false geeft als de symbolen niet langer in het eendraadschema zitten waardoor
             //de cleanup die nodig is niet gebeurd.
-            if (((element as any).electroItemId != null) && (structure.getElectroItemById(element.getElectroItemId()) == null)) {
-                this.removeElement(element); 
+            const electroItemId = element.getElectroItemId();
+            if (electroItemId != null && window.global_structure.getElectroItemById(electroItemId) == null) {
+                this.removeElement(element);
                 this.syncToEendraadSchema(); return; // Start opnieuw en stop na recursie
             }
         }
@@ -155,8 +196,8 @@ class SituationPlan {
     orderByZIndex() {
         //if (structure.sitplanview == null) return;
         this.elements.sort((a, b) => {
-            let asort = ( ((a.boxref == null) || (a.boxref.style.zIndex === "")) ? 0 : parseInt(a.boxref.style.zIndex));
-            let bsort = ( ((b.boxref == null) || (b.boxref.style.zIndex === "")) ? 0 : parseInt(b.boxref.style.zIndex));
+            let asort = (((a.boxref == null) || (a.boxref.style.zIndex === "")) ? 0 : parseInt(a.boxref.style.zIndex));
+            let bsort = (((b.boxref == null) || (b.boxref.style.zIndex === "")) ? 0 : parseInt(b.boxref.style.zIndex));
             return asort - bsort;
         });
     }
@@ -176,12 +217,14 @@ class SituationPlan {
         if (json.numPages !== undefined) {
             this.numPages = json.numPages;
         } else {
-            this.numPages = 1; }
+            this.numPages = 1;
+        }
 
         if (json.activePage !== undefined) {
             this.activePage = json.activePage;
         } else {
-            this.activePage = 1; }
+            this.activePage = 1;
+        }
 
         if (json.defaults !== undefined) {
             Object.assign(this.defaults, json.defaults);
@@ -197,20 +240,20 @@ class SituationPlan {
             this.elements = [];
         }
     }
-    
+
     /**
      * Converteer het situatieplan naar een JSON-object dat gebruikt kan worden
      * voor opslaan in lokale storage of voor versturen naar de server.
      * 
      * @returns {any} Het JSON-object dat het situatieplan bevat.
      */
-    toJsonObject(): any {
+    async toJsonObject(): Promise<any> {
         this.orderByZIndex();
         let elements = [];
         for (let element of this.elements) {
             elements.push(element.toJsonObject());
         }
-        return {numPages: this.numPages, activePage: this.activePage, defaults: this.defaults, elements: elements};
+        return { numPages: this.numPages, activePage: this.activePage, defaults: this.defaults, elements: elements };
     }
 
     /**
@@ -238,11 +281,11 @@ class SituationPlan {
         this.syncToEendraadSchema(); // Om zeker te zijn dat we geen onbestaande elementen meer hebben
         this.orderByZIndex(); // Sorteer de elementen op basis van de z-index zodat ze in de juiste volgorde worden geprint
 
-        let outstruct:any = {};
-        outstruct.numpages = (this.elements.length > 0 ? structure.sitplan.numPages : 0);
+        let outstruct: any = {};
+        outstruct.numpages = (this.elements.length > 0 ? window.global_structure.sitplan.numPages : 0);
         outstruct.pages = [];
 
-        for (let i=0; i<outstruct.numpages; i++ ) {    
+        for (let i = 0; i < outstruct.numpages; i++) {
             let svgstr = '';
 
             let maxx = getPixelsPerMillimeter() * 277;
@@ -251,16 +294,16 @@ class SituationPlan {
             let miny = 0;
 
             for (let element of this.elements) {
-                if (element.page == (i+1)) {
-                    let fontsize = (element.labelfontsize != null) ? element.labelfontsize : 11; 
+                if (element.page == (i + 1)) {
+                    let fontsize = (element.labelfontsize != null) ? element.labelfontsize : 11;
                     svgstr += element.getScaledSVG(true);
 
                     if (fitToPage) {
-                        let boundingbox = getRotatedRectangleSize(element.sizex*element.getscale(), element.sizey*element.getscale(), element.rotate);
-                        maxx = Math.max(maxx, element.posx + boundingbox.width/2);
-                        maxy = Math.max(maxy, element.posy + boundingbox.height/2);
-                        minx = Math.min(minx, element.posx - boundingbox.width/2);
-                        miny = Math.min(miny, element.posy - boundingbox.height/2);
+                        let boundingbox = getRotatedRectangleSize(element.sizex * element.getscale(), element.sizey * element.getscale(), element.rotate);
+                        maxx = Math.max(maxx, element.posx + boundingbox.width / 2);
+                        maxy = Math.max(maxy, element.posy + boundingbox.height / 2);
+                        minx = Math.min(minx, element.posx - boundingbox.width / 2);
+                        miny = Math.min(miny, element.posy - boundingbox.height / 2);
                     }
 
                     let str = element.getAdres();
@@ -268,9 +311,9 @@ class SituationPlan {
                 }
             }
 
-            svgstr = `<svg xmlns="http://www.w3.org/2000/svg" width="${maxx-minx}px" height="${maxy-miny}px" viewBox="${minx} ${miny} ${maxx-minx} ${maxy-miny}">${svgstr}</svg>`;
+            svgstr = `<svg xmlns="http://www.w3.org/2000/svg" width="${maxx - minx}px" height="${maxy - miny}px" viewBox="${minx} ${miny} ${maxx - minx} ${maxy - miny}">${svgstr}</svg>`;
 
-            outstruct.pages.push({sizex: maxx-minx, sizey: maxy-miny, svg: svgstr});
+            outstruct.pages.push({ sizex: maxx - minx, sizey: maxy - miny, svg: svgstr });
         }
 
         return outstruct;

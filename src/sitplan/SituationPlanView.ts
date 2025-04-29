@@ -5,27 +5,39 @@
  * een eendraadschema symbool zijn als een ingelezen extern bestand.
  */
 
-class SituationPlanView {
-    private zoomfactor:number = 1;
+import { SITPLANVIEW_SELECT_PADDING, SITPLANVIEW_ZOOMINTERVAL } from "../config";
+import { EventManager } from "../EventManager";
+import { htmlspecialchars } from "../general";
+import { undostruct, toggleAppView } from "../main";
+import { ContextMenu } from "./ContextMenu";
+import { getXYRectangleSize } from "./GeometricFunctions";
+import { MouseDrag } from "./MouseDrag";
+import { SituationPlan } from "./SituationPlan";
+import { type AdresLocation, type AdresType, SituationPlanElement } from "./SituationPlanElement";
+import { SituationPlanView_ElementPropertiesPopup } from "./SituationPlanView_ElementPropertiesPopup";
+import { SituationPlanView_SideBar } from "./SituationPlanView_SideBar";
+
+export class SituationPlanView {
+    private zoomfactor: number = 1;
 
     /** Referentie naar meerdere DIV's waar het stuatieplan wordt weergegeven 
      *   - paper: hieronder hangen de reële elementen en dit stelt het printable gedeelte van het schema voor
      *   - canvas: deze bevat paper en ook het niet printable gedeelte
     */
-    private canvas: HTMLElement = null;
-    private paper: HTMLElement = null;
+    private canvas: HTMLElement | null = null;
+    private paper: HTMLElement | null = null;
 
-    public sideBar: SituationPlanView_SideBar = new SituationPlanView_SideBar(document.getElementById('sidebar'));
+    public sideBar: SituationPlanView_SideBar = new SituationPlanView_SideBar(document.getElementById('sidebar') as HTMLElement);
 
-    public contextMenu: ContextMenu = null;
-    
-    private draggedBox:HTMLElement = null; /** Box die op dit moment versleept wordt of null */
-    private selectedBox:HTMLElement = null; /** Geselelecteerde box of null */
+    public contextMenu: ContextMenu | null = null;
+
+    private draggedBox: HTMLElement | null = null; /** Box die op dit moment versleept wordt of null */
+    private selectedBox: HTMLElement | null = null; /** Geselelecteerde box of null */
 
     private mousedrag: MouseDrag; /** behandelt het verslepen van een box */
-    
+
     private sitplan;
-    
+
     private event_manager;
 
     constructor(canvas: HTMLElement, paper: HTMLElement, sitplan: SituationPlan) {
@@ -38,25 +50,31 @@ class SituationPlanView {
 
         this.mousedrag = new MouseDrag();
         this.event_manager = new EventManager();
-        
+
         // Verwijder alle selecties wanneer we ergens anders klikken dan op een box
-        this.event_manager.addEventListener(canvas, 'mousedown', () => { this.contextMenu.hide(); this.clearSelection(); } );
-        this.event_manager.addEventListener(canvas, 'touchstart', () => { this.contextMenu.hide(); this.clearSelection(); } );
+        this.event_manager.addEventListener(canvas, 'mousedown', () => { 
+            if (this.contextMenu) this.contextMenu.hide(); 
+            this.clearSelection(); 
+        });
+        this.event_manager.addEventListener(canvas, 'touchstart', () => { 
+            if (this.contextMenu) this.contextMenu.hide(); 
+            this.clearSelection(); 
+        });
 
         // Control wieltje om te zoomen
-        this.event_manager.addEventListener(canvas, 'wheel', (event: WheelEvent) => {
+        this.event_manager.addEventListener(canvas, 'wheel', ((event: WheelEvent) => {
             if (!event.ctrlKey && !event.metaKey) return;
             event.preventDefault();
-            const zoom = -event.deltaY/1000;
-            if (Math.abs(zoom)>=0.01) {
+            const zoom = -event.deltaY / 1000;
+            if (Math.abs(zoom) >= 0.01) {
                 const menuHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--menu-height'));
                 const ribbonHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ribbon-height'));
                 const sideBarWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sideBarWidth'));
                 let canvasx = event.clientX - sideBarWidth;
                 let canvasy = event.clientY - menuHeight - ribbonHeight;
-                this.zoomIncrement(-event.deltaY/2000, canvasx, canvasy);
+                this.zoomIncrement(-event.deltaY / 2000, canvasx, canvasy);
             }
-        }, { passive: false })
+        }) as EventListener)
 
         // Voegt event handlers toe voor de pijltjestoesten
         this.attachArrowKeys();
@@ -145,7 +163,7 @@ class SituationPlanView {
      * Deze functie zorgt er niet voor dat ook elk element effectief een box heeft in de DOM.
      * Dit gebeurt pas in de redraw functie.
      */
-    syncToSitPlan() { 
+    public syncToSitPlan() {
         this.sitplan.syncToEendraadSchema();
     }
 
@@ -217,23 +235,23 @@ class SituationPlanView {
      */
     private toggleSelectedBoxMovable() {
         if (this.selectedBox != null) {
-            let sitPlanElement:SituationPlanElement = (this.selectedBox as any).sitPlanElementRef;
+            let sitPlanElement: SituationPlanElement = (this.selectedBox as any).sitPlanElementRef;
             if (sitPlanElement != null) {
                 let boxlabel = sitPlanElement.boxlabelref as HTMLElement | null;
                 switch (sitPlanElement.movable) {
                     case true:
-                        sitPlanElement.movable = false; 
+                        sitPlanElement.movable = false;
                         this.selectedBox.setAttribute('movable', 'false');
                         if (boxlabel != null) boxlabel.setAttribute('movable', 'false');
                         break;
                     case false: default:
-                        sitPlanElement.movable = true; 
+                        sitPlanElement.movable = true;
                         this.selectedBox.setAttribute('movable', 'true');
                         if (boxlabel != null) boxlabel.setAttribute('movable', 'true');
                         break;
                 }
             }
-        }     
+        }
         undostruct.store();
     }
 
@@ -253,7 +271,7 @@ class SituationPlanView {
         this.contextMenu.addLine();
 
         if (this.selectedBox != null) {
-            let sitPlanElement:SituationPlanElement = (this.selectedBox as any).sitPlanElementRef;
+            let sitPlanElement: SituationPlanElement = (this.selectedBox as any).sitPlanElementRef;
             if (sitPlanElement != null) {
                 switch (sitPlanElement.movable) {
                     case true:
@@ -267,10 +285,10 @@ class SituationPlanView {
                 }
             }
         }
-        
+
 
         this.contextMenu.addMenuItem('Verwijder', this.deleteSelectedBox.bind(this), 'Del');
-        
+
         //this.contextMenu.addMenuItem('Item 3', () => alert('Item 3 clicked'));
         this.contextMenu.show(event);
     }
@@ -292,21 +310,21 @@ class SituationPlanView {
     private makeBox(element: SituationPlanElement, fragment: DocumentFragment = null) {
         // Box aanmaken op de DOM voor het symbool of in te laden externe figuur
         // extra property sitPlanElementRef toegevoegd aan DOM zodat we later ons situatieplan element kunnen terugvinden
-        let box = document.createElement('div'); 
-        Object.assign(box, {id: element.id, className: "box", sitPlanElementRef: element}); 
+        let box = document.createElement('div');
+        Object.assign(box, { id: element.id, className: "box", sitPlanElementRef: element });
         box.setAttribute('movable', (element.movable ? 'true' : 'false'));
         element.boxref = box;
 
         // Boxlabel aanmaken op de DOM voor de tekst bij het symbool
         let boxlabel = document.createElement('div');
-        Object.assign(boxlabel, {id: element.id + '_label', className: "boxlabel", sitPlanElementRef: element});
+        Object.assign(boxlabel, { id: element.id + '_label', className: "boxlabel", sitPlanElementRef: element });
         boxlabel.setAttribute('movable', (element.movable ? 'true' : 'false'));
         boxlabel.innerHTML = htmlspecialchars(element.getAdres()); // is deze nodig? Wellicht reeds onderdeel van updateContent
         element.boxlabelref = boxlabel;
 
         // Content updaten en toevoegen aan de DOM
         this.updateBoxContent(element); //content moet eerst updated worden om te weten hoe groot de box is
-        if (fragment) fragment.append(box, boxlabel); else this.paper.append(box, boxlabel);       
+        if (fragment) fragment.append(box, boxlabel); else this.paper.append(box, boxlabel);
         //this.updateSymbolAndLabelPosition(element); //pas als alles op de DOM zit kunnen we berekenen waar het label hoort
 
         // Event handlers voor het bewegen met muis of touch
@@ -336,7 +354,7 @@ class SituationPlanView {
 
         const box = sitPlanElement.boxref;
         const boxlabel = sitPlanElement.boxlabelref;
-        
+
         if (box == null) return;
 
         let svg = sitPlanElement.getScaledSVG(); // Deze call past ook viewUpdateNeeded aan en moet dus eerst gebeuren
@@ -367,14 +385,14 @@ class SituationPlanView {
 
     private updateLabelPosition(sitPlanElement: SituationPlanElement | null) {
         if (!sitPlanElement) return;
-    
+
         const boxlabel = sitPlanElement.boxlabelref as HTMLElement | null;
         if (!boxlabel) return;
 
         const scale = sitPlanElement.getscale();
         const forbiddenLabelZone = getXYRectangleSize(
-            sitPlanElement.sizex * scale + SITPLANVIEW_SELECT_PADDING, 
-            sitPlanElement.sizey * scale + SITPLANVIEW_SELECT_PADDING, 
+            sitPlanElement.sizex * scale + SITPLANVIEW_SELECT_PADDING,
+            sitPlanElement.sizey * scale + SITPLANVIEW_SELECT_PADDING,
             sitPlanElement.rotate
         );
 
@@ -410,18 +428,18 @@ class SituationPlanView {
 
         if (this.sitplan.activePage == sitPlanElement.page) {
             if (boxlabel.classList.contains('hidden')) boxlabel.classList.remove('hidden'); // Vermijd aanpassingen DOM indien niet nodig
-        } else  {
+        } else {
             if (!boxlabel.classList.contains('hidden')) boxlabel.classList.add('hidden'); // Vermijd aanpassingen DOM indien niet nodig
         }
     }
-    
+
     /**
      * Wijzigt de grootte, positie en rotatietransformatie van het DIV-element dat een situationplanelement bevat in de DOM.
      * Controleert ook of het symbool op een zichtbare pagina staat en maakt het onzichtbaar indien nodig.
      * 
      * @param sitPlanElement Het situationplanelement dat aangepast moet worden.
      */
-    
+
     private updateSymbolPosition(sitPlanElement: SituationPlanElement | null) {
 
         function getRotationTransform(sitPlanElement: SituationPlanElement | null): string {
@@ -437,7 +455,7 @@ class SituationPlanView {
                 if (sitPlanElement.isEendraadschemaSymbool()) rotation -= 180;
             }
 
-            return `rotate(${rotation}deg)` + (spiegel ? ' scaleX(-1)' : '');    
+            return `rotate(${rotation}deg)` + (spiegel ? ' scaleX(-1)' : '');
         }
 
         if (!sitPlanElement) return;
@@ -446,31 +464,31 @@ class SituationPlanView {
         if (!div) return;
 
         const scale = sitPlanElement.getscale();
-        const contentwidth = sitPlanElement.sizex*scale;
-        const contentheight = sitPlanElement.sizey*scale;
-    
-        const left = ((sitPlanElement.posx-contentwidth/2-SITPLANVIEW_SELECT_PADDING)).toString() + "px";
+        const contentwidth = sitPlanElement.sizex * scale;
+        const contentheight = sitPlanElement.sizey * scale;
+
+        const left = ((sitPlanElement.posx - contentwidth / 2 - SITPLANVIEW_SELECT_PADDING)).toString() + "px";
         if (div.style.left != left) div.style.left = left; // Vermijd aanpassingen DOM indien niet nodig
 
-        const top = ((sitPlanElement.posy-contentheight/2-SITPLANVIEW_SELECT_PADDING)).toString() + "px";
+        const top = ((sitPlanElement.posy - contentheight / 2 - SITPLANVIEW_SELECT_PADDING)).toString() + "px";
         if (div.style.top != top) div.style.top = top; // Vermijd aanpassingen DOM indien niet nodig
 
-        const width = ((contentwidth + SITPLANVIEW_SELECT_PADDING*2)).toString() + "px";
+        const width = ((contentwidth + SITPLANVIEW_SELECT_PADDING * 2)).toString() + "px";
         if (div.style.width != width) div.style.width = width; // Vermijd aanpassingen DOM indien niet nodig
 
-        const height = ((contentheight + SITPLANVIEW_SELECT_PADDING*2)).toString() + "px";
+        const height = ((contentheight + SITPLANVIEW_SELECT_PADDING * 2)).toString() + "px";
         if (div.style.height != height) div.style.height = height; // Vermijd aanpassingen DOM indien niet nodig
-        
+
         const transform = getRotationTransform(sitPlanElement);
         if (div.style.transform != transform) div.style.transform = transform; // Vermijd aanpassingen DOM indien niet nodig
 
         if (this.sitplan.activePage == sitPlanElement.page) {
             if (div.classList.contains('hidden')) div.classList.remove('hidden'); // Vermijd aanpassingen DOM indien niet nodig
-        } else  {
+        } else {
             if (!div.classList.contains('hidden')) div.classList.add('hidden'); // Vermijd aanpassingen DOM indien niet nodig
         }
     }
-    
+
     /**
      * Werkt de positie van het symbool bij op de DOM indien nodig.
      * Berekent de positie van het label en werkt deze bij op de DOM indien nodig
@@ -483,7 +501,7 @@ class SituationPlanView {
         this.updateSymbolPosition(sitPlanElement); // Eerst content aanpassen anders kennen we de grootte van het symbool niet
         this.updateLabelPosition(sitPlanElement);
     }
-    
+
     /**
      * Werkt de situatieplanweergave bij door elementen te synchroniseren met de onderliggende datastructuur.
      *
@@ -500,7 +518,7 @@ class SituationPlanView {
     redraw() {
         const start = performance.now();
         this.syncToSitPlan();
-        
+
         const fragment: DocumentFragment = document.createDocumentFragment();
 
         let appendNeeded = false;
@@ -531,7 +549,7 @@ class SituationPlanView {
      */
     getSelectedBoxOrdinal(): number | null {
         if (this.selectedBox == null) return null;
-    
+
         return this.sitplan.elements.findIndex(e => e.boxref == this.selectedBox);
     }
 
@@ -544,7 +562,7 @@ class SituationPlanView {
         if (!box) return;
         box.classList.add('selected');
         this.selectedBox = box;
-    }   
+    }
 
     /**
      * Verwijdert de selectie van alle boxes.
@@ -588,17 +606,19 @@ class SituationPlanView {
                 let newzindex;
 
                 if (element.boxref != this.selectedBox) {
-                    newzindex = (parseInt(element.boxref.style.zIndex) || 0)+1;
-                } else { 
-                    newzindex = 0; }
+                    newzindex = (parseInt(element.boxref.style.zIndex) || 0) + 1;
+                } else {
+                    newzindex = 0;
+                }
 
                 element.boxref.style.zIndex = newzindex.toString();
-                if (element.boxlabelref != null) { 
-                    element.boxlabelref.style.zIndex = newzindex.toString(); }
-                
+                if (element.boxlabelref != null) {
+                    element.boxlabelref.style.zIndex = newzindex.toString();
+                }
+
             }
-        }            
-        
+        }
+
         this.sitplan.orderByZIndex();
         undostruct.store();
     }
@@ -614,14 +634,14 @@ class SituationPlanView {
 
         let newzindex = 0;
         for (let element of this.sitplan.elements) {
-            if ( (element.boxref != null) && (element.boxref != this.selectedBox) ) {
+            if ((element.boxref != null) && (element.boxref != this.selectedBox)) {
                 newzindex = Math.max(newzindex, parseInt(element.boxref.style.zIndex) || 0);
-            } 
+            }
         }
-        newzindex += 1;            
-        
+        newzindex += 1;
+
         let element = (this.selectedBox as any).sitPlanElementRef;
-        if (element == null) { this.sitplan.syncToSitPlan(); return; } 
+        if (element == null) { this.syncToSitPlan(); return; }
 
         this.selectedBox.style.zIndex = newzindex.toString();
         if (element.boxlabelref != null) element.boxlabelref.style.zIndex = newzindex.toString();
@@ -635,7 +655,7 @@ class SituationPlanView {
      * 
      * @param event - De gebeurtenis die de sleepactie activeert (muisklik of touchstart).
      */
-    private startDrag = (event) => {
+    private startDrag = (event: any) => {
         //Indien de middelste knop werd gebruikt doen we niets
         if (event.button == 1) return;
 
@@ -643,7 +663,7 @@ class SituationPlanView {
         this.contextMenu.hide();
 
         if (event == null) return;
-        let box:HTMLElement = null;
+        let box: HTMLElement = null;
 
         //Juiste box identificeren. Hou er rekening mee dat ook op een boxlabel kan geklikt zijn
         if (event.target.classList.contains('box')) {
@@ -659,7 +679,7 @@ class SituationPlanView {
         event.stopPropagation();   // Voorkomt body klikgebeurtenis
         this.clearSelection();     // Wist bestaande selectie
         this.selectBox(box); // Selecteert de box die we willen slepen
-       
+
         //Indien de rechter muisknop werd gebruikt gaan we niet verder
         if (event.button == 2) return;
 
@@ -681,7 +701,7 @@ class SituationPlanView {
                 break;
             default:
                 console.error('Ongeldige event voor startDrag functie');
-        }        
+        }
     }
 
     /**
@@ -689,12 +709,12 @@ class SituationPlanView {
      * 
      * @param event - De gebeurtenis die de sleepactie stopt (muisklik release of touchend).
      */
-    private stopDrag = (event) => {
+    private stopDrag = (event: any) => {
         function showArrowHelp() {
-            const helperTip = new HelperTip(appDocStorage);
-            helperTip.show('sitplan.arrowdrag',
-            `<h3>Tip: Symbolen verplaatsen</h3>
-            <p>Voor fijnere controle tijdens het verschuiven van symbolen kan u ook de pijltjes op het toetsenbord gebruiken.</p>`,true);
+            // const helperTip = new HelperTip(appDocStorage);
+            // helperTip.show('sitplan.arrowdrag',
+            //     `<h3>Tip: Symbolen verplaatsen</h3>
+            // <p>Voor fijnere controle tijdens het verschuiven van symbolen kan u ook de pijltjes op het toetsenbord gebruiken.</p>`, true);
         }
 
         event.stopPropagation();
@@ -721,7 +741,7 @@ class SituationPlanView {
         }
 
         this.draggedBox = null;
-        
+
     }
 
     /**
@@ -729,16 +749,16 @@ class SituationPlanView {
      * 
      * @param event - De gebeurtenis die verwerkt wordt (muisklik of touchmove).
      */
-    private processDrag = (event) => {
+    private processDrag = (event: any) => {
         if (this.draggedBox) {
             event.preventDefault();
 
-            let newLeftTop: {left: number,top: number};
+            let newLeftTop: { left: number, top: number };
             if (event.type === 'mousemove') {
-                newLeftTop = this.mousedrag.returnNewLeftTop(event.clientX,event.clientY);
+                newLeftTop = this.mousedrag.returnNewLeftTop(event.clientX, event.clientY);
             } else if (event.type === 'touchmove') {
                 const touch = event.touches[0];
-                newLeftTop = this.mousedrag.returnNewLeftTop(touch.clientX,touch.clientY);
+                newLeftTop = this.mousedrag.returnNewLeftTop(touch.clientX, touch.clientY);
             }
 
             //get paperpadding from css
@@ -749,19 +769,19 @@ class SituationPlanView {
             const minTop = (this.canvas.scrollTop - paperPadding) / this.zoomfactor;
             const maxRight = minLeft + (this.canvas.offsetWidth) / this.zoomfactor;
             const maxBottom = minTop + (this.canvas.offsetHeight) / this.zoomfactor;
-    
+
             // Zorg ervoor dat de box niet buiten redelijke grenzen van het canvas valt links-boven
             // We doen deze controle niet rechts onder omdat het canvas daar gewoon kan groeien
-            newLeftTop.left = Math.min(maxRight - this.draggedBox.offsetWidth/2, Math.max(minLeft - this.draggedBox.offsetWidth/2, newLeftTop.left)); 
-            newLeftTop.top = Math.min(maxBottom - this.draggedBox.offsetHeight/2, Math.max(minTop - this.draggedBox.offsetHeight/2, newLeftTop.top));
+            newLeftTop.left = Math.min(maxRight - this.draggedBox.offsetWidth / 2, Math.max(minLeft - this.draggedBox.offsetWidth / 2, newLeftTop.left));
+            newLeftTop.top = Math.min(maxBottom - this.draggedBox.offsetHeight / 2, Math.max(minTop - this.draggedBox.offsetHeight / 2, newLeftTop.top));
 
             const sitPlanElement = (this.draggedBox as any).sitPlanElementRef;
-            sitPlanElement.posx = newLeftTop.left + (this.draggedBox.offsetWidth/2);
-            sitPlanElement.posy = newLeftTop.top + (this.draggedBox.offsetHeight/2);
+            sitPlanElement.posx = newLeftTop.left + (this.draggedBox.offsetWidth / 2);
+            sitPlanElement.posy = newLeftTop.top + (this.draggedBox.offsetHeight / 2);
 
             this.updateSymbolAndLabelPosition(sitPlanElement);
         }
-    } 
+    }
 
     /**
      * Selecteer een pagina.
@@ -809,8 +829,8 @@ class SituationPlanView {
          * @param cycle - Het aantal keren dat het label met 90 graden moet worden gedraaid.
          *                1 is een draaing van 90 graden naar rechts, -1 is een draaing van 90 graden naar links.
          */
-        function rotateLabel(cycle) {
-            const locations = ['boven','rechts','onder','links'];
+        function rotateLabel(cycle: number) {
+            const locations = ['boven', 'rechts', 'onder', 'links'];
             let pic = this.selectedBox.sitPlanElementRef;
             if (pic == null) return;
             const index = locations.indexOf(pic.getAdresLocation());
@@ -830,8 +850,9 @@ class SituationPlanView {
         }
     }
 
+    //function that listens for keypresses on the page.
     unattachArrowKeys() {
-        this.event_manager.addEventListener(document, 'keydown', () => {} );
+        document.addEventListener('keydown', () => { });
     }
 
     /**
@@ -842,8 +863,8 @@ class SituationPlanView {
      * Daarna wordt de functie updateSymbolAndLabelPosition aangeroepen om de positie van het symbool en het label van de box te updaten.
      */
     attachArrowKeys() {
-        
-        this.event_manager.addEventListener(document, 'keydown', (event) => {
+
+        document.addEventListener('keydown', (event) => {
 
             this.contextMenu.hide();
             if (document.getElementById('outerdiv').style.display == 'none') return; // Check if we are really in the situationplan, if not, the default scrolling action will be executed by the browser
@@ -861,13 +882,13 @@ class SituationPlanView {
                         return;
                     case 'r':
                         event.preventDefault();
-                        const helperTip = new HelperTip(appDocStorage);
-                        helperTip.show('sitplan.Ctrl_r_key',
-                        `<h3>Ctrl-r genegeerd</h3>
-                        <p>Om te vermijden dat u per ongeluk de pagina ververst en uw werk verliest is de refresh sneltoets uitgeschakeld in het situatieschema.</p>`,true);
-                        return;
+                        // const helperTip = new HelperTip(appDocStorage);
+                        // helperTip.show('sitplan.Ctrl_r_key',
+                        //     `<h3>Ctrl-r genegeerd</h3>
+                        // <p>Om te vermijden dat u per ongeluk de pagina ververst en uw werk verliest is de refresh sneltoets uitgeschakeld in het situatieschema.</p>`, true);
+                        // return;
                     default:
-                        //do nothing as we also have ctrl + arrow keys here below.
+                    //do nothing as we also have ctrl + arrow keys here below.
                 }
             }
 
@@ -894,11 +915,11 @@ class SituationPlanView {
                 } else {
                     switch (event.key) {
                         case 'ArrowLeft':
-                            sitPlanElement.posx -= 1;    
+                            sitPlanElement.posx -= 1;
                             undostruct.store('arrowMove' + sitPlanElement.id);
                             break;
                         case 'ArrowRight':
-                            sitPlanElement.posx += 1;    
+                            sitPlanElement.posx += 1;
                             undostruct.store('arrowMove' + sitPlanElement.id);
                             break;
                         case 'ArrowUp':
@@ -930,16 +951,16 @@ class SituationPlanView {
      * 
      * @param elem - Het html element waar de listener wordt aan gehangen.
      */
-    attachDeleteButton(elem: HTMLElement) { 
-        this.event_manager.addEventListener(elem, 'click', () => { 
+    attachDeleteButton(elem: HTMLElement) {
+        this.event_manager.addEventListener(elem, 'click', () => {
             this.contextMenu.hide();
-            this.deleteSelectedBox(); 
-            undostruct.store(); 
-            const helperTip = new HelperTip(appDocStorage);
-            helperTip.show('sitplan.deletekey',
-            `<h3>Tip: Symbolen verwijderen</h3>
-            <p>Bespaar tijd en gebruik de 'Delete' toets op het toetsenbord om symbolen te verwijderen.</p>`,true);
-        } );      
+            this.deleteSelectedBox();
+            undostruct.store();
+            // const helperTip = new HelperTip(appDocStorage);
+            // helperTip.show('sitplan.deletekey',
+            //     `<h3>Tip: Symbolen verwijderen</h3>
+            // <p>Bespaar tijd en gebruik de 'Delete' toets op het toetsenbord om symbolen te verwijderen.</p>`, true);
+        });
     };
 
     /**
@@ -947,8 +968,8 @@ class SituationPlanView {
      * 
      * @param elem - Het html element waar de listener wordt aan gehangen.
      */
-    attachSendToBackButton(elem: HTMLElement) { 
-        this.event_manager.addEventListener(elem, 'click', () => { this.contextMenu.hide(); this.sendToBack(); } ); 
+    attachSendToBackButton(elem: HTMLElement) {
+        this.event_manager.addEventListener(elem, 'click', () => { this.contextMenu.hide(); this.sendToBack(); });
     };
 
     /**
@@ -956,8 +977,8 @@ class SituationPlanView {
      * 
      * @param elem - Het html element waar de listener wordt aan gehangen.
      */
-    attachBringToFrontButton(elem: HTMLElement) { 
-        this.event_manager.addEventListener(elem, 'click', () => { this.contextMenu.hide(); this.bringToFront(); } ); 
+    attachBringToFrontButton(elem: HTMLElement) {
+        this.event_manager.addEventListener(elem, 'click', () => { this.contextMenu.hide(); this.bringToFront(); });
     };
 
     /**
@@ -967,8 +988,8 @@ class SituationPlanView {
      * @param increment - De waarde waarmee de zoomfactor wordt aangepast. Een positieve waarde vergroot de zoom,
      *                    terwijl een negatieve waarde de zoom verkleint.
      */
-    attachZoomButton(elem: HTMLElement, increment: number) { 
-        this.event_manager.addEventListener(elem, 'click', () => { this.contextMenu.hide(); this.zoomIncrement(increment); } ); 
+    attachZoomButton(elem: HTMLElement, increment: number) {
+        this.event_manager.addEventListener(elem, 'click', () => { this.contextMenu.hide(); this.zoomIncrement(increment); });
     };
 
     /**
@@ -977,8 +998,8 @@ class SituationPlanView {
      * 
      * @param elem - Het html element waar de listener wordt aan gehangen.
      */
-    attachZoomToFitButton(elem: HTMLElement) { 
-        this.event_manager.addEventListener(elem, 'click', () => { this.contextMenu.hide(); this.zoomToFit(); } ); 
+    attachZoomToFitButton(elem: HTMLElement) {
+        this.event_manager.addEventListener(elem, 'click', () => { this.contextMenu.hide(); this.zoomToFit(); });
     };
 
     /**
@@ -989,37 +1010,37 @@ class SituationPlanView {
      * @param fileinput - Het invoerelement voor bestanden dat het bestand uploadt wanneer het verandert.
      */
     attachAddElementFromFileButton(elem: HTMLElement, fileinput: HTMLElement) {
-        this.event_manager.addEventListener(elem, 'click', () => { this.contextMenu.hide(); fileinput.click(); } );
-        this.event_manager.addEventListener(fileinput, 'change', (event) => { 
-            let element = this.sitplan.addElementFromFile(event, this.sitplan.activePage, this.paper.offsetWidth/2, this.paper.offsetHeight/2, 
+        this.event_manager.addEventListener(elem, 'click', () => { this.contextMenu.hide(); fileinput.click(); });
+        this.event_manager.addEventListener(fileinput, 'change', (event: any) => {
+            let element = this.sitplan.addElementFromFile(event, this.sitplan.activePage, this.paper.offsetWidth / 2, this.paper.offsetHeight / 2,
                 (() => {
                     this.syncToSitPlan();
                     this.clearSelection();
                     element.needsViewUpdate = true; // for an external SVG this is needed, for an electroItem it is automatically set (see next function)
 
                     const lastscale = element.scale;
-                    element.scaleSelectedBoxToPaperIfNeeded(this.paper.offsetWidth*0.995,this.paper.offsetHeight*0.995,this.sitplan.defaults.scale);
+                    element.scaleSelectedBoxToPaperIfNeeded(this.paper.offsetWidth * 0.995, this.paper.offsetHeight * 0.995, this.sitplan.defaults.scale);
 
                     this.redraw();
                     this.selectBox(element.boxref); // We moeten dit na redraw doen anders bestaat de box mogelijk nog niet
                     this.bringToFront(); // Deze slaat ook automatisch undo informatie op dus we moeten geen undostruct.store() meer doen.
-                    
+
                     (fileinput as HTMLInputElement).value = ''; // Zorgt ervoor dat hetzelfde bestand twee keer kan worden gekozen en dit nog steeds een change triggert
 
                     if (element.scale != lastscale) {
                         //Use the built in help top to display a text that the image was scaled
-                        const helperTip = new HelperTip(appDocStorage);
-                        helperTip.show('sitplan.scaledImageToFit',
-                        '<h3>Mededeling</h3>'+
-                        '<p>Deze afbeelding werd automatisch verkleind om binnen de tekenzone te blijven.</p>'+
-                        '<p>Kies "Bewerk" in het menu om de schaalfactor verder aan te passen indien gewenst.</p>',true);
+                        // const helperTip = new HelperTip(appDocStorage);
+                        // helperTip.show('sitplan.scaledImageToFit',
+                        //     '<h3>Mededeling</h3>' +
+                        //     '<p>Deze afbeelding werd automatisch verkleind om binnen de tekenzone te blijven.</p>' +
+                        //     '<p>Kies "Bewerk" in het menu om de schaalfactor verder aan te passen indien gewenst.</p>', true);
                     }
-                    
+
                 }).bind(this)
             );
         });
     }
-    
+
     /**
      * Voegt een ElectroItem toe aan het situatieplan.
      * 
@@ -1039,9 +1060,9 @@ class SituationPlanView {
         if (posy == null) posy = paperPos.y;
 
         if (id != null) {
-            let element = this.sitplan.addElementFromElectroItem(id, this.sitplan.activePage, posx, posy, 
-                                                      adrestype, adres, adreslocation, labelfontsize,
-                                                      scale, rotate);
+            let element = this.sitplan.addElementFromElectroItem(id, this.sitplan.activePage, posx, posy,
+                adrestype, adres, adreslocation, labelfontsize,
+                scale, rotate);
             if (element != null) {
                 this.syncToSitPlan();
                 this.clearSelection();
@@ -1082,12 +1103,12 @@ class SituationPlanView {
                 (electroid, adrestype, adres, adreslocation, labelfontsize, scale, rotate) => {
                     if (electroid != null) {
                         sitPlanElement.setElectroItemId(electroid);
-                        sitPlanElement.setAdres(adrestype,adres,adreslocation);
+                        sitPlanElement.setAdres(adrestype, adres, adreslocation);
                     }
                     sitPlanElement.labelfontsize = labelfontsize;
                     sitPlanElement.setscale(scale);
                     sitPlanElement.rotate = rotate;
-                    
+
                     this.updateBoxContent(sitPlanElement); //content needs to be updated first to know the size of the box
                     this.updateSymbolAndLabelPosition(sitPlanElement);
                     undostruct.store();
@@ -1103,7 +1124,7 @@ class SituationPlanView {
      * @param elem - Het HTML-element dat bij een klik een bestaand element in het situatieplan bewerkt.
      */
     attachEditButton(elem: HTMLElement) {
-        this.event_manager.addEventListener(elem, 'click', () => {this.editSelectedBox()} );
+        this.event_manager.addEventListener(elem, 'click', () => { this.editSelectedBox() });
     }
 
 
@@ -1113,7 +1134,7 @@ class SituationPlanView {
      * @param page - Het nummer van de pagina die leeg gemaakt moet worden.
      */
     wipePage(page: number) {
-        for (let i=0; i<this.sitplan.elements.length; i++) {
+        for (let i = 0; i < this.sitplan.elements.length; i++) {
             let element = this.sitplan.elements[i];
             if (element.page == this.sitplan.activePage) {
                 let boxref = element.boxref;
@@ -1124,10 +1145,10 @@ class SituationPlanView {
                     return;
                 }
             }
-        }    
+        }
     }
 
-    
+
 
     /**
      * Maakt de knoppen in de ribbon aan om onder andere pagina's te selecteren, elementen te laden of verwijderen en pagina's te zoomen.
@@ -1194,17 +1215,17 @@ class SituationPlanView {
 
         // -- Visuals om pagina te selecteren --
 
-        outputleft  += `
+        outputleft += `
             <span style="display: inline-block; width: 50px;"></span>
             <div>
                 <center>
                     <span style="display: inline-block; white-space: nowrap;">Pagina
                         <select id="id_sitplanpage">`;
-                            for (let i=1; i<= this.sitplan.numPages; i++) {
-                                outputleft += '<option value="' + i + '"' + (i == this.sitplan.activePage ? ' selected' : '') + '>' + i + '</option>';
-                            }
+        for (let i = 1; i <= this.sitplan.numPages; i++) {
+            outputleft += '<option value="' + i + '"' + (i == this.sitplan.activePage ? ' selected' : '') + '>' + i + '</option>';
+        }
 
-        outputleft +=  `
+        outputleft += `
                         </select>
                     </span><br><span style="display: inline-block; white-space: nowrap;">
                         <button id="btn_sitplan_addpage" ${(this.sitplan.activePage != this.sitplan.numPages ? ' disabled' : '')}>Nieuw</button>
@@ -1212,7 +1233,7 @@ class SituationPlanView {
                     </span>
                 </center>
             </div>`;
- 
+
         // -- Visuals om pagina te zoomen --
 
         outputright += `
@@ -1231,7 +1252,7 @@ class SituationPlanView {
                 <span class="icon-text">Schermvullend</span>
             </div>
             <span style="display: inline-block; width: 10px;"></span>`;
-        
+
         // -- Put everything in the ribbon --
 
         document.getElementById("ribbon").innerHTML = `<div id="left-icons">${outputleft}</div><div id="right-icons">${outputright}</div>`;
@@ -1244,7 +1265,7 @@ class SituationPlanView {
             this.selectPage(Number(target.value));
             undostruct.store();
         };
-        
+
         document.getElementById('btn_sitplan_addpage')!.onclick = () => {
             this.contextMenu.hide();
             this.sitplan.numPages++;
@@ -1253,7 +1274,7 @@ class SituationPlanView {
 
         document.getElementById('btn_sitplan_delpage')!.onclick = () => {
             this.contextMenu.hide();
-            const userConfirmation = confirm('Pagina '+this.sitplan.activePage+' volledig verwijderen?'); 
+            const userConfirmation = confirm('Pagina ' + this.sitplan.activePage + ' volledig verwijderen?');
             if (userConfirmation) {
                 this.wipePage(this.sitplan.activePage);
                 //set page of all sitplan.elements with page>page one lower
@@ -1262,8 +1283,8 @@ class SituationPlanView {
                         element.page--;
                     }
                 });
-                if (this.sitplan.numPages>1) this.sitplan.numPages--;
-                this.selectPage(Math.min(this.sitplan.activePage,this.sitplan.numPages))
+                if (this.sitplan.numPages > 1) this.sitplan.numPages--;
+                this.selectPage(Math.min(this.sitplan.activePage, this.sitplan.numPages))
             }
         };
 
@@ -1287,7 +1308,7 @@ class SituationPlanView {
         this.attachZoomButton(document.getElementById('button_zoomin'), 0.1);
         this.attachZoomButton(document.getElementById('button_zoomout'), -0.1);
         this.attachZoomToFitButton(document.getElementById('button_zoomToFit'));
-        
+
     }
 
     /*  
@@ -1321,33 +1342,33 @@ class SituationPlanView {
 /**
  * Toon de pagina voor het situatieplan
  */
-function showSituationPlanPage() {
+export function showSituationPlanPage() {
     toggleAppView('draw');
 
-    if (!(structure.sitplan)) { structure.sitplan = new SituationPlan() };
+    if (!(window.global_structure.sitplan)) { window.global_structure.sitplan = new SituationPlan(undefined) };
 
-    if (!(structure.sitplanview)) {
+    if (!(window.global_structure.sitplanview)) {
         //Verwijder eerst alle elementen op de DOM met id beginnend met "SP_" om eventuele wezen
         //uit eerdere oefeningen te voorkomen
         let elements = document.querySelectorAll('[id^="SP_"]');
         elements.forEach(e => e.remove());
         //Maak dan de SituationPlanView
-        structure.sitplanview = new SituationPlanView(
-            document.getElementById('canvas'), 
-            document.getElementById('paper'), 
-            structure.sitplan);
+        window.global_structure.sitplanview = new SituationPlanView(
+            document.getElementById('canvas'),
+            document.getElementById('paper'),
+            window.global_structure.sitplan);
 
-        structure.sitplanview.zoomToFit();
+        window.global_structure.sitplanview.zoomToFit();
     };
-    
-    structure.sitplanview.redraw();      
+
+    window.global_structure.sitplanview.redraw();
 
     // Initialize the HelperTip with the storage
-    const helperTip = new HelperTip(appDocStorage);
-    helperTip.show('sitplan.introductie',
-    `<h3>Situatieschema tekenen</h3>
-    <p>Op deze pagina kan u een situatieschema tekenen.</p>
-    <p>Laad een plattegrond met de knop "Uit bestand" en voeg symbolen toe met de knop "Uit schema".</p>
-    <p>Klik <a href="Documentation/sitplandoc.pdf" target="_blank" rel="noopener noreferrer">hier</a> om in een nieuw venster de documentatie te bekijken.</p>
-    <p>Het situatieschema werd recent toegevoegd aan het programma en zal nog verder ontwikkeld worden over de komende weken. Opmerkingen zijn welkom in het "contact"-formulier.</p>`);
+    // const helperTip = new HelperTip(appDocStorage);
+    // helperTip.show('sitplan.introductie',
+    //     `<h3>Situatieschema tekenen</h3>
+    // <p>Op deze pagina kan u een situatieschema tekenen.</p>
+    // <p>Laad een plattegrond met de knop "Uit bestand" en voeg symbolen toe met de knop "Uit schema".</p>
+    // <p>Klik <a href="Documentation/sitplandoc.pdf" target="_blank" rel="noopener noreferrer">hier</a> om in een nieuw venster de documentatie te bekijken.</p>
+    // <p>Het situatieschema werd recent toegevoegd aan het programma en zal nog verder ontwikkeld worden over de komende weken. Opmerkingen zijn welkom in het "contact"-formulier.</p>`);
 }

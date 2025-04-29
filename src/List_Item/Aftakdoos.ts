@@ -1,4 +1,8 @@
-class Aftakdoos extends Electro_Item {
+import { SVGelement } from "../SVGelement";
+import { SVGSymbols } from "../SVGSymbols";
+import { Electro_Item } from "./Electro_Item";
+
+export class Aftakdoos extends Electro_Item {
 
     convertLegacyKeys(mykeys: Array<[string,string,any]>) {
         this.props.type             = this.getLegacyKey(mykeys,0);

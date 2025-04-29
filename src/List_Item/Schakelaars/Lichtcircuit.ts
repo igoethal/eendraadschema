@@ -1,4 +1,11 @@
-class Lichtcircuit extends Schakelaars {
+import { htmlspecialchars } from "../../general.js";
+import { SVGelement } from "../../SVGelement";
+import { SVGSymbols } from "../../SVGSymbols";
+import { Lichtpunt } from "../Lichtpunt";
+import { Schakelaar } from "./Schakelaar";
+import { Schakelaars } from "./Schakelaars.js";
+
+export class Lichtcircuit extends Schakelaars {
 
     resetProps() {
         super.resetProps(); //Schakelaars
@@ -89,7 +96,11 @@ class Lichtcircuit extends Schakelaars {
                 lichtpunt.parent = schakelaars.id;
             }
             let ordinal = this.sourcelist.getOrdinalById(this.id); // Deze kan hier pas komen want de ordinal is gewijzigd door het invoegen van de schakelaars
-            this.sourcelist.data[ordinal] = lichtpunt;
+            if (ordinal !== null) {
+                this.sourcelist.data[ordinal] = lichtpunt;
+            } else {
+                console.error("Ordinal is null, cannot assign lichtpunt.");
+            }
 
         } else { // enkel schakelaars
 
@@ -97,7 +108,11 @@ class Lichtcircuit extends Schakelaars {
             schakelaars.id = this.id;
             schakelaars.parent = this.getParent().id;
             let ordinal = this.sourcelist.getOrdinalById(this.id);
-            this.sourcelist.data[ordinal] = schakelaars;
+            if (ordinal !== null) {
+                this.sourcelist.data[ordinal] = schakelaars;
+            } else {
+                console.error("Ordinal is null, cannot assign schakelaars.");
+            }
 
         }
         

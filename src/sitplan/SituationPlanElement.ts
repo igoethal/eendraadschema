@@ -1,5 +1,9 @@
-type AdresLocation = 'rechts'|'links'|'boven'|'onder';
-type AdresType = 'auto'|'manueel';
+import { SITPLANVIEW_DEFAULT_SCALE } from "../config.js";
+import { randomId } from "../general.js";
+import { Electro_Item } from "../List_Item/Electro_Item.js";
+
+export type AdresLocation = 'rechts'|'links'|'boven'|'onder';
+export type AdresType = 'auto'|'manueel';
 
 /**
  * Class SituationPlanElement
@@ -9,7 +13,7 @@ type AdresType = 'auto'|'manueel';
  * - SITPLANVIEW_DEFAULT_SCALE
  */
 
-class SituationPlanElement {
+export class SituationPlanElement {
 
     // -- Identificatie --
     public id:string; //unieke identificatie van het element
@@ -26,7 +30,7 @@ class SituationPlanElement {
     // -- Basis eigenschappen van het label --
     //    adres gegevens zijn private gedefinieerd omwille van consistentie (bvb adres kan leeg gelaten worden als het type auto is)
 
-    public boxlabelref = null; // Referentie naar het DIV document in de browser waar het label wordt afgebeeld
+    public boxlabelref: HTMLElement | null = null; // Referentie naar het DIV document in de browser waar het label wordt afgebeeld
 
     private adrestype: string | null = null;
     private adres: string | null = null
@@ -40,7 +44,7 @@ class SituationPlanElement {
     public sizey:number = 0; //hoogte
 
     public rotate:number = 0;
-    private scale:number = SITPLANVIEW_DEFAULT_SCALE;
+    public scale:number = SITPLANVIEW_DEFAULT_SCALE;
 
     // -- Positionering van het label --
     public labelposx = 0;
@@ -81,7 +85,7 @@ class SituationPlanElement {
 
     isEendraadschemaSymbool(): boolean {
         if (this.electroItemId != null) {
-            return (structure.getElectroItemById(this.electroItemId) != null);
+            return (window.global_structure.getElectroItemById(this.electroItemId) != null);
         }
         return false;
     }
@@ -104,7 +108,7 @@ class SituationPlanElement {
 
     isEDSSymbolAndRotates360degrees(): boolean {
         if (this.isEendraadschemaSymbool()) {
-            let electroElement: Electro_Item = structure.getElectroItemById(this.electroItemId);
+            let electroElement: Electro_Item | null = this.electroItemId !== null ? window.global_structure.getElectroItemById(this.electroItemId) : null;
             if (electroElement != null) {
                 let type = electroElement.getType();
                 return SituationPlanElement.ROTATES_360_DEGREES_TYPES.has(type);
@@ -145,8 +149,9 @@ class SituationPlanElement {
      * @returns string : 'auto' of 'manueel'
      */
 
+    //todo: check adrestype null
     getAdresType(): string {
-        return this.adrestype;
+        return this.adrestype ?? '';
     }
 
     /** 
@@ -158,7 +163,7 @@ class SituationPlanElement {
     getAdres(): string {
         if (!this.isEendraadschemaSymbool()) return ''; // Geen adres voor niet-elektro-elementen
 
-        let element = structure.getElectroItemById(this.electroItemId);
+        let element = this.electroItemId !== null ? window.global_structure.getElectroItemById(this.electroItemId) : null;
         if (element == null) return ''; // zou redundant moeten zijn want we controleerden al in isEendraadschemaSymbool
 
         if (this.adrestype === 'auto') {
@@ -276,7 +281,7 @@ class SituationPlanElement {
         }
 
         if (this.isEendraadschemaSymbool()) {
-            let electroItem = structure.getElectroItemById(this.electroItemId);
+            let electroItem = this.electroItemId !== null ? window.global_structure.getElectroItemById(this.electroItemId) : null;
             if (electroItem != null) electroItem.updateSituationPlanElement(this);
         }
 
@@ -317,8 +322,8 @@ class SituationPlanElement {
 
         if (svgElement) {
             // Extract the height and width attributes
-            this.sizey = parseInt(svgElement.getAttribute('height'));
-            this.sizex = parseInt(svgElement.getAttribute('width'));
+            this.sizey = parseInt(svgElement.getAttribute('height') || '10');
+            this.sizex = parseInt(svgElement.getAttribute('width') || '10');
         } else {
             console.error('Invalid SVG string');
         }
@@ -350,15 +355,23 @@ class SituationPlanElement {
 
     importFromFile(event: InputEvent, callback: () => void) {
         const input = event.target as HTMLInputElement;
-        const file = input.files[0];
+        const file = input.files ? input.files[0] : null;
+        if (!file) {
+            alert('Geen bestand geselecteerd');
+            return;
+        }
 
         if (file) {
             const reader = new FileReader();
-            const fileName = file.name.toLowerCase();
-            const mimeType = file.type;
+            // const fileName = file.name.toLowerCase();
+            // const mimeType = file.type;
 
             reader.onload = (e) => {
-                const fileContent = e.target.result as string;
+                const fileContent = e.target?.result as string | null;
+                if (!fileContent) {
+                    alert('Failed to read file content.');
+                    return;
+                }
                 const image = new Image();
                 image.src = fileContent;
                 image.onload = () => {

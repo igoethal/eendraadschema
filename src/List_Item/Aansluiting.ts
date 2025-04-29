@@ -1,4 +1,9 @@
-class Aansluiting extends Electro_Item {
+import { htmlspecialchars, svgTextWidth } from "../general";
+import { SVGelement } from "../SVGelement";
+import { SVGSymbols } from "../SVGSymbols";
+import { Electro_Item } from "./Electro_Item";
+
+export class Aansluiting extends Electro_Item {
     
     convertLegacyKeys(mykeys: Array<[string,string,any]>) {
         this.props.type                                 = this.getLegacyKey(mykeys,0);
@@ -125,7 +130,7 @@ class Aansluiting extends Electro_Item {
         if (this.props.type_kabel_voor_teller != "") extrashift += 50;
 
         // get image of the entire stack, make sure it is shifted to the right sufficiently so-that the counter can be added below
-        mySVG = this.sourcelist.toSVG(this.id, "vertical", 150 + extrashift); //shift 150 to the right
+        mySVG = window.global_structure.toSVG(this.id, "vertical", 150 + extrashift); //shift 150 to the right
 
         // Lijntje met hoogte 20 plaatsen net boven differentieel of automaat
         mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + mySVG.yup + '" y2="' + (mySVG.yup+20) + '" stroke="black" />';

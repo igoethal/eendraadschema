@@ -4,7 +4,7 @@
  * The start and stop are the x-locations in pixels of the part of the total SVG that needs to land on this particular page
  */
 
-class Page_Info {
+export class Page_Info {
     height: number;
     start: number;
     stop: number;

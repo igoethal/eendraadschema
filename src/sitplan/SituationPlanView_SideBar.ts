@@ -1,4 +1,4 @@
-class SituationPlanView_SideBar {
+export class SituationPlanView_SideBar {
     
     constructor(div: HTMLElement) {
     }

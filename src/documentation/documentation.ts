@@ -4,7 +4,9 @@
 
 */
 
-function showDocumentationPage() {
+import { toggleAppView } from "../main";
+
+export function showDocumentationPage() {
 
     let strleft = `
     <table border="1px" style="border-collapse:collapse" align="center" width="100%">

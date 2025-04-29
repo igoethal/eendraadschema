@@ -2,7 +2,7 @@
  * Class that helps with dragging a box on the situation plan view.
  * It keeps track of the start position of the drag and the zoomfactor.
  */
-class MouseDrag {
+export class MouseDrag {
 
     private startOffsetLeft: number = 0;
     private startOffsetTop: number = 0;
@@ -29,7 +29,7 @@ class MouseDrag {
         const ribbonHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ribbon-height'));
         const sideBarWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sideBarWidth'));
 
-        this.startPaperPos = structure.sitplanview.canvasPosToPaperPos(mouseX - sideBarWidth, mouseY - menuHeight - ribbonHeight);
+        this.startPaperPos = window.global_structure.sitplanview.canvasPosToPaperPos(mouseX - sideBarWidth, mouseY - menuHeight - ribbonHeight);
     }
 
     /**
@@ -44,7 +44,7 @@ class MouseDrag {
         const ribbonHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ribbon-height'));
         const sideBarWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sideBarWidth'));
 
-        let stopPaperPos = structure.sitplanview.canvasPosToPaperPos(mousex - sideBarWidth, mousey - menuHeight - ribbonHeight);
+        let stopPaperPos = window.global_structure.sitplanview.canvasPosToPaperPos(mousex - sideBarWidth, mousey - menuHeight - ribbonHeight);
 
         if (stopPaperPos.x != this.startPaperPos.x || stopPaperPos.y != this.startPaperPos.y) this.hassMoved = true;
 

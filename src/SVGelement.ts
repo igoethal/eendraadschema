@@ -1,4 +1,4 @@
-class SVGelement {
+export class SVGelement {
   data: string;
   xleft: number;
   xright: number;

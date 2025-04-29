@@ -1,5 +1,9 @@
-class Kring extends Electro_Item {
+import { contains, svgTextWidth, htmlspecialchars } from "../general";
+import { SVGelement } from "../SVGelement";
+import { SVGSymbols } from "../SVGSymbols";
+import { Electro_Item } from "./Electro_Item";
 
+export class Kring extends Electro_Item {
     convertLegacyKeys(mykeys: Array<[string,string,any]>) {
         this.props.type                                 = this.getLegacyKey(mykeys,0);
         this.props.aantal_polen                         = this.getLegacyKey(mykeys,4);
@@ -177,7 +181,7 @@ class Kring extends Electro_Item {
 
         // Alle verbruikers van de kring tekenen
 
-        mySVG = this.sourcelist.toSVG(this.id,"vertical",shiftright);
+        mySVG = window.global_structure.toSVG(this.id,"vertical",shiftright);
 
         // Kabel tekenen
 

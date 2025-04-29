@@ -1,7 +1,7 @@
 /**
  * Manages the addition and removal of event listeners on HTML elements.
  */
-class EventManager {
+export class EventManager {
     private listeners: { element: HTMLElement, type: string, listener: EventListenerOrEventListenerObject }[] = [];
 
     /**

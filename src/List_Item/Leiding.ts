@@ -1,4 +1,8 @@
-class Leiding extends Electro_Item {
+import { htmlspecialchars } from "../general";
+import { SVGelement } from "../SVGelement";
+import { Electro_Item } from "./Electro_Item";
+
+export class Leiding extends Electro_Item {
 
     convertLegacyKeys(mykeys: Array<[string,string,any]>) {
         // Niet van toepassing, element bestond nog niet toen we met legacy keys werkten

@@ -1,4 +1,9 @@
-class Media extends Electro_Item {
+import { htmlspecialchars } from "../general";
+import { SVGelement } from "../SVGelement";
+import { SVGSymbols } from "../SVGSymbols";
+import { Electro_Item } from "./Electro_Item";
+
+export class Media extends Electro_Item {
 
     convertLegacyKeys(mykeys: Array<[string,string,any]>) {
         //Nothing to do since Media did not exist when Legacy Keys where still a thing

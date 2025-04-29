@@ -1,4 +1,11 @@
-class Electro_Item extends List_Item {
+import { deepClone, htmlspecialchars } from "../general";
+import { Hierarchical_List } from "../Hierarchical_List";
+import { SituationPlanElement } from "../sitplan/SituationPlanElement";
+import { SVGelement } from "../SVGelement";
+import { SVGSymbols } from "../SVGSymbols";
+import { List_Item } from "./List_Item";
+
+export class Electro_Item extends List_Item {
 
   constructor(mylist: Hierarchical_List) { // This is legacy but we will live with it for now until we completely removed the key-concept
     super(mylist);
@@ -216,7 +223,7 @@ class Electro_Item extends List_Item {
           if (str == null) str = "";
           return str;
       } else {
-        let kringname:string = structure.findKringName(this.id).trim();
+        let kringname:string = window.global_structure.findKringName(this.id).trim();
         let nr:string = this.getnr().trim();
 
         if (kringname == "") return nr;

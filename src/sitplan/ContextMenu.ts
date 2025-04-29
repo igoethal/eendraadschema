@@ -1,4 +1,4 @@
-class ContextMenu {
+export class ContextMenu {
     private menuItems: { label: string, shortcut?: string, callback: () => void }[] = [];
     private menuElement: HTMLElement | null = null;
 

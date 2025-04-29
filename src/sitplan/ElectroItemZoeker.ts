@@ -6,7 +6,9 @@
  * - structure
  */
 
-class ElectroItemZoeker {
+import { Electro_Item } from "../List_Item/Electro_Item";
+
+export class ElectroItemZoeker {
 
     private excludedTypes = ['Aansluiting','Bord','Kring','Domotica','Domotica module (verticaal)',
                              'Domotica gestuurde verbruiker','Leiding','Splitsing','Verlenging',
@@ -83,10 +85,10 @@ class ElectroItemZoeker {
     reCalculate() {
         this.data = [];
         this.borden = [];
-        for (let i = 0; i<structure.length; i++) {
-            if (structure.active[i]) {
-                let id:number = structure.id[i];
-                let electroItem = structure.data[i] as Electro_Item;
+        for (let i = 0; i<window.global_structure.length; i++) {
+            if (window.global_structure.active[i]) {
+                let id:number = window.global_structure.id[i];
+                let electroItem = window.global_structure.data[i] as Electro_Item;
                 if (electroItem == null) continue;
                 let type:string = electroItem.getType();
                 if (type == 'Bord') {
@@ -94,7 +96,7 @@ class ElectroItemZoeker {
                     if ( (myName == null) || (myName.trim() == '') ) myName = 'Bord';
                     this.borden.push({id: id, naam: myName})
                 } else {
-                    let kringnaam:string = structure.findKringName(id).trim();
+                    let kringnaam:string = window.global_structure.findKringName(id).trim();
                     if (kringnaam != '') {
                         if ( (type != null) && (this.excludedTypes.indexOf(type) === -1) ) {
                             let adres:string = electroItem.getReadableAdres();

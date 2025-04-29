@@ -1,4 +1,7 @@
-class List_Item {
+import { Hierarchical_List } from "../Hierarchical_List";
+import { SVGelement } from "../SVGelement";
+
+export class List_Item {
 
     // -- Publieke variabelen --
 
@@ -51,7 +54,9 @@ class List_Item {
     // -- Retourneer ouder-item --
 
     getParent() {
-        return this.sourcelist.data[this.sourcelist.getOrdinalById(this.parent)];
+        let parentOrdinal = this.sourcelist.getOrdinalById(this.parent);
+        console.log("getParent: parentOrdinal = " + parentOrdinal + " parent = " + this.parent);
+        return this.sourcelist.data[parentOrdinal];
     }
 
     // -- Editeren van een string --

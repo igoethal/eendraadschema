@@ -1,4 +1,8 @@
-class Domotica_gestuurde_verbruiker extends Electro_Item {
+import { SVGelement } from "../SVGelement";
+import { SVGSymbols } from "../SVGSymbols";
+import { Electro_Item } from "./Electro_Item";
+
+export class Domotica_gestuurde_verbruiker extends Electro_Item {
 
     convertLegacyKeys(mykeys: Array<[string,string,any]>) {
         this.props.type                   = this.getLegacyKey(mykeys,0);
@@ -136,4 +140,8 @@ class Domotica_gestuurde_verbruiker extends Electro_Item {
         return(mySVG);
     }
 
+}
+
+function htmlspecialchars(adres: any) {
+    throw new Error("Function not implemented.");
 }

@@ -1,3 +1,6 @@
+import { MarkerList } from "./MarkerList";
+import { Page_Info } from "./Page_Info";
+
 type PaperSize = "A4" | "A3";
 type ModeVertical = "alles" | "kies";
 type RedrawCallBackFunction = () => void;
@@ -9,7 +12,7 @@ type RedrawCallBackFunction = () => void;
  * We don't use private variables in this class as we want to serialize it (JSON)
  */
 
-class Print_Table {
+export class Print_Table {
     pages:Array<Page_Info> // List of pages with for every page the displayed height (in pixels) and startx and stopx in the SVG
 
     height: number = 0;          //How high is the SVG that will be printed in pixels
@@ -33,7 +36,7 @@ class Print_Table {
         this.pages = new Array<Page_Info>();
         this.pages.push(new Page_Info()); 
 
-        this.pagemarkers = new MarkerList;
+        this.pagemarkers = new MarkerList();
     }
 
     /**
@@ -353,14 +356,14 @@ class Print_Table {
         option600.value = '600';
         option600.textContent = '600dpi (beter maar trager)';
 
-        if (typeof(structure.properties.dpi) == 'undefined') structure.properties.dpi = 300;
-        if (structure.properties.dpi == 600) option600.selected = true; else option300.selected = true;
+        if (typeof(window.global_structure.properties.dpi) == 'undefined') window.global_structure.properties.dpi = 300;
+        if (window.global_structure.properties.dpi == 600) option600.selected = true; else option300.selected = true;
 
         select.appendChild(option300);
         select.appendChild(option600);
         
         select.onchange = (event) => {
-            structure.properties.dpi = parseInt((event.target as HTMLSelectElement).value,0);
+            window.global_structure.properties.dpi = parseInt((event.target as HTMLSelectElement).value,0);
         }
 
         div.appendChild(select);
@@ -481,7 +484,7 @@ class Print_Table {
      */
 
     insertHTMLposxTable(div: HTMLElement, redrawCallBack: RedrawCallBackFunction): void {
-        if (structure.print_table.enableAutopage) this.autopage();
+        if (window.global_structure.print_table.enableAutopage) this.autopage();
 
         let outstr: string = "";
         let pagenum: number;

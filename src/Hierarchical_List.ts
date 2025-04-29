@@ -69,7 +69,65 @@
 
  *****************************************************************************/
 
-class Hierarchical_List {
+import { htmlspecialchars } from "./general";
+import { Aansluiting } from "./List_Item/Aansluiting";
+import { Aansluitpunt } from "./List_Item/Aansluitpunt";
+import { Aftakdoos } from "./List_Item/Aftakdoos";
+import { Batterij } from "./List_Item/Batterij";
+import { Bel } from "./List_Item/Bel";
+import { Boiler } from "./List_Item/Boiler";
+import { Bord } from "./List_Item/Bord";
+import { Contactdoos } from "./List_Item/Contactdoos";
+import { Diepvriezer } from "./List_Item/Diepvriezer";
+import { Domotica } from "./List_Item/Domotica";
+import { Domotica_gestuurde_verbruiker } from "./List_Item/Domotica_gestuurde_verbruiker";
+import { Domotica_verticaal } from "./List_Item/Domotica_verticaal";
+import { Droogkast } from "./List_Item/Droogkast";
+import { Drukknop } from "./List_Item/Drukknop";
+import { Electro_Item } from "./List_Item/Electro_Item";
+import { Elektriciteitsmeter } from "./List_Item/Elektriciteitsmeter";
+import { Elektrische_oven } from "./List_Item/Elektrische_oven";
+import { EV_lader } from "./List_Item/EV_lader";
+import { Ketel } from "./List_Item/Ketel";
+import { Koelkast } from "./List_Item/Koelkast";
+import { Kookfornuis } from "./List_Item/Kookfornuis";
+import { Kring } from "./List_Item/Kring";
+import { Leiding } from "./List_Item/Leiding";
+import { Lichtpunt } from "./List_Item/Lichtpunt";
+import { List_Item } from "./List_Item/List_Item";
+import { Media } from "./List_Item/Media";
+import { Meerdere_verbruikers } from "./List_Item/Meerdere_verbruikers";
+import { Microgolfoven } from "./List_Item/Microgolfoven";
+import { Motor } from "./List_Item/Motor";
+import { Omvormer } from "./List_Item/Omvormer";
+import { Overspanningsbeveiliging } from "./List_Item/Overspanningsbeveiliging";
+import { Lichtcircuit } from "./List_Item/Schakelaars/Lichtcircuit";
+import { Schakelaars } from "./List_Item/Schakelaars/Schakelaars";
+import { Splitsing } from "./List_Item/Splitsing";
+import { Stoomoven } from "./List_Item/Stoomoven";
+import { Transformator } from "./List_Item/Transformator";
+import { USB_lader } from "./List_Item/USB_lader";
+import { Vaatwasmachine } from "./List_Item/Vaatwasmachine";
+import { Ventilator } from "./List_Item/Ventilator";
+import { Verbruiker } from "./List_Item/Verbruiker";
+import { Verlenging } from "./List_Item/Verlenging";
+import { Verwarmingstoestel } from "./List_Item/Verwarmingstoestel";
+import { Vrije_ruimte } from "./List_Item/Vrije_ruimte";
+import { Vrije_tekst } from "./List_Item/Vrije_tekst";
+import { Warmtepomp } from "./List_Item/Warmtepomp";
+import { Wasmachine } from "./List_Item/Wasmachine";
+import { Zekering } from "./List_Item/Zekering";
+import { Zeldzame_symbolen } from "./List_Item/Zeldzame_symbolen";
+import { Zonnepaneel } from "./List_Item/Zonnepaneel";
+import { undostruct } from "./main";
+import { Print_Table } from "./print/Print_Table";
+import { Properties } from "./Properties";
+import { SituationPlan, type ISituationPlan } from "./sitplan/SituationPlan";
+import { SituationPlanView } from "./sitplan/SituationPlanView";
+import { SVGelement } from "./SVGelement";
+import { SVGSymbols } from "./SVGSymbols";
+
+export class Hierarchical_List {
 
     // -- Public variables --
 
@@ -81,7 +139,7 @@ class Hierarchical_List {
     length: number;
     curid: number;
     mode: string; //can be "edit" or "move"
-    sitplan: SituationPlan;
+    sitplan: ISituationPlan;
     sitplanjson: any; //this is where we store the situation plan in plan object exporting to json
     sitplanview: SituationPlanView;
     currentView: string; // Here we store '2col' | 'config' | 'draw'
@@ -97,7 +155,7 @@ class Hierarchical_List {
         this.properties = new Properties();
         this.curid = 1;
         this.mode = "edit";
-        this.sitplan = new SituationPlan();
+        this.sitplan = new SituationPlan(undefined);
       };
 
     /** dispose
@@ -173,7 +231,7 @@ class Hierarchical_List {
 
     getElectroItemById(my_id: number) : Electro_Item | null {
         let ordinal = this.id.indexOf(my_id);
-        if (ordinal != -1) return(this.data[ordinal] as Electro_Item);
+        if (ordinal != -1) return(this.data[ordinal] as unknown as Electro_Item);
         return null;
     }
 
@@ -267,7 +325,7 @@ class Hierarchical_List {
         let tempval = this.createItem(electroType);
         
         //Then push the item into the queue
-        this.data.push(tempval);
+        this.data.push(tempval as unknown as List_Item);
         this.active.push(true);
         this.id.push(this.curid);
 
@@ -415,13 +473,13 @@ class Hierarchical_List {
         if(arguments.length < 2) parent_id = this.data[currentOrdinal].parent;
         let parentOrdinal = this.getOrdinalById(parent_id);
 
-        let my_item = this.createItem((this.data[currentOrdinal] as Electro_Item).getType());
+        let my_item = this.createItem((this.data[currentOrdinal] as unknown as Electro_Item).getType());
         my_item.clone(this.data[currentOrdinal]);
 
         // Now add the clone to the structure. The clone will have id this.curid-1
         if(arguments.length < 2)
-            this.insertItemAfterId(my_item, my_id); //Cloning the top-element, this messes up the ordinals !!
-            else this.insertChildAfterId(my_item, parent_id); //Cloning childs, this messes up the ordinals !!
+            this.insertItemAfterId(my_item as unknown as List_Item, my_id); //Cloning the top-element, this messes up the ordinals !!
+            else this.insertChildAfterId(my_item as unknown as List_Item, parent_id); //Cloning childs, this messes up the ordinals !!
         
         let new_id = this.curid-1;
         this.data[this.getOrdinalById(new_id)].collapsed = this.data[this.getOrdinalById(my_id)].collapsed;
@@ -471,7 +529,7 @@ class Hierarchical_List {
     // -- Pas type aan van item met id = my_id --
 
     adjustTypeById(my_id: number, electroType : string) {
-        let ordinal = structure.getOrdinalById(my_id);
+        let ordinal = window.global_structure.getOrdinalById(my_id);
         this.adjustTypeByOrdinal(ordinal, electroType);
     }
 
@@ -579,12 +637,12 @@ class Hierarchical_List {
         if (this.data[ordinal].collapsed) {
             return(`<tr>
                         <td bgcolor="#8AB2E4" onclick="HLCollapseExpand(${this.data[ordinal].id})" valign= "top">&#x229E;</td>
-                        <td width="100%">${this.data[ordinal].toHTML(structure.mode)}<br></td>
+                        <td width="100%">${this.data[ordinal].toHTML(window.global_structure.mode)}<br></td>
                     </tr>`);
         } else {
             return(`<tr>
                        <td bgcolor="C0C0C0" onclick="HLCollapseExpand(${this.data[ordinal].id})" valign= "top">&#x229F;</td>
-                       <td width="100%">${this.data[ordinal].toHTML(structure.mode)}<br>${this.toHTML(this.id[ordinal])}</td>
+                       <td width="100%">${this.data[ordinal].toHTML(window.global_structure.mode)}<br>${this.toHTML(this.id[ordinal])}</td>
                     </tr>`);
         }
     }

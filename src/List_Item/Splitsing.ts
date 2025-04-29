@@ -1,4 +1,8 @@
-class Splitsing extends Electro_Item {
+import { SVGelement } from "../SVGelement";
+import { Electro_Item } from "./Electro_Item";
+import { List_Item } from "./List_Item";
+
+export class Splitsing extends Electro_Item {
 
     convertLegacyKeys(mykeys: Array<[string,string,any]>) {
         this.props.type             = this.getLegacyKey(mykeys,0);
@@ -29,7 +33,7 @@ class Splitsing extends Electro_Item {
         let mySVG:SVGelement; // = new SVGelement();
 
         // Maak een tekening van alle kinderen
-        mySVG = this.sourcelist.toSVG(this.id,"horizontal");
+        mySVG = window.global_structure.toSVG(this.id,"horizontal");
 
         let parent = this.getParent();
         

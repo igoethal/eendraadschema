@@ -4,7 +4,7 @@
  * the break could be added
  */
 
-class MarkerList {
+export class MarkerList {
 
     markers: { depth: number, xpos: number }[] = [];
 

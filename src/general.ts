@@ -1,8 +1,9 @@
-declare var pako: any;
+import { MarkerList } from "./print/MarkerList";
+
 declare function printPDF(svgs, print_table, properties, pages, filename, statuscallback, sitplanprint): any;
 declare function openDonatePage(): any;
 
-function deepClone (obj) {
+export function deepClone (obj) {
   var _out = new obj.constructor;
 
   var getType = function (n) {
@@ -24,7 +25,7 @@ function deepClone (obj) {
  * @returns {boolean} True if this is a development mode, false otherwise.
  */
 
-function isDevMode(): boolean {
+export function isDevMode(): boolean {
     try {
         const urlParams = new URLSearchParams(window.location.search);
         return urlParams.has('dev');
@@ -38,7 +39,7 @@ function isDevMode(): boolean {
 // Function for length of a string in 8 bit bytes
 const byteSize = str => new Blob([str]).size;
 
-function contains(a, obj) {
+export function contains(a, obj) {
     for (let i = 0; i < a.length; i++) {
         if (a[i] === obj) {
             return true;
@@ -47,13 +48,13 @@ function contains(a, obj) {
     return false;
 }
 
-function isInt(value) {
+export function isInt(value) {
   return !isNaN(value) &&
          parseInt(value) == value &&
          !isNaN(parseInt(value, 10));
 }
 
-function svgTextWidth(input:String, fontsize:Number = 10, options:String = '') {
+export function svgTextWidth(input:String, fontsize:Number = 10, options:String = '') {
     const div = document.createElement('div');
     div.innerHTML = '<svg width="1000" height="20"><text x="0" y="10" style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-size="' + Number(fontsize) + '" ' + options + '>' + input + '</text></svg>';
     
@@ -73,9 +74,9 @@ function svgTextWidth(input:String, fontsize:Number = 10, options:String = '') {
     return(Math.ceil(width));
 }
 
-function flattenSVG(SVGstruct,shiftx,shifty,node,overflowright=0) {
+export function flattenSVG(SVGstruct,shiftx,shifty,node,overflowright=0) {
 
-  if (node==0) structure.print_table.pagemarkers.clear();
+  if (node==0) window.global_structure.print_table.pagemarkers = new MarkerList();;
   
   var str:string = "";
 
@@ -170,12 +171,12 @@ function flattenSVG(SVGstruct,shiftx,shifty,node,overflowright=0) {
     str = str.replace(regex, '');
   }
 
-  structure.print_table.pagemarkers.addMarker(node,shiftx);
+  window.global_structure.print_table.pagemarkers.addMarker(node,shiftx);
 
   return str;
 }
 
-function flattenSVGfromString(xmlstr, overflowright: number = 0) {
+export function flattenSVGfromString(xmlstr, overflowright: number = 0) {
   var str:string = "";
   var parser = new DOMParser();
   var xmlDoc = parser.parseFromString(xmlstr, "text/xml"); //important to use "text/xml"
@@ -183,7 +184,7 @@ function flattenSVGfromString(xmlstr, overflowright: number = 0) {
   return str;
 }
 
-function htmlspecialchars(my_input)
+export function htmlspecialchars(my_input)
 {
     let returnstr:string;
     if (typeof(my_input) == 'undefined') returnstr = ""; else returnstr=my_input.toString();
@@ -199,7 +200,7 @@ function htmlspecialchars(my_input)
     return returnstr.replace(/[&<>"']/g, function(m) {return map[m];});
 }
 
-function browser_ie_detected()
+export function browser_ie_detected()
 {
     var ua = window.navigator.userAgent;
     var msie = ua.indexOf("MSIE ");
@@ -209,7 +210,7 @@ function browser_ie_detected()
     if ( (msie > 0) || (trident > 0) ) return true; else return false;
 }
 
-const randomId = (() => {
+export const randomId = (() => {
   const counters: Record<string, number> = {};
   
   return (prefix: string = "Rnd_"): string => {

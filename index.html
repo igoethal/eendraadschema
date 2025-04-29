@@ -1,11 +1,6 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <script src="prop/prop_scripts.js"></script>
-    <script src="builddate.js"></script>
-    <script src="pako/pako.min.js"></script>
-    <script src="jsPDF/jspdf.umd.min.js"></script>
-    <script src="jsPDF/print.js"></script>
     <link rel="stylesheet" href="css/styles.css">
     <title>Eendraadschema online tekenen</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
@@ -24,10 +19,14 @@
       <div id="app">
         <svg id="svgdefs"></svg> <!-- Bevat SVG patronen die app-wide gebruikt worden -->
         <div id="configsection" class="configsection"></div> <!-- Full page configuratie --> 
+
+        
         <div id="ribbon" style="display:none;">
           <div id="left-icons" class="left-icons"></div>
           <div id="right-icons" class="right-icons"></div>
         </div> <!-- Ribbon -->
+
+
         <div id="canvas_2col" style="display:none;"> <!-- Eendraadschema-->
           <div id="left_col">
             <div id="left_col_inner"></div>
@@ -47,6 +46,6 @@
     <input id="importfile" type="file" accept=".eds" onchange="importjson(event)" style="display:none;" >
     <input id="appendfile" type="file" accept=".eds" onchange="appendjson(event)" style="display:none;" >
     <input type="file" id="fileInput" accept="image/*" style="display:none;">
-    <script src="eendraadschema.js"></script>
+    <script type="module" src="/src/main.ts" defer></script>
   </body>
 </html>
