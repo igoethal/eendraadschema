@@ -880,14 +880,16 @@ export class SituationPlanView {
                         event.preventDefault();
                         undostruct.redo();
                         return;
-                    case 'r':
-                        event.preventDefault();
+                    // case 'r':
+                    //     event.preventDefault();
                         // const helperTip = new HelperTip(appDocStorage);
                         // helperTip.show('sitplan.Ctrl_r_key',
                         //     `<h3>Ctrl-r genegeerd</h3>
                         // <p>Om te vermijden dat u per ongeluk de pagina ververst en uw werk verliest is de refresh sneltoets uitgeschakeld in het situatieschema.</p>`, true);
                         // return;
                     default:
+                        event.preventDefault();
+
                     //do nothing as we also have ctrl + arrow keys here below.
                 }
             }

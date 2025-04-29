@@ -67,12 +67,12 @@ export class Domotica_gestuurde_verbruiker extends Electro_Item {
         let childcounter = 0; // Variabele voor het aantal kinderen, op dit moment ondersteunt de tool slechts 1 kind
                               // Kind 1 is het element dat effectief gestuurd wordt.                
 
-        for (let i = 0; i<this.sourcelist.length; i++) {
-            if ( this.isActief() && (this.sourcelist.data[i].parent == this.id ) ) {
+        for (let i = 0; i<window.global_structure.length; i++) {
+            if ( this.isActief() && (window.global_structure.data[i].parent == this.id ) ) {
                 childcounter++; // We hebben een kind gevonden
                 switch (childcounter) {
                     case 1: // Het Kind is het eerste element, i.e. de aangestuurde verbruiker. We tekenen dit kind.
-                        mySVG = this.sourcelist.toSVG(this.sourcelist.data[i].id,"horizontal",35,true);
+                        mySVG = window.global_structure.toSVG(window.global_structure.data[i].id,"horizontal",35,true);
                         break;      
                 }
             }

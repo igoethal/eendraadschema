@@ -42,7 +42,7 @@ export class Domotica extends Electro_Item {
         var strlines = htmlspecialchars(this.props.tekst).split("|");
 
         // Maak een tekening van alle kinderen
-        mySVG = this.sourcelist.toSVG(this.id,"horizontal");
+        mySVG = window.global_structure.toSVG(this.id,"horizontal");
 
         // We voorzien altijd minimaal een kader van 80 en zeker genoeg voor de tekst in het Domotica-symbool
         let minwidth = 80;

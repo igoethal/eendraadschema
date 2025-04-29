@@ -519,7 +519,7 @@ export class Hierarchical_List {
     adjustTypeByOrdinal(ordinal: number, electroType : string) {
         let tempval:Electro_Item = this.createItem(electroType);
 
-        (<any> Object).assign(tempval,this.data[ordinal]);
+        Object.assign(tempval,this.data[ordinal]);
         tempval.props.type = electroType; //We need to do this again as we overwrote it with assign
         tempval.resetProps();   //Already part of createItem but we need to run this again as the assign operation overwrote everything
 
@@ -548,7 +548,7 @@ export class Hierarchical_List {
                 let lastOrdinalInKring = 0;
                 let myOrdinal = this.getOrdinalById(item.id);
 
-                for (let i = 0; i<item.sourcelist.length; i++) {
+                for (let i = 0; i<window.global_structure.length; i++) {
                     if (this.active[i] && (this.data[i].parent == parent.id)) lastOrdinalInKring = i;
                 }
 

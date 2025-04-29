@@ -36,7 +36,7 @@ export class Domotica_verticaal extends Electro_Item {
         let mySVG:SVGelement = new SVGelement();
 
         // Eerst vragen we een tekening van alle kinderen
-        mySVG = this.sourcelist.toSVG(this.id,"vertical");
+        mySVG = window.global_structure.toSVG(this.id,"vertical");
 
         // Dan bepalen we de hoogte van het object en zorgen ervoor dat de tekst past
         let heightunaltered = mySVG.yup + mySVG.ydown;

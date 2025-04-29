@@ -83,7 +83,7 @@ export class Lichtcircuit extends Schakelaars {
         if (+(this.props.aantal_lichtpunten) > 0) { // Er is minstens 1 lichtpunt
 
             // Eerst schakelaars in het schema hangen vlak voor het this element zodat ze een id krijgen
-            this.sourcelist.insertItemBeforeId(schakelaars,this.id); 
+            window.global_structure.insertItemBeforeId(schakelaars,this.id); 
 
             // Dan het this element door een nieuw lichtpunt vervangen
             let lichtpunt = new Lichtpunt(this.sourcelist);
@@ -95,9 +95,9 @@ export class Lichtcircuit extends Schakelaars {
             } else {
                 lichtpunt.parent = schakelaars.id;
             }
-            let ordinal = this.sourcelist.getOrdinalById(this.id); // Deze kan hier pas komen want de ordinal is gewijzigd door het invoegen van de schakelaars
+            let ordinal = window.global_structure.getOrdinalById(this.id); // Deze kan hier pas komen want de ordinal is gewijzigd door het invoegen van de schakelaars
             if (ordinal !== null) {
-                this.sourcelist.data[ordinal] = lichtpunt;
+                window.global_structure.data[ordinal] = lichtpunt;
             } else {
                 console.error("Ordinal is null, cannot assign lichtpunt.");
             }
@@ -107,9 +107,9 @@ export class Lichtcircuit extends Schakelaars {
             // Het this element door de schakelaars vervangen
             schakelaars.id = this.id;
             schakelaars.parent = this.getParent().id;
-            let ordinal = this.sourcelist.getOrdinalById(this.id);
+            let ordinal = window.global_structure.getOrdinalById(this.id);
             if (ordinal !== null) {
-                this.sourcelist.data[ordinal] = schakelaars;
+                window.global_structure.data[ordinal] = schakelaars;
             } else {
                 console.error("Ordinal is null, cannot assign schakelaars.");
             }

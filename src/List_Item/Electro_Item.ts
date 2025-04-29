@@ -47,9 +47,9 @@ export class Electro_Item extends List_Item {
   getNumChildsWithKnownType() : number {
       let numChilds = 0;
       if (this.sourcelist != null) {
-          for (let i=0; i<this.sourcelist.data.length; ++i) {
-              if ( (this.sourcelist.data[i].parent === this.id) && (this.sourcelist.active[i]) 
-                && ((this.sourcelist.data[i] as Electro_Item).getType() != "") ) numChilds++;
+          for (let i=0; i<window.global_structure.data.length; ++i) {
+              if ( (window.global_structure.data[i].parent === this.id) && (window.global_structure.active[i]) 
+                && ((window.global_structure.data[i] as Electro_Item).getType() != "") ) numChilds++;
           }  
       }
       return(numChilds);
@@ -75,18 +75,18 @@ export class Electro_Item extends List_Item {
     let parent = this.getParent();
 
     if ( (parent != null) && ((parent as Electro_Item).getType() == "Meerdere verbruikers") ) {
-        let myOrdinal = this.sourcelist.getOrdinalById(this.id);
+        let myOrdinal = window.global_structure.getOrdinalById(this.id);
         let lastOrdinal = 0;
-        for (let i = 0; i<this.sourcelist.data.length; ++i) {
-            if (this.sourcelist.active[i] && !((this.sourcelist.data[i] as Electro_Item).isVrijeTekstZonderKader()) && (this.sourcelist.data[i].parent == this.parent)) lastOrdinal = i;
+        for (let i = 0; i<window.global_structure.data.length; ++i) {
+            if (window.global_structure.active[i] && !((window.global_structure.data[i] as Electro_Item).isVrijeTekstZonderKader()) && (window.global_structure.data[i].parent == this.parent)) lastOrdinal = i;
         }
         if (lastOrdinal > myOrdinal) return true; else return false; 
     } else {
         if (this.sourcelist != null) {
-            for (let i=0; i<this.sourcelist.data.length; ++i) {
-                if ( (this.sourcelist.data[i].parent === this.id) && 
-                     (this.sourcelist.active[i]) && !((this.sourcelist.data[i] as Electro_Item).isVrijeTekstZonderKader()) && 
-                     ((this.sourcelist.data[i] as Electro_Item).getType() != "") && ((this.sourcelist.data[i] as Electro_Item).getType() != null) ) return true;
+            for (let i=0; i<window.global_structure.data.length; ++i) {
+                if ( (window.global_structure.data[i].parent === this.id) && 
+                     (window.global_structure.active[i]) && !((window.global_structure.data[i] as Electro_Item).isVrijeTekstZonderKader()) && 
+                     ((window.global_structure.data[i] as Electro_Item).getType() != "") && ((window.global_structure.data[i] as Electro_Item).getType() != null) ) return true;
             }  
         }
     }  
@@ -101,7 +101,7 @@ export class Electro_Item extends List_Item {
     this.parent = source_item.parent;
     this.indent = source_item.indent;
     this.collapsed = source_item.collapsed;
-    this.sourcelist = source_item.sourcelist;
+    this.sourcelist = window.global_structure;
 
     this.props = deepClone((source_item as Electro_Item).props);  
   }

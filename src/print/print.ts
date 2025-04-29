@@ -1,21 +1,25 @@
+import { flattenSVGfromString } from "../general";
+import { download_by_blob, displayButtonPrintToPdf, toggleAppView, printPDF } from "../main";
+import { SVGelement } from "../SVGelement";
+
 function HLDisplayPage() {
-    structure.print_table.displaypage = parseInt((document.getElementById("id_select_page") as HTMLInputElement).value)-1;
+    window.global_structure.print_table.displaypage = parseInt((document.getElementById("id_select_page") as HTMLInputElement).value)-1;
     printsvg();
 }
 
-function dosvgdownload() {
+export function dosvgdownload() {
     var prtContent = document.getElementById("printsvgarea").innerHTML;
     var filename = (document.getElementById("dosvgname") as HTMLInputElement).value;
     download_by_blob(prtContent, filename, 'data:image/svg+xml;charset=utf-8'); //Was text/plain
 }
 
-function getPrintSVGWithoutAddress(outSVG: SVGelement, page:number = structure.print_table.displaypage) {
+function getPrintSVGWithoutAddress(outSVG: SVGelement, page:number = window.global_structure.print_table.displaypage) {
     var scale = 1;
 
-    var startx = structure.print_table.pages[page].start;
-    var width = structure.print_table.pages[page].stop - startx;
-    var starty = structure.print_table.getstarty();
-    var height = structure.print_table.getstopy() - starty;
+    var startx = window.global_structure.print_table.pages[page].start;
+    var width = window.global_structure.print_table.pages[page].stop - startx;
+    var starty = window.global_structure.print_table.getstarty();
+    var height = window.global_structure.print_table.getstopy() - starty;
 
     var viewbox = '' + startx + ' ' + starty + ' ' + width + ' ' + height;
 
@@ -26,20 +30,20 @@ function getPrintSVGWithoutAddress(outSVG: SVGelement, page:number = structure.p
     return(outstr);
 }
 
-function printsvg() {
+export function printsvg() {
 
     function generatePdf() {
-        if (typeof(structure.properties.dpi) == 'undefined') structure.properties.dpi = 300;
+        if (typeof(window.global_structure.properties.dpi) == 'undefined') window.global_structure.properties.dpi = 300;
     
-        let svg = flattenSVGfromString(structure.toSVG(0,"horizontal").data);
-        const pages = Array.from({ length: structure.print_table.pages.length }, (_, i) => i+1);  
+        let svg = flattenSVGfromString(window.global_structure.toSVG(0,"horizontal").data);
+        const pages = Array.from({ length: window.global_structure.print_table.pages.length }, (_, i) => i+1);  
 
-        const sitplanprint = structure.sitplan.toSitPlanPrint();
+        const sitplanprint = window.global_structure.sitplan.toSitPlanPrint(false);
     
         printPDF(
             svg,
-            structure.print_table,
-            structure.properties,
+            window.global_structure.print_table,
+            window.global_structure.properties,
             pages, 
             (document.getElementById("dopdfname") as HTMLInputElement).value, //filename
             document.getElementById("progress_pdf"), //HTML element where callback status can be given
@@ -57,13 +61,13 @@ function printsvg() {
     // We will display it at the end of this function    
 
     var outSVG = new SVGelement();
-    outSVG = structure.toSVG(0,"horizontal");
+    outSVG = window.global_structure.toSVG(0,"horizontal");
 
     var height = outSVG.yup + outSVG.ydown;
     var width = outSVG.xleft + outSVG.xright;
 
-    structure.print_table.setHeight(height);
-    structure.print_table.setMaxWidth(width+10);
+    window.global_structure.print_table.setHeight(height);
+    window.global_structure.print_table.setMaxWidth(width+10);
 
     // Then we display all the print options
 
@@ -81,8 +85,8 @@ function printsvg() {
         +  '</div>';
 
     document.getElementById('button_pdfdownload').onclick = generatePdf;
-    structure.print_table.insertHTMLselectPaperSize(document.getElementById('select_papersize') as HTMLElement, printsvg);
-    structure.print_table.insertHTMLselectdpi(document.getElementById('select_dpi') as HTMLElement, printsvg);
+    window.global_structure.print_table.insertHTMLselectPaperSize(document.getElementById('select_papersize') as HTMLElement, printsvg);
+    window.global_structure.print_table.insertHTMLselectdpi(document.getElementById('select_dpi') as HTMLElement, printsvg);
     
     outstr 
         =  '<br>'
@@ -94,13 +98,13 @@ function printsvg() {
 
     document.getElementById("configsection").insertAdjacentHTML('beforeend', outstr);
 
-    structure.print_table.insertHTMLcheckAutopage(document.getElementById('check_autopage') as HTMLElement, printsvg);
-    if (!structure.print_table.enableAutopage) {
-        structure.print_table.insertHTMLchooseVerticals(document.getElementById('id_verticals') as HTMLElement, printsvg);
-        structure.print_table.insertHTMLsuggestXposButton(document.getElementById('id_suggest_xpos_button') as HTMLElement, printsvg);
+    window.global_structure.print_table.insertHTMLcheckAutopage(document.getElementById('check_autopage') as HTMLElement, printsvg);
+    if (!window.global_structure.print_table.enableAutopage) {
+        window.global_structure.print_table.insertHTMLchooseVerticals(document.getElementById('id_verticals') as HTMLElement, printsvg);
+        window.global_structure.print_table.insertHTMLsuggestXposButton(document.getElementById('id_suggest_xpos_button') as HTMLElement, printsvg);
     }
 
-    if (!structure.print_table.enableAutopage) {
+    if (!window.global_structure.print_table.enableAutopage) {
         outstr 
             = '<br>'
             +  '<table border="0">'
@@ -118,14 +122,14 @@ function printsvg() {
         
         document.getElementById("configsection").insertAdjacentHTML('beforeend', outstr);    
 
-        structure.print_table.insertHTMLposxTable(document.getElementById('id_print_table') as HTMLElement, printsvg)
+        window.global_structure.print_table.insertHTMLposxTable(document.getElementById('id_print_table') as HTMLElement, printsvg)
     }
 
     strleft += '<hr>';
 
     strleft += '<b>Printvoorbeeld: </b>Pagina <select onchange="HLDisplayPage()" id="id_select_page">'
-    for (let i=0; i<structure.print_table.pages.length; i++) {
-        if (i==structure.print_table.displaypage) {
+    for (let i=0; i<window.global_structure.print_table.pages.length; i++) {
+        if (i==window.global_structure.print_table.displaypage) {
             strleft += '<option value=' + (i+1) + ' selected>' + (i+1) + '</option>';
         } else {
             strleft += '<option value=' + (i+1) + '>' + (i+1) + '</option>';

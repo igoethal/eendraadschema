@@ -37,7 +37,7 @@ export class Meerdere_verbruikers extends Electro_Item {
         let mySVG:SVGelement; // = new SVGelement();
 
         // Maak een tekening van alle kinderen
-        mySVG = this.sourcelist.toSVG(this.id,"horizontal");
+        mySVG = window.global_structure.toSVG(this.id,"horizontal");
 
         // We voorzien altijd verticale ruimte, zelfs als de kinderen nog niet gedefinieerd zijn
         mySVG.ydown = Math.max(mySVG.ydown,25);

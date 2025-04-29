@@ -38,8 +38,8 @@ export class List_Item {
 
     getNumChilds() : number {
         let numChilds = 0;
-            for (let i=0; i<this.sourcelist.data.length; ++i) {
-                if ((this.sourcelist.data[i].parent === this.id) && (this.sourcelist.active[i])) numChilds++;
+            for (let i=0; i<window.global_structure.data.length; ++i) {
+                if ((window.global_structure.data[i].parent === this.id) && (window.global_structure.active[i])) numChilds++;
             }  
         return(numChilds);
     }
@@ -47,16 +47,16 @@ export class List_Item {
     // -- Check of het item actief is --
 
     isActief() : Boolean {
-        let ordinal = this.sourcelist.getOrdinalById(this.id);
-        return(this.sourcelist.active[ordinal]);   
+        let ordinal = window.global_structure.getOrdinalById(this.id);
+        return(window.global_structure.active[ordinal]);   
     }
 
     // -- Retourneer ouder-item --
 
     getParent() {
-        let parentOrdinal = this.sourcelist.getOrdinalById(this.parent);
+        let parentOrdinal = window.global_structure.getOrdinalById(this.parent);
         console.log("getParent: parentOrdinal = " + parentOrdinal + " parent = " + this.parent);
-        return this.sourcelist.data[parentOrdinal];
+        return window.global_structure.data[parentOrdinal];
     }
 
     // -- Editeren van een string --

@@ -153,7 +153,7 @@ export class Schakelaars extends Electro_Item {
                     schakelaar1.props.aantal_schakelaars = 1;
                     schakelaar1.props.type_schakelaar = "wissel_enkel";
                     schakelaar1.props.adres = "";
-                    this.sourcelist.insertItemBeforeId(schakelaar1,this.id);
+                    window.global_structure.insertItemBeforeId(schakelaar1,this.id);
                     let lastschakelaar = schakelaar1;
 
                     for (let i=0; i<Number(this.props.aantal_schakelaars)-2; ++i) {
@@ -167,9 +167,9 @@ export class Schakelaars extends Electro_Item {
                             schakelaar.props.adres = "";    
                         }
                         if (this.getParent().props.type === "Meerdere verbruikers") {    
-                            this.sourcelist.insertItemBeforeId(schakelaar,this.id);
+                            window.global_structure.insertItemBeforeId(schakelaar,this.id);
                         } else {
-                            this.sourcelist.insertChildAfterId(schakelaar,lastschakelaar.id);
+                            window.global_structure.insertChildAfterId(schakelaar,lastschakelaar.id);
                             lastschakelaar = schakelaar;
                         }
                     }
@@ -198,7 +198,7 @@ export class Schakelaars extends Electro_Item {
                     schakelaar1.props.aantal_schakelaars = 1;
                     schakelaar1.props.type_schakelaar = "wissel_dubbel";
                     schakelaar1.props.adres = "";
-                    this.sourcelist.insertItemBeforeId(schakelaar1,this.id);
+                    window.global_structure.insertItemBeforeId(schakelaar1,this.id);
 
                     this.props.aantal_schakelaars = 1;
                     this.props.type_schakelaar = "wissel_dubbel"
