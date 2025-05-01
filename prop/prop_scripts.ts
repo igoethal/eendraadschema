@@ -41,36 +41,6 @@ function loadFileFromText() {
 
 /// --- END OF DEVELOPMENT OPTIONS ---
 
-function exportjson(saveAs: boolean = true) { //if the boolean is false and the file API is installed, a normal save is performed (known filename)
-    var filename:string;
-
-    /* We use the Pako library to entropy code the data
-     * Final data reads "EDSXXX0000" with XXX a version and thereafter a 64base encoding of the deflated output from Pako
-     * filename = "eendraadschema.eds";
-     */
-    filename = structure.properties.filename;
-
-    var text:string = structure_to_json();
-
-    // Compress the output structure and offer as download to the user. We are at version 004
-    try {
-        let decoder = new TextDecoder("utf-8");
-        let encoder = new TextEncoder();
-        let pako_inflated = new Uint8Array(encoder.encode(text));
-        let pako_deflated = new Uint8Array(pako.deflate(pako_inflated));
-
-        text = "EDS0040000" + btoa(String.fromCharCode.apply(null, pako_deflated));
-    } catch (error) {
-        text = "TXT0040000" + text;
-    } finally {
-        if ((window as any).showOpenFilePicker) { // Use fileAPI     
-          if (saveAs) this.fileAPIobj.saveAs(text); else this.fileAPIobj.save(text);
-        } else { // legacy
-          download_by_blob(text, filename, 'data:text/eds;charset=utf-8');
-        }
-    }
-}
-
 function displayButtonPrintToPdf() {
   return("");
   //Does nothing in the serverless version, only used on https://eendraadschema.goethals-jacobs.be
@@ -79,4 +49,9 @@ function displayButtonPrintToPdf() {
 function handleButtonPrintToPdf() {
   return(0);
   //Does nothing in the serverless version, only used on https://eendraadschema.goethals-jacobs.be
+}
+
+function propUpload(text: string) {
+  return("");
+  //Does nothing in the serverless version, only used on https://eendraadschema.goethals-jacobs.be  
 }

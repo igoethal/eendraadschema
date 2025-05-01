@@ -1282,6 +1282,216 @@ var AskLegacySchakelaar = /** @class */ (function () {
     };
     return AskLegacySchakelaar;
 }());
+var AutoSaver = /** @class */ (function () {
+    function AutoSaver(interval) {
+        this.timerId = null; // Timer ID for clearing
+        this.lastSaved = null;
+        this.suspendSaving = true; // Zelfs indien we de timer gestart hebben zal het saven ben beginnen als deze false wordt
+        this.interval = interval * 1000; // Convert seconds to milliseconds
+    }
+    AutoSaver.prototype.start = function () {
+        var _this = this;
+        this.stop();
+        this.timerId = window.setInterval(function () {
+            _this.saveAutomatically();
+        }, this.interval);
+    };
+    AutoSaver.prototype.stop = function () {
+        // Clear existing timer
+        if (this.timerId !== null) {
+            window.clearInterval(this.timerId);
+        }
+    };
+    AutoSaver.prototype.reset = function (interval) {
+        if (interval === void 0) { interval = this.interval / 1000; }
+        // Clear existing timer and restart
+        this.stop();
+        this.interval = interval * 1000; // Convert seconds to milliseconds
+        this.start();
+    };
+    AutoSaver.prototype.saveAutomatically = function () {
+        var _this = this;
+        if (structure.properties.currentView != "config")
+            this.suspendSaving = false;
+        if (this.suspendSaving)
+            return;
+        var text = "TXT0040000" + structure_to_json(true);
+        if (text != this.lastSaved) {
+            (function () { return __awaiter(_this, void 0, void 0, function () {
+                var error_1;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            _a.trys.push([0, 2, , 3]);
+                            return [4 /*yield*/, this.saveToIndexedDB("TXT0040000" + structure_to_json(), true)];
+                        case 1:
+                            _a.sent();
+                            return [3 /*break*/, 3];
+                        case 2:
+                            error_1 = _a.sent();
+                            console.error("Error saving to IndexedDB:", error_1);
+                            return [3 /*break*/, 3];
+                        case 3: return [2 /*return*/];
+                    }
+                });
+            }); })();
+            //console.log('Autosave executed at ' + new Date().toLocaleString());
+            this.lastSaved = text;
+        }
+        else {
+            //console.log('Autosave skipped since no change detected at ' + new Date().toLocaleString());
+        }
+    };
+    AutoSaver.prototype.saveManually = function (text) {
+        var _this = this;
+        if (text === void 0) { text = null; }
+        this.suspendSaving = false;
+        (function () { return __awaiter(_this, void 0, void 0, function () {
+            var error_2;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 2, , 3]);
+                        if (text == null)
+                            text = "TXT0040000" + structure_to_json(true);
+                        return [4 /*yield*/, this.saveToIndexedDB(text, false)];
+                    case 1:
+                        _a.sent();
+                        return [3 /*break*/, 3];
+                    case 2:
+                        error_2 = _a.sent();
+                        console.error("Error saving to IndexedDB:", error_2);
+                        return [3 /*break*/, 3];
+                    case 3:
+                        this.lastSaved = text;
+                        return [2 /*return*/];
+                }
+            });
+        }); })();
+        this.reset();
+    };
+    /**
+     * Slaat de huidige structuur op in de IndexedDB onder de naam "autoSave".
+     * Slaat eveneens een JSON string autoSaveInfo op met volgende informatie:
+     *   - filename: de filename zoals gekozen door de gebruiker
+     *   - currentTimeStamp: de tijd waarop de structuur opgeslagen werd
+     *   - recovery: een bollean die weergeeft of het schema spontaan werd opgeslagen zonder user-interventie (recovery=true)
+     *     of samen met een save-actie (recovery=false). In het laatste geval heeft de user al een saved version van de file en
+     *     moet de cache versie niet noodzakelijk pro-actief worden aangeboden bij het opnieuw opstarten van de tool.
+     *
+     * @param {string} [text] - De tekst die opgeslagen moet worden. Indien niet gespecificeerd, wordt de huidige structuur gebruikt.
+     */
+    AutoSaver.prototype.saveToIndexedDB = function (text, recovery) {
+        if (recovery === void 0) { recovery = false; }
+        return __awaiter(this, void 0, void 0, function () {
+            var db, currentDate, info;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        db = new IndexedDBStorage("DB_EDS", "Store_EDS");
+                        // Save the structure
+                        return [4 /*yield*/, db.set("autoSave", text)];
+                    case 1:
+                        // Save the structure
+                        _a.sent();
+                        currentDate = new Date();
+                        info = {
+                            filename: structure.properties.filename,
+                            currentTimeStamp: currentDate.getDate().toString().padStart(2, '0') + "/" +
+                                (currentDate.getMonth() + 1).toString().padStart(2, '0') + "/" +
+                                currentDate.getFullYear().toString() + " " +
+                                currentDate.getHours().toString().padStart(2, '0') + ":" +
+                                currentDate.getMinutes().toString().padStart(2, '0') + ":" +
+                                currentDate.getSeconds().toString().padStart(2, '0'),
+                            recovery: recovery
+                        };
+                        //console.log(info.currentTimeStamp);
+                        return [4 /*yield*/, db.set("autoSaveInfo", JSON.stringify(info))];
+                    case 2:
+                        //console.log(info.currentTimeStamp);
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    AutoSaver.prototype.loadLastSaved = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var db, lastSavedInfo, _a, lastSavedInfoStr, error_3;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        db = new IndexedDBStorage("DB_EDS", "Store_EDS");
+                        lastSavedInfo = null;
+                        _b.label = 1;
+                    case 1:
+                        _b.trys.push([1, 4, , 5]);
+                        _a = this;
+                        return [4 /*yield*/, db.get("autoSave")];
+                    case 2:
+                        _a.lastSaved = _b.sent();
+                        return [4 /*yield*/, db.get("autoSaveInfo")];
+                    case 3:
+                        lastSavedInfoStr = _b.sent();
+                        lastSavedInfo = lastSavedInfoStr ? JSON.parse(lastSavedInfoStr) : null;
+                        return [3 /*break*/, 5];
+                    case 4:
+                        error_3 = _b.sent();
+                        this.lastSaved = null;
+                        console.error("Error loading from IndexedDB:", error_3);
+                        return [3 /*break*/, 5];
+                    case 5: return [2 /*return*/, ([this.lastSaved, lastSavedInfo])];
+                }
+            });
+        });
+    };
+    return AutoSaver;
+}());
+// Import pako
+//const pako = require('pako');
+// Helper function to encode string to Uint8Array
+function encodeChunk(chunk) {
+    var encoder = new TextEncoder();
+    return encoder.encode(chunk);
+}
+// Example: Handling large text data in chunks
+function compressLargeText(text) {
+    var chunkSize = 64 * 1024; // 64kb chunks
+    var deflate = new pako.Deflate({ level: 6 }); // Create a Deflate instance
+    var offset = 0;
+    while (offset < text.length) {
+        var end = Math.min(offset + chunkSize, text.length);
+        var chunk = text.slice(offset, end);
+        var encodedChunk = encodeChunk(chunk);
+        deflate.push(encodedChunk, end >= text.length); // true if it's the last chunk
+        offset = end;
+    }
+    if (deflate.err) {
+        console.error('Compression error:', deflate.err);
+        return null;
+    }
+    return deflate.result;
+}
+// Helper function to decode Uint8Array back to string
+function decodeChunk(chunk) {
+    var decoder = new TextDecoder("utf-8");
+    return decoder.decode(chunk);
+}
+// Decompressing function
+function decompressLargeData(compressedData) {
+    var inflate = new pako.Inflate(); // Create an Inflate instance
+    // Push the compressed data
+    inflate.push(compressedData, true); // true indicates it's the last chunk
+    // Check for errors
+    if (inflate.err) {
+        console.error('Decompression error:', inflate.err);
+        return null;
+    }
+    // Get the decompressed result
+    var decompressedData = inflate.result;
+    // Decode the decompressed result back to string
+    return decodeChunk(decompressedData);
+}
 var importExportUsingFileAPI = /** @class */ (function () {
     function importExportUsingFileAPI() {
         this.clear();
@@ -1533,6 +1743,58 @@ function upgrade_version(mystructure, version) {
                 mystructure.data[i].props.type = "Aansluitpunt";
         }
     }
+}
+/**
+ * Exporteert de huidige structuur naar een bestand in het EDS-formaat.
+ * @param {boolean} saveAs - Indien true, wordt de gebruiker gevraagd waar het bestand moet worden opgeslagen; anders wordt het bestand opgeslagen onder de bekende bestandsnaam.
+ */
+function exportjson(saveAs) {
+    if (saveAs === void 0) { saveAs = true; }
+    /**
+     * Converteert een Uint8Array naar een Base64-gecodeerde string.
+     * @param {Uint8Array} uint8Array - De array die moet worden geconverteerd.
+     * @returns {string} De Base64-gecodeerde string.
+     */
+    function uint8ArrayToBase64(uint8Array) {
+        var CHUNK_SIZE = 0x8000; // Verwerk 32KB chunks
+        var binaryString = '';
+        for (var i = 0; i < uint8Array.length; i += CHUNK_SIZE) {
+            binaryString += String.fromCharCode.apply(null, uint8Array.subarray(i, i + CHUNK_SIZE));
+        }
+        return btoa(binaryString);
+    }
+    var filename;
+    /* We gebruiken de Pako-bibliotheek om de data te entropycoderen
+     * Einddata leest "EDSXXX0000" met XXX een versie en daarna een 64base-encodering van de gedecomprimeerde uitvoer van Pako
+     * filename = "eendraadschema.eds";
+     */
+    filename = structure.properties.filename;
+    var origtext = structure_to_json();
+    var text = '';
+    // Comprimeer de uitvoerstructuur en bied deze aan als download aan de gebruiker. We zijn momenteel bij versie 004
+    try {
+        var encoder = new TextEncoder();
+        var pako_inflated = new Uint8Array(encoder.encode(origtext));
+        var pako_deflated = new Uint8Array(pako.deflate(pako_inflated));
+        text = "EDS0040000" + uint8ArrayToBase64(pako_deflated);
+    }
+    catch (error) {
+        console.log("Terugvallen naar TXT-uitvoer vanwege compressiefout: " + error);
+        text = "TXT0040000" + origtext;
+    }
+    finally {
+        if (window.showOpenFilePicker) { // Gebruik fileAPI     
+            if (saveAs)
+                this.fileAPIobj.saveAs(text);
+            else
+                this.fileAPIobj.save(text);
+        }
+        else { // legacy
+            download_by_blob(text, filename, 'data:text/eds;charset=utf-8');
+        }
+        autoSaver.saveManually("TXT0040000" + origtext); // Needs to be as TXT to be able to check with last autosave
+    }
+    propUpload(text);
 }
 /* FUNCTION json_to_structure
 
@@ -1788,7 +2050,8 @@ function importToAppend(mystring, redraw) {
     if (redraw)
         topMenu.selectMenuItemByName('Eéndraadschema');
 }
-function structure_to_json() {
+function structure_to_json(removeUnneededDataMembers) {
+    if (removeUnneededDataMembers === void 0) { removeUnneededDataMembers = true; }
     // Remove some unneeded data members that would only inflate the size of the output file
     for (var _i = 0, _a = structure.data; _i < _a.length; _i++) {
         var listitem = _a[_i];
@@ -1797,11 +2060,15 @@ function structure_to_json() {
     var swap = structure.print_table.pagemarkers;
     var swap2 = structure.sitplan;
     var swap3 = structure.sitplanview;
+    var swap4 = structure.properties.currentView;
     structure.print_table.pagemarkers = null;
     if (structure.sitplan != null)
         structure.sitplanjson = structure.sitplan.toJsonObject();
     structure.sitplan = null;
     structure.sitplanview = null;
+    if (removeUnneededDataMembers) {
+        structure.properties.currentView = null;
+    }
     // Create the output structure in uncompressed form
     var text = JSON.stringify(structure);
     // Put the removed data members back
@@ -1812,6 +2079,7 @@ function structure_to_json() {
     structure.print_table.pagemarkers = swap;
     structure.sitplan = swap2;
     structure.sitplanview = swap3;
+    structure.properties.currentView = swap4;
     // Remove sitplanjson again
     structure.sitplanjson = null;
     return (text);
@@ -1848,7 +2116,9 @@ function download_by_blob(text, filename, mimeType) {
 */
 function showFilePage() {
     var strleft = '<span id="exportscreen"></span>'; //We need the id to check elsewhere that the screen is open
-    strleft += "\n    <table border=\"1px\" style=\"border-collapse:collapse\" align=\"center\" width=\"100%\">\n      <tr>\n        <td width=\"100%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Openen</b>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"100%\" align=\"left\">\n            <table border=0>\n              <tr>\n                <td width=350 style=\"vertical-align:top;padding:5px\">\n                  <button style=\"font-size:14px\" onclick=\"loadClicked()\">Openen</button>\n                </td>\n                <td style=\"vertical-align:top;padding:7px\">\n                  Click op \"openen\" en selecteer een eerder opgeslagen EDS bestand.\n                </td>\n              </tr>\n            </table>\n        </td>\n      </tr>\n    </table><br>\n    <table border=\"1px\" style=\"border-collapse:collapse\" align=\"center\" width=\"100%\">\n      <tr>\n        <td width=\"100%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Opslaan</b>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"100%\" align=\"left\">\n    ";
+    // -- Openen uit bestand --
+    strleft += "\n    <table border=\"1px\" style=\"border-collapse:collapse\" align=\"center\" width=\"100%\">\n      <tr>\n        <td width=\"100%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Openen uit bestand</b>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"100%\" align=\"left\">\n            <table border=0>\n              <tr>\n                <td width=350 style=\"vertical-align:top;padding:5px\">\n                  <button style=\"font-size:14px\" onclick=\"loadClicked()\">Openen</button>\n                </td>\n                <td style=\"vertical-align:top;padding:7px\">\n                  Click op \"openen\" en selecteer een eerder opgeslagen EDS bestand.\n                </td>\n              </tr>\n            </table>\n        </td>\n      </tr>\n    </table><br>";
+    strleft += "\n    <table border=\"1px\" style=\"border-collapse:collapse\" align=\"center\" width=\"100%\">\n      <tr>\n        <td width=\"100%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Opslaan</b>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"100%\" align=\"left\">\n    ";
     if (window.showOpenFilePicker) { // Use fileAPI
         strleft += '<table border=0><tr><td width=350 style="vertical-align:top;padding:5px">';
         if (fileAPIobj.filename != null) {
@@ -1861,7 +2131,7 @@ function showFilePage() {
         else {
             strleft += '<button style="font-size:14px" onclick="exportjson(saveAs = true)">Opslaan als</button>';
             strleft += '</td><td style="vertical-align:top;padding:7px">';
-            strleft += '<span class="highlight-warning">Uw werk werd nog niet opgeslagen. Klik links op "Opslaan als".</span>';
+            strleft += '<span class="highlight-warning">Uw werk werd nog niet opgeslagen tijdens deze sessie. Klik links op "Opslaan als".</span>';
         }
         strleft += '</td></tr>';
         strleft += PROP_GDPR(); //Function returns empty for GIT version, returns GDPR notice when used online.
@@ -2002,11 +2272,11 @@ var undoRedo = /** @class */ (function () {
         // We store the current state of the structure in the history but we replace the SVGs by a reference to a large string store
         this.replaceSVGsByStringStore();
         if (!overschrijfVorige) {
-            this.historyEds.store(structure_to_json());
+            this.historyEds.store(structure_to_json(false)); // needs to call with false as we want to keep currentView info
             this.historyOptions.store(this.getOptions());
         }
         else {
-            this.historyEds.replace(structure_to_json());
+            this.historyEds.replace(structure_to_json(false)); // needs to call with false as we want to keep currentView info
             this.historyOptions.replace(this.getOptions());
         }
         this.replaceStringStoreBySVGs();
@@ -2128,6 +2398,79 @@ var TopMenu = /** @class */ (function () {
         this.selectItem(items[nr]);
     };
     return TopMenu;
+}());
+var Dialog = /** @class */ (function () {
+    function Dialog() {
+    }
+    // Show the helper tip if it hasn't been dismissed before
+    Dialog.prototype.show = function (htmlContent) {
+        // Create the popup
+        var popupOverlay = document.createElement('div');
+        popupOverlay.id = 'popupOverlay';
+        popupOverlay.style.position = 'fixed';
+        popupOverlay.style.top = '0';
+        popupOverlay.style.left = '0';
+        popupOverlay.style.width = '100%';
+        popupOverlay.style.height = '100%';
+        popupOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+        popupOverlay.style.display = 'flex';
+        popupOverlay.style.justifyContent = 'center';
+        popupOverlay.style.alignItems = 'center';
+        popupOverlay.style.visibility = 'hidden';
+        popupOverlay.style.zIndex = '9999';
+        var popup = document.createElement('div');
+        popup.style.position = 'fixed';
+        popup.style.top = '50%';
+        popup.style.left = '50%';
+        popup.style.transform = 'translate(-50%, -50%)';
+        popup.style.backgroundColor = 'white';
+        popup.style.padding = '5px 20px 20px';
+        popup.style.border = '1px solid #ccc';
+        popup.style.borderRadius = '8px';
+        popup.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
+        popup.style.zIndex = '1000';
+        // Add the HTML content
+        popup.innerHTML = htmlContent;
+        // Style the title
+        var title = popup.querySelector('h3');
+        if (title) {
+            title.style.color = '#06F'; // Similar blue as the OK button
+        }
+        // Create the "OK" button
+        var okButton = document.createElement('button');
+        okButton.textContent = 'OK';
+        okButton.style.marginTop = '10px';
+        okButton.style.padding = '10px 20px';
+        okButton.style.cursor = 'pointer';
+        okButton.style.backgroundColor = '#3399FF'; // Lighter blue hue
+        okButton.style.color = 'white';
+        okButton.style.border = 'none';
+        okButton.style.borderRadius = '5px'; // Rounded corners
+        okButton.style.display = 'block';
+        okButton.style.marginLeft = 'auto';
+        okButton.style.marginRight = 'auto';
+        okButton.style.width = '100px'; // Wider button
+        // Add hover effect
+        okButton.addEventListener('mouseover', function () {
+            okButton.style.backgroundColor = '#06F'; // Darker blue on hover
+        });
+        okButton.addEventListener('mouseout', function () {
+            okButton.style.backgroundColor = '#3399FF'; // Lighter blue when not hovering
+        });
+        okButton.addEventListener('click', function () {
+            // Remove the popup
+            document.body.removeChild(popupOverlay);
+            document.body.style.pointerEvents = 'auto';
+        });
+        popup.appendChild(okButton);
+        // Add the popup to the document body
+        popupOverlay.appendChild(popup);
+        document.body.appendChild(popupOverlay);
+        popupOverlay.style.visibility = 'visible';
+        document.body.style.pointerEvents = 'none'; // Disable interactions with the background
+        popupOverlay.style.pointerEvents = 'auto'; // Enable interactions with the popup
+    };
+    return Dialog;
 }());
 var HelperTip = /** @class */ (function () {
     function HelperTip(storage, storagePrefix) {
@@ -4936,6 +5279,130 @@ var SituationPlanView_SideBar = /** @class */ (function () {
 }());
 function HLInsertSymbol(event, id) {
 }
+/**
+ * @class
+ * @name IndexedDBStorage
+ * @description
+ * Een klasse om data op te slaan in indexedDB.
+ *
+ * @constructor
+ * @param {string} dbName - De naam van de database.
+ * @param {string} storeName - De naam van de store.
+ */
+var IndexedDBStorage = /** @class */ (function () {
+    /**
+     * @constructor
+     * @param {string} dbName - De naam van de database.
+     * @param {string} storeName - De naam van de store.
+     */
+    function IndexedDBStorage(dbName, storeName) {
+        this.dbName = dbName;
+        this.storeName = storeName;
+    }
+    /**
+     * Open de database en maak deze gereed voor gebruik.
+     * @private
+     * @returns {Promise<IDBDatabase | null>}
+     */
+    IndexedDBStorage.prototype.openDB = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var _this = this;
+            return __generator(this, function (_a) {
+                return [2 /*return*/, new Promise(function (resolve, reject) {
+                        var request = indexedDB.open(_this.dbName, 1);
+                        request.onupgradeneeded = function (event) {
+                            var db = event.target.result;
+                            if (!db.objectStoreNames.contains(_this.storeName)) {
+                                db.createObjectStore(_this.storeName, { keyPath: "key" });
+                            }
+                        };
+                        request.onsuccess = function () { return resolve(request.result); };
+                        request.onerror = function () { return resolve(null); };
+                    })];
+            });
+        });
+    };
+    /**
+     * Schrijf data naar de store.
+     * @param {string} key - De sleutel van de data.
+     * @param {string} value - De waarde van de data.
+     * @returns {Promise<boolean>}
+     */
+    IndexedDBStorage.prototype.set = function (key, value) {
+        return __awaiter(this, void 0, void 0, function () {
+            var startTime, db_1, error_4;
+            var _this = this;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        startTime = performance.now();
+                        _a.label = 1;
+                    case 1:
+                        _a.trys.push([1, 3, , 4]);
+                        return [4 /*yield*/, this.openDB()];
+                    case 2:
+                        db_1 = _a.sent();
+                        if (!db_1)
+                            return [2 /*return*/, false];
+                        return [2 /*return*/, new Promise(function (resolve) {
+                                var transaction = db_1.transaction(_this.storeName, "readwrite");
+                                var store = transaction.objectStore(_this.storeName);
+                                var request = store.put({ key: key, value: value });
+                                request.onsuccess = function () { return resolve(true); };
+                                request.onerror = function () { return resolve(false); };
+                            })];
+                    case 3:
+                        error_4 = _a.sent();
+                        console.error("Error in IndexedDBStorage.set: ".concat(error_4));
+                        return [2 /*return*/, false];
+                    case 4: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    /**
+     * Lees data uit de store.
+     * @param {string} key - De sleutel van de data.
+     * @returns {Promise<string | null>}
+     */
+    IndexedDBStorage.prototype.get = function (key) {
+        return __awaiter(this, void 0, void 0, function () {
+            var db_2, error_5;
+            var _this = this;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 2, , 3]);
+                        return [4 /*yield*/, this.openDB()];
+                    case 1:
+                        db_2 = _a.sent();
+                        if (!db_2)
+                            return [2 /*return*/, null];
+                        return [2 /*return*/, new Promise(function (resolve) {
+                                var transaction = db_2.transaction(_this.storeName, "readonly");
+                                var store = transaction.objectStore(_this.storeName);
+                                var request = store.get(key);
+                                request.onsuccess = function () {
+                                    if (request.result) {
+                                        resolve(request.result.value);
+                                    }
+                                    else {
+                                        resolve(null);
+                                    }
+                                };
+                                request.onerror = function () { return resolve(null); };
+                            })];
+                    case 2:
+                        error_5 = _a.sent();
+                        console.error("Error accessing IndexedDB:", error_5);
+                        return [2 /*return*/, null];
+                    case 3: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    return IndexedDBStorage;
+}());
 var MultiLevelStorage = /** @class */ (function () {
     function MultiLevelStorage(storageKey, initialData) {
         this.storageKey = storageKey;
@@ -10974,7 +11441,7 @@ var Hierarchical_List = /** @class */ (function () {
 var SITPLANVIEW_SELECT_PADDING = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--selectPadding').trim());
 var SITPLANVIEW_ZOOMINTERVAL = { MIN: 0.1, MAX: 1000 };
 var SITPLANVIEW_DEFAULT_SCALE = 0.7;
-var CONFIGPAGE_LEFT = "\n    <table border=\"1px\" style=\"border-collapse:collapse;\" align=\"center\" width=\"100%\"><tr><td style=\"padding-top: 0; padding-right: 10px; padding-bottom: 10px; padding-left: 10px;\">\n        <p><font size=\"+2\">\n          <b>Welkom op \u00E9\u00E9ndraadschema</b>\n        </font></p>\n      <p><font size=\"+1\">  \n           Kies \u00E9\u00E9n van onderstaande voorbeelden om van te starten of start van een leeg schema (optie 3).\n      </font></p>\n      <font size=\"+1\">\n        <i>\n          <b>Tip: </b>Om de mogelijkheden van het programma te leren kennen is het vaak beter eerst een voorbeeldschema te\n          bekijken alvorens van een leeg schema te vertrekken.\n        </i>\n      </font>\n    </td></tr></table>\n    <br>\n    <table border=\"1px\" style=\"border-collapse:collapse\" align=\"center\" width=\"100%\">\n      <tr>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Voorbeeld 1</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Voorbeeld 2</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Leeg schema</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Openen</b>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/example000.svg\" height=\"300px\"><br><br>\n          Eenvoudig schema, enkel contactdozen en lichtpunten.\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/example001.svg\" height=\"300px\"><br><br>\n          Iets complexer schema met teleruptoren, verbruikers achter contactdozen en gesplitste kringen.\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/gear.svg\" height=\"100px\"><br><br>\n";
+var CONFIGPAGE_LEFT = "\n    <table border=\"1px\" style=\"border-collapse:collapse;\" align=\"center\" width=\"100%\"><tr><td style=\"padding-top: 0; padding-right: 10px; padding-bottom: 10px; padding-left: 10px;\">\n        <p><font size=\"+2\">\n          <b>Welkom op \u00E9\u00E9ndraadschema</b>\n        </font></p>\n      <p><font size=\"+1\">  \n           Kies \u00E9\u00E9n van onderstaande voorbeelden om van te starten of start van een leeg schema (optie 3).\n      </font></p>\n      <font size=\"+1\">\n        <i>\n          <b>Tip: </b>Om de mogelijkheden van het programma te leren kennen is het vaak beter eerst een voorbeeldschema te\n          bekijken alvorens van een leeg schema te vertrekken.\n        </i>\n      </font>\n    </td></tr></table>\n    <div id=\"autoSaveRecover\"></div>\n    <br>\n    <table border=\"1px\" style=\"border-collapse:collapse\" align=\"center\" width=\"100%\">\n      <tr>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Voorbeeld 1</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Voorbeeld 2</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Leeg schema</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Openen</b>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/example000.svg\" height=\"300px\"><br><br>\n          Eenvoudig schema, enkel contactdozen en lichtpunten.\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/example001.svg\" height=\"300px\"><br><br>\n          Iets complexer schema met teleruptoren, verbruikers achter contactdozen en gesplitste kringen.\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/gear.svg\" height=\"100px\"><br><br>\n";
 var CONFIGPAGE_RIGHT = "\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/import_icon.svg\" height=\"100px\"><br><br>\n          Open een schema dat u eerder heeft opgeslagen op uw computer (EDS-bestand). Enkel bestanden aangemaakt na 12 juli 2019 worden herkend.\n          <br><br>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"load_example(0)\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"load_example(1)\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"read_settings()\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"loadClicked()\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n      </tr>\n    </table>\n  ";
 var CONFIGPRINTPAGE = "\n<div>\n</div>\n<br>\n";
 var EXAMPLE0 = "EDS0040000eJztWe9r6zYU/VeMv84rjp2kaxhjbQdv422f3qMblIdRrBtHtSwF2Un6g+5v35HsxM5emiVpB68QKCWRda+uzjmSjuInX5LKqqk/6l0EPmcV80e3T77gaAj8GTOkKn8UBr5QfPUx1VKyWUnoM2GyJPQzelb6oydfGX/k/yImEz/wq4cZ4dslU6Wci0qoDI2MqYrJZKYxLB5GaBpTmU7JFLbDyOcIJjuqIJI2oJiRYZnN1A+brEnOxiQTxZKKpCQ7ZnTfG+LpRnTCSVYs6WSIQ5uCcUOo1l9l2xwSFeNBOjcLSti80gVjVd15M7kok5Ikpfg2WQORa1O52S4wIZ25OcYIVYwVnRHr+hdam3YG/nPgl3puUpKixIhqLuVzUFMRtVT0Wip6/01FS8OVNhzfUHVGjOHzqDJz6la2hmVHIVYkq0qitpLokEo+mjeXAlr+urny4g9RMNhHBTaY8rLhtWZD6pQhAE1lxRR3GB0okDoRIBYqGc9FuYbiFcpZ5wRcS3oU2TqiYc6ttl3aCTviuWg5i1+nns0i9pTPeUc94UvyqXX5avXU1FQCbZvaibZq5/qa7a+froA+0jxHCV/L6DflLSGkl0S0TUPXW0VUA/K2GtpY/Je7OBt+C5y5zf0FznqHc3ZDRop02pxJ75e4q13ExZ3Vdn7Quu+11F1rUJZWXOty2+mBhtwmBhxCtuXVRDeZOsdtI4AJK8nCxAWppCAyaLDBGzvvlGhSoVNGYz1fckogCpaTxON12Rh+yuRkySoy3BLafdJJ3DTWKYHRlrFXcSoBBxxMjfV6m9sBcj86FuToBPLeIPeOBTk+gbw3yOGxIPdPIO8LcnxxLMiDE8h7KzluQe53bin9QxzvjRF35NWGoTUOf9pZ5TrHjS3wF7ZL4h4lTdSjtsB7OeOux1Qb8WjZkpTgdJfiTtVGJ0VBhuo+DoCO86FkjEe8+vdVpG0dhjXvC9oAF66k7LqKfRx51Ntu7/rfjL07wpJfMZ6zwqH7fr3d9U7aOrYj6vwkMDiZuzfcSKL+0Sif3N3+KF8cjXLH3v1ua0+FSbHSWpjaCZcd6W/g4PP5GCsRu5bIOlB/mgnK3M9O9ZQxQ8VQvN1HJHaeO9oDwjoUaORS5Dg0vg7EKZBvYaUp311SZ3NVuV2jt/OXuc49fXjsbe+tQXw/6J0fi150GHrRVvRI5e8YvDg6Frw3Wb/vFLwv6A2nsEDaW7fl/2//MJKl6bYXREHvIoDNOw+GQXwewBzjao2LH64lMM3YfOErcOhhR8Z2gjURR18sZULB4LKxJEscKfvpEv5o5rxXfVxNSWQWwMEQYijY/VJw+1Kp/0PfmqRyJtlD3d3dMjPL0e3TZhROLlO/YCqR28VakGzvghmwUNbIIb/mBHIqkboTkklJ9mh1CR7WGR6avDMGm1iKR/cyqm+5sCK04eSUOBHwq7CLVkr3IFpSGIZnxG1KvVTu5cyN1sb6Mu8SxJL7+OPY/PSpMvCIXmg/Iyj0UCpB/GQbPpMced/FkYf21Z9t//Dpj1X75gP6vmACMYtmsDO2HuxnrgsS6mxM1kIozLR5ayQ4Fda0wmMYbcGwiVyfibbbjXfvRXF44/09CL1fH+3k4W/dJWlQ42hnzbHknv8BXkCfFg==";
@@ -11002,38 +11469,6 @@ function loadFileFromText() {
     fileAPIobj.clear();
 }
 /// --- END OF DEVELOPMENT OPTIONS ---
-function exportjson(saveAs) {
-    if (saveAs === void 0) { saveAs = true; }
-    var filename;
-    /* We use the Pako library to entropy code the data
-     * Final data reads "EDSXXX0000" with XXX a version and thereafter a 64base encoding of the deflated output from Pako
-     * filename = "eendraadschema.eds";
-     */
-    filename = structure.properties.filename;
-    var text = structure_to_json();
-    // Compress the output structure and offer as download to the user. We are at version 004
-    try {
-        var decoder = new TextDecoder("utf-8");
-        var encoder = new TextEncoder();
-        var pako_inflated = new Uint8Array(encoder.encode(text));
-        var pako_deflated = new Uint8Array(pako.deflate(pako_inflated));
-        text = "EDS0040000" + btoa(String.fromCharCode.apply(null, pako_deflated));
-    }
-    catch (error) {
-        text = "TXT0040000" + text;
-    }
-    finally {
-        if (window.showOpenFilePicker) { // Use fileAPI     
-            if (saveAs)
-                this.fileAPIobj.saveAs(text);
-            else
-                this.fileAPIobj.save(text);
-        }
-        else { // legacy
-            download_by_blob(text, filename, 'data:text/eds;charset=utf-8');
-        }
-    }
-}
 function displayButtonPrintToPdf() {
     return ("");
     //Does nothing in the serverless version, only used on https://eendraadschema.goethals-jacobs.be
@@ -11042,6 +11477,11 @@ function handleButtonPrintToPdf() {
     return (0);
     //Does nothing in the serverless version, only used on https://eendraadschema.goethals-jacobs.be
 }
+function propUpload(text) {
+    return ("");
+    //Does nothing in the serverless version, only used on https://eendraadschema.goethals-jacobs.be  
+}
+var _this = this;
 function forceUndoStore() {
     undostruct.store();
 }
@@ -11412,8 +11852,6 @@ menuItems = [
 ];
 PROP_edit_menu(menuItems);
 var topMenu = new TopMenu('minitabs', 'menu-item', menuItems);
-// Download a default structure
-EDStoStructure(EXAMPLE_DEFAULT, false); //Just in case the user doesn't select a scheme and goes to drawing immediately, there should be something there
 // Now add handlers for everything that changes in the left column
 document.querySelector('#left_col_inner').addEventListener('change', function (event) {
     function propUpdate(my_id, item, type, value) {
@@ -11453,4 +11891,34 @@ document.querySelector('#left_col_inner').addEventListener('change', function (e
     propUpdate(parseInt(idNumber), key, type, value);
     // Perform your logic here with the extracted data
 });
-restart_all();
+EDStoStructure(EXAMPLE_DEFAULT, false); //Just in case the user doesn't select a scheme and goes to drawing immediately, there should be something there
+// Check if there is anything in the autosave and load it
+var recoveryAvailable = false;
+var lastSavedStr = null;
+var lastSavedInfo = null;
+var autoSaver = new AutoSaver(5);
+(function () { return __awaiter(_this, void 0, void 0, function () {
+    var _a;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0: return [4 /*yield*/, autoSaver.loadLastSaved()];
+            case 1:
+                _a = _b.sent(), lastSavedStr = _a[0], lastSavedInfo = _a[1];
+                if ((lastSavedStr != null) /* && (lastSavedInfo.recovery == true) */)
+                    recoveryAvailable = true;
+                return [2 /*return*/];
+        }
+    });
+}); })().then(function () {
+    if (!recoveryAvailable) {
+        EDStoStructure(EXAMPLE_DEFAULT, false);
+        autoSaver.start();
+        restart_all();
+    }
+    else {
+        var helperTip = new HelperTip(appDocStorage);
+        helperTip.show('file.autoRecovered', "<h3>Laatste schema geladen uit browsercache</h3>\n                        <p>Deze tool vond een schema in de browsercache.\n                           Dit schema dateert van <b>".concat(lastSavedInfo.currentTimeStamp, "</b>\n                           met als naam <b>").concat(lastSavedInfo.filename, "</b>.\n                           U kan op dit gerecupereerde schema verder werken of een ander schema laden in het \"Bestand\"-menu.</p>\n                        <p><b>Opgelet! </b>De browsercache is een tijdelijke opslag, en wordt occasioneel gewist.\n                                           Het blijft belangrijk uw werk regelmatig op te slaan in het \"Bestand\"-menu om gegevensverlies tegen te gaan.</p>"));
+        EDStoStructure(lastSavedStr);
+        autoSaver.start();
+    }
+});

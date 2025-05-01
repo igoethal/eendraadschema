@@ -131,10 +131,10 @@ class undoRedo {
         this.replaceSVGsByStringStore();
 
         if (!overschrijfVorige) {
-            this.historyEds.store(structure_to_json());
+            this.historyEds.store(structure_to_json(false)); // needs to call with false as we want to keep currentView info
             this.historyOptions.store(this.getOptions());
         } else {
-            this.historyEds.replace(structure_to_json());
+            this.historyEds.replace(structure_to_json(false)); // needs to call with false as we want to keep currentView info
             this.historyOptions.replace(this.getOptions());
         }
         

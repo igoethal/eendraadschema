@@ -439,32 +439,27 @@ PROP_edit_menu(menuItems);
 
 const topMenu = new TopMenu('minitabs', 'menu-item', menuItems);
 
-// Download a default structure
-
-EDStoStructure(EXAMPLE_DEFAULT,false); //Just in case the user doesn't select a scheme and goes to drawing immediately, there should be something there
-
 // Now add handlers for everything that changes in the left column
-
 document.querySelector('#left_col_inner').addEventListener('change', function(event) {
 
     function propUpdate(my_id: number, item: string, type: string, value: string | boolean): void {
         switch (type) {
-          case "select-one":
-              if (item == "type") { // Type changed
+        case "select-one":
+            if (item == "type") { // Type changed
                 structure.adjustTypeById(my_id, value as string);
-              } else {
+            } else {
                 structure.data[structure.getOrdinalById(my_id)].props[item] = (value as string);
-              }
-              structure.updateHTMLinner(my_id);
-              break;
-          case "text":
-              structure.data[structure.getOrdinalById(my_id)].props[item] = (value as string);
-              if (item==='kortsluitvermogen') structure.updateHTMLinner(my_id);
-              break;
-          case "checkbox":
-              structure.data[structure.getOrdinalById(my_id)].props[item] = (value as boolean);
-              structure.updateHTMLinner(my_id);
-              break;
+            }
+            structure.updateHTMLinner(my_id);
+            break;
+        case "text":
+            structure.data[structure.getOrdinalById(my_id)].props[item] = (value as string);
+            if (item==='kortsluitvermogen') structure.updateHTMLinner(my_id);
+            break;
+        case "checkbox":
+            structure.data[structure.getOrdinalById(my_id)].props[item] = (value as boolean);
+            structure.updateHTMLinner(my_id);
+            break;
         }
         undostruct.store();
         HLRedrawTreeSVG();
@@ -488,4 +483,36 @@ document.querySelector('#left_col_inner').addEventListener('change', function(ev
     // Perform your logic here with the extracted data
 });
 
-restart_all();
+EDStoStructure(EXAMPLE_DEFAULT,false); //Just in case the user doesn't select a scheme and goes to drawing immediately, there should be something there
+
+// Check if there is anything in the autosave and load it
+let recoveryAvailable = false
+let lastSavedStr = null;
+let lastSavedInfo = null;
+const autoSaver = new AutoSaver(5);
+(async () => {   
+    [lastSavedStr, lastSavedInfo] = await autoSaver.loadLastSaved();
+    if ((lastSavedStr != null) /* && (lastSavedInfo.recovery == true) */ ) recoveryAvailable = true;
+})().then(() => {
+    if (!recoveryAvailable) {
+        EDStoStructure(EXAMPLE_DEFAULT,false);
+        autoSaver.start();    
+        restart_all();
+    } else {
+        const helperTip = new HelperTip(appDocStorage);
+        helperTip.show('file.autoRecovered',
+                       `<h3>Laatste schema geladen uit browsercache</h3>
+                        <p>Deze tool vond een schema in de browsercache.
+                           Dit schema dateert van <b>${lastSavedInfo.currentTimeStamp}</b>
+                           met als naam <b>${lastSavedInfo.filename}</b>.
+                           U kan op dit gerecupereerde schema verder werken of een ander schema laden in het "Bestand"-menu.</p>
+                        <p><b>Opgelet! </b>De browsercache is een tijdelijke opslag, en wordt occasioneel gewist.
+                                           Het blijft belangrijk uw werk regelmatig op te slaan in het "Bestand"-menu om gegevensverlies tegen te gaan.</p>`);
+        EDStoStructure(lastSavedStr);
+        autoSaver.start();    
+    }
+});
+
+
+
+

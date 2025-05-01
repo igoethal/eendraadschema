@@ -252,8 +252,7 @@ class SituationPlanView {
                 } else {
                     //console.log("Selection canceled.");
                 }
-            })();
-            
+            })();    
         }
     }
 

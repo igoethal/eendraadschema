@@ -219,6 +219,61 @@ function upgrade_version(mystructure, version) {
 
 }
 
+/**
+ * Exporteert de huidige structuur naar een bestand in het EDS-formaat.
+ * @param {boolean} saveAs - Indien true, wordt de gebruiker gevraagd waar het bestand moet worden opgeslagen; anders wordt het bestand opgeslagen onder de bekende bestandsnaam.
+ */
+function exportjson(saveAs: boolean = true) { // Indien de boolean false is en de file API is geïnstalleerd, wordt een normale opslag uitgevoerd (bekende bestandsnaam)
+
+    /**
+     * Converteert een Uint8Array naar een Base64-gecodeerde string.
+     * @param {Uint8Array} uint8Array - De array die moet worden geconverteerd.
+     * @returns {string} De Base64-gecodeerde string.
+     */
+    function uint8ArrayToBase64(uint8Array: Uint8Array): string {
+        const CHUNK_SIZE = 0x8000; // Verwerk 32KB chunks
+        let binaryString = '';
+        for (let i = 0; i < uint8Array.length; i += CHUNK_SIZE) {
+            binaryString += String.fromCharCode.apply(
+                null,
+                uint8Array.subarray(i, i + CHUNK_SIZE)
+            );
+        }
+        return btoa(binaryString);
+    }
+
+    var filename: string;
+
+    /* We gebruiken de Pako-bibliotheek om de data te entropycoderen
+     * Einddata leest "EDSXXX0000" met XXX een versie en daarna een 64base-encodering van de gedecomprimeerde uitvoer van Pako
+     * filename = "eendraadschema.eds";
+     */
+    filename = structure.properties.filename;
+
+    let origtext: string = structure_to_json();
+    let text: string = '';
+
+    // Comprimeer de uitvoerstructuur en bied deze aan als download aan de gebruiker. We zijn momenteel bij versie 004
+    try {
+        let encoder = new TextEncoder();
+        let pako_inflated = new Uint8Array(encoder.encode(origtext));
+        let pako_deflated = new Uint8Array(pako.deflate(pako_inflated));
+        text = "EDS0040000" + uint8ArrayToBase64(pako_deflated);
+    } catch (error) {
+        console.log("Terugvallen naar TXT-uitvoer vanwege compressiefout: " + error);
+        text = "TXT0040000" + origtext;
+    } finally {
+        if ((window as any).showOpenFilePicker) { // Gebruik fileAPI     
+          if (saveAs) this.fileAPIobj.saveAs(text); else this.fileAPIobj.save(text);
+        } else { // legacy
+          download_by_blob(text, filename, 'data:text/eds;charset=utf-8');
+        }
+        autoSaver.saveManually("TXT0040000" + origtext); // Needs to be as TXT to be able to check with last autosave
+    }
+
+    propUpload(text);
+}
+
 /* FUNCTION json_to_structure
 
    Takes a string in pure json and puts the content in a hierarchical list that is returned.
@@ -503,7 +558,7 @@ function importToAppend(mystring: string, redraw = true) {
     if (redraw) topMenu.selectMenuItemByName('Eéndraadschema');
 }
 
-function structure_to_json() {
+function structure_to_json(removeUnneededDataMembers = true) {
 
     // Remove some unneeded data members that would only inflate the size of the output file
     for (let listitem of structure.data) {
@@ -512,11 +567,16 @@ function structure_to_json() {
     let swap:MarkerList = structure.print_table.pagemarkers;
     let swap2:SituationPlan = structure.sitplan;
     let swap3:SituationPlanView = structure.sitplanview;
+    let swap4:string = structure.properties.currentView;
     
     structure.print_table.pagemarkers = null;
     if (structure.sitplan != null) structure.sitplanjson = structure.sitplan.toJsonObject();
     structure.sitplan = null;
     structure.sitplanview = null;
+
+    if (removeUnneededDataMembers) {
+        structure.properties.currentView = null;
+    }
     
     // Create the output structure in uncompressed form
     var text:string = JSON.stringify(structure);
@@ -528,6 +588,7 @@ function structure_to_json() {
     structure.print_table.pagemarkers = swap;
     structure.sitplan = swap2;
     structure.sitplanview = swap3;
+    structure.properties.currentView = swap4;
 
     // Remove sitplanjson again
     structure.sitplanjson = null;    
@@ -573,11 +634,12 @@ function showFilePage() {
 
     var strleft: string = '<span id="exportscreen"></span>'; //We need the id to check elsewhere that the screen is open
 
+    // -- Openen uit bestand --
     strleft += `
     <table border="1px" style="border-collapse:collapse" align="center" width="100%">
       <tr>
         <td width="100%" align="center" bgcolor="LightGrey">
-          <b>Openen</b>
+          <b>Openen uit bestand</b>
         </td>
       </tr>
       <tr>
@@ -594,7 +656,9 @@ function showFilePage() {
             </table>
         </td>
       </tr>
-    </table><br>
+    </table><br>`;
+
+    strleft += `
     <table border="1px" style="border-collapse:collapse" align="center" width="100%">
       <tr>
         <td width="100%" align="center" bgcolor="LightGrey">
@@ -617,7 +681,7 @@ function showFilePage() {
         } else {
             strleft += '<button style="font-size:14px" onclick="exportjson(saveAs = true)">Opslaan als</button>';
             strleft += '</td><td style="vertical-align:top;padding:7px">'    
-            strleft += '<span class="highlight-warning">Uw werk werd nog niet opgeslagen. Klik links op "Opslaan als".</span>';
+            strleft += '<span class="highlight-warning">Uw werk werd nog niet opgeslagen tijdens deze sessie. Klik links op "Opslaan als".</span>';
         }
         strleft += '</td></tr>';
         strleft += PROP_GDPR(); //Function returns empty for GIT version, returns GDPR notice when used online.

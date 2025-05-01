@@ -17,6 +17,7 @@ var CONFIGPAGE_LEFT:string = `
         </i>
       </font>
     </td></tr></table>
+    <div id="autoSaveRecover"></div>
     <br>
     <table border="1px" style="border-collapse:collapse" align="center" width="100%">
       <tr>
