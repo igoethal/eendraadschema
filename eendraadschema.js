@@ -1092,9 +1092,15 @@ function printsvg() {
         document.getElementById("progress_pdf"), //HTML element where callback status can be given
         sitplanprint);
     }
-    function renderPrintSVG(outSVG) {
+    function renderPrintSVG_EDS(outSVG) {
         document.getElementById("printarea").innerHTML = '<div id="printsvgarea">' +
             getPrintSVGWithoutAddress(outSVG) +
+            '</div>';
+    }
+    function renderPrintSVG_sitplan(page) {
+        var outstruct = structure.sitplan.toSitPlanPrint();
+        document.getElementById("printarea").innerHTML = '<div id="printsvgarea">' +
+            outstruct.pages[page].svg +
             '</div>';
     }
     // First we generate an SVG image. We do this first because we need the size
@@ -1151,8 +1157,12 @@ function printsvg() {
         structure.print_table.insertHTMLposxTable(document.getElementById('id_print_table'), printsvg);
     }
     strleft += '<hr>';
+    var numPages = structure.print_table.pages.length + (structure.sitplan ? structure.sitplan.getNumPages() : 0);
+    if (structure.print_table.displaypage >= numPages) {
+        structure.print_table.displaypage = numPages - 1;
+    }
     strleft += '<b>Printvoorbeeld: </b>Pagina <select onchange="HLDisplayPage()" id="id_select_page">';
-    for (var i = 0; i < structure.print_table.pages.length; i++) {
+    for (var i = 0; i < numPages; i++) {
         if (i == structure.print_table.displaypage) {
             strleft += '<option value=' + (i + 1) + ' selected>' + (i + 1) + '</option>';
         }
@@ -1167,7 +1177,12 @@ function printsvg() {
     strleft += '<div id="printarea"></div>';
     document.getElementById("configsection").insertAdjacentHTML('beforeend', strleft);
     // Finally we show the actual SVG
-    renderPrintSVG(outSVG);
+    if (structure.print_table.displaypage < structure.print_table.pages.length) { //displaypage starts counting at 0
+        renderPrintSVG_EDS(outSVG);
+    }
+    else {
+        renderPrintSVG_sitplan(structure.print_table.displaypage - structure.print_table.pages.length);
+    }
     toggleAppView('config');
 }
 var AskLegacySchakelaar = /** @class */ (function () {
@@ -1282,26 +1297,78 @@ var AskLegacySchakelaar = /** @class */ (function () {
     };
     return AskLegacySchakelaar;
 }());
+/**
+ * Klasse voor het automatisch en regelmatig opslaan van het huidige schema in IndexedDB
+ *
+ * @class AutoSaver
+ */
 var AutoSaver = /** @class */ (function () {
+    /**
+     * Constructor voor AutoSaver-klasse.
+     *
+     * @param {number} interval - Het interval in seconden tussen autosave pogingen.
+     */
     function AutoSaver(interval) {
-        this.timerId = null; // Timer ID for clearing
-        this.lastSaved = null;
-        this.suspendSaving = true; // Zelfs indien we de timer gestart hebben zal het saven ben beginnen als deze false wordt
-        this.interval = interval * 1000; // Convert seconds to milliseconds
+        /**
+         * Timer ID.
+         *
+         * @type {number | null}
+         */
+        this.timerId = null;
+        /**
+         * Laatste opgeslagen data (als string).
+         *
+         * @type {string | null}
+         */
+        this.lastSavedString = null;
+        /**
+         * Geeft weer of de laatste data manueel was (user-interactie) of een echte autoSave.
+         *
+         * @type {typeof AutoSaver.SavedType[keyof typeof AutoSaver.SavedType]}
+         */
+        this.lastChangedType = AutoSaver.SavedType.NONE;
+        /**
+         * Zelfs indien we de timer gestart hebben zal het saven pas beginnen als deze false wordt.
+         *
+         * @type {boolean}
+         */
+        this.suspendSaving = true;
+        this.interval = interval * 1000; // Converteer seconden naar milliseconden
     }
+    /**
+     * Start het autosaven van de huidige structuur.
+     *
+     * Deze methode start een timer die elke {@link interval} seconden een poging doet om de huidige structuur op te slaan.
+     * Dit opslaan zal echter worden uitgesteld (suspendSaving) zolang de gebruiker niet een scherm open heeft waarop
+     * getekend kan worden (eendraadschema of situatieschema).
+     */
     AutoSaver.prototype.start = function () {
         var _this = this;
         this.stop();
         this.timerId = window.setInterval(function () {
             _this.saveAutomatically();
         }, this.interval);
+        this.suspendSaving = true;
     };
+    /**
+     * Stop het autosaven van de huidige structuur.
+     *
+     * Deze methode verwijdert de timer die elke {@link interval} seconden een poging doet om de huidige structuur op te slaan.
+     */
     AutoSaver.prototype.stop = function () {
         // Clear existing timer
         if (this.timerId !== null) {
             window.clearInterval(this.timerId);
         }
     };
+    /**
+     * Herstart het autosaven van de huidige structuur.
+     *
+     * Deze methode verwijdert de timer die elke {@link interval} seconden een poging doet om de huidige structuur op te slaan en
+     * start de timer opnieuw op.
+     *
+     * @param {number} [interval] Nieuwe interval in seconden (standaardwaarde: huidige interval)
+     */
     AutoSaver.prototype.reset = function (interval) {
         if (interval === void 0) { interval = this.interval / 1000; }
         // Clear existing timer and restart
@@ -1309,23 +1376,39 @@ var AutoSaver = /** @class */ (function () {
         this.interval = interval * 1000; // Convert seconds to milliseconds
         this.start();
     };
-    AutoSaver.prototype.saveAutomatically = function () {
-        var _this = this;
+    /**
+     * Controleert of de gebruiker een scherm open heeft waarop getekend kan worden (eendraadschema of situatieschema)
+     * Zoja wordt suspend uitgeschakeld en kan het autosaven beginnen.
+     */
+    AutoSaver.prototype.haltSuspendingIfUserStartedDrawing = function () {
         if (structure.properties.currentView != "config")
             this.suspendSaving = false;
+    };
+    /**
+     * Slaat nhet huidige schema automatisch op in de IndexedDB onder de naam "autoSave".
+     * Dit wel enkel indien de gebruiker al een tekenscherm geopend heeft (eendraadschema of situatieschema)
+     *
+     * Deze methode wordt elke {@link interval} seconden uitgevoerd door de timer die gestart is met {@link start}.
+     */
+    AutoSaver.prototype.saveAutomatically = function () {
+        var _this = this;
+        // Als de gebruiker nog niet aan het tekenen is dan is er niets te saven
+        this.haltSuspendingIfUserStartedDrawing();
         if (this.suspendSaving)
             return;
-        var text = "TXT0040000" + structure_to_json(true);
-        if (text != this.lastSaved) {
+        // Als het schema gewijzigd is wordt dit opgeslagen in IndexedDB
+        var text = "TXT0040000" + structure.toJsonObject(true);
+        if (text != this.lastSavedString) {
             (function () { return __awaiter(_this, void 0, void 0, function () {
                 var error_1;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
                             _a.trys.push([0, 2, , 3]);
-                            return [4 /*yield*/, this.saveToIndexedDB("TXT0040000" + structure_to_json(), true)];
+                            return [4 /*yield*/, this.saveToIndexedDB("TXT0040000" + structure.toJsonObject(true), true)];
                         case 1:
-                            _a.sent();
+                            _a.sent(); // parameter true geeft aan dat het over een autosave gaat
+                            this.lastSavedString = text;
                             return [3 /*break*/, 3];
                         case 2:
                             error_1 = _a.sent();
@@ -1335,17 +1418,22 @@ var AutoSaver = /** @class */ (function () {
                     }
                 });
             }); })();
-            //console.log('Autosave executed at ' + new Date().toLocaleString());
-            this.lastSaved = text;
         }
         else {
-            //console.log('Autosave skipped since no change detected at ' + new Date().toLocaleString());
+            //console.log('Autosave overgeslagen omdat er geen veranderingen waren op ' + new Date().toLocaleString());
         }
     };
+    /**
+     * Slaat het huidige schema op in de IndexedDB onder de naam "autoSave".
+     *
+     * @param {string} [text] - De tekst die opgeslagen moet worden. Indien niet gespecificeerd, wordt de structure.toJsonObject gebruikt.
+     */
     AutoSaver.prototype.saveManually = function (text) {
         var _this = this;
         if (text === void 0) { text = null; }
+        // Een gebruiker die actief zelf een schema opslaat wordt gezien als bewijs dat de gebruiker actief aan het tekenen is
         this.suspendSaving = false;
+        // Het schema wordt altijd opgeslagen in IndexedDB
         (function () { return __awaiter(_this, void 0, void 0, function () {
             var error_2;
             return __generator(this, function (_a) {
@@ -1353,18 +1441,17 @@ var AutoSaver = /** @class */ (function () {
                     case 0:
                         _a.trys.push([0, 2, , 3]);
                         if (text == null)
-                            text = "TXT0040000" + structure_to_json(true);
+                            text = "TXT0040000" + structure.toJsonObject(true);
                         return [4 /*yield*/, this.saveToIndexedDB(text, false)];
                     case 1:
-                        _a.sent();
+                        _a.sent(); // parameter false geeft aan dat het over een manual save gaat
+                        this.lastSavedString = text;
                         return [3 /*break*/, 3];
                     case 2:
                         error_2 = _a.sent();
                         console.error("Error saving to IndexedDB:", error_2);
                         return [3 /*break*/, 3];
-                    case 3:
-                        this.lastSaved = text;
-                        return [2 /*return*/];
+                    case 3: return [2 /*return*/];
                 }
             });
         }); })();
@@ -1374,12 +1461,12 @@ var AutoSaver = /** @class */ (function () {
      * Slaat de huidige structuur op in de IndexedDB onder de naam "autoSave".
      * Slaat eveneens een JSON string autoSaveInfo op met volgende informatie:
      *   - filename: de filename zoals gekozen door de gebruiker
-     *   - currentTimeStamp: de tijd waarop de structuur opgeslagen werd
+     *   - currentTimeStamp: de datum tijd waarop de structuur opgeslagen werd
      *   - recovery: een bollean die weergeeft of het schema spontaan werd opgeslagen zonder user-interventie (recovery=true)
      *     of samen met een save-actie (recovery=false). In het laatste geval heeft de user al een saved version van de file en
      *     moet de cache versie niet noodzakelijk pro-actief worden aangeboden bij het opnieuw opstarten van de tool.
      *
-     * @param {string} [text] - De tekst die opgeslagen moet worden. Indien niet gespecificeerd, wordt de huidige structuur gebruikt.
+     * @param {string} [text] - De tekst die opgeslagen moet worden.
      */
     AutoSaver.prototype.saveToIndexedDB = function (text, recovery) {
         if (recovery === void 0) { recovery = false; }
@@ -1389,11 +1476,10 @@ var AutoSaver = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         db = new IndexedDBStorage("DB_EDS", "Store_EDS");
-                        // Save the structure
-                        return [4 /*yield*/, db.set("autoSave", text)];
-                    case 1:
-                        // Save the structure
-                        _a.sent();
+                        if (!db) {
+                            console.error("Error saving to IndexedDB, kan de database niet openen.");
+                            return [2 /*return*/];
+                        }
                         currentDate = new Date();
                         info = {
                             filename: structure.properties.filename,
@@ -1405,45 +1491,71 @@ var AutoSaver = /** @class */ (function () {
                                 currentDate.getSeconds().toString().padStart(2, '0'),
                             recovery: recovery
                         };
-                        //console.log(info.currentTimeStamp);
-                        return [4 /*yield*/, db.set("autoSaveInfo", JSON.stringify(info))];
-                    case 2:
-                        //console.log(info.currentTimeStamp);
+                        return [4 /*yield*/, Promise.all([
+                                db.set("autoSave", text),
+                                db.set("autoSaveInfo", JSON.stringify(info))
+                            ])];
+                    case 1:
                         _a.sent();
                         return [2 /*return*/];
                 }
             });
         });
     };
+    /**
+     * Laadt de laatste opgeslagen data uit de IndexedDB, en retourneert deze als een array
+     * met twee elementen: de eigenlijke code van het schema (json)en de info over de opslag zoals filename,
+     * currentTimeStamp en recovery (true indien het een autosave was, false indien het een
+     * save-actie was).
+     *
+     * @returns {Promise<[string | null, string | null]>} Een promise die resolvet naar een
+     * array met twee elementen: de tekst van het schema en de info over de opslag.
+     */
     AutoSaver.prototype.loadLastSaved = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var db, lastSavedInfo, _a, lastSavedInfoStr, error_3;
+            var db, lastSavedInfoStr, lastSavedInfo_1, error_3;
+            var _a;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         db = new IndexedDBStorage("DB_EDS", "Store_EDS");
-                        lastSavedInfo = null;
+                        if (!db)
+                            return [2 /*return*/, [null, null]];
                         _b.label = 1;
                     case 1:
-                        _b.trys.push([1, 4, , 5]);
-                        _a = this;
-                        return [4 /*yield*/, db.get("autoSave")];
+                        _b.trys.push([1, 3, , 4]);
+                        lastSavedInfoStr = void 0;
+                        return [4 /*yield*/, Promise.all([
+                                db.get("autoSave"),
+                                db.get("autoSaveInfo")
+                            ])];
                     case 2:
-                        _a.lastSaved = _b.sent();
-                        return [4 /*yield*/, db.get("autoSaveInfo")];
+                        _a = _b.sent(), this.lastSavedString = _a[0], lastSavedInfoStr = _a[1];
+                        lastSavedInfo_1 = lastSavedInfoStr ? JSON.parse(lastSavedInfoStr) : null;
+                        return [2 /*return*/, ([this.lastSavedString, lastSavedInfo_1])];
                     case 3:
-                        lastSavedInfoStr = _b.sent();
-                        lastSavedInfo = lastSavedInfoStr ? JSON.parse(lastSavedInfoStr) : null;
-                        return [3 /*break*/, 5];
-                    case 4:
                         error_3 = _b.sent();
-                        this.lastSaved = null;
+                        this.lastSavedString = null;
                         console.error("Error loading from IndexedDB:", error_3);
-                        return [3 /*break*/, 5];
-                    case 5: return [2 /*return*/, ([this.lastSaved, lastSavedInfo])];
+                        return [2 /*return*/, [null, null]];
+                    case 4: return [2 /*return*/];
                 }
             });
         });
+    };
+    /**
+     * Enum voor soorten opslag.
+     *
+     * @readonly
+     * @enum {string}
+     * @property {string} AUTOMATIC Automatische opslag
+     * @property {string} MANUAL Manuele opslag
+     * @property {string} NONE Geen opslag
+     */
+    AutoSaver.SavedType = {
+        AUTOMATIC: "AUTOMATIC",
+        MANUAL: "MANUAL",
+        NONE: "NONE"
     };
     return AutoSaver;
 }());
@@ -1769,7 +1881,7 @@ function exportjson(saveAs) {
      * filename = "eendraadschema.eds";
      */
     filename = structure.properties.filename;
-    var origtext = structure_to_json();
+    var origtext = structure.toJsonObject(true);
     var text = '';
     // Comprimeer de uitvoerstructuur en bied deze aan als download aan de gebruiker. We zijn momenteel bij versie 004
     try {
@@ -2050,40 +2162,6 @@ function importToAppend(mystring, redraw) {
     if (redraw)
         topMenu.selectMenuItemByName('Eéndraadschema');
 }
-function structure_to_json(removeUnneededDataMembers) {
-    if (removeUnneededDataMembers === void 0) { removeUnneededDataMembers = true; }
-    // Remove some unneeded data members that would only inflate the size of the output file
-    for (var _i = 0, _a = structure.data; _i < _a.length; _i++) {
-        var listitem = _a[_i];
-        listitem.sourcelist = null;
-    }
-    var swap = structure.print_table.pagemarkers;
-    var swap2 = structure.sitplan;
-    var swap3 = structure.sitplanview;
-    var swap4 = structure.properties.currentView;
-    structure.print_table.pagemarkers = null;
-    if (structure.sitplan != null)
-        structure.sitplanjson = structure.sitplan.toJsonObject();
-    structure.sitplan = null;
-    structure.sitplanview = null;
-    if (removeUnneededDataMembers) {
-        structure.properties.currentView = null;
-    }
-    // Create the output structure in uncompressed form
-    var text = JSON.stringify(structure);
-    // Put the removed data members back
-    for (var _b = 0, _c = structure.data; _b < _c.length; _b++) {
-        var listitem = _c[_b];
-        listitem.sourcelist = structure;
-    }
-    structure.print_table.pagemarkers = swap;
-    structure.sitplan = swap2;
-    structure.sitplanview = swap3;
-    structure.properties.currentView = swap4;
-    // Remove sitplanjson again
-    structure.sitplanjson = null;
-    return (text);
-}
 /** FUNCTION download_by_blob
  *
  *  Downloads an EDS file to the user's PC
@@ -2272,11 +2350,11 @@ var undoRedo = /** @class */ (function () {
         // We store the current state of the structure in the history but we replace the SVGs by a reference to a large string store
         this.replaceSVGsByStringStore();
         if (!overschrijfVorige) {
-            this.historyEds.store(structure_to_json(false)); // needs to call with false as we want to keep currentView info
+            this.historyEds.store(structure.toJsonObject(false)); // needs to call with false as we want to keep currentView info
             this.historyOptions.store(this.getOptions());
         }
         else {
-            this.historyEds.replace(structure_to_json(false)); // needs to call with false as we want to keep currentView info
+            this.historyEds.replace(structure.toJsonObject(false)); // needs to call with false as we want to keep currentView info
             this.historyOptions.replace(this.getOptions());
         }
         this.replaceStringStoreBySVGs();
@@ -2926,6 +3004,13 @@ var SituationPlan = /** @class */ (function () {
      */
     SituationPlan.prototype.getElements = function () {
         return this.elements;
+    };
+    /**
+     * Geeft het aantal pagina's van het situatieplan terug.
+     * @returns {number} Het aantal pagina's van het situatieplan.
+     */
+    SituationPlan.prototype.getNumPages = function () {
+        return (this.elements.length > 0 ? this.numPages : 0);
     };
     SituationPlan.prototype.heeftEenzameSchakelaars = function () {
         var schakelaars = this.elements.filter(function (element) {
@@ -4718,6 +4803,15 @@ var SituationPlanView = /** @class */ (function () {
                 _this.selectBox(element.boxref); // We moeten dit na redraw doen anders bestaat de box mogelijk nog niet
                 _this.bringToFront(); // Deze slaat ook automatisch undo informatie op dus we moeten geen undostruct.store() meer doen.
                 fileinput.value = ''; // Zorgt ervoor dat hetzelfde bestand twee keer kan worden gekozen en dit nog steeds een change triggert
+                if ((element.sizex == 0) || (element.sizey == 0)) {
+                    //Use the built in help top to display a text that the image is invalid and remove it again
+                    _this.deleteSelectedBox();
+                    var dialog = new Dialog();
+                    dialog.show('<h3>Ongeldige afmetingen</h3>' +
+                        '<p>Dit bestand wordt door de browser herkend als een afbeelding met hoogte of breedte gelijk aan 0.</p>' +
+                        '<p>Dit bestand kan bijgevolg niet geladen worden.</p>');
+                    return;
+                }
                 if (element.scale != lastscale) {
                     //Use the built in help top to display a text that the image was scaled
                     var helperTip = new HelperTip(appDocStorage);
@@ -11435,6 +11529,40 @@ var Hierarchical_List = /** @class */ (function () {
             outSVG.data = header + outSVG.data + footer;
         }
         return (outSVG);
+    };
+    Hierarchical_List.prototype.toJsonObject = function (removeUnneededDataMembers) {
+        if (removeUnneededDataMembers === void 0) { removeUnneededDataMembers = true; }
+        // Remove some unneeded data members that would only inflate the size of the output file
+        for (var _i = 0, _a = this.data; _i < _a.length; _i++) {
+            var listitem = _a[_i];
+            listitem.sourcelist = null;
+        }
+        var swap = this.print_table.pagemarkers;
+        var swap2 = this.sitplan;
+        var swap3 = this.sitplanview;
+        var swap4 = this.properties.currentView;
+        this.print_table.pagemarkers = null;
+        if (this.sitplan != null)
+            this.sitplanjson = this.sitplan.toJsonObject();
+        this.sitplan = null;
+        this.sitplanview = null;
+        if (removeUnneededDataMembers) {
+            this.properties.currentView = null;
+        }
+        // Create the output structure in uncompressed form
+        var text = JSON.stringify(this);
+        // Put the removed data members back
+        for (var _b = 0, _c = this.data; _b < _c.length; _b++) {
+            var listitem = _c[_b];
+            listitem.sourcelist = this;
+        }
+        this.print_table.pagemarkers = swap;
+        this.sitplan = swap2;
+        this.sitplanview = swap3;
+        this.properties.currentView = swap4;
+        // Remove sitplanjson again
+        this.sitplanjson = null;
+        return (text);
     };
     return Hierarchical_List;
 }());

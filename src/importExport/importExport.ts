@@ -250,7 +250,7 @@ function exportjson(saveAs: boolean = true) { // Indien de boolean false is en d
      */
     filename = structure.properties.filename;
 
-    let origtext: string = structure_to_json();
+    let origtext: string = structure.toJsonObject(true);
     let text: string = '';
 
     // Comprimeer de uitvoerstructuur en bied deze aan als download aan de gebruiker. We zijn momenteel bij versie 004
@@ -556,45 +556,6 @@ function importToAppend(mystring: string, redraw = true) {
 
     //redraw if needed
     if (redraw) topMenu.selectMenuItemByName('Eéndraadschema');
-}
-
-function structure_to_json(removeUnneededDataMembers = true) {
-
-    // Remove some unneeded data members that would only inflate the size of the output file
-    for (let listitem of structure.data) {
-        listitem.sourcelist = null;
-    }
-    let swap:MarkerList = structure.print_table.pagemarkers;
-    let swap2:SituationPlan = structure.sitplan;
-    let swap3:SituationPlanView = structure.sitplanview;
-    let swap4:string = structure.properties.currentView;
-    
-    structure.print_table.pagemarkers = null;
-    if (structure.sitplan != null) structure.sitplanjson = structure.sitplan.toJsonObject();
-    structure.sitplan = null;
-    structure.sitplanview = null;
-
-    if (removeUnneededDataMembers) {
-        structure.properties.currentView = null;
-    }
-    
-    // Create the output structure in uncompressed form
-    var text:string = JSON.stringify(structure);
-
-    // Put the removed data members back
-    for (let listitem of structure.data) {
-        listitem.sourcelist = structure;
-    }
-    structure.print_table.pagemarkers = swap;
-    structure.sitplan = swap2;
-    structure.sitplanview = swap3;
-    structure.properties.currentView = swap4;
-
-    // Remove sitplanjson again
-    structure.sitplanjson = null;    
-
-    return(text);
-
 }
 
 /** FUNCTION download_by_blob

@@ -1078,6 +1078,7 @@ class SituationPlanView {
         this.event_manager.addEventListener(fileinput, 'change', (event) => { 
             let element = this.sitplan.addElementFromFile(event, this.sitplan.activePage, this.paper.offsetWidth/2, this.paper.offsetHeight/2, 
                 (() => {
+
                     this.syncToSitPlan();
                     this.clearSelection();
                     element.needsViewUpdate = true; // for an external SVG this is needed, for an electroItem it is automatically set (see next function)
@@ -1090,6 +1091,17 @@ class SituationPlanView {
                     this.bringToFront(); // Deze slaat ook automatisch undo informatie op dus we moeten geen undostruct.store() meer doen.
                     
                     (fileinput as HTMLInputElement).value = ''; // Zorgt ervoor dat hetzelfde bestand twee keer kan worden gekozen en dit nog steeds een change triggert
+
+                    if ( (element.sizex == 0) || (element.sizey == 0) ) {
+                        //Use the built in help top to display a text that the image is invalid and remove it again
+                        this.deleteSelectedBox();
+                        const dialog = new Dialog();
+                        dialog.show(
+                        '<h3>Ongeldige afmetingen</h3>'+
+                        '<p>Dit bestand wordt door de browser herkend als een afbeelding met hoogte of breedte gelijk aan 0.</p>'+
+                        '<p>Dit bestand kan bijgevolg niet geladen worden.</p>');
+                        return;
+                    }
 
                     if (element.scale != lastscale) {
                         //Use the built in help top to display a text that the image was scaled

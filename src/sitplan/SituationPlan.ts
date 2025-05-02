@@ -43,6 +43,13 @@ class SituationPlan {
         return this.elements;
     }
 
+    /**
+     * Geeft het aantal pagina's van het situatieplan terug.
+     * @returns {number} Het aantal pagina's van het situatieplan.
+     */
+    getNumPages(): number {
+        return (this.elements.length > 0 ? this.numPages : 0);
+    }
 
     heeftEenzameSchakelaars() {
         var schakelaars = this.elements.filter(function (element) {

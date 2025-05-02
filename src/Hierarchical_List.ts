@@ -815,4 +815,43 @@ class Hierarchical_List {
         }
         return(outSVG);
     }
+
+    toJsonObject(removeUnneededDataMembers = true) {
+
+        // Remove some unneeded data members that would only inflate the size of the output file
+        for (let listitem of this.data) {
+            listitem.sourcelist = null;
+        }
+        let swap:MarkerList = this.print_table.pagemarkers;
+        let swap2:SituationPlan = this.sitplan;
+        let swap3:SituationPlanView = this.sitplanview;
+        let swap4:string = this.properties.currentView;
+        
+        this.print_table.pagemarkers = null;
+        if (this.sitplan != null) this.sitplanjson = this.sitplan.toJsonObject();
+        this.sitplan = null;
+        this.sitplanview = null;
+    
+        if (removeUnneededDataMembers) {
+            this.properties.currentView = null;
+        }
+        
+        // Create the output structure in uncompressed form
+        var text:string = JSON.stringify(this);
+    
+        // Put the removed data members back
+        for (let listitem of this.data) {
+            listitem.sourcelist = this;
+        }
+        this.print_table.pagemarkers = swap;
+        this.sitplan = swap2;
+        this.sitplanview = swap3;
+        this.properties.currentView = swap4;
+    
+        // Remove sitplanjson again
+        this.sitplanjson = null;    
+    
+        return(text);
+    
+    }
 }

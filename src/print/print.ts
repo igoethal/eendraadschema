@@ -47,9 +47,17 @@ function printsvg() {
         );
     }
 
-    function renderPrintSVG(outSVG: SVGelement) {
+    function renderPrintSVG_EDS(outSVG: SVGelement) {
         document.getElementById("printarea").innerHTML = '<div id="printsvgarea">' +
                                                             getPrintSVGWithoutAddress(outSVG) +
+                                                        '</div>';
+    }
+
+    function renderPrintSVG_sitplan(page: number) {
+        const outstruct = structure.sitplan.toSitPlanPrint();
+
+        document.getElementById("printarea").innerHTML = '<div id="printsvgarea">' +
+                                                            outstruct.pages[page].svg +
                                                         '</div>';
     }
     
@@ -69,7 +77,6 @@ function printsvg() {
 
     let outstr: string = "";
     var strleft: string = "";
-
 
     document.getElementById("configsection").innerHTML
         =  '<div>'
@@ -123,8 +130,13 @@ function printsvg() {
 
     strleft += '<hr>';
 
+    const numPages = structure.print_table.pages.length + (structure.sitplan? structure.sitplan.getNumPages() : 0);
+    if (structure.print_table.displaypage >= numPages) {
+        structure.print_table.displaypage = numPages-1;
+    }
+
     strleft += '<b>Printvoorbeeld: </b>Pagina <select onchange="HLDisplayPage()" id="id_select_page">'
-    for (let i=0; i<structure.print_table.pages.length; i++) {
+    for (let i=0; i<numPages; i++) {
         if (i==structure.print_table.displaypage) {
             strleft += '<option value=' + (i+1) + ' selected>' + (i+1) + '</option>';
         } else {
@@ -145,7 +157,11 @@ function printsvg() {
 
     // Finally we show the actual SVG
 
-    renderPrintSVG(outSVG);
+    if (structure.print_table.displaypage < structure.print_table.pages.length) { //displaypage starts counting at 0
+        renderPrintSVG_EDS(outSVG);    
+    } else {
+        renderPrintSVG_sitplan(structure.print_table.displaypage - structure.print_table.pages.length);
+    }
 
     toggleAppView('config');
 }
