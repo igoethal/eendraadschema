@@ -287,8 +287,9 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanE
     const div = document.createElement('div');
 
     div.innerHTML = `
-        <div id="popupOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; visibility: hidden; z-index: 9999;">
-            <div id="popupWindow" style="width: 500px; background-color: white; padding: 20px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); display: flex; flex-direction: column; justify-content: space-between;">
+        <div id="popupOverlay" class="popup-overlay">
+            <div id="popupWindow" class="popup">
+                <h3>Element toevoegen/bewerken</h3>
                 <div id="selectKringContainer" style="display: flex; margin-bottom: 10px; align-items: center;">
                     <label for="selectKring" style="margin-right: 10px; display: inline-block;">Kring:</label>
                     <select id="selectKring"></select>
@@ -339,9 +340,9 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanE
                         : `<label for="setDefaultCheckbox" style="margin-left: 10px; flex-grow: 1; flex-wrap: wrap;">Zet schaal als standaard voor alle toekomstige nieuwe symbolen.</label>`
                     }            
                 </div>
-                <div style="display: flex; justify-content: center;">
-                    <button id="okButton" style="margin-right: 5px;">OK</button>
-                    <button id="cancelButton" style="margin-left: 5px;">Annuleren</button>
+                <div style="display: flex; justify-content: center; gap: 0px;">
+                    <button id="okButton" class="rounded-button">OK</button>
+                    <button id="cancelButton" class="rounded-button">Annuleren</button>
                 </div>
             </div>
         </div>`;

@@ -1088,20 +1088,21 @@ class SituationPlanView {
 
                     this.redraw();
                     this.selectBox(element.boxref); // We moeten dit na redraw doen anders bestaat de box mogelijk nog niet
-                    this.bringToFront(); // Deze slaat ook automatisch undo informatie op dus we moeten geen undostruct.store() meer doen.
                     
                     (fileinput as HTMLInputElement).value = ''; // Zorgt ervoor dat hetzelfde bestand twee keer kan worden gekozen en dit nog steeds een change triggert
 
                     if ( (element.sizex == 0) || (element.sizey == 0) ) {
                         //Use the built in help top to display a text that the image is invalid and remove it again
                         this.deleteSelectedBox();
-                        const dialog = new Dialog();
-                        dialog.show(
-                        '<h3>Ongeldige afmetingen</h3>'+
-                        '<p>Dit bestand wordt door de browser herkend als een afbeelding met hoogte of breedte gelijk aan 0.</p>'+
-                        '<p>Dit bestand kan bijgevolg niet geladen worden.</p>');
+                        const dialog = new Dialog('Ongeldige afmetingen', 
+                            '<p>Dit bestand wordt door de browser herkend als een afbeelding met hoogte of breedte gelijk aan 0.</p>'+
+                            '<p>Dit bestand kan bijgevolg niet geladen worden.</p>');
+                        dialog.show();
                         return;
                     }
+
+                    this.bringToFront(); // Deze slaat ook automatisch undo informatie op dus we moeten geen undostruct.store() meer doen.
+                                         // We voeren deze om dezelfde reden pas uit na het checken dat het bestand geldig is.
 
                     if (element.scale != lastscale) {
                         //Use the built in help top to display a text that the image was scaled
@@ -1351,19 +1352,25 @@ class SituationPlanView {
 
         document.getElementById('btn_sitplan_delpage')!.onclick = () => {
             this.contextMenu.hide();
-            const userConfirmation = confirm('Pagina '+this.sitplan.activePage+' volledig verwijderen?'); 
-            if (userConfirmation) {
-                this.wipePage(this.sitplan.activePage);
-                //set page of all sitplan.elements with page>page one lower
-                this.sitplan.elements.forEach(element => {
-                    if (element.page > this.sitplan.activePage) {
-                        element.page--;
-                    }
-                });
-                if (this.sitplan.numPages>1) this.sitplan.numPages--;
-                this.selectPage(Math.min(this.sitplan.activePage,this.sitplan.numPages))
-                undostruct.store();
-            }
+            const dialog = new Dialog('Pagina verwijderen', `Pagina ${this.sitplan.activePage} volledig verwijderen?`,
+                [
+                    { text: 'OK', callback: (() => 
+                        {
+                            this.wipePage(this.sitplan.activePage);
+                            //set page of all sitplan.elements with page>page one lower
+                            this.sitplan.elements.forEach(element => {
+                                if (element.page > this.sitplan.activePage) {
+                                    element.page--;
+                                }
+                            });
+                            if (this.sitplan.numPages>1) this.sitplan.numPages--;
+                            this.selectPage(Math.min(this.sitplan.activePage,this.sitplan.numPages))
+                            undostruct.store();
+                        }).bind(this) },
+                    { text: 'Annuleren', callback: () => {} }
+
+                ]);
+            dialog.show();
         };
 
         // -- Actions om elementen toe te voegen of verwijderen --

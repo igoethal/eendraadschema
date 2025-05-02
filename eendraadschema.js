@@ -2478,69 +2478,50 @@ var TopMenu = /** @class */ (function () {
     return TopMenu;
 }());
 var Dialog = /** @class */ (function () {
-    function Dialog() {
+    function Dialog(title, body, buttons) {
+        if (buttons === void 0) { buttons = null; }
+        this.title = title;
+        this.body = body;
+        if (!buttons) {
+            this.buttons = [{ text: 'OK', callback: function () { } }];
+        }
+        else {
+            this.buttons = buttons;
+        }
     }
     // Show the helper tip if it hasn't been dismissed before
-    Dialog.prototype.show = function (htmlContent) {
+    Dialog.prototype.show = function () {
         // Create the popup
         var popupOverlay = document.createElement('div');
         popupOverlay.id = 'popupOverlay';
-        popupOverlay.style.position = 'fixed';
-        popupOverlay.style.top = '0';
-        popupOverlay.style.left = '0';
-        popupOverlay.style.width = '100%';
-        popupOverlay.style.height = '100%';
-        popupOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-        popupOverlay.style.display = 'flex';
-        popupOverlay.style.justifyContent = 'center';
-        popupOverlay.style.alignItems = 'center';
-        popupOverlay.style.visibility = 'hidden';
-        popupOverlay.style.zIndex = '9999';
+        popupOverlay.classList.add('popup-overlay');
         var popup = document.createElement('div');
-        popup.style.position = 'fixed';
-        popup.style.top = '50%';
-        popup.style.left = '50%';
-        popup.style.transform = 'translate(-50%, -50%)';
-        popup.style.backgroundColor = 'white';
-        popup.style.padding = '5px 20px 20px';
-        popup.style.border = '1px solid #ccc';
-        popup.style.borderRadius = '8px';
-        popup.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
-        popup.style.zIndex = '1000';
+        popup.id = 'popup';
+        popup.classList.add('popup');
         // Add the HTML content
-        popup.innerHTML = htmlContent;
-        // Style the title
-        var title = popup.querySelector('h3');
-        if (title) {
-            title.style.color = '#06F'; // Similar blue as the OK button
+        popup.innerHTML = "<h3>".concat(this.title, "</h3><p>").concat(this.body, "</p>");
+        // Add the buttons
+        var buttonContainer = document.createElement('div');
+        buttonContainer.style.display = 'flex';
+        buttonContainer.style.justifyContent = 'center';
+        buttonContainer.style.gap = '0px';
+        var _loop_1 = function (button) {
+            var buttonElement = document.createElement('button');
+            buttonElement.textContent = button.text;
+            buttonElement.classList.add('rounded-button');
+            buttonElement.addEventListener('click', (function () {
+                document.body.removeChild(popupOverlay);
+                document.body.style.pointerEvents = 'auto';
+                button.callback();
+            }).bind(this_1));
+            buttonContainer.appendChild(buttonElement);
+        };
+        var this_1 = this;
+        for (var _i = 0, _a = this.buttons; _i < _a.length; _i++) {
+            var button = _a[_i];
+            _loop_1(button);
         }
-        // Create the "OK" button
-        var okButton = document.createElement('button');
-        okButton.textContent = 'OK';
-        okButton.style.marginTop = '10px';
-        okButton.style.padding = '10px 20px';
-        okButton.style.cursor = 'pointer';
-        okButton.style.backgroundColor = '#3399FF'; // Lighter blue hue
-        okButton.style.color = 'white';
-        okButton.style.border = 'none';
-        okButton.style.borderRadius = '5px'; // Rounded corners
-        okButton.style.display = 'block';
-        okButton.style.marginLeft = 'auto';
-        okButton.style.marginRight = 'auto';
-        okButton.style.width = '100px'; // Wider button
-        // Add hover effect
-        okButton.addEventListener('mouseover', function () {
-            okButton.style.backgroundColor = '#06F'; // Darker blue on hover
-        });
-        okButton.addEventListener('mouseout', function () {
-            okButton.style.backgroundColor = '#3399FF'; // Lighter blue when not hovering
-        });
-        okButton.addEventListener('click', function () {
-            // Remove the popup
-            document.body.removeChild(popupOverlay);
-            document.body.style.pointerEvents = 'auto';
-        });
-        popup.appendChild(okButton);
+        popup.appendChild(buttonContainer);
         // Add the popup to the document body
         popupOverlay.appendChild(popup);
         document.body.appendChild(popupOverlay);
@@ -2569,35 +2550,12 @@ var HelperTip = /** @class */ (function () {
         // Create the popup
         var popupOverlay = document.createElement('div');
         popupOverlay.id = 'popupOverlay';
-        popupOverlay.style.position = 'fixed';
-        popupOverlay.style.top = '0';
-        popupOverlay.style.left = '0';
-        popupOverlay.style.width = '100%';
-        popupOverlay.style.height = '100%';
-        popupOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-        popupOverlay.style.display = 'flex';
-        popupOverlay.style.justifyContent = 'center';
-        popupOverlay.style.alignItems = 'center';
-        popupOverlay.style.visibility = 'hidden';
-        popupOverlay.style.zIndex = '9999';
+        popupOverlay.classList.add('popup-overlay');
         var popup = document.createElement('div');
-        popup.style.position = 'fixed';
-        popup.style.top = '50%';
-        popup.style.left = '50%';
-        popup.style.transform = 'translate(-50%, -50%)';
-        popup.style.backgroundColor = 'white';
-        popup.style.padding = '5px 20px 20px';
-        popup.style.border = '1px solid #ccc';
-        popup.style.borderRadius = '8px';
-        popup.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
-        popup.style.zIndex = '1000';
+        popup.id = 'popup';
+        popup.classList.add('popup');
         // Add the HTML content
         popup.innerHTML = htmlContent;
-        // Style the title
-        var title = popup.querySelector('h3');
-        if (title) {
-            title.style.color = '#06F'; // Similar blue as the OK button
-        }
         // Create the "Never display again" checkbox
         var checkboxLabel = document.createElement('label');
         checkboxLabel.style.display = 'block';
@@ -2614,24 +2572,7 @@ var HelperTip = /** @class */ (function () {
         // Create the "OK" button
         var okButton = document.createElement('button');
         okButton.textContent = 'OK';
-        okButton.style.marginTop = '10px';
-        okButton.style.padding = '10px 20px';
-        okButton.style.cursor = 'pointer';
-        okButton.style.backgroundColor = '#3399FF'; // Lighter blue hue
-        okButton.style.color = 'white';
-        okButton.style.border = 'none';
-        okButton.style.borderRadius = '5px'; // Rounded corners
-        okButton.style.display = 'block';
-        okButton.style.marginLeft = 'auto';
-        okButton.style.marginRight = 'auto';
-        okButton.style.width = '100px'; // Wider button
-        // Add hover effect
-        okButton.addEventListener('mouseover', function () {
-            okButton.style.backgroundColor = '#06F'; // Darker blue on hover
-        });
-        okButton.addEventListener('mouseout', function () {
-            okButton.style.backgroundColor = '#3399FF'; // Lighter blue when not hovering
-        });
+        okButton.classList.add('rounded-button');
         okButton.addEventListener('click', function () {
             // Set the neverdisplay flag if the checkbox is checked
             _this.storage.set(displayedInThisSessionKey, true, true);
@@ -4801,17 +4742,17 @@ var SituationPlanView = /** @class */ (function () {
                 element.scaleSelectedBoxToPaperIfNeeded(_this.paper.offsetWidth * 0.995, _this.paper.offsetHeight * 0.995, _this.sitplan.defaults.scale);
                 _this.redraw();
                 _this.selectBox(element.boxref); // We moeten dit na redraw doen anders bestaat de box mogelijk nog niet
-                _this.bringToFront(); // Deze slaat ook automatisch undo informatie op dus we moeten geen undostruct.store() meer doen.
                 fileinput.value = ''; // Zorgt ervoor dat hetzelfde bestand twee keer kan worden gekozen en dit nog steeds een change triggert
                 if ((element.sizex == 0) || (element.sizey == 0)) {
                     //Use the built in help top to display a text that the image is invalid and remove it again
                     _this.deleteSelectedBox();
-                    var dialog = new Dialog();
-                    dialog.show('<h3>Ongeldige afmetingen</h3>' +
-                        '<p>Dit bestand wordt door de browser herkend als een afbeelding met hoogte of breedte gelijk aan 0.</p>' +
+                    var dialog = new Dialog('Ongeldige afmetingen', '<p>Dit bestand wordt door de browser herkend als een afbeelding met hoogte of breedte gelijk aan 0.</p>' +
                         '<p>Dit bestand kan bijgevolg niet geladen worden.</p>');
+                    dialog.show();
                     return;
                 }
+                _this.bringToFront(); // Deze slaat ook automatisch undo informatie op dus we moeten geen undostruct.store() meer doen.
+                // We voeren deze om dezelfde reden pas uit na het checken dat het bestand geldig is.
                 if (element.scale != lastscale) {
                     //Use the built in help top to display a text that the image was scaled
                     var helperTip = new HelperTip(appDocStorage);
@@ -4909,20 +4850,23 @@ var SituationPlanView = /** @class */ (function () {
         };
         document.getElementById('btn_sitplan_delpage').onclick = function () {
             _this.contextMenu.hide();
-            var userConfirmation = confirm('Pagina ' + _this.sitplan.activePage + ' volledig verwijderen?');
-            if (userConfirmation) {
-                _this.wipePage(_this.sitplan.activePage);
-                //set page of all sitplan.elements with page>page one lower
-                _this.sitplan.elements.forEach(function (element) {
-                    if (element.page > _this.sitplan.activePage) {
-                        element.page--;
-                    }
-                });
-                if (_this.sitplan.numPages > 1)
-                    _this.sitplan.numPages--;
-                _this.selectPage(Math.min(_this.sitplan.activePage, _this.sitplan.numPages));
-                undostruct.store();
-            }
+            var dialog = new Dialog('Pagina verwijderen', "Pagina ".concat(_this.sitplan.activePage, " volledig verwijderen?"), [
+                { text: 'OK', callback: (function () {
+                        _this.wipePage(_this.sitplan.activePage);
+                        //set page of all sitplan.elements with page>page one lower
+                        _this.sitplan.elements.forEach(function (element) {
+                            if (element.page > _this.sitplan.activePage) {
+                                element.page--;
+                            }
+                        });
+                        if (_this.sitplan.numPages > 1)
+                            _this.sitplan.numPages--;
+                        _this.selectPage(Math.min(_this.sitplan.activePage, _this.sitplan.numPages));
+                        undostruct.store();
+                    }).bind(_this) },
+                { text: 'Annuleren', callback: function () { } }
+            ]);
+            dialog.show();
         };
         // -- Actions om elementen toe te voegen of verwijderen --
         this.attachAddElementFromFileButton(document.getElementById('button_Add'), document.getElementById('fileInput'));
@@ -5247,9 +5191,9 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK, ca
      * Eerst maken we de pop-up
      */
     var div = document.createElement('div');
-    div.innerHTML = "\n        <div id=\"popupOverlay\" style=\"position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; visibility: hidden; z-index: 9999;\">\n            <div id=\"popupWindow\" style=\"width: 500px; background-color: white; padding: 20px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); display: flex; flex-direction: column; justify-content: space-between;\">\n                <div id=\"selectKringContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label for=\"selectKring\" style=\"margin-right: 10px; display: inline-block;\">Kring:</label>\n                    <select id=\"selectKring\"></select>\n                </div>\n                <div id=\"selectElectroItemContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label for=\"selectElectroItemBox\" style=\"margin-right: 10px; display: inline-block;\">Element:</label>\n                    <select id=\"selectElectroItemBox\"></select><span style=\"display: inline-block; width: 10px;\"></span>\n                    <button id=\"expandButton\" title=\"Omzetten in indivuele elementen\" style=\"background-color:lightblue;\">Uitpakken</button>\n                </div>\n                <div id=\"textContainer\" style=\"display: flex; margin-bottom: 30px; align-items: center;\">\n                    <label for=\"textInput\" style=\"margin-right: 10px; display: inline-block;\">ID:</label>\n                    <input id=\"textInput\" style=\"width: 100px;\" type=\"number\" min=\"0\" step=\"1\" value=\"\">\n                    <div id=\"feedback\" style=\"margin-left: 10px; width: 100%; font-size: 12px\"></div>\n                </div>\n                <div id=\"selectContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label for=\"selectAdresType\" style=\"margin-right: 10px; display: inline-block; white-space: nowrap;\">Label type:</label>\n                    <select id=\"selectAdresType\">\n                        <option value=\"auto\">Automatisch</option>\n                        <option value=\"manueel\">Handmatig</option>\n                    </select>\n                </div>\n                <div id=\"adresContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label for=\"adresInput\" style=\"margin-right: 10px; display: inline-block; white-space: nowrap;\">Label tekst:</label>\n                    <input id=\"adresInput\" style=\"width: 100%;\" type=\"text\" value=\"\">\n                    <select id=\"selectAdresLocation\" style=\"margin-left: 10px; display: inline-block;\">\n                        <option value=\"links\">Links</option>\n                        <option value=\"rechts\">Rechts</option>\n                        <option value=\"boven\">Boven</option>\n                        <option value=\"onder\">Onder</option>\n                    </select>\n                </div>\n                <div id=\"fontSizeContainer\" style=\"display: flex; margin-bottom: 30px; align-items: center;\">\n                    <label for=\"fontSizeInput\" style=\"margin-right: 10px; display: inline-block; white-space: nowrap;\">Tekengrootte (px):</label>\n                    <input id=\"fontSizeInput\" style=\"width: 100px;\" type=\"number\" min=\"1\" max=\"72\" step=\"11\" value=\"11\">\n                </div> \n                <div style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label for=\"scaleInput\" style=\"margin-right: 10px; display: inline-block;\">Schaal (%):</label>\n                    <input id=\"scaleInput\" style=\"width: 100px;\" type=\"number\" min=\"10\" max=\"400\" step=\"10\" value=\"".concat(String(SITPLANVIEW_DEFAULT_SCALE * 100), "\">\n                </div>\n                <div style=\"display: flex; margin-bottom: 20px; align-items: center;\">\n                    <label for=\"rotationInput\" style=\"margin-right: 10px; display: inline-block;\">Rotatie (\u00B0):</label>\n                    <input id=\"rotationInput\" style=\"width: 100px;\" type=\"number\" min=\"0\" max=\"360\" step=\"10\" value=\"0\">\n                </div>\n                <div id=\"setDefaultContainer\" style=\"display: flex; margin-bottom: 20px; align-items: flex-start;\">\n                    <input type=\"checkbox\" id=\"setDefaultCheckbox\">\n                    ").concat((sitplanElement == null) || ((sitplanElement != null) && (sitplanElement.getElectroItemId() != null))
+    div.innerHTML = "\n        <div id=\"popupOverlay\" class=\"popup-overlay\">\n            <div id=\"popupWindow\" class=\"popup\">\n                <h3>Element toevoegen/bewerken</h3>\n                <div id=\"selectKringContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label for=\"selectKring\" style=\"margin-right: 10px; display: inline-block;\">Kring:</label>\n                    <select id=\"selectKring\"></select>\n                </div>\n                <div id=\"selectElectroItemContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label for=\"selectElectroItemBox\" style=\"margin-right: 10px; display: inline-block;\">Element:</label>\n                    <select id=\"selectElectroItemBox\"></select><span style=\"display: inline-block; width: 10px;\"></span>\n                    <button id=\"expandButton\" title=\"Omzetten in indivuele elementen\" style=\"background-color:lightblue;\">Uitpakken</button>\n                </div>\n                <div id=\"textContainer\" style=\"display: flex; margin-bottom: 30px; align-items: center;\">\n                    <label for=\"textInput\" style=\"margin-right: 10px; display: inline-block;\">ID:</label>\n                    <input id=\"textInput\" style=\"width: 100px;\" type=\"number\" min=\"0\" step=\"1\" value=\"\">\n                    <div id=\"feedback\" style=\"margin-left: 10px; width: 100%; font-size: 12px\"></div>\n                </div>\n                <div id=\"selectContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label for=\"selectAdresType\" style=\"margin-right: 10px; display: inline-block; white-space: nowrap;\">Label type:</label>\n                    <select id=\"selectAdresType\">\n                        <option value=\"auto\">Automatisch</option>\n                        <option value=\"manueel\">Handmatig</option>\n                    </select>\n                </div>\n                <div id=\"adresContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label for=\"adresInput\" style=\"margin-right: 10px; display: inline-block; white-space: nowrap;\">Label tekst:</label>\n                    <input id=\"adresInput\" style=\"width: 100%;\" type=\"text\" value=\"\">\n                    <select id=\"selectAdresLocation\" style=\"margin-left: 10px; display: inline-block;\">\n                        <option value=\"links\">Links</option>\n                        <option value=\"rechts\">Rechts</option>\n                        <option value=\"boven\">Boven</option>\n                        <option value=\"onder\">Onder</option>\n                    </select>\n                </div>\n                <div id=\"fontSizeContainer\" style=\"display: flex; margin-bottom: 30px; align-items: center;\">\n                    <label for=\"fontSizeInput\" style=\"margin-right: 10px; display: inline-block; white-space: nowrap;\">Tekengrootte (px):</label>\n                    <input id=\"fontSizeInput\" style=\"width: 100px;\" type=\"number\" min=\"1\" max=\"72\" step=\"11\" value=\"11\">\n                </div> \n                <div style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label for=\"scaleInput\" style=\"margin-right: 10px; display: inline-block;\">Schaal (%):</label>\n                    <input id=\"scaleInput\" style=\"width: 100px;\" type=\"number\" min=\"10\" max=\"400\" step=\"10\" value=\"".concat(String(SITPLANVIEW_DEFAULT_SCALE * 100), "\">\n                </div>\n                <div style=\"display: flex; margin-bottom: 20px; align-items: center;\">\n                    <label for=\"rotationInput\" style=\"margin-right: 10px; display: inline-block;\">Rotatie (\u00B0):</label>\n                    <input id=\"rotationInput\" style=\"width: 100px;\" type=\"number\" min=\"0\" max=\"360\" step=\"10\" value=\"0\">\n                </div>\n                <div id=\"setDefaultContainer\" style=\"display: flex; margin-bottom: 20px; align-items: flex-start;\">\n                    <input type=\"checkbox\" id=\"setDefaultCheckbox\">\n                    ").concat((sitplanElement == null) || ((sitplanElement != null) && (sitplanElement.getElectroItemId() != null))
         ? "<label for=\"setDefaultCheckbox\" style=\"margin-left: 10px; flex-grow: 1; flex-wrap: wrap;\">Zet tekengrootte en schaal als standaard voor alle toekomstige nieuwe symbolen.</label>"
-        : "<label for=\"setDefaultCheckbox\" style=\"margin-left: 10px; flex-grow: 1; flex-wrap: wrap;\">Zet schaal als standaard voor alle toekomstige nieuwe symbolen.</label>", "            \n                </div>\n                <div style=\"display: flex; justify-content: center;\">\n                    <button id=\"okButton\" style=\"margin-right: 5px;\">OK</button>\n                    <button id=\"cancelButton\" style=\"margin-left: 5px;\">Annuleren</button>\n                </div>\n            </div>\n        </div>");
+        : "<label for=\"setDefaultCheckbox\" style=\"margin-left: 10px; flex-grow: 1; flex-wrap: wrap;\">Zet schaal als standaard voor alle toekomstige nieuwe symbolen.</label>", "            \n                </div>\n                <div style=\"display: flex; justify-content: center; gap: 0px;\">\n                    <button id=\"okButton\" class=\"rounded-button\">OK</button>\n                    <button id=\"cancelButton\" class=\"rounded-button\">Annuleren</button>\n                </div>\n            </div>\n        </div>");
     var popupOverlay = div.querySelector('#popupOverlay');
     var popupWindow = popupOverlay.querySelector('#popupWindow');
     var selectKringContainer = popupWindow.querySelector('#selectKringContainer');

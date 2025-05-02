@@ -474,3 +474,54 @@ table {
   margin: 2px 0;
 }
 
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  visibility: hidden;
+  z-index: 9999;
+}
+
+.popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  padding: 5px 20px 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  z-index: 1000000;
+}
+
+.popup h3 {
+  color: #06F;
+}
+
+.rounded-button {
+  margin-top: 10px;
+  margin-bottom: 0px;
+  margin-left: 7px;
+  margin-right: 7px;
+  padding: 10px 20px;
+  cursor: pointer;
+  background-color: #3399FF; /* Lighter blue hue */
+  color: white;
+  border: none;
+  border-radius: 5px; /* Rounded corners */
+  display: block;
+  width: 100px; /* Wider button */
+  transition: background-color 0.3s ease-in-out;
+}
+
+.rounded-button:hover {
+  background-color: #06F; /* Darker blue on hover */
+}
+
