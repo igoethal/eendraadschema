@@ -2569,6 +2569,10 @@ var HelperTip = /** @class */ (function () {
         italicText.appendChild(checkboxText);
         checkboxLabel.appendChild(italicText);
         popup.appendChild(checkboxLabel);
+        var buttonContainer = document.createElement('div');
+        buttonContainer.style.display = 'flex';
+        buttonContainer.style.justifyContent = 'center';
+        buttonContainer.style.gap = '0px';
         // Create the "OK" button
         var okButton = document.createElement('button');
         okButton.textContent = 'OK';
@@ -2583,7 +2587,8 @@ var HelperTip = /** @class */ (function () {
             document.body.removeChild(popupOverlay);
             document.body.style.pointerEvents = 'auto';
         });
-        popup.appendChild(okButton);
+        buttonContainer.appendChild(okButton);
+        popup.appendChild(buttonContainer);
         // Add the popup to the document body
         popupOverlay.appendChild(popup);
         document.body.appendChild(popupOverlay);

@@ -45,6 +45,11 @@ class HelperTip {
         checkboxLabel.appendChild(italicText);
     
         popup.appendChild(checkboxLabel);
+
+        const buttonContainer = document.createElement('div');
+        buttonContainer.style.display = 'flex';
+        buttonContainer.style.justifyContent = 'center';
+        buttonContainer.style.gap = '0px';        
     
         // Create the "OK" button
         const okButton = document.createElement('button');
@@ -62,7 +67,9 @@ class HelperTip {
           document.body.style.pointerEvents = 'auto';
         });
     
-        popup.appendChild(okButton);
+        buttonContainer.appendChild(okButton);
+
+        popup.appendChild(buttonContainer);
     
         // Add the popup to the document body
         popupOverlay.appendChild(popup);
