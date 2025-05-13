@@ -63,7 +63,8 @@ class Aansluiting extends Electro_Item {
     overrideKeys() {
         if ( ( (this.props.aantal_polen as number) < 1 ) || ( (this.props.aantal_polen as number) > 4 ) ) this.props.aantal_polen = "2"; //Test dat aantal polen bestaat
         if (typeof(this.props.huishoudelijk) == 'undefined') this.props.huishoudelijk = true;
-        if (!["automatisch", "differentieel", "differentieelautomaat"].includes(this.props.bescherming)) this.props.fase = '';
+        if (!["automatisch", "differentieel", "differentieelautomaat", "smelt"].includes(this.props.bescherming)) this.props.fase = '';
+        if (!["automatisch", "differentieel", "differentieelautomaat"].includes(this.props.bescherming)) this.props.kortsluitvermogen = '';
     }
 
     toHTML(mode: string) {
@@ -103,6 +104,10 @@ class Aansluiting extends Electro_Item {
                         +  ", Fase: " + this.selectPropToHTML('fase',["","L1","L2","L3"]);
                 break;
 
+            case "smelt":
+                output += ", Fase: " + this.selectPropToHTML('fase',["","L1","L2","L3"]);
+                break;
+
         }
 
         output += ", Kabeltype na teller: " + this.stringPropToHTML('type_kabel_na_teller',10)
@@ -122,7 +127,7 @@ class Aansluiting extends Electro_Item {
         function addFase(startNumlines:number, mySVG:SVGelement): number {
             let numlines = startNumlines;
             if (['L1','L2','L3'].includes(this.props.fase)) {
-                numlines = numlines + (this.props.huishoudelijk ? 1.3 : 1.0);
+                numlines = numlines + ((this.props.huishoudelijk && this.props.kortsluitvermogen != '') ? 1.3 : 1.0);
                 mySVG.data += "<text x=\"" + (mySVG.xleft+15+11*(numlines-1)) + "\" y=\"" + (mySVG.yup-10) + "\"" 
                         +  " transform=\"rotate(-90 " + (mySVG.xleft+15+11*(numlines-1)) + "," + (mySVG.yup-10) + ")" 
                         +  "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" 
@@ -359,6 +364,7 @@ class Aansluiting extends Electro_Item {
 
             case "smelt":
 
+                numlines = 1; // Hier houden we het aantal lijnen tekst bij
                 mySVG.yup += 30;  // Hoeveel ruimte moeten we onderaan voorzien voor de zekering
 
                 mySVG.data += '<use xlink:href="#zekering_smelt" x=\"' + mySVG.xleft + '" y="' + mySVG.yup + '" />'
@@ -366,6 +372,13 @@ class Aansluiting extends Electro_Item {
                         +  " transform=\"rotate(-90 " + (mySVG.xleft+15) + "," + (mySVG.yup-10) + ")" 
                         +  "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" 
                         +  htmlspecialchars(this.props.aantal_polen + "P - " +  this.props.amperage + "A") + "</text>";
+
+                // Code om fase toe te voegen
+                numlines = addFase.bind(this)(numlines, mySVG);
+
+                // Genoeg plaats voorzien aan de rechterkant en eindigen
+                mySVG.xright = Math.max(mySVG.xright,20+11*(numlines-1));
+
                 break;
 
             case "geen":

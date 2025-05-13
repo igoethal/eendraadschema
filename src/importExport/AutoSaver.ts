@@ -45,22 +45,57 @@ class AutoSaver {
      *
      * @type {typeof AutoSaver.SavedType[keyof typeof AutoSaver.SavedType]}
      */
-    private lastChangedType: typeof AutoSaver.SavedType[keyof typeof AutoSaver.SavedType] = AutoSaver.SavedType.NONE;
+    private lastSavedType: typeof AutoSaver.SavedType[keyof typeof AutoSaver.SavedType] = AutoSaver.SavedType.NONE;
     /**
      * Zelfs indien we de timer gestart hebben zal het saven pas beginnen als deze false wordt.
      *
      * @type {boolean}
      */
     private suspendSaving: boolean = true;
+
+    /**
+     * Functie die een referentie naar de huidige structuur geeft.
+     *
+     * @returns {Hierarchical_List} - De huidige structure.
+     */
+    private getStructure: () => Hierarchical_List;
+
+
+    /**
+     * Functie die zal uitgevoerd worden nadat de autosave geslaagd is.
+     *
+     * @type {() => void}
+     */
+    private callbackAfterSave: () => void = null;
     
     /**
      * Constructor voor AutoSaver-klasse.
      *
      * @param {number} interval - Het interval in seconden tussen autosave pogingen.
      */
-    constructor(interval: number) {
+    constructor(interval: number, getStructure: () => Hierarchical_List) {
         this.interval = interval * 1000; // Converteer seconden naar milliseconden
+        this.getStructure = getStructure;
     }
+
+    /**
+     * Geeft aan of er sinds de laatste manuele opslag (door de gebruiker) veranderingen zijn gedetecteerd aan het schema.
+     *
+     * @returns {boolean} - True indien er sinds de laatste manuele opslag veranderingen zijn aangebracht, false indien niet.
+     */
+    hasChangesSinceLastManualSave() {
+        return this.lastSavedType === AutoSaver.SavedType.AUTOMATIC;
+    }
+
+    /**
+     * Zorgt ervoor dat {@link hasChangesSinceLastManualSave} True retourneert.
+     *
+     * Deze methode zet de interne variabele lastSavedType naar AutoSaver.SavedType.AUTOMATIC,
+     * zodat {@link hasChangesSinceLastManualSave} True retourneert.
+     */
+    forceHasChangesSinceLastManualSave() {
+        this.lastSavedType = AutoSaver.SavedType.AUTOMATIC;
+    }  
 
     /**
      * Start het autosaven van de huidige structuur.
@@ -71,6 +106,7 @@ class AutoSaver {
      */
     start() {
         this.stop();
+        this.lastSavedString = null;
         this.timerId = window.setInterval(() => {
             this.saveAutomatically();
         }, this.interval);
@@ -101,6 +137,7 @@ class AutoSaver {
         // Clear existing timer and restart
         this.stop();
         this.interval = interval * 1000; // Convert seconds to milliseconds
+        this.lastSavedType = AutoSaver.SavedType.NONE;
         this.start();
     }
 
@@ -109,7 +146,7 @@ class AutoSaver {
      * Zoja wordt suspend uitgeschakeld en kan het autosaven beginnen.
      */
     private haltSuspendingIfUserStartedDrawing() {
-        if (structure.properties.currentView != "config") this.suspendSaving = false;
+        if (this.getStructure().properties.currentView != "config") this.suspendSaving = false;
     }
 
     /**
@@ -125,15 +162,19 @@ class AutoSaver {
         if (this.suspendSaving) return;
 
         // Als het schema gewijzigd is wordt dit opgeslagen in IndexedDB
-        const text = "TXT0040000" + structure.toJsonObject(true);
+        const text = "TXT0040000" + this.getStructure().toJsonObject(true);
         if (text != this.lastSavedString) {
             (async () => {
                 try {
-                    await this.saveToIndexedDB("TXT0040000" + structure.toJsonObject(true), true); // parameter true geeft aan dat het over een autosave gaat
+                    await this.saveToIndexedDB("TXT0040000" + this.getStructure().toJsonObject(true), true); // parameter true geeft aan dat het over een autosave gaat
                     this.lastSavedString = text;
+                    this.lastSavedType = AutoSaver.SavedType.AUTOMATIC;
                     //console.log('Autosave uitgevoerd op ' + new Date().toLocaleString());
                 } catch (error) {
                     console.error("Error saving to IndexedDB:", error);
+                } finally {
+                    //this.getStructure().updateRibbon();
+                    if (this.callbackAfterSave) this.callbackAfterSave();
                 }
             })();
         } else {
@@ -154,14 +195,26 @@ class AutoSaver {
         // Het schema wordt altijd opgeslagen in IndexedDB
         (async () => {
             try {
-                if (text == null) text = "TXT0040000" + structure.toJsonObject(true);
+                if (text == null) text = "TXT0040000" + this.getStructure().toJsonObject(true);
                 await this.saveToIndexedDB(text, false); // parameter false geeft aan dat het over een manual save gaat
                 this.lastSavedString = text;
+                this.lastSavedType = AutoSaver.SavedType.MANUAL;
             } catch (error) {
                 console.error("Error saving to IndexedDB:", error);
+            } finally {
+                if (this.callbackAfterSave) this.callbackAfterSave();
+                //this.getStructure().updateRibbon();
             }
         })();
         this.reset();
+    }
+
+    setCallbackAfterSave(callback: () => void) {
+        this.callbackAfterSave = callback;
+    }
+
+    getSavedType() {
+        return this.lastSavedType;
     }
 
     /**
@@ -186,7 +239,7 @@ class AutoSaver {
         // Save some additional information 
         let currentDate = new Date();
         const info = {
-            filename: structure.properties.filename,
+            filename: this.getStructure().properties.filename,
             currentTimeStamp: currentDate.getDate().toString().padStart(2, '0') + "/" +
                             (currentDate.getMonth() + 1).toString().padStart(2, '0') + "/" +
                             currentDate.getFullYear().toString() + " " +
@@ -224,10 +277,17 @@ class AutoSaver {
                 db.get("autoSaveInfo")
             ]);
             const lastSavedInfo = lastSavedInfoStr ? JSON.parse(lastSavedInfoStr) : null;
+            this.lastSavedType = (lastSavedInfo 
+                                    ? (lastSavedInfo.recovery
+                                        ? AutoSaver.SavedType.AUTOMATIC
+                                        : AutoSaver.SavedType.MANUAL)
+                                    : AutoSaver.SavedType.NONE);
             return([this.lastSavedString, lastSavedInfo]);
+            
         } catch (error) {
             this.lastSavedString = null;
             console.error("Error loading from IndexedDB:", error);
+            this.lastSavedType = AutoSaver.SavedType.NONE;
             return [null, null];
         }
         

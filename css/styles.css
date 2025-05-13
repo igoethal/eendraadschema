@@ -418,18 +418,29 @@ table {
 
 .highlight-warning {
   background-color: #FFD1D1; /* Light red/pink background */
-  border-left: 5px solid #FF6347;
-  padding: 2px 10px 2px 10px;
-  font-weight: bold;
+  border: 1px solid #FF6347;
+  padding: 4px 5px 4px 5px;  
+  font-weight: normal;
+  font-size: smaller;
   color: #B22222; /* Firebrick red for text */
 }
 
 .highlight-warning-big {
   background-color: #FFD1D1; /* Light red/pink background */
-  border-left: 5px solid #FF6347; /* Tomato red border to mimic marker */
-  padding: 2px 10px 2px 10px;
-  font-weight: bold;
+  border: 1px solid #FF6347; /* Tomato red border to mimic marker */
+  padding: 4px 5px 4px 5px;
+  font-weight: normal;
+  font-size: smaller;
   color: #B22222; /* Firebrick red for text */
+}
+
+.highlight-ok-big {
+  background-color: #CCFFCC; /* Light green background */
+  border: 1px solid #33CC33; /* Medium green border to mimic marker */
+  padding: 4px 5px 4px 5px;
+  font-weight: normal;
+  font-size: smaller;
+  color: #006600; /* Dark green for text */
 }
 
 .svg-icon {

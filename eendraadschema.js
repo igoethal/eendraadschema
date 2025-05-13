@@ -1308,7 +1308,7 @@ var AutoSaver = /** @class */ (function () {
      *
      * @param {number} interval - Het interval in seconden tussen autosave pogingen.
      */
-    function AutoSaver(interval) {
+    function AutoSaver(interval, getStructure) {
         /**
          * Timer ID.
          *
@@ -1326,15 +1326,39 @@ var AutoSaver = /** @class */ (function () {
          *
          * @type {typeof AutoSaver.SavedType[keyof typeof AutoSaver.SavedType]}
          */
-        this.lastChangedType = AutoSaver.SavedType.NONE;
+        this.lastSavedType = AutoSaver.SavedType.NONE;
         /**
          * Zelfs indien we de timer gestart hebben zal het saven pas beginnen als deze false wordt.
          *
          * @type {boolean}
          */
         this.suspendSaving = true;
+        /**
+         * Functie die zal uitgevoerd worden nadat de autosave geslaagd is.
+         *
+         * @type {() => void}
+         */
+        this.callbackAfterSave = null;
         this.interval = interval * 1000; // Converteer seconden naar milliseconden
+        this.getStructure = getStructure;
     }
+    /**
+     * Geeft aan of er sinds de laatste manuele opslag (door de gebruiker) veranderingen zijn gedetecteerd aan het schema.
+     *
+     * @returns {boolean} - True indien er sinds de laatste manuele opslag veranderingen zijn aangebracht, false indien niet.
+     */
+    AutoSaver.prototype.hasChangesSinceLastManualSave = function () {
+        return this.lastSavedType === AutoSaver.SavedType.AUTOMATIC;
+    };
+    /**
+     * Zorgt ervoor dat {@link hasChangesSinceLastManualSave} True retourneert.
+     *
+     * Deze methode zet de interne variabele lastSavedType naar AutoSaver.SavedType.AUTOMATIC,
+     * zodat {@link hasChangesSinceLastManualSave} True retourneert.
+     */
+    AutoSaver.prototype.forceHasChangesSinceLastManualSave = function () {
+        this.lastSavedType = AutoSaver.SavedType.AUTOMATIC;
+    };
     /**
      * Start het autosaven van de huidige structuur.
      *
@@ -1345,6 +1369,7 @@ var AutoSaver = /** @class */ (function () {
     AutoSaver.prototype.start = function () {
         var _this = this;
         this.stop();
+        this.lastSavedString = null;
         this.timerId = window.setInterval(function () {
             _this.saveAutomatically();
         }, this.interval);
@@ -1374,6 +1399,7 @@ var AutoSaver = /** @class */ (function () {
         // Clear existing timer and restart
         this.stop();
         this.interval = interval * 1000; // Convert seconds to milliseconds
+        this.lastSavedType = AutoSaver.SavedType.NONE;
         this.start();
     };
     /**
@@ -1381,7 +1407,7 @@ var AutoSaver = /** @class */ (function () {
      * Zoja wordt suspend uitgeschakeld en kan het autosaven beginnen.
      */
     AutoSaver.prototype.haltSuspendingIfUserStartedDrawing = function () {
-        if (structure.properties.currentView != "config")
+        if (this.getStructure().properties.currentView != "config")
             this.suspendSaving = false;
     };
     /**
@@ -1397,24 +1423,30 @@ var AutoSaver = /** @class */ (function () {
         if (this.suspendSaving)
             return;
         // Als het schema gewijzigd is wordt dit opgeslagen in IndexedDB
-        var text = "TXT0040000" + structure.toJsonObject(true);
+        var text = "TXT0040000" + this.getStructure().toJsonObject(true);
         if (text != this.lastSavedString) {
             (function () { return __awaiter(_this, void 0, void 0, function () {
                 var error_1;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
-                            _a.trys.push([0, 2, , 3]);
-                            return [4 /*yield*/, this.saveToIndexedDB("TXT0040000" + structure.toJsonObject(true), true)];
+                            _a.trys.push([0, 2, 3, 4]);
+                            return [4 /*yield*/, this.saveToIndexedDB("TXT0040000" + this.getStructure().toJsonObject(true), true)];
                         case 1:
                             _a.sent(); // parameter true geeft aan dat het over een autosave gaat
                             this.lastSavedString = text;
-                            return [3 /*break*/, 3];
+                            this.lastSavedType = AutoSaver.SavedType.AUTOMATIC;
+                            return [3 /*break*/, 4];
                         case 2:
                             error_1 = _a.sent();
                             console.error("Error saving to IndexedDB:", error_1);
-                            return [3 /*break*/, 3];
-                        case 3: return [2 /*return*/];
+                            return [3 /*break*/, 4];
+                        case 3:
+                            //this.getStructure().updateRibbon();
+                            if (this.callbackAfterSave)
+                                this.callbackAfterSave();
+                            return [7 /*endfinally*/];
+                        case 4: return [2 /*return*/];
                     }
                 });
             }); })();
@@ -1439,23 +1471,34 @@ var AutoSaver = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        _a.trys.push([0, 2, , 3]);
+                        _a.trys.push([0, 2, 3, 4]);
                         if (text == null)
-                            text = "TXT0040000" + structure.toJsonObject(true);
+                            text = "TXT0040000" + this.getStructure().toJsonObject(true);
                         return [4 /*yield*/, this.saveToIndexedDB(text, false)];
                     case 1:
                         _a.sent(); // parameter false geeft aan dat het over een manual save gaat
                         this.lastSavedString = text;
-                        return [3 /*break*/, 3];
+                        this.lastSavedType = AutoSaver.SavedType.MANUAL;
+                        return [3 /*break*/, 4];
                     case 2:
                         error_2 = _a.sent();
                         console.error("Error saving to IndexedDB:", error_2);
-                        return [3 /*break*/, 3];
-                    case 3: return [2 /*return*/];
+                        return [3 /*break*/, 4];
+                    case 3:
+                        if (this.callbackAfterSave)
+                            this.callbackAfterSave();
+                        return [7 /*endfinally*/];
+                    case 4: return [2 /*return*/];
                 }
             });
         }); })();
         this.reset();
+    };
+    AutoSaver.prototype.setCallbackAfterSave = function (callback) {
+        this.callbackAfterSave = callback;
+    };
+    AutoSaver.prototype.getSavedType = function () {
+        return this.lastSavedType;
     };
     /**
      * Slaat de huidige structuur op in de IndexedDB onder de naam "autoSave".
@@ -1482,7 +1525,7 @@ var AutoSaver = /** @class */ (function () {
                         }
                         currentDate = new Date();
                         info = {
-                            filename: structure.properties.filename,
+                            filename: this.getStructure().properties.filename,
                             currentTimeStamp: currentDate.getDate().toString().padStart(2, '0') + "/" +
                                 (currentDate.getMonth() + 1).toString().padStart(2, '0') + "/" +
                                 currentDate.getFullYear().toString() + " " +
@@ -1532,11 +1575,17 @@ var AutoSaver = /** @class */ (function () {
                     case 2:
                         _a = _b.sent(), this.lastSavedString = _a[0], lastSavedInfoStr = _a[1];
                         lastSavedInfo_1 = lastSavedInfoStr ? JSON.parse(lastSavedInfoStr) : null;
+                        this.lastSavedType = (lastSavedInfo_1
+                            ? (lastSavedInfo_1.recovery
+                                ? AutoSaver.SavedType.AUTOMATIC
+                                : AutoSaver.SavedType.MANUAL)
+                            : AutoSaver.SavedType.NONE);
                         return [2 /*return*/, ([this.lastSavedString, lastSavedInfo_1])];
                     case 3:
                         error_3 = _b.sent();
                         this.lastSavedString = null;
                         console.error("Error loading from IndexedDB:", error_3);
+                        this.lastSavedType = AutoSaver.SavedType.NONE;
                         return [2 /*return*/, [null, null]];
                     case 4: return [2 /*return*/];
                 }
@@ -1895,16 +1944,18 @@ function exportjson(saveAs) {
         text = "TXT0040000" + origtext;
     }
     finally {
-        if (window.showOpenFilePicker) { // Gebruik fileAPI     
+        if (window.showOpenFilePicker) { // Gebruik fileAPI    
+            if ((fileAPIobj.filename == null) && (saveAs == false))
+                saveAs = true; // Default to SaveAs if we have no file name
             if (saveAs)
-                this.fileAPIobj.saveAs(text);
+                this.fileAPIobj.saveAs(text).then(function () { return autoSaver.saveManually("TXT0040000" + origtext); });
             else
-                this.fileAPIobj.save(text);
+                this.fileAPIobj.save(text).then(function () { return autoSaver.saveManually("TXT0040000" + origtext); });
         }
         else { // legacy
             download_by_blob(text, filename, 'data:text/eds;charset=utf-8');
+            autoSaver.saveManually("TXT0040000" + origtext); // Needs to be as TXT to be able to check with last autosave
         }
-        autoSaver.saveManually("TXT0040000" + origtext); // Needs to be as TXT to be able to check with last autosave
     }
     propUpload(text);
 }
@@ -2082,8 +2133,11 @@ function EDStoJson(mystring) {
    Will redraw everything if the redraw flag is set.
 
 */
-function EDStoStructure(mystring, redraw) {
+function EDStoStructure(mystring, redraw, askUserToSave) {
     if (redraw === void 0) { redraw = true; }
+    if (askUserToSave === void 0) { askUserToSave = false; }
+    if (autoSaver)
+        autoSaver.reset();
     var JSONdata = EDStoJson(mystring);
     // Dump the json in into the structure and redraw if needed
     loadFromText(JSONdata.text, JSONdata.version, redraw);
@@ -2100,6 +2154,13 @@ function EDStoStructure(mystring, redraw) {
     if (rightelem != null) {
         rightelem.scrollTop = 0;
         rightelem.scrollLeft = 0;
+    }
+    // Make a manual save in the autoSaver
+    if (autoSaver && !askUserToSave)
+        autoSaver.saveManually();
+    if (askUserToSave) {
+        autoSaver.forceHasChangesSinceLastManualSave();
+        structure.updateRibbon();
     }
 }
 function importToAppend(mystring, redraw) {
@@ -2538,13 +2599,16 @@ var HelperTip = /** @class */ (function () {
         this.storagePrefix = storagePrefix;
     }
     // Show the helper tip if it hasn't been dismissed before
-    HelperTip.prototype.show = function (key, htmlContent, checked) {
+    HelperTip.prototype.show = function (key, htmlContent, checked, callback) {
         var _this = this;
         if (checked === void 0) { checked = false; }
+        if (callback === void 0) { callback = function () { }; }
         var neverDisplayKey = "".concat(this.storagePrefix, ".").concat(key, ".neverDisplay");
         var displayedInThisSessionKey = "".concat(this.storagePrefix, ".").concat(key, ".displayedInThisSession");
         // Check if the tip was dismissed before
         if ((this.storage.get(neverDisplayKey) === true) || (this.storage.get(displayedInThisSessionKey) === true)) {
+            if (callback)
+                callback();
             return; // Do nothing if the tip was dismissed or already shown
         }
         // Create the popup
@@ -2577,7 +2641,9 @@ var HelperTip = /** @class */ (function () {
         var okButton = document.createElement('button');
         okButton.textContent = 'OK';
         okButton.classList.add('rounded-button');
-        okButton.addEventListener('click', function () {
+        okButton.addEventListener('click', function (event) {
+            //stop the event from propagating
+            event.stopPropagation();
             // Set the neverdisplay flag if the checkbox is checked
             _this.storage.set(displayedInThisSessionKey, true, true);
             if (checkbox.checked) {
@@ -2586,6 +2652,8 @@ var HelperTip = /** @class */ (function () {
             // Remove the popup
             document.body.removeChild(popupOverlay);
             document.body.style.pointerEvents = 'auto';
+            if (callback)
+                callback();
         });
         buttonContainer.appendChild(okButton);
         popup.appendChild(buttonContainer);
@@ -4820,6 +4888,8 @@ var SituationPlanView = /** @class */ (function () {
      */
     SituationPlanView.prototype.updateRibbon = function () {
         var _this = this;
+        if (structure.properties.currentView != "draw")
+            return;
         var outputleft = "";
         var outputright = "";
         // -- Undo/redo buttons --
@@ -4830,6 +4900,13 @@ var SituationPlanView = /** @class */ (function () {
         outputleft += "\n            <span style=\"display: inline-block; width: 10px;\"></span>\n            <div class=\"icon\" id=\"button_edit\">\n                <span class=\"icon-image\" style=\"font-size:24px\">&#x2699;</span>\n                <span class=\"icon-text\">Bewerk</span>\n            </div>";
         // -- Visuals om naar achteren of voren te sturen --
         outputleft += "\n            <span style=\"display: inline-block; width: 10px;\"></span>\n            <div class=\"icon\" id=\"sendBack\">\n                <span class=\"icon-image\" style=\"font-size:24px\">\u2B07\u2B07</span>\n                <span class=\"icon-text\">Naar achter</span>\n            </div>\n            <div class=\"icon\" id=\"bringFront\">\n                <span class=\"icon-image\" style=\"font-size:24px\">\u2B06\u2B06</span>\n                <span class=\"icon-text\">Naar voor</span>\n            </div>";
+        // -- Add an icon of a floppy (save symbol) like the icons above --
+        if (autoSaver && autoSaver.hasChangesSinceLastManualSave()) {
+            outputleft += "\n                <span style=\"display: inline-block; width: 10px;\"></span>\n                <div class=\"highlight-warning-big\" style=\"width: 64px; display: inline-block; vertical-align: middle; text-align: center;\" id=\"button_save\" onclick=\"exportjson(false)\" onmouseover=\"this.style.cursor='pointer'\" onmouseout=\"this.style.cursor='default'\">\n                    <span class=\"icon-image\" style=\"font-size:24px\">\uD83D\uDCBE</span>\n                    <span class=\"icon-text\" style=\"display: inline-block; width: 100%;\">Opslaan</span>\n                </div>";
+        }
+        else {
+            outputleft += "\n                <span style=\"display: inline-block; width: 10px;\"></span>\n                <div class=\"highlight-ok-big\" id=\"button_save\" style=\"width: 64px; display: inline-block; vertical-align: middle; text-align: center;\" onmouseover=\"this.style.cursor='pointer'\" onmouseout=\"this.style.cursor='default'\" onclick=\"topMenu.selectMenuItemByName('Bestand')\">\n                    <span class=\"icon-image\" style=\"font-size:24px; filter: grayscale(100%); opacity: 0.5;\">\uD83D\uDCBE</span>\n                    <span class=\"icon-text\" style=\"display: inline-block; width: 100%;\">Bestand</span>\n                </div>";
+        }
         // -- Visuals om pagina te selecteren --
         outputleft += "\n            <span style=\"display: inline-block; width: 50px;\"></span>\n            <div>\n                <center>\n                    <span style=\"display: inline-block; white-space: nowrap;\">Pagina\n                        <select id=\"id_sitplanpage\">";
         for (var i = 1; i <= this.sitplan.numPages; i++) {
@@ -6785,8 +6862,10 @@ var Aansluiting = /** @class */ (function (_super) {
             this.props.aantal_polen = "2"; //Test dat aantal polen bestaat
         if (typeof (this.props.huishoudelijk) == 'undefined')
             this.props.huishoudelijk = true;
-        if (!["automatisch", "differentieel", "differentieelautomaat"].includes(this.props.bescherming))
+        if (!["automatisch", "differentieel", "differentieelautomaat", "smelt"].includes(this.props.bescherming))
             this.props.fase = '';
+        if (!["automatisch", "differentieel", "differentieelautomaat"].includes(this.props.bescherming))
+            this.props.kortsluitvermogen = '';
     };
     Aansluiting.prototype.toHTML = function (mode) {
         this.overrideKeys();
@@ -6818,6 +6897,9 @@ var Aansluiting = /** @class */ (function (_super) {
                     + ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief')
                     + ", Fase: " + this.selectPropToHTML('fase', ["", "L1", "L2", "L3"]);
                 break;
+            case "smelt":
+                output += ", Fase: " + this.selectPropToHTML('fase', ["", "L1", "L2", "L3"]);
+                break;
         }
         output += ", Kabeltype na teller: " + this.stringPropToHTML('type_kabel_na_teller', 10)
             + ", Kabeltype v&oacute;&oacute;r teller: " + this.stringPropToHTML('type_kabel_voor_teller', 10);
@@ -6831,7 +6913,7 @@ var Aansluiting = /** @class */ (function (_super) {
         function addFase(startNumlines, mySVG) {
             var numlines = startNumlines;
             if (['L1', 'L2', 'L3'].includes(this.props.fase)) {
-                numlines = numlines + (this.props.huishoudelijk ? 1.3 : 1.0);
+                numlines = numlines + ((this.props.huishoudelijk && this.props.kortsluitvermogen != '') ? 1.3 : 1.0);
                 mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
                     + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
                     + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
@@ -7031,12 +7113,17 @@ var Aansluiting = /** @class */ (function (_super) {
                     + '<use xlink:href="#arrow" x=\"' + (mySVG.xleft - 18) + '" y="' + (mySVG.yup - 12) + '" />';
                 break;
             case "smelt":
+                numlines = 1; // Hier houden we het aantal lijnen tekst bij
                 mySVG.yup += 30; // Hoeveel ruimte moeten we onderaan voorzien voor de zekering
                 mySVG.data += '<use xlink:href="#zekering_smelt" x=\"' + mySVG.xleft + '" y="' + mySVG.yup + '" />'
                     + "<text x=\"" + (mySVG.xleft + 15) + "\" y=\"" + (mySVG.yup - 10) + "\""
                     + " transform=\"rotate(-90 " + (mySVG.xleft + 15) + "," + (mySVG.yup - 10) + ")"
                     + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
                     + htmlspecialchars(this.props.aantal_polen + "P - " + this.props.amperage + "A") + "</text>";
+                // Code om fase toe te voegen
+                numlines = addFase.bind(this)(numlines, mySVG);
+                // Genoeg plaats voorzien aan de rechterkant en eindigen
+                mySVG.xright = Math.max(mySVG.xright, 20 + 11 * (numlines - 1));
                 break;
             case "geen":
                 mySVG.yup += 0;
@@ -8419,8 +8506,10 @@ var Kring = /** @class */ (function (_super) {
             this.props.differentieel_is_selectief = false;
         if (typeof (this.props.huishoudelijk) == 'undefined')
             this.props.huishoudelijk = true;
-        if (!["automatisch", "differentieel", "differentieelautomaat"].includes(this.props.bescherming))
+        if (!["automatisch", "differentieel", "differentieelautomaat", "smelt"].includes(this.props.bescherming))
             this.props.fase = '';
+        if (!["automatisch", "differentieel", "differentieelautomaat"].includes(this.props.bescherming))
+            this.props.kortsluitvermogen = '';
     };
     Kring.prototype.toHTML = function (mode) {
         this.overrideKeys();
@@ -8452,6 +8541,9 @@ var Kring = /** @class */ (function (_super) {
                     + ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief')
                     + ", Fase: " + this.selectPropToHTML('fase', ["", "L1", "L2", "L3"]);
                 break;
+            case "smelt":
+                output += ", Fase: " + this.selectPropToHTML('fase', ["", "L1", "L2", "L3"]);
+                break;
         }
         // Eigenschappen van de kabel
         output += ", Kabel: " + this.checkboxPropToHTML('kabel_is_aanwezig');
@@ -8471,7 +8563,7 @@ var Kring = /** @class */ (function (_super) {
         function addFase(startNumlines, mySVG) {
             var numlines = startNumlines;
             if (['L1', 'L2', 'L3'].includes(this.props.fase)) {
-                numlines = numlines + (this.props.huishoudelijk ? 1.3 : 1.0);
+                numlines = numlines + ((this.props.huishoudelijk && this.props.kortsluitvermogen != '') ? 1.3 : 1.0);
                 mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
                     + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
                     + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
@@ -8732,12 +8824,17 @@ var Kring = /** @class */ (function (_super) {
                 nameshift = -11;
                 break;
             case "smelt":
+                numlines = 1; // Hier houden we het aantal lijnen tekst bij
                 mySVG.yup += 30; // Hoeveel ruimte moeten we onderaan voorzien voor de zekering
                 mySVG.data += '<use xlink:href="#zekering_smelt" x=\"' + mySVG.xleft + '" y="' + mySVG.yup + '" />'
                     + "<text x=\"" + (mySVG.xleft + 15) + "\" y=\"" + (mySVG.yup - 10) + "\""
                     + " transform=\"rotate(-90 " + (mySVG.xleft + 15) + "," + (mySVG.yup - 10) + ")"
                     + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
                     + htmlspecialchars(this.props.aantal_polen + "P - " + this.props.amperage + "A") + "</text>";
+                // Code om fase toe te voegen
+                numlines = addFase.bind(this)(numlines, mySVG);
+                // Genoeg plaats voorzien aan de rechterkant en eindigen
+                mySVG.xright = Math.max(mySVG.xright, 20 + 11 * (numlines - 1));
                 break;
             case "geen":
                 mySVG.yup += 0; // Hoeveel ruimte moeten we onderaan voorzien voor de zekering
@@ -10262,8 +10359,10 @@ var Zekering = /** @class */ (function (_super) {
             this.props.nr = "";
         if (typeof (this.props.huishoudelijk) == 'undefined')
             this.props.huishoudelijk = true;
-        if (!["automatisch", "differentieel", "differentieelautomaat"].includes(this.props.bescherming))
+        if (!["automatisch", "differentieel", "differentieelautomaat", "smelt"].includes(this.props.bescherming))
             this.props.fase = '';
+        if (!["automatisch", "differentieel", "differentieelautomaat"].includes(this.props.bescherming))
+            this.props.kortsluitvermogen = '';
     };
     Zekering.prototype.toHTML = function (mode) {
         this.overrideKeys();
@@ -10297,6 +10396,9 @@ var Zekering = /** @class */ (function (_super) {
                     + ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief')
                     + ", Fase: " + this.selectPropToHTML('fase', ["", "L1", "L2", "L3"]);
                 break;
+            case "smelt":
+                output += ", Fase: " + this.selectPropToHTML('fase', ["", "L1", "L2", "L3"]);
+                break;
         }
         if ((this.props.kortsluitvermogen != '') && (['differentieel', 'automatisch', 'differentieelautomaat'].includes(this.props.bescherming))) {
             output += ", Huishoudelijke installatie: " + this.checkboxPropToHTML('huishoudelijk');
@@ -10307,8 +10409,8 @@ var Zekering = /** @class */ (function (_super) {
         function addFase(startNumlines, mySVG) {
             var numlines = startNumlines;
             if (['L1', 'L2', 'L3'].includes(this.props.fase)) {
-                numlines = numlines + (this.props.huishoudelijk ? 1.3 : 1.0);
-                mySVG.data += '<text x="' + (21 + 10) + '" y="' + (25 + 15 + (numlines - 1) * 11) + '" '
+                numlines = numlines + ((this.props.huishoudelijk && this.props.kortsluitvermogen != '') ? 1.3 : 1.0);
+                mySVG.data += '<text x="' + (21 + 10 + (this.props.bescherming == 'smelt' ? 4 : 0)) + '" y="' + (25 + 15 + (numlines - 1) * 11) + '" '
                     + 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">'
                     + htmlspecialchars(this.props.fase) + '</text>';
             }
@@ -10441,10 +10543,13 @@ var Zekering = /** @class */ (function (_super) {
                 numlines = addFase.bind(this)(numlines, mySVG);
                 break;
             case "smelt":
+                numlines = 1.4; // Hier houden we het aantal lijnen tekst bij
                 mySVG.data += '<use xlink:href="#zekering_smelt_horizontaal" x="21" y="25" />'
                     + '<text x="' + (21 + 14) + '" y="' + (25 + 20) + '" '
                     + 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">'
                     + htmlspecialchars(this.props.aantal_polen + "P - " + this.props.amperage + "A") + '</text>';
+                // Code om fase toe te voegen
+                numlines = addFase.bind(this)(numlines, mySVG);
                 break;
         }
         mySVG.ydown = mySVG.ydown + 11 * (numlines - 1);
@@ -11249,6 +11354,8 @@ var Hierarchical_List = /** @class */ (function () {
     };
     ;
     Hierarchical_List.prototype.updateRibbon = function () {
+        if (structure.properties.currentView != '2col')
+            return; // het heeft geen zin de EDS ribbon aan te passen als de EDS niet open staat
         var output = "";
         // Plaats bovenaan de switch van editeer-mode (teken of verplaats) --
         output += "\n            <div class=\"icon\" ".concat((undostruct.undoStackSize() > 0 ? 'onclick="undoClicked()"' : "style=\"filter: opacity(45%)\""), ">\n                <img src=\"gif/undo.png\" alt=\"Ongedaan maken\" class=\"icon-image\">\n                <span class=\"icon-text\">Ongedaan maken</span>\n            </div>\n            <div class=\"icon\" ").concat((undostruct.redoStackSize() > 0 ? 'onclick="redoClicked()"' : "style=\"filter: opacity(45%)\""), ">\n                <img src=\"gif/redo.png\" alt=\"Opnieuw\" class=\"icon-image\">\n                <span class=\"icon-text\">Opnieuw</span>\n            </div>\n            <span style=\"display: inline-block; width: 30px;\"></span>\n        ");
@@ -11263,9 +11370,19 @@ var Hierarchical_List = /** @class */ (function () {
                 break;
         }
         output += '</p>';
-        output += '<span style="display: inline-block; width: 30px;"></span>';
-        output += '<p style="margin-top: 5px;margin-bottom: 5px;" class="highlight-warning-big">Vergeet niet regelmatig uw werk<br>op te slaan in het "Bestand"-menu.</p>';
-        document.getElementById("ribbon").innerHTML = "<div id=\"left-icons\">".concat(output, "</div>");
+        if (autoSaver && autoSaver.hasChangesSinceLastManualSave()) {
+            output += '<span style="display: inline-block; width: 30px;"></span>';
+            output += "<div style=\"margin-top: 5px;margin-bottom: 5px;display: flex; align-items: center; justify-content: center;\" class=\"highlight-warning-big\" onclick=\"exportjson(false)\"\n                           onmouseover=\"this.style.cursor='pointer'\" \n                           onmouseout=\"this.style.cursor='default'\">\n                           <div style=\"display: inline-block; vertical-align: middle;\"><span class=\"icon-image\" style=\"font-size:24px;\">\uD83D\uDCBE</span></div>\n                           <div style=\"display: inline-block; vertical-align: middle; margin-left: 10px;\">\n                               U heeft niet opgeslagen wijzigingen. Klik hier om op te slaan<br>\n                               of ga naar het \"Bestand\"-menu voor meer opties.\n                           </div>\n                        </div>";
+        }
+        else {
+            output += '<span style="display: inline-block; width: 30px;"></span>';
+            output += "<div style=\"margin-top: 5px;margin-bottom: 5px;display: flex; align-items: center; justify-content: center;\" class=\"highlight-ok-big\" onclick=\"topMenu.selectMenuItemByName('Bestand')\"\n                           onmouseover=\"this.style.cursor='pointer'\" \n                           onmouseout=\"this.style.cursor='default'\">\n                           <div style=\"display: inline-block; vertical-align: middle;\"><span class=\"icon-image\" style=\"font-size:24px; filter: grayscale(100%); opacity: 0.5;\">\uD83D\uDCBE</span></div>\n                           <div style=\"display: inline-block; vertical-align: middle; margin-left: 10px;\">\n                               Er zijn geen niet opgeslagen wijzigingen. Ga naar het \"Bestand\"-menu<br>\n                               indien u toch wenst op te slaan.\n                           </div>\n                        </div>";
+        }
+        var ribbonElement = document.getElementById("ribbon");
+        var newHTML = "<div id=\"left-icons\">".concat(output, "</div>");
+        //if (ribbonElement.innerHTML !== newHTML) {
+        ribbonElement.innerHTML = newHTML; // Doesn't make a lot of sense to test as browser changes innerHTML anyway
+        //}
     };
     // -- Functie om de tree links te tekenen te starten by node met id = myParent --
     Hierarchical_List.prototype.toHTMLinner = function (ordinal) {
@@ -11518,7 +11635,7 @@ var Hierarchical_List = /** @class */ (function () {
 var SITPLANVIEW_SELECT_PADDING = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--selectPadding').trim());
 var SITPLANVIEW_ZOOMINTERVAL = { MIN: 0.1, MAX: 1000 };
 var SITPLANVIEW_DEFAULT_SCALE = 0.7;
-var CONFIGPAGE_LEFT = "\n    <table border=\"1px\" style=\"border-collapse:collapse;\" align=\"center\" width=\"100%\"><tr><td style=\"padding-top: 0; padding-right: 10px; padding-bottom: 10px; padding-left: 10px;\">\n        <p><font size=\"+2\">\n          <b>Welkom op \u00E9\u00E9ndraadschema</b>\n        </font></p>\n      <p><font size=\"+1\">  \n           Kies \u00E9\u00E9n van onderstaande voorbeelden om van te starten of start van een leeg schema (optie 3).\n      </font></p>\n      <font size=\"+1\">\n        <i>\n          <b>Tip: </b>Om de mogelijkheden van het programma te leren kennen is het vaak beter eerst een voorbeeldschema te\n          bekijken alvorens van een leeg schema te vertrekken.\n        </i>\n      </font>\n    </td></tr></table>\n    <div id=\"autoSaveRecover\"></div>\n    <br>\n    <table border=\"1px\" style=\"border-collapse:collapse\" align=\"center\" width=\"100%\">\n      <tr>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Voorbeeld 1</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Voorbeeld 2</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Leeg schema</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Openen</b>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/example000.svg\" height=\"300px\"><br><br>\n          Eenvoudig schema, enkel contactdozen en lichtpunten.\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/example001.svg\" height=\"300px\"><br><br>\n          Iets complexer schema met teleruptoren, verbruikers achter contactdozen en gesplitste kringen.\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/gear.svg\" height=\"100px\"><br><br>\n";
+var CONFIGPAGE_LEFT = "\n    <table border=\"1px\" style=\"border-collapse:collapse;\" align=\"center\" width=\"100%\"><tr><td style=\"padding-top: 0; padding-right: 10px; padding-bottom: 10px; padding-left: 10px;\">\n        <p><font size=\"+2\">\n          <b>Welkom op \u00E9\u00E9ndraadschema</b>\n        </font></p>\n      <p><font size=\"+1\">  \n           Deze gratis tool laat toe zowel \u00E9\u00E9ndraadschema's als situatieschema's te tekenen, inclusief complexere schema's\n           met bijvoorbeeld domotica. De schema's kunnen als PDF bestand worden ge\u00EBxporteerd en geprint.\n           Voor de experts kunnen schema's eveneens worden omgezet in SVG vectorformaat om in andere programma's verder te bewerken.\n      </font></p>\n      <p><font size=\"+1\">  \n           Kies \u00E9\u00E9n van onderstaande voorbeelden om van te starten of start van een leeg schema (optie 3).\n      </font></p>\n      <font size=\"+1\">\n        <i>\n          <b>Tip: </b>Om de mogelijkheden van het programma te leren kennen is het vaak beter eerst een voorbeeldschema te\n          bekijken alvorens van een leeg schema te vertrekken.\n        </i>\n      </font>\n    </td></tr></table>\n    <div id=\"autoSaveRecover\"></div>\n    <br>\n    <table border=\"1px\" style=\"border-collapse:collapse\" align=\"center\" width=\"100%\">\n      <tr>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Voorbeeld 1</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Voorbeeld 2</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Leeg schema</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Openen</b>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/example000.svg\" height=\"300px\"><br><br>\n          Eenvoudig schema, enkel contactdozen en lichtpunten.\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/example001.svg\" height=\"300px\"><br><br>\n          Iets complexer schema met teleruptoren, verbruikers achter contactdozen en gesplitste kringen.\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/gear.svg\" height=\"100px\"><br><br>\n";
 var CONFIGPAGE_RIGHT = "\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/import_icon.svg\" height=\"100px\"><br><br>\n          Open een schema dat u eerder heeft opgeslagen op uw computer (EDS-bestand). Enkel bestanden aangemaakt na 12 juli 2019 worden herkend.\n          <br><br>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"load_example(0)\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"load_example(1)\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"read_settings()\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"loadClicked()\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n      </tr>\n    </table>\n  ";
 var CONFIGPRINTPAGE = "\n<div>\n</div>\n<br>\n";
 var EXAMPLE0 = "EDS0040000eJztWe9r6zYU/VeMv84rjp2kaxhjbQdv422f3qMblIdRrBtHtSwF2Un6g+5v35HsxM5emiVpB68QKCWRda+uzjmSjuInX5LKqqk/6l0EPmcV80e3T77gaAj8GTOkKn8UBr5QfPUx1VKyWUnoM2GyJPQzelb6oydfGX/k/yImEz/wq4cZ4dslU6Wci0qoDI2MqYrJZKYxLB5GaBpTmU7JFLbDyOcIJjuqIJI2oJiRYZnN1A+brEnOxiQTxZKKpCQ7ZnTfG+LpRnTCSVYs6WSIQ5uCcUOo1l9l2xwSFeNBOjcLSti80gVjVd15M7kok5Ikpfg2WQORa1O52S4wIZ25OcYIVYwVnRHr+hdam3YG/nPgl3puUpKixIhqLuVzUFMRtVT0Wip6/01FS8OVNhzfUHVGjOHzqDJz6la2hmVHIVYkq0qitpLokEo+mjeXAlr+urny4g9RMNhHBTaY8rLhtWZD6pQhAE1lxRR3GB0okDoRIBYqGc9FuYbiFcpZ5wRcS3oU2TqiYc6ttl3aCTviuWg5i1+nns0i9pTPeUc94UvyqXX5avXU1FQCbZvaibZq5/qa7a+froA+0jxHCV/L6DflLSGkl0S0TUPXW0VUA/K2GtpY/Je7OBt+C5y5zf0FznqHc3ZDRop02pxJ75e4q13ExZ3Vdn7Quu+11F1rUJZWXOty2+mBhtwmBhxCtuXVRDeZOsdtI4AJK8nCxAWppCAyaLDBGzvvlGhSoVNGYz1fckogCpaTxON12Rh+yuRkySoy3BLafdJJ3DTWKYHRlrFXcSoBBxxMjfV6m9sBcj86FuToBPLeIPeOBTk+gbw3yOGxIPdPIO8LcnxxLMiDE8h7KzluQe53bin9QxzvjRF35NWGoTUOf9pZ5TrHjS3wF7ZL4h4lTdSjtsB7OeOux1Qb8WjZkpTgdJfiTtVGJ0VBhuo+DoCO86FkjEe8+vdVpG0dhjXvC9oAF66k7LqKfRx51Ntu7/rfjL07wpJfMZ6zwqH7fr3d9U7aOrYj6vwkMDiZuzfcSKL+0Sif3N3+KF8cjXLH3v1ua0+FSbHSWpjaCZcd6W/g4PP5GCsRu5bIOlB/mgnK3M9O9ZQxQ8VQvN1HJHaeO9oDwjoUaORS5Dg0vg7EKZBvYaUp311SZ3NVuV2jt/OXuc49fXjsbe+tQXw/6J0fi150GHrRVvRI5e8YvDg6Frw3Wb/vFLwv6A2nsEDaW7fl/2//MJKl6bYXREHvIoDNOw+GQXwewBzjao2LH64lMM3YfOErcOhhR8Z2gjURR18sZULB4LKxJEscKfvpEv5o5rxXfVxNSWQWwMEQYijY/VJw+1Kp/0PfmqRyJtlD3d3dMjPL0e3TZhROLlO/YCqR28VakGzvghmwUNbIIb/mBHIqkboTkklJ9mh1CR7WGR6avDMGm1iKR/cyqm+5sCK04eSUOBHwq7CLVkr3IFpSGIZnxG1KvVTu5cyN1sb6Mu8SxJL7+OPY/PSpMvCIXmg/Iyj0UCpB/GQbPpMced/FkYf21Z9t//Dpj1X75gP6vmACMYtmsDO2HuxnrgsS6mxM1kIozLR5ayQ4Fda0wmMYbcGwiVyfibbbjXfvRXF44/09CL1fH+3k4W/dJWlQ42hnzbHknv8BXkCfFg==";
@@ -11558,6 +11675,12 @@ function propUpload(text) {
     return ("");
     //Does nothing in the serverless version, only used on https://eendraadschema.goethals-jacobs.be  
 }
+var CookieBanner = /** @class */ (function () {
+    function CookieBanner() {
+    }
+    CookieBanner.prototype.run = function () { }; //Does nothing in the serverless version, only used on https://eendraadschema.goethals-jacobs.be
+    return CookieBanner;
+}());
 var _this = this;
 function forceUndoStore() {
     undostruct.store();
@@ -11969,11 +12092,27 @@ document.querySelector('#left_col_inner').addEventListener('change', function (e
     // Perform your logic here with the extracted data
 });
 EDStoStructure(EXAMPLE_DEFAULT, false); //Just in case the user doesn't select a scheme and goes to drawing immediately, there should be something there
-// Check if there is anything in the autosave and load it
+// Create the autoSaver
+// - the constructor takes a function that points it to the latest structure whenever it asks for it
+// - We also add a callback function that is called after each save performed by the autoSaver.  This function will update the Save icon in the ribbon when needed
+var autoSaver = new AutoSaver(5, function () { return (structure); });
+autoSaver.setCallbackAfterSave((function () {
+    var lastSavedType = autoSaver.getSavedType();
+    function updateRibbons() {
+        var currentSavedType = autoSaver.getSavedType();
+        if (lastSavedType === currentSavedType)
+            return; // Only update the ribbons if the type changed
+        lastSavedType = currentSavedType;
+        structure.updateRibbon();
+        if (structure.sitplanview)
+            structure.sitplanview.updateRibbon();
+    }
+    return updateRibbons;
+})());
+// Finally check if there is anything in the autosave and load it
 var recoveryAvailable = false;
 var lastSavedStr = null;
 var lastSavedInfo = null;
-var autoSaver = new AutoSaver(5);
 (function () { return __awaiter(_this, void 0, void 0, function () {
     var _a;
     return __generator(this, function (_b) {
@@ -11989,13 +12128,23 @@ var autoSaver = new AutoSaver(5);
 }); })().then(function () {
     if (!recoveryAvailable) {
         EDStoStructure(EXAMPLE_DEFAULT, false);
-        autoSaver.start();
         restart_all();
+        var myCookieBanner = new CookieBanner();
+        myCookieBanner.run();
     }
     else {
         var helperTip = new HelperTip(appDocStorage);
-        helperTip.show('file.autoRecovered', "<h3>Laatste schema geladen uit browsercache</h3>\n                        <p>Deze tool vond een schema in de browsercache.\n                           Dit schema dateert van <b>".concat(lastSavedInfo.currentTimeStamp, "</b>\n                           met als naam <b>").concat(lastSavedInfo.filename, "</b>.\n                           U kan op dit gerecupereerde schema verder werken of een ander schema laden in het \"Bestand\"-menu.</p>\n                        <p><b>Opgelet! </b>De browsercache is een tijdelijke opslag, en wordt occasioneel gewist.\n                                           Het blijft belangrijk uw werk regelmatig op te slaan in het \"Bestand\"-menu om gegevensverlies tegen te gaan.</p>"));
-        EDStoStructure(lastSavedStr);
-        autoSaver.start();
+        helperTip.show('file.autoRecovered', "<h3>Laatste schema geladen uit browsercache</h3>" +
+            "<p>Deze tool vond een schema in de browsercache. " +
+            "Dit schema dateert van <b>".concat(lastSavedInfo.currentTimeStamp, "</b> ") +
+            "met als naam <b>".concat(lastSavedInfo.filename, "</b>. ") +
+            "U kan op dit gerecupereerde schema verder werken of een ander schema laden in het \"Bestand\"-menu.</p>" +
+            "<p><b>Opgelet! </b>De browsercache is een tijdelijke opslag, en wordt occasioneel gewist. " +
+            "Het blijft belangrijk uw werk regelmatig op te slaan om gegevensverlies te voorkomen.</p>", false, (function () {
+            var myCookieBanner = new CookieBanner();
+            myCookieBanner.run();
+        }).bind(_this));
+        EDStoStructure(lastSavedStr, true, true);
     }
+    autoSaver.start();
 });

@@ -8,12 +8,13 @@ class HelperTip {
     }
   
     // Show the helper tip if it hasn't been dismissed before
-    show(key: string, htmlContent: string, checked: boolean = false): void {
+    show(key: string, htmlContent: string, checked: boolean = false, callback: () => void = () => {}): void {
         const neverDisplayKey = `${this.storagePrefix}.${key}.neverDisplay`;
         const displayedInThisSessionKey = `${this.storagePrefix}.${key}.displayedInThisSession`;
     
         // Check if the tip was dismissed before
         if ( (this.storage.get(neverDisplayKey) === true) || (this.storage.get(displayedInThisSessionKey) === true) ) {
+          if (callback) callback();
           return; // Do nothing if the tip was dismissed or already shown
         }
     
@@ -56,7 +57,9 @@ class HelperTip {
         okButton.textContent = 'OK';
         okButton.classList.add('rounded-button');
     
-        okButton.addEventListener('click', () => {
+        okButton.addEventListener('click', (event) => {
+          //stop the event from propagating
+          event.stopPropagation();
           // Set the neverdisplay flag if the checkbox is checked
           this.storage.set(displayedInThisSessionKey, true, true);
           if (checkbox.checked) {
@@ -65,6 +68,7 @@ class HelperTip {
           // Remove the popup
           document.body.removeChild(popupOverlay);
           document.body.style.pointerEvents = 'auto';
+          if (callback) callback();
         });
     
         buttonContainer.appendChild(okButton);

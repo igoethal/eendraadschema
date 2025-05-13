@@ -27,7 +27,7 @@
     "SVGSymbols.ts",
     "Hierarchical_List.ts",
     "config.ts",
-    "../prop/prop_scripts.ts",
+    "../prop/*.ts",
     "main.ts"
 , "documentation/HelperTip.ts"  ]
 }

@@ -67,9 +67,7 @@ class importExportUsingFileAPI {
         };
 
         this.fileHandle = await (window as any).showSaveFilePicker(options);
-        await this.saveFile(content, this.fileHandle);
-
-        
+        await this.saveFile(content, this.fileHandle);      
     };
 
     async saveFile(content: any, handle: any) {
@@ -263,12 +261,16 @@ function exportjson(saveAs: boolean = true) { // Indien de boolean false is en d
         console.log("Terugvallen naar TXT-uitvoer vanwege compressiefout: " + error);
         text = "TXT0040000" + origtext;
     } finally {
-        if ((window as any).showOpenFilePicker) { // Gebruik fileAPI     
-          if (saveAs) this.fileAPIobj.saveAs(text); else this.fileAPIobj.save(text);
+        if ((window as any).showOpenFilePicker) { // Gebruik fileAPI    
+            if ( (fileAPIobj.filename == null) && (saveAs == false) ) saveAs = true; // Default to SaveAs if we have no file name
+            if (saveAs) 
+                this.fileAPIobj.saveAs(text).then(() => autoSaver.saveManually("TXT0040000" + origtext)); 
+            else 
+                this.fileAPIobj.save(text).then(() => autoSaver.saveManually("TXT0040000" + origtext));
         } else { // legacy
           download_by_blob(text, filename, 'data:text/eds;charset=utf-8');
+          autoSaver.saveManually("TXT0040000" + origtext); // Needs to be as TXT to be able to check with last autosave
         }
-        autoSaver.saveManually("TXT0040000" + origtext); // Needs to be as TXT to be able to check with last autosave
     }
 
     propUpload(text);
@@ -461,7 +463,9 @@ function EDStoJson(mystring: string) {
 
 */
 
-function EDStoStructure(mystring: string, redraw = true) {
+function EDStoStructure(mystring: string, redraw = true, askUserToSave = false) {
+
+    if (autoSaver) autoSaver.reset();
 
     let JSONdata = EDStoJson(mystring);
     
@@ -484,6 +488,13 @@ function EDStoStructure(mystring: string, redraw = true) {
       rightelem.scrollTop = 0;
       rightelem.scrollLeft = 0;
     }
+
+    // Make a manual save in the autoSaver
+    if (autoSaver && !askUserToSave) autoSaver.saveManually();
+    if (askUserToSave) {
+        autoSaver.forceHasChangesSinceLastManualSave();
+        structure.updateRibbon();
+    } 
 
 }
 

@@ -8,6 +8,11 @@ var CONFIGPAGE_LEFT:string = `
           <b>Welkom op ééndraadschema</b>
         </font></p>
       <p><font size="+1">  
+           Deze gratis tool laat toe zowel ééndraadschema's als situatieschema's te tekenen, inclusief complexere schema's
+           met bijvoorbeeld domotica. De schema's kunnen als PDF bestand worden geëxporteerd en geprint.
+           Voor de experts kunnen schema's eveneens worden omgezet in SVG vectorformaat om in andere programma's verder te bewerken.
+      </font></p>
+      <p><font size="+1">  
            Kies één van onderstaande voorbeelden om van te starten of start van een leeg schema (optie 3).
       </font></p>
       <font size="+1">

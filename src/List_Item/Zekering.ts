@@ -23,7 +23,8 @@ class Zekering extends Electro_Item {
         if ( (this.props.bescherming != "differentieel") && (this.props.bescherming != "differentieelautomaat") ) this.props.differentieel_is_selectief = false;
         if (!this.isChildOf("Kring")) this.props.nr = "";
         if (typeof(this.props.huishoudelijk) == 'undefined') this.props.huishoudelijk = true;
-        if (!["automatisch", "differentieel", "differentieelautomaat"].includes(this.props.bescherming)) this.props.fase = '';
+        if (!["automatisch", "differentieel", "differentieelautomaat", "smelt"].includes(this.props.bescherming)) this.props.fase = '';
+        if (!["automatisch", "differentieel", "differentieelautomaat"].includes(this.props.bescherming)) this.props.kortsluitvermogen = '';
     }
 
     toHTML(mode: string) {
@@ -65,6 +66,10 @@ class Zekering extends Electro_Item {
                        +  ", Fase: " + this.selectPropToHTML('fase',["","L1","L2","L3"]);
                 break;
 
+            case "smelt":
+                output += ", Fase: " + this.selectPropToHTML('fase',["","L1","L2","L3"]);
+                break;
+
         }
 
         if ((this.props.kortsluitvermogen != '') && (['differentieel','automatisch','differentieelautomaat'].includes(this.props.bescherming))) {
@@ -79,8 +84,8 @@ class Zekering extends Electro_Item {
         function addFase(startNumlines:number, mySVG:SVGelement): number {
             let numlines = startNumlines;
             if (['L1','L2','L3'].includes(this.props.fase)) {
-                numlines = numlines + (this.props.huishoudelijk ? 1.3 : 1.0);
-                mySVG.data += '<text x="' + (21+10) + '" y="' + (25+15+(numlines-1)*11) + '" ' 
+                numlines = numlines + ((this.props.huishoudelijk && this.props.kortsluitvermogen != '') ? 1.3 : 1.0);
+                mySVG.data += '<text x="' + (21+10+(this.props.bescherming == 'smelt' ? 4 : 0)) + '" y="' + (25+15+(numlines-1)*11) + '" ' 
                         +  'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' 
                         +  htmlspecialchars(this.props.fase) + '</text>';
             }
@@ -240,10 +245,16 @@ class Zekering extends Electro_Item {
 
             case "smelt":
 
+                numlines = 1.4; // Hier houden we het aantal lijnen tekst bij
+
                 mySVG.data += '<use xlink:href="#zekering_smelt_horizontaal" x="21" y="25" />'
                            +  '<text x="' + (21+14) + '" y="' + (25+20) + '" ' 
                            +  'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">'
                            +  htmlspecialchars(this.props.aantal_polen + "P - " +  this.props.amperage + "A") + '</text>';
+
+                // Code om fase toe te voegen
+                numlines = addFase.bind(this)(numlines, mySVG);
+
                 break;
         }
 

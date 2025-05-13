@@ -396,6 +396,8 @@ function read_settings() {
 
 //--- MAIN PROGRAM ---
 
+
+
 declare var CONF_builddate: any; //needed to be able to read the variable from the builddate.js file (otherwise compiler will complain)
 
 var CONF_aantal_droge_kringen = 7;
@@ -485,32 +487,57 @@ document.querySelector('#left_col_inner').addEventListener('change', function(ev
 
 EDStoStructure(EXAMPLE_DEFAULT,false); //Just in case the user doesn't select a scheme and goes to drawing immediately, there should be something there
 
-// Check if there is anything in the autosave and load it
+// Create the autoSaver
+// - the constructor takes a function that points it to the latest structure whenever it asks for it
+// - We also add a callback function that is called after each save performed by the autoSaver.  This function will update the Save icon in the ribbon when needed
+
+let autoSaver = new AutoSaver(5, () => {return(structure);});
+autoSaver.setCallbackAfterSave((() => { // Update ribbons after each save (automatic or manual) by the autoSaver, but only if the lastSavedType changed
+    let lastSavedType = autoSaver.getSavedType();
+    function updateRibbons(){
+        const currentSavedType = autoSaver.getSavedType();
+        if (lastSavedType === currentSavedType) return; // Only update the ribbons if the type changed
+        lastSavedType = currentSavedType;
+        structure.updateRibbon(); 
+        if (structure.sitplanview) structure.sitplanview.updateRibbon(); 
+    }
+    return updateRibbons;
+})());
+
+// Finally check if there is anything in the autosave and load it
+
 let recoveryAvailable = false
 let lastSavedStr = null;
 let lastSavedInfo = null;
-const autoSaver = new AutoSaver(5);
+
+
+
 (async () => {   
     [lastSavedStr, lastSavedInfo] = await autoSaver.loadLastSaved();
     if ((lastSavedStr != null) /* && (lastSavedInfo.recovery == true) */ ) recoveryAvailable = true;
 })().then(() => {
     if (!recoveryAvailable) {
         EDStoStructure(EXAMPLE_DEFAULT,false);
-        autoSaver.start();    
         restart_all();
+        let myCookieBanner = new CookieBanner();
+        myCookieBanner.run();
     } else {
         const helperTip = new HelperTip(appDocStorage);
-        helperTip.show('file.autoRecovered',
-                       `<h3>Laatste schema geladen uit browsercache</h3>
-                        <p>Deze tool vond een schema in de browsercache.
-                           Dit schema dateert van <b>${lastSavedInfo.currentTimeStamp}</b>
-                           met als naam <b>${lastSavedInfo.filename}</b>.
-                           U kan op dit gerecupereerde schema verder werken of een ander schema laden in het "Bestand"-menu.</p>
-                        <p><b>Opgelet! </b>De browsercache is een tijdelijke opslag, en wordt occasioneel gewist.
-                                           Het blijft belangrijk uw werk regelmatig op te slaan in het "Bestand"-menu om gegevensverlies tegen te gaan.</p>`);
-        EDStoStructure(lastSavedStr);
-        autoSaver.start();    
-    }
+        helperTip.show( 'file.autoRecovered',
+                        `<h3>Laatste schema geladen uit browsercache</h3>` +
+                        `<p>Deze tool vond een schema in de browsercache. `+
+                            `Dit schema dateert van <b>${lastSavedInfo.currentTimeStamp}</b> ` +
+                            `met als naam <b>${lastSavedInfo.filename}</b>. ` +
+                            `U kan op dit gerecupereerde schema verder werken of een ander schema laden in het "Bestand"-menu.</p>` +
+                        `<p><b>Opgelet! </b>De browsercache is een tijdelijke opslag, en wordt occasioneel gewist. ` +
+                            `Het blijft belangrijk uw werk regelmatig op te slaan om gegevensverlies te voorkomen.</p>`
+                        ,false,(() => {
+                            let myCookieBanner = new CookieBanner();
+                            myCookieBanner.run();
+                        }).bind(this));
+        EDStoStructure(lastSavedStr, true, true);  
+    } 
+    autoSaver.start();    
 });
 
 

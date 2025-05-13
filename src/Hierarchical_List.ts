@@ -519,6 +519,8 @@ class Hierarchical_List {
     };
 
     updateRibbon() {
+        if (structure.properties.currentView != '2col') return; // het heeft geen zin de EDS ribbon aan te passen als de EDS niet open staat
+
         let output: string = "";
 
         // Plaats bovenaan de switch van editeer-mode (teken of verplaats) --
@@ -566,11 +568,35 @@ class Hierarchical_List {
         }
         output += '</p>';
 
-        output += '<span style="display: inline-block; width: 30px;"></span>';
-
-        output += '<p style="margin-top: 5px;margin-bottom: 5px;" class="highlight-warning-big">Vergeet niet regelmatig uw werk<br>op te slaan in het "Bestand"-menu.</p>';
+        if (autoSaver && autoSaver.hasChangesSinceLastManualSave()) {
+            output +=  '<span style="display: inline-block; width: 30px;"></span>';
+            output +=  `<div style="margin-top: 5px;margin-bottom: 5px;display: flex; align-items: center; justify-content: center;" class="highlight-warning-big" onclick="exportjson(false)"
+                           onmouseover="this.style.cursor='pointer'" 
+                           onmouseout="this.style.cursor='default'">
+                           <div style="display: inline-block; vertical-align: middle;"><span class="icon-image" style="font-size:24px;">💾</span></div>
+                           <div style="display: inline-block; vertical-align: middle; margin-left: 10px;">
+                               U heeft niet opgeslagen wijzigingen. Klik hier om op te slaan<br>
+                               of ga naar het "Bestand"-menu voor meer opties.
+                           </div>
+                        </div>`;
+        } else {
+            output +=  '<span style="display: inline-block; width: 30px;"></span>';
+            output +=  `<div style="margin-top: 5px;margin-bottom: 5px;display: flex; align-items: center; justify-content: center;" class="highlight-ok-big" onclick="topMenu.selectMenuItemByName('Bestand')"
+                           onmouseover="this.style.cursor='pointer'" 
+                           onmouseout="this.style.cursor='default'">
+                           <div style="display: inline-block; vertical-align: middle;"><span class="icon-image" style="font-size:24px; filter: grayscale(100%); opacity: 0.5;">💾</span></div>
+                           <div style="display: inline-block; vertical-align: middle; margin-left: 10px;">
+                               Er zijn geen niet opgeslagen wijzigingen. Ga naar het "Bestand"-menu<br>
+                               indien u toch wenst op te slaan.
+                           </div>
+                        </div>`;
+        }
         
-        document.getElementById("ribbon").innerHTML = `<div id="left-icons">${output}</div>`;
+        const ribbonElement = document.getElementById("ribbon");
+        const newHTML = `<div id="left-icons">${output}</div>`;
+        //if (ribbonElement.innerHTML !== newHTML) {
+            ribbonElement.innerHTML = newHTML; // Doesn't make a lot of sense to test as browser changes innerHTML anyway
+        //}
     }
 
     // -- Functie om de tree links te tekenen te starten by node met id = myParent --

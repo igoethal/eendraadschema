@@ -55,3 +55,7 @@ function propUpload(text: string) {
   return("");
   //Does nothing in the serverless version, only used on https://eendraadschema.goethals-jacobs.be  
 }
+
+class CookieBanner {
+  run() {} //Does nothing in the serverless version, only used on https://eendraadschema.goethals-jacobs.be
+}

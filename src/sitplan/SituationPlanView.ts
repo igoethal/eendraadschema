@@ -1236,6 +1236,8 @@ class SituationPlanView {
      * TODO: Er zijn efficientiewinsten mogelijk door niet telkens de hele ribbon te hertekenen.
      */
     updateRibbon() {
+        if (structure.properties.currentView != "draw") return;
+
         let outputleft: string = "";
         let outputright: string = "";
 
@@ -1290,6 +1292,24 @@ class SituationPlanView {
                 <span class="icon-text">Naar voor</span>
             </div>`
 
+        // -- Add an icon of a floppy (save symbol) like the icons above --
+
+        if (autoSaver && autoSaver.hasChangesSinceLastManualSave()) {
+            outputleft += `
+                <span style="display: inline-block; width: 10px;"></span>
+                <div class="highlight-warning-big" style="width: 64px; display: inline-block; vertical-align: middle; text-align: center;" id="button_save" onclick="exportjson(false)" onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'">
+                    <span class="icon-image" style="font-size:24px">💾</span>
+                    <span class="icon-text" style="display: inline-block; width: 100%;">Opslaan</span>
+                </div>`
+        } else {
+            outputleft += `
+                <span style="display: inline-block; width: 10px;"></span>
+                <div class="highlight-ok-big" id="button_save" style="width: 64px; display: inline-block; vertical-align: middle; text-align: center;" onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'" onclick="topMenu.selectMenuItemByName('Bestand')">
+                    <span class="icon-image" style="font-size:24px; filter: grayscale(100%); opacity: 0.5;">💾</span>
+                    <span class="icon-text" style="display: inline-block; width: 100%;">Bestand</span>
+                </div>`
+        }
+
         // -- Visuals om pagina te selecteren --
 
         outputleft  += `
@@ -1310,7 +1330,7 @@ class SituationPlanView {
                     </span>
                 </center>
             </div>`;
- 
+
         // -- Visuals om pagina te zoomen --
 
         outputright += `
