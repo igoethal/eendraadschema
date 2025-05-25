@@ -225,7 +225,7 @@ class Schakelaars extends Electro_Item {
             ( {endx: startx, str: str, lowerbound: lowerbound} = tekenKeten[i].toSVGString(startx,islast,sitplan,mirrortext) ); 
             // Als we geen legacy schakelaars tekenen halen we links het lijntje van de eerste schakelaar weg
             if (sitplan) {
-                if ( (structure.properties.legacySchakelaars == false) && (i == 0 ) && (tekenKeten.length == 1) ) {
+                if ( (globalThis.structure.properties.legacySchakelaars == false) && (i == 0 ) && (tekenKeten.length == 1) ) {
                     if (str.startsWith('<line')) {
                         let idx = str.indexOf('>');
                         str = str.substring(idx+1);

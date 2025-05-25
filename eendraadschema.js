@@ -72,68 +72,6 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (g && (g = 0, op[0] && (_ = 0)), _) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        if (typeof b !== "function" && b !== null)
-            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 var __rest = (this && this.__rest) || function (s, e) {
     var t = {};
     for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
@@ -150,7 +88,7 @@ function deepClone(obj) {
     var getType = function (n) {
         return Object.prototype.toString.call(n).slice(8, -1);
     };
-    for (var _key in obj) {
+    for (let _key in obj) {
         if (obj.hasOwnProperty(_key)) {
             _out[_key] = getType(obj[_key]) === 'Object' || getType(obj[_key]) === 'Array' ? deepClone(obj[_key]) : obj[_key];
         }
@@ -165,7 +103,7 @@ function deepClone(obj) {
  */
 function isDevMode() {
     try {
-        var urlParams = new URLSearchParams(window.location.search);
+        const urlParams = new URLSearchParams(window.location.search);
         return urlParams.has('dev');
     }
     catch (error) {
@@ -174,9 +112,9 @@ function isDevMode() {
     }
 }
 // Function for length of a string in 8 bit bytes
-var byteSize = function (str) { return new Blob([str]).size; };
+const byteSize = str => new Blob([str]).size;
 function contains(a, obj) {
-    for (var i = 0; i < a.length; i++) {
+    for (let i = 0; i < a.length; i++) {
         if (a[i] === obj) {
             return true;
         }
@@ -188,12 +126,10 @@ function isInt(value) {
         parseInt(value) == value &&
         !isNaN(parseInt(value, 10));
 }
-function svgTextWidth(input, fontsize, options) {
-    if (fontsize === void 0) { fontsize = 10; }
-    if (options === void 0) { options = ''; }
-    var div = document.createElement('div');
+function svgTextWidth(input, fontsize = 10, options = '') {
+    const div = document.createElement('div');
     div.innerHTML = '<svg width="1000" height="20"><text x="0" y="10" style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-size="' + Number(fontsize) + '" ' + options + '>' + input + '</text></svg>';
-    var tryoutdiv = document.body;
+    let tryoutdiv = document.body;
     /*if (document.getElementById("configsection").style.display === 'block') {
       tryoutdiv = document.getElementById("configsection") as HTMLElement;
     } else if (document.getElementById("outerdiv").style.display === 'block') {
@@ -202,14 +138,13 @@ function svgTextWidth(input, fontsize, options) {
       tryoutdiv = document.getElementById("right_col_inner") as HTMLElement;
     }*/
     tryoutdiv.appendChild(div);
-    var width = div.children[0].children[0].getBBox().width;
+    const width = div.children[0].children[0].getBBox().width;
     tryoutdiv.removeChild(div);
     return (Math.ceil(width));
 }
-function flattenSVG(SVGstruct, shiftx, shifty, node, overflowright) {
-    if (overflowright === void 0) { overflowright = 0; }
+function flattenSVG(SVGstruct, shiftx, shifty, node, overflowright = 0) {
     if (node == 0)
-        structure.print_table.pagemarkers.clear();
+        globalThis.structure.print_table.pagemarkers.clear();
     var str = "";
     var X = new XMLSerializer();
     var parser = new DOMParser();
@@ -290,8 +225,8 @@ function flattenSVG(SVGstruct, shiftx, shifty, node, overflowright) {
             var polystr_out = "";
             var polystr_in = outstruct.attributes.getNamedItem("points").nodeValue;
             var splitted_in = polystr_in.split(" ");
-            for (var countstr = 0; countstr < splitted_in.length; countstr++) {
-                var points_in = splitted_in[countstr].split(",");
+            for (let countstr = 0; countstr < splitted_in.length; countstr++) {
+                let points_in = splitted_in[countstr].split(",");
                 polystr_out += (points_in[0] * 1 + shiftx) + ',' + (points_in[1] * 1 + shifty);
                 if (countstr < splitted_in.length - 1) {
                     polystr_out += ' ';
@@ -304,11 +239,10 @@ function flattenSVG(SVGstruct, shiftx, shifty, node, overflowright) {
         var regex = /xmlns="[^"]+"/g;
         str = str.replace(regex, '');
     }
-    structure.print_table.pagemarkers.addMarker(node, shiftx);
+    globalThis.structure.print_table.pagemarkers.addMarker(node, shiftx);
     return str;
 }
-function flattenSVGfromString(xmlstr, overflowright) {
-    if (overflowright === void 0) { overflowright = 0; }
+function flattenSVGfromString(xmlstr, overflowright = 0) {
     var str = "";
     var parser = new DOMParser();
     var xmlDoc = parser.parseFromString(xmlstr, "text/xml"); //important to use "text/xml"
@@ -316,7 +250,7 @@ function flattenSVGfromString(xmlstr, overflowright) {
     return str;
 }
 function htmlspecialchars(my_input) {
-    var returnstr;
+    let returnstr;
     if (typeof (my_input) == 'undefined')
         returnstr = "";
     else
@@ -339,16 +273,15 @@ function browser_ie_detected() {
     else
         return false;
 }
-var randomId = (function () {
-    var counters = {};
-    return function (prefix) {
-        if (prefix === void 0) { prefix = "Rnd_"; }
+const randomId = (() => {
+    const counters = {};
+    return (prefix = "Rnd_") => {
         if (!(prefix in counters)) {
             counters[prefix] = 0;
         }
-        var value = counters[prefix];
+        const value = counters[prefix];
         counters[prefix]++;
-        return "".concat(prefix).concat(value.toString());
+        return `${prefix}${value.toString()}`;
     };
 })();
 /**
@@ -359,77 +292,73 @@ var randomId = (function () {
  * @param options - An array van strings met de opties in de dropdown lijst.
  * @returns A promise that resolves to the selected option string, or null if cancelled.
  */
-function showSelectPopup(question, options) {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            return [2 /*return*/, new Promise(function (resolve) {
-                    var popupOverlay = document.createElement("div");
-                    Object.assign(popupOverlay.style, {
-                        position: 'fixed',
-                        top: 0, left: 0, width: '100%', height: '100%',
-                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                        display: 'flex',
-                        justifyContent: 'center', alignItems: 'center',
-                        visibility: 'hidden',
-                        zIndex: 9999
-                    });
-                    document.body.appendChild(popupOverlay);
-                    var popup = document.createElement("div");
-                    Object.assign(popup.style, {
-                        backgroundColor: "white", border: "1px solid #ccc", padding: "20px", boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)"
-                    });
-                    popupOverlay.appendChild(popup);
-                    var questionAndSelect = document.createElement("div");
-                    questionAndSelect.style.display = "flex";
-                    questionAndSelect.style.alignItems = "center";
-                    var questionElem = document.createElement("p");
-                    questionElem.textContent = question;
-                    questionAndSelect.appendChild(questionElem);
-                    var selectElem = document.createElement("select");
-                    options.forEach(function (option) {
-                        var optionElem = document.createElement("option");
-                        optionElem.value = option;
-                        optionElem.textContent = option;
-                        selectElem.appendChild(optionElem);
-                    });
-                    selectElem.style.marginLeft = "10px";
-                    questionAndSelect.appendChild(selectElem);
-                    popup.appendChild(questionAndSelect);
-                    var buttonBar = document.createElement("div");
-                    Object.assign(buttonBar.style, {
-                        display: "flex", justifyContent: "center", marginTop: "10px"
-                    });
-                    var okButton = document.createElement("button");
-                    okButton.textContent = "OK";
-                    okButton.style.marginRight = "10px";
-                    buttonBar.appendChild(okButton);
-                    var cancelButton = document.createElement("button");
-                    cancelButton.textContent = "Annuleren";
-                    buttonBar.appendChild(cancelButton);
-                    popup.appendChild(buttonBar);
-                    okButton.addEventListener("click", function () {
-                        var selectedValue = selectElem.value;
-                        popupOverlay.style.visibility = 'hidden';
-                        popupOverlay.removeChild(popup);
-                        document.body.removeChild(popupOverlay);
-                        resolve(selectedValue);
-                    });
-                    cancelButton.addEventListener("click", function () {
-                        popupOverlay.style.visibility = 'hidden';
-                        popupOverlay.removeChild(popup);
-                        document.body.removeChild(popupOverlay);
-                        resolve(null);
-                    });
-                    popupOverlay.style.visibility = 'visible';
-                })];
+async function showSelectPopup(question, options) {
+    return new Promise((resolve) => {
+        const popupOverlay = document.createElement("div");
+        Object.assign(popupOverlay.style, {
+            position: 'fixed',
+            top: 0, left: 0, width: '100%', height: '100%',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            justifyContent: 'center', alignItems: 'center',
+            visibility: 'hidden',
+            zIndex: 9999
         });
+        document.body.appendChild(popupOverlay);
+        const popup = document.createElement("div");
+        Object.assign(popup.style, {
+            backgroundColor: "white", border: "1px solid #ccc", padding: "20px", boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)"
+        });
+        popupOverlay.appendChild(popup);
+        const questionAndSelect = document.createElement("div");
+        questionAndSelect.style.display = "flex";
+        questionAndSelect.style.alignItems = "center";
+        const questionElem = document.createElement("p");
+        questionElem.textContent = question;
+        questionAndSelect.appendChild(questionElem);
+        const selectElem = document.createElement("select");
+        options.forEach((option) => {
+            const optionElem = document.createElement("option");
+            optionElem.value = option;
+            optionElem.textContent = option;
+            selectElem.appendChild(optionElem);
+        });
+        selectElem.style.marginLeft = "10px";
+        questionAndSelect.appendChild(selectElem);
+        popup.appendChild(questionAndSelect);
+        const buttonBar = document.createElement("div");
+        Object.assign(buttonBar.style, {
+            display: "flex", justifyContent: "center", marginTop: "10px"
+        });
+        const okButton = document.createElement("button");
+        okButton.textContent = "OK";
+        okButton.style.marginRight = "10px";
+        buttonBar.appendChild(okButton);
+        const cancelButton = document.createElement("button");
+        cancelButton.textContent = "Annuleren";
+        buttonBar.appendChild(cancelButton);
+        popup.appendChild(buttonBar);
+        okButton.addEventListener("click", () => {
+            const selectedValue = selectElem.value;
+            popupOverlay.style.visibility = 'hidden';
+            popupOverlay.removeChild(popup);
+            document.body.removeChild(popupOverlay);
+            resolve(selectedValue);
+        });
+        cancelButton.addEventListener("click", () => {
+            popupOverlay.style.visibility = 'hidden';
+            popupOverlay.removeChild(popup);
+            document.body.removeChild(popupOverlay);
+            resolve(null);
+        });
+        popupOverlay.style.visibility = 'visible';
     });
 }
-var Session = /** @class */ (function () {
-    function Session() {
+class Session {
+    constructor() {
         this.sessionKey = 'SessionJS';
         this.newUser = false;
-        var storedSessionId = localStorage.getItem(this.sessionKey);
+        const storedSessionId = localStorage.getItem(this.sessionKey);
         if (storedSessionId) {
             this.sessionId = storedSessionId;
         }
@@ -439,26 +368,25 @@ var Session = /** @class */ (function () {
             this.newUser = true;
         }
     }
-    Session.prototype.generateRandomBase64String = function (length) {
-        var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-        var result = '';
-        var charactersLength = characters.length;
-        for (var i = 0; i < length; i++) {
-            var randomIndex = Math.floor(Math.random() * charactersLength);
+    generateRandomBase64String(length) {
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+        let result = '';
+        const charactersLength = characters.length;
+        for (let i = 0; i < length; i++) {
+            const randomIndex = Math.floor(Math.random() * charactersLength);
             result += characters[randomIndex];
         }
         return result;
-    };
-    Session.prototype.getSessionId = function () {
+    }
+    getSessionId() {
         return this.sessionId;
-    };
-    Session.prototype.isNewUser = function () {
+    }
+    isNewUser() {
         return this.newUser;
-    };
-    return Session;
-}());
-var SVGelement = /** @class */ (function () {
-    function SVGelement() {
+    }
+}
+class SVGelement {
+    constructor() {
         this.data = "";
         this.xleft = 0;
         this.xright = 0;
@@ -466,13 +394,12 @@ var SVGelement = /** @class */ (function () {
         this.yup = 0;
         this.ydown = 0;
     }
-    return SVGelement;
-}());
+}
 /**
  * Manages the addition and removal of event listeners on HTML elements.
  */
-var EventManager = /** @class */ (function () {
-    function EventManager() {
+class EventManager {
+    constructor() {
         this.listeners = [];
     }
     /**
@@ -483,82 +410,79 @@ var EventManager = /** @class */ (function () {
      * @param type - The type of the event.
      * @param listener - The event listener function or object.
      */
-    EventManager.prototype.addEventListener = function (element, type, listener) {
-        var existingListenerIndex = this.listeners.findIndex(function (l) { return l.element === element && l.type === type; });
+    addEventListener(element, type, listener) {
+        const existingListenerIndex = this.listeners.findIndex(l => l.element === element && l.type === type);
         if (existingListenerIndex !== -1) {
-            var existingListener = this.listeners[existingListenerIndex];
+            const existingListener = this.listeners[existingListenerIndex];
             element.removeEventListener(type, existingListener.listener);
             this.listeners.splice(existingListenerIndex, 1);
         }
-        this.listeners.push({ element: element, type: type, listener: listener });
+        this.listeners.push({ element, type, listener });
         element.addEventListener(type, listener);
         this.cleanup(); // Before we proceed, remove all listeners for elements that no longer exist
-    };
+    }
     /**
      * Removes all event listeners managed by this EventManager instance.
      */
-    EventManager.prototype.removeAllEventListeners = function () {
-        this.listeners.forEach(function (_a) {
-            var element = _a.element, type = _a.type, listener = _a.listener;
+    removeAllEventListeners() {
+        this.listeners.forEach(({ element, type, listener }) => {
             element.removeEventListener(type, listener);
         });
         this.listeners = [];
-    };
+    }
     /**
      * Disposes of the EventManager by removing all event listeners.
      */
-    EventManager.prototype.dispose = function () {
+    dispose() {
         this.removeAllEventListeners();
-    };
+    }
     /**
      * Removes all listeners for which the HTML element no longer exists.
      */
-    EventManager.prototype.cleanup = function () {
-        this.listeners = this.listeners.filter(function (_a) {
-            var element = _a.element, type = _a.type, listener = _a.listener;
+    cleanup() {
+        this.listeners = this.listeners.filter(({ element, type, listener }) => {
             if (!document.contains(element)) {
                 element.removeEventListener(type, listener);
                 return false;
             }
             return true;
         });
-    };
-    return EventManager;
-}());
+    }
+}
 /**
  * A class to handle a list of potential page breaks or markers in the form {depth,xpos} with depth how nested
  * they are (lower depth is better to include a page break) and xpos the location in pixels in the SVG where
  * the break could be added
  */
-var MarkerList = /** @class */ (function () {
-    function MarkerList() {
+class MarkerList {
+    constructor() {
         this.markers = [];
     }
     /**
      * Clear the list of markers
      */
-    MarkerList.prototype.clear = function () {
+    clear() {
         this.markers = [];
-    };
+    }
     /**
      * Add a marker to the markerlist.
      * If the same marker already exists, no new one will be added.
      * @param depth - The depth of the marker, or how nested it is (lower depth is better for page breaks).
      * @param xpos - The x-coordinate position of the marker.
      */
-    MarkerList.prototype.addMarker = function (depth, xpos) {
+    addMarker(depth, xpos) {
         // Check if the marker already exists
-        var exists = this.markers.some(function (marker) { return marker.depth === depth && marker.xpos === xpos; });
+        const exists = this.markers.some(marker => marker.depth === depth && marker.xpos === xpos);
         if (!exists) {
-            this.markers.push({ depth: depth, xpos: xpos });
+            this.markers.push({ depth, xpos });
         }
-    };
+    }
     /**
      * Sorts the markers by their x-coordinate position in ascending order.
      */
-    MarkerList.prototype.sort = function () {
-        this.markers.sort(function (a, b) { return a.xpos - b.xpos; });
-    };
+    sort() {
+        this.markers.sort((a, b) => a.xpos - b.xpos);
+    }
     /**
      * Looks for the marker in the half-open internal (minx, maxx] with the lowest possible depth.
      * If multiple markers exist with the same depth, the one with the highest xpos is returned.
@@ -567,47 +491,45 @@ var MarkerList = /** @class */ (function () {
      * @param maxx - Maximal x for any markers that will be considered.
      * @returns The marker with the lowest depth (and highest xpos if multiple exist) or a dummy marker if none are found.
      */
-    MarkerList.prototype.findMinDepth = function (minx, maxx) {
+    findMinDepth(minx, maxx) {
         // Filter markers within the range
-        var filteredMarkers = this.markers.filter(function (marker) { return marker.xpos > minx && marker.xpos <= maxx; });
+        const filteredMarkers = this.markers.filter(marker => marker.xpos > minx && marker.xpos <= maxx);
         if (filteredMarkers.length === 0) {
             return { depth: null, xpos: maxx }; // No markers in the specified range so we just take the maximum
         }
         // Find the marker with the lowest depth, if multiple exist with the same depth, take the one with the highest xpos
-        return filteredMarkers.reduce(function (minDepthMarker, marker) {
+        return filteredMarkers.reduce((minDepthMarker, marker) => {
             if (marker.depth < minDepthMarker.depth ||
                 (marker.depth === minDepthMarker.depth && marker.xpos > minDepthMarker.xpos)) {
                 return marker;
             }
             return minDepthMarker;
         }, filteredMarkers[0]);
-    };
-    return MarkerList;
-}());
+    }
+}
 /**
  * Store information on what part of the SVG lands on one specific page
  * The height is the final height in number of pixels
  * The start and stop are the x-locations in pixels of the part of the total SVG that needs to land on this particular page
  */
-var Page_Info = /** @class */ (function () {
-    function Page_Info() {
+class Page_Info {
+    constructor() {
         this.height = 0;
         this.start = 0;
         this.stop = 0;
     }
-    return Page_Info;
-}());
+}
 /**
  * Stores all information about pagination and how pages will be printed.
  * Can perform automatic pagination or ask the user to paginate.
  *
  * We don't use private variables in this class as we want to serialize it (JSON)
  */
-var Print_Table = /** @class */ (function () {
+class Print_Table {
     /**
      * Initialize list of pages (foresee at least 1 page) and pagemarkers
      */
-    function Print_Table() {
+    constructor() {
         this.height = 0; //How high is the SVG that will be printed in pixels
         this.maxwidth = 0; //What is the width of the SVG that will be printed in pixels and therefore the maximum printing width
         this.displaypage = 0;
@@ -620,57 +542,56 @@ var Print_Table = /** @class */ (function () {
      * Set papersize to either "A4" or "A3"
      * @param papersize - A string, if it is neither "A4" or "A3", the papersize will default to "A4".
      */
-    Print_Table.prototype.setPaperSize = function (papersize) {
+    setPaperSize(papersize) {
         this.papersize = (papersize === "A3" ? "A3" : "A4");
-    };
+    }
     /**
      * Get papersize.  If papersize was not yet defined, it is forced to "A4"
      * @returns The papersize, either "A3" or "A4"
      */
-    Print_Table.prototype.getPaperSize = function () {
+    getPaperSize() {
         if (!this.papersize)
             this.papersize = "A4";
         return (this.papersize);
-    };
+    }
     /**
      * Set displayheight of all pages to height
      * @param height - Height in pixels
      */
-    Print_Table.prototype.setHeight = function (height) {
+    setHeight(height) {
         this.height = height;
-        this.pages.forEach(function (page) { page.height = height; });
-    };
+        this.pages.forEach(page => { page.height = height; });
+    }
     /**
      * Get displayheight
      * @returns Height in pixels
      */
-    Print_Table.prototype.getHeight = function () {
+    getHeight() {
         return (this.height);
-    };
+    }
     /**
      * Set modevertical to either "alles" (meaning we show the full height of the page) or "kies" meaning the user can choose
      * @param more - Either "alles" or "kies"
      */
-    Print_Table.prototype.setModeVertical = function (mode) {
+    setModeVertical(mode) {
         this.modevertical = (mode === "kies" ? "kies" : "alles");
         this.forceCorrectFigures();
-    };
+    }
     /**
      * Get modevertical
      * @returns either "alles" or "kies"
      */
-    Print_Table.prototype.getModeVertical = function () {
+    getModeVertical() {
         this.forceCorrectFigures();
         return (this.modevertical);
-    };
+    }
     /**
      * Checks that all start and stop position of pages are valid
      * For instance, the startx position should never be higher than the stopx.
      * In addition, the SVG always goes from left to right over the pages so the startx
      * of a new page cannot be lower than the stopx of the page before.
      */
-    Print_Table.prototype.forceCorrectFigures = function () {
-        var _this = this;
+    forceCorrectFigures() {
         if (!this.modevertical) {
             this.modevertical = "alles";
         }
@@ -684,70 +605,70 @@ var Print_Table = /** @class */ (function () {
                 this.stopy = this.height;
         }
         this.pages[this.pages.length - 1].stop = this.maxwidth;
-        this.pages.forEach(function (page, index) {
+        this.pages.forEach((page, index) => {
             if (page.stop < 0)
                 page.stop = 0;
             if (page.start < 0)
                 page.start = 0;
             if (index > 0) {
-                page.start = _this.pages[index - 1].stop;
+                page.start = this.pages[index - 1].stop;
             }
-            if (page.stop > _this.maxwidth) {
-                _this.pages[_this.pages.length - 1].stop = _this.maxwidth;
+            if (page.stop > this.maxwidth) {
+                this.pages[this.pages.length - 1].stop = this.maxwidth;
             }
             if (page.start > page.stop) {
                 page.start = page.stop;
             }
         });
-    };
+    }
     /**
      * Sets the maximum width of the SVG to be displayed.
      * As a general rule this equals the width of the SVG itself in pixels
      * @param maxwidth
      */
-    Print_Table.prototype.setMaxWidth = function (maxwidth) {
+    setMaxWidth(maxwidth) {
         this.maxwidth = maxwidth;
         this.forceCorrectFigures();
-    };
+    }
     /**
      * Gets the maximum width that can be displayed or printed
      * @returns maxwidth, as a general rule this equals the width of the SVG itsef in pixels
      */
-    Print_Table.prototype.getMaxWidth = function () {
+    getMaxWidth() {
         return (this.maxwidth);
-    };
+    }
     /**
      * Returns the starty position of the page that will be displayed or printed
      * @returns starty
      */
-    Print_Table.prototype.getstarty = function () {
+    getstarty() {
         this.forceCorrectFigures();
         return (this.starty);
-    };
+    }
     /**
      * Returns the stopy position of the page that will be displayed or printed
      * @returns stopy
      */
-    Print_Table.prototype.getstopy = function () {
+    getstopy() {
         this.forceCorrectFigures();
         return (this.stopy);
-    };
+    }
     /**
      * Sets the starty position of the page that will be displayed or printed
      * @param starty
      */
-    Print_Table.prototype.setstarty = function (starty) {
+    setstarty(starty) {
         this.starty = starty;
         this.forceCorrectFigures;
-    };
+    }
     /**
      * Sets the stopy position of the page that will be displayed or printed
      * @param starty
      */
-    Print_Table.prototype.setstopy = function (stopy) {
+    setstopy(stopy) {
         this.stopy = stopy;
         this.forceCorrectFigures;
-    };
+    }
     /**
      * Sets the stopx position of one specific page to a desired value.
      * The function calls forceCorrectFigures() afterwards to ensure the natural flow of pages (left to right)
@@ -756,7 +677,7 @@ var Print_Table = /** @class */ (function () {
      * @param page - page number for which we want to set the stopx (starts counting at zero)
      * @param stop - stopx position to set
      */
-    Print_Table.prototype.setStop = function (page, stop) {
+    setStop(page, stop) {
         if (page > 0) {
             if (stop < this.pages[page - 1].stop)
                 stop = this.pages[page - 1].stop;
@@ -769,11 +690,11 @@ var Print_Table = /** @class */ (function () {
             stop = this.maxwidth;
         this.pages[page].stop = stop;
         this.forceCorrectFigures();
-    };
+    }
     /**
      * Automatically create pages based on pagemarkers
      */
-    Print_Table.prototype.autopage = function () {
+    autopage() {
         /*  Autopage uses some ratio's determined by the useful SVG drawing size on the PDF.  This depends on the margins configured in print.js
             At present all of this is still hard-coded.  Should become a function of print.js
           
@@ -789,16 +710,15 @@ var Print_Table = /** @class */ (function () {
             Width: 420-20 --> 400
             Ratio: 1.6878
         */
-        var _this = this;
         //First set all pages to maximum to avoid that we bump into boundaries
-        this.pages.forEach(function (page, index) {
-            page.stop = _this.maxwidth;
+        this.pages.forEach((page, index) => {
+            page.stop = this.maxwidth;
         });
-        var height = this.getstopy() - this.getstarty();
-        var maxsvgwidth = height * (this.getPaperSize() == "A3" ? 1.6878 : 1.8467);
-        var minsvgwidth = 3 / 4 * maxsvgwidth;
-        var page = 0;
-        var pos = 0;
+        let height = this.getstopy() - this.getstarty();
+        let maxsvgwidth = height * (this.getPaperSize() == "A3" ? 1.6878 : 1.8467);
+        let minsvgwidth = 3 / 4 * maxsvgwidth;
+        let page = 0;
+        let pos = 0;
         if (maxsvgwidth > 0) {
             while ((this.maxwidth - pos) > maxsvgwidth) { // The undivided part still does not fit on a page
                 pos = this.pagemarkers.findMinDepth(pos + minsvgwidth, pos + maxsvgwidth).xpos;
@@ -811,26 +731,26 @@ var Print_Table = /** @class */ (function () {
         // The last page stops at the maximum size of the SVG
         this.setStop(page, this.maxwidth);
         // Delete unneeded pages at the end
-        for (var i = this.pages.length - 1; i > page; i--) {
+        for (let i = this.pages.length - 1; i > page; i--) {
             this.deletePage(i);
         }
-    };
+    }
     /**
      * Add a page
      */
-    Print_Table.prototype.addPage = function () {
+    addPage() {
         var page_info;
         page_info = new Page_Info();
         page_info.height = this.height;
         page_info.start = this.pages[this.pages.length - 1].stop;
         page_info.stop = this.maxwidth;
         this.pages.push(page_info);
-    };
+    }
     /**
      * Remove a page
      * @param page - number of the page to be removed, starting at 0
      */
-    Print_Table.prototype.deletePage = function (page) {
+    deletePage(page) {
         if (page == 0) {
             this.pages[1].start = 0;
         }
@@ -838,7 +758,7 @@ var Print_Table = /** @class */ (function () {
             this.pages[page - 1].stop = this.pages[page].stop;
         }
         this.pages.splice(page, 1);
-    };
+    }
     /**
      * Display a Select box to choose papersize (A3 or A4)
      * The table is displayed in the HTMLElement div that is given as a parameter to the function.
@@ -847,8 +767,7 @@ var Print_Table = /** @class */ (function () {
      * @param div - Existing HTMLElement where the table will be inserted
      * @param redrawCallBack - Callback function that ensures everything that needs to be redrawn is redrawn
      */
-    Print_Table.prototype.insertHTMLselectPaperSize = function (div, redrawCallBack) {
-        var _this = this;
+    insertHTMLselectPaperSize(div, redrawCallBack) {
         var select = document.createElement('select');
         select.id = 'select_papersize_input';
         var optionA4 = document.createElement('option');
@@ -863,12 +782,12 @@ var Print_Table = /** @class */ (function () {
             optionA4.selected = true;
         select.appendChild(optionA4);
         select.appendChild(optionA3);
-        select.onchange = function (event) {
-            _this.setPaperSize(event.target.value);
+        select.onchange = (event) => {
+            this.setPaperSize(event.target.value);
             redrawCallBack();
         };
         div.appendChild(select);
-    };
+    }
     /**
      * Display a Select box to choose dpi (300 or 600)
      * The table is displayed in the HTMLElement div that is given as a parameter to the function.
@@ -877,7 +796,7 @@ var Print_Table = /** @class */ (function () {
      * @param div - Existing HTMLElement where the table will be inserted
      * @param redrawCallBack - Callback function that ensures everything that needs to be redrawn is redrawn
      */
-    Print_Table.prototype.insertHTMLselectdpi = function (div, redrawCallBack) {
+    insertHTMLselectdpi(div, redrawCallBack) {
         var select = document.createElement('select');
         select.id = "select_dpi_input";
         var option300 = document.createElement('option');
@@ -886,19 +805,19 @@ var Print_Table = /** @class */ (function () {
         var option600 = document.createElement('option');
         option600.value = '600';
         option600.textContent = '600dpi (beter maar trager)';
-        if (typeof (structure.properties.dpi) == 'undefined')
-            structure.properties.dpi = 300;
-        if (structure.properties.dpi == 600)
+        if (typeof (globalThis.structure.properties.dpi) == 'undefined')
+            globalThis.structure.properties.dpi = 300;
+        if (globalThis.structure.properties.dpi == 600)
             option600.selected = true;
         else
             option300.selected = true;
         select.appendChild(option300);
         select.appendChild(option600);
-        select.onchange = function (event) {
-            structure.properties.dpi = parseInt(event.target.value, 0);
+        select.onchange = (event) => {
+            globalThis.structure.properties.dpi = parseInt(event.target.value, 0);
         };
         div.appendChild(select);
-    };
+    }
     /**
      * Display a Check box to decide if one wants to use autopage or not.
      * If autopage is enabled, we also recalculate the page boundaries
@@ -908,8 +827,7 @@ var Print_Table = /** @class */ (function () {
      * @param div - Existing HTMLElement where the table will be inserted
      * @param redrawCallBack - Callback function that ensures everything that needs to be redrawn is redrawn
      */
-    Print_Table.prototype.insertHTMLcheckAutopage = function (div, redrawCallBack) {
-        var _this = this;
+    insertHTMLcheckAutopage(div, redrawCallBack) {
         var checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.id = 'autopage';
@@ -926,11 +844,11 @@ var Print_Table = /** @class */ (function () {
         }
         div.append(checkbox);
         div.append(label);
-        checkbox.onchange = function (event) {
-            _this.enableAutopage = !event.target.checked;
+        checkbox.onchange = (event) => {
+            this.enableAutopage = !event.target.checked;
             redrawCallBack();
         };
-    };
+    }
     /**
      * Display a select box to choose the vertical mode.
      * If vertical mode is "kies", we also display input boxes to choose the starty and stopy positions.
@@ -940,9 +858,8 @@ var Print_Table = /** @class */ (function () {
      * @param div - Existing HTMLElement where the table will be inserted
      * @param redrawCallBack - Callback function that ensures everything that needs to be redrawn is redrawn
      */
-    Print_Table.prototype.insertHTMLchooseVerticals = function (div, redrawCallBack) {
-        var _this = this;
-        var outstr = "";
+    insertHTMLchooseVerticals(div, redrawCallBack) {
+        let outstr = "";
         switch (this.modevertical) {
             case "kies":
                 outstr += 'Hoogte <select id="select_modeVertical"><option value="alles">Alles (standaard)</option><option value="kies" selected="Selected">Kies (expert)</option></select>';
@@ -956,45 +873,44 @@ var Print_Table = /** @class */ (function () {
                 outstr += 'Hoogte <select id="select_modeVertical"><option value="alles">Alles (standaard)</option><option value="kies">Kies (expert)</option></select>';
         }
         div.insertAdjacentHTML('beforeend', outstr);
-        document.getElementById('select_modeVertical').onchange = function (event) {
-            _this.setModeVertical(event.target.value);
+        document.getElementById('select_modeVertical').onchange = (event) => {
+            this.setModeVertical(event.target.value);
             redrawCallBack();
         };
         if (this.modevertical == "kies") {
-            document.getElementById('input_starty').onchange = function (event) {
-                var starty = parseInt(event.target.value);
+            document.getElementById('input_starty').onchange = (event) => {
+                let starty = parseInt(event.target.value);
                 if (isNaN(starty))
                     starty = 0;
-                _this.setstarty(starty);
-                _this.forceCorrectFigures();
+                this.setstarty(starty);
+                this.forceCorrectFigures();
                 redrawCallBack();
             };
-            document.getElementById('input_stopy').onchange = function (event) {
-                var stopy = parseInt(event.target.value);
+            document.getElementById('input_stopy').onchange = (event) => {
+                let stopy = parseInt(event.target.value);
                 if (isNaN(stopy))
-                    stopy = _this.getHeight();
+                    stopy = this.getHeight();
                 ;
-                _this.setstopy(stopy);
-                _this.forceCorrectFigures();
+                this.setstopy(stopy);
+                this.forceCorrectFigures();
                 redrawCallBack();
             };
         }
-    };
+    }
     /**
      * Display a button to force auto-pagination even when in manual mode
      * @param div - Existing HTMLElement where the table will be inserted
      * @param redrawCallBack - Callback function that ensures everything that needs to be redrawn is redrawn
      */
-    Print_Table.prototype.insertHTMLsuggestXposButton = function (div, redrawCallBack) {
-        var _this = this;
+    insertHTMLsuggestXposButton(div, redrawCallBack) {
         var button = document.createElement('button');
         button.innerText = 'Suggereer X-posities';
         div.append(button);
-        button.onclick = function () {
-            _this.autopage();
+        button.onclick = () => {
+            this.autopage();
             redrawCallBack();
         };
-    };
+    }
     /**
      * Display a table where the user can choose start and stop positions for the x-coordinates in the SVG of each individual page
      * The table is displayed in the HTMLElement div that is given as a parameter to the function.
@@ -1003,12 +919,11 @@ var Print_Table = /** @class */ (function () {
      * @param div - Existing HTMLElement where the table will be inserted
      * @param redrawCallBack - Callback function that ensures everything that needs to be redrawn is redrawn
      */
-    Print_Table.prototype.insertHTMLposxTable = function (div, redrawCallBack) {
-        var _this = this;
-        if (structure.print_table.enableAutopage)
+    insertHTMLposxTable(div, redrawCallBack) {
+        if (globalThis.structure.print_table.enableAutopage)
             this.autopage();
-        var outstr = "";
-        var pagenum;
+        let outstr = "";
+        let pagenum;
         outstr += '<table border="1" cellpadding="3">';
         outstr += '<tr><th align="center">Pagina</th><th align="center">Startx</th><th align"center">Stopx</th><th align"left">Acties</th></tr>';
         for (pagenum = 0; pagenum < this.pages.length; pagenum++) {
@@ -1031,36 +946,35 @@ var Print_Table = /** @class */ (function () {
         }
         outstr += "</table>";
         div.insertAdjacentHTML('beforeend', outstr);
-        document.getElementById('Btn_Addpage').onclick = function () {
-            _this.addPage();
+        document.getElementById('Btn_Addpage').onclick = () => {
+            this.addPage();
             redrawCallBack();
         };
-        document.querySelectorAll('button[id^="Btn_Deletepage_"]').forEach(function (button) {
-            var match = button.id.match(/Btn_Deletepage_(\d+)/);
+        document.querySelectorAll('button[id^="Btn_Deletepage_"]').forEach(button => {
+            const match = button.id.match(/Btn_Deletepage_(\d+)/);
             if (match) {
-                var page_1 = parseInt(match[1]);
-                button.onclick = function () {
-                    _this.deletePage(page_1);
+                const page = parseInt(match[1]);
+                button.onclick = () => {
+                    this.deletePage(page);
                     redrawCallBack();
                 };
             }
         });
-        document.querySelectorAll('input[id^="input_stop_"]').forEach(function (input) {
-            input.addEventListener('change', function (event) {
-                var match = event.target.id.match(/input_stop_(\d+)/);
+        document.querySelectorAll('input[id^="input_stop_"]').forEach(input => {
+            input.addEventListener('change', (event) => {
+                const match = event.target.id.match(/input_stop_(\d+)/);
                 if (match) {
-                    var page = parseInt(match[1]);
-                    var stop_1 = parseInt(event.target.value);
-                    _this.setStop(page, stop_1);
+                    const page = parseInt(match[1]);
+                    const stop = parseInt(event.target.value);
+                    this.setStop(page, stop);
                     redrawCallBack();
                 }
             });
         });
-    };
-    return Print_Table;
-}());
+    }
+}
 function HLDisplayPage() {
-    structure.print_table.displaypage = parseInt(document.getElementById("id_select_page").value) - 1;
+    globalThis.structure.print_table.displaypage = parseInt(document.getElementById("id_select_page").value) - 1;
     printsvg();
 }
 function dosvgdownload() {
@@ -1068,13 +982,12 @@ function dosvgdownload() {
     var filename = document.getElementById("dosvgname").value;
     download_by_blob(prtContent, filename, 'data:image/svg+xml;charset=utf-8'); //Was text/plain
 }
-function getPrintSVGWithoutAddress(outSVG, page) {
-    if (page === void 0) { page = structure.print_table.displaypage; }
+function getPrintSVGWithoutAddress(outSVG, page = globalThis.structure.print_table.displaypage) {
     var scale = 1;
-    var startx = structure.print_table.pages[page].start;
-    var width = structure.print_table.pages[page].stop - startx;
-    var starty = structure.print_table.getstarty();
-    var height = structure.print_table.getstopy() - starty;
+    var startx = globalThis.structure.print_table.pages[page].start;
+    var width = globalThis.structure.print_table.pages[page].stop - startx;
+    var starty = globalThis.structure.print_table.getstarty();
+    var height = globalThis.structure.print_table.getstopy() - starty;
     var viewbox = '' + startx + ' ' + starty + ' ' + width + ' ' + height;
     var outstr = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" transform="scale(1,1)" style="border:1px solid white" ' +
         'height="' + (height * scale) + '" width="' + (width * scale) + '" viewBox="' + viewbox + '">' +
@@ -1083,12 +996,12 @@ function getPrintSVGWithoutAddress(outSVG, page) {
 }
 function printsvg() {
     function generatePdf() {
-        if (typeof (structure.properties.dpi) == 'undefined')
-            structure.properties.dpi = 300;
-        var svg = flattenSVGfromString(structure.toSVG(0, "horizontal").data);
-        var pages = Array.from({ length: structure.print_table.pages.length }, function (_, i) { return i + 1; });
-        var sitplanprint = structure.sitplan.toSitPlanPrint();
-        printPDF(svg, structure.print_table, structure.properties, pages, document.getElementById("dopdfname").value, //filename
+        if (typeof (globalThis.structure.properties.dpi) == 'undefined')
+            globalThis.structure.properties.dpi = 300;
+        let svg = flattenSVGfromString(globalThis.structure.toSVG(0, "horizontal").data);
+        const pages = Array.from({ length: globalThis.structure.print_table.pages.length }, (_, i) => i + 1);
+        const sitplanprint = globalThis.structure.sitplan.toSitPlanPrint();
+        printPDF(svg, globalThis.structure.print_table, globalThis.structure.properties, pages, document.getElementById("dopdfname").value, //filename
         document.getElementById("progress_pdf"), //HTML element where callback status can be given
         sitplanprint);
     }
@@ -1098,7 +1011,7 @@ function printsvg() {
             '</div>';
     }
     function renderPrintSVG_sitplan(page) {
-        var outstruct = structure.sitplan.toSitPlanPrint();
+        const outstruct = globalThis.structure.sitplan.toSitPlanPrint();
         document.getElementById("printarea").innerHTML = '<div id="printsvgarea">' +
             outstruct.pages[page].svg +
             '</div>';
@@ -1106,13 +1019,13 @@ function printsvg() {
     // First we generate an SVG image. We do this first because we need the size
     // We will display it at the end of this function    
     var outSVG = new SVGelement();
-    outSVG = structure.toSVG(0, "horizontal");
+    outSVG = globalThis.structure.toSVG(0, "horizontal");
     var height = outSVG.yup + outSVG.ydown;
     var width = outSVG.xleft + outSVG.xright;
-    structure.print_table.setHeight(height);
-    structure.print_table.setMaxWidth(width + 10);
+    globalThis.structure.print_table.setHeight(height);
+    globalThis.structure.print_table.setMaxWidth(width + 10);
     // Then we display all the print options
-    var outstr = "";
+    let outstr = "";
     var strleft = "";
     document.getElementById("configsection").innerHTML
         = '<div>'
@@ -1123,8 +1036,8 @@ function printsvg() {
             + '    <span id="progress_pdf"></span>' // Area where status of pdf generation can be displayed
             + '</div>';
     document.getElementById('button_pdfdownload').onclick = generatePdf;
-    structure.print_table.insertHTMLselectPaperSize(document.getElementById('select_papersize'), printsvg);
-    structure.print_table.insertHTMLselectdpi(document.getElementById('select_dpi'), printsvg);
+    globalThis.structure.print_table.insertHTMLselectPaperSize(document.getElementById('select_papersize'), printsvg);
+    globalThis.structure.print_table.insertHTMLselectdpi(document.getElementById('select_dpi'), printsvg);
     outstr
         = '<br>'
             + '<div>'
@@ -1133,12 +1046,12 @@ function printsvg() {
             + '    <span id="id_suggest_xpos_button"></span>' // A button to force auto pagination comes here
             + '</div>';
     document.getElementById("configsection").insertAdjacentHTML('beforeend', outstr);
-    structure.print_table.insertHTMLcheckAutopage(document.getElementById('check_autopage'), printsvg);
-    if (!structure.print_table.enableAutopage) {
-        structure.print_table.insertHTMLchooseVerticals(document.getElementById('id_verticals'), printsvg);
-        structure.print_table.insertHTMLsuggestXposButton(document.getElementById('id_suggest_xpos_button'), printsvg);
+    globalThis.structure.print_table.insertHTMLcheckAutopage(document.getElementById('check_autopage'), printsvg);
+    if (!globalThis.structure.print_table.enableAutopage) {
+        globalThis.structure.print_table.insertHTMLchooseVerticals(document.getElementById('id_verticals'), printsvg);
+        globalThis.structure.print_table.insertHTMLsuggestXposButton(document.getElementById('id_suggest_xpos_button'), printsvg);
     }
-    if (!structure.print_table.enableAutopage) {
+    if (!globalThis.structure.print_table.enableAutopage) {
         outstr
             = '<br>'
                 + '<table border="0">'
@@ -1154,16 +1067,16 @@ function printsvg() {
                 + '</table>'
                 + '<br>';
         document.getElementById("configsection").insertAdjacentHTML('beforeend', outstr);
-        structure.print_table.insertHTMLposxTable(document.getElementById('id_print_table'), printsvg);
+        globalThis.structure.print_table.insertHTMLposxTable(document.getElementById('id_print_table'), printsvg);
     }
     strleft += '<hr>';
-    var numPages = structure.print_table.pages.length + (structure.sitplan ? structure.sitplan.getNumPages() : 0);
-    if (structure.print_table.displaypage >= numPages) {
-        structure.print_table.displaypage = numPages - 1;
+    const numPages = globalThis.structure.print_table.pages.length + (globalThis.structure.sitplan ? globalThis.structure.sitplan.getNumPages() : 0);
+    if (globalThis.structure.print_table.displaypage >= numPages) {
+        globalThis.structure.print_table.displaypage = numPages - 1;
     }
     strleft += '<b>Printvoorbeeld: </b>Pagina <select onchange="HLDisplayPage()" id="id_select_page">';
-    for (var i = 0; i < numPages; i++) {
-        if (i == structure.print_table.displaypage) {
+    for (let i = 0; i < numPages; i++) {
+        if (i == globalThis.structure.print_table.displaypage) {
             strleft += '<option value=' + (i + 1) + ' selected>' + (i + 1) + '</option>';
         }
         else {
@@ -1177,21 +1090,19 @@ function printsvg() {
     strleft += '<div id="printarea"></div>';
     document.getElementById("configsection").insertAdjacentHTML('beforeend', strleft);
     // Finally we show the actual SVG
-    if (structure.print_table.displaypage < structure.print_table.pages.length) { //displaypage starts counting at 0
+    if (globalThis.structure.print_table.displaypage < globalThis.structure.print_table.pages.length) { //displaypage starts counting at 0
         renderPrintSVG_EDS(outSVG);
     }
     else {
-        renderPrintSVG_sitplan(structure.print_table.displaypage - structure.print_table.pages.length);
+        renderPrintSVG_sitplan(globalThis.structure.print_table.displaypage - globalThis.structure.print_table.pages.length);
     }
     toggleAppView('config');
 }
-var AskLegacySchakelaar = /** @class */ (function () {
-    function AskLegacySchakelaar() {
-    }
+class AskLegacySchakelaar {
     // Show the helper tip if it hasn't been dismissed before
-    AskLegacySchakelaar.prototype.show = function () {
+    show() {
         // Create the popup
-        var popupOverlay = document.createElement('div');
+        const popupOverlay = document.createElement('div');
         popupOverlay.id = 'popupOverlay';
         Object.assign(popupOverlay.style, {
             position: 'fixed', top: '0', left: '0',
@@ -1200,7 +1111,7 @@ var AskLegacySchakelaar = /** @class */ (function () {
             display: 'flex', justifyContent: 'center', alignItems: 'center',
             visibility: 'hidden', zIndex: '9999'
         });
-        var popup = document.createElement('div');
+        const popup = document.createElement('div');
         Object.assign(popup.style, {
             position: 'fixed', top: '50%', left: '50%',
             transform: 'translate(-50%, -50%)', backgroundColor: 'white',
@@ -1208,33 +1119,33 @@ var AskLegacySchakelaar = /** @class */ (function () {
             boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)', zIndex: '1000'
         });
         // Add the HTML content
-        popup.innerHTML = "<h3>Aanpassing symbolen schakelaars</h3>" +
-            "<p>Beste gebruiker. Uw situatieschema bevat symbolen voor schakelaars. " +
-            "Tot nogtoe werden die altijd afgebeeld met een klein lijntje (leiding) aan de zijkant.</p>" +
+        popup.innerHTML = `<h3>Aanpassing symbolen schakelaars</h3>` +
+            `<p>Beste gebruiker. Uw situatieschema bevat symbolen voor schakelaars. ` +
+            `Tot nogtoe werden die altijd afgebeeld met een klein lijntje (leiding) aan de zijkant.</p>` +
             '<table border="0" style="border-collapse:collapse"><tr><td>' +
-            "<svg style=\"padding: 0px; margin: 0px; display:block\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" transform=\"scale(1,1)\" viewBox=\"12 0 38 40\" width=\"38\" height=\"40\"><defs><g id=\"signalisatielamp\"><circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\"></circle><line x1=\"-3\" y1=\"-3\" x2=\"3\" y2=\"3\" stroke=\"black\"></line><line x1=\"-3\" y1=\"3\" x2=\"3\" y2=\"-3\" stroke=\"black\"></line></g><g id=\"schakelaar_enkel\"><line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\"></line><line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\"></line><circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\"></circle></g></defs><line x1=\"1\" x2=\"31\" y1=\"25\" y2=\"25\" stroke=\"black\"></line><use xlink:href=\"#schakelaar_enkel\" x=\"31\" y=\"25\"></use></svg>" +
+            `<svg style="padding: 0px; margin: 0px; display:block" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" transform="scale(1,1)" viewBox="12 0 38 40" width="38" height="40"><defs><g id="signalisatielamp"><circle cx="0" cy="0" r="5" fill="white" stroke="black"></circle><line x1="-3" y1="-3" x2="3" y2="3" stroke="black"></line><line x1="-3" y1="3" x2="3" y2="-3" stroke="black"></line></g><g id="schakelaar_enkel"><line x1="0" y1="0" x2="10" y2="-20" stroke="black"></line><line x1="10" y1="-20" x2="15" y2="-17.5" stroke="black"></line><circle cx="0" cy="0" r="5" fill="white" stroke="black"></circle></g></defs><line x1="1" x2="31" y1="25" y2="25" stroke="black"></line><use xlink:href="#schakelaar_enkel" x="31" y="25"></use></svg>` +
             '</td><td>' +
-            "<svg style=\"padding: 0px; margin: 0px; display:block\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" transform=\"scale(1,1)\" viewBox=\"12 0 38 40\" width=\"38\" height=\"40\"><defs><g id=\"signalisatielamp\"><circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\"></circle><line x1=\"-3\" y1=\"-3\" x2=\"3\" y2=\"3\" stroke=\"black\"></line><line x1=\"-3\" y1=\"3\" x2=\"3\" y2=\"-3\" stroke=\"black\"></line></g><g id=\"schakelaar_enkel\"><line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\"></line><line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\"></line><circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\"></circle></g></defs><use xlink:href=\"#schakelaar_enkel\" x=\"31\" y=\"25\"></use></svg>" +
+            `<svg style="padding: 0px; margin: 0px; display:block" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" transform="scale(1,1)" viewBox="12 0 38 40" width="38" height="40"><defs><g id="signalisatielamp"><circle cx="0" cy="0" r="5" fill="white" stroke="black"></circle><line x1="-3" y1="-3" x2="3" y2="3" stroke="black"></line><line x1="-3" y1="3" x2="3" y2="-3" stroke="black"></line></g><g id="schakelaar_enkel"><line x1="0" y1="0" x2="10" y2="-20" stroke="black"></line><line x1="10" y1="-20" x2="15" y2="-17.5" stroke="black"></line><circle cx="0" cy="0" r="5" fill="white" stroke="black"></circle></g></defs><use xlink:href="#schakelaar_enkel" x="31" y="25"></use></svg>` +
             '</td></tr></table>' +
-            "<p>Op terechte vraag van enkele gebruikers zal dat voor toekomstige schema's niet meer het geval zijn en zullen de " +
-            "symbolen getekend worden zoals gangbaar in de meeste andere tekenprogramma's.</p>" +
-            "<p>Doorgaans zal het dan ook niet langer noodzakelijk zijn om dergelijke schakelaars te roteren.</p>" +
-            "<p>Voor dit schema kan u zelf nog kiezen hoe u de symbolen wenst weer te geven.</p>";
+            `<p>Op terechte vraag van enkele gebruikers zal dat voor toekomstige schema's niet meer het geval zijn en zullen de ` +
+            `symbolen getekend worden zoals gangbaar in de meeste andere tekenprogramma's.</p>` +
+            `<p>Doorgaans zal het dan ook niet langer noodzakelijk zijn om dergelijke schakelaars te roteren.</p>` +
+            `<p>Voor dit schema kan u zelf nog kiezen hoe u de symbolen wenst weer te geven.</p>`;
         // Style the title
-        var title = popup.querySelector('h3');
+        const title = popup.querySelector('h3');
         if (title)
             title.style.color = '#06F'; // Similar blue as the OK button
         // Create the radioButtons
-        var radioButtons = document.createElement('div');
+        const radioButtons = document.createElement('div');
         radioButtons.style.display = 'flex';
         radioButtons.style.flexDirection = 'column';
         radioButtons.style.marginTop = '10px';
-        var radioButton1 = document.createElement('input');
+        const radioButton1 = document.createElement('input');
         radioButton1.type = 'radio';
         radioButton1.name = 'symbolChoice';
         radioButton1.id = 'keepLegacy';
         radioButton1.checked = true;
-        var label1 = document.createElement('label');
+        const label1 = document.createElement('label');
         label1.htmlFor = 'keepLegacy';
         label1.style.display = 'flex';
         label1.style.alignItems = 'start';
@@ -1242,11 +1153,11 @@ var AskLegacySchakelaar = /** @class */ (function () {
         label1.appendChild(radioButton1);
         label1.appendChild(document.createTextNode('U behoudt de symbolen zoals voorheen voor dit schema.'));
         radioButtons.appendChild(label1);
-        var radioButton2 = document.createElement('input');
+        const radioButton2 = document.createElement('input');
         radioButton2.type = 'radio';
         radioButton2.name = 'symbolChoice';
         radioButton2.id = 'dropLegacy';
-        var label2 = document.createElement('label');
+        const label2 = document.createElement('label');
         label2.htmlFor = 'dropLegacy';
         label2.style.display = 'flex';
         label2.style.alignItems = 'start';
@@ -1256,7 +1167,7 @@ var AskLegacySchakelaar = /** @class */ (function () {
         radioButtons.appendChild(label2);
         popup.appendChild(radioButtons);
         // Create the "OK" button
-        var okButton = document.createElement('button');
+        const okButton = document.createElement('button');
         okButton.textContent = 'OK';
         Object.assign(okButton.style, {
             marginTop: '10px', padding: '10px 20px', cursor: 'pointer',
@@ -1265,10 +1176,10 @@ var AskLegacySchakelaar = /** @class */ (function () {
             marginLeft: 'auto', marginRight: 'auto', width: '100px' // Wider button
         });
         // Add hover effect
-        okButton.addEventListener('mouseover', function () {
+        okButton.addEventListener('mouseover', () => {
             okButton.style.backgroundColor = '#06F'; // Darker blue on hover
         });
-        okButton.addEventListener('mouseout', function () {
+        okButton.addEventListener('mouseout', () => {
             okButton.style.backgroundColor = '#3399FF'; // Lighter blue when not hovering
         });
         popup.appendChild(okButton);
@@ -1278,15 +1189,15 @@ var AskLegacySchakelaar = /** @class */ (function () {
         popupOverlay.style.visibility = 'visible';
         document.body.style.pointerEvents = 'none'; // Disable interactions with the background
         popupOverlay.style.pointerEvents = 'auto'; // Enable interactions with the popup
-        return new Promise(function (resolve) {
-            okButton.addEventListener('click', function () {
-                var symbolChoice = document.querySelector('input[name="symbolChoice"]:checked');
+        return new Promise((resolve) => {
+            okButton.addEventListener('click', () => {
+                const symbolChoice = document.querySelector('input[name="symbolChoice"]:checked');
                 if (symbolChoice && symbolChoice.id === 'keepLegacy') {
-                    structure.properties.legacySchakelaars = true;
+                    globalThis.structure.properties.legacySchakelaars = true;
                 }
                 else if (symbolChoice && symbolChoice.id === 'dropLegacy') {
-                    structure.properties.legacySchakelaars = false;
-                    structure.sitplan.dropLegacySchakelaars();
+                    globalThis.structure.properties.legacySchakelaars = false;
+                    globalThis.structure.sitplan.dropLegacySchakelaars();
                 }
                 // Remove the popup
                 document.body.removeChild(popupOverlay);
@@ -1294,21 +1205,20 @@ var AskLegacySchakelaar = /** @class */ (function () {
                 resolve("OK clicked!");
             }, { once: true });
         });
-    };
-    return AskLegacySchakelaar;
-}());
+    }
+}
 /**
  * Klasse voor het automatisch en regelmatig opslaan van het huidige schema in IndexedDB
  *
  * @class AutoSaver
  */
-var AutoSaver = /** @class */ (function () {
+class AutoSaver {
     /**
      * Constructor voor AutoSaver-klasse.
      *
      * @param {number} interval - Het interval in seconden tussen autosave pogingen.
      */
-    function AutoSaver(interval, getStructure) {
+    constructor(interval, getStructure) {
         /**
          * Timer ID.
          *
@@ -1347,18 +1257,18 @@ var AutoSaver = /** @class */ (function () {
      *
      * @returns {boolean} - True indien er sinds de laatste manuele opslag veranderingen zijn aangebracht, false indien niet.
      */
-    AutoSaver.prototype.hasChangesSinceLastManualSave = function () {
+    hasChangesSinceLastManualSave() {
         return this.lastSavedType === AutoSaver.SavedType.AUTOMATIC;
-    };
+    }
     /**
      * Zorgt ervoor dat {@link hasChangesSinceLastManualSave} True retourneert.
      *
      * Deze methode zet de interne variabele lastSavedType naar AutoSaver.SavedType.AUTOMATIC,
      * zodat {@link hasChangesSinceLastManualSave} True retourneert.
      */
-    AutoSaver.prototype.forceHasChangesSinceLastManualSave = function () {
+    forceHasChangesSinceLastManualSave() {
         this.lastSavedType = AutoSaver.SavedType.AUTOMATIC;
-    };
+    }
     /**
      * Start het autosaven van de huidige structuur.
      *
@@ -1366,26 +1276,25 @@ var AutoSaver = /** @class */ (function () {
      * Dit opslaan zal echter worden uitgesteld (suspendSaving) zolang de gebruiker niet een scherm open heeft waarop
      * getekend kan worden (eendraadschema of situatieschema).
      */
-    AutoSaver.prototype.start = function () {
-        var _this = this;
+    start() {
         this.stop();
         this.lastSavedString = null;
-        this.timerId = window.setInterval(function () {
-            _this.saveAutomatically();
+        this.timerId = window.setInterval(() => {
+            this.saveAutomatically();
         }, this.interval);
         this.suspendSaving = true;
-    };
+    }
     /**
      * Stop het autosaven van de huidige structuur.
      *
      * Deze methode verwijdert de timer die elke {@link interval} seconden een poging doet om de huidige structuur op te slaan.
      */
-    AutoSaver.prototype.stop = function () {
+    stop() {
         // Clear existing timer
         if (this.timerId !== null) {
             window.clearInterval(this.timerId);
         }
-    };
+    }
     /**
      * Herstart het autosaven van de huidige structuur.
      *
@@ -1394,112 +1303,90 @@ var AutoSaver = /** @class */ (function () {
      *
      * @param {number} [interval] Nieuwe interval in seconden (standaardwaarde: huidige interval)
      */
-    AutoSaver.prototype.reset = function (interval) {
-        if (interval === void 0) { interval = this.interval / 1000; }
+    reset(interval = this.interval / 1000) {
         // Clear existing timer and restart
         this.stop();
         this.interval = interval * 1000; // Convert seconds to milliseconds
         this.lastSavedType = AutoSaver.SavedType.NONE;
         this.start();
-    };
+    }
     /**
      * Controleert of de gebruiker een scherm open heeft waarop getekend kan worden (eendraadschema of situatieschema)
      * Zoja wordt suspend uitgeschakeld en kan het autosaven beginnen.
      */
-    AutoSaver.prototype.haltSuspendingIfUserStartedDrawing = function () {
+    haltSuspendingIfUserStartedDrawing() {
         if (this.getStructure().properties.currentView != "config")
             this.suspendSaving = false;
-    };
+    }
     /**
      * Slaat nhet huidige schema automatisch op in de IndexedDB onder de naam "autoSave".
      * Dit wel enkel indien de gebruiker al een tekenscherm geopend heeft (eendraadschema of situatieschema)
      *
      * Deze methode wordt elke {@link interval} seconden uitgevoerd door de timer die gestart is met {@link start}.
      */
-    AutoSaver.prototype.saveAutomatically = function () {
-        var _this = this;
+    saveAutomatically() {
         // Als de gebruiker nog niet aan het tekenen is dan is er niets te saven
         this.haltSuspendingIfUserStartedDrawing();
         if (this.suspendSaving)
             return;
         // Als het schema gewijzigd is wordt dit opgeslagen in IndexedDB
-        var text = "TXT0040000" + this.getStructure().toJsonObject(true);
+        const text = "TXT0040000" + this.getStructure().toJsonObject(true);
         if (text != this.lastSavedString) {
-            (function () { return __awaiter(_this, void 0, void 0, function () {
-                var error_1;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            _a.trys.push([0, 2, 3, 4]);
-                            return [4 /*yield*/, this.saveToIndexedDB("TXT0040000" + this.getStructure().toJsonObject(true), true)];
-                        case 1:
-                            _a.sent(); // parameter true geeft aan dat het over een autosave gaat
-                            this.lastSavedString = text;
-                            this.lastSavedType = AutoSaver.SavedType.AUTOMATIC;
-                            return [3 /*break*/, 4];
-                        case 2:
-                            error_1 = _a.sent();
-                            console.error("Error saving to IndexedDB:", error_1);
-                            return [3 /*break*/, 4];
-                        case 3:
-                            //this.getStructure().updateRibbon();
-                            if (this.callbackAfterSave)
-                                this.callbackAfterSave();
-                            return [7 /*endfinally*/];
-                        case 4: return [2 /*return*/];
-                    }
-                });
-            }); })();
+            (async () => {
+                try {
+                    await this.saveToIndexedDB("TXT0040000" + this.getStructure().toJsonObject(true), true); // parameter true geeft aan dat het over een autosave gaat
+                    this.lastSavedString = text;
+                    this.lastSavedType = AutoSaver.SavedType.AUTOMATIC;
+                    //console.log('Autosave uitgevoerd op ' + new Date().toLocaleString());
+                }
+                catch (error) {
+                    console.error("Error saving to IndexedDB:", error);
+                }
+                finally {
+                    //this.getStructure().updateRibbon();
+                    if (this.callbackAfterSave)
+                        this.callbackAfterSave();
+                }
+            })();
         }
         else {
             //console.log('Autosave overgeslagen omdat er geen veranderingen waren op ' + new Date().toLocaleString());
         }
-    };
+    }
     /**
      * Slaat het huidige schema op in de IndexedDB onder de naam "autoSave".
      *
      * @param {string} [text] - De tekst die opgeslagen moet worden. Indien niet gespecificeerd, wordt de structure.toJsonObject gebruikt.
      */
-    AutoSaver.prototype.saveManually = function (text) {
-        var _this = this;
-        if (text === void 0) { text = null; }
+    saveManually(text = null) {
         // Een gebruiker die actief zelf een schema opslaat wordt gezien als bewijs dat de gebruiker actief aan het tekenen is
         this.suspendSaving = false;
         // Het schema wordt altijd opgeslagen in IndexedDB
-        (function () { return __awaiter(_this, void 0, void 0, function () {
-            var error_2;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        _a.trys.push([0, 2, 3, 4]);
-                        if (text == null)
-                            text = "TXT0040000" + this.getStructure().toJsonObject(true);
-                        return [4 /*yield*/, this.saveToIndexedDB(text, false)];
-                    case 1:
-                        _a.sent(); // parameter false geeft aan dat het over een manual save gaat
-                        this.lastSavedString = text;
-                        this.lastSavedType = AutoSaver.SavedType.MANUAL;
-                        return [3 /*break*/, 4];
-                    case 2:
-                        error_2 = _a.sent();
-                        console.error("Error saving to IndexedDB:", error_2);
-                        return [3 /*break*/, 4];
-                    case 3:
-                        if (this.callbackAfterSave)
-                            this.callbackAfterSave();
-                        return [7 /*endfinally*/];
-                    case 4: return [2 /*return*/];
-                }
-            });
-        }); })();
+        (async () => {
+            try {
+                if (text == null)
+                    text = "TXT0040000" + this.getStructure().toJsonObject(true);
+                await this.saveToIndexedDB(text, false); // parameter false geeft aan dat het over een manual save gaat
+                this.lastSavedString = text;
+                this.lastSavedType = AutoSaver.SavedType.MANUAL;
+            }
+            catch (error) {
+                console.error("Error saving to IndexedDB:", error);
+            }
+            finally {
+                if (this.callbackAfterSave)
+                    this.callbackAfterSave();
+                //this.getStructure().updateRibbon();
+            }
+        })();
         this.reset();
-    };
-    AutoSaver.prototype.setCallbackAfterSave = function (callback) {
+    }
+    setCallbackAfterSave(callback) {
         this.callbackAfterSave = callback;
-    };
-    AutoSaver.prototype.getSavedType = function () {
+    }
+    getSavedType() {
         return this.lastSavedType;
-    };
+    }
     /**
      * Slaat de huidige structuur op in de IndexedDB onder de naam "autoSave".
      * Slaat eveneens een JSON string autoSaveInfo op met volgende informatie:
@@ -1511,40 +1398,29 @@ var AutoSaver = /** @class */ (function () {
      *
      * @param {string} [text] - De tekst die opgeslagen moet worden.
      */
-    AutoSaver.prototype.saveToIndexedDB = function (text, recovery) {
-        if (recovery === void 0) { recovery = false; }
-        return __awaiter(this, void 0, void 0, function () {
-            var db, currentDate, info;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        db = new IndexedDBStorage("DB_EDS", "Store_EDS");
-                        if (!db) {
-                            console.error("Error saving to IndexedDB, kan de database niet openen.");
-                            return [2 /*return*/];
-                        }
-                        currentDate = new Date();
-                        info = {
-                            filename: this.getStructure().properties.filename,
-                            currentTimeStamp: currentDate.getDate().toString().padStart(2, '0') + "/" +
-                                (currentDate.getMonth() + 1).toString().padStart(2, '0') + "/" +
-                                currentDate.getFullYear().toString() + " " +
-                                currentDate.getHours().toString().padStart(2, '0') + ":" +
-                                currentDate.getMinutes().toString().padStart(2, '0') + ":" +
-                                currentDate.getSeconds().toString().padStart(2, '0'),
-                            recovery: recovery
-                        };
-                        return [4 /*yield*/, Promise.all([
-                                db.set("autoSave", text),
-                                db.set("autoSaveInfo", JSON.stringify(info))
-                            ])];
-                    case 1:
-                        _a.sent();
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
+    async saveToIndexedDB(text, recovery = false) {
+        const db = new IndexedDBStorage("DB_EDS", "Store_EDS");
+        if (!db) {
+            console.error("Error saving to IndexedDB, kan de database niet openen.");
+            return;
+        }
+        // Save some additional information 
+        let currentDate = new Date();
+        const info = {
+            filename: this.getStructure().properties.filename,
+            currentTimeStamp: currentDate.getDate().toString().padStart(2, '0') + "/" +
+                (currentDate.getMonth() + 1).toString().padStart(2, '0') + "/" +
+                currentDate.getFullYear().toString() + " " +
+                currentDate.getHours().toString().padStart(2, '0') + ":" +
+                currentDate.getMinutes().toString().padStart(2, '0') + ":" +
+                currentDate.getSeconds().toString().padStart(2, '0'),
+            recovery: recovery
+        };
+        await Promise.all([
+            db.set("autoSave", text),
+            db.set("autoSaveInfo", JSON.stringify(info))
+        ]);
+    }
     /**
      * Laadt de laatste opgeslagen data uit de IndexedDB, en retourneert deze als een array
      * met twee elementen: de eigenlijke code van het schema (json)en de info over de opslag zoals filename,
@@ -1554,76 +1430,62 @@ var AutoSaver = /** @class */ (function () {
      * @returns {Promise<[string | null, string | null]>} Een promise die resolvet naar een
      * array met twee elementen: de tekst van het schema en de info over de opslag.
      */
-    AutoSaver.prototype.loadLastSaved = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var db, lastSavedInfoStr, lastSavedInfo_1, error_3;
-            var _a;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0:
-                        db = new IndexedDBStorage("DB_EDS", "Store_EDS");
-                        if (!db)
-                            return [2 /*return*/, [null, null]];
-                        _b.label = 1;
-                    case 1:
-                        _b.trys.push([1, 3, , 4]);
-                        lastSavedInfoStr = void 0;
-                        return [4 /*yield*/, Promise.all([
-                                db.get("autoSave"),
-                                db.get("autoSaveInfo")
-                            ])];
-                    case 2:
-                        _a = _b.sent(), this.lastSavedString = _a[0], lastSavedInfoStr = _a[1];
-                        lastSavedInfo_1 = lastSavedInfoStr ? JSON.parse(lastSavedInfoStr) : null;
-                        this.lastSavedType = (lastSavedInfo_1
-                            ? (lastSavedInfo_1.recovery
-                                ? AutoSaver.SavedType.AUTOMATIC
-                                : AutoSaver.SavedType.MANUAL)
-                            : AutoSaver.SavedType.NONE);
-                        return [2 /*return*/, ([this.lastSavedString, lastSavedInfo_1])];
-                    case 3:
-                        error_3 = _b.sent();
-                        this.lastSavedString = null;
-                        console.error("Error loading from IndexedDB:", error_3);
-                        this.lastSavedType = AutoSaver.SavedType.NONE;
-                        return [2 /*return*/, [null, null]];
-                    case 4: return [2 /*return*/];
-                }
-            });
-        });
-    };
-    /**
-     * Enum voor soorten opslag.
-     *
-     * @readonly
-     * @enum {string}
-     * @property {string} AUTOMATIC Automatische opslag
-     * @property {string} MANUAL Manuele opslag
-     * @property {string} NONE Geen opslag
-     */
-    AutoSaver.SavedType = {
-        AUTOMATIC: "AUTOMATIC",
-        MANUAL: "MANUAL",
-        NONE: "NONE"
-    };
-    return AutoSaver;
-}());
+    async loadLastSaved() {
+        const db = new IndexedDBStorage("DB_EDS", "Store_EDS");
+        if (!db)
+            return [null, null];
+        try {
+            let lastSavedInfoStr;
+            [this.lastSavedString, lastSavedInfoStr] = await Promise.all([
+                db.get("autoSave"),
+                db.get("autoSaveInfo")
+            ]);
+            const lastSavedInfo = lastSavedInfoStr ? JSON.parse(lastSavedInfoStr) : null;
+            this.lastSavedType = (lastSavedInfo
+                ? (lastSavedInfo.recovery
+                    ? AutoSaver.SavedType.AUTOMATIC
+                    : AutoSaver.SavedType.MANUAL)
+                : AutoSaver.SavedType.NONE);
+            return ([this.lastSavedString, lastSavedInfo]);
+        }
+        catch (error) {
+            this.lastSavedString = null;
+            console.error("Error loading from IndexedDB:", error);
+            this.lastSavedType = AutoSaver.SavedType.NONE;
+            return [null, null];
+        }
+    }
+}
+/**
+ * Enum voor soorten opslag.
+ *
+ * @readonly
+ * @enum {string}
+ * @property {string} AUTOMATIC Automatische opslag
+ * @property {string} MANUAL Manuele opslag
+ * @property {string} NONE Geen opslag
+ */
+AutoSaver.SavedType = {
+    AUTOMATIC: "AUTOMATIC",
+    MANUAL: "MANUAL",
+    NONE: "NONE"
+};
 // Import pako
 //const pako = require('pako');
 // Helper function to encode string to Uint8Array
 function encodeChunk(chunk) {
-    var encoder = new TextEncoder();
+    const encoder = new TextEncoder();
     return encoder.encode(chunk);
 }
 // Example: Handling large text data in chunks
 function compressLargeText(text) {
-    var chunkSize = 64 * 1024; // 64kb chunks
-    var deflate = new pako.Deflate({ level: 6 }); // Create a Deflate instance
-    var offset = 0;
+    const chunkSize = 64 * 1024; // 64kb chunks
+    const deflate = new pako.Deflate({ level: 6 }); // Create a Deflate instance
+    let offset = 0;
     while (offset < text.length) {
-        var end = Math.min(offset + chunkSize, text.length);
-        var chunk = text.slice(offset, end);
-        var encodedChunk = encodeChunk(chunk);
+        const end = Math.min(offset + chunkSize, text.length);
+        const chunk = text.slice(offset, end);
+        const encodedChunk = encodeChunk(chunk);
         deflate.push(encodedChunk, end >= text.length); // true if it's the last chunk
         offset = end;
     }
@@ -1635,12 +1497,12 @@ function compressLargeText(text) {
 }
 // Helper function to decode Uint8Array back to string
 function decodeChunk(chunk) {
-    var decoder = new TextDecoder("utf-8");
+    const decoder = new TextDecoder("utf-8");
     return decoder.decode(chunk);
 }
 // Decompressing function
 function decompressLargeData(compressedData) {
-    var inflate = new pako.Inflate(); // Create an Inflate instance
+    const inflate = new pako.Inflate(); // Create an Inflate instance
     // Push the compressed data
     inflate.push(compressedData, true); // true indicates it's the last chunk
     // Check for errors
@@ -1649,21 +1511,21 @@ function decompressLargeData(compressedData) {
         return null;
     }
     // Get the decompressed result
-    var decompressedData = inflate.result;
+    const decompressedData = inflate.result;
     // Decode the decompressed result back to string
     return decodeChunk(decompressedData);
 }
-var importExportUsingFileAPI = /** @class */ (function () {
-    function importExportUsingFileAPI() {
+class importExportUsingFileAPI {
+    constructor() {
         this.clear();
         //this.updateButtons();
     }
-    importExportUsingFileAPI.prototype.clear = function () {
+    clear() {
         this.saveNeeded = false;
         this.fileHandle = null;
         this.filename = null;
-    };
-    importExportUsingFileAPI.prototype.updateLastSaved = function () {
+    }
+    updateLastSaved() {
         var currentdate = new Date();
         this.lastsaved = currentdate.getHours().toString().padStart(2, '0') + ":" +
             currentdate.getMinutes().toString().padStart(2, '0') + ":" +
@@ -1673,108 +1535,55 @@ var importExportUsingFileAPI = /** @class */ (function () {
         if (document.getElementById('exportscreen')) {
             showFilePage(); // Update the export screen if we are actually on the export screen
         }
-    };
-    importExportUsingFileAPI.prototype.setSaveNeeded = function (input) {
-        var lastSaveNeeded = this.saveNeeded;
+    }
+    setSaveNeeded(input) {
+        let lastSaveNeeded = this.saveNeeded;
         this.saveNeeded = input;
         //if (input !== lastSaveNeeded) this.updateButtons();
-    };
-    importExportUsingFileAPI.prototype.readFile = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var _a, file, contents;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0:
-                        _a = this;
-                        return [4 /*yield*/, window.showOpenFilePicker({
-                                types: [{
-                                        description: 'Eendraadschema (.eds)',
-                                        accept: { 'application/eds': ['.eds'] },
-                                    }],
-                            })];
-                    case 1:
-                        _a.fileHandle = (_b.sent())[0];
-                        return [4 /*yield*/, this.fileHandle.getFile()];
-                    case 2:
-                        file = _b.sent();
-                        return [4 /*yield*/, file.text()];
-                    case 3:
-                        contents = _b.sent();
-                        this.filename = file.name;
-                        structure.properties.filename = file.name;
-                        this.setSaveNeeded(false);
-                        this.updateLastSaved(); // Needed because EDStoStructure whipes everything   
-                        return [2 /*return*/, contents];
-                }
-            });
+    }
+    async readFile() {
+        [this.fileHandle] = await window.showOpenFilePicker({
+            types: [{
+                    description: 'Eendraadschema (.eds)',
+                    accept: { 'application/eds': ['.eds'] },
+                }],
         });
-    };
-    importExportUsingFileAPI.prototype.saveAs = function (content) {
-        return __awaiter(this, void 0, void 0, function () {
-            var options, _a;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0:
-                        options = {
-                            suggestedName: structure.properties.filename,
-                            types: [{
-                                    description: 'Eendraadschema (.eds)',
-                                    accept: { 'application/eds': ['.eds'] },
-                                }],
-                            startIn: 'documents' // Suggests the Documents folder
-                        };
-                        _a = this;
-                        return [4 /*yield*/, window.showSaveFilePicker(options)];
-                    case 1:
-                        _a.fileHandle = _b.sent();
-                        return [4 /*yield*/, this.saveFile(content, this.fileHandle)];
-                    case 2:
-                        _b.sent();
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
+        const file = await this.fileHandle.getFile();
+        const contents = await file.text();
+        this.filename = file.name;
+        globalThis.structure.properties.filename = file.name;
+        this.setSaveNeeded(false);
+        this.updateLastSaved(); // Needed because EDStoStructure whipes everything   
+        return contents;
+    }
+    async saveAs(content) {
+        const options = {
+            suggestedName: globalThis.structure.properties.filename,
+            types: [{
+                    description: 'Eendraadschema (.eds)',
+                    accept: { 'application/eds': ['.eds'] },
+                }],
+            startIn: 'documents' // Suggests the Documents folder
+        };
+        this.fileHandle = await window.showSaveFilePicker(options);
+        await this.saveFile(content, this.fileHandle);
+    }
     ;
-    importExportUsingFileAPI.prototype.saveFile = function (content, handle) {
-        return __awaiter(this, void 0, void 0, function () {
-            var writable;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, handle.createWritable()];
-                    case 1:
-                        writable = _a.sent();
-                        return [4 /*yield*/, writable.write(content)];
-                    case 2:
-                        _a.sent();
-                        return [4 /*yield*/, writable.close()];
-                    case 3:
-                        _a.sent();
-                        this.filename = handle.name;
-                        structure.properties.filename = handle.name;
-                        this.setSaveNeeded(false);
-                        this.updateLastSaved();
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
+    async saveFile(content, handle) {
+        const writable = await handle.createWritable();
+        await writable.write(content);
+        await writable.close();
+        this.filename = handle.name;
+        globalThis.structure.properties.filename = handle.name;
+        this.setSaveNeeded(false);
+        this.updateLastSaved();
+    }
     ;
-    importExportUsingFileAPI.prototype.save = function (content) {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.saveFile(content, this.fileHandle)];
-                    case 1:
-                        _a.sent();
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
+    async save(content) {
+        await this.saveFile(content, this.fileHandle);
+    }
     ;
-    return importExportUsingFileAPI;
-}());
+}
 var fileAPIobj = new importExportUsingFileAPI();
 /* FUNCTION importjson
 
@@ -1801,26 +1610,15 @@ var appendjson = function (event) {
 
    Gets called when a user wants to open a file.  Checks if the fileAPI is available in the browser.
    If so, the fileAPI is used.  If not, the legacy function importjson is called */
-function loadClicked() {
-    return __awaiter(this, void 0, void 0, function () {
-        var data;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    if (!window.showOpenFilePicker) return [3 /*break*/, 2];
-                    return [4 /*yield*/, fileAPIobj.readFile()];
-                case 1:
-                    data = _a.sent();
-                    EDStoStructure(data);
-                    return [3 /*break*/, 3];
-                case 2:
-                    document.getElementById('importfile').click();
-                    document.getElementById('importfile').value = "";
-                    _a.label = 3;
-                case 3: return [2 /*return*/];
-            }
-        });
-    });
+async function loadClicked() {
+    if (window.showOpenFilePicker) { // Use fileAPI
+        let data = await fileAPIobj.readFile();
+        EDStoStructure(data);
+    }
+    else { // Legacy
+        document.getElementById('importfile').click();
+        document.getElementById('importfile').value = "";
+    }
 }
 /**
  * function importToAppendClicked()
@@ -1828,14 +1626,9 @@ function loadClicked() {
  * Vraagt om een EDS bestand op de machine te kiezen en voegt de inhoud toe aan het reeds geopende schema.
  * We gebruiken hier bewust niet de fileAPI aangezien die reeds gebruikt wordt voor het reeds geopende schema.
  */
-function importToAppendClicked() {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            document.getElementById('appendfile').click();
-            document.getElementById('appendfile').value = "";
-            return [2 /*return*/];
-        });
-    });
+async function importToAppendClicked() {
+    document.getElementById('appendfile').click();
+    document.getElementById('appendfile').value = "";
 }
 /* FUNCTION upgrade_version
 
@@ -1854,7 +1647,7 @@ function upgrade_version(mystructure, version) {
     * en keys[16][2] die aangeeft of vrije tekst al dan niet een kader bevat (verbruiker) of niet (zonder kader)
     */
     if (version < 2) {
-        for (var i = 0; i < mystructure.length; i++) {
+        for (let i = 0; i < mystructure.length; i++) {
             // Breedte van Vrije tekst velden zonder kader met 30 verhogen sinds 16/12/2023
             if ((mystructure.data[i].keys[0][2] === "Vrije tekst") && (mystructure.data[i].keys[16][2] != "verbruiker")) {
                 if (Number(mystructure.data[i].keys[22][2]) > 0)
@@ -1868,7 +1661,7 @@ function upgrade_version(mystructure, version) {
     }
     // In versie 2 heetten Contactdozen altijd nog Stopcontacten
     if (version < 3) {
-        for (var i = 0; i < mystructure.length; i++) {
+        for (let i = 0; i < mystructure.length; i++) {
             if (mystructure.data[i].keys[0][2] === "Stopcontact")
                 mystructure.data[i].keys[0][2] = "Contactdoos";
             if (mystructure.data[i].keys[0][2] === "Leeg")
@@ -1877,7 +1670,7 @@ function upgrade_version(mystructure, version) {
     }
     // In versie 3 heetten Contactdozen ook soms nog Stopcontacten, maar niet altijd
     if (version == 3) {
-        for (var i = 0; i < mystructure.length; i++) {
+        for (let i = 0; i < mystructure.length; i++) {
             if (mystructure.data[i].props.type === "Stopcontact")
                 mystructure.data[i].props.type = "Contactdoos";
         }
@@ -1885,13 +1678,13 @@ function upgrade_version(mystructure, version) {
     //Vanaf versie 4 staan niet automatisch meer haakjes <> rond de benaming van borden. Indien kleiner dan versie 4 moeten we deze toevoegen
     if (version < 4) {
         if (version < 3) {
-            for (var i = 0; i < mystructure.length; i++) {
+            for (let i = 0; i < mystructure.length; i++) {
                 if ((mystructure.data[i].keys[0][2] === "Bord") && (mystructure.data[i].keys[10][2] !== ""))
                     mystructure.data[i].keys[10][2] = '<' + mystructure.data[i].keys[10][2] + '>';
             }
         }
         else {
-            for (var i = 0; i < mystructure.length; i++) {
+            for (let i = 0; i < mystructure.length; i++) {
                 if ((mystructure.data[i].props.type === "Bord") && (mystructure.data[i].props.naam !== ""))
                     mystructure.data[i].props.naam = '<' + mystructure.data[i].props.naam + '>';
             }
@@ -1899,7 +1692,7 @@ function upgrade_version(mystructure, version) {
     }
     //Algemene upgrade voor versies 3 tot en met 4
     if ((version >= 3) && (version <= 4)) {
-        for (var i = 0; i < mystructure.length; i++) {
+        for (let i = 0; i < mystructure.length; i++) {
             if (mystructure.data[i].props.type === "Leeg")
                 mystructure.data[i].props.type = "Aansluitpunt";
         }
@@ -1909,17 +1702,16 @@ function upgrade_version(mystructure, version) {
  * Exporteert de huidige structuur naar een bestand in het EDS-formaat.
  * @param {boolean} saveAs - Indien true, wordt de gebruiker gevraagd waar het bestand moet worden opgeslagen; anders wordt het bestand opgeslagen onder de bekende bestandsnaam.
  */
-function exportjson(saveAs) {
-    if (saveAs === void 0) { saveAs = true; }
+function exportjson(saveAs = true) {
     /**
      * Converteert een Uint8Array naar een Base64-gecodeerde string.
      * @param {Uint8Array} uint8Array - De array die moet worden geconverteerd.
      * @returns {string} De Base64-gecodeerde string.
      */
     function uint8ArrayToBase64(uint8Array) {
-        var CHUNK_SIZE = 0x8000; // Verwerk 32KB chunks
-        var binaryString = '';
-        for (var i = 0; i < uint8Array.length; i += CHUNK_SIZE) {
+        const CHUNK_SIZE = 0x8000; // Verwerk 32KB chunks
+        let binaryString = '';
+        for (let i = 0; i < uint8Array.length; i += CHUNK_SIZE) {
             binaryString += String.fromCharCode.apply(null, uint8Array.subarray(i, i + CHUNK_SIZE));
         }
         return btoa(binaryString);
@@ -1929,14 +1721,14 @@ function exportjson(saveAs) {
      * Einddata leest "EDSXXX0000" met XXX een versie en daarna een 64base-encodering van de gedecomprimeerde uitvoer van Pako
      * filename = "eendraadschema.eds";
      */
-    filename = structure.properties.filename;
-    var origtext = structure.toJsonObject(true);
-    var text = '';
+    filename = globalThis.structure.properties.filename;
+    let origtext = globalThis.structure.toJsonObject(true);
+    let text = '';
     // Comprimeer de uitvoerstructuur en bied deze aan als download aan de gebruiker. We zijn momenteel bij versie 004
     try {
-        var encoder = new TextEncoder();
-        var pako_inflated = new Uint8Array(encoder.encode(origtext));
-        var pako_deflated = new Uint8Array(pako.deflate(pako_inflated));
+        let encoder = new TextEncoder();
+        let pako_inflated = new Uint8Array(encoder.encode(origtext));
+        let pako_deflated = new Uint8Array(pako.deflate(pako_inflated));
         text = "EDS0040000" + uint8ArrayToBase64(pako_deflated);
     }
     catch (error) {
@@ -1948,9 +1740,9 @@ function exportjson(saveAs) {
             if ((fileAPIobj.filename == null) && (saveAs == false))
                 saveAs = true; // Default to SaveAs if we have no file name
             if (saveAs)
-                this.fileAPIobj.saveAs(text).then(function () { return autoSaver.saveManually("TXT0040000" + origtext); });
+                this.fileAPIobj.saveAs(text).then(() => autoSaver.saveManually("TXT0040000" + origtext));
             else
-                this.fileAPIobj.save(text).then(function () { return autoSaver.saveManually("TXT0040000" + origtext); });
+                this.fileAPIobj.save(text).then(() => autoSaver.saveManually("TXT0040000" + origtext));
         }
         else { // legacy
             download_by_blob(text, filename, 'data:text/eds;charset=utf-8');
@@ -1968,22 +1760,20 @@ function exportjson(saveAs) {
    if version is set to 0.  If version is not set to 0 it should be set to the verson of the json.
     
 */
-function json_to_structure(text, oldstruct, version) {
-    if (oldstruct === void 0) { oldstruct = null; }
-    if (version === void 0) { version = 0; }
+function json_to_structure(text, oldstruct = null, version = 0) {
     // If a structure exists, clear it
     if (oldstruct != null)
         oldstruct.dispose(); // Clear the structure
     /* Read all data from disk in a javascript structure mystructure.
         * Afterwards we will gradually copy elements from this one into the official outstruct
         */
-    var mystructure = JSON.parse(text);
+    let mystructure = JSON.parse(text);
     // upgrade if needed
     if (version != 0)
         upgrade_version(mystructure, version);
     /* We starten met het kopieren van data naar de eigenlijke outstruct.
     * Ook hier houden we er rekening mee dat in oude saves mogelijk niet alle info voorhanden was */
-    var outstruct = new Hierarchical_List();
+    let outstruct = new Hierarchical_List();
     // Kopieren van hoofd-eigenschappen
     if (typeof mystructure.properties != 'undefined') {
         if (typeof mystructure.properties.filename != "undefined")
@@ -2019,7 +1809,7 @@ function json_to_structure(text, oldstruct, version) {
         else {
             outstruct.print_table.enableAutopage = false;
         }
-        for (var i = 0; i < mystructure.print_table.pages.length; i++) {
+        for (let i = 0; i < mystructure.print_table.pages.length; i++) {
             if (i != 0)
                 outstruct.print_table.addPage();
             outstruct.print_table.pages[i].height = mystructure.print_table.pages[i].height;
@@ -2035,7 +1825,7 @@ function json_to_structure(text, oldstruct, version) {
     /* Kopieren van de eigenschappen van elk element.
     * Keys voor versies 1 en 2 en props voor versie 3
     */
-    for (var i = 0; i < mystructure.length; i++) {
+    for (let i = 0; i < mystructure.length; i++) {
         if ((version != 0) && (version < 3)) {
             outstruct.addItem(mystructure.data[i].keys[0][2]);
             outstruct.data[i].convertLegacyKeys(mystructure.data[i].keys);
@@ -2058,9 +1848,8 @@ function json_to_structure(text, oldstruct, version) {
     // Return the result
     return outstruct;
 }
-function loadFromText(text, version, redraw) {
-    if (redraw === void 0) { redraw = true; }
-    structure = json_to_structure(text, structure, version);
+function loadFromText(text, version, redraw = true) {
+    globalThis.structure = json_to_structure(text, globalThis.structure, version);
     if (redraw == true)
         topMenu.selectMenuItemByName('Eéndraadschema'); // Ga naar het bewerken scherm, dat zal automatisch voor hertekenen zorgen.
 }
@@ -2073,8 +1862,8 @@ function loadFromText(text, version, redraw) {
  * @returns {Object} - Een object met twee attributen: text en version. Text is de json string en version is de versie van de string.
  */
 function EDStoJson(mystring) {
-    var text = "";
-    var version;
+    let text = "";
+    let version;
     /* If first 3 bytes read "EDS", it is an entropy coded file
         * The first 3 bytes are EDS, the next 3 bytes indicate the version
         * The next 4 bytes are decimal zeroes "0000"
@@ -2098,17 +1887,17 @@ function EDStoJson(mystring) {
             version = 1; // Hele oude files bevatten geen versie, ze proberen ze te lezen als versie 1
         mystring = atob(mystring.substring(10, mystring.length));
         var buffer = new Uint8Array(mystring.length);
-        for (var i = 0; i < mystring.length; i++) {
+        for (let i = 0; i < mystring.length; i++) {
             buffer[i - 0] = mystring.charCodeAt(i);
         }
         try { //See if the text decoder works, if not, we will do it manually (slower)
-            var decoder = new TextDecoder("utf-8");
+            let decoder = new TextDecoder("utf-8");
             text = decoder.decode(pako.inflate(buffer));
         }
         catch (error) { //Continue without the text decoder (old browsers)
             var inflated = pako.inflate(buffer);
             text = "";
-            for (var i = 0; i < inflated.length; i++) {
+            for (let i = 0; i < inflated.length; i++) {
                 text += String.fromCharCode(inflated[i]);
             }
         }
@@ -2133,24 +1922,22 @@ function EDStoJson(mystring) {
    Will redraw everything if the redraw flag is set.
 
 */
-function EDStoStructure(mystring, redraw, askUserToSave) {
-    if (redraw === void 0) { redraw = true; }
-    if (askUserToSave === void 0) { askUserToSave = false; }
+function EDStoStructure(mystring, redraw = true, askUserToSave = false) {
     if (autoSaver)
         autoSaver.reset();
-    var JSONdata = EDStoJson(mystring);
+    let JSONdata = EDStoJson(mystring);
     // Dump the json in into the structure and redraw if needed
     loadFromText(JSONdata.text, JSONdata.version, redraw);
     // Clear the undo stack and push this one on top
-    undostruct.clear();
-    undostruct.store();
+    globalThis.undostruct.clear();
+    globalThis.undostruct.store();
     // Scroll to top left for the SVG and HTML, this can only be done at the end because "right col" has to actually be visible
-    var leftelem = document.getElementById("left_col");
+    const leftelem = document.getElementById("left_col");
     if (leftelem != null) {
         leftelem.scrollTop = 0;
         leftelem.scrollLeft = 0;
     }
-    var rightelem = document.getElementById("right_col");
+    const rightelem = document.getElementById("right_col");
     if (rightelem != null) {
         rightelem.scrollTop = 0;
         rightelem.scrollLeft = 0;
@@ -2160,63 +1947,62 @@ function EDStoStructure(mystring, redraw, askUserToSave) {
         autoSaver.saveManually();
     if (askUserToSave) {
         autoSaver.forceHasChangesSinceLastManualSave();
-        structure.updateRibbon();
+        globalThis.structure.updateRibbon();
     }
 }
-function importToAppend(mystring, redraw) {
-    if (redraw === void 0) { redraw = true; }
-    var JSONdata = EDStoJson(mystring);
-    var structureToAppend = json_to_structure(JSONdata.text, null, JSONdata.version);
+function importToAppend(mystring, redraw = true) {
+    let JSONdata = EDStoJson(mystring);
+    let structureToAppend = json_to_structure(JSONdata.text, null, JSONdata.version);
     //get the Maximal ID in array structure.id and call it maxID
-    var maxID = 0;
-    for (var i = 0; i < structure.id.length; i++) {
-        if (structure.id[i] > maxID)
-            maxID = structure.id[i];
+    let maxID = 0;
+    for (let i = 0; i < globalThis.structure.id.length; i++) {
+        if (globalThis.structure.id[i] > maxID)
+            maxID = globalThis.structure.id[i];
     }
     //then increase the ID's in structureToAppend accordingly
-    for (var i = 0; i < structureToAppend.id.length; i++) {
+    for (let i = 0; i < structureToAppend.id.length; i++) {
         structureToAppend.id[i] += maxID;
         structureToAppend.data[i].id += maxID;
         if (structureToAppend.data[i].parent != 0) {
             structureToAppend.data[i].parent += maxID;
         }
     }
-    structure.curid += structureToAppend.curid;
+    globalThis.structure.curid += structureToAppend.curid;
     //then merge information for the eendraadschema
-    structure.length = structure.length + structureToAppend.length;
-    structure.active = structure.active.concat(structureToAppend.active);
-    structure.id = structure.id.concat(structureToAppend.id);
-    structure.data = structure.data.concat(structureToAppend.data);
+    globalThis.structure.length = globalThis.structure.length + structureToAppend.length;
+    globalThis.structure.active = globalThis.structure.active.concat(structureToAppend.active);
+    globalThis.structure.id = globalThis.structure.id.concat(structureToAppend.id);
+    globalThis.structure.data = globalThis.structure.data.concat(structureToAppend.data);
     //update the sourcelist
-    structure.data.forEach(function (item) {
-        item.sourcelist = structure;
+    globalThis.structure.data.forEach((item) => {
+        item.sourcelist = globalThis.structure;
     });
     //then set the printer to autopage
-    structure.print_table.enableAutopage = true;
+    globalThis.structure.print_table.enableAutopage = true;
     //then merge the situation plans but only if both exist
-    if (structure.sitplan != null) {
+    if (globalThis.structure.sitplan != null) {
         if (structureToAppend.sitplan != null) {
             // Eerst oude situationplanview leeg maken, anders blijven oude div's hangen
-            if (structure.sitplanview != null)
-                structure.sitplanview.dispose();
+            if (globalThis.structure.sitplanview != null)
+                globalThis.structure.sitplanview.dispose();
             // dan nieuw situationplan maken en bij openen van het schema zal automatisch een nieuw situationplanview gecreëerd wordne
-            structure.sitplanjson = structure.sitplan.toJsonObject();
+            globalThis.structure.sitplanjson = globalThis.structure.sitplan.toJsonObject();
             structureToAppend.sitplanjson = structureToAppend.sitplan.toJsonObject();
-            for (var i = 0; i < structureToAppend.sitplanjson.elements.length; i++) {
+            for (let i = 0; i < structureToAppend.sitplanjson.elements.length; i++) {
                 if (structureToAppend.sitplanjson.elements[i].electroItemId != null)
                     structureToAppend.sitplanjson.elements[i].electroItemId += maxID;
-                structureToAppend.sitplanjson.elements[i].page += structure.sitplanjson.numPages;
+                structureToAppend.sitplanjson.elements[i].page += globalThis.structure.sitplanjson.numPages;
             }
-            if ((structure.sitplanjson != null) && (structureToAppend.sitplanjson != null)) {
-                structure.sitplanjson.numPages += structureToAppend.sitplanjson.numPages;
-                structure.sitplanjson.elements = structure.sitplanjson.elements.concat(structureToAppend.sitplanjson.elements);
+            if ((globalThis.structure.sitplanjson != null) && (structureToAppend.sitplanjson != null)) {
+                globalThis.structure.sitplanjson.numPages += structureToAppend.sitplanjson.numPages;
+                globalThis.structure.sitplanjson.elements = globalThis.structure.sitplanjson.elements.concat(structureToAppend.sitplanjson.elements);
             }
-            structure.sitplan.fromJsonObject(structure.sitplanjson);
-            structure.sitplanjson = null;
+            globalThis.structure.sitplan.fromJsonObject(globalThis.structure.sitplanjson);
+            globalThis.structure.sitplanjson = null;
         }
     }
-    structure.reSort();
-    undostruct.store();
+    globalThis.structure.reSort();
+    globalThis.undostruct.store();
     //then remove the pointer from structureToAppend and let the garbage collector do its work
     structureToAppend = null;
     //redraw if needed
@@ -2236,16 +2022,16 @@ function download_by_blob(text, filename, mimeType) {
         }), filename);
     }
     else if (URL && 'download' in element) {
-        var uriContent = URL.createObjectURL(new Blob([text], { type: mimeType }));
+        let uriContent = URL.createObjectURL(new Blob([text], { type: mimeType }));
         element.setAttribute('href', uriContent);
         element.setAttribute('download', filename);
         element.style.display = 'none';
         document.body.appendChild(element);
         element.click();
-        setTimeout(function () { return document.body.removeChild(element); }, 1000); // 1-second delay
+        setTimeout(() => document.body.removeChild(element), 1000); // 1-second delay
     }
     else {
-        this.location.go("".concat(mimeType, ",").concat(encodeURIComponent(text)));
+        this.location.go(`${mimeType},${encodeURIComponent(text)}`);
     }
 }
 /* FUNCTION showFilePage
@@ -2256,8 +2042,38 @@ function download_by_blob(text, filename, mimeType) {
 function showFilePage() {
     var strleft = '<span id="exportscreen"></span>'; //We need the id to check elsewhere that the screen is open
     // -- Openen uit bestand --
-    strleft += "\n    <table border=\"1px\" style=\"border-collapse:collapse\" align=\"center\" width=\"100%\">\n      <tr>\n        <td width=\"100%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Openen uit bestand</b>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"100%\" align=\"left\">\n            <table border=0>\n              <tr>\n                <td width=350 style=\"vertical-align:top;padding:5px\">\n                  <button style=\"font-size:14px\" onclick=\"loadClicked()\">Openen</button>\n                </td>\n                <td style=\"vertical-align:top;padding:7px\">\n                  Click op \"openen\" en selecteer een eerder opgeslagen EDS bestand.\n                </td>\n              </tr>\n            </table>\n        </td>\n      </tr>\n    </table><br>";
-    strleft += "\n    <table border=\"1px\" style=\"border-collapse:collapse\" align=\"center\" width=\"100%\">\n      <tr>\n        <td width=\"100%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Opslaan</b>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"100%\" align=\"left\">\n    ";
+    strleft += `
+    <table border="1px" style="border-collapse:collapse" align="center" width="100%">
+      <tr>
+        <td width="100%" align="center" bgcolor="LightGrey">
+          <b>Openen uit bestand</b>
+        </td>
+      </tr>
+      <tr>
+        <td width="100%" align="left">
+            <table border=0>
+              <tr>
+                <td width=350 style="vertical-align:top;padding:5px">
+                  <button style="font-size:14px" onclick="loadClicked()">Openen</button>
+                </td>
+                <td style="vertical-align:top;padding:7px">
+                  Click op "openen" en selecteer een eerder opgeslagen EDS bestand.
+                </td>
+              </tr>
+            </table>
+        </td>
+      </tr>
+    </table><br>`;
+    strleft += `
+    <table border="1px" style="border-collapse:collapse" align="center" width="100%">
+      <tr>
+        <td width="100%" align="center" bgcolor="LightGrey">
+          <b>Opslaan</b>
+        </td>
+      </tr>
+      <tr>
+        <td width="100%" align="left">
+    `;
     if (window.showOpenFilePicker) { // Use fileAPI
         strleft += '<table border=0><tr><td width=350 style="vertical-align:top;padding:5px">';
         if (fileAPIobj.filename != null) {
@@ -2278,7 +2094,7 @@ function showFilePage() {
     }
     else { // Legacy
         strleft += '<table border=0><tr><td width=350 style="vertical-align:top;padding:7px">';
-        strleft += 'Bestandsnaam: <span id="settings"><code>' + structure.properties.filename + '</code><br><button style="font-size:14px" onclick="exportjson()">Opslaan</button>&nbsp;<button style="font-size:14px" onclick="HL_enterSettings()">Naam wijzigen</button></span>';
+        strleft += 'Bestandsnaam: <span id="settings"><code>' + globalThis.structure.properties.filename + '</code><br><button style="font-size:14px" onclick="exportjson()">Opslaan</button>&nbsp;<button style="font-size:14px" onclick="HL_enterSettings()">Naam wijzigen</button></span>';
         strleft += '</td><td style="vertical-align:top;padding:5px">';
         strleft += 'U kan het schema opslaan op uw lokale harde schijf voor later gebruik. De standaard-naam is eendraadschema.eds. U kan deze wijzigen door links op "wijzigen" te klikken. ';
         strleft += 'Klik vervolgens op "opslaan" en volg de instructies van uw browser. ';
@@ -2288,68 +2104,95 @@ function showFilePage() {
         strleft += PROP_GDPR(); //Function returns empty for GIT version, returns GDPR notice when used online.
         strleft += '</table>';
     }
-    strleft += "\n        </td>\n      </tr>\n    </table><br>    \n    ";
-    strleft += "\n    <table border=\"1px\" style=\"border-collapse:collapse\" align=\"center\" width=\"100%\">\n      <tr>\n        <td width=\"100%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Samenvoegen</b>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"100%\" align=\"left\">\n            <table border=0>\n              <tr>\n                <td width=350 style=\"vertical-align:top;padding:5px\">\n                  <button style=\"font-size:14px\" onclick=\"importToAppendClicked()\">Samenvoegen (Expert!)</button>\n                </td>\n                <td style=\"vertical-align:top;padding:7px\">\n                  Open een tweede EDS bestand en voeg de inhoud toe aan het huidige EDS bestand.<br>\n                  Voegt de \u00E9\u00E9ndraadschema's samen en voegt eveneens pagina's toe aan het situatieschema als dat nodig is.<br><br>\n                  <span style=\"color:red;font-weight:bold\">Opgelet!</span> Het is aanbevolen uw werk op te slaan alvorens deze functie te gebruiken!\n                </td>\n              </tr>\n            </table>\n        </td>\n      </tr>\n    </table>";
+    strleft += `
+        </td>
+      </tr>
+    </table><br>    
+    `;
+    strleft += `
+    <table border="1px" style="border-collapse:collapse" align="center" width="100%">
+      <tr>
+        <td width="100%" align="center" bgcolor="LightGrey">
+          <b>Samenvoegen</b>
+        </td>
+      </tr>
+      <tr>
+        <td width="100%" align="left">
+            <table border=0>
+              <tr>
+                <td width=350 style="vertical-align:top;padding:5px">
+                  <button style="font-size:14px" onclick="importToAppendClicked()">Samenvoegen (Expert!)</button>
+                </td>
+                <td style="vertical-align:top;padding:7px">
+                  Open een tweede EDS bestand en voeg de inhoud toe aan het huidige EDS bestand.<br>
+                  Voegt de ééndraadschema's samen en voegt eveneens pagina's toe aan het situatieschema als dat nodig is.<br><br>
+                  <span style="color:red;font-weight:bold">Opgelet!</span> Het is aanbevolen uw werk op te slaan alvorens deze functie te gebruiken!
+                </td>
+              </tr>
+            </table>
+        </td>
+      </tr>
+    </table>`;
     document.getElementById("configsection").innerHTML = strleft;
     toggleAppView('config');
 }
-var jsonStore = /** @class */ (function () {
-    function jsonStore(maxSteps) {
-        if (maxSteps === void 0) { maxSteps = 100; }
+class jsonStore {
+    constructor(maxSteps = 100) {
         this.maxSteps = maxSteps;
         this.undoStack = [];
         this.redoStack = [];
     }
-    jsonStore.prototype.store = function (text) {
+    store(text, popFirst = false) {
+        if ((popFirst) && (this.undoStack.length > 0))
+            this.undoStack.pop(); // Remove the oldest entry
         if (this.undoStack.length >= this.maxSteps) {
             this.undoStack.shift(); // Remove the oldest entry to maintain maxSteps
         }
         this.undoStack.push(text);
         this.redoStack = []; // Clear the redo stack whenever a new store is made
-    };
-    jsonStore.prototype.replace = function (text) {
+    }
+    replace(text) {
         if (this.undoStack.length > 0) {
             this.undoStack[this.undoStack.length - 1] = text;
         }
         else {
             this.store(text);
         }
-    };
+    }
     //Always call store before undo otherwise there is nothing to put on the redo stack !!
-    jsonStore.prototype.undo = function () {
+    undo() {
         if (this.undoStack.length <= 1) {
             return null;
         }
-        var lastState = this.undoStack.pop();
+        const lastState = this.undoStack.pop();
         this.redoStack.push(lastState);
         return this.undoStack.length > 0 ? this.undoStack[this.undoStack.length - 1] : null;
-    };
-    jsonStore.prototype.redo = function () {
+    }
+    redo() {
         if (this.redoStack.length === 0) {
             return null;
         }
-        var lastRedoState = this.redoStack.pop();
+        let lastRedoState = this.redoStack.pop();
         this.undoStack.push(lastRedoState);
         return lastRedoState;
-    };
-    jsonStore.prototype.clear = function () {
+    }
+    clear() {
         this.undoStack = [];
         this.redoStack = [];
-    };
-    jsonStore.prototype.undoStackSize = function () { return (Math.max(this.undoStack.length - 1, 0)); };
-    jsonStore.prototype.redoStackSize = function () { return (Math.max(this.redoStack.length, 0)); };
-    return jsonStore;
-}());
-var LargeStringStore = /** @class */ (function () {
-    function LargeStringStore() {
+    }
+    undoStackSize() { return (Math.max(this.undoStack.length - 1, 0)); }
+    redoStackSize() { return (Math.max(this.redoStack.length, 0)); }
+}
+class LargeStringStore {
+    constructor() {
         this.data = [];
     }
-    LargeStringStore.prototype.push = function (text) {
+    push(text) {
         this.data.push(text);
         return (this.data.length - 1);
-    };
-    LargeStringStore.prototype.pushIfNotExists = function (text) {
-        var index = this.data.indexOf(text);
+    }
+    pushIfNotExists(text) {
+        let index = this.data.indexOf(text);
         if (index == -1) {
             this.data.push(text);
             return (this.data.length - 1);
@@ -2357,98 +2200,105 @@ var LargeStringStore = /** @class */ (function () {
         else {
             return index;
         }
-    };
-    LargeStringStore.prototype.get = function (index) {
+    }
+    get(index) {
         return this.data[index];
-    };
-    LargeStringStore.prototype.clear = function () {
+    }
+    clear() {
         this.data = [];
-    };
-    return LargeStringStore;
-}());
-var undoRedo = /** @class */ (function () {
-    function undoRedo(maxSteps) {
-        if (maxSteps === void 0) { maxSteps = 100; }
+    }
+}
+class undoRedo {
+    constructor(maxSteps = 100) {
         this.largeStrings = new LargeStringStore();
         this.samenVoegSleutel = null; // Indien de store functie wordt opgeroepen met deze string wordt geen nieuwe undo stap gecreëerd maar de vorige aangepast
         this.historyEds = new jsonStore(maxSteps);
         this.historyOptions = new jsonStore(maxSteps);
     }
-    undoRedo.prototype.replaceSVGsByStringStore = function () {
-        if (structure.sitplan != null) {
-            for (var _i = 0, _a = structure.sitplan.getElements(); _i < _a.length; _i++) {
-                var element = _a[_i];
+    replaceSVGsByStringStore() {
+        if (globalThis.structure.sitplan != null) {
+            for (let element of globalThis.structure.sitplan.getElements()) {
                 if (!element.isEendraadschemaSymbool())
                     element.svg = this.largeStrings.pushIfNotExists(element.getUnscaledSVGifNotElectroItem()).toString();
             }
         }
-    };
-    undoRedo.prototype.replaceStringStoreBySVGs = function () {
-        if (structure.sitplan != null) {
-            for (var _i = 0, _a = structure.sitplan.getElements(); _i < _a.length; _i++) {
-                var element = _a[_i];
+    }
+    replaceStringStoreBySVGs() {
+        if (globalThis.structure.sitplan != null) {
+            for (let element of globalThis.structure.sitplan.getElements()) {
                 if (!element.isEendraadschemaSymbool())
                     element.svg = this.largeStrings.get(parseInt(element.svg));
             }
         }
-    };
-    undoRedo.prototype.getOptions = function () {
-        var options = {};
-        if (structure.sitplanview != null) {
-            options.selectedBoxOrdinal = structure.sitplanview.getSelectedBoxOrdinal();
-            if (structure.sitplanview.sideBar.getUndoRedoOptions != null) {
-                Object.assign(options, structure.sitplanview.sideBar.getUndoRedoOptions());
+    }
+    getOptions() {
+        let options = {};
+        if (globalThis.structure.sitplanview != null) {
+            options.selectedBoxesOrdinals = globalThis.structure.sitplanview.getSelectedBoxesOrdinals();
+            if (globalThis.structure.sitplanview.sideBar.getUndoRedoOptions != null) {
+                Object.assign(options, globalThis.structure.sitplanview.sideBar.getUndoRedoOptions());
             }
         }
         return (JSON.stringify(options));
-    };
-    undoRedo.prototype.store = function (sleutel) {
-        if (sleutel === void 0) { sleutel = null; }
-        var overschrijfVorige = false;
+    }
+    store(sleutel = null) {
+        let overschrijfVorige = false;
         if ((sleutel != null) && (sleutel == this.samenVoegSleutel))
             overschrijfVorige = true;
         this.samenVoegSleutel = sleutel;
-        // We store the current state of the structure in the history but we replace the SVGs by a reference to a large string store
+        // We store the current state of the globalThis.structure in the history but we replace the SVGs by a reference to a large string store
         this.replaceSVGsByStringStore();
         if (!overschrijfVorige) {
-            this.historyEds.store(structure.toJsonObject(false)); // needs to call with false as we want to keep currentView info
+            this.historyEds.store(globalThis.structure.toJsonObject(false)); // needs to call with false as we want to keep currentView info
             this.historyOptions.store(this.getOptions());
         }
         else {
-            this.historyEds.replace(structure.toJsonObject(false)); // needs to call with false as we want to keep currentView info
+            this.historyEds.replace(globalThis.structure.toJsonObject(false)); // needs to call with false as we want to keep currentView info
             this.historyOptions.replace(this.getOptions());
         }
         this.replaceStringStoreBySVGs();
-        if ((structure.properties.currentView == 'draw') && (structure.sitplanview != null))
-            structure.sitplanview.updateRibbon();
-        else if (structure.properties.currentView == '2col')
-            structure.updateRibbon();
-    };
-    undoRedo.prototype.reload = function (text, options) {
+        if ((globalThis.structure.properties.currentView == 'draw') && (globalThis.structure.sitplanview != null))
+            globalThis.structure.sitplanview.updateRibbon();
+        else if (globalThis.structure.properties.currentView == '2col')
+            globalThis.structure.updateRibbon();
+    }
+    updateSelectedBoxes() {
+        this.historyOptions.store(this.getOptions(), true);
+    }
+    reload(text, options) {
         this.samenVoegSleutel = null;
-        var lastView = structure.properties.currentView;
-        var lastmode = structure.mode;
+        let lastView = globalThis.structure.properties.currentView;
+        let lastmode = globalThis.structure.mode;
         if (text != null)
             loadFromText(text, 0, false);
         // We replace the references to the large string store by the actual SVGs
         this.replaceStringStoreBySVGs();
-        // We need to resort and clean the structure to avoid bad references
-        structure.reSort();
-        structure.mode = lastmode;
-        if (structure.properties.currentView != lastView)
-            toggleAppView(structure.properties.currentView);
-        switch (structure.properties.currentView) {
+        // We need to resort and clean the globalThis.structure to avoid bad references
+        globalThis.structure.reSort();
+        globalThis.structure.mode = lastmode;
+        if (globalThis.structure.properties.currentView != lastView)
+            toggleAppView(globalThis.structure.properties.currentView);
+        switch (globalThis.structure.properties.currentView) {
             case 'draw':
                 topMenu.selectMenuItemByOrdinal(3);
                 showSituationPlanPage();
-                if (structure.sitplanview.sideBar.setUndoRedoOptions != null)
-                    structure.sitplanview.sideBar.setUndoRedoOptions(options);
-                var htmlId = structure.sitplan.getElements()[options.selectedBoxOrdinal].id;
-                if (htmlId == null)
+                if (globalThis.structure.sitplanview.sideBar.setUndoRedoOptions != null)
+                    globalThis.structure.sitplanview.sideBar.setUndoRedoOptions(options);
+                if (options.selectedBoxesOrdinals == null)
                     break;
-                var div = document.getElementById(htmlId);
-                if (div != null)
-                    structure.sitplanview.selectBox(div);
+                for (let selectedBox of options.selectedBoxesOrdinals) {
+                    if (globalThis.structure.sitplan.getElements().length <= selectedBox)
+                        break;
+                    let element = globalThis.structure.sitplan.getElements()[selectedBox];
+                    if (element == null)
+                        break;
+                    let htmlId = element.id;
+                    if (htmlId == null)
+                        break;
+                    let div = document.getElementById(htmlId);
+                    if (div != null)
+                        globalThis.structure.sitplanview.selectBox(div);
+                }
                 break;
             case '2col':
                 topMenu.selectMenuItemByOrdinal(2);
@@ -2459,128 +2309,119 @@ var undoRedo = /** @class */ (function () {
                 printsvg();
                 break;
         }
-    };
-    undoRedo.prototype.undo = function () {
-        var text = this.historyEds.undo();
-        var optionsString = this.historyOptions.undo();
-        var options = optionsString ? JSON.parse(optionsString) : {};
+    }
+    undo() {
+        let text = this.historyEds.undo();
+        let optionsString = this.historyOptions.undo();
+        let options = optionsString ? JSON.parse(optionsString) : {};
         this.reload(text, options);
-    };
-    undoRedo.prototype.redo = function () {
-        var text = this.historyEds.redo();
-        var optionsString = this.historyOptions.redo();
-        var options = optionsString ? JSON.parse(optionsString) : {};
+    }
+    redo() {
+        let text = this.historyEds.redo();
+        let optionsString = this.historyOptions.redo();
+        let options = optionsString ? JSON.parse(optionsString) : {};
         this.reload(text, options);
-    };
-    undoRedo.prototype.clear = function () {
+    }
+    clear() {
         this.samenVoegSleutel = null;
         this.historyEds.clear();
         this.historyOptions.clear();
         this.largeStrings.clear();
-        structure.updateRibbon();
-    };
-    undoRedo.prototype.undoStackSize = function () { return (this.historyEds.undoStackSize()); };
-    undoRedo.prototype.redoStackSize = function () { return (this.historyEds.redoStackSize()); };
-    return undoRedo;
-}());
-var TopMenu = /** @class */ (function () {
-    function TopMenu(ulId, liClassName, menuItems) {
+        globalThis.structure.updateRibbon();
+    }
+    undoStackSize() { return (this.historyEds.undoStackSize()); }
+    redoStackSize() { return (this.historyEds.redoStackSize()); }
+}
+class TopMenu {
+    constructor(ulId, liClassName, menuItems) {
         this.ulElement = document.getElementById(ulId);
         this.liClassName = liClassName;
         this.menuItems = menuItems;
         this.renderMenu();
         this.resetToFirstItem(); // Ensure the first item is selected initially
     }
-    TopMenu.prototype.renderMenu = function () {
-        var _this = this;
+    renderMenu() {
         this.ulElement.innerHTML = ''; // Clear any existing content
-        this.menuItems.forEach(function (item) {
-            var liElement = document.createElement('li');
-            var aElement = document.createElement('a');
-            liElement.className = _this.liClassName;
+        this.menuItems.forEach(item => {
+            const liElement = document.createElement('li');
+            const aElement = document.createElement('a');
+            liElement.className = this.liClassName;
             aElement.innerText = item.name;
-            aElement.addEventListener('click', function () {
-                _this.selectItem(aElement);
+            aElement.addEventListener('click', () => {
+                this.selectItem(aElement);
                 item.callback();
             });
             liElement.appendChild(aElement);
-            _this.ulElement.appendChild(liElement);
+            this.ulElement.appendChild(liElement);
         });
-    };
-    TopMenu.prototype.selectItem = function (selectedElement) {
+    }
+    selectItem(selectedElement) {
         // Remove 'current' ID from all <a> elements
-        var items = this.ulElement.querySelectorAll('a');
-        items.forEach(function (item) { return item.removeAttribute('id'); });
+        const items = this.ulElement.querySelectorAll('a');
+        items.forEach(item => item.removeAttribute('id'));
         // Add 'current' ID to the clicked <a> element
         selectedElement.id = 'current';
-    };
-    TopMenu.prototype.resetToFirstItem = function () {
-        var firstItem = this.ulElement.querySelector('a');
+    }
+    resetToFirstItem() {
+        const firstItem = this.ulElement.querySelector('a');
         if (firstItem) {
             this.selectItem(firstItem);
         }
-    };
-    TopMenu.prototype.selectMenuItemByName = function (name) {
-        var item = this.menuItems.find(function (menuItem) { return menuItem.name === name; });
+    }
+    selectMenuItemByName(name) {
+        const item = this.menuItems.find(menuItem => menuItem.name === name);
         if (item) {
-            var aElement = Array.from(this.ulElement.querySelectorAll('a')).find(function (a) { return a.innerText === name; });
+            const aElement = Array.from(this.ulElement.querySelectorAll('a')).find(a => a.innerText === name);
             if (aElement) {
                 this.selectItem(aElement);
                 item.callback();
             }
         }
-    };
-    TopMenu.prototype.selectMenuItemByOrdinal = function (nr) {
+    }
+    selectMenuItemByOrdinal(nr) {
         // Remove 'current' ID from all <a> elements
-        var items = this.ulElement.querySelectorAll('a');
-        items.forEach(function (item) { return item.removeAttribute('id'); });
+        const items = this.ulElement.querySelectorAll('a');
+        items.forEach(item => item.removeAttribute('id'));
         this.selectItem(items[nr]);
-    };
-    return TopMenu;
-}());
-var Dialog = /** @class */ (function () {
-    function Dialog(title, body, buttons) {
-        if (buttons === void 0) { buttons = null; }
+    }
+}
+class Dialog {
+    constructor(title, body, buttons = null) {
         this.title = title;
         this.body = body;
         if (!buttons) {
-            this.buttons = [{ text: 'OK', callback: function () { } }];
+            this.buttons = [{ text: 'OK', callback: () => { } }];
         }
         else {
             this.buttons = buttons;
         }
     }
     // Show the helper tip if it hasn't been dismissed before
-    Dialog.prototype.show = function () {
+    show() {
         // Create the popup
-        var popupOverlay = document.createElement('div');
+        const popupOverlay = document.createElement('div');
         popupOverlay.id = 'popupOverlay';
         popupOverlay.classList.add('popup-overlay');
-        var popup = document.createElement('div');
+        const popup = document.createElement('div');
         popup.id = 'popup';
         popup.classList.add('popup');
         // Add the HTML content
-        popup.innerHTML = "<h3>".concat(this.title, "</h3><p>").concat(this.body, "</p>");
+        popup.innerHTML = `<h3>${this.title}</h3><p>${this.body}</p>`;
         // Add the buttons
-        var buttonContainer = document.createElement('div');
+        const buttonContainer = document.createElement('div');
         buttonContainer.style.display = 'flex';
         buttonContainer.style.justifyContent = 'center';
         buttonContainer.style.gap = '0px';
-        var _loop_1 = function (button) {
-            var buttonElement = document.createElement('button');
+        for (const button of this.buttons) {
+            const buttonElement = document.createElement('button');
             buttonElement.textContent = button.text;
             buttonElement.classList.add('rounded-button');
-            buttonElement.addEventListener('click', (function () {
+            buttonElement.addEventListener('click', (() => {
                 document.body.removeChild(popupOverlay);
                 document.body.style.pointerEvents = 'auto';
                 button.callback();
-            }).bind(this_1));
+            }).bind(this));
             buttonContainer.appendChild(buttonElement);
-        };
-        var this_1 = this;
-        for (var _i = 0, _a = this.buttons; _i < _a.length; _i++) {
-            var button = _a[_i];
-            _loop_1(button);
         }
         popup.appendChild(buttonContainer);
         // Add the popup to the document body
@@ -2589,22 +2430,17 @@ var Dialog = /** @class */ (function () {
         popupOverlay.style.visibility = 'visible';
         document.body.style.pointerEvents = 'none'; // Disable interactions with the background
         popupOverlay.style.pointerEvents = 'auto'; // Enable interactions with the popup
-    };
-    return Dialog;
-}());
-var HelperTip = /** @class */ (function () {
-    function HelperTip(storage, storagePrefix) {
-        if (storagePrefix === void 0) { storagePrefix = 'helpertip'; }
+    }
+}
+class HelperTip {
+    constructor(storage, storagePrefix = 'helpertip') {
         this.storage = storage;
         this.storagePrefix = storagePrefix;
     }
     // Show the helper tip if it hasn't been dismissed before
-    HelperTip.prototype.show = function (key, htmlContent, checked, callback) {
-        var _this = this;
-        if (checked === void 0) { checked = false; }
-        if (callback === void 0) { callback = function () { }; }
-        var neverDisplayKey = "".concat(this.storagePrefix, ".").concat(key, ".neverDisplay");
-        var displayedInThisSessionKey = "".concat(this.storagePrefix, ".").concat(key, ".displayedInThisSession");
+    show(key, htmlContent, checked = false, callback = () => { }) {
+        const neverDisplayKey = `${this.storagePrefix}.${key}.neverDisplay`;
+        const displayedInThisSessionKey = `${this.storagePrefix}.${key}.displayedInThisSession`;
         // Check if the tip was dismissed before
         if ((this.storage.get(neverDisplayKey) === true) || (this.storage.get(displayedInThisSessionKey) === true)) {
             if (callback)
@@ -2612,42 +2448,42 @@ var HelperTip = /** @class */ (function () {
             return; // Do nothing if the tip was dismissed or already shown
         }
         // Create the popup
-        var popupOverlay = document.createElement('div');
+        const popupOverlay = document.createElement('div');
         popupOverlay.id = 'popupOverlay';
         popupOverlay.classList.add('popup-overlay');
-        var popup = document.createElement('div');
+        const popup = document.createElement('div');
         popup.id = 'popup';
         popup.classList.add('popup');
         // Add the HTML content
         popup.innerHTML = htmlContent;
         // Create the "Never display again" checkbox
-        var checkboxLabel = document.createElement('label');
+        const checkboxLabel = document.createElement('label');
         checkboxLabel.style.display = 'block';
         checkboxLabel.style.marginTop = '10px';
-        var checkbox = document.createElement('input');
+        const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.checked = checked;
         checkboxLabel.appendChild(checkbox);
-        var checkboxText = document.createTextNode(' Deze tekst nooit meer weergeven in deze browser.');
-        var italicText = document.createElement('i');
+        const checkboxText = document.createTextNode(' Deze tekst nooit meer weergeven in deze browser.');
+        const italicText = document.createElement('i');
         italicText.appendChild(checkboxText);
         checkboxLabel.appendChild(italicText);
         popup.appendChild(checkboxLabel);
-        var buttonContainer = document.createElement('div');
+        const buttonContainer = document.createElement('div');
         buttonContainer.style.display = 'flex';
         buttonContainer.style.justifyContent = 'center';
         buttonContainer.style.gap = '0px';
         // Create the "OK" button
-        var okButton = document.createElement('button');
+        const okButton = document.createElement('button');
         okButton.textContent = 'OK';
         okButton.classList.add('rounded-button');
-        okButton.addEventListener('click', function (event) {
+        okButton.addEventListener('click', (event) => {
             //stop the event from propagating
             event.stopPropagation();
             // Set the neverdisplay flag if the checkbox is checked
-            _this.storage.set(displayedInThisSessionKey, true, true);
+            this.storage.set(displayedInThisSessionKey, true, true);
             if (checkbox.checked) {
-                _this.storage.set(neverDisplayKey, true);
+                this.storage.set(neverDisplayKey, true);
             }
             // Remove the popup
             document.body.removeChild(popupOverlay);
@@ -2663,28 +2499,60 @@ var HelperTip = /** @class */ (function () {
         popupOverlay.style.visibility = 'visible';
         document.body.style.pointerEvents = 'none'; // Disable interactions with the background
         popupOverlay.style.pointerEvents = 'auto'; // Enable interactions with the popup
-    };
-    return HelperTip;
-}());
+    }
+}
 /* FUNCTION showFilePage
    
    Shows the Documentation-Page.
 
 */
 function showDocumentationPage() {
-    var strleft = "\n    <table border=\"1px\" style=\"border-collapse:collapse\" align=\"center\" width=\"100%\">\n      <tr>\n        <td width=\"100%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Handleiding</b>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"100%\" align=\"left\">\n            <table border=0>\n              <tr>\n                <td width=100 style=\"vertical-align:top;padding:5px\">\n                  <button style=\"font-size:14px\" id=\"Btn_downloadManual\">E\u00E9ndraadschema</button>\n                </td>\n                <td style=\"vertical-align:top;padding:7px\">\n                  Een volledige handleiding is beschikbaar in PDF formaat.\n                  Klik links om deze in een ander venster te openen.\n                  <br>\n                  Het programma is in volle ontwikkeling dus delen van de handleiding zijn\n                  mogelijk ietwat verouderd.  \n                </td>\n              </tr>\n              <tr>\n                <td width=100 style=\"vertical-align:top;padding:5px\">\n                  <button style=\"font-size:14px\" id=\"Btn_downloadSitPlanManual\">Situatieschema</button>\n                </td>\n                <td style=\"vertical-align:top;padding:7px\">\n                  Specifiek voor het werken met het situatieschema werd een ander korter document opgesteld.\n                  Klik link om deze in een ander venster te openen.\n                </td>\n              </tr>\n            </table>\n        </td>\n      </tr>\n    </table>";
+    let strleft = `
+    <table border="1px" style="border-collapse:collapse" align="center" width="100%">
+      <tr>
+        <td width="100%" align="center" bgcolor="LightGrey">
+          <b>Handleiding</b>
+        </td>
+      </tr>
+      <tr>
+        <td width="100%" align="left">
+            <table border=0>
+              <tr>
+                <td width=100 style="vertical-align:top;padding:5px">
+                  <button style="font-size:14px" id="Btn_downloadManual">Eéndraadschema</button>
+                </td>
+                <td style="vertical-align:top;padding:7px">
+                  Een volledige handleiding is beschikbaar in PDF formaat.
+                  Klik links om deze in een ander venster te openen.
+                  <br>
+                  Het programma is in volle ontwikkeling dus delen van de handleiding zijn
+                  mogelijk ietwat verouderd.  
+                </td>
+              </tr>
+              <tr>
+                <td width=100 style="vertical-align:top;padding:5px">
+                  <button style="font-size:14px" id="Btn_downloadSitPlanManual">Situatieschema</button>
+                </td>
+                <td style="vertical-align:top;padding:7px">
+                  Specifiek voor het werken met het situatieschema werd een ander korter document opgesteld.
+                  Klik link om deze in een ander venster te openen.
+                </td>
+              </tr>
+            </table>
+        </td>
+      </tr>
+    </table>`;
     document.getElementById("configsection").innerHTML = strleft;
     toggleAppView('config');
-    document.getElementById('Btn_downloadManual').onclick = function () { window.open('Documentation/edsdoc.pdf', '_blank'); };
-    document.getElementById('Btn_downloadSitPlanManual').onclick = function () { window.open('Documentation/sitplandoc.pdf', '_blank'); };
+    document.getElementById('Btn_downloadManual').onclick = () => { window.open('Documentation/edsdoc.pdf', '_blank'); };
+    document.getElementById('Btn_downloadSitPlanManual').onclick = () => { window.open('Documentation/sitplandoc.pdf', '_blank'); };
 }
-var ContextMenu = /** @class */ (function () {
+class ContextMenu {
     /**
      * Constructor voor het initialiseren van het contextmenu-element.
      * @param div - Het HTML-element waaraan het contextmenu wordt toegevoegd.
      */
-    function ContextMenu(div) {
-        if (div === void 0) { div = document.body; }
+    constructor(div = document.body) {
         this.menuItems = [];
         this.menuElement = null;
         this.menuElement = document.createElement('div');
@@ -2694,106 +2562,104 @@ var ContextMenu = /** @class */ (function () {
     /**
      * Wis alle menu-items.
      */
-    ContextMenu.prototype.clearMenu = function () {
+    clearMenu() {
         this.menuItems = [];
         if (this.menuElement) {
             this.menuElement.innerHTML = '';
         }
-    };
+    }
     /**
      * Voeg een menu-item toe met een optionele sneltoets.
      * @param label - De tekstlabel van het menu-item.
      * @param callback - De functie die wordt aangeroepen bij het klikken op het menu-item.
      * @param shortcut - De optionele sneltoets voor het menu-item.
      */
-    ContextMenu.prototype.addMenuItem = function (label, callback, shortcut) {
-        this.menuItems.push({ label: label, shortcut: shortcut, callback: callback });
-    };
+    addMenuItem(label, callback, shortcut) {
+        this.menuItems.push({ label, shortcut, callback });
+    }
     /**
      * Voeg een scheidingslijn toe aan het menu.
      */
-    ContextMenu.prototype.addLine = function () {
-        this.menuItems.push({ label: 'separator', callback: function () { } });
-    };
+    addLine() {
+        this.menuItems.push({ label: 'separator', callback: () => { } });
+    }
     /**
      * Render de menu-items.
      */
-    ContextMenu.prototype.renderMenu = function () {
-        var _this = this;
+    renderMenu() {
         if (this.menuElement) {
             this.menuElement.innerHTML = '';
-            this.menuItems.forEach(function (item, index) {
+            this.menuItems.forEach((item, index) => {
                 if (item.label === 'separator') {
-                    var separator = document.createElement('hr');
+                    const separator = document.createElement('hr');
                     separator.className = 'context-menu-separator';
-                    _this.menuElement.appendChild(separator);
+                    this.menuElement.appendChild(separator);
                 }
                 else {
-                    var menuItem = document.createElement('div');
+                    const menuItem = document.createElement('div');
                     menuItem.className = 'context-menu-item';
-                    var labelElement = document.createElement('span');
+                    const labelElement = document.createElement('span');
                     labelElement.textContent = item.label;
-                    var shortcutElement = document.createElement('span');
+                    const shortcutElement = document.createElement('span');
                     shortcutElement.textContent = item.shortcut || '';
                     shortcutElement.className = 'context-menu-shortcut';
                     menuItem.appendChild(labelElement);
                     menuItem.appendChild(shortcutElement);
-                    menuItem.addEventListener('click', function () {
+                    menuItem.addEventListener('click', () => {
                         item.callback();
-                        _this.hide();
+                        this.hide();
                     });
-                    _this.menuElement.appendChild(menuItem);
+                    this.menuElement.appendChild(menuItem);
                 }
             });
         }
-    };
+    }
     /**
      * Toon het contextmenu op de locatie van de muisklik.
      * @param event - Het muisgebeurtenisobject.
      */
-    ContextMenu.prototype.show = function (event) {
+    show(event) {
         if (this.menuElement) {
             this.renderMenu();
             this.menuElement.style.display = 'block';
-            var clientX = event.clientX, clientY = event.clientY;
-            var innerWidth_1 = window.innerWidth, innerHeight_1 = window.innerHeight;
-            var _a = this.menuElement, offsetWidth = _a.offsetWidth, offsetHeight = _a.offsetHeight;
-            var left = clientX;
-            var top_1 = clientY;
-            if (left + offsetWidth > innerWidth_1) {
-                left = innerWidth_1 - offsetWidth;
+            const { clientX, clientY } = event;
+            const { innerWidth, innerHeight } = window;
+            const { offsetWidth, offsetHeight } = this.menuElement;
+            let left = clientX;
+            let top = clientY;
+            if (left + offsetWidth > innerWidth) {
+                left = innerWidth - offsetWidth;
             }
-            if (top_1 + offsetHeight > innerHeight_1) {
-                top_1 = innerHeight_1 - offsetHeight;
+            if (top + offsetHeight > innerHeight) {
+                top = innerHeight - offsetHeight;
             }
-            this.menuElement.style.left = "".concat(left, "px");
-            this.menuElement.style.top = "".concat(top_1, "px");
+            this.menuElement.style.left = `${left}px`;
+            this.menuElement.style.top = `${top}px`;
         }
-    };
+    }
     /**
      * Verberg het contextmenu.
      */
-    ContextMenu.prototype.hide = function () {
+    hide() {
         if (this.menuElement) {
             this.menuElement.style.display = 'none';
         }
-    };
-    return ContextMenu;
-}());
+    }
+}
 /**
  * Class gebruikt in SituationPlanView om te zoeken naar electroitems op basis van de kringnaam.
  * Dit laat toe items to selecteren uit het volledige eendraadschema en ze te plaatsen op het situatieschema.
  *
  * Deze class refereert naar de volgende globale variabelen:
- * - structure
+ * - globalThis.structure
  */
-var ElectroItemZoeker = /** @class */ (function () {
+class ElectroItemZoeker {
     /**
      * Constructor van de ElectroItemZoeker.
      *
      * Initialiseert de lijst van alle toegestane ElectroItems in het situatieplan.
      */
-    function ElectroItemZoeker() {
+    constructor() {
         this.excludedTypes = ['Aansluiting', 'Bord', 'Kring', 'Domotica', 'Domotica module (verticaal)',
             'Domotica gestuurde verbruiker', 'Leiding', 'Splitsing', 'Verlenging',
             'Vrije ruimte', 'Meerdere verbruikers'];
@@ -2806,9 +2672,9 @@ var ElectroItemZoeker = /** @class */ (function () {
      * @returns {Object[]} een lijst van objecten met de volgende structuur:
      *                  {id: number, kringnaam: string, adres: string, type: string}
      */
-    ElectroItemZoeker.prototype.getData = function () {
+    getData() {
         return this.data;
-    };
+    }
     /**
     * Geeft de lijst van alle Borden in het eendraadschema.
     * @returns {Object[]} een lijst van objecten met de volgende structuur:
@@ -2816,25 +2682,25 @@ var ElectroItemZoeker = /** @class */ (function () {
     *
     * Indien de originele naam null is of enkel uit spaties bestaat wordt als naam "Bord" meegegeven
     */
-    ElectroItemZoeker.prototype.getBorden = function () {
+    getBorden() {
         return this.borden;
-    };
+    }
     /**
      * Geeft een lijst van alle unieke kringnamen retour uit de lijst van ElectroItems.
      * @returns {string[]} een lijst van unieke kringnamen.
      */
-    ElectroItemZoeker.prototype.getUniqueKringnaam = function () {
-        return Array.from(new Set(this.data.map(function (x) { return x.kringnaam; })));
-    };
+    getUniqueKringnaam() {
+        return Array.from(new Set(this.data.map(x => x.kringnaam)));
+    }
     /**
      * Geeft een lijst van alle ElectroItems retour die behoren tot de kring met de naam 'kringnaam'.
      * @param {string} kringnaam - de naam van de kring.
      * @returns {Object[]} een lijst van objecten met de volgende structuur:
      *                  {id: number, adres: string, type: string}
      */
-    ElectroItemZoeker.prototype.getElectroItemsByKring = function (kringnaam) {
-        return this.data.filter(function (x) { return x.kringnaam === kringnaam; }).map(function (x) { return ({ id: x.id, adres: x.adres, type: x.type }); });
-    };
+    getElectroItemsByKring(kringnaam) {
+        return this.data.filter(x => x.kringnaam === kringnaam).map(x => ({ id: x.id, adres: x.adres, type: x.type }));
+    }
     /**
      * Rekent de lijst van alle toegestane ElectroItems opnieuw uit.
      *
@@ -2847,46 +2713,45 @@ var ElectroItemZoeker = /** @class */ (function () {
      *
      * Er wordt eveneens een lijst van borden gemaakt.
      */
-    ElectroItemZoeker.prototype.reCalculate = function () {
+    reCalculate() {
         this.data = [];
         this.borden = [];
-        for (var i = 0; i < structure.length; i++) {
-            if (structure.active[i]) {
-                var id = structure.id[i];
-                var electroItem = structure.data[i];
+        for (let i = 0; i < globalThis.structure.length; i++) {
+            if (globalThis.structure.active[i]) {
+                let id = globalThis.structure.id[i];
+                let electroItem = globalThis.structure.data[i];
                 if (electroItem == null)
                     continue;
-                var type = electroItem.getType();
+                let type = electroItem.getType();
                 if (type == 'Bord') {
-                    var myName = electroItem.props.naam;
+                    let myName = electroItem.props.naam;
                     if ((myName == null) || (myName.trim() == ''))
                         myName = 'Bord';
                     this.borden.push({ id: id, naam: myName });
                 }
                 else {
-                    var kringnaam = structure.findKringName(id).trim();
+                    let kringnaam = globalThis.structure.findKringName(id).trim();
                     if (kringnaam != '') {
                         if ((type != null) && (this.excludedTypes.indexOf(type) === -1)) {
-                            var adres = electroItem.getReadableAdres();
+                            let adres = electroItem.getReadableAdres();
                             this.data.push({ id: id, kringnaam: kringnaam, adres: adres, type: type });
                         }
                     }
                 }
             }
         }
-    };
-    return ElectroItemZoeker;
-}());
+    }
+}
 /**
  * Functie die de breedte en hoogte van een rechthoek als invoer neemt, evenals een rotatie rond het midden van de rechthoek.
  * De functie retourneert de breedte en hoogte van de kleinste rechthoek die de geroteerde rechthoek omsluit met zijden langs de X- en Y-assen.
  */
 function getRotatedRectangleSize(width, height, rotation) {
-    var rotationInRadians = rotation * Math.PI / 180;
-    var cos = Math.cos(rotationInRadians);
-    var sin = Math.sin(rotationInRadians);
-    var rotatedWidth = Math.abs(width * cos) + Math.abs(height * sin);
-    var rotatedHeight = Math.abs(width * sin) + Math.abs(height * cos);
+    const rotationInRadians = rotation * Math.PI / 180;
+    const cos = Math.cos(rotationInRadians);
+    const sin = Math.sin(rotationInRadians);
+    const rotatedWidth = Math.abs(width * cos) + Math.abs(height * sin);
+    const rotatedHeight = Math.abs(width * sin) + Math.abs(height * cos);
     return { width: rotatedWidth, height: rotatedHeight };
 }
 /**
@@ -2901,15 +2766,15 @@ function getXYRectangleSize(width, height, rotation) {
     rotation = Math.abs(rotation) % 180;
     if (rotation > 90)
         rotation = 180 - rotation;
-    var rotationInRadians = rotation * Math.PI / 180;
-    var cos = Math.cos(rotationInRadians);
-    var sin = Math.sin(rotationInRadians);
+    const rotationInRadians = rotation * Math.PI / 180;
+    const cos = Math.cos(rotationInRadians);
+    const sin = Math.sin(rotationInRadians);
     return { width: Math.min(width / cos, height / sin), height: Math.min(width / sin, height / cos) };
 }
 /**
  * Cache het resultaat van getPixelsPerMillimeter() om de overhead van het maken en verwijderen van een DOM-element bij elke oproep te voorkomen.
  */
-var cachedPixelsPerMillimeter = null;
+let cachedPixelsPerMillimeter = null;
 /**
  * Berekent het aantal pixels in een millimeter op het huidige scherm.
  * Maakt gebruik van een cache om de overhead van het maken en verwijderen van een DOM-element bij elke oproep te voorkomen.
@@ -2917,11 +2782,11 @@ var cachedPixelsPerMillimeter = null;
  */
 function getPixelsPerMillimeter() {
     if (cachedPixelsPerMillimeter === null) {
-        var div = document.createElement('div');
+        const div = document.createElement('div');
         div.style.width = '10mm';
         div.style.position = 'absolute';
         document.body.appendChild(div);
-        var widthInPixels = div.offsetWidth;
+        const widthInPixels = div.offsetWidth;
         document.body.removeChild(div);
         cachedPixelsPerMillimeter = widthInPixels / 10;
     }
@@ -2931,8 +2796,8 @@ function getPixelsPerMillimeter() {
  * Class that helps with dragging a box on the situation plan view.
  * It keeps track of the start position of the drag and the zoomfactor.
  */
-var MouseDrag = /** @class */ (function () {
-    function MouseDrag() {
+class MouseDrag {
+    constructor() {
         this.startOffsetLeft = 0;
         this.startOffsetTop = 0;
         this.hassMoved = false;
@@ -2944,51 +2809,44 @@ var MouseDrag = /** @class */ (function () {
      * @param startOffsetLeft The left position of the box when the drag starts.
      * @param startOffsetTop The top position of the box when the drag starts.
      */
-    MouseDrag.prototype.startDrag = function (mouseX, mouseY, startOffsetLeft, startOffsetTop) {
-        if (mouseX === void 0) { mouseX = 0; }
-        if (mouseY === void 0) { mouseY = 0; }
-        if (startOffsetLeft === void 0) { startOffsetLeft = 0; }
-        if (startOffsetTop === void 0) { startOffsetTop = 0; }
+    startDrag(mouseX = 0, mouseY = 0, startOffsetLeft = 0, startOffsetTop = 0) {
         this.startOffsetLeft = startOffsetLeft;
         this.startOffsetTop = startOffsetTop;
         this.hassMoved = false;
-        var menuHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--menu-height'));
-        var ribbonHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ribbon-height'));
-        var sideBarWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sideBarWidth'));
-        this.startPaperPos = structure.sitplanview.canvasPosToPaperPos(mouseX - sideBarWidth, mouseY - menuHeight - ribbonHeight);
-    };
+        const menuHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--menu-height'));
+        const ribbonHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ribbon-height'));
+        const sideBarWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sideBarWidth'));
+        this.startPaperPos = globalThis.structure.sitplanview.canvasPosToPaperPos(mouseX - sideBarWidth, mouseY - menuHeight - ribbonHeight);
+    }
     /**
-     * Return the new left and top position of the box based on the current mouse position.
+     * Return the new x and y position of the box based on the current mouse position.
      * @param mouseX The current x position of the mouse.
      * @param mouseY The current y position of the mouse.
-     * @returns An object with the new left and top position of the box.
+     * @returns An object with the new x and y position of the box.
      */
-    MouseDrag.prototype.returnNewLeftTop = function (mousex, mousey) {
-        if (mousex === void 0) { mousex = 0; }
-        if (mousey === void 0) { mousey = 0; }
-        var menuHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--menu-height'));
-        var ribbonHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ribbon-height'));
-        var sideBarWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sideBarWidth'));
-        var stopPaperPos = structure.sitplanview.canvasPosToPaperPos(mousex - sideBarWidth, mousey - menuHeight - ribbonHeight);
+    returnNewPaperPos(mousex = 0, mousey = 0) {
+        const menuHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--menu-height'));
+        const ribbonHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ribbon-height'));
+        const sideBarWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sideBarWidth'));
+        let stopPaperPos = globalThis.structure.sitplanview.canvasPosToPaperPos(mousex - sideBarWidth, mousey - menuHeight - ribbonHeight);
         if (stopPaperPos.x != this.startPaperPos.x || stopPaperPos.y != this.startPaperPos.y)
             this.hassMoved = true;
         return ({
-            left: (stopPaperPos.x - this.startPaperPos.x) + this.startOffsetLeft,
-            top: (stopPaperPos.y - this.startPaperPos.y) + this.startOffsetTop
+            x: (stopPaperPos.x - this.startPaperPos.x) + this.startOffsetLeft,
+            y: (stopPaperPos.y - this.startPaperPos.y) + this.startOffsetTop
         });
-    };
-    return MouseDrag;
-}());
+    }
+}
 /**
  * Volledig overzicht van een situatieplan.
  * Werd gebouwd voor gebruik in de browser maar is redelijk browser-agnostic.
  * De effectieve code om te interageren met de browser zelf zit in class SituationPlanView.
  *
  * Deze class refereert naar de volgende globale variabelen:
- * - structure
+ * - globalThis.structure
  */
-var SituationPlan = /** @class */ (function () {
-    function SituationPlan() {
+class SituationPlan {
+    constructor() {
         this.activePage = 1; // We houden deze bij in situationplan zodat ook wijzigingen van pagina's worden opgeslagen
         this.numPages = 1;
         this.elements = [];
@@ -3002,7 +2860,7 @@ var SituationPlan = /** @class */ (function () {
      * Reset alle waarden van het situatieplan naar hun default waarde.
      * Gebruik deze functie om alle data te wissen en het situatieplan opnieuw te beginnen.
      */
-    SituationPlan.prototype.dispose = function () {
+    dispose() {
         this.elements = [];
         this.numPages = 1;
         this.activePage = 1;
@@ -3011,25 +2869,25 @@ var SituationPlan = /** @class */ (function () {
             scale: SITPLANVIEW_DEFAULT_SCALE,
             rotate: 0
         };
-    };
+    }
     /**
      * Workaround om de private variabele elements te kunnen gebruiken in friend classs
      * @returns {SituationPlanElement[]} De elementen van het situatieplan
      */
-    SituationPlan.prototype.getElements = function () {
+    getElements() {
         return this.elements;
-    };
+    }
     /**
      * Geeft het aantal pagina's van het situatieplan terug.
      * @returns {number} Het aantal pagina's van het situatieplan.
      */
-    SituationPlan.prototype.getNumPages = function () {
+    getNumPages() {
         return (this.elements.length > 0 ? this.numPages : 0);
-    };
-    SituationPlan.prototype.heeftEenzameSchakelaars = function () {
+    }
+    heeftEenzameSchakelaars() {
         var schakelaars = this.elements.filter(function (element) {
             if (element.isEendraadschemaSymbool()) {
-                var electroItem = structure.getElectroItemById(element.getElectroItemId());
+                let electroItem = globalThis.structure.getElectroItemById(element.getElectroItemId());
                 if (electroItem != null) {
                     if (electroItem.props.type == "Schakelaars") {
                         if ((electroItem.props.aantal_schakelaars == 1) || (electroItem.props.aantal_schakelaars == null)) {
@@ -3040,12 +2898,11 @@ var SituationPlan = /** @class */ (function () {
             }
         });
         return schakelaars.length > 1;
-    };
-    SituationPlan.prototype.dropLegacySchakelaars = function () {
-        for (var _i = 0, _a = this.elements; _i < _a.length; _i++) {
-            var element = _a[_i];
+    }
+    dropLegacySchakelaars() {
+        for (let element of this.elements) {
             if (element.isEendraadschemaSymbool()) {
-                var electroItem = structure.getElectroItemById(element.getElectroItemId());
+                let electroItem = globalThis.structure.getElectroItemById(element.getElectroItemId());
                 if (electroItem != null) {
                     if (electroItem.props.type == "Schakelaars") {
                         if ((electroItem.props.aantal_schakelaars == 1) || (electroItem.props.aantal_schakelaars == null)) {
@@ -3056,15 +2913,15 @@ var SituationPlan = /** @class */ (function () {
             }
         }
         ;
-    };
+    }
     /**
      * SituationPlanElement toevoegen aan het situatieplan
      * @param element
      * @returns {void}
      */
-    SituationPlan.prototype.addElement = function (element) {
+    addElement(element) {
         this.elements.push(element);
-    };
+    }
     /**
      * Laad een SVG-inhoud vanuit een bestand en voegt deze toe aan het situatieplan.
      * De SVG werd geselecteerd in een fileInput HTML element en komt binnen via het event in de functie header.
@@ -3076,13 +2933,13 @@ var SituationPlan = /** @class */ (function () {
      * @param {() => void} callback Een callback-functie die wordt aangeroepen wanneer het element is toegevoegd.
      * @returns {SituationPlanElement} Het element dat is toegevoegd.
      */
-    SituationPlan.prototype.addElementFromFile = function (event, page, posx, posy, callback) {
-        var element = new SituationPlanElement();
+    addElementFromFile(event, page, posx, posy, callback) {
+        let element = new SituationPlanElement();
         element.setVars({ page: page, posx: posx, posy: posy, labelfontsize: this.defaults.fontsize, scale: this.defaults.scale, rotate: this.defaults.rotate });
         element.importFromFile(event, callback);
         this.elements.push(element);
         return element;
-    };
+    }
     /**
      * Creëer een nieuw element in het situatieplan dat gelinkt is aan een Electro_Item
      *
@@ -3100,17 +2957,17 @@ var SituationPlan = /** @class */ (function () {
      * @param {number} rotate De rotatie van het element.
      * @returns {SituationPlanElement} Het element dat is toegevoegd.
      */
-    SituationPlan.prototype.addElementFromElectroItem = function (electroItemId, page, posx, posy, adrestype, adres, adreslocation, labelfontsize, scale, rotate) {
-        var electroItem = structure.getElectroItemById(electroItemId);
+    addElementFromElectroItem(electroItemId, page, posx, posy, adrestype, adres, adreslocation, labelfontsize, scale, rotate) {
+        const electroItem = globalThis.structure.getElectroItemById(electroItemId);
         if (!electroItem)
             return null;
-        var element = electroItem.toSituationPlanElement();
-        Object.assign(element, { page: page, posx: posx, posy: posy, labelfontsize: labelfontsize, scale: scale, rotate: rotate });
+        const element = electroItem.toSituationPlanElement();
+        Object.assign(element, { page, posx, posy, labelfontsize, scale, rotate });
         element.setElectroItemId(electroItemId);
         element.setAdres(adrestype, adres, adreslocation);
         this.elements.push(element);
         return element;
-    };
+    }
     /**
      * Verwijder een element van het situatieplan.
      * In principe is er altijd maar één maar de functie gebruikt recursie in het geval er meerdere zouden zijn
@@ -3119,8 +2976,8 @@ var SituationPlan = /** @class */ (function () {
      * @param {SituationPlanElement} element Het element dat verwijderd moet worden.
      * @returns {void}
      */
-    SituationPlan.prototype.removeElement = function (element) {
-        var index = this.elements.indexOf(element);
+    removeElement(element) {
+        const index = this.elements.indexOf(element);
         if (index === -1)
             return;
         this.elements.splice(index, 1);
@@ -3129,7 +2986,7 @@ var SituationPlan = /** @class */ (function () {
         if (element.boxlabelref != null)
             element.boxlabelref.remove();
         this.removeElement(element); // Recurse in het geval er meerdere zouden zijn maar dit zou niet mogen gebeuren
-    };
+    }
     /**
      * Zorgt ervoor dat alle elementen in het situatieplan een link hebben naar
      * het eendraadschema.
@@ -3137,20 +2994,19 @@ var SituationPlan = /** @class */ (function () {
      * Als een element in het situatieplan verwijst naar een symbool dat niet langer in
      * het eendraadschema zit, wordt het element verwijderd uit het situatieplan.
      */
-    SituationPlan.prototype.syncToEendraadSchema = function () {
-        for (var _i = 0, _a = this.elements; _i < _a.length; _i++) {
-            var element = _a[_i];
+    syncToEendraadSchema() {
+        for (let element of this.elements) {
             //Indien een symbool niet langer in het eendraadschema zit moet het ook uit het situatieplan verwijderd worden
             //We kunnen hier niet de functie isEendraadSchemaSymbool of getElectroItemById gebruiken want die zorgen
             //ervoor dat onderstaande altijd false geeft als de symbolen niet langer in het eendraadschema zitten waardoor
             //de cleanup die nodig is niet gebeurd.
-            if ((element.electroItemId != null) && (structure.getElectroItemById(element.getElectroItemId()) == null)) {
+            if ((element.electroItemId != null) && (globalThis.structure.getElectroItemById(element.getElectroItemId()) == null)) {
                 this.removeElement(element);
                 this.syncToEendraadSchema();
                 return; // Start opnieuw en stop na recursie
             }
         }
-    };
+    }
     /**
      * Sorteer de elementen in het situatieplan op basis van de z-index van hun boxref elementen in de DOM.
      * Elementen met een `null` `boxref` worden naar het einde van de lijst verplaatst.
@@ -3160,14 +3016,14 @@ var SituationPlan = /** @class */ (function () {
      *
      * @returns {void}
      */
-    SituationPlan.prototype.orderByZIndex = function () {
-        //if (structure.sitplanview == null) return;
-        this.elements.sort(function (a, b) {
-            var asort = (((a.boxref == null) || (a.boxref.style.zIndex === "")) ? 0 : parseInt(a.boxref.style.zIndex));
-            var bsort = (((b.boxref == null) || (b.boxref.style.zIndex === "")) ? 0 : parseInt(b.boxref.style.zIndex));
+    orderByZIndex() {
+        //if (globalThis.structure.sitplanview == null) return;
+        this.elements.sort((a, b) => {
+            let asort = (((a.boxref == null) || (a.boxref.style.zIndex === "")) ? 0 : parseInt(a.boxref.style.zIndex));
+            let bsort = (((b.boxref == null) || (b.boxref.style.zIndex === "")) ? 0 : parseInt(b.boxref.style.zIndex));
             return asort - bsort;
         });
-    };
+    }
     /**
      * Initialiseer het situatieplan vanuit een json-object.
      *
@@ -3177,7 +3033,7 @@ var SituationPlan = /** @class */ (function () {
      *                      Elke json-object in de array bevat de properties van een SituationPlanElement.
      * @returns {void}
      */
-    SituationPlan.prototype.fromJsonObject = function (json) {
+    fromJsonObject(json) {
         this.dispose();
         if (json.numPages !== undefined) {
             this.numPages = json.numPages;
@@ -3195,8 +3051,8 @@ var SituationPlan = /** @class */ (function () {
             Object.assign(this.defaults, json.defaults);
         }
         if (Array.isArray(json.elements)) {
-            this.elements = json.elements.map(function (element) {
-                var newElement = new SituationPlanElement();
+            this.elements = json.elements.map((element) => {
+                const newElement = new SituationPlanElement();
                 newElement.fromJsonObject(element);
                 return newElement;
             });
@@ -3204,31 +3060,30 @@ var SituationPlan = /** @class */ (function () {
         else {
             this.elements = [];
         }
-    };
+    }
     /**
      * Converteer het situatieplan naar een JSON-object dat gebruikt kan worden
      * voor opslaan in lokale storage of voor versturen naar de server.
      *
      * @returns {any} Het JSON-object dat het situatieplan bevat.
      */
-    SituationPlan.prototype.toJsonObject = function () {
+    toJsonObject() {
         this.orderByZIndex();
-        var elements = [];
-        for (var _i = 0, _a = this.elements; _i < _a.length; _i++) {
-            var element = _a[_i];
+        let elements = [];
+        for (let element of this.elements) {
             elements.push(element.toJsonObject());
         }
         return { numPages: this.numPages, activePage: this.activePage, defaults: this.defaults, elements: elements };
-    };
+    }
     /**
      * Tel het aantal elementen in het situatieplan dat overeenkomt met het gegeven electroItemId.
      *
      * @param {number} electroItemId - Het ID van het Electro_Item waarvan de elementen geteld moeten worden.
      * @returns {number} Het aantal elementen met het gegeven electroItemId.
      */
-    SituationPlan.prototype.countByElectroItemId = function (electroItemId) {
-        return this.elements.filter(function (element) { return element.getElectroItemId() === electroItemId; }).length;
-    };
+    countByElectroItemId(electroItemId) {
+        return this.elements.filter(element => element.getElectroItemId() === electroItemId).length;
+    }
     /**
      * Converteer het situatieplan naar een formaat dat gebruikt kan worden voor printen.
      *
@@ -3249,55 +3104,51 @@ var SituationPlan = /** @class */ (function () {
      *                      ]
      *                  }
      */
-    SituationPlan.prototype.toSitPlanPrint = function (fitToPage) {
-        if (fitToPage === void 0) { fitToPage = false; }
+    toSitPlanPrint(fitToPage = false) {
         this.syncToEendraadSchema(); // Om zeker te zijn dat we geen onbestaande elementen meer hebben
         this.orderByZIndex(); // Sorteer de elementen op basis van de z-index zodat ze in de juiste volgorde worden geprint
-        var outstruct = {};
-        outstruct.numpages = (this.elements.length > 0 ? structure.sitplan.numPages : 0);
+        let outstruct = {};
+        outstruct.numpages = (this.elements.length > 0 ? globalThis.structure.sitplan.numPages : 0);
         outstruct.pages = [];
-        for (var i = 0; i < outstruct.numpages; i++) {
-            var svgstr = '';
-            var maxx = getPixelsPerMillimeter() * 277;
-            var maxy = getPixelsPerMillimeter() * 150;
-            var minx = 0;
-            var miny = 0;
-            for (var _i = 0, _a = this.elements; _i < _a.length; _i++) {
-                var element = _a[_i];
+        for (let i = 0; i < outstruct.numpages; i++) {
+            let svgstr = '';
+            let maxx = getPixelsPerMillimeter() * 277;
+            let maxy = getPixelsPerMillimeter() * 150;
+            let minx = 0;
+            let miny = 0;
+            for (let element of this.elements) {
                 if (element.page == (i + 1)) {
-                    var fontsize = (element.labelfontsize != null) ? element.labelfontsize : 11;
+                    let fontsize = (element.labelfontsize != null) ? element.labelfontsize : 11;
                     svgstr += element.getScaledSVG(true);
                     if (fitToPage) {
-                        var boundingbox = getRotatedRectangleSize(element.sizex * element.getscale(), element.sizey * element.getscale(), element.rotate);
+                        let boundingbox = getRotatedRectangleSize(element.sizex * element.getscale(), element.sizey * element.getscale(), element.rotate);
                         maxx = Math.max(maxx, element.posx + boundingbox.width / 2);
                         maxy = Math.max(maxy, element.posy + boundingbox.height / 2);
                         minx = Math.min(minx, element.posx - boundingbox.width / 2);
                         miny = Math.min(miny, element.posy - boundingbox.height / 2);
                     }
-                    var str = element.getAdres();
-                    svgstr += "<text x=\"".concat(element.labelposx, "\" y=\"").concat(element.labelposy, "\" font-size=\"").concat(fontsize, "\" fill=\"black\" text-anchor=\"middle\" dominant-baseline=\"middle\">").concat(htmlspecialchars(str), "</text>");
+                    let str = element.getAdres();
+                    svgstr += `<text x="${element.labelposx}" y="${element.labelposy}" font-size="${fontsize}" fill="black" text-anchor="middle" dominant-baseline="middle">${htmlspecialchars(str)}</text>`;
                 }
             }
-            svgstr = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"".concat(maxx - minx, "px\" height=\"").concat(maxy - miny, "px\" viewBox=\"").concat(minx, " ").concat(miny, " ").concat(maxx - minx, " ").concat(maxy - miny, "\">").concat(svgstr, "</svg>");
+            svgstr = `<svg xmlns="http://www.w3.org/2000/svg" width="${maxx - minx}px" height="${maxy - miny}px" viewBox="${minx} ${miny} ${maxx - minx} ${maxy - miny}">${svgstr}</svg>`;
             outstruct.pages.push({ sizex: maxx - minx, sizey: maxy - miny, svg: svgstr });
         }
         return outstruct;
-    };
-    return SituationPlan;
-}());
+    }
+}
 /**
  * Class SituationPlanElement
  *
  * Deze class refereert naar de volgende globale variabelen:
- * - structure
+ * - globalThis.structure
  * - SITPLANVIEW_DEFAULT_SCALE
  */
-var SituationPlanElement = /** @class */ (function () {
+class SituationPlanElement {
     /**
      * Constructor
      */
-    function SituationPlanElement() {
-        var _this = this;
+    constructor() {
         this.electroItemId = null; // Referentie naar het electro-element in de datastructuur indien van toepassing
         // -- Basis eigenschappen van het element zelf --
         this.boxref = null; // Referentie naar het DIV document in de browser waar het element wordt afgebeeld
@@ -3334,45 +3185,45 @@ var SituationPlanElement = /** @class */ (function () {
          *
          * @returns {[number, boolean]} - Een array met de rotatiehoek en een boolean die aangeeft of de afbeelding gespiegeld moet worden.
          */
-        this.berekenAfbeeldingsRotatieEnSpiegeling = function () {
+        this.berekenAfbeeldingsRotatieEnSpiegeling = () => {
             // Eerst testen we of het een schakelaar is die we niet in legacy afbeelden
-            if (structure.properties.legacySchakelaars == false) {
-                if (_this.isEendraadschemaSymbool()) {
-                    var electroItem = structure.getElectroItemById(_this.electroItemId);
+            if (globalThis.structure.properties.legacySchakelaars == false) {
+                if (this.isEendraadschemaSymbool()) {
+                    let electroItem = globalThis.structure.getElectroItemById(this.electroItemId);
                     if (electroItem != null) {
                         if ((electroItem.props.type == 'Schakelaars') &&
                             ((electroItem.props.aantal_schakelaars == 1) || (electroItem.props.aantal_schakelaars == null))) {
                             if (['enkelpolig', 'dubbelpolig', 'driepolig', 'dubbelaansteking',
                                 'wissel_enkel', 'wissel_dubbel', 'kruis_enkel',
                                 'dimschakelaar', 'dimschakelaar wissel', 'rolluikschakelaar'].includes(electroItem.props.type_schakelaar))
-                                return [_this.rotate, false];
+                                return [this.rotate, false];
                         }
                     }
                 }
             }
             // Zo-niet volgen we de oude code, schakelaars zullen hier mogelijk links/rechts gespiegeld worden
-            var rotate = _this.rotate;
+            let rotate = this.rotate;
             while (rotate < 0)
                 rotate = rotate + 360;
             rotate = rotate % 360;
-            var spiegel = false;
+            let spiegel = false;
             if ((rotate >= 90) && (rotate < 270)) {
-                if (_this.isEDSSymbolAndRotates360degrees())
+                if (this.isEDSSymbolAndRotates360degrees())
                     spiegel = true;
-                if (_this.isEendraadschemaSymbool())
+                if (this.isEendraadschemaSymbool())
                     rotate = rotate + 180;
             }
             return [rotate, spiegel];
         };
         this.id = randomId("SP_");
     }
-    SituationPlanElement.prototype.setscale = function (scale) {
+    setscale(scale) {
         this.scale = scale;
         this.needsViewUpdate = true;
-    };
-    SituationPlanElement.prototype.getscale = function () {
+    }
+    getscale() {
         return this.scale;
-    };
+    }
     /**
      * isEendraadschemaSymbool
      *
@@ -3381,23 +3232,23 @@ var SituationPlanElement = /** @class */ (function () {
      *
      * @returns boolean
      */
-    SituationPlanElement.prototype.isEendraadschemaSymbool = function () {
+    isEendraadschemaSymbool() {
         if (this.electroItemId != null) {
-            return (structure.getElectroItemById(this.electroItemId) != null);
+            return (globalThis.structure.getElectroItemById(this.electroItemId) != null);
         }
         return false;
-    };
-    SituationPlanElement.prototype.isEDSSymbolAndRotates360degrees = function () {
+    }
+    isEDSSymbolAndRotates360degrees() {
         if (this.isEendraadschemaSymbool()) {
-            var electroElement = structure.getElectroItemById(this.electroItemId);
+            let electroElement = globalThis.structure.getElectroItemById(this.electroItemId);
             if (electroElement != null) {
-                var type = electroElement.getType();
+                let type = electroElement.getType();
                 return SituationPlanElement.ROTATES_360_DEGREES_TYPES.has(type);
             }
             return false;
         }
         return false;
-    };
+    }
     /**
      * setAdres
      *
@@ -3405,40 +3256,40 @@ var SituationPlanElement = /** @class */ (function () {
      * @param adres string : Indien manueel, het adres. Indien auto wordt deze genegeerd en this.adres altijd op null gezet.
      * @param adreslocation string: 'rechts' of 'links' of 'boven' of 'onder'
      */
-    SituationPlanElement.prototype.setAdres = function (adrestype, adres, adreslocation) {
+    setAdres(adrestype, adres, adreslocation) {
         this.adrestype = adrestype;
         this.adreslocation = adreslocation;
         if (this.adrestype === 'manueel')
             this.adres = adres;
         else
             this.adres = null;
-    };
+    }
     /**
      * setAdresLocation
      *
      * @param adreslocation string: 'rechts' of 'links' of 'boven' of 'onder'
      */
-    SituationPlanElement.prototype.setAdresLocation = function (adreslocation) {
+    setAdresLocation(adreslocation) {
         this.adreslocation = adreslocation;
-    };
+    }
     /**
      * getAdresType
      *
      * @returns string : 'auto' of 'manueel'
      */
-    SituationPlanElement.prototype.getAdresType = function () {
+    getAdresType() {
         return this.adrestype;
-    };
+    }
     /**
      * getAdres
      *
      * @returns string : adres
      */
-    SituationPlanElement.prototype.getAdres = function () {
+    getAdres() {
         var _a;
         if (!this.isEendraadschemaSymbool())
             return ''; // Geen adres voor niet-elektro-elementen
-        var element = structure.getElectroItemById(this.electroItemId);
+        let element = globalThis.structure.getElectroItemById(this.electroItemId);
         if (element == null)
             return ''; // zou redundant moeten zijn want we controleerden al in isEendraadschemaSymbool
         if (this.adrestype === 'auto') {
@@ -3447,15 +3298,15 @@ var SituationPlanElement = /** @class */ (function () {
         else {
             return (_a = this.adres) !== null && _a !== void 0 ? _a : '';
         }
-    };
+    }
     /**
      * getAdresLocation
      *
      * @returns 'rechts'|'links'|'boven'|'onder'
      */
-    SituationPlanElement.prototype.getAdresLocation = function () {
+    getAdresLocation() {
         return this.adreslocation;
-    };
+    }
     /**
      * setElectroItemId
      *
@@ -3463,20 +3314,20 @@ var SituationPlanElement = /** @class */ (function () {
      *
      * TODO: zou beter een private functie zijn en niet worden aangeroepen vanuit SituationPlan en SituationPlanView
      */
-    SituationPlanElement.prototype.setElectroItemId = function (electroItemId) {
+    setElectroItemId(electroItemId) {
         this.electroItemId = electroItemId;
-    };
+    }
     /**
      * getElectroItemId
      *
      * @returns number : id van het electroitem in structure
      */
-    SituationPlanElement.prototype.getElectroItemId = function () {
+    getElectroItemId() {
         if (this.isEendraadschemaSymbool())
             return this.electroItemId;
         else
             return null;
-    };
+    }
     /**
      * updateElectroItemSVG
      *
@@ -3484,9 +3335,7 @@ var SituationPlanElement = /** @class */ (function () {
      * @param width number : breedte van de SVG zonder schaling en rotatie, indien niet gegeven wordt de breedte gezocht met functie getSizeFromString
      * @param height number : hoogte van de SVG zonder schaling en rotatie
      */
-    SituationPlanElement.prototype.updateElectroItemSVG = function (svg, width, height) {
-        if (width === void 0) { width = undefined; }
-        if (height === void 0) { height = undefined; }
+    updateElectroItemSVG(svg, width = undefined, height = undefined) {
         if (this.isEendraadschemaSymbool()) {
             if (this.svg !== svg) { // This works because when saving to a file, svg is set to '' so an update will be triggered here
                 this.needsViewUpdate = true;
@@ -3499,22 +3348,21 @@ var SituationPlanElement = /** @class */ (function () {
                     this.getSizeFromString();
             }
         }
-    };
+    }
     /**
      * getUnscaledSVGifNotElectroItem
      *
      * @returns string : SVG content van het element op voorwaarde dat het geen electro-element is
      */
-    SituationPlanElement.prototype.getUnscaledSVGifNotElectroItem = function () {
+    getUnscaledSVGifNotElectroItem() {
         // cleanSVG(): Deze functie is nodig omdat gebleken is dat de print SVG commando's in jsPDF niet overweg kunnen met SVG's die niet dadelijk beginnen met '<svg' 
-        var _this = this;
-        var cleanSVG = function () {
-            if (_this.svg == null)
-                _this.svg = '';
+        const cleanSVG = () => {
+            if (this.svg == null)
+                this.svg = '';
             else {
-                var index = _this.svg.indexOf('<svg');
+                const index = this.svg.indexOf('<svg');
                 if (index !== -1)
-                    _this.svg = _this.svg.substring(index);
+                    this.svg = this.svg.substring(index);
             }
         };
         if (!this.isEendraadschemaSymbool()) {
@@ -3524,7 +3372,7 @@ var SituationPlanElement = /** @class */ (function () {
         else {
             return '';
         }
-    };
+    }
     /**
      * getScaledSVG
      *
@@ -3534,44 +3382,45 @@ var SituationPlanElement = /** @class */ (function () {
      *
      * TODO: kan nog efficienter indien we een flag "updated" hebben in het element zodat we weten wanneer we alles moeten hertekenen
      */
-    SituationPlanElement.prototype.getScaledSVG = function (positioned) {
-        if (positioned === void 0) { positioned = false; }
+    getScaledSVG(positioned = false) {
         if (this.isEendraadschemaSymbool()) {
-            var electroItem = structure.getElectroItemById(this.electroItemId);
+            let electroItem = globalThis.structure.getElectroItemById(this.electroItemId);
             if (electroItem != null)
                 electroItem.updateSituationPlanElement(this);
         }
-        var posinfo = '';
-        var transform = '';
+        let posinfo = '';
+        let transform = '';
         if (positioned) { // Indien we de SVG willen positioneren en roteren, bvb voor gebruik in een print
-            posinfo = "x=\"".concat(this.posx - this.sizex / 2 * this.scale, "\" y=\"").concat(this.posy - this.sizey / 2 * this.scale, "\"");
-            var _a = this.berekenAfbeeldingsRotatieEnSpiegeling(), rotate = _a[0], spiegel = _a[1];
-            transform = "transform=\"rotate(".concat(rotate, " ").concat(this.posx, " ").concat(this.posy, ")").concat((spiegel ? " scale(-1,1) translate(".concat(-this.posx * 2, " 0)") : ''), "\"");
-            return "<g ".concat(transform, ">\n                    <svg ").concat(posinfo, " width=\"").concat(this.sizex * this.scale, "px\" height=\"").concat(this.sizey * this.scale, "px\" viewBox=\"0 0 ").concat(this.sizex, " ").concat(this.sizey, "\">").concat(this.svg, "</svg>\n                    </g>");
+            posinfo = `x="${this.posx - this.sizex / 2 * this.scale}" y="${this.posy - this.sizey / 2 * this.scale}"`;
+            const [rotate, spiegel] = this.berekenAfbeeldingsRotatieEnSpiegeling();
+            transform = `transform="rotate(${rotate} ${this.posx} ${this.posy})${(spiegel ? ` scale(-1,1) translate(${-this.posx * 2} 0)` : '')}"`;
+            return `<g ${transform}>
+                    <svg ${posinfo} width="${this.sizex * this.scale}px" height="${this.sizey * this.scale}px" viewBox="0 0 ${this.sizex} ${this.sizey}">${this.svg}</svg>
+                    </g>`;
         }
         else { // Indien we de SVG willen gebruiken in een innerHTML van een div element en dit element dan zelf positioneren en roteren
-            return "<svg class=\"svg-icon\" width=\"".concat(this.sizex * this.scale, "px\" height=\"").concat(this.sizey * this.scale, "px\" viewBox=\"0 0 ").concat(this.sizex, " ").concat(this.sizey, "\">").concat(this.svg, "</svg>");
+            return `<svg class="svg-icon" width="${this.sizex * this.scale}px" height="${this.sizey * this.scale}px" viewBox="0 0 ${this.sizex} ${this.sizey}">${this.svg}</svg>`;
         }
-    };
+    }
     /**
      * Wijzigt de pagina van het element
      *
      * @param {number} page - Het nummer van de pagina
      */
-    SituationPlanElement.prototype.changePage = function (page) {
+    changePage(page) {
         this.page = page;
-    };
+    }
     /**
      * getSizeFromString
      *
      * Haal de grootte van het SVG element uit de SVG string
      */
-    SituationPlanElement.prototype.getSizeFromString = function () {
+    getSizeFromString() {
         // Create a DOMParser to parse the SVG string
-        var parser = new DOMParser();
-        var svgDoc = parser.parseFromString(this.svg, "image/svg+xml");
+        const parser = new DOMParser();
+        const svgDoc = parser.parseFromString(this.svg, "image/svg+xml");
         // Access the SVG element
-        var svgElement = svgDoc.querySelector('svg');
+        const svgElement = svgDoc.querySelector('svg');
         if (svgElement) {
             // Extract the height and width attributes
             this.sizey = parseInt(svgElement.getAttribute('height'));
@@ -3580,23 +3429,22 @@ var SituationPlanElement = /** @class */ (function () {
         else {
             console.error('Invalid SVG string');
         }
-    };
+    }
     /**
      * Scalet het selecteerde element naar het papier als dat nodig is
      *
      * @param {number} maxx - Maximale breedte van het canvas
      * @param {number} maxy - Maximale hoogte van het canvas
      */
-    SituationPlanElement.prototype.scaleSelectedBoxToPaperIfNeeded = function (maxx, maxy, defaultscale) {
-        if (defaultscale === void 0) { defaultscale = 1; }
+    scaleSelectedBoxToPaperIfNeeded(maxx, maxy, defaultscale = 1) {
         //get the width and hight of the sitplanelement
-        var width = this.sizex;
-        var height = this.sizey;
+        const width = this.sizex;
+        const height = this.sizey;
         //calculate the maximum allowed scaling for a canvas of 550x300
-        var maxScale = Math.min(defaultscale, maxx / width, maxy / height);
+        const maxScale = Math.min(defaultscale, maxx / width, maxy / height);
         //scale the element to the maximum allowed scaling
         this.scale = Math.floor(maxScale * 10000) / 10000;
-    };
+    }
     /**
      * Leest de inhoud van een situatieplanelement uit een image bestand
      * Enkel image bestanden ondersteund door de browser worden ondersteund
@@ -3604,25 +3452,24 @@ var SituationPlanElement = /** @class */ (function () {
      * @param event Event van het file input element gedefinieerd in index.html
      * @param callback Callback functie die wordt uitgevoerd na het inladen van de file
      */
-    SituationPlanElement.prototype.importFromFile = function (event, callback) {
-        var _this = this;
-        var input = event.target;
-        var file = input.files[0];
+    importFromFile(event, callback) {
+        const input = event.target;
+        const file = input.files[0];
         if (file) {
-            var reader = new FileReader();
-            var fileName = file.name.toLowerCase();
-            var mimeType = file.type;
-            reader.onload = function (e) {
-                var fileContent = e.target.result;
-                var image = new Image();
+            const reader = new FileReader();
+            const fileName = file.name.toLowerCase();
+            const mimeType = file.type;
+            reader.onload = (e) => {
+                const fileContent = e.target.result;
+                const image = new Image();
                 image.src = fileContent;
-                image.onload = function () {
-                    _this.sizex = image.width;
-                    _this.sizey = image.height;
-                    _this.svg = "<svg width=\"".concat(image.width, "\" height=\"").concat(image.height, "\"><image href=\"").concat(fileContent, "\" width=\"").concat(image.width, "\" height=\"").concat(image.height, "\"/></svg>");
+                image.onload = () => {
+                    this.sizex = image.width;
+                    this.sizey = image.height;
+                    this.svg = `<svg width="${image.width}" height="${image.height}"><image href="${fileContent}" width="${image.width}" height="${image.height}"/></svg>`;
                     callback();
                 };
-                image.onerror = function () {
+                image.onerror = () => {
                     alert('Het formaat van deze file wordt niet ondersteund.');
                 };
             };
@@ -3631,21 +3478,21 @@ var SituationPlanElement = /** @class */ (function () {
         else {
             alert('Geen bestand geselecteerd');
         }
-    };
+    }
     /**
      * setVars
      *
      * @param object Object : object met de variabelen die moeten worden ingesteld
      */
-    SituationPlanElement.prototype.setVars = function (object) {
+    setVars(object) {
         Object.assign(this, object);
-    };
+    }
     /**
      * toJsonObject
      *
      * @returns Object : object met de variabelen van het element dat dadelijk kan worden omgezet naar een JSON string
      */
-    SituationPlanElement.prototype.toJsonObject = function () {
+    toJsonObject() {
         return {
             page: this.page,
             posx: this.posx,
@@ -3664,13 +3511,13 @@ var SituationPlanElement = /** @class */ (function () {
             svg: (this.isEendraadschemaSymbool() ? '' : this.svg),
             electroItemId: this.electroItemId
         };
-    };
+    }
     /**
      * fromJsonObject
      *
      * @param json any : object met de variabelen van het element dat dadelijk kan worden omgezet naar een JSON string
      */
-    SituationPlanElement.prototype.fromJsonObject = function (json) {
+    fromJsonObject(json) {
         this.page = json.page;
         this.posx = json.posx;
         this.posy = json.posy;
@@ -3688,32 +3535,38 @@ var SituationPlanElement = /** @class */ (function () {
         this.electroItemId = json.electroItemId;
         this.needsViewUpdate = true; // TODO: make this more efficient as it will always trigger redraws, even when not needed
         this.movable = (json.movable != null) ? json.movable : true;
-    };
-    /**
-     * rotates360degrees
-     *
-     * Per default wordt er vanuit gegaan dat bij rotatie over rotatiehoeken alpha tussen 90 en 270 graden deze rotatie kan vervangen worden.
-     * door een rotatie over alpha-180 graden.  Om een voorbeeld te geven, een batterij roteren over 180 graden heeft geen zin, dat blijft het originele symbool.
-     *
-     * Voor bepaalde elementen is dit niet het geval. Een contactdoos gedraaid over 180 graden moet de opening naar rechts hebben in plaats van naar links.
-     * Deze functie geeft true terug indien een volledige rotatie nodig is.
-     *
-     * @returns boolean
-     *
-     * TODO: functie verplaatsen naar Electro_Item
-     */
-    SituationPlanElement.ROTATES_360_DEGREES_TYPES = new Set(['Contactdoos', 'Lichtpunt', 'Drukknop', 'Media', 'Schakelaars', 'Lichtcircuit', 'Bord', 'Bel']);
-    return SituationPlanElement;
-}());
+    }
+}
+/**
+ * rotates360degrees
+ *
+ * Per default wordt er vanuit gegaan dat bij rotatie over rotatiehoeken alpha tussen 90 en 270 graden deze rotatie kan vervangen worden.
+ * door een rotatie over alpha-180 graden.  Om een voorbeeld te geven, een batterij roteren over 180 graden heeft geen zin, dat blijft het originele symbool.
+ *
+ * Voor bepaalde elementen is dit niet het geval. Een contactdoos gedraaid over 180 graden moet de opening naar rechts hebben in plaats van naar links.
+ * Deze functie geeft true terug indien een volledige rotatie nodig is.
+ *
+ * @returns boolean
+ *
+ * TODO: functie verplaatsen naar Electro_Item
+ */
+SituationPlanElement.ROTATES_360_DEGREES_TYPES = new Set(['Contactdoos', 'Lichtpunt', 'Drukknop', 'Media', 'Schakelaars', 'Lichtcircuit', 'Bord', 'Bel']);
+var MovableType;
+(function (MovableType) {
+    MovableType[MovableType["Movable"] = 0] = "Movable";
+    MovableType[MovableType["NotMovable"] = 1] = "NotMovable";
+    MovableType[MovableType["Mixed"] = 2] = "Mixed";
+    MovableType[MovableType["Undefined"] = 3] = "Undefined";
+})(MovableType || (MovableType = {}));
+;
 /**
  * Deze class behandelt het tekenen van het situatieplan.
  *
  * Er wordt regelmatig de terminologie Box gebruikt in de code. Een box is een sleepbaar element en kan zowel
  * een eendraadschema symbool zijn als een ingelezen extern bestand.
  */
-var SituationPlanView = /** @class */ (function () {
-    function SituationPlanView(canvas, paper, sitplan) {
-        var _this = this;
+class SituationPlanView {
+    constructor(canvas, paper, sitplan) {
         this.zoomfactor = 1;
         /** Referentie naar meerdere DIV's waar het stuatieplan wordt weergegeven
          *   - paper: hieronder hangen de reële elementen en dit stelt het printable gedeelte van het schema voor
@@ -3724,91 +3577,113 @@ var SituationPlanView = /** @class */ (function () {
         this.sideBar = new SituationPlanView_SideBar(document.getElementById('sidebar'));
         this.contextMenu = null;
         this.draggedBox = null; /** Box die op dit moment versleept wordt of null */
-        this.selectedBox = null; /** Geselelecteerde box of null */
+        this.draggedHalo = { left: 0, top: 0, right: 0, bottom: 0 };
+        this.selected = new SituationPlanView_Selected();
         /**
          * Toont het contextmenu op de locatie van de muis.
          *
          * @param event - De muisgebeurtenis die het menu opent (right click).
          */
-        this.showContextMenu = function (event) {
-            if (_this.selectedBox == null)
+        this.showContextMenu = (event) => {
+            if (this.selected.length() < 1)
                 return;
-            var sitPlanElement = _this.selectedBox.sitPlanElementRef;
+            let sitPlanElement = this.selected.getLastSelected().sitPlanElementRef;
             if (sitPlanElement == null)
                 return;
             event.preventDefault();
-            _this.contextMenu.clearMenu();
-            _this.contextMenu.addMenuItem('Draai rechts', function () { _this.rotateSelectedBox(90, true); }, 'Ctrl →');
-            _this.contextMenu.addMenuItem('Draai links', function () { _this.rotateSelectedBox(-90, true); }, 'Ctrl ←');
-            _this.contextMenu.addLine();
-            _this.contextMenu.addMenuItem('Bewerk', _this.editSelectedBox.bind(_this), 'Enter');
-            _this.contextMenu.addLine();
-            switch (sitPlanElement.movable) {
-                case true:
-                    _this.contextMenu.addMenuItem('Vergrendel', _this.toggleSelectedBoxMovable.bind(_this), 'Ctrl L');
-                    _this.contextMenu.addLine();
+            this.contextMenu.clearMenu();
+            if (sitPlanElement.movable) {
+                this.contextMenu.addMenuItem('Draai rechts', () => { this.rotateSelectedBoxes(90, true); }, 'Ctrl →');
+                this.contextMenu.addMenuItem('Draai links', () => { this.rotateSelectedBoxes(-90, true); }, 'Ctrl ←');
+                this.contextMenu.addLine();
+            }
+            this.contextMenu.addMenuItem('Bewerk', this.editSelectedBox.bind(this), 'Enter');
+            this.contextMenu.addLine();
+            switch (this.getSelectionMovability()) {
+                case MovableType.Movable:
+                    this.contextMenu.addMenuItem('Vergrendel', this.toggleSelectedBoxesMovable.bind(this), 'Ctrl L');
                     break;
-                case false:
-                    _this.contextMenu.addMenuItem('Ontgrendel', _this.toggleSelectedBoxMovable.bind(_this), 'Ctrl L');
-                    _this.contextMenu.addLine();
+                case MovableType.NotMovable:
+                    this.contextMenu.addMenuItem('Ontgrendel', this.toggleSelectedBoxesMovable.bind(this), 'Ctrl L');
+                    break;
+                case MovableType.Mixed:
+                    this.contextMenu.addMenuItem('Vergrendel', () => { this.toggleSelectedBoxesMovable.bind(this)(MovableType.NotMovable); }, 'Ctrl L');
+                    this.contextMenu.addMenuItem('Ontgrendel', () => { this.toggleSelectedBoxesMovable.bind(this)(MovableType.Movable); }, '');
                     break;
             }
-            _this.contextMenu.addMenuItem('Verwijder', _this.deleteSelectedBox.bind(_this), 'Del');
-            if ((_this.sitplan.numPages > 1) && (sitPlanElement.movable)) {
-                _this.contextMenu.addLine();
-                _this.contextMenu.addMenuItem('Naar pagina..', _this.changePageSelectedBox.bind(_this), 'PgUp/PgDn');
+            if (sitPlanElement.movable) {
+                this.contextMenu.addLine();
+                this.contextMenu.addMenuItem('Verwijder', () => {
+                    this.deleteSelectedBoxes();
+                    globalThis.undostruct.store();
+                }, 'Del');
+                if ((this.sitplan.numPages > 1) && (sitPlanElement.movable)) {
+                    this.contextMenu.addLine();
+                    this.contextMenu.addMenuItem('Naar pagina..', this.changePageSelectedBoxes.bind(this), 'PgUp/PgDn');
+                }
             }
-            _this.contextMenu.show(event);
+            this.contextMenu.show(event);
         };
         /**
          * Start een sleepactie voor een box in het situatieplan.
          *
          * @param event - De gebeurtenis die de sleepactie activeert (muisklik of touchstart).
          */
-        this.startDrag = function (event) {
-            //Indien de middelste knop werd gebruikt doen we niets
-            if (event.button == 1)
-                return;
-            //Verbergen van de contextmenu, en enkele controles
-            _this.contextMenu.hide();
+        this.startDrag = (event) => {
+            // Initialisatie
             if (event == null)
                 return;
-            var box = null;
-            //Juiste box identificeren. Hou er rekening mee dat ook op een boxlabel kan geklikt zijn
-            if (event.target.classList.contains('box')) {
+            const shiftPressed = event.shiftKey; //Controleert of de shift-toets is ingedrukt 
+            if (event.button == 1)
+                return; //Indien de middelste knop werd gebruikt doen we niets
+            this.contextMenu.hide();
+            // Geklikte box identificeren. Hou er rekening mee dat ook op een boxlabel kan geklikt zijn
+            let box = null;
+            let sitPlanElement = event.target.sitPlanElementRef;
+            if (sitPlanElement == null)
+                return;
+            if (event.target.classList.contains('box'))
                 box = event.target;
-            }
-            else if (event.target.classList.contains('boxlabel')) {
-                var sitPlanElement = event.target.sitPlanElementRef;
-                if (sitPlanElement == null)
-                    return;
+            else if (event.target.classList.contains('boxlabel'))
                 box = sitPlanElement.boxref;
-            }
-            ;
             if (box == null)
                 return;
-            //Nu gaan we de box selecteren. Dit moet zowel voor de linker als de rechter muisknop
+            // Hoeveel ruimte slepen we mee in de halo van alle geselecteerde en movable boxes
+            this.draggedHalo = this.getDraggedHaloAroundElement(sitPlanElement);
+            // Nu gaan we de box selecteren. Dit moet zowel voor de linker als de rechter muisknop
+            // Als de shift toets werd ingedrukt houden we ook de reeds bestaande selectie in stand
+            if (shiftPressed) {
+                this.selectToggleBox(box);
+            }
+            else {
+                if (!this.selected.includes(box))
+                    this.clearSelection(); // Wist bestaande selectie als de huidige box er nog niet in zit
+                this.selectBox(box); // Voegt de huidige box toe aan de selectie
+            }
             event.stopPropagation(); // Voorkomt body klikgebeurtenis
-            _this.clearSelection(); // Wist bestaande selectie
-            _this.selectBox(box); // Selecteert de box die we willen slepen
-            //Indien de rechter muisknop werd gebruikt gaan we niet verder
+            // Indien de rechter muisknop werd gebruikt gaan we na selectie niet verder met slepen
             if (event.button == 2)
                 return;
-            //OK, het is een touch event of de linkse knop dus we gaan verder met slepen maar controlleren eerst of we dat wel mogen
-            if (box.getAttribute('movable') == "false")
+            // OK, het is een touch event of de linkse knop dus we gaan verder met slepen maar controlleren eerst of we dat wel mogen
+            // we doen dit op basis van de box waarop we geklikt hebben, dit bijft de referentie voor het slepen, ook al bewegen
+            // eventueel andere geselecteerde boxes mee. De checks moeten falen voor zowel waarden false als null
+            if (!box.classList.contains('selected'))
+                return; // Dit kan vreemd lijken maar is perfect mogelijk, bijvoorbeeld als
+            // de shift toets werd ingedrukt om de selectie te verwijderen
+            if (box.getAttribute('movable') == 'false')
                 return;
-            _this.draggedBox = box; // Houdt de box die we aan het slepen zijn
+            this.draggedBox = box; // Houdt de box die we aan het slepen zijn
             switch (event.type) {
                 case 'mousedown':
-                    _this.mousedrag.startDrag(event.clientX, event.clientY, _this.draggedBox.offsetLeft, _this.draggedBox.offsetTop);
-                    document.addEventListener('mousemove', _this.processDrag);
-                    document.addEventListener('mouseup', _this.stopDrag);
+                    this.mousedrag.startDrag(event.clientX, event.clientY, sitPlanElement.posx, sitPlanElement.posy);
+                    document.addEventListener('mousemove', this.processDrag);
+                    document.addEventListener('mouseup', this.stopDrag);
                     break;
                 case 'touchstart':
-                    var touch = event.touches[0];
-                    _this.mousedrag.startDrag(touch.clientX, touch.clientY, _this.draggedBox.offsetLeft, _this.draggedBox.offsetTop);
-                    document.addEventListener('touchmove', _this.processDrag, { passive: false });
-                    document.addEventListener('touchend', _this.stopDrag);
+                    const touch = event.touches[0];
+                    this.mousedrag.startDrag(touch.clientX, touch.clientY, sitPlanElement.posx, sitPlanElement.posy);
+                    document.addEventListener('touchmove', this.processDrag, { passive: false });
+                    document.addEventListener('touchend', this.stopDrag);
                     break;
                 default:
                     console.error('Ongeldige event voor startDrag functie');
@@ -3819,65 +3694,80 @@ var SituationPlanView = /** @class */ (function () {
          *
          * @param event - De gebeurtenis die de sleepactie stopt (muisklik release of touchend).
          */
-        this.stopDrag = function (event) {
+        this.stopDrag = (event) => {
             function showArrowHelp() {
-                var helperTip = new HelperTip(appDocStorage);
-                helperTip.show('sitplan.arrowdrag', "<h3>Tip: Symbolen verplaatsen</h3>\n            <p>Voor fijnere controle tijdens het verschuiven van symbolen kan u ook de pijltjes op het toetsenbord gebruiken.</p>", true);
+                const helperTip = new HelperTip(globalThis.appDocStorage);
+                helperTip.show('sitplan.arrowdrag', `<h3>Tip: Symbolen verplaatsen</h3>
+            <p>Voor fijnere controle tijdens het verschuiven van symbolen kan u ook de pijltjes op het toetsenbord gebruiken.</p>`, true);
             }
             event.stopPropagation();
             switch (event.type) {
                 case 'mouseup':
-                    document.removeEventListener('mousemove', _this.processDrag);
-                    document.removeEventListener('mouseup', _this.stopDrag);
-                    if (_this.mousedrag.hassMoved) {
+                    document.removeEventListener('mousemove', this.processDrag);
+                    document.removeEventListener('mouseup', this.stopDrag);
+                    if (this.mousedrag.hassMoved) {
                         showArrowHelp();
-                        undostruct.store();
+                        globalThis.undostruct.store();
                     }
                     break;
                 case 'touchend':
-                    document.removeEventListener('touchmove', _this.processDrag);
-                    document.removeEventListener('touchend', _this.stopDrag);
-                    if (_this.mousedrag.hassMoved) {
+                    document.removeEventListener('touchmove', this.processDrag);
+                    document.removeEventListener('touchend', this.stopDrag);
+                    if (this.mousedrag.hassMoved) {
                         showArrowHelp();
-                        undostruct.store();
+                        globalThis.undostruct.store();
                     }
                     break;
                 default:
                     console.error('Ongeldige event voor stopDrag functie');
             }
-            _this.draggedBox = null;
+            this.draggedBox = null;
         };
         /**
          * Verwerkt een muisklik of touch event tijdens het slepen van een box in het situatieplan.
          *
          * @param event - De gebeurtenis die verwerkt wordt (muisklik of touchmove).
          */
-        this.processDrag = function (event) {
-            if (_this.draggedBox) {
+        this.processDrag = (event) => {
+            if (this.draggedBox) {
+                // Initialisatie
                 event.preventDefault();
-                var newLeftTop = void 0;
-                if (event.type === 'mousemove') {
-                    newLeftTop = _this.mousedrag.returnNewLeftTop(event.clientX, event.clientY);
-                }
+                const sitPlanReferenceElement = this.draggedBox.sitPlanElementRef;
+                if (sitPlanReferenceElement === null)
+                    return;
+                // Nieuwe locatie van het referentie-element bepalen
+                let newPaperPos;
+                if (event.type === 'mousemove')
+                    newPaperPos = this.mousedrag.returnNewPaperPos(event.clientX, event.clientY);
                 else if (event.type === 'touchmove') {
-                    var touch = event.touches[0];
-                    newLeftTop = _this.mousedrag.returnNewLeftTop(touch.clientX, touch.clientY);
+                    const touch = event.touches[0];
+                    newPaperPos = this.mousedrag.returnNewPaperPos(touch.clientX, touch.clientY);
                 }
-                //get paperpadding from css
-                var paperPadding = parseFloat(getComputedStyle(_this.paper).getPropertyValue('--paperPadding'));
-                //return topleft of the scrolled this.outerdiv
-                var minLeft = (_this.canvas.scrollLeft - paperPadding) / _this.zoomfactor;
-                var minTop = (_this.canvas.scrollTop - paperPadding) / _this.zoomfactor;
-                var maxRight = minLeft + (_this.canvas.offsetWidth) / _this.zoomfactor;
-                var maxBottom = minTop + (_this.canvas.offsetHeight) / _this.zoomfactor;
-                // Zorg ervoor dat de box niet buiten redelijke grenzen van het canvas valt links-boven
-                // We doen deze controle niet rechts onder omdat het canvas daar gewoon kan groeien
-                newLeftTop.left = Math.min(maxRight - _this.draggedBox.offsetWidth / 2, Math.max(minLeft - _this.draggedBox.offsetWidth / 2, newLeftTop.left));
-                newLeftTop.top = Math.min(maxBottom - _this.draggedBox.offsetHeight / 2, Math.max(minTop - _this.draggedBox.offsetHeight / 2, newLeftTop.top));
-                var sitPlanElement = _this.draggedBox.sitPlanElementRef;
-                sitPlanElement.posx = newLeftTop.left + (_this.draggedBox.offsetWidth / 2);
-                sitPlanElement.posy = newLeftTop.top + (_this.draggedBox.offsetHeight / 2);
-                _this.updateSymbolAndLabelPosition(sitPlanElement);
+                // De referentiebox moet in de viewBox (het zichtbare deel van het schema) blijven en geen van de geselecteerde
+                // elementen mogen links of boven een negatieve coordinaat krijgen en onbereikbaar worden
+                const paperPadding = parseFloat(getComputedStyle(this.paper).getPropertyValue('--paperPadding'));
+                const viewBox = {
+                    x: (this.canvas.scrollLeft - paperPadding) / this.zoomfactor,
+                    y: (this.canvas.scrollTop - paperPadding) / this.zoomfactor,
+                    width: (this.canvas.offsetWidth) / this.zoomfactor,
+                    height: (this.canvas.offsetHeight) / this.zoomfactor
+                };
+                newPaperPos.x = Math.min(viewBox.x + viewBox.width, Math.max(viewBox.x, this.draggedHalo.left - paperPadding / this.zoomfactor, newPaperPos.x));
+                newPaperPos.y = Math.min(viewBox.y + viewBox.height, Math.max(viewBox.y, this.draggedHalo.top - paperPadding / this.zoomfactor, newPaperPos.y));
+                // Wijzig nu de positie van alle elementen en herteken
+                const shift = { x: newPaperPos.x - sitPlanReferenceElement.posx, y: newPaperPos.y - sitPlanReferenceElement.posy };
+                for (let selected of this.selected.getAllSelected()) {
+                    if (selected == null)
+                        continue;
+                    const sitPlanElement = selected.sitPlanElementRef;
+                    if (sitPlanElement == null)
+                        continue;
+                    if (sitPlanElement.movable === false)
+                        continue;
+                    sitPlanElement.posx += shift.x;
+                    sitPlanElement.posy += shift.y;
+                    this.updateSymbolAndLabelPosition(sitPlanElement);
+                }
             }
         };
         /**
@@ -3891,22 +3781,20 @@ var SituationPlanView = /** @class */ (function () {
          * @param scale - De schaal van het ElectroItem.
          * @param rotate - De rotatie van het ElectroItem.
          */
-        this.addElectroItem = function (id, adrestype, adres, adreslocation, labelfontsize, scale, rotate, posx, posy) {
-            if (posx === void 0) { posx = null; }
-            if (posy === void 0) { posy = null; }
-            var paperPos = _this.canvasPosToPaperPos(50, 50);
+        this.addElectroItem = (id, adrestype, adres, adreslocation, labelfontsize, scale, rotate, posx = null, posy = null) => {
+            let paperPos = this.canvasPosToPaperPos(50, 50);
             if (posx == null)
                 posx = paperPos.x;
             if (posy == null)
                 posy = paperPos.y;
             if (id != null) {
-                var element = _this.sitplan.addElementFromElectroItem(id, _this.sitplan.activePage, posx, posy, adrestype, adres, adreslocation, labelfontsize, scale, rotate);
+                let element = this.sitplan.addElementFromElectroItem(id, this.sitplan.activePage, posx, posy, adrestype, adres, adreslocation, labelfontsize, scale, rotate);
                 if (element != null) {
-                    _this.syncToSitPlan();
-                    _this.clearSelection();
-                    _this.redraw();
-                    _this.selectBox(element.boxref); // We moeten dit na redraw doen anders bestaat de box mogelijk nog niet
-                    _this.bringToFront(); // Deze slaat ook automatisch undo informatie op dus we moeten geen undostruct.store() meer doen.
+                    this.syncToSitPlan();
+                    this.clearSelection();
+                    this.redraw();
+                    this.selectOneBox(element.boxref); // We moeten dit na redraw doen anders bestaat de box mogelijk nog niet
+                    this.bringToFront(); // Deze slaat ook automatisch undo informatie op dus we moeten geen globalThis.undostruct.store() meer doen.
                 }
             }
             else {
@@ -3916,27 +3804,49 @@ var SituationPlanView = /** @class */ (function () {
         /**
          * Toont een popup met de eigenschappen van het geselecteerde element en maakt het mogelijk om deze te bewerken.
          */
-        this.editSelectedBox = function (cancelCallback) {
-            _this.contextMenu.hide();
-            _this.unattachArrowKeys();
-            if (_this.selectedBox) {
-                var sitPlanElement_1 = _this.selectedBox.sitPlanElementRef;
-                if (!sitPlanElement_1)
+        this.editSelectedBox = (cancelCallback) => {
+            this.contextMenu.hide();
+            this.unattachArrowKeys();
+            if (this.selected.length() == 1) {
+                const sitPlanElement = this.selected.getLastSelected().sitPlanElementRef;
+                if (!sitPlanElement)
                     return;
-                SituationPlanView_ElementPropertiesPopup(sitPlanElement_1, function (electroid, adrestype, adres, adreslocation, labelfontsize, scale, rotate) {
+                SituationPlanView_ElementPropertiesPopup(sitPlanElement, (electroid, adrestype, adres, adreslocation, labelfontsize, scale, rotate) => {
                     if (electroid != null) {
-                        sitPlanElement_1.setElectroItemId(electroid);
-                        sitPlanElement_1.setAdres(adrestype, adres, adreslocation);
+                        sitPlanElement.setElectroItemId(electroid);
+                        sitPlanElement.setAdres(adrestype, adres, adreslocation);
                     }
-                    sitPlanElement_1.labelfontsize = labelfontsize;
-                    sitPlanElement_1.setscale(scale);
-                    sitPlanElement_1.rotate = rotate;
-                    _this.updateBoxContent(sitPlanElement_1); //content needs to be updated first to know the size of the box
-                    _this.updateSymbolAndLabelPosition(sitPlanElement_1);
-                    undostruct.store();
+                    sitPlanElement.labelfontsize = labelfontsize;
+                    sitPlanElement.setscale(scale);
+                    sitPlanElement.rotate = rotate;
+                    this.updateBoxContent(sitPlanElement); //content needs to be updated first to know the size of the box
+                    this.updateSymbolAndLabelPosition(sitPlanElement);
+                    globalThis.undostruct.store();
                 }, cancelCallback);
             }
-            _this.attachArrowKeys();
+            else if (this.selected.length() > 1) {
+                const elements = [];
+                for (let selected of this.selected.getAllSelected()) {
+                    const sitPlanElement = selected.sitPlanElementRef;
+                    if (sitPlanElement == null)
+                        continue;
+                    elements.push(sitPlanElement);
+                }
+                SituationPlanView_MultiElementPropertiesPopup(elements, (labelfontsize, scale, rotate) => {
+                    for (let sitPlanElement of elements) {
+                        if (labelfontsize != null)
+                            sitPlanElement.labelfontsize = labelfontsize;
+                        if (scale != null)
+                            sitPlanElement.setscale(scale);
+                        if (rotate != null)
+                            sitPlanElement.rotate = rotate;
+                        this.updateBoxContent(sitPlanElement); //content needs to be updated first to know the size of the box
+                        this.updateSymbolAndLabelPosition(sitPlanElement);
+                    }
+                    globalThis.undostruct.store();
+                }, cancelCallback);
+            }
+            this.attachArrowKeys();
         };
         this.canvas = canvas;
         this.paper = paper;
@@ -3946,21 +3856,21 @@ var SituationPlanView = /** @class */ (function () {
         this.mousedrag = new MouseDrag();
         this.event_manager = new EventManager();
         // Verwijder alle selecties wanneer we ergens anders klikken dan op een box
-        this.event_manager.addEventListener(canvas, 'mousedown', function () { _this.contextMenu.hide(); _this.clearSelection(); });
-        this.event_manager.addEventListener(canvas, 'touchstart', function () { _this.contextMenu.hide(); _this.clearSelection(); });
+        this.event_manager.addEventListener(canvas, 'mousedown', () => { this.contextMenu.hide(); this.clearSelection(); });
+        this.event_manager.addEventListener(canvas, 'touchstart', () => { this.contextMenu.hide(); this.clearSelection(); });
         // Control wieltje om te zoomen
-        this.event_manager.addEventListener(canvas, 'wheel', function (event) {
+        this.event_manager.addEventListener(canvas, 'wheel', (event) => {
             if (!event.ctrlKey && !event.metaKey)
                 return;
             event.preventDefault();
-            var zoom = -event.deltaY / 1000;
+            const zoom = -event.deltaY / 1000;
             if (Math.abs(zoom) >= 0.01) {
-                var menuHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--menu-height'));
-                var ribbonHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ribbon-height'));
-                var sideBarWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sideBarWidth'));
-                var canvasx = event.clientX - sideBarWidth;
-                var canvasy = event.clientY - menuHeight - ribbonHeight;
-                _this.zoomIncrement(-event.deltaY / 2000, canvasx, canvasy);
+                const menuHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--menu-height'));
+                const ribbonHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ribbon-height'));
+                const sideBarWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sideBarWidth'));
+                let canvasx = event.clientX - sideBarWidth;
+                let canvasy = event.clientY - menuHeight - ribbonHeight;
+                this.zoomIncrement(-event.deltaY / 2000, canvasx, canvasy);
             }
         }, { passive: false });
         // Voegt event handlers toe voor de pijltjestoesten
@@ -3978,13 +3888,13 @@ var SituationPlanView = /** @class */ (function () {
      * @param {number} canvasy - De y-co ordinaat in het canvas.
      * @returns {Object} Object {x,y} met de x-coördinaat en y-coördinaat op het paper.
      */
-    SituationPlanView.prototype.canvasPosToPaperPos = function (canvasx, canvasy) {
-        var paperPadding = parseFloat(getComputedStyle(this.paper).getPropertyValue('--paperPadding'));
+    canvasPosToPaperPos(canvasx, canvasy) {
+        const paperPadding = parseFloat(getComputedStyle(this.paper).getPropertyValue('--paperPadding'));
         return {
             x: (canvasx + this.canvas.scrollLeft - paperPadding) / this.zoomfactor,
             y: (canvasy + this.canvas.scrollTop - paperPadding) / this.zoomfactor
         };
-    };
+    }
     /**
      * Converteert een punt oöordinaat op het papier naar een coördinaat op het canvas (omgekeerde van hierboven).
      *
@@ -3992,13 +3902,13 @@ var SituationPlanView = /** @class */ (function () {
      * @param {number} papery - De y-coördinaat op het papier.
      * @returns {Object} Object {x,y} met de x-coördinaat en y-coördinaat op het canvas.
      */
-    SituationPlanView.prototype.paperPosToCanvasPos = function (paperx, papery) {
-        var paperPadding = parseFloat(getComputedStyle(this.paper).getPropertyValue('--paperPadding'));
+    paperPosToCanvasPos(paperx, papery) {
+        const paperPadding = parseFloat(getComputedStyle(this.paper).getPropertyValue('--paperPadding'));
         return {
             x: paperx * this.zoomfactor - this.canvas.scrollLeft + paperPadding,
             y: papery * this.zoomfactor - this.canvas.scrollTop + paperPadding
         };
-    };
+    }
     /**
      * Indien een gewenste coördinaat op zowel het canvas als het papier gegeven zijn, hoe moeten we dan scrollen?
      *
@@ -4008,13 +3918,13 @@ var SituationPlanView = /** @class */ (function () {
      * @param {number} papery - De y-coördinaat op het papier.
      * @returns {Object} Object {x,y} met de gewenste scrollLeft en scrollTop.
      */
-    SituationPlanView.prototype.canvasAndPaperPosToScrollPos = function (canvasx, canvasy, paperx, papery) {
-        var paperPadding = parseFloat(getComputedStyle(this.paper).getPropertyValue('--paperPadding'));
+    canvasAndPaperPosToScrollPos(canvasx, canvasy, paperx, papery) {
+        const paperPadding = parseFloat(getComputedStyle(this.paper).getPropertyValue('--paperPadding'));
         return {
             x: paperx * this.zoomfactor - canvasx + paperPadding + 0.5,
             y: papery * this.zoomfactor - canvasy + paperPadding + 0.5
         };
-    };
+    }
     /**
      * Maakt deze instance ongedaan en verwijderd alle door deze instance aangemaakte elementen uit de DOM.
      *
@@ -4022,18 +3932,17 @@ var SituationPlanView = /** @class */ (function () {
      * Als een element een referentie naar een box heeft, wordt deze verwijderd uit de DOM.
      * Als een element een referentie naar een label heeft, wordt deze verwijderd uit de DOM.
      */
-    SituationPlanView.prototype.dispose = function () {
+    dispose() {
         //Verwijder de event manager
         this.event_manager.dispose();
         //Ga over all situationplanelements and verwijder de bijhorende boxes uit the DOM
-        for (var _i = 0, _a = this.sitplan.elements; _i < _a.length; _i++) {
-            var element = _a[_i];
+        for (let element of this.sitplan.elements) {
             if (element.boxref != null)
                 element.boxref.remove();
             if (element.boxlabelref != null)
                 element.boxlabelref.remove();
         }
-    };
+    }
     /**
      * Zorgt ervoor dat alle elementen in het situatieplan een link hebben naar
      * het eendraadschema.
@@ -4044,9 +3953,9 @@ var SituationPlanView = /** @class */ (function () {
      * Deze functie zorgt er niet voor dat ook elk element effectief een box heeft in de DOM.
      * Dit gebeurt pas in de redraw functie.
      */
-    SituationPlanView.prototype.syncToSitPlan = function () {
+    syncToSitPlan() {
         this.sitplan.syncToEendraadSchema();
-    };
+    }
     /**
      * Stel de zoomfactor in zodat het paper-element volledig in het browser window wordt weergegeven
      *
@@ -4054,28 +3963,26 @@ var SituationPlanView = /** @class */ (function () {
      *   om te berekenen hoeveel ruimte beschikbaar is voor het papier. De standaard
      *   is de CSS-waarde van --paperPadding.
      */
-    SituationPlanView.prototype.zoomToFit = function (paperPadding) {
-        if (paperPadding === void 0) { paperPadding = parseFloat(getComputedStyle(this.paper).getPropertyValue('--paperPadding')); }
-        var sideBarWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sideBarWidth'));
-        var scale = Math.min((this.canvas.offsetWidth - paperPadding * 2) / this.paper.offsetWidth, (this.canvas.offsetHeight - paperPadding * 2) / this.paper.offsetHeight);
+    zoomToFit(paperPadding = parseFloat(getComputedStyle(this.paper).getPropertyValue('--paperPadding'))) {
+        const sideBarWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sideBarWidth'));
+        const scale = Math.min((this.canvas.offsetWidth - paperPadding * 2) / this.paper.offsetWidth, (this.canvas.offsetHeight - paperPadding * 2) / this.paper.offsetHeight);
         this.setzoom(scale);
-    };
+    }
     /**
      * Geeft de huidige zoomfactor terug.
      * @returns De huidige zoomfactor.
      */
-    SituationPlanView.prototype.getZoomFactor = function () {
+    getZoomFactor() {
         return this.zoomfactor;
-    };
+    }
     /**
      * Stel de zoomfactor in.
      * @param factor - De zoomfactor, standaard 1.
      */
-    SituationPlanView.prototype.setzoom = function (factor) {
-        if (factor === void 0) { factor = 1; }
+    setzoom(factor = 1) {
         this.zoomfactor = factor;
-        this.paper.style.transform = "scale(".concat(factor, ")");
-    };
+        this.paper.style.transform = `scale(${factor})`;
+    }
     /**
      * Verhoogt of verlaagt de zoomfactor met een bepaalde waarde.
      *
@@ -4083,79 +3990,112 @@ var SituationPlanView = /** @class */ (function () {
      *   Een positieve waarde vergroot de zoom, terwijl een negatieve waarde de zoom verkleint.
      *   Standaard is deze waarde 0, wat betekent dat er geen aanpassing is.
      */
-    SituationPlanView.prototype.zoomIncrement = function (increment, canvasx, canvasy) {
-        if (increment === void 0) { increment = 0; }
-        if (canvasx === void 0) { canvasx = this.canvas.offsetWidth / 2; }
-        if (canvasy === void 0) { canvasy = this.canvas.offsetHeight / 2; }
-        var menuHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--menu-height'));
-        var ribbonHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ribbon-height'));
-        var sideBarWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sideBarWidth'));
-        var paperPadding = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--paperPadding'));
-        var mousePosOnPaper = this.canvasPosToPaperPos(canvasx, canvasy);
+    zoomIncrement(increment = 0, canvasx = this.canvas.offsetWidth / 2, canvasy = this.canvas.offsetHeight / 2) {
+        /*const menuHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--menu-height'));
+        const ribbonHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ribbon-height'));
+        const sideBarWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sideBarWidth'));
+        const paperPadding = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--paperPadding'));*/
+        let mousePosOnPaper = this.canvasPosToPaperPos(canvasx, canvasy);
         this.setzoom(Math.min(SITPLANVIEW_ZOOMINTERVAL.MAX, Math.max(SITPLANVIEW_ZOOMINTERVAL.MIN, this.zoomfactor * (1 + increment))));
-        var scrollPos = this.canvasAndPaperPosToScrollPos(canvasx, canvasy, mousePosOnPaper.x, mousePosOnPaper.y);
+        const scrollPos = this.canvasAndPaperPosToScrollPos(canvasx, canvasy, mousePosOnPaper.x, mousePosOnPaper.y);
         this.canvas.scrollLeft = scrollPos.x;
         this.canvas.scrollTop = scrollPos.y;
-    };
-    /**
-     * Verwisselt de movable property van het geselecteerde box-element.
-     *
-     * Als het geselecteerde box-element bestaat, wordt de movable property
-     * verwisseld van waar naar onwaar of van onwaar naar waar.
-     * Daarnaast wordt de movable-attribute van het box-element aangepast.
-     */
-    SituationPlanView.prototype.toggleSelectedBoxMovable = function () {
-        if (this.selectedBox != null) {
-            var sitPlanElement = this.selectedBox.sitPlanElementRef;
+    }
+    getSelectionMovability() {
+        let situatie = MovableType.Undefined;
+        for (let selectedBox of this.selected.getAllSelected()) {
+            let sitPlanElement = selectedBox.sitPlanElementRef;
             if (sitPlanElement != null) {
-                var boxlabel = sitPlanElement.boxlabelref;
                 switch (sitPlanElement.movable) {
                     case true:
-                        sitPlanElement.movable = false;
-                        this.selectedBox.setAttribute('movable', 'false');
-                        if (boxlabel != null)
-                            boxlabel.setAttribute('movable', 'false');
+                        if (situatie == MovableType.Undefined || situatie == MovableType.Movable)
+                            situatie = MovableType.Movable;
+                        else if (situatie == MovableType.NotMovable)
+                            situatie = MovableType.Mixed;
                         break;
                     case false:
                     default:
+                        if (situatie == MovableType.Undefined || situatie == MovableType.NotMovable)
+                            situatie = MovableType.NotMovable;
+                        else if (situatie == MovableType.Movable)
+                            situatie = MovableType.Mixed;
+                        break;
+                }
+            }
+        }
+        return situatie;
+    }
+    /**
+     * Verwisselt de movable property van de geselecteerde box-elementen.
+     *
+     * Alle boxen worden gewisseld, ook als ze niet allemaal dezelfde property hebben
+     */
+    toggleSelectedBoxesMovable(desiredSituatie = MovableType.Undefined) {
+        if (desiredSituatie == MovableType.Undefined) {
+            let startSituatie = this.getSelectionMovability();
+            desiredSituatie = (startSituatie == MovableType.Movable || startSituatie == MovableType.Mixed)
+                ? MovableType.NotMovable : MovableType.Movable;
+        }
+        for (let selectedBox of this.selected.getAllSelected()) {
+            let sitPlanElement = selectedBox.sitPlanElementRef;
+            if (sitPlanElement != null) {
+                let boxlabel = sitPlanElement.boxlabelref;
+                switch (desiredSituatie) {
+                    case MovableType.NotMovable:
+                        sitPlanElement.movable = false;
+                        selectedBox.setAttribute('movable', 'false');
+                        if (boxlabel != null)
+                            boxlabel.setAttribute('movable', 'false');
+                        break;
+                    case MovableType.Movable:
                         sitPlanElement.movable = true;
-                        this.selectedBox.setAttribute('movable', 'true');
+                        selectedBox.setAttribute('movable', 'true');
                         if (boxlabel != null)
                             boxlabel.setAttribute('movable', 'true');
                         break;
+                    default:
+                    // do nothing
                 }
-                undostruct.store();
             }
         }
-    };
-    SituationPlanView.prototype.changePageSelectedBox = function () {
-        var _this = this;
-        if (this.selectedBox != null) {
-            var pages_1 = Array.from({ length: this.sitplan.numPages }, function (_, i) { return String(i + 1); }).filter(function (page) { return page !== String(_this.sitplan.activePage); });
-            (function () { return __awaiter(_this, void 0, void 0, function () {
-                var result, sitPlanElement;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0: return [4 /*yield*/, showSelectPopup("Nieuwe pagina:", pages_1)];
-                        case 1:
-                            result = _a.sent();
-                            if (result !== null) {
-                                sitPlanElement = this.selectedBox.sitPlanElementRef;
-                                if (sitPlanElement != null) {
-                                    sitPlanElement.changePage(+result);
-                                    this.selectPage(+result);
-                                    undostruct.store();
-                                }
-                            }
-                            else {
-                                //console.log("Selection canceled.");
-                            }
-                            return [2 /*return*/];
-                    }
-                });
-            }); })();
+        //if the above iteration had at least one element, store in globalThis.undostruct
+        if (this.selected.length() > 0)
+            globalThis.undostruct.store();
+    }
+    /**
+     * Verandert de pagina van de geselecteerde box-elementen.
+     *
+     * Als er elementen geselecteerd zijn, wordt een popup getoond om de pagina te selecteren.
+     * De pagina die reeds actief is, wordt niet getoond in de lijst.
+     *
+     * @fires showSelectPopup
+     * @fires selectPage
+     * @fires selectBox
+     * @fires globalThis.undostruct.store
+     */
+    changePageSelectedBoxes() {
+        if (this.selected.length() > 0) {
+            const pages = Array.from({ length: this.sitplan.numPages }, (_, i) => String(i + 1)).filter(page => page !== String(this.sitplan.activePage));
+            let selectedBoxes = this.selected.getAllSelected().filter(e => e != null);
+            let selectedMovableBoxes = selectedBoxes.filter(e => e.sitPlanElementRef != null && e.sitPlanElementRef.movable);
+            let selectedSitPlanElements = selectedBoxes.map(e => e.sitPlanElementRef).filter(e => e != null);
+            let selectedMovableSitPlanElements = selectedSitPlanElements.filter(e => e.movable);
+            (async () => {
+                const result = await showSelectPopup("Nieuwe pagina:", pages);
+                if (result !== null) {
+                    for (let element of selectedMovableSitPlanElements)
+                        element.changePage(+result);
+                    this.selectPage(+result);
+                    for (let box of selectedMovableBoxes)
+                        this.selectBox(box);
+                    globalThis.undostruct.store();
+                }
+                else {
+                    // Do nothing, selection canceled
+                }
+            })();
         }
-    };
+    }
     /**
      * Maakt een box en een label op de DOM of in een document-fragmentaan voor een element in het situatieplan.
      *
@@ -4170,16 +4110,15 @@ var SituationPlanView = /** @class */ (function () {
      *
      * @param element - Het element in het situatieplan dat een box op de DOM nodig heeft.
      */
-    SituationPlanView.prototype.makeBox = function (element, fragment) {
-        if (fragment === void 0) { fragment = null; }
+    makeBox(element, fragment = null) {
         // Box aanmaken op de DOM voor het symbool of in te laden externe figuur
         // extra property sitPlanElementRef toegevoegd aan DOM zodat we later ons situatieplan element kunnen terugvinden
-        var box = document.createElement('div');
+        let box = document.createElement('div');
         Object.assign(box, { id: element.id, className: "box", sitPlanElementRef: element });
         box.setAttribute('movable', (element.movable ? 'true' : 'false'));
         element.boxref = box;
         // Boxlabel aanmaken op de DOM voor de tekst bij het symbool
-        var boxlabel = document.createElement('div');
+        let boxlabel = document.createElement('div');
         Object.assign(boxlabel, { id: element.id + '_label', className: "boxlabel", sitPlanElementRef: element });
         boxlabel.setAttribute('movable', (element.movable ? 'true' : 'false'));
         boxlabel.innerHTML = htmlspecialchars(element.getAdres()); // is deze nodig? Wellicht reeds onderdeel van updateContent
@@ -4198,7 +4137,7 @@ var SituationPlanView = /** @class */ (function () {
         boxlabel.addEventListener('touchstart', this.startDrag);
         box.addEventListener('contextmenu', this.showContextMenu);
         boxlabel.addEventListener('contextmenu', this.showContextMenu);
-    };
+    }
     /**
      * Werk de content van het box-element en label-element van een situatieplanelement bij in de DOM.
      *
@@ -4212,14 +4151,14 @@ var SituationPlanView = /** @class */ (function () {
      *
      * @param sitPlanElement - Het situatieplanelement dat aangepast moet worden.
      */
-    SituationPlanView.prototype.updateBoxContent = function (sitPlanElement) {
+    updateBoxContent(sitPlanElement) {
         if (!sitPlanElement)
             return;
-        var box = sitPlanElement.boxref;
-        var boxlabel = sitPlanElement.boxlabelref;
+        const box = sitPlanElement.boxref;
+        const boxlabel = sitPlanElement.boxlabelref;
         if (box == null)
             return;
-        var svg = sitPlanElement.getScaledSVG(); // Deze call past ook viewUpdateNeeded aan en moet dus eerst gebeuren
+        let svg = sitPlanElement.getScaledSVG(); // Deze call past ook viewUpdateNeeded aan en moet dus eerst gebeuren
         if (sitPlanElement.needsViewUpdate) {
             sitPlanElement.needsViewUpdate = false;
             if (svg != null)
@@ -4229,14 +4168,14 @@ var SituationPlanView = /** @class */ (function () {
         }
         ;
         if (boxlabel != null) {
-            var adres = sitPlanElement.getAdres();
+            let adres = sitPlanElement.getAdres();
             if (sitPlanElement.labelfontsize != null)
                 boxlabel.style.fontSize = String(sitPlanElement.labelfontsize) + 'px';
-            var newadres = (adres != null ? htmlspecialchars(adres) : '');
+            let newadres = (adres != null ? htmlspecialchars(adres) : '');
             if (newadres != boxlabel.innerHTML)
                 boxlabel.innerHTML = newadres;
         }
-    };
+    }
     /**
      * Berekent de positie van het label van een situationplanelement in functie vna de grootte van het situationplanelement.
      * het situationplanelement moet daarvoor reeds een box hebben die aan de DOM werd toegevoegd om de grootte van deze box te kunnen bepalen.
@@ -4246,16 +4185,16 @@ var SituationPlanView = /** @class */ (function () {
      *
      * @param sitPlanElement - Het situatieplanelement waarvoor de positie van het label moet worden berekend.
      */
-    SituationPlanView.prototype.updateLabelPosition = function (sitPlanElement) {
+    updateLabelPosition(sitPlanElement) {
         if (!sitPlanElement)
             return;
-        var boxlabel = sitPlanElement.boxlabelref;
+        const boxlabel = sitPlanElement.boxlabelref;
         if (!boxlabel)
             return;
-        var scale = sitPlanElement.getscale();
-        var forbiddenLabelZone = getXYRectangleSize(sitPlanElement.sizex * scale + SITPLANVIEW_SELECT_PADDING, sitPlanElement.sizey * scale + SITPLANVIEW_SELECT_PADDING, sitPlanElement.rotate);
+        const scale = sitPlanElement.getscale();
+        const forbiddenLabelZone = getXYRectangleSize(sitPlanElement.sizex * scale + SITPLANVIEW_SELECT_PADDING, sitPlanElement.sizey * scale + SITPLANVIEW_SELECT_PADDING, sitPlanElement.rotate);
         // Berekken de x/left positie van het label
-        var adreslocation = sitPlanElement.getAdresLocation();
+        const adreslocation = sitPlanElement.getAdresLocation();
         switch (adreslocation) {
             case 'links':
                 sitPlanElement.labelposx = sitPlanElement.posx - forbiddenLabelZone.width / 2 - boxlabel.offsetWidth / 2;
@@ -4265,25 +4204,25 @@ var SituationPlanView = /** @class */ (function () {
                 break;
             default: sitPlanElement.labelposx = sitPlanElement.posx;
         }
-        var left = "".concat(sitPlanElement.labelposx - boxlabel.offsetWidth / 2, "px");
+        const left = `${sitPlanElement.labelposx - boxlabel.offsetWidth / 2}px`;
         if (boxlabel.style.left != left)
             boxlabel.style.left = left; // Vermijd aanpassingen DOM indien niet nodig
         // Bereken de y/top positie van het label
         // Deze bevat wat meer complexe trickery om alles min of meer overeen te doen komen tussen print en scherm
-        var top;
+        let top;
         switch (adreslocation) {
             case 'boven': {
-                top = "".concat(sitPlanElement.posy - forbiddenLabelZone.height / 2 - boxlabel.offsetHeight * 0.8, "px");
+                top = `${sitPlanElement.posy - forbiddenLabelZone.height / 2 - boxlabel.offsetHeight * 0.8}px`;
                 sitPlanElement.labelposy = sitPlanElement.posy - forbiddenLabelZone.height / 2 - boxlabel.offsetHeight * 0.5 / 2;
                 break;
             }
             case 'onder': {
-                top = "".concat(sitPlanElement.posy + forbiddenLabelZone.height / 2 - boxlabel.offsetHeight * 0.2, "px");
+                top = `${sitPlanElement.posy + forbiddenLabelZone.height / 2 - boxlabel.offsetHeight * 0.2}px`;
                 sitPlanElement.labelposy = sitPlanElement.posy + forbiddenLabelZone.height / 2 + boxlabel.offsetHeight * 0.7 / 2;
                 break;
             }
             default:
-                top = "".concat(sitPlanElement.posy - boxlabel.offsetHeight / 2, "px");
+                top = `${sitPlanElement.posy - boxlabel.offsetHeight / 2}px`;
                 sitPlanElement.labelposy = sitPlanElement.posy + 1;
         }
         if (boxlabel.style.top != top)
@@ -4296,41 +4235,41 @@ var SituationPlanView = /** @class */ (function () {
             if (!boxlabel.classList.contains('hidden'))
                 boxlabel.classList.add('hidden'); // Vermijd aanpassingen DOM indien niet nodig
         }
-    };
+    }
     /**
      * Wijzigt de grootte, positie en rotatietransformatie van het DIV-element dat een situationplanelement bevat in de DOM.
      * Controleert ook of het symbool op een zichtbare pagina staat en maakt het onzichtbaar indien nodig.
      *
      * @param sitPlanElement Het situationplanelement dat aangepast moet worden.
      */
-    SituationPlanView.prototype.updateSymbolPosition = function (sitPlanElement) {
+    updateSymbolPosition(sitPlanElement) {
         function getRotationTransform(sitPlanElement) {
             if (!sitPlanElement)
                 return '';
-            var _a = sitPlanElement.berekenAfbeeldingsRotatieEnSpiegeling(), rotation = _a[0], spiegel = _a[1];
-            return "rotate(".concat(rotation, "deg)") + (spiegel ? ' scaleX(-1)' : '');
+            const [rotation, spiegel] = sitPlanElement.berekenAfbeeldingsRotatieEnSpiegeling();
+            return `rotate(${rotation}deg)` + (spiegel ? ' scaleX(-1)' : '');
         }
         if (!sitPlanElement)
             return;
-        var div = sitPlanElement.boxref;
+        const div = sitPlanElement.boxref;
         if (!div)
             return;
-        var scale = sitPlanElement.getscale();
-        var contentwidth = sitPlanElement.sizex * scale;
-        var contentheight = sitPlanElement.sizey * scale;
-        var left = ((sitPlanElement.posx - contentwidth / 2 - SITPLANVIEW_SELECT_PADDING)).toString() + "px";
+        const scale = sitPlanElement.getscale();
+        const contentwidth = sitPlanElement.sizex * scale;
+        const contentheight = sitPlanElement.sizey * scale;
+        const left = ((sitPlanElement.posx - contentwidth / 2 - SITPLANVIEW_SELECT_PADDING)).toString() + "px";
         if (div.style.left != left)
             div.style.left = left; // Vermijd aanpassingen DOM indien niet nodig
-        var top = ((sitPlanElement.posy - contentheight / 2 - SITPLANVIEW_SELECT_PADDING)).toString() + "px";
+        const top = ((sitPlanElement.posy - contentheight / 2 - SITPLANVIEW_SELECT_PADDING)).toString() + "px";
         if (div.style.top != top)
             div.style.top = top; // Vermijd aanpassingen DOM indien niet nodig
-        var width = ((contentwidth + SITPLANVIEW_SELECT_PADDING * 2)).toString() + "px";
+        const width = ((contentwidth + SITPLANVIEW_SELECT_PADDING * 2)).toString() + "px";
         if (div.style.width != width)
             div.style.width = width; // Vermijd aanpassingen DOM indien niet nodig
-        var height = ((contentheight + SITPLANVIEW_SELECT_PADDING * 2)).toString() + "px";
+        const height = ((contentheight + SITPLANVIEW_SELECT_PADDING * 2)).toString() + "px";
         if (div.style.height != height)
             div.style.height = height; // Vermijd aanpassingen DOM indien niet nodig
-        var transform = getRotationTransform(sitPlanElement);
+        const transform = getRotationTransform(sitPlanElement);
         if (div.style.transform != transform)
             div.style.transform = transform; // Vermijd aanpassingen DOM indien niet nodig
         if (this.sitplan.activePage == sitPlanElement.page) {
@@ -4341,19 +4280,19 @@ var SituationPlanView = /** @class */ (function () {
             if (!div.classList.contains('hidden'))
                 div.classList.add('hidden'); // Vermijd aanpassingen DOM indien niet nodig
         }
-    };
+    }
     /**
      * Werkt de positie van het symbool bij op de DOM indien nodig.
      * Berekent de positie van het label en werkt deze bij op de DOM indien nodig
      *     *
      * @param sitPlanElement - Het situationplanelement
      */
-    SituationPlanView.prototype.updateSymbolAndLabelPosition = function (sitPlanElement) {
+    updateSymbolAndLabelPosition(sitPlanElement) {
         if (!sitPlanElement)
             return;
         this.updateSymbolPosition(sitPlanElement); // Eerst content aanpassen anders kennen we de grootte van het symbool niet
         this.updateLabelPosition(sitPlanElement);
-    };
+    }
     /**
      * Werkt de situatieplanweergave bij door elementen te synchroniseren met de onderliggende datastructuur.
      *
@@ -4366,13 +4305,12 @@ var SituationPlanView = /** @class */ (function () {
      * Het gebruik van document fragments maakt de redraw aanzienlijk sneller in google chrome.
      * In Firefox is deze ook snel zonder document fragments.
      */
-    SituationPlanView.prototype.redraw = function () {
-        var start = performance.now();
+    redraw() {
+        const start = performance.now();
         this.syncToSitPlan();
-        var fragment = document.createDocumentFragment();
-        var appendNeeded = false;
-        for (var _i = 0, _a = this.sitplan.elements; _i < _a.length; _i++) {
-            var element = _a[_i];
+        const fragment = document.createDocumentFragment();
+        let appendNeeded = false;
+        for (let element of this.sitplan.elements) {
             if (!element.boxref) {
                 this.makeBox(element, fragment);
                 appendNeeded = true;
@@ -4381,8 +4319,7 @@ var SituationPlanView = /** @class */ (function () {
         if (appendNeeded)
             this.paper.append(fragment); // We moeten de boxes toevoegen aan de DOM alvorens de label positie te berekenen aangezien we de size van de labels moeten kennen
         this.showPage(this.sitplan.activePage);
-        for (var _b = 0, _c = this.sitplan.elements; _b < _c.length; _b++) {
-            var element = _c[_b];
+        for (let element of this.sitplan.elements) {
             if (element.page == this.sitplan.activePage) {
                 this.updateBoxContent(element);
                 this.updateSymbolAndLabelPosition(element);
@@ -4390,76 +4327,114 @@ var SituationPlanView = /** @class */ (function () {
         }
         this.updateRibbon();
         this.sideBar.render();
-        var end = performance.now();
-        console.log("Redraw took ".concat(end - start, "ms"));
-    };
+        const end = performance.now();
+        console.log(`Redraw took ${end - start}ms`);
+    }
     /**
      * Geeft de ordinal van het geselecteerde element terug in de array van het situatieplan.
      *
-     * @returns {string | null} De id van de geselecteerde box, of null.
+     * @returns {number | null} De id van de geselecteerde box, of null.
      */
-    SituationPlanView.prototype.getSelectedBoxOrdinal = function () {
-        var _this = this;
-        if (this.selectedBox == null)
+    getLastSelectedBoxOrdinal() {
+        if (this.selected.length() == 0)
             return null;
-        return this.sitplan.elements.findIndex(function (e) { return e.boxref == _this.selectedBox; });
-    };
+        return this.sitplan.elements.findIndex(e => e.boxref == this.selected.getLastSelected());
+    }
+    /**
+     * Geeft de ordinals van de geselecteerde elementen terug in de array van het situatieplan.
+     *
+     * @returns {number[] | null} De ordinals van de geselecteerde boxes, of null.
+     */
+    getSelectedBoxesOrdinals() {
+        if (this.selected.length() == 0)
+            return [];
+        return this.sitplan.elements.filter(e => this.selected.includes(e.boxref)).map(e => this.sitplan.elements.indexOf(e));
+    }
     /**
      * Maakt de gegeven box de geselecteerde box.
      *
      * @param box - Het element dat geselecteerd moet worden.
      */
-    SituationPlanView.prototype.selectBox = function (box) {
+    selectOneBox(box) {
         if (!box)
             return;
         box.classList.add('selected');
-        this.selectedBox = box;
-    };
+        this.selected.selectOne(box);
+        globalThis.undostruct.updateSelectedBoxes();
+    }
+    /**
+     * Maakt de gegeven box geselecteerd als deze niet null is.
+     *
+     * @param box - Het element dat geselecteerd moet worden.
+     */
+    selectBox(box) {
+        if (!box)
+            return;
+        box.classList.add('selected');
+        this.selected.select(box);
+        globalThis.undostruct.updateSelectedBoxes();
+    }
+    /**
+     * Selecteert de gegeven box als deze niet al geselecteerd is, of deselecteert deze als deze al geselecteerd is.
+     * De allerlaatste box in de selectie wordt nooit gedeselecteerd.
+     *
+     * @param box - Het element dat geselecteerd moet worden.
+     */
+    selectToggleBox(box) {
+        if (!box)
+            return;
+        this.selected.toggleButNeverRemoveLast(box);
+        if (this.selected.includes(box))
+            box.classList.add('selected');
+        else
+            box.classList.remove('selected');
+        globalThis.undostruct.updateSelectedBoxes();
+    }
     /**
      * Verwijdert de selectie van alle boxes.
      */
-    SituationPlanView.prototype.clearSelection = function () {
-        var boxes = document.querySelectorAll('.box');
-        boxes.forEach(function (b) { return b.classList.remove('selected'); });
-        this.selectedBox = null;
-    };
+    clearSelection() {
+        let boxes = document.querySelectorAll('.box');
+        boxes.forEach(b => b.classList.remove('selected'));
+        this.selected.clear();
+    }
     /**
-     * Verwijdert de geselecteerde box en verwijdert deze ook uit het situatieplan.
-     * Verwijdert ook het bijhorende label.
+     * Verwijdert de geselecteerde boxen en verwijdert deze ook uit het situatieplan.
+     * Verwijdert ook de bijhorende labels.
      */
-    SituationPlanView.prototype.deleteSelectedBox = function () {
-        if (this.selectedBox == null)
+    deleteSelectedBoxes() {
+        if (this.selected.length() == 0)
             return;
-        var id = this.selectedBox.id;
-        var sitPlanElement = this.selectedBox.sitPlanElementRef;
-        if (sitPlanElement == null)
-            return;
-        this.selectedBox.remove();
-        if (sitPlanElement.boxlabelref != null)
-            sitPlanElement.boxlabelref.remove();
-        this.sitplan.removeElement(sitPlanElement);
-        this.selectedBox = null;
+        for (let selectedBox of this.selected.getAllSelected()) {
+            let sitPlanElement = selectedBox.sitPlanElementRef;
+            if (sitPlanElement == null)
+                continue;
+            if (sitPlanElement.movable == false)
+                continue;
+            selectedBox.remove();
+            if (sitPlanElement.boxlabelref != null)
+                sitPlanElement.boxlabelref.remove();
+            this.sitplan.removeElement(sitPlanElement);
+        }
+        this.selected.clear();
         this.sideBar.render();
-    };
+    }
     /**
      * Send the selected box to the back of the z-index stack and reorder the elements of the situation plan accordingly
      * so that after saving or during printing the elements are drawn in the same order.
      *
      * @returns void
      */
-    SituationPlanView.prototype.sendToBack = function () {
-        if (this.selectedBox == null)
+    sendToBack() {
+        if (this.selected.length() == 0)
             return;
-        for (var _i = 0, _a = this.sitplan.elements; _i < _a.length; _i++) {
-            var element = _a[_i];
+        for (let element of this.sitplan.elements) {
             if (element.boxref != null) {
-                var newzindex = void 0;
-                if (element.boxref != this.selectedBox) {
-                    newzindex = (parseInt(element.boxref.style.zIndex) || 0) + 1;
-                }
-                else {
+                let newzindex;
+                if ((this.selected.includes(element.boxref)) && (element.movable != false))
                     newzindex = 0;
-                }
+                else
+                    newzindex = (parseInt(element.boxref.style.zIndex) || 0) + 1;
                 element.boxref.style.zIndex = newzindex.toString();
                 if (element.boxlabelref != null) {
                     element.boxlabelref.style.zIndex = newzindex.toString();
@@ -4467,56 +4442,95 @@ var SituationPlanView = /** @class */ (function () {
             }
         }
         this.sitplan.orderByZIndex();
-        undostruct.store();
-    };
+        globalThis.undostruct.store();
+    }
     /**
      * Send the selected box to the front of the z-index stack and reorder the elements of the situation plan accordingly
      * so that after saving or during printing the elements are drawn in the same order.
      *
      * @returns void
      */
-    SituationPlanView.prototype.bringToFront = function (undoStore) {
-        if (undoStore === void 0) { undoStore = true; }
-        if (this.selectedBox == null)
+    bringToFront(undoStore = true) {
+        if (this.selected.length() == 0)
             return;
-        var newzindex = 0;
-        for (var _i = 0, _a = this.sitplan.elements; _i < _a.length; _i++) {
-            var element_1 = _a[_i];
-            if ((element_1.boxref != null) && (element_1.boxref != this.selectedBox)) {
-                newzindex = Math.max(newzindex, parseInt(element_1.boxref.style.zIndex) || 0);
+        let newzindex = 0;
+        for (let element of this.sitplan.elements) {
+            if ((element.boxref != null) && (!this.selected.includes(element.boxref))) {
+                newzindex = Math.max(newzindex, parseInt(element.boxref.style.zIndex) || 0);
             }
         }
         newzindex += 1;
-        var element = this.selectedBox.sitPlanElementRef;
-        if (element == null) {
-            this.sitplan.syncToSitPlan();
-            return;
+        for (let selected of this.selected.getAllSelected()) {
+            let element = selected.sitPlanElementRef;
+            if (element == null) {
+                this.sitplan.syncToSitPlan();
+                return;
+            }
+            if (element.movable == false)
+                continue;
+            selected.style.zIndex = newzindex.toString();
+            if (element.boxlabelref != null)
+                element.boxlabelref.style.zIndex = newzindex.toString();
         }
-        this.selectedBox.style.zIndex = newzindex.toString();
-        if (element.boxlabelref != null)
-            element.boxlabelref.style.zIndex = newzindex.toString();
         this.sitplan.orderByZIndex();
         if (undoStore)
-            undostruct.store();
-    };
+            globalThis.undostruct.store();
+    }
+    /**
+     * De halo rond een SituationPlanElement is de ruimte die wordt mee gesleept rond het referentie-element.
+     * Deze bevat de unie van alle geselecteerde en movable andere elementen.
+     * Deze informatie is nodig om tijdens het slepen te bepalen of alle elementen nog op aanvaardbare plaatsen zitten.
+     *
+     * @param sitPlanReferenceElement - Het situatieplanelement in het midden van de geselecteerde boxen.
+     * @returns {Object} Een object met de volgende properties:
+     *   - left: de afstand links van het element in het midden tot de linker rand van de unie
+     *   - right: de afstand rechts van het element in het midden tot de rechter rand van de unie
+     *   - top: de afstand boven het element in het midden tot de boven rand van de unie
+     *   - bottom: de afstand onder het element in het midden tot de onder rand van de unie
+     */
+    getDraggedHaloAroundElement(sitPlanReferenceElement) {
+        // Bereken de unie van de centra van alle geselecteerde boxes
+        let xmin = sitPlanReferenceElement.posx;
+        let ymin = sitPlanReferenceElement.posy;
+        let xmax = sitPlanReferenceElement.posx;
+        let ymax = sitPlanReferenceElement.posy;
+        for (let selected of this.selected.getAllSelected()) {
+            if ((selected == null) || (selected === this.draggedBox))
+                continue;
+            const sitPlanElement = selected.sitPlanElementRef;
+            if (sitPlanElement == null)
+                continue;
+            if (sitPlanElement.movable == false)
+                continue;
+            xmin = Math.min(xmin, sitPlanElement.posx);
+            ymin = Math.min(ymin, sitPlanElement.posy);
+            xmax = Math.max(xmax, sitPlanElement.posx);
+            ymax = Math.max(ymax, sitPlanElement.posy);
+        }
+        // Hoeveel ruimte moeten we laten rond de geselecteerde boxes
+        const halo = { left: sitPlanReferenceElement.posx - xmin,
+            right: xmax - sitPlanReferenceElement.posx,
+            top: sitPlanReferenceElement.posy - ymin,
+            bottom: ymax - sitPlanReferenceElement.posy };
+        return halo;
+    }
     /**
      * Selecteer een pagina.
      *
      * @param page - Het nummer van de pagina die getoond moet worden.
      */
-    SituationPlanView.prototype.selectPage = function (page) {
+    selectPage(page) {
         this.sitplan.activePage = page;
         this.redraw();
-    };
+    }
     /**
      * Toont enkel de elementen die op de pagina staan die als parameter wordt meegegeven.
      *
      * @param page - Het nummer van de pagina die getoond moet worden.
      */
-    SituationPlanView.prototype.showPage = function (page) {
+    showPage(page) {
         this.clearSelection();
-        for (var _i = 0, _a = this.sitplan.elements; _i < _a.length; _i++) {
-            var element = _a[_i];
+        for (let element of this.sitplan.elements) {
             if (element.page != page) {
                 element.boxref.classList.add('hidden');
                 element.boxlabelref.classList.add('hidden');
@@ -4527,7 +4541,7 @@ var SituationPlanView = /** @class */ (function () {
             }
         }
         this.updateRibbon();
-    };
+    }
     /**
      * Roteert de geselecteerde box met het opgegeven aantal graden.
      * De box wordt geroteerd rond zijn middelpunt.
@@ -4536,8 +4550,7 @@ var SituationPlanView = /** @class */ (function () {
      * Deze functie slaat de status op, zodat het aanroepen van undo() deze actie ongedaan maakt.
      * @param degrees - Het aantal graden waarmee de box moet worden gedraaid.
      */
-    SituationPlanView.prototype.rotateSelectedBox = function (degrees, rotateLabelToo) {
-        if (rotateLabelToo === void 0) { rotateLabelToo = false; }
+    rotateSelectedBoxes(degrees, rotateLabelToo = false) {
         /**
          * Roteert het label.
          *
@@ -4546,30 +4559,32 @@ var SituationPlanView = /** @class */ (function () {
          * @param cycle - Het aantal keren dat het label met 90 graden moet worden gedraaid.
          *                1 is een draaing van 90 graden naar rechts, -1 is een draaing van 90 graden naar links.
          */
-        function rotateLabel(cycle) {
-            var locations = ['boven', 'rechts', 'onder', 'links'];
-            var pic = this.selectedBox.sitPlanElementRef;
+        function rotateLabel(pic, cycle) {
+            const locations = ['boven', 'rechts', 'onder', 'links'];
             if (pic == null)
                 return;
-            var index = locations.indexOf(pic.getAdresLocation());
+            const index = locations.indexOf(pic.getAdresLocation());
             pic.setAdresLocation(locations[(index + cycle + 4) % 4]);
         }
         ;
-        if (this.selectedBox) {
-            if (rotateLabelToo) {
-                rotateLabel.bind(this)(Math.round(degrees / 90));
-            }
-            var id = this.selectedBox.id;
-            var pic = this.selectedBox.sitPlanElementRef;
+        for (let selected of this.selected.getAllSelected()) {
+            let pic = selected.sitPlanElementRef;
+            if (pic == null)
+                continue;
+            if (pic.movable == false)
+                continue;
             pic.rotate = (pic.rotate + degrees) % 360;
+            if (rotateLabelToo)
+                rotateLabel.bind(this)(pic, Math.round(degrees / 90));
             this.updateBoxContent(pic);
             this.updateSymbolAndLabelPosition(pic);
-            undostruct.store();
         }
-    };
-    SituationPlanView.prototype.unattachArrowKeys = function () {
-        this.event_manager.addEventListener(document, 'keydown', function () { });
-    };
+        if (this.selected.length() > 0)
+            globalThis.undostruct.store();
+    }
+    unattachArrowKeys() {
+        this.event_manager.addEventListener(document, 'keydown', () => { });
+    }
     /**
      * Voegt eventlisteners toe om pijltjestoetsen te hanteren.
      *
@@ -4577,50 +4592,57 @@ var SituationPlanView = /** @class */ (function () {
      * De positie van de box wordt aangepast door de posx of posy van het element in het situatieplan te veranderen.
      * Daarna wordt de functie updateSymbolAndLabelPosition aangeroepen om de positie van het symbool en het label van de box te updaten.
      */
-    SituationPlanView.prototype.attachArrowKeys = function () {
-        var _this = this;
-        this.event_manager.addEventListener(document, 'keydown', function (event) {
-            _this.contextMenu.hide();
+    attachArrowKeys() {
+        this.event_manager.addEventListener(document, 'keydown', (event) => {
+            this.contextMenu.hide();
             if (document.getElementById('outerdiv').style.display == 'none')
                 return; // Check if we are really in the situationplan, if not, the default scrolling action will be executed by the browser
             if (document.getElementById('popupOverlay') != null)
                 return; // We need the keys when editing symbol properties.
+            let selectedBoxes = this.selected.getAllSelected().filter(e => e != null);
+            let selectedMovableBoxes = selectedBoxes.filter(e => e.sitPlanElementRef != null && e.sitPlanElementRef.movable);
+            let selectedSitPlanElements = selectedBoxes.map(e => e.sitPlanElementRef).filter(e => e != null);
+            let selectedMovableSitPlanElements = selectedSitPlanElements.filter(e => e.movable);
+            const paperPadding = parseFloat(getComputedStyle(this.paper).getPropertyValue('--paperPadding'));
             // Loop enkel voor undo-redo, andere acties beneden
             if (event.ctrlKey) {
                 switch (event.key) {
                     case 'z':
                         event.preventDefault();
-                        undostruct.undo();
+                        globalThis.undostruct.undo();
                         return;
                     case 'y':
                         event.preventDefault();
-                        undostruct.redo();
+                        globalThis.undostruct.redo();
                         return;
                     case 'r':
                         event.preventDefault();
-                        var helperTip = new HelperTip(appDocStorage);
-                        helperTip.show('sitplan.Ctrl_r_key', "<h3>Ctrl-r genegeerd</h3>\n                        <p>Om te vermijden dat u per ongeluk de pagina ververst en uw werk verliest is de refresh sneltoets uitgeschakeld in het situatieschema.</p>", true);
+                        const helperTip = new HelperTip(globalThis.appDocStorage);
+                        helperTip.show('sitplan.Ctrl_r_key', `<h3>Ctrl-r genegeerd</h3>
+                        <p>Om te vermijden dat u per ongeluk de pagina ververst en uw werk verliest is de refresh sneltoets uitgeschakeld in het situatieschema.</p>`, true);
                         return;
                     default:
                     //do nothing as we also have ctrl + arrow keys here below.
                 }
             }
             // Loop indien box geselecteerd
-            if (_this.selectedBox) { // Check if we have a selected box, if not, the default scrolling action will be executed by the browser
+            if (this.selected.length() > 0) { // Check if we have a selected box, if not, the default scrolling action will be executed by the browser
                 event.preventDefault();
-                var sitPlanElement = _this.selectedBox.sitPlanElementRef;
+                const sitPlanElement = this.selected.getLastSelected().sitPlanElementRef;
                 if (!sitPlanElement)
                     return;
+                const draggedHalo = this.getDraggedHaloAroundElement(sitPlanElement);
                 if (event.ctrlKey) {
                     switch (event.key) {
                         case 'ArrowLeft':
-                            _this.rotateSelectedBox(-90, true);
+                            this.rotateSelectedBoxes(-90, true);
                             return;
                         case 'ArrowRight':
-                            _this.rotateSelectedBox(90, true);
+                            this.rotateSelectedBoxes(90, true);
                             return;
                         case 'l':
-                            _this.toggleSelectedBoxMovable();
+                        case 'L':
+                            this.toggleSelectedBoxesMovable();
                             return;
                         default:
                             return;
@@ -4628,150 +4650,155 @@ var SituationPlanView = /** @class */ (function () {
                 }
                 else {
                     switch (event.key) {
-                        case 'ArrowLeft':
-                            sitPlanElement.posx -= 1;
-                            undostruct.store('arrowMove' + sitPlanElement.id);
+                        case 'ArrowLeft': {
+                            const shiftx = Math.max(draggedHalo.left - paperPadding / this.zoomfactor, sitPlanElement.posx - 1) - sitPlanElement.posx;
+                            for (let element of selectedMovableSitPlanElements)
+                                element.posx += shiftx;
+                            globalThis.undostruct.store('arrowMove' + sitPlanElement.id); // technically this is not correct and should contain the list of all moved objects
                             break;
+                        }
                         case 'ArrowRight':
-                            sitPlanElement.posx += 1;
-                            undostruct.store('arrowMove' + sitPlanElement.id);
+                            const shiftx = 1;
+                            for (let element of selectedMovableSitPlanElements)
+                                element.posx += shiftx;
+                            globalThis.undostruct.store('arrowMove' + sitPlanElement.id); // technically this is not correct and should contain the list of all moved objects
                             break;
-                        case 'ArrowUp':
-                            sitPlanElement.posy -= 1;
-                            undostruct.store('arrowMove' + sitPlanElement.id);
+                        case 'ArrowUp': {
+                            const shifty = Math.max(draggedHalo.top - paperPadding / this.zoomfactor, sitPlanElement.posy - 1) - sitPlanElement.posy;
+                            for (let element of selectedMovableSitPlanElements)
+                                element.posy += shifty;
+                            globalThis.undostruct.store('arrowMove' + sitPlanElement.id); // technically this is not correct and should contain the list of all moved objects
                             break;
+                        }
                         case 'ArrowDown':
-                            sitPlanElement.posy += 1;
-                            undostruct.store('arrowMove' + sitPlanElement.id);
+                            const shifty = 1;
+                            for (let element of selectedMovableSitPlanElements)
+                                element.posy += shifty;
+                            globalThis.undostruct.store('arrowMove' + sitPlanElement.id); // technically this is not correct and should contain the list of all moved objects
                             break;
                         case 'PageDown':
                             {
-                                var oldPage = sitPlanElement.page;
-                                var newPage = (sitPlanElement.page + 1);
-                                if (newPage > _this.sitplan.numPages)
+                                let oldPage = sitPlanElement.page;
+                                let newPage = (sitPlanElement.page + 1);
+                                if (newPage > this.sitplan.numPages)
                                     newPage = 1;
-                                if (sitPlanElement.movable) {
-                                    sitPlanElement.changePage(newPage);
-                                    var box = _this.selectedBox;
-                                    _this.selectPage(newPage);
-                                    _this.selectBox(box); //keep the selection active
-                                    if (newPage != oldPage) {
-                                        _this.bringToFront(false);
-                                    }
-                                }
-                                else {
-                                    _this.selectPage(newPage);
-                                }
-                                if (newPage != oldPage)
-                                    undostruct.store();
+                                if (newPage == oldPage)
+                                    return;
+                                for (let element of selectedMovableSitPlanElements)
+                                    element.changePage(newPage);
+                                this.selectPage(newPage); // Naar de nieuwe pagina gaan, dit wist ook de selectie
+                                for (let box of selectedMovableBoxes)
+                                    this.selectBox(box); // De geselecteerde elementen terug selecteren
+                                this.bringToFront(false); // Indien de pagina is gewijzigd, breng de nog geselecteerde elementen naar voren
+                                globalThis.undostruct.store();
                             }
                             break;
                         case 'PageUp':
                             {
-                                var oldPage = sitPlanElement.page;
-                                var newPage = (sitPlanElement.page - 1);
+                                let oldPage = sitPlanElement.page;
+                                let newPage = (sitPlanElement.page - 1);
                                 if (newPage < 1)
-                                    newPage = _this.sitplan.numPages;
-                                if (sitPlanElement.movable) {
-                                    sitPlanElement.changePage(newPage);
-                                    var box = _this.selectedBox;
-                                    _this.selectPage(newPage);
-                                    _this.selectBox(box); //keep the selection active
-                                    if (newPage != oldPage) {
-                                        _this.bringToFront(false);
-                                    }
-                                }
-                                else {
-                                    _this.selectPage(newPage);
-                                }
-                                if (newPage != oldPage)
-                                    undostruct.store();
+                                    newPage = this.sitplan.numPages;
+                                if (newPage == oldPage)
+                                    return;
+                                const boxarray = this.selected.getAllSelected(); // eerst bestaande selectie bewaren
+                                for (let element of selectedMovableSitPlanElements)
+                                    element.changePage(newPage);
+                                this.selectPage(newPage); // Naar de nieuwe pagina gaan, dit wist ook de selectie
+                                for (let box of selectedMovableBoxes)
+                                    this.selectBox(box); // De geselecteerde elementen terug selecteren
+                                this.bringToFront(false); // Indien de pagina is gewijzigd, breng de nog geselecteerde elementen naar voren
+                                globalThis.undostruct.store();
                             }
                             break;
                         case 'Escape':
-                            _this.clearSelection();
+                            this.clearSelection();
                             break;
                         case 'Enter':
-                            _this.editSelectedBox();
+                            this.editSelectedBox();
                             return;
                         case 'Delete':
-                            if (_this.selectedBox != null) {
-                                _this.deleteSelectedBox();
-                                undostruct.store();
+                            if (this.selected.length() > 0) {
+                                this.deleteSelectedBoxes();
+                                globalThis.undostruct.store();
                             }
                             break;
                         default:
                             return;
                     }
                 }
-                _this.updateSymbolAndLabelPosition(sitPlanElement);
+                // We berekenen de selectie opnieuw want deze kan gewijzigd zijn, o.a. door de delete knop
+                selectedBoxes = this.selected.getAllSelected().filter(e => e != null);
+                selectedMovableBoxes = selectedBoxes.filter(e => e.sitPlanElementRef != null && e.sitPlanElementRef.movable);
+                selectedSitPlanElements = selectedBoxes.map(e => e.sitPlanElementRef).filter(e => e != null);
+                selectedMovableSitPlanElements = selectedSitPlanElements.filter(e => e.movable);
+                for (let element of selectedMovableSitPlanElements)
+                    this.updateSymbolAndLabelPosition(element);
                 // Loop indien geen box geselecteerd
             }
             else {
                 switch (event.key) {
                     case 'PageDown':
                         {
-                            var oldPage = _this.sitplan.activePage;
-                            var newPage = (oldPage + 1);
-                            if (newPage > _this.sitplan.numPages)
+                            let oldPage = this.sitplan.activePage;
+                            let newPage = (oldPage + 1);
+                            if (newPage > this.sitplan.numPages)
                                 newPage = 1;
-                            _this.selectPage(newPage);
+                            this.selectPage(newPage);
                             if (newPage != oldPage)
-                                undostruct.store("changePage");
+                                globalThis.undostruct.store("changePage");
                         }
                         break;
                     case 'PageUp':
                         {
-                            var oldPage = _this.sitplan.activePage;
-                            var newPage = (oldPage - 1);
+                            let oldPage = this.sitplan.activePage;
+                            let newPage = (oldPage - 1);
                             if (newPage < 1)
-                                newPage = _this.sitplan.numPages;
-                            _this.selectPage(newPage);
-                            if (newPage != _this.sitplan.activePage)
-                                undostruct.store("changePage");
+                                newPage = this.sitplan.numPages;
+                            this.selectPage(newPage);
+                            if (newPage != this.sitplan.activePage)
+                                globalThis.undostruct.store("changePage");
                         }
                         break;
                 }
             }
         });
-    };
+    }
     /**
      * Hangt een klik event listener aan het gegeven element met als doel de huidig geselecteerde box te verwijderen.
      *
      * @param elem - Het html element waar de listener wordt aan gehangen.
      */
-    SituationPlanView.prototype.attachDeleteButton = function (elem) {
-        var _this = this;
-        this.event_manager.addEventListener(elem, 'click', function () {
-            _this.contextMenu.hide();
-            if (_this.selectedBox != null) {
-                _this.deleteSelectedBox();
-                var helperTip = new HelperTip(appDocStorage);
-                helperTip.show('sitplan.deletekey', "<h3>Tip: Symbolen verwijderen</h3>\n                <p>Bespaar tijd en gebruik de 'Delete' toets op het toetsenbord om symbolen te verwijderen.</p>", true);
-                undostruct.store();
+    attachDeleteButton(elem) {
+        this.event_manager.addEventListener(elem, 'click', () => {
+            this.contextMenu.hide();
+            if (this.selected.length() > 0) {
+                this.deleteSelectedBoxes();
+                const helperTip = new HelperTip(globalThis.appDocStorage);
+                helperTip.show('sitplan.deletekey', `<h3>Tip: Symbolen verwijderen</h3>
+                <p>Bespaar tijd en gebruik de 'Delete' toets op het toetsenbord om symbolen te verwijderen.</p>`, true);
+                globalThis.undostruct.store();
             }
         });
-    };
+    }
     ;
     /**
      * Hangt een klik event listener aan het gegeven element met als doel de huidig geselecteerde box naar de achtergrond te sturen.
      *
      * @param elem - Het html element waar de listener wordt aan gehangen.
      */
-    SituationPlanView.prototype.attachSendToBackButton = function (elem) {
-        var _this = this;
-        this.event_manager.addEventListener(elem, 'click', function () { _this.contextMenu.hide(); _this.sendToBack(); });
-    };
+    attachSendToBackButton(elem) {
+        this.event_manager.addEventListener(elem, 'click', () => { this.contextMenu.hide(); this.sendToBack(); });
+    }
     ;
     /**
      * Hangt een klik event listener aan het gegeven element met als doel de huidig geselecteerde box naar de voorgrond te brengen.
      *
      * @param elem - Het html element waar de listener wordt aan gehangen.
      */
-    SituationPlanView.prototype.attachBringToFrontButton = function (elem) {
-        var _this = this;
-        this.event_manager.addEventListener(elem, 'click', function () { _this.contextMenu.hide(); _this.bringToFront(); });
-    };
+    attachBringToFrontButton(elem) {
+        this.event_manager.addEventListener(elem, 'click', () => { this.contextMenu.hide(); this.bringToFront(); });
+    }
     ;
     /**
      * Hangt een klik event listener aan het gegeven element met als doel de zoomfactor aan te passen.
@@ -4780,10 +4807,9 @@ var SituationPlanView = /** @class */ (function () {
      * @param increment - De waarde waarmee de zoomfactor wordt aangepast. Een positieve waarde vergroot de zoom,
      *                    terwijl een negatieve waarde de zoom verkleint.
      */
-    SituationPlanView.prototype.attachZoomButton = function (elem, increment) {
-        var _this = this;
-        this.event_manager.addEventListener(elem, 'click', function () { _this.contextMenu.hide(); _this.zoomIncrement(increment); });
-    };
+    attachZoomButton(elem, increment) {
+        this.event_manager.addEventListener(elem, 'click', () => { this.contextMenu.hide(); this.zoomIncrement(increment); });
+    }
     ;
     /**
      * Hangt een klik event listener aan het gegeven element met als doel het situatieplan
@@ -4791,10 +4817,9 @@ var SituationPlanView = /** @class */ (function () {
      *
      * @param elem - Het html element waar de listener wordt aan gehangen.
      */
-    SituationPlanView.prototype.attachZoomToFitButton = function (elem) {
-        var _this = this;
-        this.event_manager.addEventListener(elem, 'click', function () { _this.contextMenu.hide(); _this.zoomToFit(); });
-    };
+    attachZoomToFitButton(elem) {
+        this.event_manager.addEventListener(elem, 'click', () => { this.contextMenu.hide(); this.zoomToFit(); });
+    }
     ;
     /**
      * Hangt een klik event listener aan het gegeven element om een bestand te kiezen en een verandering event listener aan het invoerelement
@@ -4803,81 +4828,76 @@ var SituationPlanView = /** @class */ (function () {
      * @param elem - Het HTML-element dat bij een klik een bestand moet openen.
      * @param fileinput - Het invoerelement voor bestanden dat het bestand uploadt wanneer het verandert.
      */
-    SituationPlanView.prototype.attachAddElementFromFileButton = function (elem, fileinput) {
-        var _this = this;
-        this.event_manager.addEventListener(elem, 'click', function () { _this.contextMenu.hide(); fileinput.click(); });
-        this.event_manager.addEventListener(fileinput, 'change', function (event) {
-            var element = _this.sitplan.addElementFromFile(event, _this.sitplan.activePage, _this.paper.offsetWidth / 2, _this.paper.offsetHeight / 2, (function () {
-                _this.syncToSitPlan();
-                _this.clearSelection();
+    attachAddElementFromFileButton(elem, fileinput) {
+        this.event_manager.addEventListener(elem, 'click', () => { this.contextMenu.hide(); fileinput.click(); });
+        this.event_manager.addEventListener(fileinput, 'change', (event) => {
+            let element = this.sitplan.addElementFromFile(event, this.sitplan.activePage, this.paper.offsetWidth / 2, this.paper.offsetHeight / 2, (() => {
+                this.syncToSitPlan();
+                this.clearSelection();
                 element.needsViewUpdate = true; // for an external SVG this is needed, for an electroItem it is automatically set (see next function)
-                var lastscale = element.scale;
-                element.scaleSelectedBoxToPaperIfNeeded(_this.paper.offsetWidth * 0.995, _this.paper.offsetHeight * 0.995, _this.sitplan.defaults.scale);
-                _this.redraw();
-                _this.selectBox(element.boxref); // We moeten dit na redraw doen anders bestaat de box mogelijk nog niet
+                const lastscale = element.scale;
+                element.scaleSelectedBoxToPaperIfNeeded(this.paper.offsetWidth * 0.995, this.paper.offsetHeight * 0.995, this.sitplan.defaults.scale);
+                this.redraw();
+                this.selectOneBox(element.boxref); // We moeten dit na redraw doen anders bestaat de box mogelijk nog niet
                 fileinput.value = ''; // Zorgt ervoor dat hetzelfde bestand twee keer kan worden gekozen en dit nog steeds een change triggert
                 if ((element.sizex == 0) || (element.sizey == 0)) {
                     //Use the built in help top to display a text that the image is invalid and remove it again
-                    _this.deleteSelectedBox();
-                    var dialog = new Dialog('Ongeldige afmetingen', '<p>Dit bestand wordt door de browser herkend als een afbeelding met hoogte of breedte gelijk aan 0.</p>' +
+                    this.deleteSelectedBoxes();
+                    const dialog = new Dialog('Ongeldige afmetingen', '<p>Dit bestand wordt door de browser herkend als een afbeelding met hoogte of breedte gelijk aan 0.</p>' +
                         '<p>Dit bestand kan bijgevolg niet geladen worden.</p>');
                     dialog.show();
                     return;
                 }
-                _this.bringToFront(); // Deze slaat ook automatisch undo informatie op dus we moeten geen undostruct.store() meer doen.
+                this.bringToFront(); // Deze slaat ook automatisch undo informatie op dus we moeten geen globalThis.undostruct.store() meer doen.
                 // We voeren deze om dezelfde reden pas uit na het checken dat het bestand geldig is.
                 if (element.scale != lastscale) {
                     //Use the built in help top to display a text that the image was scaled
-                    var helperTip = new HelperTip(appDocStorage);
+                    const helperTip = new HelperTip(globalThis.appDocStorage);
                     helperTip.show('sitplan.scaledImageToFit', '<h3>Mededeling</h3>' +
                         '<p>Deze afbeelding werd automatisch verkleind om binnen de tekenzone te blijven.</p>' +
                         '<p>Kies "Bewerk" in het menu om de schaalfactor verder aan te passen indien gewenst.</p>', true);
                 }
-            }).bind(_this));
+            }).bind(this));
         });
-    };
+    }
     /**
      * Hangt een klik event listener aan het gegeven element om een nieuw Electro_Item aan het situatieplan toe te voegen.
      *
      * @param elem - Het HTML-element dat bij een klik een nieuw element toevoegt.
      */
-    SituationPlanView.prototype.attachAddElectroItemButton = function (elem) {
-        var _this = this;
-        this.event_manager.addEventListener(elem, 'click', function () {
-            _this.contextMenu.hide();
-            _this.unattachArrowKeys();
-            SituationPlanView_ElementPropertiesPopup(null, _this.addElectroItem.bind(_this));
-            _this.attachArrowKeys();
+    attachAddElectroItemButton(elem) {
+        this.event_manager.addEventListener(elem, 'click', () => {
+            this.contextMenu.hide();
+            this.unattachArrowKeys();
+            SituationPlanView_ElementPropertiesPopup(null, this.addElectroItem.bind(this));
+            this.attachArrowKeys();
         });
-    };
+    }
     /**
      * Hangt een klik event listener aan het gegeven element om een bestaand element in het situatieplan te bewerken.
      *
      * @param elem - Het HTML-element dat bij een klik een bestaand element in het situatieplan bewerkt.
      */
-    SituationPlanView.prototype.attachEditButton = function (elem) {
-        var _this = this;
-        this.event_manager.addEventListener(elem, 'click', function () { _this.editSelectedBox(); });
-    };
+    attachEditButton(elem) {
+        this.event_manager.addEventListener(elem, 'click', () => { this.editSelectedBox(); });
+    }
     /**
      * Verwijdert alle elementen van de pagina met het gegeven nummer.
      *
      * @param page - Het nummer van de pagina die leeg gemaakt moet worden.
      */
-    SituationPlanView.prototype.wipePage = function (page) {
-        for (var i = 0; i < this.sitplan.elements.length; i++) {
-            var element = this.sitplan.elements[i];
-            if (element.page == this.sitplan.activePage) {
-                var boxref = element.boxref;
-                if (boxref != null) {
-                    this.selectBox(boxref);
-                    this.deleteSelectedBox();
-                    this.wipePage(page); // Need to call again to avoid loop going in error as length changes
-                    return;
-                }
-            }
+    wipePage(page) {
+        let ElementsToWipe = this.sitplan.elements.filter((element) => element.page == page);
+        for (let element of ElementsToWipe) {
+            if (element == null)
+                continue;
+            if (element.boxref != null)
+                element.boxref.remove();
+            if (element.boxlabelref != null)
+                element.boxlabelref.remove();
+            this.sitplan.removeElement(element);
         }
-    };
+    }
     /**
      * Maakt de knoppen in de ribbon aan om onder andere pagina's te selecteren, elementen te laden of verwijderen en pagina's te zoomen.
      * Deze functie wordt aangeroepen telkens er iets in de toestand verandert die mogelijk kan leiden tot aanpassingen in de ribbon.
@@ -4886,67 +4906,138 @@ var SituationPlanView = /** @class */ (function () {
      *
      * TODO: Er zijn efficientiewinsten mogelijk door niet telkens de hele ribbon te hertekenen.
      */
-    SituationPlanView.prototype.updateRibbon = function () {
-        var _this = this;
-        if (structure.properties.currentView != "draw")
+    updateRibbon() {
+        if (globalThis.structure.properties.currentView != "draw")
             return;
-        var outputleft = "";
-        var outputright = "";
+        let outputleft = "";
+        let outputright = "";
         // -- Undo/redo buttons --
-        outputleft += "\n            <div class=\"icon\" ".concat((undostruct.undoStackSize() > 0 ? 'onclick="undoClicked()"' : 'style="filter: opacity(45%)"'), ">\n                <img src=\"gif/undo.png\" alt=\"Ongedaan maken\" class=\"icon-image\">\n                <span class=\"icon-text\">Ongedaan maken</span>\n            </div>\n            <div class=\"icon\"  ").concat((undostruct.redoStackSize() > 0 ? 'onclick="redoClicked()"' : 'style=\"filter: opacity(45%)\"'), ">\n                <img src=\"gif/redo.png\" alt=\"Opnieuw\" class=\"icon-image\">\n                <span class=\"icon-text\">Opnieuw</span>\n            </div>");
+        outputleft += `
+            <div class="icon" ${(globalThis.undostruct.undoStackSize() > 0 ? 'onclick="undoClicked()"' : 'style="filter: opacity(45%)"')}>
+                <img src="gif/undo.png" alt="Ongedaan maken" class="icon-image">
+                <span class="icon-text">Ongedaan maken</span>
+            </div>
+            <div class="icon"  ${(globalThis.undostruct.redoStackSize() > 0 ? 'onclick="redoClicked()"' : 'style=\"filter: opacity(45%)\"')}>
+                <img src="gif/redo.png" alt="Opnieuw" class="icon-image">
+                <span class="icon-text">Opnieuw</span>
+            </div>`;
         // -- Visuals om items te laden of verwijderen --
-        outputleft += "\n            <span style=\"display: inline-block; width: 30px;\"></span>\n            <div class=\"icon\" id=\"button_Add\">\n                <span class=\"icon-image\" style=\"font-size:24px\">\u2795</span>\n                <span class=\"icon-text\">Uit bestand</span>\n            </div>\n            <div class=\"icon\" id=\"button_Add_electroItem\">\n                <span class=\"icon-image\" style=\"font-size:24px\">\u2795</span>\n                <span class=\"icon-text\">Uit schema</span>\n            </div>\n            <div class=\"icon\" id=\"button_Delete\">\n                <span class=\"icon-image\" style=\"font-size:24px\">\uD83D\uDDD1</span>\n                <span class=\"icon-text\">Verwijder</span>\n            </div>";
+        outputleft += `
+            <span style="display: inline-block; width: 30px;"></span>
+            <div class="icon" id="button_Add">
+                <span class="icon-image" style="font-size:24px">➕</span>
+                <span class="icon-text">Uit bestand</span>
+            </div>
+            <div class="icon" id="button_Add_electroItem">
+                <span class="icon-image" style="font-size:24px">➕</span>
+                <span class="icon-text">Uit schema</span>
+            </div>
+            <div class="icon" id="button_Delete">
+                <span class="icon-image" style="font-size:24px">🗑</span>
+                <span class="icon-text">Verwijder</span>
+            </div>`;
         // -- Visuals om items te bewerken --
-        outputleft += "\n            <span style=\"display: inline-block; width: 10px;\"></span>\n            <div class=\"icon\" id=\"button_edit\">\n                <span class=\"icon-image\" style=\"font-size:24px\">&#x2699;</span>\n                <span class=\"icon-text\">Bewerk</span>\n            </div>";
+        outputleft += `
+            <span style="display: inline-block; width: 10px;"></span>
+            <div class="icon" id="button_edit">
+                <span class="icon-image" style="font-size:24px">&#x2699;</span>
+                <span class="icon-text">Bewerk</span>
+            </div>`;
         // -- Visuals om naar achteren of voren te sturen --
-        outputleft += "\n            <span style=\"display: inline-block; width: 10px;\"></span>\n            <div class=\"icon\" id=\"sendBack\">\n                <span class=\"icon-image\" style=\"font-size:24px\">\u2B07\u2B07</span>\n                <span class=\"icon-text\">Naar achter</span>\n            </div>\n            <div class=\"icon\" id=\"bringFront\">\n                <span class=\"icon-image\" style=\"font-size:24px\">\u2B06\u2B06</span>\n                <span class=\"icon-text\">Naar voor</span>\n            </div>";
+        outputleft += `
+            <span style="display: inline-block; width: 10px;"></span>
+            <div class="icon" id="sendBack">
+                <span class="icon-image" style="font-size:24px">⬇⬇</span>
+                <span class="icon-text">Naar achter</span>
+            </div>
+            <div class="icon" id="bringFront">
+                <span class="icon-image" style="font-size:24px">⬆⬆</span>
+                <span class="icon-text">Naar voor</span>
+            </div>`;
         // -- Add an icon of a floppy (save symbol) like the icons above --
         if (autoSaver && autoSaver.hasChangesSinceLastManualSave()) {
-            outputleft += "\n                <span style=\"display: inline-block; width: 10px;\"></span>\n                <div class=\"highlight-warning-big\" style=\"width: 64px; display: inline-block; vertical-align: middle; text-align: center;\" id=\"button_save\" onclick=\"exportjson(false)\" onmouseover=\"this.style.cursor='pointer'\" onmouseout=\"this.style.cursor='default'\">\n                    <span class=\"icon-image\" style=\"font-size:24px\">\uD83D\uDCBE</span>\n                    <span class=\"icon-text\" style=\"display: inline-block; width: 100%;\">Opslaan</span>\n                </div>";
+            outputleft += `
+                <span style="display: inline-block; width: 10px;"></span>
+                <div class="highlight-warning-big" style="width: 64px; display: inline-block; vertical-align: middle; text-align: center;" id="button_save" onclick="exportjson(false)" onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'">
+                    <span class="icon-image" style="font-size:24px">💾</span>
+                    <span class="icon-text" style="display: inline-block; width: 100%;">Opslaan</span>
+                </div>`;
         }
         else {
-            outputleft += "\n                <span style=\"display: inline-block; width: 10px;\"></span>\n                <div class=\"highlight-ok-big\" id=\"button_save\" style=\"width: 64px; display: inline-block; vertical-align: middle; text-align: center;\" onmouseover=\"this.style.cursor='pointer'\" onmouseout=\"this.style.cursor='default'\" onclick=\"topMenu.selectMenuItemByName('Bestand')\">\n                    <span class=\"icon-image\" style=\"font-size:24px; filter: grayscale(100%); opacity: 0.5;\">\uD83D\uDCBE</span>\n                    <span class=\"icon-text\" style=\"display: inline-block; width: 100%;\">Bestand</span>\n                </div>";
+            outputleft += `
+                <span style="display: inline-block; width: 10px;"></span>
+                <div class="highlight-ok-big" id="button_save" style="width: 64px; display: inline-block; vertical-align: middle; text-align: center;" onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'" onclick="topMenu.selectMenuItemByName('Bestand')">
+                    <span class="icon-image" style="font-size:24px; filter: grayscale(100%); opacity: 0.5;">💾</span>
+                    <span class="icon-text" style="display: inline-block; width: 100%;">Bestand</span>
+                </div>`;
         }
         // -- Visuals om pagina te selecteren --
-        outputleft += "\n            <span style=\"display: inline-block; width: 50px;\"></span>\n            <div>\n                <center>\n                    <span style=\"display: inline-block; white-space: nowrap;\">Pagina\n                        <select id=\"id_sitplanpage\">";
-        for (var i = 1; i <= this.sitplan.numPages; i++) {
+        outputleft += `
+            <span style="display: inline-block; width: 50px;"></span>
+            <div>
+                <center>
+                    <span style="display: inline-block; white-space: nowrap;">Pagina
+                        <select id="id_sitplanpage">`;
+        for (let i = 1; i <= this.sitplan.numPages; i++) {
             outputleft += '<option value="' + i + '"' + (i == this.sitplan.activePage ? ' selected' : '') + '>' + i + '</option>';
         }
-        outputleft += "\n                        </select>\n                    </span><br><span style=\"display: inline-block; white-space: nowrap;\">\n                        <button id=\"btn_sitplan_addpage\" ".concat((this.sitplan.activePage != this.sitplan.numPages ? ' disabled' : ''), ">Nieuw</button>\n                        <button id=\"btn_sitplan_delpage\" style=\"background-color:red;\" ").concat((this.sitplan.numPages <= 1 ? ' disabled' : ''), ">&#9851;</button>\n                    </span>\n                </center>\n            </div>");
+        outputleft += `
+                        </select>
+                    </span><br><span style="display: inline-block; white-space: nowrap;">
+                        <button id="btn_sitplan_addpage" ${(this.sitplan.activePage != this.sitplan.numPages ? ' disabled' : '')}>Nieuw</button>
+                        <button id="btn_sitplan_delpage" style="background-color:red;" ${(this.sitplan.numPages <= 1 ? ' disabled' : '')}>&#9851;</button>
+                    </span>
+                </center>
+            </div>`;
         // -- Visuals om pagina te zoomen --
-        outputright += "\n            <span style=\"display: inline-block; width: 10px;\"></span>\n            <div class=\"icon\" id=\"button_zoomin\">\n                <span class=\"icon-image\" style=\"font-size: 24px;\">\uD83D\uDD0D</span>\n                <span class=\"icon-text\">In</span>\n            </div>\n            <div class=\"icon\" id=\"button_zoomout\">\n                <span class=\"icon-image\" style=\"font-size: 24px;\">\uD83C\uDF0D</span>\n                <span class=\"icon-text\">Uit</span>\n            </div>\n            <div class=\"icon\" id=\"button_zoomToFit\">\n                <span class=\"icon-image\" style=\"font-size: 24px;\">\uD83D\uDDA5\uFE0F</span>\n                <!--<img src=\"gif/scaleup.png\" alt=\"Schermvullend\" class=\"icon-image\">-->\n                <span class=\"icon-text\">Schermvullend</span>\n            </div>\n            <span style=\"display: inline-block; width: 10px;\"></span>";
+        outputright += `
+            <span style="display: inline-block; width: 10px;"></span>
+            <div class="icon" id="button_zoomin">
+                <span class="icon-image" style="font-size: 24px;">🔍</span>
+                <span class="icon-text">In</span>
+            </div>
+            <div class="icon" id="button_zoomout">
+                <span class="icon-image" style="font-size: 24px;">🌍</span>
+                <span class="icon-text">Uit</span>
+            </div>
+            <div class="icon" id="button_zoomToFit">
+                <span class="icon-image" style="font-size: 24px;">🖥️</span>
+                <!--<img src="gif/scaleup.png" alt="Schermvullend" class="icon-image">-->
+                <span class="icon-text">Schermvullend</span>
+            </div>
+            <span style="display: inline-block; width: 10px;"></span>`;
         // -- Put everything in the ribbon --
-        document.getElementById("ribbon").innerHTML = "<div id=\"left-icons\">".concat(outputleft, "</div><div id=\"right-icons\">").concat(outputright, "</div>");
+        document.getElementById("ribbon").innerHTML = `<div id="left-icons">${outputleft}</div><div id="right-icons">${outputright}</div>`;
         // -- Actions om pagina te selecteren --
-        document.getElementById('id_sitplanpage').onchange = function (event) {
-            _this.contextMenu.hide();
-            var target = event.target;
-            _this.selectPage(Number(target.value));
-            undostruct.store("changePage");
+        document.getElementById('id_sitplanpage').onchange = (event) => {
+            this.contextMenu.hide();
+            const target = event.target;
+            this.selectPage(Number(target.value));
+            globalThis.undostruct.store("changePage");
         };
-        document.getElementById('btn_sitplan_addpage').onclick = function () {
-            _this.contextMenu.hide();
-            _this.sitplan.numPages++;
-            _this.selectPage(_this.sitplan.numPages);
-            undostruct.store();
+        document.getElementById('btn_sitplan_addpage').onclick = () => {
+            this.contextMenu.hide();
+            this.sitplan.numPages++;
+            this.selectPage(this.sitplan.numPages);
+            globalThis.undostruct.store();
         };
-        document.getElementById('btn_sitplan_delpage').onclick = function () {
-            _this.contextMenu.hide();
-            var dialog = new Dialog('Pagina verwijderen', "Pagina ".concat(_this.sitplan.activePage, " volledig verwijderen?"), [
-                { text: 'OK', callback: (function () {
-                        _this.wipePage(_this.sitplan.activePage);
+        document.getElementById('btn_sitplan_delpage').onclick = () => {
+            this.contextMenu.hide();
+            const dialog = new Dialog('Pagina verwijderen', `Pagina ${this.sitplan.activePage} volledig verwijderen?`, [
+                { text: 'OK', callback: (() => {
+                        this.wipePage(this.sitplan.activePage);
                         //set page of all sitplan.elements with page>page one lower
-                        _this.sitplan.elements.forEach(function (element) {
-                            if (element.page > _this.sitplan.activePage) {
+                        this.sitplan.elements.forEach(element => {
+                            if (element.page > this.sitplan.activePage) {
                                 element.page--;
                             }
                         });
-                        if (_this.sitplan.numPages > 1)
-                            _this.sitplan.numPages--;
-                        _this.selectPage(Math.min(_this.sitplan.activePage, _this.sitplan.numPages));
-                        undostruct.store();
-                    }).bind(_this) },
-                { text: 'Annuleren', callback: function () { } }
+                        if (this.sitplan.numPages > 1)
+                            this.sitplan.numPages--;
+                        this.selectPage(Math.min(this.sitplan.activePage, this.sitplan.numPages));
+                        globalThis.undostruct.store();
+                    }).bind(this) },
+                { text: 'Annuleren', callback: () => { } }
             ]);
             dialog.show();
         };
@@ -4963,43 +5054,46 @@ var SituationPlanView = /** @class */ (function () {
         this.attachZoomButton(document.getElementById('button_zoomin'), 0.1);
         this.attachZoomButton(document.getElementById('button_zoomout'), -0.1);
         this.attachZoomToFitButton(document.getElementById('button_zoomToFit'));
-    };
-    return SituationPlanView;
-}()); // *** END CLASS ***
+    }
+} // *** END CLASS ***
 /**
  * Toon de pagina voor het situatieplan
  */
 function showSituationPlanPage() {
     toggleAppView('draw');
-    if (!(structure.sitplan)) {
-        structure.sitplan = new SituationPlan();
+    if (!(globalThis.structure.sitplan)) {
+        globalThis.structure.sitplan = new SituationPlan();
     }
     ;
-    if (!(structure.sitplanview)) {
+    if (!(globalThis.structure.sitplanview)) {
         //Verwijder eerst alle elementen op de DOM met id beginnend met "SP_" om eventuele wezen
         //uit eerdere oefeningen te voorkomen
-        var elements = document.querySelectorAll('[id^="SP_"]');
-        elements.forEach(function (e) { return e.remove(); });
+        let elements = document.querySelectorAll('[id^="SP_"]');
+        elements.forEach(e => e.remove());
         //Maak dan de SituationPlanView
-        structure.sitplanview = new SituationPlanView(document.getElementById('canvas'), document.getElementById('paper'), structure.sitplan);
-        structure.sitplanview.zoomToFit();
+        globalThis.structure.sitplanview = new SituationPlanView(document.getElementById('canvas'), document.getElementById('paper'), globalThis.structure.sitplan);
+        globalThis.structure.sitplanview.zoomToFit();
     }
     ;
-    if (structure.properties.legacySchakelaars == null) {
-        if (structure.sitplan.heeftEenzameSchakelaars()) {
-            var askLegacySchakelaar = new AskLegacySchakelaar();
-            askLegacySchakelaar.show().then(function () {
-                structure.sitplanview.redraw();
+    if (globalThis.structure.properties.legacySchakelaars == null) {
+        if (globalThis.structure.sitplan.heeftEenzameSchakelaars()) {
+            let askLegacySchakelaar = new AskLegacySchakelaar();
+            askLegacySchakelaar.show().then(() => {
+                globalThis.structure.sitplanview.redraw();
             });
             return;
         }
         else {
-            structure.properties.legacySchakelaars = false; // We gaan dadelijk naar de nieuwe situatie
+            globalThis.structure.properties.legacySchakelaars = false; // We gaan dadelijk naar de nieuwe situatie
         }
     }
-    structure.sitplanview.redraw();
-    var helperTip = new HelperTip(appDocStorage);
-    helperTip.show('sitplan.introductie', "<h3>Situatieschema tekenen</h3>\n    <p>Op deze pagina kan u een situatieschema tekenen.</p>\n    <p>Laad een plattegrond met de knop \"Uit bestand\" en voeg symbolen toe met de knop \"Uit schema\".</p>\n    <p>Klik <a href=\"Documentation/sitplandoc.pdf\" target=\"_blank\" rel=\"noopener noreferrer\">hier</a> om in een nieuw venster de documentatie te bekijken.</p>\n    <p>We werken elke dag om dit programma beter te maken. Opmerkingen en idee\u00EBn zijn welkom in het \"contact\"-formulier.</p>");
+    globalThis.structure.sitplanview.redraw();
+    const helperTip = new HelperTip(globalThis.appDocStorage);
+    helperTip.show('sitplan.introductie', `<h3>Situatieschema tekenen</h3>
+    <p>Op deze pagina kan u een situatieschema tekenen.</p>
+    <p>Laad een plattegrond met de knop "Uit bestand" en voeg symbolen toe met de knop "Uit schema".</p>
+    <p>Klik <a href="Documentation/sitplandoc.pdf" target="_blank" rel="noopener noreferrer">hier</a> om in een nieuw venster de documentatie te bekijken.</p>
+    <p>We werken elke dag om dit programma beter te maken. Opmerkingen en ideeën zijn welkom in het "contact"-formulier.</p>`);
 }
 /**
  * Een serie functies om een formulier te tonen met edit-functionaliteiten voor symbolen in het situatieplan
@@ -5031,19 +5125,17 @@ function showSituationPlanPage() {
  *                                              Indien null fungeert deze functie als Add in plaats van Edit.
  * @param {function} callbackOK Een referentie naar de functie die moet worden uitgevoerd als op OK wordt geklikt.
  */
-function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK, callbackCancel) {
+function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK, callbackCancel = () => { }) {
     // Interne variabelen voor alle subfuncties                                    
-    if (callbackCancel === void 0) { callbackCancel = function () { }; }
-    var adressen = new ElectroItemZoeker();
-    var kringnamen = adressen.getUniqueKringnaam();
+    let adressen = new ElectroItemZoeker();
+    let kringnamen = adressen.getUniqueKringnaam();
     /**
      * Vul het select element voor de kringen met alle gekende info rond kringnamen
      */
     function rePopulateKringSelect() {
         selectKring.innerHTML = ''; // Alles wissen
-        for (var _i = 0, kringnamen_1 = kringnamen; _i < kringnamen_1.length; _i++) {
-            var kringnaam = kringnamen_1[_i];
-            var option = document.createElement('option');
+        for (let kringnaam of kringnamen) {
+            const option = document.createElement('option');
             option.value = kringnaam;
             option.text = kringnaam;
             selectKring.appendChild(option);
@@ -5057,14 +5149,13 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK, ca
      *
      * Gebruikte variabelen: sitplanElement uit de hoofdfunctie is het element waarvoor we de eigenschappen wijzigen
      */
-    function initKringSelect(electroItemId) {
-        if (electroItemId === void 0) { electroItemId = null; }
+    function initKringSelect(electroItemId = null) {
         rePopulateKringSelect();
         if ((electroItemId == null) && (sitplanElement != null) && (sitplanElement.getElectroItemId() != null)) {
             electroItemId = sitplanElement.getElectroItemId();
         }
         if (electroItemId != null)
-            selectKring.value = structure.findKringName(electroItemId);
+            selectKring.value = globalThis.structure.findKringName(electroItemId);
         selectKring.onchange = KringSelectChanged;
     }
     /**
@@ -5080,11 +5171,11 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK, ca
      * Vul het select element voor electro-items met alle electro-items binnen de gekozen kring
      */
     function rePopulateElectroItemBox() {
-        var electroItems = adressen.getElectroItemsByKring(selectKring.value);
+        let electroItems = adressen.getElectroItemsByKring(selectKring.value);
         selectElectroItemBox.innerHTML = ''; //Clear all options
-        for (var i = 0; i < electroItems.length; ++i) {
-            var electroItem = electroItems[i];
-            var option = document.createElement('option');
+        for (let i = 0; i < electroItems.length; ++i) {
+            const electroItem = electroItems[i];
+            const option = document.createElement('option');
             option.value = String(i);
             option.text = electroItem.adres + ' | ' + electroItem.type;
             selectElectroItemBox.appendChild(option);
@@ -5098,15 +5189,14 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK, ca
      *
      * Gebruikte variabelen: sitplanElement uit de hoofdfunctie is het element waarvoor we de eigenschappen wijzigen
      */
-    function initElectroItemBox(electroItemId) {
-        if (electroItemId === void 0) { electroItemId = null; }
+    function initElectroItemBox(electroItemId = null) {
         rePopulateElectroItemBox();
-        var electroItems = adressen.getElectroItemsByKring(selectKring.value);
+        let electroItems = adressen.getElectroItemsByKring(selectKring.value);
         if ((electroItemId == null) && (sitplanElement != null) && (sitplanElement.getElectroItemId() != null)) {
             electroItemId = sitplanElement.getElectroItemId();
         }
         if (electroItemId != 0) {
-            for (var i = 0; i < electroItems.length; ++i) {
+            for (let i = 0; i < electroItems.length; ++i) {
                 if (electroItems[i].id == electroItemId)
                     selectElectroItemBox.value = String(i);
             }
@@ -5128,11 +5218,11 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK, ca
      * Vul het Id-veld met de id van het gekozen electro-item in de bovenstaande twee velden (select-kring en select electro-item)
      */
     function rePopulateIdField() {
-        var str = '';
-        var electroItems = adressen.getElectroItemsByKring(selectKring.value);
-        var idx = Number(selectElectroItemBox.value);
+        let str = '';
+        let electroItems = adressen.getElectroItemsByKring(selectKring.value);
+        let idx = Number(selectElectroItemBox.value);
         if (!isNaN(idx)) {
-            var item = electroItems[idx];
+            let item = electroItems[idx];
             if (item != null)
                 str = electroItems[idx].id.toString();
         }
@@ -5162,9 +5252,9 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK, ca
     function IdFieldChanged() {
         if (textInput.value != null) {
             textInput.value = textInput.value.replace(/[^0-9]/g, '');
-            var electroItemId = Number(textInput.value);
+            let electroItemId = Number(textInput.value);
             updateElectroType();
-            if (structure.getElectroItemById(electroItemId) != null) {
+            if (globalThis.structure.getElectroItemById(electroItemId) != null) {
                 initKringSelect(electroItemId);
                 initElectroItemBox(electroItemId);
                 selectAdresType.value = 'auto';
@@ -5173,18 +5263,17 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK, ca
         }
         ;
     }
-    function handleExpandButton(electroItemId) {
-        if (electroItemId === void 0) { electroItemId = null; }
+    function handleExpandButton(electroItemId = null) {
         if (electroItemId == null)
             return;
-        var element = structure.getElectroItemById(electroItemId);
+        let element = globalThis.structure.getElectroItemById(electroItemId);
         if (element == null)
             return;
         element.expand();
         adressen.reCalculate();
         kringnamen = adressen.getUniqueKringnaam();
         IdFieldChanged();
-        structure.sitplanview.redraw();
+        globalThis.structure.sitplanview.redraw();
     }
     /**
      * Toon het type verbruiker van het gekozen electro-item
@@ -5195,15 +5284,15 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK, ca
             expandButton.style.display = 'none';
         }
         else {
-            var electroItemId_1 = Number(textInput.value);
-            var element = structure.getElectroItemById(electroItemId_1);
+            let electroItemId = Number(textInput.value);
+            let element = globalThis.structure.getElectroItemById(electroItemId);
             if (element != null) {
-                var type = element.getType();
+                const type = element.getType();
                 feedback.innerHTML = '<span style="color:green;">' + element.getType() + '</span>';
                 if (element.isExpandable()) {
                     expandButton.style.display = 'block';
                     feedback.innerHTML += '<br><span style="color: black;">Klik op uitpakken indien u de onderliggende elementen in het situatieschema wil kunnen plaatsen.</span>';
-                    expandButton.onclick = function () { handleExpandButton(electroItemId_1); };
+                    expandButton.onclick = () => { handleExpandButton(electroItemId); };
                 }
                 else
                     expandButton.style.display = 'none';
@@ -5218,9 +5307,9 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK, ca
      * Wanneer het type adres gewijzigd wordt, wordt ook het adresveld zelf aangepast
      */
     function selectAdresTypeChanged() {
-        var id = Number(textInput.value);
+        let id = Number(textInput.value);
         updateElectroType();
-        var element = structure.getElectroItemById(id);
+        let element = globalThis.structure.getElectroItemById(id);
         if (element == null) {
             adresInput.value = '';
             adresInput.readOnly = true;
@@ -5261,7 +5350,7 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK, ca
      *
      * @param event
      */
-    var handleEnterKey = function (event) {
+    const handleEnterKey = (event) => {
         if (event.key === 'Enter') {
             event.preventDefault();
             event.stopPropagation();
@@ -5272,32 +5361,88 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK, ca
     /*
      * Eerst maken we de pop-up
      */
-    var div = document.createElement('div');
-    div.innerHTML = "\n        <div id=\"popupOverlay\" class=\"popup-overlay\">\n            <div id=\"popupWindow\" class=\"popup\">\n                <h3>Element toevoegen/bewerken</h3>\n                <div id=\"selectKringContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label for=\"selectKring\" style=\"margin-right: 10px; display: inline-block;\">Kring:</label>\n                    <select id=\"selectKring\"></select>\n                </div>\n                <div id=\"selectElectroItemContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label for=\"selectElectroItemBox\" style=\"margin-right: 10px; display: inline-block;\">Element:</label>\n                    <select id=\"selectElectroItemBox\"></select><span style=\"display: inline-block; width: 10px;\"></span>\n                    <button id=\"expandButton\" title=\"Omzetten in indivuele elementen\" style=\"background-color:lightblue;\">Uitpakken</button>\n                </div>\n                <div id=\"textContainer\" style=\"display: flex; margin-bottom: 30px; align-items: center;\">\n                    <label for=\"textInput\" style=\"margin-right: 10px; display: inline-block;\">ID:</label>\n                    <input id=\"textInput\" style=\"width: 100px;\" type=\"number\" min=\"0\" step=\"1\" value=\"\">\n                    <div id=\"feedback\" style=\"margin-left: 10px; width: 100%; font-size: 12px\"></div>\n                </div>\n                <div id=\"selectContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label for=\"selectAdresType\" style=\"margin-right: 10px; display: inline-block; white-space: nowrap;\">Label type:</label>\n                    <select id=\"selectAdresType\">\n                        <option value=\"auto\">Automatisch</option>\n                        <option value=\"manueel\">Handmatig</option>\n                    </select>\n                </div>\n                <div id=\"adresContainer\" style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label for=\"adresInput\" style=\"margin-right: 10px; display: inline-block; white-space: nowrap;\">Label tekst:</label>\n                    <input id=\"adresInput\" style=\"width: 100%;\" type=\"text\" value=\"\">\n                    <select id=\"selectAdresLocation\" style=\"margin-left: 10px; display: inline-block;\">\n                        <option value=\"links\">Links</option>\n                        <option value=\"rechts\">Rechts</option>\n                        <option value=\"boven\">Boven</option>\n                        <option value=\"onder\">Onder</option>\n                    </select>\n                </div>\n                <div id=\"fontSizeContainer\" style=\"display: flex; margin-bottom: 30px; align-items: center;\">\n                    <label for=\"fontSizeInput\" style=\"margin-right: 10px; display: inline-block; white-space: nowrap;\">Tekengrootte (px):</label>\n                    <input id=\"fontSizeInput\" style=\"width: 100px;\" type=\"number\" min=\"1\" max=\"72\" step=\"11\" value=\"11\">\n                </div> \n                <div style=\"display: flex; margin-bottom: 10px; align-items: center;\">\n                    <label for=\"scaleInput\" style=\"margin-right: 10px; display: inline-block;\">Schaal (%):</label>\n                    <input id=\"scaleInput\" style=\"width: 100px;\" type=\"number\" min=\"10\" max=\"400\" step=\"10\" value=\"".concat(String(SITPLANVIEW_DEFAULT_SCALE * 100), "\">\n                </div>\n                <div style=\"display: flex; margin-bottom: 20px; align-items: center;\">\n                    <label for=\"rotationInput\" style=\"margin-right: 10px; display: inline-block;\">Rotatie (\u00B0):</label>\n                    <input id=\"rotationInput\" style=\"width: 100px;\" type=\"number\" min=\"0\" max=\"360\" step=\"10\" value=\"0\">\n                </div>\n                <div id=\"setDefaultContainer\" style=\"display: flex; margin-bottom: 20px; align-items: flex-start;\">\n                    <input type=\"checkbox\" id=\"setDefaultCheckbox\">\n                    ").concat((sitplanElement == null) || ((sitplanElement != null) && (sitplanElement.getElectroItemId() != null))
-        ? "<label for=\"setDefaultCheckbox\" style=\"margin-left: 10px; flex-grow: 1; flex-wrap: wrap;\">Zet tekengrootte en schaal als standaard voor alle toekomstige nieuwe symbolen.</label>"
-        : "<label for=\"setDefaultCheckbox\" style=\"margin-left: 10px; flex-grow: 1; flex-wrap: wrap;\">Zet schaal als standaard voor alle toekomstige nieuwe symbolen.</label>", "            \n                </div>\n                <div style=\"display: flex; justify-content: center; gap: 0px;\">\n                    <button id=\"okButton\" class=\"rounded-button\">OK</button>\n                    <button id=\"cancelButton\" class=\"rounded-button\">Annuleren</button>\n                </div>\n            </div>\n        </div>");
-    var popupOverlay = div.querySelector('#popupOverlay');
-    var popupWindow = popupOverlay.querySelector('#popupWindow');
-    var selectKringContainer = popupWindow.querySelector('#selectKringContainer');
-    var selectKring = popupWindow.querySelector('#selectKring');
-    var selectElectroItemContainer = popupWindow.querySelector('#selectElectroItemContainer');
-    var selectElectroItemBox = popupWindow.querySelector('#selectElectroItemBox');
-    var expandButton = popupWindow.querySelector('#expandButton');
-    var textContainer = popupWindow.querySelector('#textContainer');
-    var textInput = popupWindow.querySelector('#textInput');
-    var feedback = popupWindow.querySelector('#feedback');
-    var selectContainer = popupWindow.querySelector('#selectContainer');
-    var selectAdresType = popupWindow.querySelector('#selectAdresType');
-    var adresContainer = popupWindow.querySelector('#adresContainer');
-    var adresInput = popupWindow.querySelector('#adresInput');
-    var selectAdresLocation = popupWindow.querySelector('#selectAdresLocation');
-    var fontSizeContainer = popupWindow.querySelector('#fontSizeContainer');
-    var fontSizeInput = popupWindow.querySelector('#fontSizeInput');
-    var scaleInput = popupWindow.querySelector('#scaleInput');
-    var rotationInput = popupWindow.querySelector('#rotationInput');
-    var setDefaultCheckbox = popupWindow.querySelector('#setDefaultCheckbox');
-    var okButton = popupWindow.querySelector('#okButton');
-    var cancelButton = popupWindow.querySelector('#cancelButton');
+    const div = document.createElement('div');
+    div.innerHTML = `
+        <div id="popupOverlay" class="popup-overlay">
+            <div id="popupWindow" class="popup">
+                <h3>Element toevoegen/bewerken</h3>
+                <div id="selectKringContainer" style="display: flex; margin-bottom: 10px; align-items: center;">
+                    <label for="selectKring" style="margin-right: 10px; display: inline-block;">Kring:</label>
+                    <select id="selectKring"></select>
+                </div>
+                <div id="selectElectroItemContainer" style="display: flex; margin-bottom: 10px; align-items: center;">
+                    <label for="selectElectroItemBox" style="margin-right: 10px; display: inline-block;">Element:</label>
+                    <select id="selectElectroItemBox"></select><span style="display: inline-block; width: 10px;"></span>
+                    <button id="expandButton" title="Omzetten in indivuele elementen" style="background-color:lightblue;">Uitpakken</button>
+                </div>
+                <div id="textContainer" style="display: flex; margin-bottom: 30px; align-items: center;">
+                    <label for="textInput" style="margin-right: 10px; display: inline-block;">ID:</label>
+                    <input id="textInput" style="width: 100px;" type="number" min="0" step="1" value="">
+                    <div id="feedback" style="margin-left: 10px; width: 100%; font-size: 12px"></div>
+                </div>
+                <div id="selectContainer" style="display: flex; margin-bottom: 10px; align-items: center;">
+                    <label for="selectAdresType" style="margin-right: 10px; display: inline-block; white-space: nowrap;">Label type:</label>
+                    <select id="selectAdresType">
+                        <option value="auto">Automatisch</option>
+                        <option value="manueel">Handmatig</option>
+                    </select>
+                </div>
+                <div id="adresContainer" style="display: flex; margin-bottom: 10px; align-items: center;">
+                    <label for="adresInput" style="margin-right: 10px; display: inline-block; white-space: nowrap;">Label tekst:</label>
+                    <input id="adresInput" style="width: 100%;" type="text" value="">
+                    <select id="selectAdresLocation" style="margin-left: 10px; display: inline-block;">
+                        <option value="links">Links</option>
+                        <option value="rechts">Rechts</option>
+                        <option value="boven">Boven</option>
+                        <option value="onder">Onder</option>
+                    </select>
+                </div>
+                <div id="fontSizeContainer" style="display: flex; margin-bottom: 30px; align-items: center;">
+                    <label for="fontSizeInput" style="margin-right: 10px; display: inline-block; white-space: nowrap;">Tekengrootte (px):</label>
+                    <input id="fontSizeInput" style="width: 100px;" type="number" min="1" max="72" step="11" value="11">
+                </div> 
+                <div style="display: flex; margin-bottom: 10px; align-items: center;">
+                    <label for="scaleInput" style="margin-right: 10px; display: inline-block;">Schaal (%):</label>
+                    <input id="scaleInput" style="width: 100px;" type="number" min="10" max="400" step="10" value="${String(SITPLANVIEW_DEFAULT_SCALE * 100)}">
+                </div>
+                <div style="display: flex; margin-bottom: 20px; align-items: center;">
+                    <label for="rotationInput" style="margin-right: 10px; display: inline-block;">Rotatie (°):</label>
+                    <input id="rotationInput" style="width: 100px;" type="number" min="0" max="360" step="10" value="0">
+                </div>
+                <div id="setDefaultContainer" style="display: flex; margin-bottom: 20px; align-items: flex-start;">
+                    <input type="checkbox" id="setDefaultCheckbox">
+                    ${(sitplanElement == null) || ((sitplanElement != null) && (sitplanElement.getElectroItemId() != null))
+        ? `<label for="setDefaultCheckbox" style="margin-left: 10px; flex-grow: 1; flex-wrap: wrap;">Zet tekengrootte en schaal als standaard voor alle toekomstige nieuwe symbolen.</label>`
+        : `<label for="setDefaultCheckbox" style="margin-left: 10px; flex-grow: 1; flex-wrap: wrap;">Zet schaal als standaard voor alle toekomstige nieuwe symbolen.</label>`}            
+                </div>
+                <div style="display: flex; justify-content: center; gap: 0px;">
+                    <button id="okButton" class="rounded-button">OK</button>
+                    <button id="cancelButton" class="rounded-button">Annuleren</button>
+                </div>
+            </div>
+        </div>`;
+    const popupOverlay = div.querySelector('#popupOverlay');
+    const popupWindow = popupOverlay.querySelector('#popupWindow');
+    const selectKringContainer = popupWindow.querySelector('#selectKringContainer');
+    const selectKring = popupWindow.querySelector('#selectKring');
+    const selectElectroItemContainer = popupWindow.querySelector('#selectElectroItemContainer');
+    const selectElectroItemBox = popupWindow.querySelector('#selectElectroItemBox');
+    const expandButton = popupWindow.querySelector('#expandButton');
+    const textContainer = popupWindow.querySelector('#textContainer');
+    const textInput = popupWindow.querySelector('#textInput');
+    const feedback = popupWindow.querySelector('#feedback');
+    const selectContainer = popupWindow.querySelector('#selectContainer');
+    const selectAdresType = popupWindow.querySelector('#selectAdresType');
+    const adresContainer = popupWindow.querySelector('#adresContainer');
+    const adresInput = popupWindow.querySelector('#adresInput');
+    const selectAdresLocation = popupWindow.querySelector('#selectAdresLocation');
+    const fontSizeContainer = popupWindow.querySelector('#fontSizeContainer');
+    const fontSizeInput = popupWindow.querySelector('#fontSizeInput');
+    const scaleInput = popupWindow.querySelector('#scaleInput');
+    const rotationInput = popupWindow.querySelector('#rotationInput');
+    const setDefaultCheckbox = popupWindow.querySelector('#setDefaultCheckbox');
+    const okButton = popupWindow.querySelector('#okButton');
+    const cancelButton = popupWindow.querySelector('#cancelButton');
     /*
      * Dan zoeken we de nodige informatie over de symbolen in het ééndraadschema.
      * Indien sitPlanElement werd opgegeven worden de eigenschappen van dit element getoond.
@@ -5308,7 +5453,7 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK, ca
     initIdField();
     if (sitplanElement != null) { // Form werd aangeroepen om een reeds bestaand element te editeren
         if (sitplanElement.getElectroItemId() != null) { // Het gaat over een bestaand Electro-item
-            var electroItem = structure.getElectroItemById(sitplanElement.getElectroItemId());
+            let electroItem = globalThis.structure.getElectroItemById(sitplanElement.getElectroItemId());
             if ((electroItem != null) && (electroItem.getType() == 'Bord')) {
                 selectKringContainer.style.display = 'none';
                 selectElectroItemContainer.style.display = 'none';
@@ -5333,8 +5478,8 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK, ca
     }
     else { // Form werd aangeroepen om een nieuw element te creëren
         selectAdresTypeChanged();
-        fontSizeInput.value = String(structure.sitplan.defaults.fontsize);
-        scaleInput.value = String(structure.sitplan.defaults.scale * 100);
+        fontSizeInput.value = String(globalThis.structure.sitplan.defaults.fontsize);
+        scaleInput.value = String(globalThis.structure.sitplan.defaults.scale * 100);
         selectAdresLocation.value = 'rechts';
     }
     /*
@@ -5350,8 +5495,8 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK, ca
      */
     textInput.onblur = selectAdresTypeChanged;
     selectAdresType.onchange = selectAdresTypeChanged;
-    adresInput.onclick = function () {
-        Array.from(selectAdresType.options).forEach(function (option) {
+    adresInput.onclick = () => {
+        Array.from(selectAdresType.options).forEach(option => {
             if (option.text === "Handmatig") {
                 option.selected = true;
             }
@@ -5361,24 +5506,24 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK, ca
     /*
      * Eventhandlers, OK en Cancel knoppen
      */
-    okButton.onclick = function () {
+    okButton.onclick = () => {
         function isNumeric(value) {
             return /^-?\d+(\.\d+)?$/.test(value);
         }
-        var returnId = (textInput.value.trim() == '' ? null : Number(textInput.value));
+        let returnId = (textInput.value.trim() == '' ? null : Number(textInput.value));
         if (!(isNumeric(scaleInput.value)) || (Number(scaleInput.value) <= 0))
-            scaleInput.value = String(structure.sitplan.defaults.scale * 100);
+            scaleInput.value = String(globalThis.structure.sitplan.defaults.scale * 100);
         if (!(isNumeric(rotationInput.value)))
             rotationInput.value = String(0);
         if (setDefaultCheckbox.checked) {
             if ((sitplanElement == null) || ((sitplanElement != null) && (sitplanElement.getElectroItemId() != null)))
-                structure.sitplan.defaults.fontsize = Number(fontSizeInput.value);
-            structure.sitplan.defaults.scale = Number(scaleInput.value) / 100;
+                globalThis.structure.sitplan.defaults.fontsize = Number(fontSizeInput.value);
+            globalThis.structure.sitplan.defaults.scale = Number(scaleInput.value) / 100;
         }
         closePopup(); // We close the popup first to avoid that an error somewhere leaves it open
         callbackOK(returnId, selectAdresType.value, adresInput.value, selectAdresLocation.value, Number(fontSizeInput.value), Number(scaleInput.value) / 100, Number(rotationInput.value));
     };
-    cancelButton.onclick = function () {
+    cancelButton.onclick = () => {
         closePopup();
         callbackCancel();
     };
@@ -5388,15 +5533,235 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement, callbackOK, ca
     document.body.appendChild(div);
     showPopup();
 }
-var SituationPlanView_SideBar = /** @class */ (function () {
-    function SituationPlanView_SideBar(div) {
+/**
+ * Een serie functies om een formulier te tonen met edit-functionaliteiten voor symbolen in het situatieplan
+ *
+ * De volgorde van code en functies in deze file volgt de structuur van de popup.
+ *
+ * popupWindow
+ *  selectKringContainer
+ *      selectKring -- Keuze kringnaam, gedraagt zich als een filter.
+ *  selectElectroItemContainer
+ *      selectElectroItemBox -- Keuze electroItem.
+ *  textContainer
+ *      textInput -- Hier wordt het electroItemId ingevuld, ofwel door de gebruiker, ofwel door het programma
+ *      feedback -- Hier wordt weergegeven over welk soort item het gaat, bvb "Contactdoos"
+ *  selectContainer
+ *      selectAdresType -- Hier kan gekozen wat voor soort tekstlabel gebruikt wordt, automatisch of handmatig.
+ *  adresContainer
+ *      adresInput -- Het eigenlijke tekstlabel, kan automatisch ingevuld zijn ("automatisch") of handmatig door de gebruiker
+ *      selectAdresLocation -- Locatie van het label, boven, onder, links of rechts.
+ *  fontsizeContainer
+ *      fontsizeInput -- De fontsize van het label, kan automatisch ingevuld zijn ("automatisch") of handmatig door de gebruiker
+ *  Andere elementen
+ *      scale -- Schaalfactor van het symbool
+ *      rotation -- Eventuele rotatie van het symbool
+ *  buttons
+ *      OK, Cancel -- OK en Cancel knoppen
+ *
+ * @param {SituationPlanElement} sitplanElement Het element waarvoor de eigenschappen getoond moeten worden.
+ *                                              Indien null fungeert deze functie als Add in plaats van Edit.
+ * @param {function} callbackOK Een referentie naar de functie die moet worden uitgevoerd als op OK wordt geklikt.
+ */
+function SituationPlanView_MultiElementPropertiesPopup(sitplanElements, callbackOK, callbackCancel = () => { }) {
+    /**
+     * Toont de popup met alle opties voor het bewerken van een element
+     */
+    function showPopup() {
+        popupOverlay.style.visibility = 'visible';
+        document.body.style.pointerEvents = 'none'; // Disable interactions with the background
+        popupOverlay.style.pointerEvents = 'auto'; // Enable interactions with the popup
     }
-    SituationPlanView_SideBar.prototype.renderSymbols = function () {
+    /**
+     * Sluit de popup, meestal omdat op OK of Cancel werd geklikt of Enter op het toetsenbord.
+     * Ter waarschuwing, er wordt geen verdere actie ondernomen zoals het plaatsen van het gekozen symbool
+     * in het situatieplan. Dit dient de gebruiker van deze set functies zelf nog te doen.
+     */
+    function closePopup() {
+        popupOverlay.style.visibility = 'hidden';
+        document.body.style.pointerEvents = 'auto'; // Re-enable interactions with the background
+        div.remove();
+    }
+    /**
+     * We stellen het tikken van Enter in een veld gelijk aan het klikken op OK in het formulier
+     *
+     * @param event
+     */
+    const handleEnterKey = (event) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            event.stopPropagation();
+            okButton.click();
+        }
     };
-    SituationPlanView_SideBar.prototype.render = function () {
+    //--- HOOFDFUNCTIE ------------------------------------------------------------------------------------
+    /*
+     * Eerst maken we de pop-up
+     */
+    const div = document.createElement('div');
+    div.innerHTML = `
+        <div id="popupOverlay" class="popup-overlay">
+            <div id="popupWindow" class="popup">
+                <h3>Meerdere elementen bewerken</h3>
+                <div id="fontSizeContainer" style="display: flex; margin-bottom: 30px; align-items: center;">
+                    <label for="fontSizeInput" style="margin-right: 10px; display: inline-block; white-space: nowrap;">Tekengrootte (px):</label>
+                    <input id="fontSizeInput" style="width: 100px;" type="number" min="1" max="72" step="11" value="11">
+                </div> 
+                <div style="display: flex; margin-bottom: 10px; align-items: center;">
+                    <label for="scaleInput" style="margin-right: 10px; display: inline-block;">Schaal (%):</label>
+                    <input id="scaleInput" style="width: 100px;" type="number" min="10" max="400" step="10" value="${String(SITPLANVIEW_DEFAULT_SCALE * 100)}">
+                </div>
+                <div style="display: flex; margin-bottom: 20px; align-items: center;">
+                    <label for="rotationInput" style="margin-right: 10px; display: inline-block;">Rotatie (°):</label>
+                    <input id="rotationInput" style="width: 100px;" type="number" min="0" max="360" step="10" value="0">
+                </div>
+                <div id="setDefaultContainer" style="display: flex; margin-bottom: 20px; align-items: flex-start;">
+                    <input type="checkbox" id="setDefaultCheckbox">
+                    <label for="setDefaultCheckbox" style="margin-left: 10px; flex-grow: 1; flex-wrap: wrap;">Zet tekengrootte en schaal als standaard voor alle toekomstige nieuwe symbolen.</label>
+                </div>
+                <div style="display: flex; justify-content: center; gap: 0px;">
+                    <button id="okButton" class="rounded-button">OK</button>
+                    <button id="cancelButton" class="rounded-button">Annuleren</button>
+                </div>
+            </div>
+        </div>`;
+    const popupOverlay = div.querySelector('#popupOverlay');
+    const popupWindow = popupOverlay.querySelector('#popupWindow');
+    const fontSizeContainer = popupWindow.querySelector('#fontSizeContainer');
+    const fontSizeInput = popupWindow.querySelector('#fontSizeInput');
+    const scaleInput = popupWindow.querySelector('#scaleInput');
+    const rotationInput = popupWindow.querySelector('#rotationInput');
+    const setDefaultCheckbox = popupWindow.querySelector('#setDefaultCheckbox');
+    const okButton = popupWindow.querySelector('#okButton');
+    const cancelButton = popupWindow.querySelector('#cancelButton');
+    /*
+     * Dan zetten we default waarden in de velden op basis van wat we weten van de elementen
+     */
+    let fontSize = null;
+    let scale = null;
+    let rotation = null;
+    for (let element of sitplanElements) {
+        if (element.labelfontsize != null) {
+            if (fontSize == null)
+                fontSize = element.labelfontsize;
+            else if (fontSize != element.labelfontsize)
+                fontSize = 'multiple';
+        }
+        if (element.getscale() != null) {
+            if (scale == null)
+                scale = element.getscale();
+            else if (scale != element.getscale())
+                scale = 'multiple';
+        }
+        if (element.rotate != null) {
+            if (rotation == null)
+                rotation = element.rotate;
+            else if (rotation != element.rotate)
+                rotation = 'multiple';
+        }
+    }
+    fontSizeInput.value = (fontSize != 'multiple') ? String(fontSize) : String('');
+    scaleInput.value = (scale != 'multiple') ? String(scale * 100) : String('');
+    rotationInput.value = (rotation != 'multiple') ? String(rotation) : String('');
+    /*
+     * Eventhandlers, enter op de tekst velden staat gelijk aan OK klikken
+     */
+    fontSizeInput.onkeydown = handleEnterKey;
+    scaleInput.onkeydown = handleEnterKey;
+    rotationInput.onkeydown = handleEnterKey;
+    /*
+     * Eventhandlers, OK en Cancel knoppen
+     */
+    okButton.onclick = () => {
+        function isNumeric(value) {
+            return /^-?\d+(\.\d+)?$/.test(value);
+        }
+        let fontSize = null;
+        let scale = null;
+        let rotation = null;
+        if (isNumeric(fontSizeInput.value))
+            fontSize = Number(fontSizeInput.value);
+        if (isNumeric(scaleInput.value))
+            scale = Number(scaleInput.value) / 100;
+        if (isNumeric(rotationInput.value))
+            rotation = Number(rotationInput.value);
+        if (setDefaultCheckbox.checked) {
+            if (fontSize != null)
+                globalThis.structure.sitplan.defaults.fontsize = Number(fontSizeInput.value);
+            if (scale != null)
+                globalThis.structure.sitplan.defaults.scale = Number(scaleInput.value) / 100;
+        }
+        closePopup(); // We close the popup first to avoid that an error somewhere leaves it open
+        callbackOK(fontSize, scale, rotation);
     };
-    return SituationPlanView_SideBar;
-}());
+    cancelButton.onclick = () => {
+        closePopup();
+        callbackCancel();
+    };
+    /*
+     * Het volledige formulier aan de body toevoegen en tonen
+     */
+    document.body.appendChild(div);
+    showPopup();
+}
+class SituationPlanView_Selected {
+    constructor() {
+        this.data = [];
+    }
+    clear() {
+        this.data = [];
+    }
+    selectOne(element) {
+        this.clear();
+        this.data.push(element);
+    }
+    select(element) {
+        if (this.data.includes(element)) {
+            // if element is the last one in the list, it can remain, if not, it should move to the last position so-that we can use it as a last selected element
+            if (this.data.indexOf(element) != this.data.length - 1) {
+                this.data.splice(this.data.indexOf(element), 1);
+                this.data.push(element);
+            }
+            return;
+        }
+        else
+            this.data.push(element);
+    }
+    toggleButNeverRemoveLast(element) {
+        if (this.data.includes(element)) {
+            if (this.data.length != 1)
+                this.data.splice(this.data.indexOf(element), 1);
+        }
+        else {
+            this.data.push(element);
+        }
+    }
+    getLastSelected() {
+        if (this.data.length == 0)
+            return null;
+        return this.data[this.data.length - 1];
+    }
+    /*public getAllSelected(): IterableIterator<HTMLElement> {
+        return this.data[Symbol.iterator]();
+    }*/
+    getAllSelected() {
+        return this.data;
+    }
+    length() {
+        return this.data.length;
+    }
+    includes(element) {
+        return this.data.includes(element);
+    }
+}
+class SituationPlanView_SideBar {
+    constructor(div) {
+    }
+    renderSymbols() {
+    }
+    render() {
+    }
+}
 function HLInsertSymbol(event, id) {
 }
 /**
@@ -5409,13 +5774,13 @@ function HLInsertSymbol(event, id) {
  * @param {string} dbName - De naam van de database.
  * @param {string} storeName - De naam van de store.
  */
-var IndexedDBStorage = /** @class */ (function () {
+class IndexedDBStorage {
     /**
      * @constructor
      * @param {string} dbName - De naam van de database.
      * @param {string} storeName - De naam van de store.
      */
-    function IndexedDBStorage(dbName, storeName) {
+    constructor(dbName, storeName) {
         this.dbName = dbName;
         this.storeName = storeName;
     }
@@ -5424,127 +5789,96 @@ var IndexedDBStorage = /** @class */ (function () {
      * @private
      * @returns {Promise<IDBDatabase | null>}
      */
-    IndexedDBStorage.prototype.openDB = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var _this = this;
-            return __generator(this, function (_a) {
-                return [2 /*return*/, new Promise(function (resolve, reject) {
-                        var request = indexedDB.open(_this.dbName, 1);
-                        request.onupgradeneeded = function (event) {
-                            var db = event.target.result;
-                            if (!db.objectStoreNames.contains(_this.storeName)) {
-                                db.createObjectStore(_this.storeName, { keyPath: "key" });
-                            }
-                        };
-                        request.onsuccess = function () { return resolve(request.result); };
-                        request.onerror = function () { return resolve(null); };
-                    })];
-            });
+    async openDB() {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open(this.dbName, 1);
+            request.onupgradeneeded = (event) => {
+                const db = event.target.result;
+                if (!db.objectStoreNames.contains(this.storeName)) {
+                    db.createObjectStore(this.storeName, { keyPath: "key" });
+                }
+            };
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => resolve(null);
         });
-    };
+    }
     /**
      * Schrijf data naar de store.
      * @param {string} key - De sleutel van de data.
      * @param {string} value - De waarde van de data.
      * @returns {Promise<boolean>}
      */
-    IndexedDBStorage.prototype.set = function (key, value) {
-        return __awaiter(this, void 0, void 0, function () {
-            var startTime, db_1, error_4;
-            var _this = this;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        startTime = performance.now();
-                        _a.label = 1;
-                    case 1:
-                        _a.trys.push([1, 3, , 4]);
-                        return [4 /*yield*/, this.openDB()];
-                    case 2:
-                        db_1 = _a.sent();
-                        if (!db_1)
-                            return [2 /*return*/, false];
-                        return [2 /*return*/, new Promise(function (resolve) {
-                                var transaction = db_1.transaction(_this.storeName, "readwrite");
-                                var store = transaction.objectStore(_this.storeName);
-                                var request = store.put({ key: key, value: value });
-                                request.onsuccess = function () { return resolve(true); };
-                                request.onerror = function () { return resolve(false); };
-                            })];
-                    case 3:
-                        error_4 = _a.sent();
-                        console.error("Error in IndexedDBStorage.set: ".concat(error_4));
-                        return [2 /*return*/, false];
-                    case 4: return [2 /*return*/];
-                }
+    async set(key, value) {
+        const startTime = performance.now();
+        try {
+            const db = await this.openDB();
+            if (!db)
+                return false;
+            return new Promise((resolve) => {
+                const transaction = db.transaction(this.storeName, "readwrite");
+                const store = transaction.objectStore(this.storeName);
+                const request = store.put({ key, value });
+                request.onsuccess = () => resolve(true);
+                request.onerror = () => resolve(false);
             });
-        });
-    };
+        }
+        catch (error) {
+            console.error(`Error in IndexedDBStorage.set: ${error}`);
+            return false;
+        }
+    }
     /**
      * Lees data uit de store.
      * @param {string} key - De sleutel van de data.
      * @returns {Promise<string | null>}
      */
-    IndexedDBStorage.prototype.get = function (key) {
-        return __awaiter(this, void 0, void 0, function () {
-            var db_2, error_5;
-            var _this = this;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        _a.trys.push([0, 2, , 3]);
-                        return [4 /*yield*/, this.openDB()];
-                    case 1:
-                        db_2 = _a.sent();
-                        if (!db_2)
-                            return [2 /*return*/, null];
-                        return [2 /*return*/, new Promise(function (resolve) {
-                                var transaction = db_2.transaction(_this.storeName, "readonly");
-                                var store = transaction.objectStore(_this.storeName);
-                                var request = store.get(key);
-                                request.onsuccess = function () {
-                                    if (request.result) {
-                                        resolve(request.result.value);
-                                    }
-                                    else {
-                                        resolve(null);
-                                    }
-                                };
-                                request.onerror = function () { return resolve(null); };
-                            })];
-                    case 2:
-                        error_5 = _a.sent();
-                        console.error("Error accessing IndexedDB:", error_5);
-                        return [2 /*return*/, null];
-                    case 3: return [2 /*return*/];
-                }
+    async get(key) {
+        try {
+            const db = await this.openDB();
+            if (!db)
+                return null;
+            return new Promise((resolve) => {
+                const transaction = db.transaction(this.storeName, "readonly");
+                const store = transaction.objectStore(this.storeName);
+                const request = store.get(key);
+                request.onsuccess = () => {
+                    if (request.result) {
+                        resolve(request.result.value);
+                    }
+                    else {
+                        resolve(null);
+                    }
+                };
+                request.onerror = () => resolve(null);
             });
-        });
-    };
-    return IndexedDBStorage;
-}());
-var MultiLevelStorage = /** @class */ (function () {
-    function MultiLevelStorage(storageKey, initialData) {
+        }
+        catch (error) {
+            console.error("Error accessing IndexedDB:", error);
+            return null;
+        }
+    }
+}
+class MultiLevelStorage {
+    constructor(storageKey, initialData) {
         this.storageKey = storageKey;
         // Load data from storage or initialize with default data
         this.data = this.loadFromStorage() || deepClone(initialData);
         this.memoryData = deepClone(initialData);
     }
     // Load data from localStorage
-    MultiLevelStorage.prototype.loadFromStorage = function () {
-        var storedData = localStorage.getItem(this.storageKey);
+    loadFromStorage() {
+        const storedData = localStorage.getItem(this.storageKey);
         return storedData ? JSON.parse(storedData) : null;
-    };
+    }
     // Save data to localStorage
-    MultiLevelStorage.prototype.saveToStorage = function () {
+    saveToStorage() {
         localStorage.setItem(this.storageKey, JSON.stringify(this.data));
-    };
+    }
     // Get a value at a specific path (e.g., "user.profile.name")
-    MultiLevelStorage.prototype.get = function (path) {
-        var keys = path.split('.');
-        var current = this.memoryData;
-        for (var _i = 0, keys_1 = keys; _i < keys_1.length; _i++) {
-            var key = keys_1[_i];
+    get(path) {
+        const keys = path.split('.');
+        let current = this.memoryData;
+        for (const key of keys) {
             if (current && typeof current === 'object' && key in current) {
                 current = current[key];
             }
@@ -5557,8 +5891,7 @@ var MultiLevelStorage = /** @class */ (function () {
             return current;
         }
         current = this.data;
-        for (var _a = 0, keys_2 = keys; _a < keys_2.length; _a++) {
-            var key = keys_2[_a];
+        for (const key of keys) {
             if (current && typeof current === 'object' && key in current) {
                 current = current[key];
             }
@@ -5567,14 +5900,13 @@ var MultiLevelStorage = /** @class */ (function () {
             }
         }
         return current;
-    };
+    }
     // Set a value at a specific path (e.g., "user.profile.name", "John Doe")
-    MultiLevelStorage.prototype.set = function (path, value, inMemory) {
-        if (inMemory === void 0) { inMemory = false; }
-        var keys = path.split('.');
-        var current = inMemory ? this.memoryData : this.data;
-        for (var i = 0; i < keys.length - 1; i++) {
-            var key = keys[i];
+    set(path, value, inMemory = false) {
+        const keys = path.split('.');
+        let current = inMemory ? this.memoryData : this.data;
+        for (let i = 0; i < keys.length - 1; i++) {
+            const key = keys[i];
             if (!current[key] || typeof current[key] !== 'object') {
                 current[key] = {}; // Create nested objects if they don't exist
             }
@@ -5584,13 +5916,13 @@ var MultiLevelStorage = /** @class */ (function () {
         if (!inMemory) {
             this.saveToStorage(); // Save updated data to storage
         }
-    };
+    }
     // Delete a node at a specific path (e.g., "user.profile.name")
-    MultiLevelStorage.prototype.delete = function (path) {
-        var keys = path.split('.');
-        var current = this.memoryData;
-        for (var i = 0; i < keys.length - 1; i++) {
-            var key = keys[i];
+    delete(path) {
+        const keys = path.split('.');
+        let current = this.memoryData;
+        for (let i = 0; i < keys.length - 1; i++) {
+            const key = keys[i];
             if (!current[key] || typeof current[key] !== 'object') {
                 break; // Path not found, nothing to delete
             }
@@ -5598,8 +5930,8 @@ var MultiLevelStorage = /** @class */ (function () {
         }
         delete current[keys[keys.length - 1]]; // Delete the key
         current = this.data;
-        for (var i = 0; i < keys.length - 1; i++) {
-            var key = keys[i];
+        for (let i = 0; i < keys.length - 1; i++) {
+            const key = keys[i];
             if (!current[key] || typeof current[key] !== 'object') {
                 return; // Path not found, nothing to delete
             }
@@ -5607,22 +5939,21 @@ var MultiLevelStorage = /** @class */ (function () {
         }
         delete current[keys[keys.length - 1]]; // Delete the key
         this.saveToStorage(); // Save updated data to storage
-    };
+    }
     // Get the entire data object
-    MultiLevelStorage.prototype.getAll = function () {
-        return __assign(__assign({}, this.data), this.memoryData);
-    };
+    getAll() {
+        return Object.assign(Object.assign({}, this.data), this.memoryData);
+    }
     // Clear the entire data and storage
-    MultiLevelStorage.prototype.clear = function () {
+    clear() {
         this.data = {};
         this.memoryData = {};
         localStorage.removeItem(this.storageKey);
-    };
-    return MultiLevelStorage;
-}());
-var List_Item = /** @class */ (function () {
+    }
+}
+class List_Item {
     // -- Constructor --
-    function List_Item(mylist) {
+    constructor(mylist) {
         this.id = 0; //undefined
         this.parent = 0; //no parent
         this.indent = 0; //at root note, no parent
@@ -5631,52 +5962,52 @@ var List_Item = /** @class */ (function () {
         this.sourcelist = mylist;
     }
     // -- Initialisatie van properties --
-    List_Item.prototype.resetProps = function () { this.props = {}; };
+    resetProps() { this.props = {}; }
     // -- Default maximum aantal kinderen ==
-    List_Item.prototype.getMaxNumChilds = function () {
+    getMaxNumChilds() {
         return (2 ^ 16);
-    };
+    }
     // -- Tel aantal kinderen --
-    List_Item.prototype.getNumChilds = function () {
-        var numChilds = 0;
-        for (var i = 0; i < this.sourcelist.data.length; ++i) {
+    getNumChilds() {
+        let numChilds = 0;
+        for (let i = 0; i < this.sourcelist.data.length; ++i) {
             if ((this.sourcelist.data[i].parent === this.id) && (this.sourcelist.active[i]))
                 numChilds++;
         }
         return (numChilds);
-    };
+    }
     // -- Check of het item actief is --
-    List_Item.prototype.isActief = function () {
-        var ordinal = this.sourcelist.getOrdinalById(this.id);
+    isActief() {
+        let ordinal = this.sourcelist.getOrdinalById(this.id);
         return (this.sourcelist.active[ordinal]);
-    };
+    }
     // -- Retourneer ouder-item --
-    List_Item.prototype.getParent = function () {
+    getParent() {
         return this.sourcelist.data[this.sourcelist.getOrdinalById(this.parent)];
-    };
+    }
     // -- Editeren van een string --
-    List_Item.prototype.stringPropToHTML = function (item, size) {
-        var output = "";
-        var sizestr = "";
+    stringPropToHTML(item, size) {
+        let output = "";
+        let sizestr = "";
         if (size != null)
             sizestr = ' size="' + size + '" ';
         output = '<input type="text"' + sizestr + ' id="' + 'HL_edit_' + this.id + '_' + item + '" value="' + this.props[item] + '">';
         return (output);
-    };
+    }
     // -- Editeren van een checkbox --
-    List_Item.prototype.checkboxPropToHTML = function (item) {
-        var output;
+    checkboxPropToHTML(item) {
+        let output;
         output = '<input type="checkbox" id="' + 'HL_edit_' + this.id + '_' + item + '" '
             + (this.props[item] ? ' checked' : '') + '>';
         return (output);
-    };
+    }
     // -- Editeren van een select box --
-    List_Item.prototype.selectPropToHTML = function (item, items) {
-        var myId = "HL_edit_" + this.id + "_" + item;
-        var output = "";
-        var options = "";
+    selectPropToHTML(item, items) {
+        let myId = "HL_edit_" + this.id + "_" + item;
+        let output = "";
+        let options = "";
         output = '<select id="' + myId + '">';
-        for (var i = 0; i < items.length; i++) {
+        for (let i = 0; i < items.length; i++) {
             options = "";
             if (this.props[item] == items[i]) {
                 options += " selected";
@@ -5693,63 +6024,60 @@ var List_Item = /** @class */ (function () {
         }
         output += "</select>";
         return (output);
-    };
+    }
     // -- Genereer HTML code voor de boom-editor --
-    List_Item.prototype.toHTML = function (mode) {
+    toHTML(mode) {
         return ("toHTML() function not defined for base class List_Item. Extend class first.");
-    };
-    List_Item.prototype.toSVG = function () {
-        var mySVG = new SVGelement();
+    }
+    toSVG() {
+        let mySVG = new SVGelement();
         return (mySVG);
-    };
-    return List_Item;
-}());
-var Electro_Item = /** @class */ (function (_super) {
-    __extends(Electro_Item, _super);
-    function Electro_Item(mylist) {
-        var _this = _super.call(this, mylist) || this;
-        _this.resetProps(); // In Javascript, this calls the derived classes
-        return _this;
+    }
+}
+class Electro_Item extends List_Item {
+    constructor(mylist) {
+        super(mylist);
+        this.resetProps(); // In Javascript, this calls the derived classes
     }
     // -- Lees oude legacy keys (enkel voor EDS versies 001 en 002) --
-    Electro_Item.prototype.getLegacyKey = function (mykeys, keyid) {
+    getLegacyKey(mykeys, keyid) {
         if ((typeof (mykeys) != 'undefined') && (mykeys.length > keyid)) {
             return mykeys[keyid][2];
         }
         else {
             return null;
         }
-    };
+    }
     // -- Converteer oud key-based systeem (EDS versies 1 en 2) --
-    Electro_Item.prototype.convertLegacyKeys = function (mykeys) { }; // Do nothing if not defined in derived class
+    convertLegacyKeys(mykeys) { } // Do nothing if not defined in derived class
     // -- Na creatie van een item, zet alle props op default waarden --
-    Electro_Item.prototype.resetProps = function () { _super.prototype.resetProps.call(this); }; // overriden in each derived class
+    resetProps() { super.resetProps(); } // overriden in each derived class
     // -- Zoek vader van het Electro_Item --
-    Electro_Item.prototype.getParent = function () {
-        return _super.prototype.getParent.call(this);
-    };
+    getParent() {
+        return super.getParent();
+    }
     // -- Lijst met toegestande kinderen van het Electro_item --
-    Electro_Item.prototype.allowedChilds = function () {
+    allowedChilds() {
         return ["", "Aansluiting", "Domotica", "Domotica module (verticaal)", "Domotica gestuurde verbruiker", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Contactdoos", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Media", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zekering/differentieel", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Zeldzame symbolen"];
-    };
+    }
     // -- Aantal actieve kinderen van het Electro_item --
-    Electro_Item.prototype.getNumChildsWithKnownType = function () {
-        var numChilds = 0;
+    getNumChildsWithKnownType() {
+        let numChilds = 0;
         if (this.sourcelist != null) {
-            for (var i = 0; i < this.sourcelist.data.length; ++i) {
+            for (let i = 0; i < this.sourcelist.data.length; ++i) {
                 if ((this.sourcelist.data[i].parent === this.id) && (this.sourcelist.active[i])
                     && (this.sourcelist.data[i].getType() != ""))
                     numChilds++;
             }
         }
         return (numChilds);
-    };
+    }
     // -- Check of Electro_item een kind heeft --
-    Electro_Item.prototype.heeftKindMetGekendType = function () {
+    heeftKindMetGekendType() {
         return (this.getNumChildsWithKnownType() > 0);
-    };
+    }
     // -- Check of [item] een vrije tekst zonder kader is --
-    Electro_Item.prototype.isVrijeTekstZonderKader = function () {
+    isVrijeTekstZonderKader() {
         if (this.getType() == "Vrije tekst") {
             if (this.props.vrije_tekst_type == "zonder kader")
                 return true;
@@ -5758,14 +6086,14 @@ var Electro_Item = /** @class */ (function (_super) {
         }
         else
             return false;
-    };
+    }
     // -- Check of er een streepje moet geplaatst worden achter bepaalde elementen zoals een contactdoos of lichtpunt --
-    Electro_Item.prototype.heeftVerbruikerAlsKind = function () {
-        var parent = this.getParent();
+    heeftVerbruikerAlsKind() {
+        let parent = this.getParent();
         if ((parent != null) && (parent.getType() == "Meerdere verbruikers")) {
-            var myOrdinal = this.sourcelist.getOrdinalById(this.id);
-            var lastOrdinal = 0;
-            for (var i = 0; i < this.sourcelist.data.length; ++i) {
+            let myOrdinal = this.sourcelist.getOrdinalById(this.id);
+            let lastOrdinal = 0;
+            for (let i = 0; i < this.sourcelist.data.length; ++i) {
                 if (this.sourcelist.active[i] && !(this.sourcelist.data[i].isVrijeTekstZonderKader()) && (this.sourcelist.data[i].parent == this.parent))
                     lastOrdinal = i;
             }
@@ -5776,7 +6104,7 @@ var Electro_Item = /** @class */ (function (_super) {
         }
         else {
             if (this.sourcelist != null) {
-                for (var i = 0; i < this.sourcelist.data.length; ++i) {
+                for (let i = 0; i < this.sourcelist.data.length; ++i) {
                     if ((this.sourcelist.data[i].parent === this.id) &&
                         (this.sourcelist.active[i]) && !(this.sourcelist.data[i].isVrijeTekstZonderKader()) &&
                         (this.sourcelist.data[i].getType() != "") && (this.sourcelist.data[i].getType() != null))
@@ -5785,37 +6113,37 @@ var Electro_Item = /** @class */ (function (_super) {
             }
         }
         return false;
-    };
+    }
     // -- Maak het huidige Electro_item een copy van source_item --
-    Electro_Item.prototype.clone = function (source_item) {
+    clone(source_item) {
         this.parent = source_item.parent;
         this.indent = source_item.indent;
         this.collapsed = source_item.collapsed;
         this.sourcelist = source_item.sourcelist;
         this.props = deepClone(source_item.props);
-    };
+    }
     // -- Type van het Electro_item teruggeven --
-    Electro_Item.prototype.getType = function () { return this.props.type; };
+    getType() { return this.props.type; }
     // -- Checken of parent een gevraagd type is --
-    Electro_Item.prototype.isChildOf = function (typestr) {
+    isChildOf(typestr) {
         if (this.parent != 0)
             return (this.getParent().getType() == typestr);
         else
             return false;
-    };
+    }
     //-- Clear all keys, met uitzondering van nr indien er een nummer is --
-    Electro_Item.prototype.clearProps = function () {
-        var oldnr;
+    clearProps() {
+        let oldnr;
         if (typeof (this.props.nr) != 'undefined')
             oldnr = this.props.nr;
         else
             oldnr = "";
         this.props = {};
         this.props.nr = oldnr;
-    };
+    }
     // -- Returns the maximum number of childs the Electro_Item can have --
-    Electro_Item.prototype.getMaxNumChilds = function () {
-        var parent = this.getParent();
+    getMaxNumChilds() {
+        let parent = this.getParent();
         if (parent == null)
             return 256; //This should never happen, all allowed childs of null have their own implementations of getMaxNumChilds() and will never call this.
         switch (parent.getType()) {
@@ -5826,20 +6154,20 @@ var Electro_Item = /** @class */ (function (_super) {
                 return 1;
                 break; // By default, most element can have 1 child unless overwritten by derived classes
         }
-    };
+    }
     // -- Returns true if the Electro_Item can take an extra childs --
-    Electro_Item.prototype.checkInsertChild = function () { return (this.getMaxNumChilds() > this.getNumChilds()); };
+    checkInsertChild() { return (this.getMaxNumChilds() > this.getNumChilds()); }
     // -- Returns true if the parent can take an extra child --
-    Electro_Item.prototype.checkInsertSibling = function () {
-        var parent = this.getParent();
+    checkInsertSibling() {
+        let parent = this.getParent();
         if (parent == null)
             return true;
         else
             return (parent.getMaxNumChilds() > parent.getNumChilds());
-    };
+    }
     // -- Displays the navigation buttons for the Electro_Item, i.e. the green and blue arrows, and the selection of the Type (Bord, Kring, ...) --
-    Electro_Item.prototype.toHTMLHeader = function (mode) {
-        var output = "";
+    toHTMLHeader(mode) {
+        let output = "";
         if (mode == "move") {
             output += "<b>ID: " + this.id + "</b>, ";
             output += 'Moeder: <input id="id_parent_change_' + this.id + '" type="text" size="2" value="' + this.parent + '" onchange="HL_changeparent(' + this.id + ')"> ';
@@ -5861,29 +6189,29 @@ var Electro_Item = /** @class */ (function (_super) {
         ;
         output += " <button style=\"background-color:red;\" onclick=\"HLDelete(" + this.id + ")\">&#9851;</button>";
         output += "&nbsp;";
-        var parent = this.getParent();
-        var consumerArray;
+        let parent = this.getParent();
+        let consumerArray;
         if (parent == null)
             consumerArray = ["", "Aansluiting", "Zekering/differentieel", "Kring"];
         else
             consumerArray = this.getParent().allowedChilds();
         output += this.selectPropToHTML('type', consumerArray);
         return (output);
-    };
+    }
     // -- Displays the Expand button for the Electro_item, in case the item is expandable --
-    Electro_Item.prototype.toHTMLFooter = function () {
+    toHTMLFooter() {
         if (this.isExpandable()) {
-            return (" <button title=\"Meerdere elementen (bvb schakelaars) omzetten in indivuele elementen\" style=\"background-color:lightblue;\" onclick=\"HLExpand(".concat(this.id, ")\">Uitpakken</button>"));
+            return (` <button title="Meerdere elementen (bvb schakelaars) omzetten in indivuele elementen" style="background-color:lightblue;" onclick="HLExpand(${this.id})">Uitpakken</button>`);
         }
         else {
             return ("");
         }
-    };
+    }
     // -- This one will get called if the type of the Electro_Item has not yet been chosen --
-    Electro_Item.prototype.toHTML = function (mode) { return (this.toHTMLHeader(mode)); }; // Implemented in the derived classes
+    toHTML(mode) { return (this.toHTMLHeader(mode)); } // Implemented in the derived classes
     // -- Get the number of the Electro_Item, if it is not defined, ask the parent
-    Electro_Item.prototype.getnr = function () {
-        var parent = this.getParent();
+    getnr() {
+        let parent = this.getParent();
         if (parent != null) {
             switch (parent.getType()) {
                 case "Kring":
@@ -5897,18 +6225,18 @@ var Electro_Item = /** @class */ (function (_super) {
             return "";
         }
         ;
-    };
+    }
     // -- Get readable address of the Electro_Item, if it is not defined, ask the parent --
-    Electro_Item.prototype.getReadableAdres = function () {
+    getReadableAdres() {
         if (this.getType() == "Bord") {
-            var str = this.props.naam;
+            let str = this.props.naam;
             if (str == null)
                 str = "";
             return str;
         }
         else {
-            var kringname = structure.findKringName(this.id).trim();
-            var nr = this.getnr().trim();
+            let kringname = globalThis.structure.findKringName(this.id).trim();
+            let nr = this.getnr().trim();
             if (kringname == "")
                 return nr;
             else if (nr == "")
@@ -5916,11 +6244,11 @@ var Electro_Item = /** @class */ (function (_super) {
             else
                 return kringname + "." + nr;
         }
-    };
+    }
     // -- Display the number in the html tree view, but only if it is displayable
-    Electro_Item.prototype.nrToHtml = function () {
-        var str = "";
-        var parent = this.getParent();
+    nrToHtml() {
+        let str = "";
+        let parent = this.getParent();
         if (parent != null) {
             if ((parent.getType() == "Kring") || (parent.getType() == "Domotica module (verticaal)")) {
                 str += "Nr: " + this.stringPropToHTML('nr', 5) + ", ";
@@ -5931,58 +6259,51 @@ var Electro_Item = /** @class */ (function (_super) {
         }
         ;
         return (str);
-    };
+    }
     ;
     // -- Code to add the addressline below when drawing SVG. This is called by most derived classes --
-    Electro_Item.prototype.addAddressToSVG = function (mySVG, starty, godown, shiftx) {
-        if (starty === void 0) { starty = 60; }
-        if (godown === void 0) { godown = 15; }
-        if (shiftx === void 0) { shiftx = 0; }
-        var returnstr = "";
+    addAddressToSVG(mySVG, starty = 60, godown = 15, shiftx = 0) {
+        let returnstr = "";
         if (!(/^\s*$/.test(this.props.adres))) { //check if adres contains only white space
             returnstr = '<text x="' + ((mySVG.xright - 20) / 2 + 21 + shiftx) + '" y="' + starty + '" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-style="italic">' + htmlspecialchars(this.props.adres) + '</text>';
             mySVG.ydown = mySVG.ydown + godown;
         }
         return returnstr;
-    };
+    }
     // -- Make the SVG for the electro item, placeholder for derived classes --
-    Electro_Item.prototype.toSVG = function (sitplan, mirror) {
-        if (sitplan === void 0) { sitplan = false; }
-        if (mirror === void 0) { mirror = false; }
-        return (new SVGelement());
-    }; //Placeholder for derived classes
+    toSVG(sitplan = false, mirror = false) { return (new SVGelement()); } //Placeholder for derived classes
     /** ToSituationPlanElement
      *
      * @returns {SituationPlanElement} The SituationPlanElement that represents this Electro_Item
      */
-    Electro_Item.prototype.toSituationPlanElement = function () {
-        var myElement = new SituationPlanElement();
+    toSituationPlanElement() {
+        let myElement = new SituationPlanElement();
         //this.updateSituationPlanElement(myElement); //Lijkt niet nodig aangezien dit zoiezo gebeurt in getScaledSVG bij iedere update
         return (myElement);
-    };
+    }
     /**
      * Functie geeft aan of een Electro_Item nog verder kan uitgesplitst worden in kleinere Items.
      * Deze is vooral nuttig voor het situatieschema om groepen van schakelaars of een lichtcircuit te herkennen.
      */
-    Electro_Item.prototype.isExpandable = function () {
+    isExpandable() {
         return false;
-    };
+    }
     /**
      * Deze functie splitst een Electro_Item verder uit in kleinere Items.  Dit is uiteraard enkel mogelijk indien isExpandable() true geeft.
      * De aanpassing wordt direct op de sourcelist uitgevoerd.
      */
-    Electro_Item.prototype.expand = function () {
+    expand() {
         if (!this.isExpandable())
             return;
-    };
+    }
     /**
      * Geeft het maximum aantal elementen dat een Electro_Item kan hebben in een situatieplan.
      *
      * @returns {number} Het maximum aantal elementen dat een Electro_Item kan hebben in een situatieplan.
      */
-    Electro_Item.prototype.maxSituationPlanElements = function () {
+    maxSituationPlanElements() {
         return 1;
-    };
+    }
     /**
      * Geeft de boundary's terug van het element in het situatieplan. Deze boundary's worden gebruikt om het element te positioneren en te clippen.
      *
@@ -5992,14 +6313,14 @@ var Electro_Item = /** @class */ (function (_super) {
      *   - cliptop: zelfs als clipleft maar aan de bovenkant.
      *   - addbottom: zelfde als addright maar aan de onderkant.
      */
-    Electro_Item.prototype.getSitPlanBoundaries = function () {
+    getSitPlanBoundaries() {
         return {
             clipleft: 12,
             addright: 0,
             cliptop: 0,
             addbottom: 0
         };
-    };
+    }
     /**
      * Genereert de SVG voor gebruik in het Situatieplan.  Deze wordt gegenereerd op basis van de standaard SVG in het eendraadschema
      * maar met extra aanpassingen:
@@ -6010,41 +6331,35 @@ var Electro_Item = /** @class */ (function (_super) {
      *
      * @param myElement - Het SituationPlanElement waarvoor de SVG gecreëerd moet worden.
      */
-    Electro_Item.prototype.updateSituationPlanElement = function (myElement) {
-        var spiegeltext = false;
-        var rotate = myElement.rotate % 360;
+    updateSituationPlanElement(myElement) {
+        let spiegeltext = false;
+        let rotate = myElement.rotate % 360;
         if ((rotate >= 90) && (rotate < 270))
             spiegeltext = true;
         // als we een enkelvoudige schakelaar hebben die niet legacy is, dan spiegelen we niet
         if (this.props.type == "Schakelaars") {
-            if (structure.properties.legacySchakelaars == false) {
+            if (globalThis.structure.properties.legacySchakelaars == false) {
                 if ((this.props.aantal_schakelaars == 1) || (this.props.aantal_schakelaars == null)) {
                     spiegeltext = false;
                 }
             }
         }
         SVGSymbols.clearSymbols(); // We gaan enkel de symbolen gebruiken die nodig zijn voor dit element
-        var mySVGElement = this.toSVG(true, spiegeltext);
-        var sizex = mySVGElement.xright + mySVGElement.xleft + 10;
-        var sizey = mySVGElement.yup + mySVGElement.ydown;
-        var boundaries = this.getSitPlanBoundaries();
-        var width = sizex - boundaries.clipleft + boundaries.addright;
-        var height = sizey - boundaries.cliptop + boundaries.addbottom;
+        let mySVGElement = this.toSVG(true, spiegeltext);
+        let sizex = mySVGElement.xright + mySVGElement.xleft + 10;
+        let sizey = mySVGElement.yup + mySVGElement.ydown;
+        let boundaries = this.getSitPlanBoundaries();
+        let width = sizex - boundaries.clipleft + boundaries.addright;
+        let height = sizey - boundaries.cliptop + boundaries.addbottom;
         myElement.updateElectroItemSVG('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" transform="scale(1,1)" ' +
-            "viewBox=\"".concat(boundaries.clipleft, " ").concat(boundaries.cliptop, " ").concat(sizex - boundaries.clipleft + boundaries.addright, " ").concat(sizey - boundaries.cliptop + boundaries.addbottom, "\" width=\"").concat(width, "\" height=\"").concat(height, "\">") +
+            `viewBox="${boundaries.clipleft} ${boundaries.cliptop} ${sizex - boundaries.clipleft + boundaries.addright} ${sizey - boundaries.cliptop + boundaries.addbottom}" width="${width}" height="${height}">` +
             SVGSymbols.getNeededSymbols() + // enkel de symbolen die nodig zijn voor dit element
             mySVGElement.data +
             '</svg>', width, height);
-    };
-    return Electro_Item;
-}(List_Item));
-var Schakelaar = /** @class */ (function () {
-    function Schakelaar(type, halfwaterdicht, verklikkerlamp, signalisatielamp, trekschakelaar, aantal) {
-        if (halfwaterdicht === void 0) { halfwaterdicht = false; }
-        if (verklikkerlamp === void 0) { verklikkerlamp = false; }
-        if (signalisatielamp === void 0) { signalisatielamp = false; }
-        if (trekschakelaar === void 0) { trekschakelaar = false; }
-        if (aantal === void 0) { aantal = 1; }
+    }
+}
+class Schakelaar {
+    constructor(type, halfwaterdicht = false, verklikkerlamp = false, signalisatielamp = false, trekschakelaar = false, aantal = 1) {
         this.sitplan = false;
         this.mirrortext = false;
         this.type = type;
@@ -6054,18 +6369,17 @@ var Schakelaar = /** @class */ (function () {
         this.trekschakelaar = trekschakelaar;
         this.aantal = aantal;
     }
-    Schakelaar.prototype.schakelaarAttributentoSVGString = function (endx, isdubbel) {
-        if (isdubbel === void 0) { isdubbel = false; }
+    schakelaarAttributentoSVGString(endx, isdubbel = false) {
         SVGSymbols.addSymbol('signalisatielamp');
-        var outputstr = "";
+        let outputstr = "";
         if (this.signalisatielamp)
             outputstr += '<use xlink:href="#signalisatielamp" x="' + (endx - 10) + '" y="25" />';
         if (this.halfwaterdicht) {
-            var textoptions = 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10"';
+            let textoptions = 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10"';
             if (this.mirrortext == false)
-                outputstr += "<text x=\"".concat(endx, "\" y=\"10\" ").concat(textoptions, ">h</text>");
+                outputstr += `<text x="${endx}" y="10" ${textoptions}>h</text>`;
             else
-                outputstr += "<text transform=\"scale(-1,1) translate(".concat(-2 * endx, ",0)\" x=\"").concat(endx, "\" y=\"10\" ").concat(textoptions, ">h</text>");
+                outputstr += `<text transform="scale(-1,1) translate(${-2 * endx},0)" x="${endx}" y="10" ${textoptions}>h</text>`;
         }
         if (this.verklikkerlamp)
             outputstr += '<line x1="' + (endx - 3) + '" x2="' + (endx + 3) + '" y1="22" y2="28" stroke="black" /><line x1="' + (endx - 3) + '" x2="' + (endx + 3) + '" y1="28" y2="22" stroke="black" />';
@@ -6080,91 +6394,91 @@ var Schakelaar = /** @class */ (function () {
             }
         }
         return outputstr;
-    };
-    Schakelaar.prototype.enkeltoDrawReturnObj = function (startx) {
-        var outputstr = "";
-        var endx = startx + 30;
+    }
+    enkeltoDrawReturnObj(startx) {
+        let outputstr = "";
+        let endx = startx + 30;
         SVGSymbols.addSymbol('schakelaar_enkel');
         outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
             + '<use xlink:href="#schakelaar_enkel" x="' + endx + '" y="25" />'
             + this.schakelaarAttributentoSVGString(endx);
         return ({ endx: endx, str: outputstr, lowerbound: null });
-    };
-    Schakelaar.prototype.dubbeltoDrawReturnObj = function (startx) {
-        var outputstr = "";
-        var endx = startx + 30;
+    }
+    dubbeltoDrawReturnObj(startx) {
+        let outputstr = "";
+        let endx = startx + 30;
         SVGSymbols.addSymbol('schakelaar_dubbel');
         outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
             + '<use xlink:href="#schakelaar_dubbel" x="' + endx + '" y="25" />'
             + this.schakelaarAttributentoSVGString(endx, true);
         return ({ endx: endx, str: outputstr, lowerbound: null });
-    };
-    Schakelaar.prototype.driepoligtoDrawReturnObj = function (startx) {
-        var outputstr = "";
-        var endx = startx + 30;
+    }
+    driepoligtoDrawReturnObj(startx) {
+        let outputstr = "";
+        let endx = startx + 30;
         SVGSymbols.addSymbol('schakelaar_trippel');
         outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
             + '<use xlink:href="#schakelaar_trippel" x="' + endx + '" y="25" />'
             + this.schakelaarAttributentoSVGString(endx, true);
         return ({ endx: endx, str: outputstr, lowerbound: null });
-    };
-    Schakelaar.prototype.dubbelaanstekingtoDrawReturnObj = function (startx) {
-        var outputstr = "";
-        var endx = startx + 30;
+    }
+    dubbelaanstekingtoDrawReturnObj(startx) {
+        let outputstr = "";
+        let endx = startx + 30;
         SVGSymbols.addSymbol('schakelaar_dubbelaansteking');
         outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
             + '<use xlink:href="#schakelaar_dubbelaansteking" x="' + endx + '" y="25" />'
             + this.schakelaarAttributentoSVGString(endx);
         return ({ endx: endx, str: outputstr, lowerbound: null });
-    };
-    Schakelaar.prototype.wissel_enkeltoDrawReturnObj = function (startx) {
-        var outputstr = "";
-        var endx = startx + 30;
+    }
+    wissel_enkeltoDrawReturnObj(startx) {
+        let outputstr = "";
+        let endx = startx + 30;
         SVGSymbols.addSymbol('schakelaar_wissel_enkel');
         outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
             + '<use xlink:href="#schakelaar_wissel_enkel" x="' + endx + '" y="25" />'
             + this.schakelaarAttributentoSVGString(endx);
         return ({ endx: endx, str: outputstr, lowerbound: null });
-    };
-    Schakelaar.prototype.wissel_dubbeltoDrawReturnObj = function (startx) {
-        var outputstr = "";
-        var endx = startx + 30;
+    }
+    wissel_dubbeltoDrawReturnObj(startx) {
+        let outputstr = "";
+        let endx = startx + 30;
         SVGSymbols.addSymbol('schakelaar_wissel_dubbel');
         outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
             + '<use xlink:href="#schakelaar_wissel_dubbel" x="' + endx + '" y="25" />'
             + this.schakelaarAttributentoSVGString(endx, true);
         return ({ endx: endx, str: outputstr, lowerbound: null });
-    };
-    Schakelaar.prototype.kruis_enkeltoDrawReturnObj = function (startx) {
-        var outputstr = "";
-        var endx = startx + 30;
+    }
+    kruis_enkeltoDrawReturnObj(startx) {
+        let outputstr = "";
+        let endx = startx + 30;
         SVGSymbols.addSymbol('schakelaar_kruis_enkel');
         outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
             + '<use xlink:href="#schakelaar_kruis_enkel" x="' + endx + '" y="25" />'
             + this.schakelaarAttributentoSVGString(endx);
         return ({ endx: endx, str: outputstr, lowerbound: null });
-    };
-    Schakelaar.prototype.dimschakelaartoDrawReturnObj = function (startx) {
-        var outputstr = "";
-        var endx = startx + 30;
+    }
+    dimschakelaartoDrawReturnObj(startx) {
+        let outputstr = "";
+        let endx = startx + 30;
         SVGSymbols.addSymbol('schakelaar_enkel_dim');
         outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
             + '<use xlink:href="#schakelaar_enkel_dim" x="' + endx + '" y="25" />'
             + this.schakelaarAttributentoSVGString(endx);
         return ({ endx: endx, str: outputstr, lowerbound: null });
-    };
-    Schakelaar.prototype.dimschakelaarWisseltoDrawReturnObj = function (startx) {
-        var outputstr = "";
-        var endx = startx + 30;
+    }
+    dimschakelaarWisseltoDrawReturnObj(startx) {
+        let outputstr = "";
+        let endx = startx + 30;
         SVGSymbols.addSymbol('schakelaar_wissel_dim');
         outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
             + '<use xlink:href="#schakelaar_wissel_dim" x="' + endx + '" y="25" />'
             + this.schakelaarAttributentoSVGString(endx);
         return ({ endx: endx, str: outputstr, lowerbound: null });
-    };
-    Schakelaar.prototype.bewegingsschakelaartoDrawReturnObj = function (startx) {
-        var outputstr = "";
-        var endx = startx + 20;
+    }
+    bewegingsschakelaartoDrawReturnObj(startx) {
+        let outputstr = "";
+        let endx = startx + 20;
         SVGSymbols.addSymbol('relais');
         SVGSymbols.addSymbol('moving_man');
         SVGSymbols.addSymbol('detectie_klein');
@@ -6176,47 +6490,47 @@ var Schakelaar = /** @class */ (function () {
             + '<line x1="' + (endx + 40) + '" x2="' + (endx + 40) + '" y1="29" y2="43" fill="none" style="stroke:black" />'
             + '<line x1="' + (endx) + '" x2="' + (endx + 40) + '" y1="43" y2="43" fill="none" style="stroke:black" />';
         return ({ endx: endx, str: outputstr, lowerbound: null });
-    };
-    Schakelaar.prototype.rolluikschakelaartoDrawReturnObj = function (startx) {
-        var outputstr = "";
-        var endx = startx + 30;
+    }
+    rolluikschakelaartoDrawReturnObj(startx) {
+        let outputstr = "";
+        let endx = startx + 30;
         SVGSymbols.addSymbol('schakelaar_rolluik');
         outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
             + '<use xlink:href="#schakelaar_rolluik" x="' + endx + '" y="25" />';
         if (this.halfwaterdicht) {
-            var textoptions = 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10"';
+            let textoptions = 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10"';
             if (this.mirrortext == false)
-                outputstr += "<text x=\"".concat(endx, "\" y=\"10\" ").concat(textoptions, ">h</text>");
+                outputstr += `<text x="${endx}" y="10" ${textoptions}>h</text>`;
             else
-                outputstr += "<text transform=\"scale(-1,1) translate(".concat(-2 * endx, ",0)\" x=\"").concat(endx, "\" y=\"10\" ").concat(textoptions, ">h</text>");
+                outputstr += `<text transform="scale(-1,1) translate(${-2 * endx},0)" x="${endx}" y="10" ${textoptions}>h</text>`;
         }
         return ({ endx: endx, str: outputstr, lowerbound: null });
-    };
-    Schakelaar.prototype.magneetcontacttoDrawReturnObj = function (startx) {
-        var outputstr = "";
-        var endx = startx + 20;
+    }
+    magneetcontacttoDrawReturnObj(startx) {
+        let outputstr = "";
+        let endx = startx + 20;
         SVGSymbols.addSymbol('magneetcontact');
         // Alles naar beneden schuiven als we het aantal laders boven het symbool willen plaatsen
         if (this.aantal > 1) {
-            var textoptions = 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10"';
+            let textoptions = 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10"';
             if (this.mirrortext == false)
-                outputstr += "<text x=\"31\" y=\"10\" ".concat(textoptions, ">x").concat(htmlspecialchars(this.aantal), "</text>");
+                outputstr += `<text x="31" y="10" ${textoptions}>x${htmlspecialchars(this.aantal)}</text>`;
             else
-                outputstr += "<text transform=\"scale(-1,1) translate(-62,0)\" x=\"31\" y=\"10\" ".concat(textoptions, ">x").concat(htmlspecialchars(this.aantal), "</text>");
+                outputstr += `<text transform="scale(-1,1) translate(-62,0)" x="31" y="10" ${textoptions}>x${htmlspecialchars(this.aantal)}</text>`;
         }
         outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
             + '<use xlink:href="#magneetcontact" x="' + endx + '" y="25" />';
         return ({ endx: endx, str: outputstr, lowerbound: null });
-    };
-    Schakelaar.prototype.defaulttoDrawReturnObj = function (startx, symbol) {
-        var outputstr = "";
-        var endx = startx + 20;
+    }
+    defaulttoDrawReturnObj(startx, symbol) {
+        let outputstr = "";
+        let endx = startx + 20;
         SVGSymbols.addSymbol(symbol.substring(1));
         outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
             + '<use xlink:href="' + symbol + '" x="' + endx + '" y="25" />';
         return ({ endx: endx, str: outputstr, lowerbound: null });
-    };
-    Schakelaar.prototype.extraPlaatsRechts = function () {
+    }
+    extraPlaatsRechts() {
         if ((this.type == "enkel") || (this.type == "dubbel") || (this.type == "driepolig") || (this.type == "dubbelaansteking") ||
             (this.type == "wissel_enkel") || (this.type == "wissel_dubbel") || (this.type == "kruis_enkel") || (this.type == "dimschakelaar") ||
             (this.type == "dimschakelaar_wissel"))
@@ -6225,108 +6539,105 @@ var Schakelaar = /** @class */ (function () {
             return 7;
         else
             return 0;
-    };
-    Schakelaar.prototype.toSVGString = function (startx, last, sitplan, mirrortext) {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v;
-        if (sitplan === void 0) { sitplan = false; }
-        if (mirrortext === void 0) { mirrortext = false; }
-        var outputstr = "";
-        var endx;
-        var lowerbound = 20;
+    }
+    toSVGString(startx, last, sitplan = false, mirrortext = false) {
+        let outputstr = "";
+        let endx;
+        let lowerbound = 20;
         this.sitplan = sitplan;
         this.mirrortext = mirrortext;
         switch (this.type) {
             case "enkel":
-                (_a = (this.enkeltoDrawReturnObj(startx)), endx = _a.endx, outputstr = _a.str);
+                ({ endx: endx, str: outputstr } = (this.enkeltoDrawReturnObj(startx)));
                 endx += 5;
                 break;
             case "dubbel":
-                (_b = (this.dubbeltoDrawReturnObj(startx)), endx = _b.endx, outputstr = _b.str);
+                ({ endx: endx, str: outputstr } = (this.dubbeltoDrawReturnObj(startx)));
                 endx += 5;
                 break;
             case "driepolig":
-                (_c = (this.driepoligtoDrawReturnObj(startx)), endx = _c.endx, outputstr = _c.str);
+                ({ endx: endx, str: outputstr } = (this.driepoligtoDrawReturnObj(startx)));
                 endx += 5;
                 break;
             case "dubbelaansteking":
-                (_d = (this.dubbelaanstekingtoDrawReturnObj(startx)), endx = _d.endx, outputstr = _d.str);
+                ({ endx: endx, str: outputstr } = (this.dubbelaanstekingtoDrawReturnObj(startx)));
                 endx += 5;
                 break;
             case "wissel_enkel":
-                (_e = (this.wissel_enkeltoDrawReturnObj(startx)), endx = _e.endx, outputstr = _e.str);
+                ({ endx: endx, str: outputstr } = (this.wissel_enkeltoDrawReturnObj(startx)));
                 endx += 5;
                 lowerbound = Math.max(lowerbound, 35);
                 break;
             case "wissel_dubbel":
-                (_f = (this.wissel_dubbeltoDrawReturnObj(startx)), endx = _f.endx, outputstr = _f.str);
+                ({ endx: endx, str: outputstr } = (this.wissel_dubbeltoDrawReturnObj(startx)));
                 endx += 5;
                 lowerbound = Math.max(lowerbound, 35);
                 break;
             case "kruis_enkel":
-                (_g = (this.kruis_enkeltoDrawReturnObj(startx)), endx = _g.endx, outputstr = _g.str);
+                ({ endx: endx, str: outputstr } = (this.kruis_enkeltoDrawReturnObj(startx)));
                 endx += 5;
                 lowerbound = Math.max(lowerbound, 35);
                 break;
             case "dimschakelaar":
-                (_h = (this.dimschakelaartoDrawReturnObj(startx)), endx = _h.endx, outputstr = _h.str);
+                ({ endx: endx, str: outputstr } = (this.dimschakelaartoDrawReturnObj(startx)));
                 endx += 5;
                 break;
             case "dimschakelaar_wissel":
-                (_j = (this.dimschakelaarWisseltoDrawReturnObj(startx)), endx = _j.endx, outputstr = _j.str);
+                ({ endx: endx, str: outputstr } = (this.dimschakelaarWisseltoDrawReturnObj(startx)));
                 endx += 5;
                 lowerbound = Math.max(lowerbound, 35);
                 break;
             case "bewegingsschakelaar":
-                (_k = (this.bewegingsschakelaartoDrawReturnObj(startx)), endx = _k.endx, outputstr = _k.str);
+                ({ endx: endx, str: outputstr } = (this.bewegingsschakelaartoDrawReturnObj(startx)));
                 endx += 40;
                 lowerbound = Math.max(lowerbound, 30);
                 break;
             case "rolluikschakelaar":
-                (_l = (this.rolluikschakelaartoDrawReturnObj(startx)), endx = _l.endx, outputstr = _l.str);
+                ({ endx: endx, str: outputstr } = (this.rolluikschakelaartoDrawReturnObj(startx)));
                 endx += 8;
                 lowerbound = Math.max(lowerbound, 25);
                 break;
             case "magneetcontact":
-                (_m = (this.magneetcontacttoDrawReturnObj(startx)), endx = _m.endx, outputstr = _m.str);
+                ({ endx: endx, str: outputstr } = (this.magneetcontacttoDrawReturnObj(startx)));
                 endx += 20;
                 lowerbound = Math.max(lowerbound, 25);
                 break;
             case "schakelaar":
-                (_o = (this.defaulttoDrawReturnObj(startx, '#schakelaar')), endx = _o.endx, outputstr = _o.str);
+                ({ endx: endx, str: outputstr } = (this.defaulttoDrawReturnObj(startx, '#schakelaar')));
                 endx += 40;
                 break;
             case "schemerschakelaar":
                 SVGSymbols.addSymbol('arrow'); // nodig voor de schemerschakelaar
-                (_p = (this.defaulttoDrawReturnObj(startx, '#schemerschakelaar')), endx = _p.endx, outputstr = _p.str);
+                ({ endx: endx, str: outputstr } = (this.defaulttoDrawReturnObj(startx, '#schemerschakelaar')));
                 endx += 40;
                 break;
             case "teleruptor":
-                (_q = (this.defaulttoDrawReturnObj(startx, '#teleruptor')), endx = _q.endx, outputstr = _q.str);
+                ({ endx: endx, str: outputstr } = (this.defaulttoDrawReturnObj(startx, '#teleruptor')));
                 endx += 40;
                 lowerbound = Math.max(lowerbound, 30);
                 break;
             case "dimmer":
-                (_r = (this.defaulttoDrawReturnObj(startx, '#dimmer')), endx = _r.endx, outputstr = _r.str);
+                ({ endx: endx, str: outputstr } = (this.defaulttoDrawReturnObj(startx, '#dimmer')));
                 endx += 40;
                 lowerbound = Math.max(lowerbound, 30);
                 break;
             case "relais":
-                (_s = (this.defaulttoDrawReturnObj(startx, '#relais')), endx = _s.endx, outputstr = _s.str);
+                ({ endx: endx, str: outputstr } = (this.defaulttoDrawReturnObj(startx, '#relais')));
                 endx += 40;
                 lowerbound = Math.max(lowerbound, 30);
                 break;
             case "minuterie":
-                (_t = (this.defaulttoDrawReturnObj(startx, '#minuterie')), endx = _t.endx, outputstr = _t.str);
+                ({ endx: endx, str: outputstr } = (this.defaulttoDrawReturnObj(startx, '#minuterie')));
                 endx += 40;
                 lowerbound = Math.max(lowerbound, 30);
                 break;
             case "thermostaat":
-                (_u = (this.defaulttoDrawReturnObj(startx, '#thermostaat')), endx = _u.endx, outputstr = _u.str);
+                ({ endx: endx, str: outputstr } = (this.defaulttoDrawReturnObj(startx, '#thermostaat')));
                 endx += 40;
                 lowerbound = Math.max(lowerbound, 30);
                 break;
             case "tijdschakelaar":
-                (_v = (this.defaulttoDrawReturnObj(startx, '#tijdschakelaar')), endx = _v.endx, outputstr = _v.str);
+                ({ endx: endx, str: outputstr } = (this.defaulttoDrawReturnObj(startx, '#tijdschakelaar')));
                 endx += 40;
                 lowerbound = Math.max(lowerbound, 30);
                 break;
@@ -6334,15 +6645,13 @@ var Schakelaar = /** @class */ (function () {
                 endx = 30; //Indien type niet herkend wordt minstens deze variabele definieren
         }
         return ({ endx: endx, str: outputstr, lowerbound: lowerbound });
-    };
-    return Schakelaar;
-}());
-var Schakelaars = /** @class */ (function (_super) {
-    __extends(Schakelaars, _super);
-    function Schakelaars(mylist) {
-        return _super.call(this, mylist) || this;
     }
-    Schakelaars.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Schakelaars extends Electro_Item {
+    constructor(mylist) {
+        super(mylist);
+    }
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.aantal_schakelaars = this.getLegacyKey(mykeys, 4);
         this.props.type_schakelaar = this.getLegacyKey(mykeys, 5);
@@ -6352,8 +6661,8 @@ var Schakelaars = /** @class */ (function (_super) {
         this.props.is_halfwaterdicht = this.getLegacyKey(mykeys, 20);
         this.props.heeft_verklikkerlampje = this.getLegacyKey(mykeys, 21);
         this.props.is_trekschakelaar = this.getLegacyKey(mykeys, 25);
-    };
-    Schakelaars.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Schakelaars"; // This is rather a formality as we should already have this at this stage
         this.props.aantal_schakelaars = "1"; // Per default 1 schakelaar
@@ -6363,25 +6672,25 @@ var Schakelaars = /** @class */ (function (_super) {
         this.props.is_halfwaterdicht = false; // Per default niet halfwaterdicht
         this.props.heeft_verklikkerlampje = false; // Per default geen verklikkerslampje
         this.props.is_trekschakelaar = false; // Per default geen trekschakelaar
-    };
-    Schakelaars.prototype.kanHalfwaterdichtZijn = function () {
+    }
+    kanHalfwaterdichtZijn() {
         return ((this.props.type_schakelaar == "enkelpolig") || (this.props.type_schakelaar == "dubbelpolig") || (this.props.type_schakelaar == "driepolig") || (this.props.type_schakelaar == "kruis_enkel") ||
             (this.props.type_schakelaar == "dubbelaansteking") || (this.props.type_schakelaar == "wissel_enkel") || (this.props.type_schakelaar == "wissel_dubbel") || (this.props.type_schakelaar == "dubbel") ||
             (this.props.type_schakelaar == "dimschakelaar") || (this.props.type_schakelaar == "dimschakelaar wissel") || (this.props.type_schakelaar == "rolluikschakelaar"));
-    };
-    Schakelaars.prototype.kanVerklikkerlampjeHebben = function () {
+    }
+    kanVerklikkerlampjeHebben() {
         return ((this.props.type_schakelaar == "enkelpolig") || (this.props.type_schakelaar == "dubbelpolig") || (this.props.type_schakelaar == "driepolig") || (this.props.type_schakelaar == "kruis_enkel") ||
             (this.props.type_schakelaar == "dubbelaansteking") || (this.props.type_schakelaar == "wissel_enkel") || (this.props.type_schakelaar == "wissel_dubbel") || (this.props.type_schakelaar == "dubbel") ||
             (this.props.type_schakelaar == "dimschakelaar") || (this.props.type_schakelaar == "dimschakelaar wissel"));
-    };
-    Schakelaars.prototype.kanSignalisatielampjeHebben = function () {
+    }
+    kanSignalisatielampjeHebben() {
         return this.kanVerklikkerlampjeHebben();
-    };
-    Schakelaars.prototype.kanTrekschakelaarHebben = function () {
+    }
+    kanTrekschakelaarHebben() {
         return ((this.props.type_schakelaar == "enkelpolig") || (this.props.type_schakelaar == "dubbelpolig") || (this.props.type_schakelaar == "driepolig") || (this.props.type_schakelaar == "kruis_enkel") ||
             (this.props.type_schakelaar == "dubbelaansteking") || (this.props.type_schakelaar == "wissel_enkel") || (this.props.type_schakelaar == "wissel_dubbel") || (this.props.type_schakelaar == "dubbel"));
-    };
-    Schakelaars.prototype.overrideKeys = function () {
+    }
+    overrideKeys() {
         switch (this.props.type_schakelaar) {
             case "enkelpolig":
                 this.props.aantal_schakelaars = String(Math.min(Number(this.props.aantal_schakelaars), 5));
@@ -6404,10 +6713,10 @@ var Schakelaars = /** @class */ (function (_super) {
             this.props.heeft_signalisatielampje = false;
         if (!this.kanTrekschakelaarHebben)
             this.props.is_trekschakelaar = false;
-    };
-    Schakelaars.prototype.toHTML = function (mode) {
+    }
+    toHTML(mode) {
         this.overrideKeys();
-        var output = this.toHTMLHeader(mode);
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml();
         output += this.selectPropToHTML('type_schakelaar', ["enkelpolig", "dubbelpolig", "driepolig", "dubbelaansteking", "wissel_enkel", "wissel_dubbel", "kruis_enkel", "---", "schakelaar", "dimschakelaar", "dimschakelaar wissel", "bewegingsschakelaar", "schemerschakelaar", "---", "teleruptor", "relais", "dimmer", "tijdschakelaar", "minuterie", "thermostaat", "rolluikschakelaar", "---", "magneetcontact"]);
         if (this.kanHalfwaterdichtZijn())
@@ -6432,8 +6741,8 @@ var Schakelaars = /** @class */ (function (_super) {
         output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         output += this.toHTMLFooter();
         return (output);
-    };
-    Schakelaars.prototype.bouwSchakelaarKeten = function (tekenKeten) {
+    }
+    bouwSchakelaarKeten(tekenKeten) {
         switch (this.props.type_schakelaar) {
             case "wissel_enkel":
                 tekenKeten.push(new Schakelaar("wissel_enkel", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
@@ -6491,7 +6800,7 @@ var Schakelaars = /** @class */ (function (_super) {
                     tekenKeten.push(new Schakelaar("enkel", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
                 if (Number(this.props.aantal_schakelaars) > 1) {
                     tekenKeten.push(new Schakelaar("wissel_enkel", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
-                    for (var i = 2; i < Number(this.props.aantal_schakelaars); ++i) {
+                    for (let i = 2; i < Number(this.props.aantal_schakelaars); ++i) {
                         tekenKeten.push(new Schakelaar("kruis_enkel", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
                     }
                     tekenKeten.push(new Schakelaar("wissel_enkel", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
@@ -6509,8 +6818,8 @@ var Schakelaars = /** @class */ (function (_super) {
                 tekenKeten.push(new Schakelaar("driepolig", this.props.is_halfwaterdicht, this.props.heeft_verklikkerlampje, this.props.heeft_signalisatielampje, this.props.is_trekschakelaar));
                 break;
         }
-    };
-    Schakelaars.prototype.isExpandable = function () {
+    }
+    isExpandable() {
         switch (this.props.type_schakelaar) {
             case "enkelpolig":
             case "dubbelpolig":
@@ -6518,21 +6827,21 @@ var Schakelaars = /** @class */ (function (_super) {
             default:
                 return (false);
         }
-    };
-    Schakelaars.prototype.expand = function () {
+    }
+    expand() {
         switch (this.props.type_schakelaar) {
             case "enkelpolig":
                 if (Number(this.props.aantal_schakelaars) > 1) { // Er zijn er altijd 2 als er niet 1 is
-                    var adresGoesHere = Math.floor(this.props.aantal_schakelaars / 2);
-                    var schakelaar1 = new Schakelaars(this.sourcelist);
+                    let adresGoesHere = Math.floor(this.props.aantal_schakelaars / 2);
+                    let schakelaar1 = new Schakelaars(this.sourcelist);
                     Object.assign(schakelaar1.props, this.props);
                     schakelaar1.props.aantal_schakelaars = 1;
                     schakelaar1.props.type_schakelaar = "wissel_enkel";
                     schakelaar1.props.adres = "";
                     this.sourcelist.insertItemBeforeId(schakelaar1, this.id);
-                    var lastschakelaar = schakelaar1;
-                    for (var i = 0; i < Number(this.props.aantal_schakelaars) - 2; ++i) {
-                        var schakelaar = new Schakelaars(this.sourcelist);
+                    let lastschakelaar = schakelaar1;
+                    for (let i = 0; i < Number(this.props.aantal_schakelaars) - 2; ++i) {
+                        let schakelaar = new Schakelaars(this.sourcelist);
                         Object.assign(schakelaar.props, this.props);
                         schakelaar.props.aantal_schakelaars = 1;
                         schakelaar.props.type_schakelaar = "kruis_enkel";
@@ -6568,7 +6877,7 @@ var Schakelaars = /** @class */ (function (_super) {
                 break;
             case "dubbelpolig":
                 if (Number(this.props.aantal_schakelaars) > 1) { // Er zijn er altijd 2 als er niet 1 is
-                    var schakelaar1 = new Schakelaars(this.sourcelist);
+                    let schakelaar1 = new Schakelaars(this.sourcelist);
                     Object.assign(schakelaar1.props, this.props);
                     schakelaar1.props.aantal_schakelaars = 1;
                     schakelaar1.props.type_schakelaar = "wissel_dubbel";
@@ -6585,27 +6894,24 @@ var Schakelaars = /** @class */ (function (_super) {
                 }
                 break;
         }
-    };
-    Schakelaars.prototype.toSVG = function (sitplan, mirrortext) {
-        var _a;
-        if (sitplan === void 0) { sitplan = false; }
-        if (mirrortext === void 0) { mirrortext = false; }
-        var mySVG = new SVGelement();
-        var tekenKeten = [];
+    }
+    toSVG(sitplan = false, mirrortext = false) {
+        let mySVG = new SVGelement();
+        let tekenKeten = [];
         // Eerst maken we een keten van unieke schakelaars. De aantallen worden hier vervangen door individuele elementen in een array
         this.bouwSchakelaarKeten(tekenKeten);
         var lowerbound = 20; // How low does the switch go below the baseline, needed to place adres afterwards
         var startx = 1;
         var endx;
-        for (var i = 0; i < tekenKeten.length; i++) {
-            var islast = ((i == tekenKeten.length - 1) && (!this.heeftVerbruikerAlsKind()));
-            var str = void 0;
-            (_a = tekenKeten[i].toSVGString(startx, islast, sitplan, mirrortext), startx = _a.endx, str = _a.str, lowerbound = _a.lowerbound);
+        for (let i = 0; i < tekenKeten.length; i++) {
+            let islast = ((i == tekenKeten.length - 1) && (!this.heeftVerbruikerAlsKind()));
+            let str;
+            ({ endx: startx, str: str, lowerbound: lowerbound } = tekenKeten[i].toSVGString(startx, islast, sitplan, mirrortext));
             // Als we geen legacy schakelaars tekenen halen we links het lijntje van de eerste schakelaar weg
             if (sitplan) {
-                if ((structure.properties.legacySchakelaars == false) && (i == 0) && (tekenKeten.length == 1)) {
+                if ((globalThis.structure.properties.legacySchakelaars == false) && (i == 0) && (tekenKeten.length == 1)) {
                     if (str.startsWith('<line')) {
-                        var idx = str.indexOf('>');
+                        let idx = str.indexOf('>');
                         str = str.substring(idx + 1);
                     }
                 }
@@ -6614,7 +6920,7 @@ var Schakelaars = /** @class */ (function (_super) {
         }
         // Voor bepaalde symbolen moet wat extra ruimte rechts voorzien worden om te vermijden dat de tekening door de volgende kring loopt
         if ((!this.heeftVerbruikerAlsKind()) || (sitplan)) {
-            var extra = tekenKeten[tekenKeten.length - 1].extraPlaatsRechts();
+            let extra = tekenKeten[tekenKeten.length - 1].extraPlaatsRechts();
             if (sitplan)
                 extra = Math.max(0, extra - 5);
             startx += extra;
@@ -6625,26 +6931,21 @@ var Schakelaars = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data += (sitplan ? '' : this.addAddressToSVG(mySVG, 25 + lowerbound, Math.max(0, lowerbound - 20)));
         return (mySVG);
-    };
-    return Schakelaars;
-}(Electro_Item));
-var Lichtcircuit = /** @class */ (function (_super) {
-    __extends(Lichtcircuit, _super);
-    function Lichtcircuit() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Lichtcircuit.prototype.resetProps = function () {
-        _super.prototype.resetProps.call(this); //Schakelaars
+}
+class Lichtcircuit extends Schakelaars {
+    resetProps() {
+        super.resetProps(); //Schakelaars
         this.props.type = "Lichtcircuit"; // This is rather a formality as we should already have this at this stage
         this.props.aantal_lichtpunten = "1"; // Per default 1 lichtpunt
-    };
-    Lichtcircuit.prototype.convertLegacyKeys = function (mykeys) {
-        _super.prototype.convertLegacyKeys.call(this, mykeys);
+    }
+    convertLegacyKeys(mykeys) {
+        super.convertLegacyKeys(mykeys);
         this.props.aantal_lichtpunten = this.getLegacyKey(mykeys, 13);
-    };
-    Lichtcircuit.prototype.toHTML = function (mode) {
+    }
+    toHTML(mode) {
         this.overrideKeys();
-        var output = this.toHTMLHeader(mode);
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml();
         output += this.selectPropToHTML('type_schakelaar', ["enkelpolig", "dubbelpolig", "driepolig", "dubbelaansteking", "wissel_enkel", "wissel_dubbel", "kruis_enkel", "---", "schakelaar", "dimschakelaar", "dimschakelaar wissel", "bewegingsschakelaar", "schemerschakelaar", "---", "teleruptor", "relais", "dimmer", "tijdschakelaar", "minuterie", "thermostaat", "rolluikschakelaar"]);
         if (this.kanHalfwaterdichtZijn())
@@ -6679,9 +6980,9 @@ var Lichtcircuit = /** @class */ (function (_super) {
         output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         output += this.toHTMLFooter();
         return (output);
-    };
-    Lichtcircuit.prototype.countExpandableElements = function () {
-        var countExpandableElements = (this.props.aantal_lichtpunten == "0") ? 0 : 1;
+    }
+    countExpandableElements() {
+        let countExpandableElements = (this.props.aantal_lichtpunten == "0") ? 0 : 1;
         switch (this.props.type_schakelaar) {
             case "enkelpolig":
             case "dubbelpolig":
@@ -6691,22 +6992,22 @@ var Lichtcircuit = /** @class */ (function (_super) {
                 countExpandableElements += 1;
         }
         return countExpandableElements;
-    };
-    Lichtcircuit.prototype.isExpandable = function () {
+    }
+    isExpandable() {
         return this.countExpandableElements() > 1;
-    };
-    Lichtcircuit.prototype.expand = function () {
+    }
+    expand() {
         //Nieuwe schakelaars maken, alle eigenschappen kopieren behalve type en aantal_lichtpunten
         //Het adres nemen we over van het this element
-        var schakelaars = new Schakelaars(this.sourcelist);
-        var _a = this.props, type = _a.type, aantal_lichtpunten = _a.aantal_lichtpunten, rest = __rest(_a, ["type", "aantal_lichtpunten"]);
+        let schakelaars = new Schakelaars(this.sourcelist);
+        const _a = this.props, { type, aantal_lichtpunten } = _a, rest = __rest(_a, ["type", "aantal_lichtpunten"]);
         Object.assign(schakelaars.props, rest);
         schakelaars.props.adres = this.props.adres;
         if (+(this.props.aantal_lichtpunten) > 0) { // Er is minstens 1 lichtpunt
             // Eerst schakelaars in het schema hangen vlak voor het this element zodat ze een id krijgen
             this.sourcelist.insertItemBeforeId(schakelaars, this.id);
             // Dan het this element door een nieuw lichtpunt vervangen
-            var lichtpunt = new Lichtpunt(this.sourcelist);
+            let lichtpunt = new Lichtpunt(this.sourcelist);
             lichtpunt.props.aantal = this.props.aantal_lichtpunten;
             lichtpunt.props.is_halfwaterdicht = this.props.is_halfwaterdicht;
             lichtpunt.id = this.id;
@@ -6716,35 +7017,32 @@ var Lichtcircuit = /** @class */ (function (_super) {
             else {
                 lichtpunt.parent = schakelaars.id;
             }
-            var ordinal = this.sourcelist.getOrdinalById(this.id); // Deze kan hier pas komen want de ordinal is gewijzigd door het invoegen van de schakelaars
+            let ordinal = this.sourcelist.getOrdinalById(this.id); // Deze kan hier pas komen want de ordinal is gewijzigd door het invoegen van de schakelaars
             this.sourcelist.data[ordinal] = lichtpunt;
         }
         else { // enkel schakelaars
             // Het this element door de schakelaars vervangen
             schakelaars.id = this.id;
             schakelaars.parent = this.getParent().id;
-            var ordinal = this.sourcelist.getOrdinalById(this.id);
+            let ordinal = this.sourcelist.getOrdinalById(this.id);
             this.sourcelist.data[ordinal] = schakelaars;
         }
         // schakelaars uitpakken in elementen
         schakelaars.expand();
-    };
-    Lichtcircuit.prototype.toSVG = function (sitplan, mirrortext) {
-        var _a;
-        if (sitplan === void 0) { sitplan = false; }
-        if (mirrortext === void 0) { mirrortext = false; }
-        var mySVG = new SVGelement();
-        var tekenKeten = [];
+    }
+    toSVG(sitplan = false, mirrortext = false) {
+        let mySVG = new SVGelement();
+        let tekenKeten = [];
         // Eerst maken we een keten van unieke schakelaars. De aantallen worden hier vervangen door individuele elementen in een array
         this.bouwSchakelaarKeten(tekenKeten);
         var lowerbound = 20; // How low does the switch go below the baseline, needed to place adres afterwards
         var startx = 1;
         var endx;
         // Teken de schakelaars
-        for (var i = 0; i < tekenKeten.length; i++) {
-            var islast = ((i == tekenKeten.length - 1) && (!this.heeftVerbruikerAlsKind()));
-            var str = void 0;
-            (_a = tekenKeten[i].toSVGString(startx, islast, sitplan, mirrortext), startx = _a.endx, str = _a.str, lowerbound = _a.lowerbound);
+        for (let i = 0; i < tekenKeten.length; i++) {
+            let islast = ((i == tekenKeten.length - 1) && (!this.heeftVerbruikerAlsKind()));
+            let str;
+            ({ endx: startx, str: str, lowerbound: lowerbound } = tekenKeten[i].toSVGString(startx, islast, sitplan, mirrortext));
             mySVG.data += str;
         }
         if (this.props.aantal_lichtpunten >= 1) { //1 of meerdere lampen
@@ -6754,7 +7052,7 @@ var Lichtcircuit = /** @class */ (function (_super) {
             mySVG.data += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
                 + '<use xlink:href="#lamp" x="' + endx + '" y="25" />';
             // Teken aantal lampen en symbool 'h' voor halfwaterdicht
-            var print_str_upper = ""; //string om bovenaan te plaatsen
+            let print_str_upper = ""; //string om bovenaan te plaatsen
             if (this.props.is_halfwaterdicht) {
                 print_str_upper = "h";
                 if (parseInt(this.props.aantal_lichtpunten) > 1)
@@ -6764,11 +7062,11 @@ var Lichtcircuit = /** @class */ (function (_super) {
                 print_str_upper = "x" + this.props.aantal_lichtpunten;
             }
             if (print_str_upper != "") {
-                var textoptions = 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10"';
+                let textoptions = 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10"';
                 if (mirrortext == false)
-                    mySVG.data += "<text x=\"".concat(endx, "\" y=\"10\" ").concat(textoptions, ">").concat(htmlspecialchars(print_str_upper), "</text>");
+                    mySVG.data += `<text x="${endx}" y="10" ${textoptions}>${htmlspecialchars(print_str_upper)}</text>`;
                 else
-                    mySVG.data += "<text transform=\"scale(-1,1) translate(".concat(-2 * endx, ",0)\" x=\"").concat(endx, "\" y=\"10\" ").concat(textoptions, ">").concat(htmlspecialchars(print_str_upper), "</text>");
+                    mySVG.data += `<text transform="scale(-1,1) translate(${-2 * endx},0)" x="${endx}" y="10" ${textoptions}>${htmlspecialchars(print_str_upper)}</text>`;
             }
             // Teken een leiding achter de lamp indien er nog kinderen zijn
             endx++;
@@ -6781,7 +7079,7 @@ var Lichtcircuit = /** @class */ (function (_super) {
         else { //Geen lampen
             // Voor bepaalde symbolen moet wat extra ruimte rechts voorzien worden om te vermijden dat de tekening door de volgende kring loopt
             if ((!this.heeftVerbruikerAlsKind() || sitplan) && (tekenKeten.length > 0)) {
-                var extra = tekenKeten[tekenKeten.length - 1].extraPlaatsRechts();
+                let extra = tekenKeten[tekenKeten.length - 1].extraPlaatsRechts();
                 if (sitplan)
                     extra = Math.max(0, extra - 5);
                 startx += extra;
@@ -6793,15 +7091,10 @@ var Lichtcircuit = /** @class */ (function (_super) {
         mySVG.ydown = 25;
         mySVG.data += (sitplan ? '' : this.addAddressToSVG(mySVG, 25 + lowerbound, Math.max(0, lowerbound - 20)));
         return (mySVG);
-    };
-    return Lichtcircuit;
-}(Schakelaars));
-var Aansluiting = /** @class */ (function (_super) {
-    __extends(Aansluiting, _super);
-    function Aansluiting() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Aansluiting.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Aansluiting extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.aantal_polen = this.getLegacyKey(mykeys, 4);
         this.props.bescherming = this.getLegacyKey(mykeys, 7);
@@ -6828,8 +7121,8 @@ var Aansluiting = /** @class */ (function (_super) {
                 this.props.curve_automaat = this.getLegacyKey(mykeys, 18);
                 break;
         }
-    };
-    Aansluiting.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Aansluiting";
         this.props.aantal_polen = "2";
@@ -6846,18 +7139,18 @@ var Aansluiting = /** @class */ (function (_super) {
         this.props.type_kabel_voor_teller = "";
         this.props.huishoudelijk = true;
         this.props.fase = '';
-    };
-    Aansluiting.prototype.allowedChilds = function () {
+    }
+    allowedChilds() {
         return ["", "Bord", "Kring", "Splitsing"];
-    };
-    Aansluiting.prototype.getMaxNumChilds = function () {
+    }
+    getMaxNumChilds() {
         return 256;
         // Dit kan vreemd lijken omdat in principe een aansluiting maar 1 kind heeft.
         // Echter, in het verleden was 256 wel toegelaten en het is niet uit te sluiten dat gebruikers meerdere kringen onder een aansluiting gehangen hebben
         // om deze kringen verticaal te kunnen stapelen. Om het programma backward compatibel te houden behouden we dus 256 tot grandfathering code kan worden ontwikkeld.
         // Ook laat dit toe om tijdelijk een elementje onder aansluiting te hangen alvorens het met move elders onder te brengen
-    };
-    Aansluiting.prototype.overrideKeys = function () {
+    }
+    overrideKeys() {
         if ((this.props.aantal_polen < 1) || (this.props.aantal_polen > 4))
             this.props.aantal_polen = "2"; //Test dat aantal polen bestaat
         if (typeof (this.props.huishoudelijk) == 'undefined')
@@ -6866,10 +7159,10 @@ var Aansluiting = /** @class */ (function (_super) {
             this.props.fase = '';
         if (!["automatisch", "differentieel", "differentieelautomaat"].includes(this.props.bescherming))
             this.props.kortsluitvermogen = '';
-    };
-    Aansluiting.prototype.toHTML = function (mode) {
+    }
+    toHTML(mode) {
         this.overrideKeys();
-        var output = this.toHTMLHeader(mode);
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;Naam: " + this.stringPropToHTML('naam', 5) + "<br>";
         if (this.getParent() != null)
             output += "Nr: " + this.stringPropToHTML('nr', 5) + ", ";
@@ -6908,10 +7201,10 @@ var Aansluiting = /** @class */ (function (_super) {
         }
         output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
-    };
-    Aansluiting.prototype.toSVG = function () {
+    }
+    toSVG() {
         function addFase(startNumlines, mySVG) {
-            var numlines = startNumlines;
+            let numlines = startNumlines;
             if (['L1', 'L2', 'L3'].includes(this.props.fase)) {
                 numlines = numlines + ((this.props.huishoudelijk && this.props.kortsluitvermogen != '') ? 1.3 : 1.0);
                 mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
@@ -6921,14 +7214,14 @@ var Aansluiting = /** @class */ (function (_super) {
             }
             return numlines;
         }
-        var mySVG = new SVGelement();
+        let mySVG = new SVGelement();
         SVGSymbols.addSymbol('zekering_automatisch');
         SVGSymbols.addSymbol('zekering_empty');
         SVGSymbols.addSymbol('arrow');
         SVGSymbols.addSymbol('zekering_smelt');
         SVGSymbols.addSymbol('elekriciteitsmeter');
         // Indien er een kabeltype vóór de teller is schuiven we alles op
-        var extrashift = 0;
+        let extrashift = 0;
         if (this.props.type_kabel_voor_teller != "")
             extrashift += 50;
         // get image of the entire stack, make sure it is shifted to the right sufficiently so-that the counter can be added below
@@ -6937,7 +7230,7 @@ var Aansluiting = /** @class */ (function (_super) {
         mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + mySVG.yup + '" y2="' + (mySVG.yup + 20) + '" stroke="black" />';
         mySVG.yup += 20;
         // Zekering, differentieel, of ander symbool onderaan plaatsen
-        var numlines = 1; // Hier houden we het aantal lijnen tekst bij 
+        let numlines = 1; // Hier houden we het aantal lijnen tekst bij 
         switch (this.props.bescherming) {
             case "automatisch":
                 numlines = 1; // Hier houden we het aantal lijnen tekst bij
@@ -6964,7 +7257,7 @@ var Aansluiting = /** @class */ (function (_super) {
                             + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
                             + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
                             + htmlspecialchars("" + (this.props.kortsluitvermogen * 1000)) + "</text>";
-                        var rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen * 1000))) + 6;
+                        let rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen * 1000))) + 6;
                         mySVG.data += '<rect x="' + (mySVG.xleft + 15 + 11 * (numlines - 2) + 1) + '" y="' + (mySVG.yup - 10 - (rectsize / 2)) + '" width="' + (11 * 1.2) + '" height="' + rectsize + '" fill="none" stroke="black" />';
                     }
                     else {
@@ -7017,7 +7310,7 @@ var Aansluiting = /** @class */ (function (_super) {
                             + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
                             + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
                             + htmlspecialchars("" + (this.props.kortsluitvermogen * 1000)) + "</text>";
-                        var rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen * 1000))) + 6;
+                        let rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen * 1000))) + 6;
                         mySVG.data += '<rect x="' + (mySVG.xleft + 15 + 11 * (numlines - 2) + 1) + '" y="' + (mySVG.yup - 10 - (rectsize / 2)) + '" width="' + (11 * 1.2) + '" height="' + rectsize + '" fill="none" stroke="black" />';
                     }
                     else {
@@ -7078,7 +7371,7 @@ var Aansluiting = /** @class */ (function (_super) {
                             + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
                             + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
                             + htmlspecialchars("" + (this.props.kortsluitvermogen * 1000)) + "</text>";
-                        var rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen * 1000))) + 6;
+                        let rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen * 1000))) + 6;
                         mySVG.data += '<rect x="' + (mySVG.xleft + 15 + 11 * (numlines - 2) + 1) + '" y="' + (mySVG.yup - 10 - (rectsize / 2)) + '" width="' + (11 * 1.2) + '" height="' + rectsize + '" fill="none" stroke="black" />';
                     }
                     else {
@@ -7164,33 +7457,27 @@ var Aansluiting = /** @class */ (function (_super) {
         mySVG.xright = mySVG.xright + mySVG.xleft - 1;
         mySVG.xleft = 1;
         return (mySVG);
-    };
-    return Aansluiting;
-}(Electro_Item));
-var Aansluitpunt = /** @class */ (function (_super) {
-    __extends(Aansluitpunt, _super);
-    function Aansluitpunt() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Aansluitpunt.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Aansluitpunt extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.nr = this.getLegacyKey(mykeys, 10);
         this.props.adres = this.getLegacyKey(mykeys, 15);
-    };
-    Aansluitpunt.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Aansluitpunt";
         this.props.adres = "";
-    };
-    Aansluitpunt.prototype.toHTML = function (mode) {
-        var output = this.toHTMLHeader(mode);
+    }
+    toHTML(mode) {
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml();
         output += "Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
-    };
-    Aansluitpunt.prototype.toSVG = function (sitplan) {
-        if (sitplan === void 0) { sitplan = false; }
-        var mySVG = new SVGelement();
+    }
+    toSVG(sitplan = false) {
+        let mySVG = new SVGelement();
         SVGSymbols.addSymbol('aansluitpunt');
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 29;
@@ -7200,33 +7487,27 @@ var Aansluitpunt = /** @class */ (function (_super) {
             + '<use xlink:href="#aansluitpunt" x="21" y="25"></use>';
         mySVG.data += (sitplan ? "" : this.addAddressToSVG(mySVG, 45, 0));
         return (mySVG);
-    };
-    return Aansluitpunt;
-}(Electro_Item));
-var Aftakdoos = /** @class */ (function (_super) {
-    __extends(Aftakdoos, _super);
-    function Aftakdoos() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Aftakdoos.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Aftakdoos extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.nr = this.getLegacyKey(mykeys, 10);
         this.props.adres = this.getLegacyKey(mykeys, 15);
-    };
-    Aftakdoos.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Aftakdoos";
         this.props.adres = "";
-    };
-    Aftakdoos.prototype.toHTML = function (mode) {
-        var output = this.toHTMLHeader(mode);
+    }
+    toHTML(mode) {
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml();
         output += "Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
-    };
-    Aftakdoos.prototype.toSVG = function (sitplan) {
-        if (sitplan === void 0) { sitplan = false; }
-        var mySVG = new SVGelement();
+    }
+    toSVG(sitplan = false) {
+        let mySVG = new SVGelement();
         SVGSymbols.addSymbol('aftakdoos');
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 49;
@@ -7236,34 +7517,28 @@ var Aftakdoos = /** @class */ (function (_super) {
             + '<use xlink:href="#aftakdoos" x="21" y="25"></use>';
         mySVG.data += (sitplan ? "" : this.addAddressToSVG(mySVG, 55, 10));
         return (mySVG);
-    };
-    return Aftakdoos;
-}(Electro_Item));
-var Batterij = /** @class */ (function (_super) {
-    __extends(Batterij, _super);
-    function Batterij() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Batterij.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Batterij extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.nr = this.getLegacyKey(mykeys, 10);
         this.props.adres = this.getLegacyKey(mykeys, 15);
-    };
-    Batterij.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Batterij";
         this.props.adres = "";
-    };
-    Batterij.prototype.toHTML = function (mode) {
-        var output = this.toHTMLHeader(mode);
+    }
+    toHTML(mode) {
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml();
         output += "Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
-    };
-    Batterij.prototype.toSVG = function (sitplan) {
-        if (sitplan === void 0) { sitplan = false; }
-        var mySVG = new SVGelement();
-        var outputstr = "";
+    }
+    toSVG(sitplan = false) {
+        let mySVG = new SVGelement();
+        let outputstr = "";
         SVGSymbols.addSymbol('batterij');
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 59;
@@ -7273,33 +7548,28 @@ var Batterij = /** @class */ (function (_super) {
             + '<use xlink:href="#batterij" x="21" y="25"></use>';
         mySVG.data += (sitplan ? "" : this.addAddressToSVG(mySVG, 55, 10));
         return (mySVG);
-    };
-    return Batterij;
-}(Electro_Item));
-var Bel = /** @class */ (function (_super) {
-    __extends(Bel, _super);
-    function Bel() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Bel.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Bel extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.nr = this.getLegacyKey(mykeys, 10);
         this.props.adres = this.getLegacyKey(mykeys, 15);
-    };
-    Bel.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Bel";
         this.props.adres = "";
-    };
-    Bel.prototype.toHTML = function (mode) {
-        var output = this.toHTMLHeader(mode);
+    }
+    toHTML(mode) {
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml();
         output += "Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
-    };
-    Bel.prototype.toSVG = function () {
-        var mySVG = new SVGelement();
-        var outputstr = "";
+    }
+    toSVG() {
+        let mySVG = new SVGelement();
+        let outputstr = "";
         SVGSymbols.addSymbol('bel');
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 40;
@@ -7309,7 +7579,7 @@ var Bel = /** @class */ (function (_super) {
             + '<use xlink:href="#bel" x="21" y="25"></use>';
         mySVG.data += this.addAddressToSVG(mySVG, 60, 15);
         return (mySVG);
-    };
+    }
     /**
      * Geeft de boundary's terug van het element in het situatieplan. Deze boundary's worden gebruikt om het element te positioneren en te clippen.
      *
@@ -7319,44 +7589,38 @@ var Bel = /** @class */ (function (_super) {
      *   - cliptop: zelfs als clipleft maar aan de bovenkant.
      *   - addbottom: zelfde als addright maar aan de onderkant.
      */
-    Bel.prototype.getSitPlanBoundaries = function () {
+    getSitPlanBoundaries() {
         return {
             clipleft: 0,
             addright: 0,
             cliptop: 0,
             addbottom: 0
         };
-    };
-    return Bel;
-}(Electro_Item));
-var Boiler = /** @class */ (function (_super) {
-    __extends(Boiler, _super);
-    function Boiler() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Boiler.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Boiler extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.heeft_accumulatie = this.getLegacyKey(mykeys, 3);
         this.props.nr = this.getLegacyKey(mykeys, 10);
         this.props.adres = this.getLegacyKey(mykeys, 15);
-    };
-    Boiler.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Boiler";
         this.props.heeft_accumulatie = false;
         this.props.adres = "";
-    };
-    Boiler.prototype.toHTML = function (mode) {
-        var output = this.toHTMLHeader(mode);
+    }
+    toHTML(mode) {
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml();
         output += "Accumulatie: " + this.checkboxPropToHTML('heeft_accumulatie');
         output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
-    };
-    Boiler.prototype.toSVG = function (sitplan) {
-        if (sitplan === void 0) { sitplan = false; }
-        var mySVG = new SVGelement();
-        var outputstr = "";
+    }
+    toSVG(sitplan = false) {
+        let mySVG = new SVGelement();
+        let outputstr = "";
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 59;
         mySVG.yup = 25;
@@ -7376,67 +7640,59 @@ var Boiler = /** @class */ (function (_super) {
         }
         mySVG.data += (sitplan ? "" : this.addAddressToSVG(mySVG, 60));
         return (mySVG);
-    };
-    return Boiler;
-}(Electro_Item));
-var Bord = /** @class */ (function (_super) {
-    __extends(Bord, _super);
-    function Bord() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Bord.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Bord extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.is_geaard = this.getLegacyKey(mykeys, 1);
         this.props.naam = this.getLegacyKey(mykeys, 10);
         this.props.adres = this.getLegacyKey(mykeys, 15);
-    };
-    Bord.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Bord";
         this.props.is_geaard = true;
         this.props.naam = "";
         this.props.adres = "";
-    };
-    Bord.prototype.allowedChilds = function () {
+    }
+    allowedChilds() {
         return ["", "Kring", "Vrije ruimte"];
-    };
-    Bord.prototype.getMaxNumChilds = function () {
+    }
+    getMaxNumChilds() {
         return 256;
-    };
-    Bord.prototype.toHTML = function (mode) {
-        var output = this.toHTMLHeader(mode);
+    }
+    toHTML(mode) {
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;Naam: " + this.stringPropToHTML('naam', 5) + ", "
             + "Geaard: " + this.checkboxPropToHTML('is_geaard');
         return (output);
-    };
-    Bord.prototype.toSitPlanSVG = function (mirrortext) {
-        if (mirrortext === void 0) { mirrortext = false; }
+    }
+    toSitPlanSVG(mirrortext = false) {
         //let str = this.props.naam;
         //if ((str == null) || (str.trim() == "")) {
         //    str = '';
         //}
-        var minheight = 60; //Math.max(60,svgTextWidth(htmlspecialchars(str),16,'') + 20); //15 padding
-        var shift = (minheight - 60) / 2;
-        var mySVG = new SVGelement();
+        let minheight = 60; //Math.max(60,svgTextWidth(htmlspecialchars(str),16,'') + 20); //15 padding
+        let shift = (minheight - 60) / 2;
+        let mySVG = new SVGelement();
         mySVG.xleft = 0;
         mySVG.xright = 41 - 10; // the 10 is added again by another routine
         mySVG.yup = 0;
         mySVG.ydown = minheight;
-        mySVG.data += "<rect y=\"5\" x=\"8\" height=\"".concat(minheight - 10, "\" width=\"24\" stroke=\"black\" stroke-width=\"1\" fill=\"none\" />");
-        mySVG.data += "<line y1=\"".concat(minheight / 2, "\" x1=\"0\" y2=\"").concat(minheight / 2, "\" x2=\"8\" stroke=\"black\" stroke-width=\"1\" />");
-        for (var i = 0; i < 5; i++) {
-            mySVG.data += "<line y1=\"".concat(10 + shift + i * 10, "\" x1=\"32\" y2=\"").concat(10 + shift + i * 10, "\" x2=\"40\" stroke=\"black\" stroke-width=\"1\" />");
+        mySVG.data += `<rect y="5" x="8" height="${minheight - 10}" width="24" stroke="black" stroke-width="1" fill="none" />`;
+        mySVG.data += `<line y1="${minheight / 2}" x1="0" y2="${minheight / 2}" x2="8" stroke="black" stroke-width="1" />`;
+        for (let i = 0; i < 5; i++) {
+            mySVG.data += `<line y1="${10 + shift + i * 10}" x1="32" y2="${10 + shift + i * 10}" x2="40" stroke="black" stroke-width="1" />`;
         }
         /*mySVG.data += '<text x="' + (15) + '" ' + 'y="' + (minheight/2) + '" '
                    +  `transform="${mirrortext ? `translate(${44},0) scale(-1,1) `: ''} rotate(90 18,${(minheight/2)})" `
                    + 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="16"' + '>'
                    + htmlspecialchars(str) + '</text>';*/
         return mySVG;
-    };
-    Bord.prototype.toSVG = function (sitplan, mirrortext) {
-        if (sitplan === void 0) { sitplan = false; }
-        if (mirrortext === void 0) { mirrortext = false; }
-        var mySVG; // = new SVGelement();
+    }
+    toSVG(sitplan = false, mirrortext = false) {
+        let mySVG; // = new SVGelement();
         if (sitplan) {
             return this.toSitPlanSVG(mirrortext);
         }
@@ -7447,13 +7703,13 @@ var Bord = /** @class */ (function (_super) {
         // Voorzie 10 extra pixels rechts na de allerlaatste kring
         mySVG.xright += 10;
         // Schuif het geheel voldoende naar links om plaats te hebben voor label en eventuele aarding
-        var mintextsize = Math.max(30, svgTextWidth(htmlspecialchars(this.props.naam), 10, 'font-weight="bold"') + 13);
-        var minxleft = mintextsize + (this.props.is_geaard ? 70 : 0); //Indien geaard hebben we 70 meer nodig
+        let mintextsize = Math.max(30, svgTextWidth(htmlspecialchars(this.props.naam), 10, 'font-weight="bold"') + 13);
+        let minxleft = mintextsize + (this.props.is_geaard ? 70 : 0); //Indien geaard hebben we 70 meer nodig
         if (this.isChildOf("Aansluiting")) {
-            var maxTotalSize = 145;
+            let maxTotalSize = 145;
             if (this.getParent().props.type_kabel_voor_teller != "")
                 maxTotalSize = maxTotalSize + 50;
-            var lengthToAdd = Math.max(0, (maxTotalSize - minxleft));
+            let lengthToAdd = Math.max(0, (maxTotalSize - minxleft));
             mintextsize = mintextsize + lengthToAdd;
             minxleft = minxleft + lengthToAdd;
         }
@@ -7487,7 +7743,7 @@ var Bord = /** @class */ (function (_super) {
                 + '<line x1="' + (mintextsize + 2.5) + '" y1="' + (mySVG.yup + 43) + '" x2="' + (mintextsize + 17.5) + '" y2="' + (mySVG.yup + 43) + '" stroke="black" />'
                 + '<line x1="' + (mintextsize + 5) + '" y1="' + (mySVG.yup + 46) + '" x2="' + (mintextsize + 15) + '" y2="' + (mySVG.yup + 46) + '" stroke="black" />';
         return (mySVG);
-    };
+    }
     /**
      * Geeft de boundary's terug van het element in het situatieplan. Deze boundary's worden gebruikt om het element te positioneren en te clippen.
      *
@@ -7497,22 +7753,17 @@ var Bord = /** @class */ (function (_super) {
      *   - cliptop: zelfs als clipleft maar aan de bovenkant.
      *   - addbottom: zelfde als addright maar aan de onderkant.
      */
-    Bord.prototype.getSitPlanBoundaries = function () {
+    getSitPlanBoundaries() {
         return {
             clipleft: 0,
             addright: 0,
             cliptop: 0,
             addbottom: 0
         };
-    };
-    return Bord;
-}(Electro_Item));
-var Contactdoos = /** @class */ (function (_super) {
-    __extends(Contactdoos, _super);
-    function Contactdoos() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Contactdoos.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Contactdoos extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.is_geaard = this.getLegacyKey(mykeys, 1);
         this.props.is_kinderveilig = this.getLegacyKey(mykeys, 2);
@@ -7525,8 +7776,8 @@ var Contactdoos = /** @class */ (function (_super) {
         this.props.is_meerfasig = this.getLegacyKey(mykeys, 21);
         this.props.heeft_nul_indien_meerfasig = this.getLegacyKey(mykeys, 25);
         this.props.in_verdeelbord = this.getLegacyKey(mykeys, 26);
-    };
-    Contactdoos.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Contactdoos";
         this.props.is_geaard = true;
@@ -7539,9 +7790,9 @@ var Contactdoos = /** @class */ (function (_super) {
         this.props.is_meerfasig = false;
         this.props.heeft_nul_indien_meerfasig = false;
         this.props.in_verdeelbord = false;
-    };
-    Contactdoos.prototype.toHTML = function (mode) {
-        var output = this.toHTMLHeader(mode);
+    }
+    toHTML(mode) {
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml()
             + "Geaard: " + this.checkboxPropToHTML('is_geaard') + ", "
             + "Kinderveiligheid: " + this.checkboxPropToHTML('is_kinderveilig') + " "
@@ -7557,11 +7808,9 @@ var Contactdoos = /** @class */ (function (_super) {
             + "In verdeelbord: " + this.checkboxPropToHTML('in_verdeelbord')
             + ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
-    };
-    Contactdoos.prototype.toSVG = function (sitplan, mirrortext) {
-        if (sitplan === void 0) { sitplan = false; }
-        if (mirrortext === void 0) { mirrortext = false; }
-        var mySVG = new SVGelement();
+    }
+    toSVG(sitplan = false, mirrortext = false) {
+        let mySVG = new SVGelement();
         SVGSymbols.addSymbol('contactdoos');
         SVGSymbols.addSymbol('contactdoos_aarding');
         SVGSymbols.addSymbol('contactdoos_kinderveilig');
@@ -7607,7 +7856,7 @@ var Contactdoos = /** @class */ (function (_super) {
             mySVG.xright += 10; //We schuiven alles 10 pixels op
         }
         // Teken alle contactdozen, inclusief aarding en kinderveiligheid indien van toepassing
-        for (var i = 0; i < this.props.aantal; ++i) {
+        for (let i = 0; i < this.props.aantal; ++i) {
             mySVG.data += '<use xlink:href="#contactdoos" x="' + startx + '" y="25"></use>';
             if (this.props.is_geaard)
                 mySVG.data += '<use xlink:href="#contactdoos_aarding" x="' + startx + '" y="25"></use>';
@@ -7625,8 +7874,8 @@ var Contactdoos = /** @class */ (function (_super) {
         // Teken halfwaterdicht indien van toepassing
         if (this.props.is_halfwaterdicht) {
             mySVG.data += '<rect x="' + (22 + (this.props.heeft_ingebouwde_schakelaar) * 10 + (this.props.is_meerfasig) * 34) + '" y="0" width="6" height="8" style="fill:rgb(255,255,255)" />';
-            var textX = (25 + (this.props.heeft_ingebouwde_schakelaar) * 10 + (this.props.is_meerfasig) * 34);
-            var textStyle = 'text-anchor:middle" font-family="Arial, Helvetica, sans-serif';
+            let textX = (25 + (this.props.heeft_ingebouwde_schakelaar) * 10 + (this.props.is_meerfasig) * 34);
+            let textStyle = 'text-anchor:middle" font-family="Arial, Helvetica, sans-serif';
             if (mirrortext == false)
                 mySVG.data += '<text x="' + (+textX) + '" y="8" style="' + textStyle + '" font-size="10">h</text>';
             else
@@ -7640,7 +7889,7 @@ var Contactdoos = /** @class */ (function (_super) {
         // Adres helemaal onderaan plaatsen
         mySVG.data += (sitplan ? "" : this.addAddressToSVG(mySVG, 60, 15));
         return (mySVG);
-    };
+    }
     /**
      * Geeft de boundary's terug van het element in het situatieplan. Deze boundary's worden gebruikt om het element te positioneren en te clippen.
      *
@@ -7650,40 +7899,34 @@ var Contactdoos = /** @class */ (function (_super) {
      *   - cliptop: zelfs als clipleft maar aan de bovenkant.
      *   - addbottom: zelfde als addright maar aan de onderkant.
      */
-    Contactdoos.prototype.getSitPlanBoundaries = function () {
+    getSitPlanBoundaries() {
         return {
             clipleft: 0,
             addright: 0,
             cliptop: 0,
             addbottom: 0
         };
-    };
-    return Contactdoos;
-}(Electro_Item));
-var Diepvriezer = /** @class */ (function (_super) {
-    __extends(Diepvriezer, _super);
-    function Diepvriezer() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Diepvriezer.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Diepvriezer extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.nr = this.getLegacyKey(mykeys, 10);
         this.props.adres = this.getLegacyKey(mykeys, 15);
-    };
-    Diepvriezer.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Diepvriezer";
         this.props.adres = "";
-    };
-    Diepvriezer.prototype.toHTML = function (mode) {
-        var output = this.toHTMLHeader(mode);
+    }
+    toHTML(mode) {
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml();
         output += "Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
-    };
-    Diepvriezer.prototype.toSVG = function (sitplan) {
-        if (sitplan === void 0) { sitplan = false; }
-        var mySVG = new SVGelement();
+    }
+    toSVG(sitplan = false) {
+        let mySVG = new SVGelement();
         SVGSymbols.addSymbol('ster');
         SVGSymbols.addSymbol('diepvriezer');
         mySVG.xleft = 1; // foresee at least some space for the conductor
@@ -7694,67 +7937,60 @@ var Diepvriezer = /** @class */ (function (_super) {
             + '<use xlink:href="#diepvriezer" x="21" y="25"></use>';
         mySVG.data += (sitplan ? "" : this.addAddressToSVG(mySVG, 60, 15));
         return (mySVG);
-    };
-    return Diepvriezer;
-}(Electro_Item));
-var Domotica = /** @class */ (function (_super) {
-    __extends(Domotica, _super);
-    function Domotica() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Domotica.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Domotica extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.nr = this.getLegacyKey(mykeys, 10);
         this.props.tekst = this.getLegacyKey(mykeys, 15);
         this.props.adres = this.getLegacyKey(mykeys, 23);
-    };
-    Domotica.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Domotica";
         this.props.tekst = "Domotica";
         this.props.adres = "";
         this.props.nr = "";
-    };
-    Domotica.prototype.allowedChilds = function () {
+    }
+    allowedChilds() {
         return ["", "Kring"];
-    };
-    Domotica.prototype.getMaxNumChilds = function () {
+    }
+    getMaxNumChilds() {
         return 256;
-    };
-    Domotica.prototype.toHTML = function (mode) {
-        var output = this.toHTMLHeader(mode);
+    }
+    toHTML(mode) {
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml()
             + "Tekst (nieuwe lijn = \"|\"): " + this.stringPropToHTML('tekst', 30)
             + ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
-    };
-    Domotica.prototype.toSVG = function () {
-        var mySVG; // = new SVGelement();
+    }
+    toSVG() {
+        let mySVG; // = new SVGelement();
         var strlines = htmlspecialchars(this.props.tekst).split("|");
         // Maak een tekening van alle kinderen
         mySVG = this.sourcelist.toSVG(this.id, "horizontal");
         // We voorzien altijd minimaal een kader van 80 en zeker genoeg voor de tekst in het Domotica-symbool
-        var minwidth = 80;
-        for (var _i = 0, strlines_1 = strlines; _i < strlines_1.length; _i++) {
-            var str = strlines_1[_i];
-            minwidth = Math.max(minwidth, svgTextWidth(htmlspecialchars(str), 10, 'font-weight="bold"') + 15);
-        } //15 padding
+        let minwidth = 80;
+        for (let str of strlines)
+            minwidth = Math.max(minwidth, svgTextWidth(htmlspecialchars(str), 10, 'font-weight="bold"') + 15); //15 padding
         minwidth += 20; //Ruimte voor leiding links
         if ((mySVG.xright + mySVG.xleft) <= minwidth)
             mySVG.xright = (minwidth - mySVG.xleft);
         // We voorzien altijd verticale ruimte, zelfs als de kinderen nog niet gedefinieerd zijn
-        var extraplace = 15 * Math.max(strlines.length - 2, 0);
+        let extraplace = 15 * Math.max(strlines.length - 2, 0);
         mySVG.yup = Math.max(mySVG.yup + 20, 25) + extraplace / 2.0;
         mySVG.ydown = Math.max(mySVG.ydown, 25) + extraplace / 2.0;
         // We tekenen kader en aansluitende lijn links
-        var width = (mySVG.xleft + mySVG.xright - 20);
+        let width = (mySVG.xleft + mySVG.xright - 20);
         mySVG.data += '<rect x="' + (20) + '" width="' + (width) +
             '" y="' + (mySVG.yup - 20 - extraplace / 2.0) + '" height="' + (40 + extraplace) + '" stroke="black" stroke-width="2" fill="white" />';
         mySVG.data += '<line x1="1" x2="20" y1="' + (mySVG.yup) + '" y2="' + (mySVG.yup) + '" stroke="black" />';
         // We plaatsen de tekst in het kader
-        var outputstr_common = '<text style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="bold" ';
-        for (var i = 0; i < strlines.length; i++) {
-            var dispy = mySVG.yup + 3 - extraplace / 2.0 - (strlines.length > 1 ? 7.5 : 0) + 15 * i;
+        let outputstr_common = '<text style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="bold" ';
+        for (let i = 0; i < strlines.length; i++) {
+            let dispy = mySVG.yup + 3 - extraplace / 2.0 - (strlines.length > 1 ? 7.5 : 0) + 15 * i;
             mySVG.data += outputstr_common + ' x="' + (21 + width / 2) + '" y="' + (dispy) + '">' + strlines[i] + '</text>';
         }
         // Forceer 1 pixel links en de rest rechts
@@ -7767,15 +8003,10 @@ var Domotica = /** @class */ (function (_super) {
             mySVG.ydown += 15;
         }
         return (mySVG);
-    };
-    return Domotica;
-}(Electro_Item));
-var Domotica_gestuurde_verbruiker = /** @class */ (function (_super) {
-    __extends(Domotica_gestuurde_verbruiker, _super);
-    function Domotica_gestuurde_verbruiker() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Domotica_gestuurde_verbruiker.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Domotica_gestuurde_verbruiker extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.type_externe_sturing = this.getLegacyKey(mykeys, 5);
         this.props.nr = this.getLegacyKey(mykeys, 10);
@@ -7785,8 +8016,8 @@ var Domotica_gestuurde_verbruiker = /** @class */ (function (_super) {
         this.props.is_geprogrammeerd = this.getLegacyKey(mykeys, 21);
         this.props.heeft_detectie = this.getLegacyKey(mykeys, 25);
         this.props.heeft_externe_sturing = this.getLegacyKey(mykeys, 26);
-    };
-    Domotica_gestuurde_verbruiker.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Domotica gestuurde verbruiker";
         this.props.type_externe_sturing = "drukknop";
@@ -7796,15 +8027,15 @@ var Domotica_gestuurde_verbruiker = /** @class */ (function (_super) {
         this.props.is_geprogrammeerd = true;
         this.props.heeft_detectie = false;
         this.props.heeft_externe_sturing = false;
-    };
-    Domotica_gestuurde_verbruiker.prototype.allowedChilds = function () {
+    }
+    allowedChilds() {
         return ["", "Batterij", "Bel", "Boiler", "Contactdoos", "Diepvriezer", "Droogkast", "Drukknop", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Media", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Zeldzame symbolen"];
-    };
-    Domotica_gestuurde_verbruiker.prototype.getMaxNumChilds = function () {
+    }
+    getMaxNumChilds() {
         return 1;
-    };
-    Domotica_gestuurde_verbruiker.prototype.toHTML = function (mode) {
-        var output = this.toHTMLHeader(mode);
+    }
+    toHTML(mode) {
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml()
             + "Draadloos: " + this.checkboxPropToHTML('is_draadloos')
             + ", Lokale Drukknop: " + this.checkboxPropToHTML('heeft_lokale_drukknop')
@@ -7815,19 +8046,18 @@ var Domotica_gestuurde_verbruiker = /** @class */ (function (_super) {
             output += ", Externe sturing: " + this.selectPropToHTML('type_externe_sturing', ["drukknop", "schakelaar"]);
         output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
-    };
-    Domotica_gestuurde_verbruiker.prototype.toSVG = function (sitplan) {
-        if (sitplan === void 0) { sitplan = false; }
-        var mySVG = new SVGelement();
+    }
+    toSVG(sitplan = false) {
+        let mySVG = new SVGelement();
         SVGSymbols.addSymbol('draadloos_klein');
         SVGSymbols.addSymbol('drukknop_klein');
         SVGSymbols.addSymbol('tijdschakelaar_klein');
         SVGSymbols.addSymbol('detectie_klein');
         SVGSymbols.addSymbol('schakelaar_klein');
         // Eerst de tekening van de aangestuurde verbruiker maken
-        var childcounter = 0; // Variabele voor het aantal kinderen, op dit moment ondersteunt de tool slechts 1 kind
+        let childcounter = 0; // Variabele voor het aantal kinderen, op dit moment ondersteunt de tool slechts 1 kind
         // Kind 1 is het element dat effectief gestuurd wordt.                
-        for (var i = 0; i < this.sourcelist.length; i++) {
+        for (let i = 0; i < this.sourcelist.length; i++) {
             if (this.isActief() && (this.sourcelist.data[i].parent == this.id)) {
                 childcounter++; // We hebben een kind gevonden
                 switch (childcounter) {
@@ -7892,42 +8122,37 @@ var Domotica_gestuurde_verbruiker = /** @class */ (function (_super) {
             }
         }
         return (mySVG);
-    };
-    return Domotica_gestuurde_verbruiker;
-}(Electro_Item));
-var Domotica_verticaal = /** @class */ (function (_super) {
-    __extends(Domotica_verticaal, _super);
-    function Domotica_verticaal() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Domotica_verticaal.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Domotica_verticaal extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         //Niet nodig, bestond niet toen we nog Keys gebruikten
-    };
-    Domotica_verticaal.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Domotica module (verticaal)";
         this.props.nr = "";
         this.props.tekst = "Domotica";
-    };
-    Domotica_verticaal.prototype.allowedChilds = function () {
+    }
+    allowedChilds() {
         return ["", "Aansluiting", "Domotica", "Domotica module (verticaal)", "Domotica gestuurde verbruiker", "Leiding", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Contactdoos", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Media", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zekering/differentieel", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Zeldzame symbolen"];
-    };
-    Domotica_verticaal.prototype.getMaxNumChilds = function () {
+    }
+    getMaxNumChilds() {
         return 256;
-    };
-    Domotica_verticaal.prototype.toHTML = function (mode) {
-        var output = this.toHTMLHeader(mode);
+    }
+    toHTML(mode) {
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml()
             + "Tekst: " + this.stringPropToHTML('tekst', 10);
         return (output);
-    };
-    Domotica_verticaal.prototype.toSVG = function () {
-        var mySVG = new SVGelement();
+    }
+    toSVG() {
+        let mySVG = new SVGelement();
         // Eerst vragen we een tekening van alle kinderen
         mySVG = this.sourcelist.toSVG(this.id, "vertical");
         // Dan bepalen we de hoogte van het object en zorgen ervoor dat de tekst past
-        var heightunaltered = mySVG.yup + mySVG.ydown;
-        var height = heightunaltered;
+        let heightunaltered = mySVG.yup + mySVG.ydown;
+        let height = heightunaltered;
         if (height < 50)
             height = 50;
         height = Math.max(height, svgTextWidth(htmlspecialchars(this.props.tekst), 10, 'font-weight="bold"') + 25);
@@ -7946,33 +8171,27 @@ var Domotica_verticaal = /** @class */ (function (_super) {
             + 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="10"' + '>'
             + htmlspecialchars(this.props.tekst) + '</text>';
         return (mySVG);
-    };
-    return Domotica_verticaal;
-}(Electro_Item));
-var Droogkast = /** @class */ (function (_super) {
-    __extends(Droogkast, _super);
-    function Droogkast() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Droogkast.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Droogkast extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.nr = this.getLegacyKey(mykeys, 10);
         this.props.adres = this.getLegacyKey(mykeys, 15);
-    };
-    Droogkast.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Droogkast";
         this.props.adres = "";
-    };
-    Droogkast.prototype.toHTML = function (mode) {
-        var output = this.toHTMLHeader(mode);
+    }
+    toHTML(mode) {
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml();
         output += "Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
-    };
-    Droogkast.prototype.toSVG = function (sitplan) {
-        if (sitplan === void 0) { sitplan = false; }
-        var mySVG = new SVGelement();
+    }
+    toSVG(sitplan = false) {
+        let mySVG = new SVGelement();
         SVGSymbols.addSymbol('droogkast');
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 59;
@@ -7982,15 +8201,10 @@ var Droogkast = /** @class */ (function (_super) {
             + '<use xlink:href="#droogkast" x="21" y="25"></use>';
         mySVG.data += (sitplan ? "" : this.addAddressToSVG(mySVG, 60, 15));
         return (mySVG);
-    };
-    return Droogkast;
-}(Electro_Item));
-var Drukknop = /** @class */ (function (_super) {
-    __extends(Drukknop, _super);
-    function Drukknop() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Drukknop.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Drukknop extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.aantal = this.getLegacyKey(mykeys, 4);
         this.props.nr = this.getLegacyKey(mykeys, 10);
@@ -8000,8 +8214,8 @@ var Drukknop = /** @class */ (function (_super) {
         this.props.is_afgeschermd = this.getLegacyKey(mykeys, 19);
         this.props.is_halfwaterdicht = this.getLegacyKey(mykeys, 20);
         this.props.heeft_verklikkerlampje = this.getLegacyKey(mykeys, 21);
-    };
-    Drukknop.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Drukknop";
         this.props.aantal = "1";
@@ -8011,17 +8225,17 @@ var Drukknop = /** @class */ (function (_super) {
         this.props.is_afgeschermd = false;
         this.props.is_halfwaterdicht = false;
         this.props.heeft_verklikkerlampje = false;
-    };
+    }
     /**
      * Geeft het maximum aantal elementen dat een Electro_Item kan hebben in een situatieplan.
      *
      * @returns {number} Het maximum aantal elementen dat een Electro_Item kan hebben in een situatieplan.
      */
-    Drukknop.prototype.maxSituationPlanElements = function () {
+    maxSituationPlanElements() {
         return this.props.aantal;
-    };
-    Drukknop.prototype.toHTML = function (mode) {
-        var output = this.toHTMLHeader(mode);
+    }
+    toHTML(mode) {
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml()
             + "Type: " + this.selectPropToHTML('type_knop', ["standaard", "dimmer", "rolluik"])
             + ", Verklikkerlampje: " + this.checkboxPropToHTML('heeft_verklikkerlampje')
@@ -8031,11 +8245,9 @@ var Drukknop = /** @class */ (function (_super) {
             + ", Aantal knoppen per armatuur: " + this.selectPropToHTML('aantal_knoppen_per_armatuur', ["1", "2", "3", "4", "5", "6", "7", "8"])
             + ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
-    };
-    Drukknop.prototype.toSVG = function (sitplan, mirrortext) {
-        if (sitplan === void 0) { sitplan = false; }
-        if (mirrortext === void 0) { mirrortext = false; }
-        var mySVG = new SVGelement();
+    }
+    toSVG(sitplan = false, mirrortext = false) {
+        let mySVG = new SVGelement();
         SVGSymbols.addSymbol('drukknop');
         mySVG.xleft = 1; // Links voldoende ruimte voor een eventuele kring voorzien
         mySVG.xright = 43;
@@ -8069,7 +8281,7 @@ var Drukknop = /** @class */ (function (_super) {
             printstr += 'x' + aantal_knoppen;
         }
         if (printstr != '') {
-            var textoptions = 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10"';
+            let textoptions = 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10"';
             if (mirrortext == false)
                 mySVG.data += '<text x="33" y="49" ' + textoptions + '>' + htmlspecialchars(printstr) + '</text>';
             else
@@ -8077,7 +8289,7 @@ var Drukknop = /** @class */ (function (_super) {
         }
         // Plaats tekst voor aantal knoppen per armatuur
         if (this.props.aantal_knoppen_per_armatuur > 1) {
-            var textoptions = 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10"';
+            let textoptions = 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10"';
             if (mirrortext == false)
                 mySVG.data += '<text x="44" y="13" ' + textoptions + '>' + htmlspecialchars(this.props.aantal_knoppen_per_armatuur) + '</text>';
             else
@@ -8103,33 +8315,27 @@ var Drukknop = /** @class */ (function (_super) {
             mySVG.data += (sitplan ? "" : this.addAddressToSVG(mySVG, 49, 5));
         }
         return (mySVG);
-    };
-    return Drukknop;
-}(Electro_Item));
-var EV_lader = /** @class */ (function (_super) {
-    __extends(EV_lader, _super);
-    function EV_lader() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    EV_lader.prototype.convertLegacyKeys = function (mykeys) {
+}
+class EV_lader extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.nr = this.getLegacyKey(mykeys, 10);
         this.props.adres = this.getLegacyKey(mykeys, 15);
-    };
-    EV_lader.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "EV lader";
         this.props.adres = "";
-    };
-    EV_lader.prototype.toHTML = function (mode) {
-        var output = this.toHTMLHeader(mode);
+    }
+    toHTML(mode) {
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml();
         output += "Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
-    };
-    EV_lader.prototype.toSVG = function (sitplan) {
-        if (sitplan === void 0) { sitplan = false; }
-        var mySVG = new SVGelement();
+    }
+    toSVG(sitplan = false) {
+        let mySVG = new SVGelement();
         SVGSymbols.addSymbol('EVlader');
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 60;
@@ -8139,33 +8345,27 @@ var EV_lader = /** @class */ (function (_super) {
             + '<use xlink:href="#EVlader" x="21" y="25"></use>';
         mySVG.data += (sitplan ? "" : this.addAddressToSVG(mySVG, 60, 15));
         return (mySVG);
-    };
-    return EV_lader;
-}(Electro_Item));
-var Elektriciteitsmeter = /** @class */ (function (_super) {
-    __extends(Elektriciteitsmeter, _super);
-    function Elektriciteitsmeter() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Elektriciteitsmeter.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Elektriciteitsmeter extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.nr = this.getLegacyKey(mykeys, 10);
         this.props.adres = this.getLegacyKey(mykeys, 15);
-    };
-    Elektriciteitsmeter.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Elektriciteitsmeter";
         this.props.adres = "";
-    };
-    Elektriciteitsmeter.prototype.toHTML = function (mode) {
-        var output = this.toHTMLHeader(mode);
+    }
+    toHTML(mode) {
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml();
         output += "Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
-    };
-    Elektriciteitsmeter.prototype.toSVG = function (sitplan) {
-        if (sitplan === void 0) { sitplan = false; }
-        var mySVG = new SVGelement();
+    }
+    toSVG(sitplan = false) {
+        let mySVG = new SVGelement();
         SVGSymbols.addSymbol('elektriciteitsmeter');
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 59;
@@ -8175,33 +8375,27 @@ var Elektriciteitsmeter = /** @class */ (function (_super) {
             + '<use xlink:href="#elektriciteitsmeter" x="21" y="25"></use>';
         mySVG.data += (sitplan ? "" : this.addAddressToSVG(mySVG, 60, 15));
         return (mySVG);
-    };
-    return Elektriciteitsmeter;
-}(Electro_Item));
-var Elektrische_oven = /** @class */ (function (_super) {
-    __extends(Elektrische_oven, _super);
-    function Elektrische_oven() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Elektrische_oven.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Elektrische_oven extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.nr = this.getLegacyKey(mykeys, 10);
         this.props.adres = this.getLegacyKey(mykeys, 15);
-    };
-    Elektrische_oven.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Elektrische oven";
         this.props.adres = "";
-    };
-    Elektrische_oven.prototype.toHTML = function (mode) {
-        var output = this.toHTMLHeader(mode);
+    }
+    toHTML(mode) {
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml();
         output += "Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
-    };
-    Elektrische_oven.prototype.toSVG = function (sitplan) {
-        if (sitplan === void 0) { sitplan = false; }
-        var mySVG = new SVGelement();
+    }
+    toSVG(sitplan = false) {
+        let mySVG = new SVGelement();
         SVGSymbols.addSymbol('oven');
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 59;
@@ -8211,15 +8405,10 @@ var Elektrische_oven = /** @class */ (function (_super) {
             + '<use xlink:href="#oven" x="21" y="25"></use>';
         mySVG.data += (sitplan ? "" : this.addAddressToSVG(mySVG, 60, 15));
         return (mySVG);
-    };
-    return Elektrische_oven;
-}(Electro_Item));
-var Ketel = /** @class */ (function (_super) {
-    __extends(Ketel, _super);
-    function Ketel() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Ketel.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Ketel extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.aantal = this.getLegacyKey(mykeys, 4);
         this.props.nr = this.getLegacyKey(mykeys, 10);
@@ -8227,8 +8416,8 @@ var Ketel = /** @class */ (function (_super) {
         this.props.keteltype = this.getLegacyKey(mykeys, 16);
         this.props.energiebron = this.getLegacyKey(mykeys, 17);
         this.props.warmtefunctie = this.getLegacyKey(mykeys, 18);
-    };
-    Ketel.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Ketel";
         this.props.aantal = "1";
@@ -8236,9 +8425,9 @@ var Ketel = /** @class */ (function (_super) {
         this.props.keteltype = "";
         this.props.energiebron = "";
         this.props.warmtefunctie = "";
-    };
-    Ketel.prototype.toHTML = function (mode) {
-        var output = this.toHTMLHeader(mode);
+    }
+    toHTML(mode) {
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml();
         output += "Type: " + this.selectPropToHTML('keteltype', ["", "Met boiler", "Met tapspiraal", "Warmtekrachtkoppeling", "Warmtewisselaar"]);
         output += ", Energiebron: " + this.selectPropToHTML('energiebron', ["", "Elektriciteit", "Gas (atmosferisch)", "Gas (ventilator)", "Vaste brandstof", "Vloeibare brandstof"]);
@@ -8246,10 +8435,9 @@ var Ketel = /** @class */ (function (_super) {
         output += ", Aantal: " + this.selectPropToHTML('aantal', ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"]);
         output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
-    };
-    Ketel.prototype.toSVG = function (sitplan) {
-        if (sitplan === void 0) { sitplan = false; }
-        var mySVG = new SVGelement();
+    }
+    toSVG(sitplan = false) {
+        let mySVG = new SVGelement();
         SVGSymbols.addSymbol('verbruiker');
         SVGSymbols.addSymbol('gas_ventilator');
         SVGSymbols.addSymbol('gas_atmosferisch');
@@ -8328,33 +8516,27 @@ var Ketel = /** @class */ (function (_super) {
         // Adres helemaal onderaan plaatsen
         mySVG.data += (sitplan ? "" : this.addAddressToSVG(mySVG, 60 + shifty, 15));
         return (mySVG);
-    };
-    return Ketel;
-}(Electro_Item));
-var Koelkast = /** @class */ (function (_super) {
-    __extends(Koelkast, _super);
-    function Koelkast() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Koelkast.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Koelkast extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.nr = this.getLegacyKey(mykeys, 10);
         this.props.adres = this.getLegacyKey(mykeys, 15);
-    };
-    Koelkast.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Koelkast";
         this.props.adres = "";
-    };
-    Koelkast.prototype.toHTML = function (mode) {
-        var output = this.toHTMLHeader(mode);
+    }
+    toHTML(mode) {
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml();
         output += "Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
-    };
-    Koelkast.prototype.toSVG = function (sitplan) {
-        if (sitplan === void 0) { sitplan = false; }
-        var mySVG = new SVGelement();
+    }
+    toSVG(sitplan = false) {
+        let mySVG = new SVGelement();
         SVGSymbols.addSymbol('ster');
         SVGSymbols.addSymbol('koelkast');
         mySVG.xleft = 1; // foresee at least some space for the conductor
@@ -8365,33 +8547,27 @@ var Koelkast = /** @class */ (function (_super) {
             + '<use xlink:href="#koelkast" x="21" y="25"></use>';
         mySVG.data += this.addAddressToSVG(mySVG, 60, 15);
         return (mySVG);
-    };
-    return Koelkast;
-}(Electro_Item));
-var Kookfornuis = /** @class */ (function (_super) {
-    __extends(Kookfornuis, _super);
-    function Kookfornuis() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Kookfornuis.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Kookfornuis extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.nr = this.getLegacyKey(mykeys, 10);
         this.props.adres = this.getLegacyKey(mykeys, 15);
-    };
-    Kookfornuis.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Kookfornuis";
         this.props.adres = "";
-    };
-    Kookfornuis.prototype.toHTML = function (mode) {
-        var output = this.toHTMLHeader(mode);
+    }
+    toHTML(mode) {
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml();
         output += "Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
-    };
-    Kookfornuis.prototype.toSVG = function (sitplan) {
-        if (sitplan === void 0) { sitplan = false; }
-        var mySVG = new SVGelement();
+    }
+    toSVG(sitplan = false) {
+        let mySVG = new SVGelement();
         SVGSymbols.addSymbol('kookfornuis');
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 59;
@@ -8401,15 +8577,10 @@ var Kookfornuis = /** @class */ (function (_super) {
             + '<use xlink:href="#kookfornuis" x="21" y="25"></use>';
         mySVG.data += (sitplan ? "" : this.addAddressToSVG(mySVG, 60, 15));
         return (mySVG);
-    };
-    return Kookfornuis;
-}(Electro_Item));
-var Kring = /** @class */ (function (_super) {
-    __extends(Kring, _super);
-    function Kring() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Kring.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Kring extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.aantal_polen = this.getLegacyKey(mykeys, 4);
         this.props.bescherming = this.getLegacyKey(mykeys, 7);
@@ -8437,8 +8608,8 @@ var Kring = /** @class */ (function (_super) {
                 this.props.curve_automaat = this.getLegacyKey(mykeys, 18);
                 break;
         }
-    };
-    Kring.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Kring";
         this.props.nr = "";
@@ -8457,7 +8628,7 @@ var Kring = /** @class */ (function (_super) {
         this.props.huishoudelijk = true;
         this.props.fase = '';
         //Bepalen of er per default een kabel aanwezig is en of we zekeringen plaatsen
-        var parent = this.getParent();
+        let parent = this.getParent();
         if (parent == null) {
             this.props.kabel_is_aanwezig = true; // Kabel aanwezig
             this.props.naam = ""; // We geven de kring geen naam als er geen parent is
@@ -8490,14 +8661,14 @@ var Kring = /** @class */ (function (_super) {
                     this.props.kabel_is_aanwezig = true; // wel een kabel na bord
                     break;
             }
-    };
-    Kring.prototype.allowedChilds = function () {
+    }
+    allowedChilds() {
         return ["", "Aansluiting", "Bord", "Domotica", "Domotica module (verticaal)", "Domotica gestuurde verbruiker", "Kring", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Contactdoos", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Media", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zekering/differentieel", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Zeldzame symbolen"];
-    };
-    Kring.prototype.getMaxNumChilds = function () {
+    }
+    getMaxNumChilds() {
         return 256;
-    };
-    Kring.prototype.overrideKeys = function () {
+    }
+    overrideKeys() {
         if ((this.props.aantal_polen < 1) || (this.props.aantal_polen > 4))
             this.props.aantal_polen = "2"; //Test dat aantal polen bestaat
         if (this.props.kabel_locatie == "Luchtleiding")
@@ -8510,10 +8681,10 @@ var Kring = /** @class */ (function (_super) {
             this.props.fase = '';
         if (!["automatisch", "differentieel", "differentieelautomaat"].includes(this.props.bescherming))
             this.props.kortsluitvermogen = '';
-    };
-    Kring.prototype.toHTML = function (mode) {
+    }
+    toHTML(mode) {
         this.overrideKeys();
-        var output = this.toHTMLHeader(mode);
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;Naam: " + this.stringPropToHTML('naam', 5) + "<br>"
             + "Zekering: " + this.selectPropToHTML('bescherming', ["automatisch", "differentieel", "differentieelautomaat", "smelt", "geen", "---", "schakelaar", "relais", "schemer", "overspanningsbeveiliging"]);
         // Aantal polen en Ampérage
@@ -8558,10 +8729,10 @@ var Kring = /** @class */ (function (_super) {
         }
         output += ", Tekst: " + this.stringPropToHTML('tekst', 10);
         return (output);
-    };
-    Kring.prototype.toSVG = function () {
+    }
+    toSVG() {
         function addFase(startNumlines, mySVG) {
-            var numlines = startNumlines;
+            let numlines = startNumlines;
             if (['L1', 'L2', 'L3'].includes(this.props.fase)) {
                 numlines = numlines + ((this.props.huishoudelijk && this.props.kortsluitvermogen != '') ? 1.3 : 1.0);
                 mySVG.data += "<text x=\"" + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "\" y=\"" + (mySVG.yup - 10) + "\""
@@ -8571,7 +8742,7 @@ var Kring = /** @class */ (function (_super) {
             }
             return numlines;
         }
-        var mySVG = new SVGelement();
+        let mySVG = new SVGelement();
         SVGSymbols.addSymbol('zekering_automatisch');
         SVGSymbols.addSymbol('zekering_empty');
         SVGSymbols.addSymbol('zekering_smelt');
@@ -8579,12 +8750,12 @@ var Kring = /** @class */ (function (_super) {
         SVGSymbols.addSymbol('arrow');
         SVGSymbols.addSymbol('relais_kring');
         // Bepalen of we de hele kring naar rechts moeten opschuiven om rekening te houden met symbooltjes qua kabel-locatie
-        var cable_location_available = 0;
+        let cable_location_available = 0;
         if (this.props.kabel_is_aanwezig /* kabel aanwezig */ && (this.props.kabel_is_in_buis /* kabel in buis */ || contains(["Ondergronds", "In wand", "Op wand"], this.props.kabel_locatie))) {
             cable_location_available = 1;
         }
         // Determine how much everything needs to be shifted right
-        var shiftright = /*35*/ 25 + 20 * cable_location_available;
+        let shiftright = /*35*/ 25 + 20 * cable_location_available;
         if (this.props.naam.length > 2) {
             shiftright = Math.max(shiftright, svgTextWidth(htmlspecialchars(this.props.naam), 12, 'font-weight="bold"') + 20);
         }
@@ -8649,8 +8820,8 @@ var Kring = /** @class */ (function (_super) {
             mySVG.yup += 23;
         }
         // Zekering, differentieel, of ander symbool onderaan plaatsen
-        var nameshift = -6; // Deze geeft aan hoeveel de naam naar beneden geduwd kan worden
-        var numlines = 1; // Hier houden we het aantal lijnen tekst bij
+        let nameshift = -6; // Deze geeft aan hoeveel de naam naar beneden geduwd kan worden
+        let numlines = 1; // Hier houden we het aantal lijnen tekst bij
         switch (this.props.bescherming) {
             case "automatisch":
                 numlines = 1; // Hier houden we het aantal lijnen tekst bij
@@ -8677,7 +8848,7 @@ var Kring = /** @class */ (function (_super) {
                             + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
                             + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
                             + htmlspecialchars("" + (this.props.kortsluitvermogen * 1000)) + "</text>";
-                        var rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen * 1000))) + 6;
+                        let rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen * 1000))) + 6;
                         mySVG.data += '<rect x="' + (mySVG.xleft + 15 + 11 * (numlines - 2) + 1) + '" y="' + (mySVG.yup - 10 - (rectsize / 2)) + '" width="' + (11 * 1.2) + '" height="' + rectsize + '" fill="none" stroke="black" />';
                     }
                     else {
@@ -8722,7 +8893,7 @@ var Kring = /** @class */ (function (_super) {
                             + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
                             + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
                             + htmlspecialchars("" + (this.props.kortsluitvermogen * 1000)) + "</text>";
-                        var rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen * 1000))) + 6;
+                        let rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen * 1000))) + 6;
                         mySVG.data += '<rect x="' + (mySVG.xleft + 15 + 11 * (numlines - 2) + 1) + '" y="' + (mySVG.yup - 10 - (rectsize / 2)) + '" width="' + (11 * 1.2) + '" height="' + rectsize + '" fill="none" stroke="black" />';
                     }
                     else {
@@ -8775,7 +8946,7 @@ var Kring = /** @class */ (function (_super) {
                             + " transform=\"rotate(-90 " + (mySVG.xleft + 15 + 11 * (numlines - 1)) + "," + (mySVG.yup - 10) + ")"
                             + "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
                             + htmlspecialchars("" + (this.props.kortsluitvermogen * 1000)) + "</text>";
-                        var rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen * 1000))) + 6;
+                        let rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen * 1000))) + 6;
                         mySVG.data += '<rect x="' + (mySVG.xleft + 15 + 11 * (numlines - 2) + 1) + '" y="' + (mySVG.yup - 10 - (rectsize / 2)) + '" width="' + (11 * 1.2) + '" height="' + rectsize + '" fill="none" stroke="black" />';
                     }
                     else {
@@ -8841,7 +9012,7 @@ var Kring = /** @class */ (function (_super) {
                 break;
         }
         // Tekst naast de kring
-        var tekstlocatie = mySVG.yup - 40; //Standaard staat tekst boven de zekering
+        let tekstlocatie = mySVG.yup - 40; //Standaard staat tekst boven de zekering
         if (this.props.bescherming == "geen")
             tekstlocatie += 25; //Als er geen zekering is kan tekst naar beneden
         mySVG.data += '<text x="' + (mySVG.xleft - 6 - 20 * cable_location_available) + '" ' + 'y="' + (tekstlocatie) + '" '
@@ -8863,43 +9034,38 @@ var Kring = /** @class */ (function (_super) {
             mySVG.ydown = 0;
         }
         return (mySVG);
-    };
-    return Kring;
-}(Electro_Item));
-var Leiding = /** @class */ (function (_super) {
-    __extends(Leiding, _super);
-    function Leiding() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Leiding.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Leiding extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         // Niet van toepassing, element bestond nog niet toen we met legacy keys werkten
-    };
-    Leiding.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Leiding";
         this.props.type_kabel = "XVB Cca 3G2,5";
         this.props.kabel_locatie = "N/A";
         this.props.kabel_is_in_buis = false;
         this.props.adres = "";
-    };
-    Leiding.prototype.overrideKeys = function () {
+    }
+    overrideKeys() {
         if (this.props.kabel_locatie == "Luchtleiding")
             this.props.kabel_is_in_buis = false; //Indien luchtleiding nooit een buis tekenen
-    };
-    Leiding.prototype.toHTML = function (mode) {
-        var output = this.toHTMLHeader(mode);
+    }
+    toHTML(mode) {
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml()
             + "Type: " + this.stringPropToHTML('type_kabel', 10)
             + ", Plaatsing: " + this.selectPropToHTML('kabel_locatie', ["N/A", "Ondergronds", "Luchtleiding", "In wand", "Op wand"]);
         if (this.props.kabel_locatie != "Luchtleiding")
             output += ", In buis: " + this.checkboxPropToHTML('kabel_is_in_buis');
         return (output);
-    };
-    Leiding.prototype.toSVG = function () {
+    }
+    toSVG() {
         this.overrideKeys();
-        var mySVG = new SVGelement();
-        var outputstr = "";
-        var width = 100;
+        let mySVG = new SVGelement();
+        let outputstr = "";
+        let width = 100;
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = width - 1;
         mySVG.yup = 25;
@@ -8942,15 +9108,10 @@ var Leiding = /** @class */ (function (_super) {
             + htmlspecialchars(this.props.type_kabel) + '</text>';
         mySVG.data += "\n";
         return (mySVG);
-    };
-    return Leiding;
-}(Electro_Item));
-var Lichtpunt = /** @class */ (function (_super) {
-    __extends(Lichtpunt, _super);
-    function Lichtpunt() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Lichtpunt.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Lichtpunt extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.aantal = this.getLegacyKey(mykeys, 4);
         this.props.nr = this.getLegacyKey(mykeys, 10);
@@ -8961,13 +9122,13 @@ var Lichtpunt = /** @class */ (function (_super) {
         this.props.is_wandlamp = this.getLegacyKey(mykeys, 19);
         this.props.is_halfwaterdicht = this.getLegacyKey(mykeys, 20);
         this.props.heeft_ingebouwde_schakelaar = this.getLegacyKey(mykeys, 21);
-    };
-    Lichtpunt.prototype.overrideKeys = function () {
+    }
+    overrideKeys() {
         if ((this.props.type_lamp == null) && (this.props.type_lamp == "")) {
             this.props.type_lamp = "standaard";
         }
-    };
-    Lichtpunt.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Lichtpunt";
         this.props.aantal = "1";
@@ -8978,18 +9139,18 @@ var Lichtpunt = /** @class */ (function (_super) {
         this.props.is_wandlamp = false;
         this.props.is_halfwaterdicht = false;
         this.props.heeft_ingebouwde_schakelaar = false;
-    };
+    }
     /**
      * Geeft het maximum aantal elementen dat een Electro_Item kan hebben in een situatieplan.
      *
      * @returns {number} Het maximum aantal elementen dat een Electro_Item kan hebben in een situatieplan.
      */
-    Lichtpunt.prototype.maxSituationPlanElements = function () {
+    maxSituationPlanElements() {
         return this.props.aantal;
-    };
-    Lichtpunt.prototype.toHTML = function (mode) {
+    }
+    toHTML(mode) {
         this.overrideKeys();
-        var output = this.toHTMLHeader(mode);
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml()
             + "Type: " + this.selectPropToHTML('type_lamp', ["standaard", "TL", "spot", "led" /*, "Spot", "Led", "Signalisatielamp" */]) + ", ";
         if (this.props.type_lamp == "TL") {
@@ -9002,18 +9163,18 @@ var Lichtpunt = /** @class */ (function (_super) {
             + "Noodverlichting: " + this.selectPropToHTML('type_noodverlichting', ["Geen", "Centraal", "Decentraal"])
             + ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
-    };
+    }
     /**
      * Berekent de grenzen voor het sitplan-element op basis van het type lamp.
      *
      * @returns Een object met de grensverrekeningen: clipleft, addright, cliptop en addbottom.
      *          De waarde van clipleft wordt kleiner gezet voor standaardlampen omdat die tekening iets meer naar links ligt.
      */
-    Lichtpunt.prototype.getSitPlanBoundaries = function () {
-        var clipleft = 0;
-        var addright = 0;
-        var cliptop = 0;
-        var addbottom = 0;
+    getSitPlanBoundaries() {
+        let clipleft = 0;
+        let addright = 0;
+        let cliptop = 0;
+        let addbottom = 0;
         switch (this.props.type_lamp) {
             case "led":
                 clipleft = 14;
@@ -9039,11 +9200,9 @@ var Lichtpunt = /** @class */ (function (_super) {
             cliptop: cliptop,
             addbottom: addbottom
         };
-    };
-    Lichtpunt.prototype.toSVG = function (sitplan, mirrortext) {
-        if (sitplan === void 0) { sitplan = false; }
-        if (mirrortext === void 0) { mirrortext = false; }
-        var mySVG = new SVGelement();
+    }
+    toSVG(sitplan = false, mirrortext = false) {
+        let mySVG = new SVGelement();
         mySVG.xleft = 1; // Links voldoende ruimte voor een eventuele kring voorzien
         mySVG.xright = 20; // We starten met breedte 20 (leidings links) en vullen later aan in functie van wat moet getekend worden
         mySVG.yup = 25;
@@ -9051,7 +9210,7 @@ var Lichtpunt = /** @class */ (function (_super) {
         // Teken de leiding links
         mySVG.data = (sitplan ? "" : '<line x1="1" x2="30" y1="25" y2="25" stroke="black" />');
         // Indien halfwaterdicht en/of meerdere lampen, voorzie de tekst bovenaan
-        var print_str_upper = "";
+        let print_str_upper = "";
         if (this.props.is_halfwaterdicht) {
             print_str_upper = "h";
             if ((parseInt(this.props.aantal) > 1) && (!sitplan))
@@ -9089,11 +9248,11 @@ var Lichtpunt = /** @class */ (function (_super) {
                 }
                 ;
                 if (print_str_upper != "") {
-                    var textoptions = 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="7"';
+                    let textoptions = 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="7"';
                     if (mirrortext == false)
-                        mySVG.data += "<text x=\"".concat(textxpos, "\" y=\"10\" ").concat(textoptions, ">").concat(htmlspecialchars(print_str_upper), "</text>");
+                        mySVG.data += `<text x="${textxpos}" y="10" ${textoptions}>${htmlspecialchars(print_str_upper)}</text>`;
                     else
-                        mySVG.data += "<text transform=\"scale(-1,1) translate(".concat(-2 * textxpos, ",0)\" x=\"").concat(textxpos, "\" y=\"10\" ").concat(textoptions, ">").concat(htmlspecialchars(print_str_upper), "</text>");
+                        mySVG.data += `<text transform="scale(-1,1) translate(${-2 * textxpos},0)" x="${textxpos}" y="10" ${textoptions}>${htmlspecialchars(print_str_upper)}</text>`;
                 }
                 switch (this.props.type_noodverlichting) { // Type noodverlichting
                     case "Centraal":
@@ -9142,11 +9301,11 @@ var Lichtpunt = /** @class */ (function (_super) {
                         textxpos = 40;
                 }
                 if (print_str_upper != "") {
-                    var textoptions = 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="7"';
+                    let textoptions = 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="7"';
                     if (mirrortext == false)
-                        mySVG.data += "<text x=\"".concat(textxpos, "\" y=\"10\" ").concat(textoptions, ">").concat(htmlspecialchars(print_str_upper), "</text>");
+                        mySVG.data += `<text x="${textxpos}" y="10" ${textoptions}>${htmlspecialchars(print_str_upper)}</text>`;
                     else
-                        mySVG.data += "<text transform=\"scale(-1,1) translate(".concat(-2 * textxpos, ",0)\" x=\"").concat(textxpos, "\" y=\"10\" ").concat(textoptions, ">").concat(htmlspecialchars(print_str_upper), "</text>");
+                        mySVG.data += `<text transform="scale(-1,1) translate(${-2 * textxpos},0)" x="${textxpos}" y="10" ${textoptions}>${htmlspecialchars(print_str_upper)}</text>`;
                 }
                 switch (this.props.type_noodverlichting) {
                     case "Centraal":
@@ -9174,7 +9333,7 @@ var Lichtpunt = /** @class */ (function (_super) {
                 var endy = 25 + (aantal_buizen) * 3.5;
                 mySVG.data += '<line x1="30" y1="' + starty + '" x2="30" y2="' + endy + '" stroke="black" stroke-width="2" />'
                     + '<line x1="90" y1="' + starty + '" x2="90" y2="' + endy + '" stroke="black" stroke-width="2" />';
-                for (var i = 0; i < aantal_buizen; i++) {
+                for (let i = 0; i < aantal_buizen; i++) {
                     mySVG.data += '<line x1="30" y1="' + (starty + (i * 7) + 3.5) + '" x2="90" y2="' + (starty + (i * 7) + 3.5) + '" stroke="black" stroke-width="2" />';
                 }
                 // Teken wandlamp indien van toepassing
@@ -9182,11 +9341,11 @@ var Lichtpunt = /** @class */ (function (_super) {
                     mySVG.data += '<line x1="50" y1="' + (27 + (aantal_buizen * 3.5)) + '" x2="70" y2="' + (27 + (aantal_buizen * 3.5)) + '" stroke="black" />';
                 // Zet symbool halfwaterdicht en aantal lampen bovenaan
                 if (print_str_upper != "") {
-                    var textoptions = 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10"';
+                    let textoptions = 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10"';
                     if (mirrortext == false)
-                        mySVG.data += "<text x=\"60\" y=\"".concat(25 - (aantal_buizen * 3.5), "\" ").concat(textoptions, ">").concat(htmlspecialchars(print_str_upper), "</text>");
+                        mySVG.data += `<text x="60" y="${25 - (aantal_buizen * 3.5)}" ${textoptions}>${htmlspecialchars(print_str_upper)}</text>`;
                     else
-                        mySVG.data += "<text transform=\"scale(-1,1) translate(-120,0)\" x=\"60\" y=\"".concat(25 - (aantal_buizen * 3.5), "\" ").concat(textoptions, ">").concat(htmlspecialchars(print_str_upper), "</text>");
+                        mySVG.data += `<text transform="scale(-1,1) translate(-120,0)" x="60" y="${25 - (aantal_buizen * 3.5)}" ${textoptions}>${htmlspecialchars(print_str_upper)}</text>`;
                 }
                 // Teken ingebouwde schakelaar indien van toepassing
                 if (this.props.heeft_ingebouwde_schakelaar) {
@@ -9243,11 +9402,11 @@ var Lichtpunt = /** @class */ (function (_super) {
                 }
                 // Zet symbool halfwaterdicht en aantal lampen bovenaan
                 if (print_str_upper != "") {
-                    var textoptions = 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10"';
+                    let textoptions = 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10"';
                     if (mirrortext == false)
-                        mySVG.data += "<text x=\"30\" y=\"10\" ".concat(textoptions, ">").concat(htmlspecialchars(print_str_upper), "</text>");
+                        mySVG.data += `<text x="30" y="10" ${textoptions}>${htmlspecialchars(print_str_upper)}</text>`;
                     else
-                        mySVG.data += "<text transform=\"scale(-1,1) translate(-60,0)\" x=\"30\" y=\"10\" ".concat(textoptions, ">").concat(htmlspecialchars(print_str_upper), "</text>");
+                        mySVG.data += `<text transform="scale(-1,1) translate(-60,0)" x="30" y="10" ${textoptions}>${htmlspecialchars(print_str_upper)}</text>`;
                 }
                 // Teken wandlamp indien van toepassing
                 if (this.props.is_wandlamp)
@@ -9262,25 +9421,20 @@ var Lichtpunt = /** @class */ (function (_super) {
         }
         mySVG.data += "\n";
         return (mySVG);
-    };
-    return Lichtpunt;
-}(Electro_Item));
-var Media = /** @class */ (function (_super) {
-    __extends(Media, _super);
-    function Media() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Media.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Media extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         //Nothing to do since Media did not exist when Legacy Keys where still a thing
-    };
-    Media.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Media";
         this.props.adres = "";
         this.props.aantal = 1;
         this.props.symbool = "";
-    };
-    Media.prototype.overrideKeys = function () {
+    }
+    overrideKeys() {
         if (['luidspreker', 'intercom'].includes(this.props.symbool)) {
             if (this.props.aantal < 1)
                 this.props.aantal = 1;
@@ -9290,10 +9444,10 @@ var Media = /** @class */ (function (_super) {
         else {
             this.props.aantal = 1;
         }
-    };
-    Media.prototype.toHTML = function (mode) {
+    }
+    toHTML(mode) {
         this.overrideKeys();
-        var output = this.toHTMLHeader(mode);
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml()
             + "Symbool: " + this.selectPropToHTML('symbool', ["", "luidspreker", "intercom"]);
         if (['luidspreker', 'intercom'].includes(this.props.symbool)) {
@@ -9301,13 +9455,12 @@ var Media = /** @class */ (function (_super) {
         }
         output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
-    };
-    Media.prototype.toSVG = function (sitplan) {
-        if (sitplan === void 0) { sitplan = false; }
-        var mySVG = new SVGelement();
+    }
+    toSVG(sitplan = false) {
+        let mySVG = new SVGelement();
         SVGSymbols.addSymbol('luidspreker');
         // Alles naar beneden schuiven als we het aantal laders boven het symbool willen plaatsen
-        var shifty = 0;
+        let shifty = 0;
         if ((this.props.aantal > 1) && (!sitplan) && (['luidspreker', 'intercom'].includes(this.props.symbool))) {
             switch (this.props.symbool) {
                 case "luidspreker":
@@ -9335,15 +9488,15 @@ var Media = /** @class */ (function (_super) {
                 break;
             case "intercom":
                 mySVG.data += (sitplan ? '' : '<line x1="1" y1="' + (25 + shifty) + '" x2="21" y2="' + (25 + shifty) + '" stroke="black" />');
-                mySVG.data += "<rect x=\"21\" y=\"".concat((15 + shifty), "\" width=\"30\" height=\"20\" stroke=\"black\" fill=\"none\" />");
-                mySVG.data += "<rect x=\"36\" y=\"".concat((20 + shifty), "\" width=\"4\" height=\"10\" stroke=\"black\" fill=\"none\" />");
-                mySVG.data += "<line x1=\"40\" y1=\"".concat((20 + shifty), "\" x2=\"51\" y2=\"").concat((15 + shifty), "\" stroke=\"black\" />");
-                mySVG.data += "<line x1=\"40\" y1=\"".concat((30 + shifty), "\" x2=\"51\" y2=\"").concat((35 + shifty), "\" stroke=\"black\" />");
-                mySVG.data += "<line x1=\"46\" y1=\"".concat((25 + shifty), "\" x2=\"56\" y2=\"").concat((25 + shifty), "\" stroke=\"black\" stroke-width=\"2\" />");
-                mySVG.data += "<line x1=\"46\" y1=\"".concat((25 + shifty), "\" x2=\"48\" y2=\"").concat((23 + shifty), "\" stroke=\"black\" stroke-width=\"1\" stroke-linecap=\"round\" />");
-                mySVG.data += "<line x1=\"46\" y1=\"".concat((25 + shifty), "\" x2=\"48\" y2=\"").concat((27 + shifty), "\" stroke=\"black\" stroke-width=\"1\" stroke-linecap=\"round\" />");
-                mySVG.data += "<line x1=\"56\" y1=\"".concat((25 + shifty), "\" x2=\"54\" y2=\"").concat((23 + shifty), "\" stroke=\"black\" stroke-width=\"1\" stroke-linecap=\"round\" />");
-                mySVG.data += "<line x1=\"56\" y1=\"".concat((25 + shifty), "\" x2=\"54\" y2=\"").concat((27 + shifty), "\" stroke=\"black\" stroke-width=\"1\" stroke-linecap=\"round\" />");
+                mySVG.data += `<rect x="21" y="${(15 + shifty)}" width="30" height="20" stroke="black" fill="none" />`;
+                mySVG.data += `<rect x="36" y="${(20 + shifty)}" width="4" height="10" stroke="black" fill="none" />`;
+                mySVG.data += `<line x1="40" y1="${(20 + shifty)}" x2="51" y2="${(15 + shifty)}" stroke="black" />`;
+                mySVG.data += `<line x1="40" y1="${(30 + shifty)}" x2="51" y2="${(35 + shifty)}" stroke="black" />`;
+                mySVG.data += `<line x1="46" y1="${(25 + shifty)}" x2="56" y2="${(25 + shifty)}" stroke="black" stroke-width="2" />`;
+                mySVG.data += `<line x1="46" y1="${(25 + shifty)}" x2="48" y2="${(23 + shifty)}" stroke="black" stroke-width="1" stroke-linecap="round" />`;
+                mySVG.data += `<line x1="46" y1="${(25 + shifty)}" x2="48" y2="${(27 + shifty)}" stroke="black" stroke-width="1" stroke-linecap="round" />`;
+                mySVG.data += `<line x1="56" y1="${(25 + shifty)}" x2="54" y2="${(23 + shifty)}" stroke="black" stroke-width="1" stroke-linecap="round" />`;
+                mySVG.data += `<line x1="56" y1="${(25 + shifty)}" x2="54" y2="${(27 + shifty)}" stroke="black" stroke-width="1" stroke-linecap="round" />`;
                 mySVG.xright = 54;
                 mySVG.data += (sitplan ? '' : this.addAddressToSVG(mySVG, 50 + shifty, 5, -3));
                 break;
@@ -9353,12 +9506,12 @@ var Media = /** @class */ (function (_super) {
                 break;
         }
         return (mySVG);
-    };
-    Media.prototype.getSitPlanBoundaries = function () {
-        var clipleft = 12;
-        var addright = 0;
-        var cliptop = 0;
-        var addbottom = 0;
+    }
+    getSitPlanBoundaries() {
+        let clipleft = 12;
+        let addright = 0;
+        let cliptop = 0;
+        let addbottom = 0;
         switch (this.props.symbool) {
             case 'luidspreker':
                 break;
@@ -9371,38 +9524,33 @@ var Media = /** @class */ (function (_super) {
                 break;
         }
         return ({ clipleft: clipleft, addright: addright, cliptop: cliptop, addbottom: addbottom });
-    };
-    return Media;
-}(Electro_Item));
-var Meerdere_verbruikers = /** @class */ (function (_super) {
-    __extends(Meerdere_verbruikers, _super);
-    function Meerdere_verbruikers() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Meerdere_verbruikers.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Meerdere_verbruikers extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.nr = this.getLegacyKey(mykeys, 10);
         this.props.adres = this.getLegacyKey(mykeys, 15);
-    };
-    Meerdere_verbruikers.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Meerdere verbruikers"; // This is rather a formality as we should already have this at this stage
         this.props.adres = ""; // Set Adres/tekst to "" when the item is cleared
-    };
-    Meerdere_verbruikers.prototype.allowedChilds = function () {
+    }
+    allowedChilds() {
         return ["", "Domotica", "Domotica gestuurde verbruiker", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Contactdoos", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Omvormer", "Overspanningsbeveiliging", "Media", "Microgolfoven", "Motor", "Schakelaars", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zekering/differentieel", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Zeldzame symbolen"];
-    };
-    Meerdere_verbruikers.prototype.getMaxNumChilds = function () {
+    }
+    getMaxNumChilds() {
         return 256;
-    };
-    Meerdere_verbruikers.prototype.toHTML = function (mode) {
-        var output = this.toHTMLHeader(mode);
+    }
+    toHTML(mode) {
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml()
             + "Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
-    };
-    Meerdere_verbruikers.prototype.toSVG = function () {
-        var mySVG; // = new SVGelement();
+    }
+    toSVG() {
+        let mySVG; // = new SVGelement();
         // Maak een tekening van alle kinderen
         mySVG = this.sourcelist.toSVG(this.id, "horizontal");
         // We voorzien altijd verticale ruimte, zelfs als de kinderen nog niet gedefinieerd zijn
@@ -9416,33 +9564,27 @@ var Meerdere_verbruikers = /** @class */ (function (_super) {
             mySVG.ydown += 15;
         }
         return (mySVG);
-    };
-    return Meerdere_verbruikers;
-}(Electro_Item));
-var Microgolfoven = /** @class */ (function (_super) {
-    __extends(Microgolfoven, _super);
-    function Microgolfoven() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Microgolfoven.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Microgolfoven extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.nr = this.getLegacyKey(mykeys, 10);
         this.props.adres = this.getLegacyKey(mykeys, 15);
-    };
-    Microgolfoven.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Microgolfoven";
         this.props.adres = "";
-    };
-    Microgolfoven.prototype.toHTML = function (mode) {
-        var output = this.toHTMLHeader(mode);
+    }
+    toHTML(mode) {
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml()
             + "Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
-    };
-    Microgolfoven.prototype.toSVG = function (sitplan) {
-        if (sitplan === void 0) { sitplan = false; }
-        var mySVG = new SVGelement();
+    }
+    toSVG(sitplan = false) {
+        let mySVG = new SVGelement();
         SVGSymbols.addSymbol('sinus');
         SVGSymbols.addSymbol('microgolf');
         mySVG.xleft = 1; // foresee at least some space for the conductor
@@ -9453,33 +9595,27 @@ var Microgolfoven = /** @class */ (function (_super) {
             + '<use xlink:href="#microgolf" x="21" y="25"></use>';
         mySVG.data += this.addAddressToSVG(mySVG, 60, 15);
         return (mySVG);
-    };
-    return Microgolfoven;
-}(Electro_Item));
-var Motor = /** @class */ (function (_super) {
-    __extends(Motor, _super);
-    function Motor() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Motor.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Motor extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.nr = this.getLegacyKey(mykeys, 10);
         this.props.adres = this.getLegacyKey(mykeys, 15);
-    };
-    Motor.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Motor";
         this.props.adres = "";
-    };
-    Motor.prototype.toHTML = function (mode) {
-        var output = this.toHTMLHeader(mode);
+    }
+    toHTML(mode) {
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml()
             + "Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
-    };
-    Motor.prototype.toSVG = function (sitplan) {
-        if (sitplan === void 0) { sitplan = false; }
-        var mySVG = new SVGelement();
+    }
+    toSVG(sitplan = false) {
+        let mySVG = new SVGelement();
         SVGSymbols.addSymbol('motor');
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 59;
@@ -9489,70 +9625,82 @@ var Motor = /** @class */ (function (_super) {
             + '<use xlink:href="#motor" x="21" y="25"></use>';
         mySVG.data += this.addAddressToSVG(mySVG, 60, 15);
         return (mySVG);
-    };
-    return Motor;
-}(Electro_Item));
-var Omvormer = /** @class */ (function (_super) {
-    __extends(Omvormer, _super);
-    function Omvormer() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Omvormer.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Omvormer extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.nr = this.getLegacyKey(mykeys, 10);
         this.props.adres = this.getLegacyKey(mykeys, 15);
-    };
-    Omvormer.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Omvormer";
         this.props.adres = "";
-    };
-    Omvormer.prototype.toHTML = function (mode) {
-        var output = this.toHTMLHeader(mode);
-        output += "&nbsp;" + this.nrToHtml()
-            + "Adres/tekst: " + this.stringPropToHTML('adres', 5);
+        this.props.inkring = false;
+    }
+    overrideKeys() {
+        let parent;
+        if (this.props.inkring == null)
+            this.props.inkring = false;
+        if (((parent = this.getParent()) != null) && (parent.getType() != "Kring"))
+            this.props.inkring = false;
+        if (this.props.inkring)
+            this.props.adres = "";
+    }
+    toHTML(mode) {
+        this.overrideKeys();
+        let output = this.toHTMLHeader(mode);
+        let parent;
+        output += "&nbsp;" + this.nrToHtml();
+        if (((parent = this.getParent()) != null) && (parent.getType() == "Kring"))
+            output += "In kring: " + this.checkboxPropToHTML('inkring')
+                + (!this.props.inkring ? ", " : "");
+        if (!this.props.inkring)
+            output += "Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
-    };
-    Omvormer.prototype.toSVG = function (sitplan) {
-        if (sitplan === void 0) { sitplan = false; }
-        var mySVG = new SVGelement();
+    }
+    toSVG(sitplan = false) {
+        let mySVG = new SVGelement();
         SVGSymbols.addSymbol('sinus');
         SVGSymbols.addSymbol('omvormer');
-        mySVG.xleft = 1; // foresee at least some space for the conductor
-        mySVG.xright = 59;
         mySVG.yup = 25;
         mySVG.ydown = 25;
-        mySVG.data = (sitplan ? "" : '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>')
-            + '<use xlink:href="#omvormer" x="21" y="25"></use>';
-        mySVG.data += (sitplan ? "" : this.addAddressToSVG(mySVG, 60, 15));
+        if (this.props.inkring) {
+            mySVG.xleft = 41; // foresee at least some space for the conductor
+            mySVG.xright = 19;
+            mySVG.data = '<use xlink:href="#omvormer" x="21" y="25"></use>';
+            //mySVG.data += (sitplan? "" : this.addAddressToSVG(mySVG,60,15));
+        }
+        else {
+            mySVG.xleft = 1; // foresee at least some space for the conductor
+            mySVG.xright = 59;
+            mySVG.data = (sitplan ? "" : '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>')
+                + '<use xlink:href="#omvormer" x="21" y="25"></use>';
+            mySVG.data += (sitplan ? "" : this.addAddressToSVG(mySVG, 60, 15));
+        }
         return (mySVG);
-    };
-    return Omvormer;
-}(Electro_Item));
-var Overspanningsbeveiliging = /** @class */ (function (_super) {
-    __extends(Overspanningsbeveiliging, _super);
-    function Overspanningsbeveiliging() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Overspanningsbeveiliging.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Overspanningsbeveiliging extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.nr = this.getLegacyKey(mykeys, 10);
         this.props.adres = this.getLegacyKey(mykeys, 15);
-    };
-    Overspanningsbeveiliging.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Overspanningsbeveiliging";
         this.props.adres = "";
-    };
-    Overspanningsbeveiliging.prototype.toHTML = function (mode) {
-        var output = this.toHTMLHeader(mode);
+    }
+    toHTML(mode) {
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml()
             + "Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
-    };
-    Overspanningsbeveiliging.prototype.toSVG = function (sitplan) {
-        if (sitplan === void 0) { sitplan = false; }
-        var mySVG = new SVGelement();
+    }
+    toSVG(sitplan = false) {
+        let mySVG = new SVGelement();
         SVGSymbols.addSymbol('overspanningsbeveiliging');
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 34;
@@ -9562,38 +9710,33 @@ var Overspanningsbeveiliging = /** @class */ (function (_super) {
             + '<use xlink:href="#overspanningsbeveiliging" x="21" y="25"></use>';
         mySVG.data += (sitplan ? "" : this.addAddressToSVG(mySVG, 55, 10));
         return (mySVG);
-    };
-    return Overspanningsbeveiliging;
-}(Electro_Item));
-var Splitsing = /** @class */ (function (_super) {
-    __extends(Splitsing, _super);
-    function Splitsing() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Splitsing.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Splitsing extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.adres = this.getLegacyKey(mykeys, 15);
-    };
-    Splitsing.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Splitsing"; // This is rather a formality as we should already have this at this stage
         this.props.adres = ""; // Set Adres/tekst to "" when the item is cleared
-    };
-    Splitsing.prototype.allowedChilds = function () {
+    }
+    allowedChilds() {
         return ["", "Kring"];
-    };
-    Splitsing.prototype.getMaxNumChilds = function () {
+    }
+    getMaxNumChilds() {
         return 256;
-    };
-    Splitsing.prototype.toHTML = function (mode, Parent) {
-        var output = this.toHTMLHeader(mode);
+    }
+    toHTML(mode, Parent) {
+        let output = this.toHTMLHeader(mode);
         return (output);
-    };
-    Splitsing.prototype.toSVG = function () {
-        var mySVG; // = new SVGelement();
+    }
+    toSVG() {
+        let mySVG; // = new SVGelement();
         // Maak een tekening van alle kinderen
         mySVG = this.sourcelist.toSVG(this.id, "horizontal");
-        var parent = this.getParent();
+        let parent = this.getParent();
         // Teken de lijn onderaan
         if ((parent.getType() == "Aansluiting") || (parent.getType() == "Kring")) {
             mySVG.data += '<line x1="' + (mySVG.xleft) + '" x2="' + (mySVG.xleft + mySVG.xrightmin)
@@ -9612,33 +9755,27 @@ var Splitsing = /** @class */ (function (_super) {
             mySVG.xleft = 1; //we leave one pixel for the bold kring-line at the left
         }
         return (mySVG);
-    };
-    return Splitsing;
-}(Electro_Item));
-var Stoomoven = /** @class */ (function (_super) {
-    __extends(Stoomoven, _super);
-    function Stoomoven() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Stoomoven.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Stoomoven extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.nr = this.getLegacyKey(mykeys, 10);
         this.props.adres = this.getLegacyKey(mykeys, 15);
-    };
-    Stoomoven.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Stoomoven";
         this.props.adres = "";
-    };
-    Stoomoven.prototype.toHTML = function (mode) {
-        var output = this.toHTMLHeader(mode);
+    }
+    toHTML(mode) {
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml()
             + "Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
-    };
-    Stoomoven.prototype.toSVG = function (sitplan) {
-        if (sitplan === void 0) { sitplan = false; }
-        var mySVG = new SVGelement();
+    }
+    toSVG(sitplan = false) {
+        let mySVG = new SVGelement();
         SVGSymbols.addSymbol('stoomoven');
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 59;
@@ -9648,36 +9785,30 @@ var Stoomoven = /** @class */ (function (_super) {
             + '<use xlink:href="#stoomoven" x="21" y="25"></use>';
         mySVG.data += (sitplan ? "" : this.addAddressToSVG(mySVG, 60, 15));
         return (mySVG);
-    };
-    return Stoomoven;
-}(Electro_Item));
-var Transformator = /** @class */ (function (_super) {
-    __extends(Transformator, _super);
-    function Transformator() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Transformator.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Transformator extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.nr = this.getLegacyKey(mykeys, 10);
         this.props.voltage = this.getLegacyKey(mykeys, 14);
         this.props.adres = this.getLegacyKey(mykeys, 15);
-    };
-    Transformator.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Transformator";
         this.props.voltage = "230V/24V";
         this.props.adres = "";
-    };
-    Transformator.prototype.toHTML = function (mode) {
-        var output = this.toHTMLHeader(mode);
+    }
+    toHTML(mode) {
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml()
             + "Voltage: " + this.stringPropToHTML('voltage', 8)
             + ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
-    };
-    Transformator.prototype.toSVG = function (sitplan) {
-        if (sitplan === void 0) { sitplan = false; }
-        var mySVG = new SVGelement();
+    }
+    toSVG(sitplan = false) {
+        let mySVG = new SVGelement();
         SVGSymbols.addSymbol('transformator');
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 47;
@@ -9689,36 +9820,30 @@ var Transformator = /** @class */ (function (_super) {
             htmlspecialchars(this.props.voltage) + "</text>";
         mySVG.data += (sitplan ? "" : this.addAddressToSVG(mySVG, 58, 15));
         return (mySVG);
-    };
-    return Transformator;
-}(Electro_Item));
-var USB_lader = /** @class */ (function (_super) {
-    __extends(USB_lader, _super);
-    function USB_lader() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    USB_lader.prototype.convertLegacyKeys = function (mykeys) {
+}
+class USB_lader extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.aantal = this.getLegacyKey(mykeys, 4);
         this.props.nr = this.getLegacyKey(mykeys, 10);
         this.props.adres = this.getLegacyKey(mykeys, 15);
-    };
-    USB_lader.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "USB lader"; // This is rather a formality as we should already have this at this stage
         this.props.aantal = "1"; // Per default 1 lader
         this.props.adres = ""; // Set Adres/tekst to "" when the item is cleared
-    };
-    USB_lader.prototype.toHTML = function (mode) {
-        var output = this.toHTMLHeader(mode);
+    }
+    toHTML(mode) {
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml();
         output += "Aantal: " + this.selectPropToHTML('aantal', ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]);
         output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
-    };
-    USB_lader.prototype.toSVG = function (sitplan) {
-        if (sitplan === void 0) { sitplan = false; }
-        var mySVG = new SVGelement();
+    }
+    toSVG(sitplan = false) {
+        let mySVG = new SVGelement();
         SVGSymbols.addSymbol('usblader');
         // Alles naar beneden schuiven als we het aantal laders boven het symbool willen plaatsen
         var shifty = 0;
@@ -9734,33 +9859,27 @@ var USB_lader = /** @class */ (function (_super) {
             + '<use xlink:href="#usblader" x="21" y="' + (shifty + 25) + '"></use>';
         mySVG.data += (sitplan ? "" : this.addAddressToSVG(mySVG, 55 + shifty, 10));
         return (mySVG);
-    };
-    return USB_lader;
-}(Electro_Item));
-var Vaatwasmachine = /** @class */ (function (_super) {
-    __extends(Vaatwasmachine, _super);
-    function Vaatwasmachine() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Vaatwasmachine.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Vaatwasmachine extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.nr = this.getLegacyKey(mykeys, 10);
         this.props.adres = this.getLegacyKey(mykeys, 15);
-    };
-    Vaatwasmachine.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Vaatwasmachine";
         this.props.adres = "";
-    };
-    Vaatwasmachine.prototype.toHTML = function (mode) {
-        var output = this.toHTMLHeader(mode);
+    }
+    toHTML(mode) {
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml();
         output += "Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
-    };
-    Vaatwasmachine.prototype.toSVG = function (sitplan) {
-        if (sitplan === void 0) { sitplan = false; }
-        var mySVG = new SVGelement();
+    }
+    toSVG(sitplan = false) {
+        let mySVG = new SVGelement();
         SVGSymbols.addSymbol('vaatwasmachine');
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 59;
@@ -9770,33 +9889,27 @@ var Vaatwasmachine = /** @class */ (function (_super) {
             + '<use xlink:href="#vaatwasmachine" x="21" y="25"></use>';
         mySVG.data += (sitplan ? "" : this.addAddressToSVG(mySVG, 60, 15));
         return (mySVG);
-    };
-    return Vaatwasmachine;
-}(Electro_Item));
-var Ventilator = /** @class */ (function (_super) {
-    __extends(Ventilator, _super);
-    function Ventilator() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Ventilator.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Ventilator extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.nr = this.getLegacyKey(mykeys, 10);
         this.props.adres = this.getLegacyKey(mykeys, 15);
-    };
-    Ventilator.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Ventilator";
         this.props.adres = "";
-    };
-    Ventilator.prototype.toHTML = function (mode) {
-        var output = this.toHTMLHeader(mode);
+    }
+    toHTML(mode) {
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml();
         output += "Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
-    };
-    Ventilator.prototype.toSVG = function (sitplan) {
-        if (sitplan === void 0) { sitplan = false; }
-        var mySVG = new SVGelement();
+    }
+    toSVG(sitplan = false) {
+        let mySVG = new SVGelement();
         SVGSymbols.addSymbol('ventilator');
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 49;
@@ -9806,15 +9919,10 @@ var Ventilator = /** @class */ (function (_super) {
             + '<use xlink:href="#ventilator" x="21" y="25"></use>';
         mySVG.data += (sitplan ? "" : this.addAddressToSVG(mySVG, 55, 10));
         return (mySVG);
-    };
-    return Ventilator;
-}(Electro_Item));
-var Verbruiker = /** @class */ (function (_super) {
-    __extends(Verbruiker, _super);
-    function Verbruiker() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Verbruiker.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Verbruiker extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.nr = this.getLegacyKey(mykeys, 10);
         this.props.tekst = this.getLegacyKey(mykeys, 15);
@@ -9824,8 +9932,8 @@ var Verbruiker = /** @class */ (function (_super) {
         this.props.is_cursief = this.getLegacyKey(mykeys, 20);
         this.props.breedte = this.getLegacyKey(mykeys, 22);
         this.props.adres = this.getLegacyKey(mykeys, 23);
-    };
-    Verbruiker.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Verbruiker";
         this.props.tekst = "";
@@ -9835,15 +9943,15 @@ var Verbruiker = /** @class */ (function (_super) {
         this.props.is_vet = false;
         this.props.is_cursief = false;
         this.props.adres = "";
-    };
-    Verbruiker.prototype.overrideKeys = function () {
+    }
+    overrideKeys() {
         if (this.props.heeft_automatische_breedte != "automatisch") {
             this.props.heeft_automatische_breedte = "handmatig";
         }
         this.adjustTextWidthIfAuto();
-    };
-    Verbruiker.prototype.toHTML = function (mode) {
-        var output = this.toHTMLHeader(mode);
+    }
+    toHTML(mode) {
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml()
             + "Tekst (nieuwe lijn = \"|\"): " + this.stringPropToHTML('tekst', 30)
             + ", Breedte: " + this.selectPropToHTML('heeft_automatische_breedte', ["automatisch", "handmatig"]);
@@ -9854,8 +9962,8 @@ var Verbruiker = /** @class */ (function (_super) {
             + ", Horizontale alignering: " + this.selectPropToHTML('horizontale_uitlijning', ["links", "centreer", "rechts"])
             + ", Adres/tekst: " + this.stringPropToHTML('adres', 2);
         return (output);
-    };
-    Verbruiker.prototype.adjustTextWidthIfAuto = function () {
+    }
+    adjustTextWidthIfAuto() {
         if (this.props.heeft_automatische_breedte === "automatisch") {
             var options = "";
             if (this.props.is_vet)
@@ -9864,15 +9972,14 @@ var Verbruiker = /** @class */ (function (_super) {
                 options += ' font-style="italic"';
             var strlines = htmlspecialchars(this.props.tekst).split("|");
             var width = 40;
-            for (var i = 0; i < strlines.length; i++) {
+            for (let i = 0; i < strlines.length; i++) {
                 width = Math.round(Math.max(width, svgTextWidth(strlines[i], 10, options) + 10));
             }
             this.props.breedte = String(width);
         }
-    };
-    Verbruiker.prototype.toSVG = function (sitplan) {
-        if (sitplan === void 0) { sitplan = false; }
-        var mySVG = new SVGelement();
+    }
+    toSVG(sitplan = false) {
+        let mySVG = new SVGelement();
         var strlines = htmlspecialchars(this.props.tekst).split("|");
         // Voldoende ruimte voorzien voor alle elementen
         this.adjustTextWidthIfAuto();
@@ -9902,7 +10009,7 @@ var Verbruiker = /** @class */ (function (_super) {
                 outputstr_common = '<text style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" x="' + (20 + 1 + width / 2) + '" ';
                 break;
         }
-        for (var i = 0; i < strlines.length; i++) {
+        for (let i = 0; i < strlines.length; i++) {
             var dispy = 28 - 7.5 * Math.min(1, strlines.length - 1) + 15 * i;
             mySVG.data += outputstr_common + ' y="' + dispy + '"' + options + '>' + strlines[i] + '</text>';
         }
@@ -9911,36 +10018,31 @@ var Verbruiker = /** @class */ (function (_super) {
             + '<rect x="21" y="5" width="' + width + '" height="' + (40 + extraplace) + '" fill="none" style="stroke:black" />'
             + this.addAddressToSVG(mySVG, 60 + extraplace, 15, width / 2 - (mySVG.xright - 20) / 2);
         return (mySVG);
-    };
-    return Verbruiker;
-}(Electro_Item));
-var Verlenging = /** @class */ (function (_super) {
-    __extends(Verlenging, _super);
-    function Verlenging() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Verlenging.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Verlenging extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.nr = this.getLegacyKey(mykeys, 10);
         this.props.breedte = this.getLegacyKey(mykeys, 22);
         this.props.adres = this.getLegacyKey(mykeys, 23);
-    };
-    Verlenging.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Verlenging";
         this.props.breedte = "40";
         this.props.adres = "";
-    };
-    Verlenging.prototype.toHTML = function (mode) {
-        var output = this.toHTMLHeader(mode);
+    }
+    toHTML(mode) {
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml()
             + "Breedte: " + this.stringPropToHTML('breedte', 3)
             + ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
-    };
-    Verlenging.prototype.toSVG = function () {
-        var mySVG = new SVGelement();
-        var outputstr = "";
+    }
+    toSVG() {
+        let mySVG = new SVGelement();
+        let outputstr = "";
         var width;
         if (isNaN(Number(this.props.breedte))) {
             width = 40;
@@ -9961,44 +10063,38 @@ var Verlenging = /** @class */ (function (_super) {
         mySVG.data += this.addAddressToSVG(mySVG, 40, 0, width / 2 - mySVG.xright / 2 - 10);
         mySVG.data += "\n";
         return (mySVG);
-    };
-    return Verlenging;
-}(Electro_Item));
-var Verwarmingstoestel = /** @class */ (function (_super) {
-    __extends(Verwarmingstoestel, _super);
-    function Verwarmingstoestel() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Verwarmingstoestel.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Verwarmingstoestel extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.heeft_accumulatie = this.getLegacyKey(mykeys, 3);
         this.props.heeft_ventilator = this.getLegacyKey(mykeys, 6);
         this.props.nr = this.getLegacyKey(mykeys, 10);
         this.props.adres = this.getLegacyKey(mykeys, 15);
-    };
-    Verwarmingstoestel.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Verwarmingstoestel";
         this.props.heeft_accumulatie = false;
         this.props.heeft_ventilator = false;
         this.props.adres = "";
-    };
-    Verwarmingstoestel.prototype.overrideKeys = function () {
+    }
+    overrideKeys() {
         if (!this.props.heeft_accumulatie)
             this.props.heeft_ventilator = false; //Indien geen accumulatie kan er ook geen ventilator zijn
-    };
-    Verwarmingstoestel.prototype.toHTML = function (mode) {
+    }
+    toHTML(mode) {
         this.overrideKeys;
-        var output = this.toHTMLHeader(mode);
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml()
             + "Accumulatie: " + this.checkboxPropToHTML('heeft_accumulatie')
             + (this.props.heeft_accumulatie ? ", Ventilator: " + this.checkboxPropToHTML('heeft_ventilator') : "")
             + ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
-    };
-    Verwarmingstoestel.prototype.toSVG = function (sitplan) {
-        if (sitplan === void 0) { sitplan = false; }
-        var mySVG = new SVGelement();
+    }
+    toSVG(sitplan = false) {
+        let mySVG = new SVGelement();
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 69;
         mySVG.yup = 25;
@@ -10028,36 +10124,31 @@ var Verwarmingstoestel = /** @class */ (function (_super) {
         }
         mySVG.data += (sitplan ? "" : this.addAddressToSVG(mySVG, 55, 10));
         return (mySVG);
-    };
-    return Verwarmingstoestel;
-}(Electro_Item));
-var Vrije_ruimte = /** @class */ (function (_super) {
-    __extends(Vrije_ruimte, _super);
-    function Vrije_ruimte() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Vrije_ruimte.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Vrije_ruimte extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.nr = this.getLegacyKey(mykeys, 10);
         this.props.breedte = this.getLegacyKey(mykeys, 22);
-    };
-    Vrije_ruimte.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Vrije ruimte"; // This is rather a formality as we should already have this at this stage
         this.props.breedte = 25; // Default breedte van de vrije ruimte
-    };
-    Vrije_ruimte.prototype.toHTML = function (mode) {
-        var output = this.toHTMLHeader(mode);
+    }
+    toHTML(mode) {
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;Breedte: " + this.stringPropToHTML('breedte', 3);
         return (output);
-    };
-    Vrije_ruimte.prototype.getMaxNumChilds = function () {
+    }
+    getMaxNumChilds() {
         return 0;
-    };
-    Vrije_ruimte.prototype.toSVG = function () {
-        var mySVG = new SVGelement();
+    }
+    toSVG() {
+        let mySVG = new SVGelement();
         // Bepaal breedte van het element
-        var desiredwidth = Number(this.props.breedte);
+        let desiredwidth = Number(this.props.breedte);
         if (isNaN(desiredwidth)) {
             desiredwidth = 25;
         }
@@ -10068,15 +10159,10 @@ var Vrije_ruimte = /** @class */ (function (_super) {
         mySVG.xright = desiredwidth;
         mySVG.data = "";
         return (mySVG);
-    };
-    return Vrije_ruimte;
-}(Electro_Item));
-var Vrije_tekst = /** @class */ (function (_super) {
-    __extends(Vrije_tekst, _super);
-    function Vrije_tekst() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Vrije_tekst.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Vrije_tekst extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.nr = this.getLegacyKey(mykeys, 10);
         this.props.tekst = this.getLegacyKey(mykeys, 15);
@@ -10087,8 +10173,8 @@ var Vrije_tekst = /** @class */ (function (_super) {
         this.props.is_cursief = this.getLegacyKey(mykeys, 20);
         this.props.breedte = this.getLegacyKey(mykeys, 22);
         this.props.adres = this.getLegacyKey(mykeys, 23);
-    };
-    Vrije_tekst.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Vrije tekst";
         this.props.tekst = "";
@@ -10099,8 +10185,8 @@ var Vrije_tekst = /** @class */ (function (_super) {
         this.props.is_vet = false;
         this.props.is_cursief = false;
         this.props.adres = "";
-    };
-    Vrije_tekst.prototype.overrideKeys = function () {
+    }
+    overrideKeys() {
         if (this.props.vrije_tekst_type != "verbruiker") {
             this.props.vrije_tekst_type = "zonder kader";
         }
@@ -10111,10 +10197,10 @@ var Vrije_tekst = /** @class */ (function (_super) {
             this.props.vrije_tekst_type = "verbruiker";
         }
         this.adjustTextWidthIfAuto();
-    };
-    Vrije_tekst.prototype.toHTML = function (mode) {
+    }
+    toHTML(mode) {
         this.overrideKeys();
-        var output = this.toHTMLHeader(mode);
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml()
             + "Tekst (nieuwe lijn = \"|\"): " + this.stringPropToHTML('tekst', 30)
             + ", Breedte: " + this.selectPropToHTML('heeft_automatische_breedte', ["automatisch", "handmatig"]);
@@ -10127,8 +10213,8 @@ var Vrije_tekst = /** @class */ (function (_super) {
         if (this.props.vrije_tekst_type != "zonder kader")
             output += ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
-    };
-    Vrije_tekst.prototype.adjustTextWidthIfAuto = function () {
+    }
+    adjustTextWidthIfAuto() {
         if (this.props.heeft_automatische_breedte === "automatisch") {
             var options = "";
             if (this.props.is_vet)
@@ -10137,15 +10223,14 @@ var Vrije_tekst = /** @class */ (function (_super) {
                 options += ' font-style="italic"';
             var strlines = htmlspecialchars(this.props.tekst).split("|");
             var width = 40;
-            for (var i = 0; i < strlines.length; i++) {
+            for (let i = 0; i < strlines.length; i++) {
                 width = Math.round(Math.max(width, svgTextWidth(strlines[i], 10, options) + 10));
             }
             this.props.breedte = String(width);
         }
-    };
-    Vrije_tekst.prototype.toSVG = function (sitplan) {
-        if (sitplan === void 0) { sitplan = false; }
-        var mySVG = new SVGelement();
+    }
+    toSVG(sitplan = false) {
+        let mySVG = new SVGelement();
         var strlines = htmlspecialchars(this.props.tekst).split("|");
         // Breedte van de vrije tekst bepalen
         this.adjustTextWidthIfAuto();
@@ -10186,8 +10271,8 @@ var Vrije_tekst = /** @class */ (function (_super) {
                 outputstr_common = '<text style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10" x="' + (shiftx + 1 + width / 2) + '" ';
                 break;
         }
-        for (var i = 0; i < strlines.length; i++) {
-            var dispy = 28 - 7.5 * Math.min(1, strlines.length - 1) + 15 * i;
+        for (let i = 0; i < strlines.length; i++) {
+            let dispy = 28 - 7.5 * Math.min(1, strlines.length - 1) + 15 * i;
             mySVG.data += outputstr_common + ' y="' + dispy + '"' + options + '>' + strlines[i] + '</text>';
         }
         // Kader en adres tekenen --
@@ -10200,7 +10285,7 @@ var Vrije_tekst = /** @class */ (function (_super) {
                 break;
         }
         return (mySVG);
-    };
+    }
     /**
      * Geeft de boundary's terug van het element in het situatieplan. Deze boundary's worden gebruikt om het element te positioneren en te clippen.
      *
@@ -10210,44 +10295,38 @@ var Vrije_tekst = /** @class */ (function (_super) {
      *   - cliptop: zelfs als clipleft maar aan de bovenkant.
      *   - addbottom: zelfde als addright maar aan de onderkant.
      */
-    Vrije_tekst.prototype.getSitPlanBoundaries = function () {
+    getSitPlanBoundaries() {
         switch (this.props.vrije_tekst_type) {
             case "zonder kader": return { clipleft: 0, addright: -8, cliptop: 10, addbottom: -10 };
             default: return { clipleft: 12, addright: 0, cliptop: 0, addbottom: 0 }; //Wegens compatibiliteit met oudere versies van de software is het ontbreken van eender welke parameter een "met kader"
         }
-    };
-    return Vrije_tekst;
-}(Electro_Item));
-var Warmtepomp = /** @class */ (function (_super) {
-    __extends(Warmtepomp, _super);
-    function Warmtepomp() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Warmtepomp.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Warmtepomp extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.aantal = this.getLegacyKey(mykeys, 4);
         this.props.nr = this.getLegacyKey(mykeys, 10);
         this.props.adres = this.getLegacyKey(mykeys, 15);
         this.props.warmtefunctie = this.getLegacyKey(mykeys, 18);
-    };
-    Warmtepomp.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Warmtepomp/airco";
         this.props.aantal = "1";
         this.props.adres = "";
         this.props.warmtefunctie = "Koelend";
-    };
-    Warmtepomp.prototype.toHTML = function (mode) {
-        var output = this.toHTMLHeader(mode);
+    }
+    toHTML(mode) {
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml()
             + "Warmte functie: " + this.selectPropToHTML('warmtefunctie', ["", "Koelend", "Verwarmend", "Verwarmend en koelend"])
             + ", Aantal: " + this.selectPropToHTML('aantal', ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"])
             + ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
-    };
-    Warmtepomp.prototype.toSVG = function (sitplan) {
-        if (sitplan === void 0) { sitplan = false; }
-        var mySVG = new SVGelement();
+    }
+    toSVG(sitplan = false) {
+        let mySVG = new SVGelement();
         SVGSymbols.addSymbol('verbruiker');
         SVGSymbols.addSymbol('bliksem');
         // Alles naar beneden schuiven als we het aantal laders boven het symbool willen plaatsen
@@ -10290,33 +10369,27 @@ var Warmtepomp = /** @class */ (function (_super) {
         // Adres helemaal onderaan plaatsen
         mySVG.data += (sitplan ? "" : this.addAddressToSVG(mySVG, 60 + shifty, 15));
         return (mySVG);
-    };
-    return Warmtepomp;
-}(Electro_Item));
-var Wasmachine = /** @class */ (function (_super) {
-    __extends(Wasmachine, _super);
-    function Wasmachine() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Wasmachine.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Wasmachine extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.nr = this.getLegacyKey(mykeys, 10);
         this.props.adres = this.getLegacyKey(mykeys, 15);
-    };
-    Wasmachine.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Wasmachine";
         this.props.adres = "";
-    };
-    Wasmachine.prototype.toHTML = function (mode) {
-        var output = this.toHTMLHeader(mode);
+    }
+    toHTML(mode) {
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml()
             + "Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
-    };
-    Wasmachine.prototype.toSVG = function (sitplan) {
-        if (sitplan === void 0) { sitplan = false; }
-        var mySVG = new SVGelement();
+    }
+    toSVG(sitplan = false) {
+        let mySVG = new SVGelement();
         SVGSymbols.addSymbol('wasmachine');
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 59;
@@ -10326,16 +10399,11 @@ var Wasmachine = /** @class */ (function (_super) {
             + '<use xlink:href="#wasmachine" x="21" y="25"></use>';
         mySVG.data += this.addAddressToSVG(mySVG, 60, 15);
         return (mySVG);
-    };
-    return Wasmachine;
-}(Electro_Item));
-var Zekering = /** @class */ (function (_super) {
-    __extends(Zekering, _super);
-    function Zekering() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Zekering.prototype.convertLegacyKeys = function (mykeys) { }; // Not needed as this element didn't exist when we still had legacy keys
-    Zekering.prototype.resetProps = function () {
+}
+class Zekering extends Electro_Item {
+    convertLegacyKeys(mykeys) { } // Not needed as this element didn't exist when we still had legacy keys
+    resetProps() {
         this.clearProps();
         this.props.type = "Zekering/differentieel"; // This is rather a formality as we should already have this at this stage
         this.props.nr = "";
@@ -10349,8 +10417,8 @@ var Zekering = /** @class */ (function (_super) {
         this.props.kortsluitvermogen = "";
         this.props.huishoudelijk = true;
         this.props.fase = '';
-    };
-    Zekering.prototype.overrideKeys = function () {
+    }
+    overrideKeys() {
         if ((this.props.aantal_polen < 1) || (this.props.aantal_polen > 4))
             this.props.aantal_polen = "2"; //Test dat aantal polen bestaat
         if ((this.props.bescherming != "differentieel") && (this.props.bescherming != "differentieelautomaat"))
@@ -10363,10 +10431,10 @@ var Zekering = /** @class */ (function (_super) {
             this.props.fase = '';
         if (!["automatisch", "differentieel", "differentieelautomaat"].includes(this.props.bescherming))
             this.props.kortsluitvermogen = '';
-    };
-    Zekering.prototype.toHTML = function (mode) {
+    }
+    toHTML(mode) {
         this.overrideKeys();
-        var output = this.toHTMLHeader(mode);
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;";
         if (this.isChildOf("Kring"))
             output = output + this.nrToHtml();
@@ -10404,10 +10472,10 @@ var Zekering = /** @class */ (function (_super) {
             output += ", Huishoudelijke installatie: " + this.checkboxPropToHTML('huishoudelijk');
         }
         return (output);
-    };
-    Zekering.prototype.toSVG = function () {
+    }
+    toSVG() {
         function addFase(startNumlines, mySVG) {
-            var numlines = startNumlines;
+            let numlines = startNumlines;
             if (['L1', 'L2', 'L3'].includes(this.props.fase)) {
                 numlines = numlines + ((this.props.huishoudelijk && this.props.kortsluitvermogen != '') ? 1.3 : 1.0);
                 mySVG.data += '<text x="' + (21 + 10 + (this.props.bescherming == 'smelt' ? 4 : 0)) + '" y="' + (25 + 15 + (numlines - 1) * 11) + '" '
@@ -10416,8 +10484,8 @@ var Zekering = /** @class */ (function (_super) {
             }
             return numlines;
         }
-        var mySVG = new SVGelement();
-        var outputstr = "";
+        let mySVG = new SVGelement();
+        let outputstr = "";
         SVGSymbols.addSymbol('zekering_automatisch_horizontaal');
         SVGSymbols.addSymbol('zekering_smelt_horizontaal');
         mySVG.xleft = 1; // Links voldoende ruimte voor een eventuele kring voorzien
@@ -10425,7 +10493,7 @@ var Zekering = /** @class */ (function (_super) {
         mySVG.yup = 25;
         mySVG.ydown = 25;
         mySVG.data += '<line x1="1" y1="' + (25) + '" x2="21" y2="' + (25) + '" stroke="black"></line>';
-        var numlines = 1; // Hier houden we het aantal lijnen tekst bij
+        let numlines = 1; // Hier houden we het aantal lijnen tekst bij
         switch (this.props.bescherming) {
             case "automatisch":
                 numlines = 1; // Hier houden we het aantal lijnen tekst bij
@@ -10448,7 +10516,7 @@ var Zekering = /** @class */ (function (_super) {
                         mySVG.data += '<text x="' + (21 + 10) + '" y="' + (25 + 15 + (numlines - 1) * 11) + '" '
                             + 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">'
                             + htmlspecialchars("" + (this.props.kortsluitvermogen * 1000)) + '</text>';
-                        var rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen * 1000))) + 6;
+                        let rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen * 1000))) + 6;
                         mySVG.data += '<rect x="' + (21 + 10 - (rectsize / 2)) + '" y="' + (25 + 15 + (numlines - 1) * 11 - 10) + '" width="' + rectsize + '" height="' + (11 * 1.2) + '" fill="none" stroke="black" />';
                     }
                     else {
@@ -10485,7 +10553,7 @@ var Zekering = /** @class */ (function (_super) {
                         mySVG.data += '<text x="' + (21 + 10) + '" y="' + (25 + 15 + (numlines - 1) * 11) + '" '
                             + 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">'
                             + htmlspecialchars("" + (this.props.kortsluitvermogen * 1000)) + '</text>';
-                        var rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen * 1000))) + 6;
+                        let rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen * 1000))) + 6;
                         mySVG.data += '<rect x="' + (21 + 10 - (rectsize / 2)) + '" y="' + (25 + 15 + (numlines - 1) * 11 - 10) + '" width="' + rectsize + '" height="' + (11 * 1.2) + '" fill="none" stroke="black" />';
                     }
                     else {
@@ -10529,7 +10597,7 @@ var Zekering = /** @class */ (function (_super) {
                         mySVG.data += '<text x="' + (21 + 10) + '" y="' + (25 + 15 + (numlines - 1) * 11) + '" '
                             + 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">'
                             + htmlspecialchars("" + (this.props.kortsluitvermogen * 1000)) + '</text>';
-                        var rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen * 1000))) + 6;
+                        let rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen * 1000))) + 6;
                         mySVG.data += '<rect x="' + (21 + 10 - (rectsize / 2)) + '" y="' + (25 + 15 + (numlines - 1) * 11 - 10) + '" width="' + rectsize + '" height="' + (11 * 1.2) + '" fill="none" stroke="black" />';
                     }
                     else {
@@ -10562,36 +10630,30 @@ var Zekering = /** @class */ (function (_super) {
             mySVG.xright = mySVG.xright + 30;
         }
         return (mySVG);
-    };
-    return Zekering;
-}(Electro_Item));
-var Zeldzame_symbolen = /** @class */ (function (_super) {
-    __extends(Zeldzame_symbolen, _super);
-    function Zeldzame_symbolen() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Zeldzame_symbolen.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Zeldzame_symbolen extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.nr = this.getLegacyKey(mykeys, 10);
         this.props.adres = this.getLegacyKey(mykeys, 15);
         this.props.symbool = this.getLegacyKey(mykeys, 16);
-    };
-    Zeldzame_symbolen.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Zeldzame symbolen";
         this.props.adres = "";
         this.props.symbool = "";
-    };
-    Zeldzame_symbolen.prototype.toHTML = function (mode) {
-        var output = this.toHTMLHeader(mode);
+    }
+    toHTML(mode) {
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml()
             + "Symbool: " + this.selectPropToHTML('symbool', ["", "deurslot"])
             + ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
-    };
-    Zeldzame_symbolen.prototype.toSVG = function (sitplan) {
-        if (sitplan === void 0) { sitplan = false; }
-        var mySVG = new SVGelement();
+    }
+    toSVG(sitplan = false) {
+        let mySVG = new SVGelement();
         SVGSymbols.addSymbol('deurslot');
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 59;
@@ -10610,44 +10672,38 @@ var Zeldzame_symbolen = /** @class */ (function (_super) {
                 break;
         }
         return (mySVG);
-    };
-    return Zeldzame_symbolen;
-}(Electro_Item));
-var Zonnepaneel = /** @class */ (function (_super) {
-    __extends(Zonnepaneel, _super);
-    function Zonnepaneel() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Zonnepaneel.prototype.convertLegacyKeys = function (mykeys) {
+}
+class Zonnepaneel extends Electro_Item {
+    convertLegacyKeys(mykeys) {
         this.props.type = this.getLegacyKey(mykeys, 0);
         this.props.aantal = this.getLegacyKey(mykeys, 4);
         this.props.nr = this.getLegacyKey(mykeys, 10);
         this.props.adres = this.getLegacyKey(mykeys, 15);
-    };
-    Zonnepaneel.prototype.resetProps = function () {
+    }
+    resetProps() {
         this.clearProps();
         this.props.type = "Zonnepaneel";
         this.props.aantal = "1";
         this.props.adres = "";
         this.props.symbool = "driehoek";
-    };
-    Zonnepaneel.prototype.overrideKeys = function () {
+    }
+    overrideKeys() {
         if (this.props.symbool == null)
             this.props.symbool = "driehoek";
-    };
-    Zonnepaneel.prototype.toHTML = function (mode) {
+    }
+    toHTML(mode) {
         this.overrideKeys();
-        var output = this.toHTMLHeader(mode);
+        let output = this.toHTMLHeader(mode);
         output += "&nbsp;" + this.nrToHtml()
             + " Aantal: " + this.selectPropToHTML('aantal', ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20",
             "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40"])
             + ', Symbool: ' + this.selectPropToHTML('symbool', ["driehoek", "pijltjes"])
             + ", Adres/tekst: " + this.stringPropToHTML('adres', 5);
         return (output);
-    };
-    Zonnepaneel.prototype.toSVG = function (sitplan) {
-        if (sitplan === void 0) { sitplan = false; }
-        var mySVG = new SVGelement();
+    }
+    toSVG(sitplan = false) {
+        let mySVG = new SVGelement();
         mySVG.xleft = 1; // Links voldoende ruimte voor een eventuele kring voorzien
         mySVG.xright = 69;
         mySVG.yup = 35;
@@ -10669,12 +10725,11 @@ var Zonnepaneel = /** @class */ (function (_super) {
         // Adres helemaal onderaan plaatsen
         mySVG.data += (sitplan ? "" : this.addAddressToSVG(mySVG, 70, 15));
         return (mySVG);
-    };
-    return Zonnepaneel;
-}(Electro_Item));
+    }
+}
 0;
-var Properties = /** @class */ (function () {
-    function Properties() {
+class Properties {
+    constructor() {
         this.filename = "eendraadschema.eds";
         this.owner = "Voornaam Achternaam<br>Straat 0<br>0000 gemeente<br>Tel: +32 00 00 00 00<br>GSM: +32 000 00 00 00<br>e-mail: voornaam.achternaam@domein.be";
         ;
@@ -10686,140 +10741,507 @@ var Properties = /** @class */ (function () {
         this.legacySchakelaars = null;
     }
     ;
-    Properties.prototype.setFilename = function (name) {
+    setFilename(name) {
         this.filename = name;
-    };
-    return Properties;
-}());
-var SVGSymbols = /** @class */ (function () {
-    function SVGSymbols() {
     }
-    SVGSymbols.addSymbol = function (symbol) {
+}
+class SVGSymbols {
+    static addSymbol(symbol) {
         if (!this.neededSymbols.includes(symbol)) {
             this.neededSymbols.push(symbol);
         }
-    };
-    SVGSymbols.clearSymbols = function () {
+    }
+    static clearSymbols() {
         this.neededSymbols = [];
-    };
-    SVGSymbols.getNeededSymbols = function (sidebar) {
-        if (sidebar === void 0) { sidebar = false; }
-        var output = '<defs>';
+    }
+    static getNeededSymbols(sidebar = false) {
+        let output = '<defs>';
         if (this.neededSymbols.includes('VerticalStripe')) {
             output += '<pattern id="VerticalStripe" x="5" y="0" width="5" height="10" patternUnits="userSpaceOnUse" >' +
                 '<line x1="0" y1="0" x2="0" y2="10" stroke="black" />' +
                 '</pattern>';
         }
-        for (var key in this.data) {
+        for (let key in this.data) {
             if (this.neededSymbols.includes(key)) {
                 if (!sidebar)
-                    output += "<g id=\"".concat(key, "\">").concat(this.data[key].replace(/\n/g, ''), "</g>");
+                    output += `<g id="${key}">${this.data[key].replace(/\n/g, '')}</g>`;
                 else {
-                    var str = this.data[key].replace(/fill="white"/g, 'fill="#e8e8e8"');
+                    let str = this.data[key].replace(/fill="white"/g, 'fill="#e8e8e8"');
                     str = str.replace(/<use xlink:href="#/g, '<use xlink:href="#SB_');
-                    output += "<g id=\"SB_".concat(key, "\">").concat(str.replace(/\n/g, ''), "</g>");
+                    output += `<g id="SB_${key}">${str.replace(/\n/g, '')}</g>`;
                 }
             }
         }
         output += '</defs>';
         return (output);
-    };
-    SVGSymbols.outputSVGSymbols = function () {
-        var output = '<defs>' +
+    }
+    static outputSVGSymbols() {
+        let output = '<defs>' +
             '<pattern id="VerticalStripe" x="5" y="0" width="5" height="10" patternUnits="userSpaceOnUse" >' +
             '<line x1="0" y1="0" x2="0" y2="10" stroke="black" />' +
             '</pattern>';
-        for (var key in this.data) {
+        for (let key in this.data) {
             if (key != 'VerticalStripe')
-                output += "<g id=\"".concat(key, "\">").concat(this.data[key].replace(/\n/g, ''), "</g>");
+                output += `<g id="${key}">${this.data[key].replace(/\n/g, '')}</g>`;
         }
         output += '</defs>';
         return (output);
-    };
-    SVGSymbols.neededSymbols = [];
-    SVGSymbols.data = {
-        batterij: "\n<rect x=\"0\" y=\"-12\" width=\"40\" height=\"27\" stroke=\"black\" fill=\"none\"/>\n<rect x=\"5\" y=\"-15\" width=\"10\" height=\"3\" stroke=\"black\" fill=\"none\"/>\n<rect x=\"25\" y=\"-15\" width=\"10\" height=\"3\" stroke=\"black\" fill=\"none\"/>\n<line x1=\"8\" y1=\"-5\" x2=\"12\" y2=\"-5\" stroke=\"black\"/>\n<line x1=\"10\" y1=\"-7\" x2=\"10\" y2=\"-3\" stroke=\"black\"/>\n<line x1=\"28\" y1=\"-5\" x2=\"32\" y2=\"-5\" stroke=\"black\"/>\n",
-        contactdoos: "\n<path d=\"M20 0 A15 15 0 0 1 35 -15\" stroke=\"black\" fill=\"none\" stroke-width=\"2\" />\n<path d=\"M20 0 A15 15 0 0 0 35 15\" stroke=\"black\" fill=\"none\" stroke-width=\"2\" />\n<line x1=\"0\" y1=\"0\" x2=\"20\" y2=\"0\" stroke=\"black\" />\n",
-        deurslot: "\n<line x1=\"1\" y1=\"-15\" x2=\"31\" y2=\"-15\" stroke=\"black\"/>\n<line x1=\"1\" y1=\"15\"  x2=\"46\" y2=\"15\" stroke=\"black\"/>\n<line x1=\"1\" y1=\"-15\" x2=\"1\" y2=\"15\" stroke=\"black\"/>\n<line x1=\"31\" y1=\"-15\" x2=\"46\" y2=\"15\" stroke=\"black\"/>\n<path d=\"M 7 3 A 6 6 0 0 1 19 3 A 6 6 0 0 1 31 3\" stroke=\"black\" fill=\"none\" />\n",
-        ster: "\n<line x1=\"0\" y1=\"-5\" x2=\"0\" y2=\"5\" style=\"stroke:black\" />\n<line x1=\"-4.33\" y1=\"-2.5\" x2=\"4.33\" y2=\"2.5\" style=\"stroke:black\" />\n<line x1=\"-4.66\" y1=\"2.5\" x2=\"4.33\" y2=\"-2.5\" style=\"stroke:black\" />\n",
-        EVlader: "\n<rect x=\"0\" y=\"13\" width=\"40\" height=\"7\" fill=\"none\" style=\"stroke:black\" />\n<line x1=\"0\" y1=\"0\" x2=\"7\" y2=\"0\" style=\"stroke:black\" />\n<line x1=\"7\" y1=\"-20\" x2=\"7\" y2=\"13\" style=\"stroke:black\" />\n<line x1=\"33\" y1=\"-20\" x2=\"33\" y2=\"13\" style=\"stroke:black\" />\n<line x1=\"7\" y1=\"-20\" x2=\"33\" y2=\"-20\" style=\"stroke:black\" />\n<rect x=\"10\" y=\"-17\" width=\"20\" height=\"8\" fill=\"none\" style=\"stroke:black\" />\n<line x1=\"20\" y1=\"-6\" x2=\"20\" y2=\"10\" style=\"stroke:black\" />\n<line x1=\"33\" y1=\"-6\" x2=\"36\" y2=\"-6\" style=\"stroke:black\" />\n<line x1=\"36\" y1=\"-6\" x2=\"36\" y2=\"4\" style=\"stroke:black\" />\n<line x1=\"36\" y1=\"4\" x2=\"39\" y2=\"4\" style=\"stroke:black\" />\n<line x1=\"39\" y1=\"4\" x2=\"39\" y2=\"-15\" style=\"stroke:black\" />\n<line x1=\"39\" y1=\"-6\" x2=\"39\" y2=\"-15\" style=\"stroke:black;stroke-width:2\" />\n<text x=\"15\" y=\"1\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"6\">V</text>\n<text x=\"25\" y=\"1\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"6\">E</text>\n<text x=\"15\" y=\"9\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"6\">E</text>\n<text x=\"25\" y=\"9\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"6\">V</text>\n",
-        lamp: "\n<line x1=\"-10.61\" y1=\"-10.61\" x2=\"10.61\" y2=\"10.61\" stroke=\"black\" stroke-width=\"2\" />\n<line x1=\"-10.61\" y1=\"10.61\" x2=\"10.61\" y2=\"-10.61\" stroke=\"black\" stroke-width=\"2\" />\n",
-        led: "\n<line x1=\"0\" y1=\"-7\" x2=\"0\" y2=\"7\" stroke=\"black\" stroke-width=\"2\" />\n<line x1=\"0\" y1=\"-7\" x2=\"12\" y2=\"0\" stroke=\"black\" stroke-width=\"2\" />\n<line x1=\"0\" y1=\"7\" x2=\"12\" y2=\"0\" stroke=\"black\" stroke-width=\"2\" />\n<line x1=\"12\" y1=\"-7\" x2=\"12\" y2=\"7\" stroke=\"black\" stroke-width=\"2\" />\n<line x1=\"6\" y1=\"-6\" x2=\"7\" y2=\"-11\" stroke=\"black\" stroke-width=\"1\" />\n<line x1=\"7\" y1=\"-11\" x2=\"8.11\" y2=\"-9.34\" stroke=\"black\" stroke-width=\"1\" />\n<line x1=\"7\" y1=\"-11\" x2=\"5.34\" y2=\"-9.9\" stroke=\"black\" stroke-width=\"1\" />\n<line x1=\"9\" y1=\"-6\" x2=\"10\" y2=\"-11\" stroke=\"black\" stroke-width=\"1\" />\n<line x1=\"10\" y1=\"-11\" x2=\"11.11\" y2=\"-9.34\" stroke=\"black\" stroke-width=\"1\" />\n<line x1=\"10\" y1=\"-11\" x2=\"8.34\" y2=\"-9.9\" stroke=\"black\" stroke-width=\"1\" />\n",
-        luidspreker: "\n<polygon points=\"0,-10 7,-10 17,-20 17,20 7,10 0,10\" fill=\"none\" stroke=\"black\"/>\n<line x1=\"7\" y1=\"-10\" x2=\"7\" y2=\"10\" stroke=\"black\" stroke-width=\"1\" />\n",
-        magneetcontact: "\n<rect x=\"0\" y=\"-10\" width=\"20\" height=\"20\" fill=\"black\" stroke=\"black\"/>\n",
-        sinus: "\n<path d=\"M0,0 C2,-5 8,-5 10,0 S18,5 20,0\" style=\"stroke:black;fill:none\" />\n",
-        spot: "\n<path d=\"M0 0 A10 10 0 0 1 10 -10\" stroke=\"black\" fill=\"white\" stroke-width=\"1\" />\n<path d=\"M0 0 A10 10 0 0 0 10 10\" stroke=\"black\" fill=\"white\" stroke-width=\"1\" />\n<circle cx=\"10\" cy=\"0\" r=\"6\" style=\"stroke:black;fill:white\" />\n<line x1=\"5.76\" x2=\"14.24\" y1=\"-4.24\" y2=\"4.24\" stroke=\"black\" stroke-width=\"1\" />\n<line x1=\"5.76\" x2=\"14.24\" y1=\"4.24\" y2=\"-4.24\" stroke=\"black\" stroke-width=\"1\" />\n",
-        noodlamp_decentraal: "\n<rect x=\"-10.61\" y=\"-10.61\" width=\"21.22\" height=\"21.22\" fill=\"white\" stroke=\"black\" />\n<circle cx=\"0\" cy=\"0\" r=\"5\" style=\"stroke:black;fill:black\" />\n<line x1=\"-7\" y1=\"-7\" x2=\"7\" y2=\"7\" stroke=\"black\" stroke-width=\"2\" />\n<line x1=\"-7\" y1=\"7\" x2=\"7\" y2=\"-7\" stroke=\"black\" stroke-width=\"2\" />\n",
-        signalisatielamp: "\n<circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n<line x1=\"-3\" y1=\"-3\" x2=\"3\" y2=\"3\" stroke=\"black\" />\n<line x1=\"-3\" y1=\"3\" x2=\"3\" y2=\"-3\" stroke=\"black\" />\n",
-        schakelaar_enkel: "\n<line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n<line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n<circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n",
-        schakelaar_klein: "\n<line x1=\"0\" y1=\"0\" x2=\"6\" y2=\"-12\" stroke=\"black\" />\n<line x1=\"6\" y1=\"-12\" x2=\"9\" y2=\"-10.5\" stroke=\"black\" />\n<circle cx=\"0\" cy=\"0\" r=\"3\" fill=\"white\" stroke=\"black\" />\n",
-        schakelaar_dubbel: "\n<line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n<line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n<line x1=\"8\" y1=\"-16\" x2=\"13\" y2=\"-13.5\" stroke=\"black\" />\n<circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n",
-        schakelaar_trippel: "\n<line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n<line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n<line x1=\"8\" y1=\"-16\" x2=\"13\" y2=\"-13.5\" stroke=\"black\" />\n<line x1=\"6\" y1=\"-12\" x2=\"11\" y2=\"-9.5\" stroke=\"black\" />\n<circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n",
-        schakelaar_wissel_enkel: "\n<line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n<line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n<line x1=\"0\" y1=\"0\" x2=\"-10\" y2=\"20\" stroke=\"black\" />\n<line x1=\"-10\" y1=\"20\" x2=\"-15\" y2=\"17.5\" stroke=\"black\" />\n<circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n",
-        schakelaar_rolluik: "\n<line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n<line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n<line x1=\"0\" y1=\"0\" x2=\"-10\" y2=\"-20\" stroke=\"black\" />\n<line x1=\"-10\" y1=\"-20\" x2=\"-15\" y2=\"-17.5\" stroke=\"black\" />\n<rect x=\"-8\" y=\"-8\" width=\"16\" height=\"16\" fill=\"white\" stroke=\"black\" />\n<text x=\"0\" y=\"6\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"16\">S</text>\n",
-        schakelaar_enkel_dim: "\n<line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n<line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n<circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n<polygon points=\"-1,-8 11,-8 11,-15\" fill=\"black\" stroke=\"black\" />\n",
-        schakelaar_wissel_dim: "\n<line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n<line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n<line x1=\"0\" y1=\"0\" x2=\"-10\" y2=\"20\" stroke=\"black\" />\n<line x1=\"-10\" y1=\"20\" x2=\"-15\" y2=\"17.5\" stroke=\"black\" />\n<circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n<polygon points=\"-1,-8 11,-8 11,-15\" fill=\"black\" stroke=\"black\" />\n",
-        schakelaar_kruis_enkel: "\n<line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n<line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n<line x1=\"0\" y1=\"0\" x2=\"-10\" y2=\"20\" stroke=\"black\" />\n<line x1=\"-10\" y1=\"20\" x2=\"-15\" y2=\"17.5\" stroke=\"black\" />\n<line x1=\"0\" y1=\"0\" x2=\"-10\" y2=\"-20\" stroke=\"black\" />\n<line x1=\"-10\" y1=\"-20\" x2=\"-15\" y2=\"-17.5\" stroke=\"black\" />\n<line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"20\" stroke=\"black\" />\n<line x1=\"10\" y1=\"20\" x2=\"15\" y2=\"17.5\" stroke=\"black\" />\n<circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n",
-        schakelaar_dubbelaansteking: "\n<line x1=\"0\" y1=\"0\" x2=\"-10\" y2=\"-20\" stroke=\"black\" />\n<line x1=\"-10\" y1=\"-20\" x2=\"-15\" y2=\"-17.5\" stroke=\"black\" />\n<line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n<line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n<circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n",
-        schakelaar_wissel_dubbel: "\n<line x1=\"0\" y1=\"0\" x2=\"10\" y2=\"-20\" stroke=\"black\" />\n<line x1=\"10\" y1=\"-20\" x2=\"15\" y2=\"-17.5\" stroke=\"black\" />\n<line x1=\"8\" y1=\"-16\" x2=\"13\" y2=\"-13.5\" stroke=\"black\" />\n<line x1=\"0\" y1=\"0\" x2=\"-10\" y2=\"20\" stroke=\"black\" />\n<line x1=\"-10\" y1=\"20\" x2=\"-15\" y2=\"17.5\" stroke=\"black\" />\n<line x1=\"-8\" y1=\"16\" x2=\"-13\" y2=\"13.5\" stroke=\"black\" />\n<circle cx=\"0\" cy=\"0\" r=\"5\" fill=\"white\" stroke=\"black\" />\n",
-        aansluitpunt: "\n<circle cx=\"5\" cy=\"0\" r=\"5\" style=\"stroke:black;fill:none\" />\n",
-        aftakdoos: "\n<circle cx=\"15\" cy=\"0\" r=\"15\" style=\"stroke:black;fill:none\" />\n<circle cx=\"15\" cy=\"0\" r=\"7.5\" style=\"stroke:black;fill:black\" />\n",
-        bewegingsschakelaar: "\n<rect x=\"0\" y=\"-13\" width=\"10\" height=\"26\" fill=\"none\" style=\"stroke:black\" />\n<rect x=\"10\" y=\"-13\" width=\"30\" height=\"26\" fill=\"none\" style=\"stroke:black\" />\n<line x1=\"10\" y1=\"13\" x2=\"40\" y2=\"-13\"  stroke=\"black\" />\n<line x1=\"15\" y1=\"-5\" x2=\"20\" y2=\"-5\"  stroke=\"black\" />\n<line x1=\"20\" y1=\"-10\" x2=\"20\" y2=\"-5\"  stroke=\"black\" />\n<line x1=\"20\" y1=\"-10\" x2=\"25\" y2=\"-10\"  stroke=\"black\" />\n<text x=\"22\" y=\"11\" style=\"text-anchor:start\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"10\">PIR</text>\n",
-        schakelaar: "\n<line x1=\"0\" y1=\"0\" x2=\"5\" y2=\"0\"  stroke=\"black\" />\n<line x1=\"5\" y1=\"0\" x2=\"35\" y2=\"-10\"  stroke=\"black\" />\n<line x1=\"35\" y1=\"0\" x2=\"40\" y2=\"0\"  stroke=\"black\" />\n",
-        schemerschakelaar: "\n<line x1=\"0\" y1=\"0\" x2=\"5\" y2=\"0\"  stroke=\"black\" />\n<line x1=\"5\" y1=\"0\" x2=\"35\" y2=\"-10\"  stroke=\"black\" />\n<line x1=\"35\" y1=\"0\" x2=\"40\" y2=\"0\"  stroke=\"black\" />\n<use xlink:href=\"#arrow\" x=\"14\" y=\"-17\" transform=\"rotate(90 14 -17)\" />\n<use xlink:href=\"#arrow\" x=\"18\" y=\"-17\" transform=\"rotate(90 18 -17)\" />\n",
-        stoomoven: "\n<rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n<path d=\"M 6 -2 A 7 5 0 0 1 13 -7 A 7 5 0 0 1 27 -7 A 7 5 0 0 1 33 -2\" stroke=\"black\" fill=\"none\" />\n<path d=\"M 6  5 A 7 5 0 0 1 13  0 A 7 5 0 0 1 27  0 A 7 5 0 0 1 33  5\" stroke=\"black\" fill=\"none\" />\n<path d=\"M 6 12 A 7 5 0 0 1 13  7 A 7 5 0 0 1 27  7 A 7 5 0 0 1 33 12\" stroke=\"black\" fill=\"none\" />\n",
-        contactdoos_aarding: "\n<line x1=\"20\" y1=\"-15\" x2=\"20\" y2=\"15\"  stroke=\"black\" stroke-width=\"2\" />\n",
-        contactdoos_kinderveilig: "\n<line x1=\"35\" y1=\"-20\" x2=\"35\" y2=\"-14.1\"  stroke=\"black\" stroke-width=\"2\" />\n<line x1=\"35\" y1=\"20\" x2=\"35\" y2=\"14.1\"  stroke=\"black\" stroke-width=\"2\" />\n",
-        bel: "\n<path d=\"M20 0 A15 15 0 0 1 0 15\" stroke=\"black\" fill=\"none\" stroke-width=\"2\" />\n<path d=\"M20 0 A15 15 0 0 0 0 -15\" stroke=\"black\" fill=\"none\" stroke-width=\"2\" />\n<line x1=\"0\" y1=\"15\" x2=\"0\" y2=\"-15\" stroke=\"black\" stroke-width=\"2\" />\n",
-        boiler: "\n<circle cx=\"20\" cy=\"0\" r=\"20\" style=\"stroke:black; fill:url(#VerticalStripe);\" />\n",
-        boiler_accu: "\n<circle cx=\"20\" cy=\"0\" r=\"20\" style=\"stroke:black;fill:none\" />\n<circle cx=\"20\" cy=\"0\" r=\"15\" style=\"stroke:black;fill:url(#VerticalStripe)\" />\n",
-        motor: "\n<circle cx=\"20\" cy=\"0\" r=\"20\" style=\"stroke:black;fill:none\" />\n<text x=\"20\" y=\"6\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"16\">M</text>\n",
-        elektriciteitsmeter: "\n<rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n<line x1=\"0\" y1=\"-6\" x2=\"40\" y2=\"-6\" stroke=\"black\" stroke-width=\"1\" />\n<text x=\"20\" y=\"10\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" font-size=\"12\">kWh</text>\n",
-        diepvriezer: "\n<rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n<use xlink:href=\"#ster\" x=\"10\" y=\"0\" />\n<use xlink:href=\"#ster\" x=\"20\" y=\"0\" />\n<use xlink:href=\"#ster\" x=\"30\" y=\"0\" />\n",
-        zonnepaneel: "\n<rect x=\"0\" y=\"-20\" width=\"50\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n<line x1=\"0\" y1=\"0\" x2=\"50\" y2=\"0\" stroke=\"black\" />\n<use xlink:href=\"#arrow\" x=\"5\" y=\"-12\" transform=\"rotate(45 5 -10)\" />\n<use xlink:href=\"#arrow\" x=\"10\" y=\"-14\" transform=\"rotate(45 10 -14)\" />\n",
-        zonnepaneel_driehoek: "\n<rect x=\"0\" y=\"-20\" width=\"50\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n<line x1=\"0\" y1=\"-20\" x2=\"20\" y2=\"0\" stroke=\"black\" />\n<line x1=\"0\" y1=\"20\" x2=\"20\" y2=\"0\" stroke=\"black\" />\n",
-        drukknop_klein: "\n<circle cx=\"8\" cy=\"0\" r=\"7\" style=\"stroke:black;fill:none\" />\n<circle cx=\"8\" cy=\"0\" r=\"4\" style=\"stroke:black;fill:none\" />\n",
-        draadloos_klein: "\n<path d=\"M 10 -7 A 10 10 0 0 1 10 7\" stroke=\"black\" fill=\"none\" /> \n<path d=\"M 7 -5 A 8 8 0 0 1 7 5\" stroke=\"black\" fill=\"none\" /> \n<path d=\"M 4 -3 A 6 6 0 0 1 4 3\" stroke=\"black\" fill=\"none\" /> \n",
-        detectie_klein: "\n<path d=\"M 10 -7 A 10 10 0 0 1 10 7\" stroke=\"black\" fill=\"none\" /> \n<path d=\"M 5 -7 A 10 10 0 0 1 5 7\" stroke=\"black\" fill=\"none\" /> \n",
-        drukknop: "\n<circle cx=\"12\" cy=\"0\" r=\"12\" style=\"stroke:black;fill:none\" />\n<circle cx=\"12\" cy=\"0\" r=\"7\" style=\"stroke:black;fill:none\" />\n",
-        teleruptor: "\n<rect x=\"0\" y=\"-13\" width=\"40\" height=\"26\" fill=\"none\" style=\"stroke:black\" />\n<line x1=\"8\" y1=\"6\" x2=\"16\" y2=\"6\"  stroke=\"black\" />\n<line x1=\"24\" y1=\"6\" x2=\"32\" y2=\"6\"  stroke=\"black\" />\n<line x1=\"16\" y1=\"-6\" x2=\"16\" y2=\"6\"  stroke=\"black\" />\n<line x1=\"24\" y1=\"-6\" x2=\"24\" y2=\"6\"  stroke=\"black\" />\n",
-        dimmer: "\n<rect x=\"0\" y=\"-13\" width=\"40\" height=\"26\" fill=\"none\" style=\"stroke:black\" />\n<line x1=\"10\" y1=\"5\" x2=\"30\" y2=\"5\"  stroke=\"black\" />\n<line x1=\"10\" y1=\"5\" x2=\"10\" y2=\"-5\"  stroke=\"black\" />\n<line x1=\"10\" y1=\"-5\" x2=\"30\" y2=\"5\"  stroke=\"black\" />\n",
-        relais: "\n<rect x=\"0\" y=\"-13\" width=\"40\" height=\"26\" fill=\"none\" style=\"stroke:black\" />\n<line x1=\"10\" y1=\"-13\" x2=\"30\" y2=\"13\"  stroke=\"black\" />\n",
-        minuterie: "\n<rect x=\"0\" y=\"-13\" width=\"40\" height=\"26\" fill=\"none\" style=\"stroke:black\" />\n<text x=\"20\" y=\"6\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"16\">t</text>\n",
-        thermostaat: "\n<rect x=\"0\" y=\"-13\" width=\"40\" height=\"26\" fill=\"none\" style=\"stroke:black\" />\n<circle cx=\"20\" cy=\"0\" r=\"8\" style=\"stroke:black;fill:none\" />\n<line x1=\"12\" y1=\"0\" x2=\"28\" y2=\"0\"  stroke=\"black\" />\n",
-        tijdschakelaar: "\n<rect x=\"0\" y=\"-13\" width=\"40\" height=\"26\" fill=\"none\" style=\"stroke:black\" />\n<circle cx=\"11\" cy=\"0\" r=\"8\" style=\"stroke:black;fill:none\" />\n<line x1=\"10\" y1=\"0\"  x2=\"17\" y2=\"0\"  stroke=\"black\" />\n<line x1=\"11\" y1=\"-6\" x2=\"11\" y2=\"1\"  stroke=\"black\" />\n<line x1=\"21\" y1=\"0\"  x2=\"25\" y2=\"0\"  stroke=\"black\" />\n<line x1=\"25\" y1=\"0\"  x2=\"31\" y2=\"-5\"  stroke=\"black\" />\n<line x1=\"31\" y1=\"0\"  x2=\"36\" y2=\"0\"  stroke=\"black\" />\n",
-        tijdschakelaar_klein: "\n<circle cx=\"8\" cy=\"0\" r=\"7\" style=\"stroke:black;fill:none\" />\n<line x1=\"7\" y1=\"0\"  x2=\"13\" y2=\"0\"  stroke=\"black\" />\n<line x1=\"8\" y1=\"-5\" x2=\"8\" y2=\"1\"  stroke=\"black\" />\n",
-        droogkast: "\n<rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n<circle cx=\"15\" cy=\"-7.5\" r=\"5\" style=\"stroke:black;fill:none\" />\n<circle cx=\"25\" cy=\"-7.5\" r=\"5\" style=\"stroke:black;fill:none\" />\n<circle cx=\"20\" cy=\"7.5\" r=\"3\" style=\"stroke:black;fill:black\" />\n",
-        omvormer: "\n<rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n<line x1=\"0\" y1=\"20\" x2=\"40\" y2=\"-20\" stroke=\"black\" />\n<use xlink:href=\"#sinus\" x=\"5\" y=\"-12\" />\"\n<line x1=\"20\" y1=\"10\" x2=\"35\" y2=\"10\" stroke=\"black\" />\n<line x1=\"20\" y1=\"13\" x2=\"35\" y2=\"13\" stroke=\"black\" stroke-dasharray=\"3\" />\n",
-        overspanningsbeveiliging: "\n<rect x=\"0\" y=\"-15\" width=\"15\" height=\"30\" fill=\"none\" style=\"stroke:black\" />\n<line x1=\"7.5\" y1=\"-18\" x2=\"7.5\" y2=\"-5\" stroke=\"black\" />\n<line x1=\"7.5\" y1=\"-5\" x2=\"4.5\" y2=\"-9\" stroke=\"black\" />\n<line x1=\"7.5\" y1=\"-5\" x2=\"10.5\" y2=\"-9\" stroke=\"black\" />\n<line x1=\"7.5\" y1=\"18\" x2=\"7.5\" y2=\"5\" stroke=\"black\" />\n<line x1=\"7.5\" y1=\"5\" x2=\"4.5\" y2=\"9\" stroke=\"black\" />\n<line x1=\"7.5\" y1=\"5\" x2=\"10.5\" y2=\"9\" stroke=\"black\" />\n",
-        koelkast: "\n<rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n<use xlink:href=\"#ster\" x=\"20\" y=\"0\" />\"\n",
-        kookfornuis: "\n<rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n<circle cx=\"10\" cy=\"10\" r=\"3\" style=\"stroke:black;fill:black\" />\n<circle cx=\"30\" cy=\"10\" r=\"3\" style=\"stroke:black;fill:black\" />\n<circle cx=\"30\" cy=\"-10\" r=\"3\" style=\"stroke:black;fill:black\" />\n",
-        microgolf: "\n<rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n<use xlink:href=\"#sinus\" x=\"10\" y=\"-10\" />\"\n<use xlink:href=\"#sinus\" x=\"10\" y=\"0\" />\"\n<use xlink:href=\"#sinus\" x=\"10\" y=\"10\" />\"\n",
-        oven: "\n<rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n<line x1=\"0\" y1=\"-5\" x2=\"40\" y2=\"-5\" stroke=\"black\" />\n<circle cx=\"20\" cy=\"7.5\" r=\"3\" style=\"stroke:black;fill:black\" />\n",
-        usblader: "\n<rect x=\"0\" y=\"-15\" width=\"60\" height=\"30\" fill=\"none\" style=\"stroke:black\" />\n<circle cx=\"12\" cy=\"-5\" r=\"5\" style=\"stroke:black;fill:none\" />\n<circle cx=\"19\" cy=\"-5\" r=\"5\" style=\"stroke:black;fill:none\" />\n<text x=\"15\" y=\"8\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"8\">AC/DC</text>\n<text x=\"42\" y=\"4\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"11\">USB</text>\n",
-        vaatwasmachine: "\n<rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n<line x1=\"0\" y1=\"-20\" x2=\"40\" y2=\"20\" style=\"stroke:black;fill:none\" />\n<line x1=\"40\" y1=\"-20\" x2=\"0\" y2=\"20\" style=\"stroke:black;fill:none\" />\n<circle cx=\"20\" cy=\"0\" r=\"8\" style=\"stroke:black;fill:white\" />\n",
-        ventilator: "\n<rect x=\"0\" y=\"-15\" width=\"30\" height=\"30\" fill=\"none\" style=\"stroke:black\" />\n<circle cx=\"10\" cy=\"0\" r=\"5\" style=\"stroke:black;fill:none\" />\n<circle cx=\"20\" cy=\"0\" r=\"5\" style=\"stroke:black;fill:none\" />\n",
-        transformator: "\n<circle cx=\"8\" cy=\"0\" r=\"8\" style=\"stroke:black;fill:none\" />\n<circle cx=\"20\" cy=\"0\" r=\"8\" style=\"stroke:black;fill:none\" />\n",
-        verwarmingstoestel: "\n<rect x=\"0\" y=\"-15\" width=\"50\" height=\"30\" fill=\"url(#VerticalStripe)\" style=\"stroke:black\" />\n",
-        verwarmingstoestel_accu: "\n<rect x=\"0\" y=\"-15\" width=\"50\" height=\"30\" fill=\"none\" style=\"stroke:black\" />\n<rect x=\"5\" y=\"-10\" width=\"40\" height=\"20\" fill=\"url(#VerticalStripe)\" style=\"stroke:black\" />\n",
-        verwarmingstoestel_accu_ventilator: "\n<rect x=\"0\" y=\"-15\" width=\"70\" height=\"30\" fill=\"none\" style=\"stroke:black\" />\n<rect x=\"5\" y=\"-10\" width=\"35\" height=\"20\" fill=\"url(#VerticalStripe)\" style=\"stroke:black\" />\n<circle cx=\"50\" cy=\"0\" r=\"5\" style=\"stroke:black;fill:none\" />\n<circle cx=\"60\" cy=\"0\" r=\"5\" style=\"stroke:black;fill:none\" />\n",
-        verbruiker: "\n<rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n",
-        wasmachine: "\n<rect x=\"0\" y=\"-20\" width=\"40\" height=\"40\" fill=\"none\" style=\"stroke:black\" />\n<circle cx=\"20\" cy=\"0\" r=\"3\" style=\"stroke:black;fill:black\" />\n<circle cx=\"20\" cy=\"0\" r=\"15\" style=\"stroke:black;fill:none\" />\n",
-        zekering_automatisch: "\n<g transform=\"rotate(-20)\">\n<line x1=\"0\" y1=\"-30\" x2=\"0\" y2=\"0\"  stroke=\"black\" />\n<rect x=\"-4\" y=\"-30\" width=\"4\" height=\"10\" style=\"fill:black\" />\n</g>\n",
-        zekering_automatisch_horizontaal: "\n<g transform=\"rotate(-20)\">\n<line x1=\"0\" y1=\"0\" x2=\"30\" y2=\"0\"  stroke=\"black\" />\n<rect x=\"20\" y=\"-4\" height=\"4\" width=\"10\" style=\"fill:black\" />\n</g>\n",
-        zekering_smelt: "\n<rect x=\"-4\" y=\"-30\" width=\"8\" height=\"30\" style=\"stroke:black;fill:none\" />\n<line x1=\"0\" y1=\"-30\" x2=\"0\" y2=\"0\" stroke=\"black\" />\n",
-        zekering_smelt_horizontaal: "\n<rect x=\"0\" y=\"-4\" height=\"8\" width=\"30\" style=\"stroke:black;fill:none\" />\n<line x1=\"0\" y1=\"0\" x2=\"30\" y2=\"0\" stroke=\"black\" />\n",
-        relais_kring: "\n<rect x=\"-8\" y=\"-30\" width=\"16\" height=\"30\" style=\"stroke:black;fill:none\" />\n<line x1=\"8\" y1=\"-22.5\" x2=\"-8\" y2=\"-7.5\" stroke=\"black\" />\n",
-        overspanningsbeveiliging_inline: "\n-> shift x -7.5  y -15\n<rect x=\"-7.5\" y=\"-30\" width=\"15\" height=\"30\" fill=\"none\" style=\"stroke:black\" />\n<line x1=\"0\" y1=\"-30\" x2=\"0\" y2=\"-20\" stroke=\"black\" />\n<line x1=\"0\" y1=\"-20\" x2=\"-3\" y2=\"-24\" stroke=\"black\" />\n<line x1=\"0\" y1=\"-20\" x2=\"3\" y2=\"-24\" stroke=\"black\" />\n<line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-10\" stroke=\"black\" />\n<line x1=\"0\" y1=\"-10\" x2=\"-3\" y2=\"-6\" stroke=\"black\" />\n<line x1=\"0\" y1=\"-10\" x2=\"3\" y2=\"-6\" stroke=\"black\" />\n",
-        zekering_empty: "\n<g transform=\"rotate(-20)\">\n<line x1=\"0\" y1=\"-30\" x2=\"0\" y2=\"0\"  stroke=\"black\" />\n</g>\n",
-        arrow: "\n<line x1=\"0\" y1=\"0\" x2=\"8\" y2=\"0\" stroke=\"black\" />\n<line x1=\"8\" y1=\"0\" x2=\"5\" y2=\"-1\" stroke=\"black\" />\n<line x1=\"8\" y1=\"0\" x2=\"5\" y2=\"1\" stroke=\"black\" />\n",
-        gas_ventilator: "\n<polygon points=\"-6,5.2 0,-5.2 6,5.2\" fill=\"black\" stroke=\"black\" />\n",
-        gas_atmosferisch: "\n<polygon points=\"-6,5.2 0,-5.2 6,5.2\" fill=\"white\" stroke=\"black\" />\n",
-        bliksem: "\n<line x1=\"0\" y1=\"-5.2\" x2=\"-3\" y2=\"0\" stroke=\"black\"/>\n<line x1=\"-3\" y1=\"0\" x2=\"3\" y2=\"0\" stroke=\"black\"/>\n<line x1=\"3\" y1=\"0\" x2=\"0\" y2=\"5.2\" stroke=\"black\"/>\n<line x1=\"0\" y1=\"5.2\" x2=\"0\" y2=\"2.2\" stroke=\"black\"/>\n<line x1=\"0\" y1=\"5.2\" x2=\"2.6\" y2=\"3.7\" stroke=\"black\"/>\n",
-        moving_man: "\n<g transform=\"matrix(0.0152987,0,0,0.01530866,0,0)\">\n<path d=\"M 710.7,10.1 C 904.8,5.2 908.6,261.4 730.9,278.4 637.5,287.3 566.3,181.5 603.8,90.8 623.4,43.4 668.7,12.9 711.4,10.1 c 1.1,-0.1 2.8,26.1 1.7,26.2 -31.4,2 -74.8,32.1 -89.1,74.7 -26.8,79.9 47,156.6 125.1,139.2 123.9,-27.6 114.1,-218.5 -36.3,-214 -0.7,0 -3.2,-26 -2.1,-26.1 z\" id=\"path4\" stroke=\"black\" stroke-width=\"10\" />\n<path d=\"m 545.3,225.9 c -67.8,-5 -133.2,0 -199.7,0 -20.7,13.6 -115,100.7 -121.1,121.1 -5.7,19.1 6.2,31.9 12.1,40.4 60.1,18.3 96.7,-60.4 133.2,-88.8 29.6,0 59.2,0 88.8,0 -59.2,78.9 -190.7,169.9 -58.5,264.3 -27.6,31.6 -55.1,63.2 -82.7,94.8 -46.9,-14.7 -165.6,-41.3 -199.7,-18.2 -7,21 -4.8,32.1 6.1,48.4 34.1,10.3 205.5,53.2 232,36.3 34.3,-37.7 68.6,-75.3 102.9,-113 32.3,27.6 64.6,55.2 96.9,82.7 -1,62.6 -14.6,249.9 24.2,266.3 10.2,3 19.1,0.5 28.2,-2 5.4,-7.4 10.8,-14.8 16.1,-22.2 6.9,-27 0.3,-272.6 -6.1,-282.5 -37.7,-32.9 -75.3,-65.9 -113,-98.9 1.3,-1.3 2.7,-2.7 4,-4 45.7,-48.4 91.5,-96.9 137.2,-145.3 20.2,19.5 40.4,39 60.5,58.5 16.7,35.8 152.2,25.4 179.6,6.1 2,-8.1 4,-16.1 6.1,-24.2 -16,-40.1 -71.7,-31.8 -127.1,-30.3 C 741.8,384.3 590.6,253 545.5,225.7 c -1.7,-1 14.9,-23.3 15.4,-22.4 -2.2,-3.5 126,97.7 134.4,107.4 9.4,9.1 55.2,51.5 82.1,78.4 68.5,-2 122,-6.5 137.2,46.4 4.9,17.1 1.9,37.1 -8.1,50.4 -18.8,25.3 -156,39.1 -197.7,18.2 -20.2,-20.2 -40.4,-40.4 -60.5,-60.5 -18.8,18.2 -37.7,36.3 -56.5,54.5 -16.8,18.2 -33.6,36.3 -50.4,54.5 32.9,28.9 65.9,57.8 98.9,86.8 11.2,17.9 18.9,272.3 8.1,306.7 -4.8,15.2 -19.9,32.9 -34.3,38.3 C 498.3,1028.1 527.8,798.3 529.4,706 505.9,686.5 482.3,667 458.8,647.5 427.9,676.7 402,732.8 362,750.4 333.5,762.9 140.3,728.4 113.8,712.1 100.1,703.6 89.3,686 85.6,667.7 59.7,543.2 281.5,646 321.3,617.4 334.7,601.3 348.2,585.1 361.7,569 266.4,454.2 335.5,414.9 402.1,326.9 c 0,-0.7 0,-1.3 0,-2 -8.1,0 -16.1,0 -24.2,0 -26.3,36.3 -124.9,147 -173.5,64.6 -35.9,-60.8 103.6,-172.2 141.1,-189.8 56.7,-3.8 167.5,-11 215.9,4 0.8,0.7 -14.9,22.6 -16.1,22.2 z\" id=\"path6\" stroke=\"black\" stroke-width=\"10\" />\n</g>\n"
-    };
-    return SVGSymbols;
-}());
+    }
+}
+SVGSymbols.neededSymbols = [];
+SVGSymbols.data = {
+    batterij: `
+<rect x="0" y="-12" width="40" height="27" stroke="black" fill="none"/>
+<rect x="5" y="-15" width="10" height="3" stroke="black" fill="none"/>
+<rect x="25" y="-15" width="10" height="3" stroke="black" fill="none"/>
+<line x1="8" y1="-5" x2="12" y2="-5" stroke="black"/>
+<line x1="10" y1="-7" x2="10" y2="-3" stroke="black"/>
+<line x1="28" y1="-5" x2="32" y2="-5" stroke="black"/>
+`,
+    contactdoos: `
+<path d="M20 0 A15 15 0 0 1 35 -15" stroke="black" fill="none" stroke-width="2" />
+<path d="M20 0 A15 15 0 0 0 35 15" stroke="black" fill="none" stroke-width="2" />
+<line x1="0" y1="0" x2="20" y2="0" stroke="black" />
+`,
+    deurslot: `
+<line x1="1" y1="-15" x2="31" y2="-15" stroke="black"/>
+<line x1="1" y1="15"  x2="46" y2="15" stroke="black"/>
+<line x1="1" y1="-15" x2="1" y2="15" stroke="black"/>
+<line x1="31" y1="-15" x2="46" y2="15" stroke="black"/>
+<path d="M 7 3 A 6 6 0 0 1 19 3 A 6 6 0 0 1 31 3" stroke="black" fill="none" />
+`,
+    ster: `
+<line x1="0" y1="-5" x2="0" y2="5" style="stroke:black" />
+<line x1="-4.33" y1="-2.5" x2="4.33" y2="2.5" style="stroke:black" />
+<line x1="-4.66" y1="2.5" x2="4.33" y2="-2.5" style="stroke:black" />
+`,
+    EVlader: `
+<rect x="0" y="13" width="40" height="7" fill="none" style="stroke:black" />
+<line x1="0" y1="0" x2="7" y2="0" style="stroke:black" />
+<line x1="7" y1="-20" x2="7" y2="13" style="stroke:black" />
+<line x1="33" y1="-20" x2="33" y2="13" style="stroke:black" />
+<line x1="7" y1="-20" x2="33" y2="-20" style="stroke:black" />
+<rect x="10" y="-17" width="20" height="8" fill="none" style="stroke:black" />
+<line x1="20" y1="-6" x2="20" y2="10" style="stroke:black" />
+<line x1="33" y1="-6" x2="36" y2="-6" style="stroke:black" />
+<line x1="36" y1="-6" x2="36" y2="4" style="stroke:black" />
+<line x1="36" y1="4" x2="39" y2="4" style="stroke:black" />
+<line x1="39" y1="4" x2="39" y2="-15" style="stroke:black" />
+<line x1="39" y1="-6" x2="39" y2="-15" style="stroke:black;stroke-width:2" />
+<text x="15" y="1" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="6">V</text>
+<text x="25" y="1" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="6">E</text>
+<text x="15" y="9" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="6">E</text>
+<text x="25" y="9" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="6">V</text>
+`,
+    lamp: `
+<line x1="-10.61" y1="-10.61" x2="10.61" y2="10.61" stroke="black" stroke-width="2" />
+<line x1="-10.61" y1="10.61" x2="10.61" y2="-10.61" stroke="black" stroke-width="2" />
+`,
+    led: `
+<line x1="0" y1="-7" x2="0" y2="7" stroke="black" stroke-width="2" />
+<line x1="0" y1="-7" x2="12" y2="0" stroke="black" stroke-width="2" />
+<line x1="0" y1="7" x2="12" y2="0" stroke="black" stroke-width="2" />
+<line x1="12" y1="-7" x2="12" y2="7" stroke="black" stroke-width="2" />
+<line x1="6" y1="-6" x2="7" y2="-11" stroke="black" stroke-width="1" />
+<line x1="7" y1="-11" x2="8.11" y2="-9.34" stroke="black" stroke-width="1" />
+<line x1="7" y1="-11" x2="5.34" y2="-9.9" stroke="black" stroke-width="1" />
+<line x1="9" y1="-6" x2="10" y2="-11" stroke="black" stroke-width="1" />
+<line x1="10" y1="-11" x2="11.11" y2="-9.34" stroke="black" stroke-width="1" />
+<line x1="10" y1="-11" x2="8.34" y2="-9.9" stroke="black" stroke-width="1" />
+`,
+    luidspreker: `
+<polygon points="0,-10 7,-10 17,-20 17,20 7,10 0,10" fill="none" stroke="black"/>
+<line x1="7" y1="-10" x2="7" y2="10" stroke="black" stroke-width="1" />
+`,
+    magneetcontact: `
+<rect x="0" y="-10" width="20" height="20" fill="black" stroke="black"/>
+`,
+    sinus: `
+<path d="M0,0 C2,-5 8,-5 10,0 S18,5 20,0" style="stroke:black;fill:none" />
+`,
+    spot: `
+<path d="M0 0 A10 10 0 0 1 10 -10" stroke="black" fill="white" stroke-width="1" />
+<path d="M0 0 A10 10 0 0 0 10 10" stroke="black" fill="white" stroke-width="1" />
+<circle cx="10" cy="0" r="6" style="stroke:black;fill:white" />
+<line x1="5.76" x2="14.24" y1="-4.24" y2="4.24" stroke="black" stroke-width="1" />
+<line x1="5.76" x2="14.24" y1="4.24" y2="-4.24" stroke="black" stroke-width="1" />
+`,
+    noodlamp_decentraal: `
+<rect x="-10.61" y="-10.61" width="21.22" height="21.22" fill="white" stroke="black" />
+<circle cx="0" cy="0" r="5" style="stroke:black;fill:black" />
+<line x1="-7" y1="-7" x2="7" y2="7" stroke="black" stroke-width="2" />
+<line x1="-7" y1="7" x2="7" y2="-7" stroke="black" stroke-width="2" />
+`,
+    signalisatielamp: `
+<circle cx="0" cy="0" r="5" fill="white" stroke="black" />
+<line x1="-3" y1="-3" x2="3" y2="3" stroke="black" />
+<line x1="-3" y1="3" x2="3" y2="-3" stroke="black" />
+`,
+    schakelaar_enkel: `
+<line x1="0" y1="0" x2="10" y2="-20" stroke="black" />
+<line x1="10" y1="-20" x2="15" y2="-17.5" stroke="black" />
+<circle cx="0" cy="0" r="5" fill="white" stroke="black" />
+`,
+    schakelaar_klein: `
+<line x1="0" y1="0" x2="6" y2="-12" stroke="black" />
+<line x1="6" y1="-12" x2="9" y2="-10.5" stroke="black" />
+<circle cx="0" cy="0" r="3" fill="white" stroke="black" />
+`,
+    schakelaar_dubbel: `
+<line x1="0" y1="0" x2="10" y2="-20" stroke="black" />
+<line x1="10" y1="-20" x2="15" y2="-17.5" stroke="black" />
+<line x1="8" y1="-16" x2="13" y2="-13.5" stroke="black" />
+<circle cx="0" cy="0" r="5" fill="white" stroke="black" />
+`,
+    schakelaar_trippel: `
+<line x1="0" y1="0" x2="10" y2="-20" stroke="black" />
+<line x1="10" y1="-20" x2="15" y2="-17.5" stroke="black" />
+<line x1="8" y1="-16" x2="13" y2="-13.5" stroke="black" />
+<line x1="6" y1="-12" x2="11" y2="-9.5" stroke="black" />
+<circle cx="0" cy="0" r="5" fill="white" stroke="black" />
+`,
+    schakelaar_wissel_enkel: `
+<line x1="0" y1="0" x2="10" y2="-20" stroke="black" />
+<line x1="10" y1="-20" x2="15" y2="-17.5" stroke="black" />
+<line x1="0" y1="0" x2="-10" y2="20" stroke="black" />
+<line x1="-10" y1="20" x2="-15" y2="17.5" stroke="black" />
+<circle cx="0" cy="0" r="5" fill="white" stroke="black" />
+`,
+    schakelaar_rolluik: `
+<line x1="0" y1="0" x2="10" y2="-20" stroke="black" />
+<line x1="10" y1="-20" x2="15" y2="-17.5" stroke="black" />
+<line x1="0" y1="0" x2="-10" y2="-20" stroke="black" />
+<line x1="-10" y1="-20" x2="-15" y2="-17.5" stroke="black" />
+<rect x="-8" y="-8" width="16" height="16" fill="white" stroke="black" />
+<text x="0" y="6" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="16">S</text>
+`,
+    schakelaar_enkel_dim: `
+<line x1="0" y1="0" x2="10" y2="-20" stroke="black" />
+<line x1="10" y1="-20" x2="15" y2="-17.5" stroke="black" />
+<circle cx="0" cy="0" r="5" fill="white" stroke="black" />
+<polygon points="-1,-8 11,-8 11,-15" fill="black" stroke="black" />
+`,
+    schakelaar_wissel_dim: `
+<line x1="0" y1="0" x2="10" y2="-20" stroke="black" />
+<line x1="10" y1="-20" x2="15" y2="-17.5" stroke="black" />
+<line x1="0" y1="0" x2="-10" y2="20" stroke="black" />
+<line x1="-10" y1="20" x2="-15" y2="17.5" stroke="black" />
+<circle cx="0" cy="0" r="5" fill="white" stroke="black" />
+<polygon points="-1,-8 11,-8 11,-15" fill="black" stroke="black" />
+`,
+    schakelaar_kruis_enkel: `
+<line x1="0" y1="0" x2="10" y2="-20" stroke="black" />
+<line x1="10" y1="-20" x2="15" y2="-17.5" stroke="black" />
+<line x1="0" y1="0" x2="-10" y2="20" stroke="black" />
+<line x1="-10" y1="20" x2="-15" y2="17.5" stroke="black" />
+<line x1="0" y1="0" x2="-10" y2="-20" stroke="black" />
+<line x1="-10" y1="-20" x2="-15" y2="-17.5" stroke="black" />
+<line x1="0" y1="0" x2="10" y2="20" stroke="black" />
+<line x1="10" y1="20" x2="15" y2="17.5" stroke="black" />
+<circle cx="0" cy="0" r="5" fill="white" stroke="black" />
+`,
+    schakelaar_dubbelaansteking: `
+<line x1="0" y1="0" x2="-10" y2="-20" stroke="black" />
+<line x1="-10" y1="-20" x2="-15" y2="-17.5" stroke="black" />
+<line x1="0" y1="0" x2="10" y2="-20" stroke="black" />
+<line x1="10" y1="-20" x2="15" y2="-17.5" stroke="black" />
+<circle cx="0" cy="0" r="5" fill="white" stroke="black" />
+`,
+    schakelaar_wissel_dubbel: `
+<line x1="0" y1="0" x2="10" y2="-20" stroke="black" />
+<line x1="10" y1="-20" x2="15" y2="-17.5" stroke="black" />
+<line x1="8" y1="-16" x2="13" y2="-13.5" stroke="black" />
+<line x1="0" y1="0" x2="-10" y2="20" stroke="black" />
+<line x1="-10" y1="20" x2="-15" y2="17.5" stroke="black" />
+<line x1="-8" y1="16" x2="-13" y2="13.5" stroke="black" />
+<circle cx="0" cy="0" r="5" fill="white" stroke="black" />
+`,
+    aansluitpunt: `
+<circle cx="5" cy="0" r="5" style="stroke:black;fill:none" />
+`,
+    aftakdoos: `
+<circle cx="15" cy="0" r="15" style="stroke:black;fill:none" />
+<circle cx="15" cy="0" r="7.5" style="stroke:black;fill:black" />
+`,
+    bewegingsschakelaar: `
+<rect x="0" y="-13" width="10" height="26" fill="none" style="stroke:black" />
+<rect x="10" y="-13" width="30" height="26" fill="none" style="stroke:black" />
+<line x1="10" y1="13" x2="40" y2="-13"  stroke="black" />
+<line x1="15" y1="-5" x2="20" y2="-5"  stroke="black" />
+<line x1="20" y1="-10" x2="20" y2="-5"  stroke="black" />
+<line x1="20" y1="-10" x2="25" y2="-10"  stroke="black" />
+<text x="22" y="11" style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="10">PIR</text>
+`,
+    schakelaar: `
+<line x1="0" y1="0" x2="5" y2="0"  stroke="black" />
+<line x1="5" y1="0" x2="35" y2="-10"  stroke="black" />
+<line x1="35" y1="0" x2="40" y2="0"  stroke="black" />
+`,
+    schemerschakelaar: `
+<line x1="0" y1="0" x2="5" y2="0"  stroke="black" />
+<line x1="5" y1="0" x2="35" y2="-10"  stroke="black" />
+<line x1="35" y1="0" x2="40" y2="0"  stroke="black" />
+<use xlink:href="#arrow" x="14" y="-17" transform="rotate(90 14 -17)" />
+<use xlink:href="#arrow" x="18" y="-17" transform="rotate(90 18 -17)" />
+`,
+    stoomoven: `
+<rect x="0" y="-20" width="40" height="40" fill="none" style="stroke:black" />
+<path d="M 6 -2 A 7 5 0 0 1 13 -7 A 7 5 0 0 1 27 -7 A 7 5 0 0 1 33 -2" stroke="black" fill="none" />
+<path d="M 6  5 A 7 5 0 0 1 13  0 A 7 5 0 0 1 27  0 A 7 5 0 0 1 33  5" stroke="black" fill="none" />
+<path d="M 6 12 A 7 5 0 0 1 13  7 A 7 5 0 0 1 27  7 A 7 5 0 0 1 33 12" stroke="black" fill="none" />
+`,
+    contactdoos_aarding: `
+<line x1="20" y1="-15" x2="20" y2="15"  stroke="black" stroke-width="2" />
+`,
+    contactdoos_kinderveilig: `
+<line x1="35" y1="-20" x2="35" y2="-14.1"  stroke="black" stroke-width="2" />
+<line x1="35" y1="20" x2="35" y2="14.1"  stroke="black" stroke-width="2" />
+`,
+    bel: `
+<path d="M20 0 A15 15 0 0 1 0 15" stroke="black" fill="none" stroke-width="2" />
+<path d="M20 0 A15 15 0 0 0 0 -15" stroke="black" fill="none" stroke-width="2" />
+<line x1="0" y1="15" x2="0" y2="-15" stroke="black" stroke-width="2" />
+`,
+    boiler: `
+<circle cx="20" cy="0" r="20" style="stroke:black; fill:url(#VerticalStripe);" />
+`,
+    boiler_accu: `
+<circle cx="20" cy="0" r="20" style="stroke:black;fill:none" />
+<circle cx="20" cy="0" r="15" style="stroke:black;fill:url(#VerticalStripe)" />
+`,
+    motor: `
+<circle cx="20" cy="0" r="20" style="stroke:black;fill:none" />
+<text x="20" y="6" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="16">M</text>
+`,
+    elektriciteitsmeter: `
+<rect x="0" y="-20" width="40" height="40" fill="none" style="stroke:black" />
+<line x1="0" y1="-6" x2="40" y2="-6" stroke="black" stroke-width="1" />
+<text x="20" y="10" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="12">kWh</text>
+`,
+    diepvriezer: `
+<rect x="0" y="-20" width="40" height="40" fill="none" style="stroke:black" />
+<use xlink:href="#ster" x="10" y="0" />
+<use xlink:href="#ster" x="20" y="0" />
+<use xlink:href="#ster" x="30" y="0" />
+`,
+    zonnepaneel: `
+<rect x="0" y="-20" width="50" height="40" fill="none" style="stroke:black" />
+<line x1="0" y1="0" x2="50" y2="0" stroke="black" />
+<use xlink:href="#arrow" x="5" y="-12" transform="rotate(45 5 -10)" />
+<use xlink:href="#arrow" x="10" y="-14" transform="rotate(45 10 -14)" />
+`,
+    zonnepaneel_driehoek: `
+<rect x="0" y="-20" width="50" height="40" fill="none" style="stroke:black" />
+<line x1="0" y1="-20" x2="20" y2="0" stroke="black" />
+<line x1="0" y1="20" x2="20" y2="0" stroke="black" />
+`,
+    drukknop_klein: `
+<circle cx="8" cy="0" r="7" style="stroke:black;fill:none" />
+<circle cx="8" cy="0" r="4" style="stroke:black;fill:none" />
+`,
+    draadloos_klein: `
+<path d="M 10 -7 A 10 10 0 0 1 10 7" stroke="black" fill="none" /> 
+<path d="M 7 -5 A 8 8 0 0 1 7 5" stroke="black" fill="none" /> 
+<path d="M 4 -3 A 6 6 0 0 1 4 3" stroke="black" fill="none" /> 
+`,
+    detectie_klein: `
+<path d="M 10 -7 A 10 10 0 0 1 10 7" stroke="black" fill="none" /> 
+<path d="M 5 -7 A 10 10 0 0 1 5 7" stroke="black" fill="none" /> 
+`,
+    drukknop: `
+<circle cx="12" cy="0" r="12" style="stroke:black;fill:none" />
+<circle cx="12" cy="0" r="7" style="stroke:black;fill:none" />
+`,
+    teleruptor: `
+<rect x="0" y="-13" width="40" height="26" fill="none" style="stroke:black" />
+<line x1="8" y1="6" x2="16" y2="6"  stroke="black" />
+<line x1="24" y1="6" x2="32" y2="6"  stroke="black" />
+<line x1="16" y1="-6" x2="16" y2="6"  stroke="black" />
+<line x1="24" y1="-6" x2="24" y2="6"  stroke="black" />
+`,
+    dimmer: `
+<rect x="0" y="-13" width="40" height="26" fill="none" style="stroke:black" />
+<line x1="10" y1="5" x2="30" y2="5"  stroke="black" />
+<line x1="10" y1="5" x2="10" y2="-5"  stroke="black" />
+<line x1="10" y1="-5" x2="30" y2="5"  stroke="black" />
+`,
+    relais: `
+<rect x="0" y="-13" width="40" height="26" fill="none" style="stroke:black" />
+<line x1="10" y1="-13" x2="30" y2="13"  stroke="black" />
+`,
+    minuterie: `
+<rect x="0" y="-13" width="40" height="26" fill="none" style="stroke:black" />
+<text x="20" y="6" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="16">t</text>
+`,
+    thermostaat: `
+<rect x="0" y="-13" width="40" height="26" fill="none" style="stroke:black" />
+<circle cx="20" cy="0" r="8" style="stroke:black;fill:none" />
+<line x1="12" y1="0" x2="28" y2="0"  stroke="black" />
+`,
+    tijdschakelaar: `
+<rect x="0" y="-13" width="40" height="26" fill="none" style="stroke:black" />
+<circle cx="11" cy="0" r="8" style="stroke:black;fill:none" />
+<line x1="10" y1="0"  x2="17" y2="0"  stroke="black" />
+<line x1="11" y1="-6" x2="11" y2="1"  stroke="black" />
+<line x1="21" y1="0"  x2="25" y2="0"  stroke="black" />
+<line x1="25" y1="0"  x2="31" y2="-5"  stroke="black" />
+<line x1="31" y1="0"  x2="36" y2="0"  stroke="black" />
+`,
+    tijdschakelaar_klein: `
+<circle cx="8" cy="0" r="7" style="stroke:black;fill:none" />
+<line x1="7" y1="0"  x2="13" y2="0"  stroke="black" />
+<line x1="8" y1="-5" x2="8" y2="1"  stroke="black" />
+`,
+    droogkast: `
+<rect x="0" y="-20" width="40" height="40" fill="none" style="stroke:black" />
+<circle cx="15" cy="-7.5" r="5" style="stroke:black;fill:none" />
+<circle cx="25" cy="-7.5" r="5" style="stroke:black;fill:none" />
+<circle cx="20" cy="7.5" r="3" style="stroke:black;fill:black" />
+`,
+    omvormer: `
+<rect x="0" y="-20" width="40" height="40" fill="none" style="stroke:black" />
+<line x1="0" y1="20" x2="40" y2="-20" stroke="black" />
+<use xlink:href="#sinus" x="5" y="-12" />"
+<line x1="20" y1="10" x2="35" y2="10" stroke="black" />
+<line x1="20" y1="13" x2="35" y2="13" stroke="black" stroke-dasharray="3" />
+`,
+    overspanningsbeveiliging: `
+<rect x="0" y="-15" width="15" height="30" fill="none" style="stroke:black" />
+<line x1="7.5" y1="-18" x2="7.5" y2="-5" stroke="black" />
+<line x1="7.5" y1="-5" x2="4.5" y2="-9" stroke="black" />
+<line x1="7.5" y1="-5" x2="10.5" y2="-9" stroke="black" />
+<line x1="7.5" y1="18" x2="7.5" y2="5" stroke="black" />
+<line x1="7.5" y1="5" x2="4.5" y2="9" stroke="black" />
+<line x1="7.5" y1="5" x2="10.5" y2="9" stroke="black" />
+`,
+    koelkast: `
+<rect x="0" y="-20" width="40" height="40" fill="none" style="stroke:black" />
+<use xlink:href="#ster" x="20" y="0" />"
+`,
+    kookfornuis: `
+<rect x="0" y="-20" width="40" height="40" fill="none" style="stroke:black" />
+<circle cx="10" cy="10" r="3" style="stroke:black;fill:black" />
+<circle cx="30" cy="10" r="3" style="stroke:black;fill:black" />
+<circle cx="30" cy="-10" r="3" style="stroke:black;fill:black" />
+`,
+    microgolf: `
+<rect x="0" y="-20" width="40" height="40" fill="none" style="stroke:black" />
+<use xlink:href="#sinus" x="10" y="-10" />"
+<use xlink:href="#sinus" x="10" y="0" />"
+<use xlink:href="#sinus" x="10" y="10" />"
+`,
+    oven: `
+<rect x="0" y="-20" width="40" height="40" fill="none" style="stroke:black" />
+<line x1="0" y1="-5" x2="40" y2="-5" stroke="black" />
+<circle cx="20" cy="7.5" r="3" style="stroke:black;fill:black" />
+`,
+    usblader: `
+<rect x="0" y="-15" width="60" height="30" fill="none" style="stroke:black" />
+<circle cx="12" cy="-5" r="5" style="stroke:black;fill:none" />
+<circle cx="19" cy="-5" r="5" style="stroke:black;fill:none" />
+<text x="15" y="8" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="8">AC/DC</text>
+<text x="42" y="4" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="11">USB</text>
+`,
+    vaatwasmachine: `
+<rect x="0" y="-20" width="40" height="40" fill="none" style="stroke:black" />
+<line x1="0" y1="-20" x2="40" y2="20" style="stroke:black;fill:none" />
+<line x1="40" y1="-20" x2="0" y2="20" style="stroke:black;fill:none" />
+<circle cx="20" cy="0" r="8" style="stroke:black;fill:white" />
+`,
+    ventilator: `
+<rect x="0" y="-15" width="30" height="30" fill="none" style="stroke:black" />
+<circle cx="10" cy="0" r="5" style="stroke:black;fill:none" />
+<circle cx="20" cy="0" r="5" style="stroke:black;fill:none" />
+`,
+    transformator: `
+<circle cx="8" cy="0" r="8" style="stroke:black;fill:none" />
+<circle cx="20" cy="0" r="8" style="stroke:black;fill:none" />
+`,
+    verwarmingstoestel: `
+<rect x="0" y="-15" width="50" height="30" fill="url(#VerticalStripe)" style="stroke:black" />
+`,
+    verwarmingstoestel_accu: `
+<rect x="0" y="-15" width="50" height="30" fill="none" style="stroke:black" />
+<rect x="5" y="-10" width="40" height="20" fill="url(#VerticalStripe)" style="stroke:black" />
+`,
+    verwarmingstoestel_accu_ventilator: `
+<rect x="0" y="-15" width="70" height="30" fill="none" style="stroke:black" />
+<rect x="5" y="-10" width="35" height="20" fill="url(#VerticalStripe)" style="stroke:black" />
+<circle cx="50" cy="0" r="5" style="stroke:black;fill:none" />
+<circle cx="60" cy="0" r="5" style="stroke:black;fill:none" />
+`,
+    verbruiker: `
+<rect x="0" y="-20" width="40" height="40" fill="none" style="stroke:black" />
+`,
+    wasmachine: `
+<rect x="0" y="-20" width="40" height="40" fill="none" style="stroke:black" />
+<circle cx="20" cy="0" r="3" style="stroke:black;fill:black" />
+<circle cx="20" cy="0" r="15" style="stroke:black;fill:none" />
+`,
+    zekering_automatisch: `
+<g transform="rotate(-20)">
+<line x1="0" y1="-30" x2="0" y2="0"  stroke="black" />
+<rect x="-4" y="-30" width="4" height="10" style="fill:black" />
+</g>
+`,
+    zekering_automatisch_horizontaal: `
+<g transform="rotate(-20)">
+<line x1="0" y1="0" x2="30" y2="0"  stroke="black" />
+<rect x="20" y="-4" height="4" width="10" style="fill:black" />
+</g>
+`,
+    zekering_smelt: `
+<rect x="-4" y="-30" width="8" height="30" style="stroke:black;fill:none" />
+<line x1="0" y1="-30" x2="0" y2="0" stroke="black" />
+`,
+    zekering_smelt_horizontaal: `
+<rect x="0" y="-4" height="8" width="30" style="stroke:black;fill:none" />
+<line x1="0" y1="0" x2="30" y2="0" stroke="black" />
+`,
+    relais_kring: `
+<rect x="-8" y="-30" width="16" height="30" style="stroke:black;fill:none" />
+<line x1="8" y1="-22.5" x2="-8" y2="-7.5" stroke="black" />
+`,
+    overspanningsbeveiliging_inline: `
+-> shift x -7.5  y -15
+<rect x="-7.5" y="-30" width="15" height="30" fill="none" style="stroke:black" />
+<line x1="0" y1="-30" x2="0" y2="-20" stroke="black" />
+<line x1="0" y1="-20" x2="-3" y2="-24" stroke="black" />
+<line x1="0" y1="-20" x2="3" y2="-24" stroke="black" />
+<line x1="0" y1="0" x2="0" y2="-10" stroke="black" />
+<line x1="0" y1="-10" x2="-3" y2="-6" stroke="black" />
+<line x1="0" y1="-10" x2="3" y2="-6" stroke="black" />
+`,
+    zekering_empty: `
+<g transform="rotate(-20)">
+<line x1="0" y1="-30" x2="0" y2="0"  stroke="black" />
+</g>
+`,
+    arrow: `
+<line x1="0" y1="0" x2="8" y2="0" stroke="black" />
+<line x1="8" y1="0" x2="5" y2="-1" stroke="black" />
+<line x1="8" y1="0" x2="5" y2="1" stroke="black" />
+`,
+    gas_ventilator: `
+<polygon points="-6,5.2 0,-5.2 6,5.2" fill="black" stroke="black" />
+`,
+    gas_atmosferisch: `
+<polygon points="-6,5.2 0,-5.2 6,5.2" fill="white" stroke="black" />
+`,
+    bliksem: `
+<line x1="0" y1="-5.2" x2="-3" y2="0" stroke="black"/>
+<line x1="-3" y1="0" x2="3" y2="0" stroke="black"/>
+<line x1="3" y1="0" x2="0" y2="5.2" stroke="black"/>
+<line x1="0" y1="5.2" x2="0" y2="2.2" stroke="black"/>
+<line x1="0" y1="5.2" x2="2.6" y2="3.7" stroke="black"/>
+`,
+    moving_man: `
+<g transform="matrix(0.0152987,0,0,0.01530866,0,0)">
+<path d="M 710.7,10.1 C 904.8,5.2 908.6,261.4 730.9,278.4 637.5,287.3 566.3,181.5 603.8,90.8 623.4,43.4 668.7,12.9 711.4,10.1 c 1.1,-0.1 2.8,26.1 1.7,26.2 -31.4,2 -74.8,32.1 -89.1,74.7 -26.8,79.9 47,156.6 125.1,139.2 123.9,-27.6 114.1,-218.5 -36.3,-214 -0.7,0 -3.2,-26 -2.1,-26.1 z" id="path4" stroke="black" stroke-width="10" />
+<path d="m 545.3,225.9 c -67.8,-5 -133.2,0 -199.7,0 -20.7,13.6 -115,100.7 -121.1,121.1 -5.7,19.1 6.2,31.9 12.1,40.4 60.1,18.3 96.7,-60.4 133.2,-88.8 29.6,0 59.2,0 88.8,0 -59.2,78.9 -190.7,169.9 -58.5,264.3 -27.6,31.6 -55.1,63.2 -82.7,94.8 -46.9,-14.7 -165.6,-41.3 -199.7,-18.2 -7,21 -4.8,32.1 6.1,48.4 34.1,10.3 205.5,53.2 232,36.3 34.3,-37.7 68.6,-75.3 102.9,-113 32.3,27.6 64.6,55.2 96.9,82.7 -1,62.6 -14.6,249.9 24.2,266.3 10.2,3 19.1,0.5 28.2,-2 5.4,-7.4 10.8,-14.8 16.1,-22.2 6.9,-27 0.3,-272.6 -6.1,-282.5 -37.7,-32.9 -75.3,-65.9 -113,-98.9 1.3,-1.3 2.7,-2.7 4,-4 45.7,-48.4 91.5,-96.9 137.2,-145.3 20.2,19.5 40.4,39 60.5,58.5 16.7,35.8 152.2,25.4 179.6,6.1 2,-8.1 4,-16.1 6.1,-24.2 -16,-40.1 -71.7,-31.8 -127.1,-30.3 C 741.8,384.3 590.6,253 545.5,225.7 c -1.7,-1 14.9,-23.3 15.4,-22.4 -2.2,-3.5 126,97.7 134.4,107.4 9.4,9.1 55.2,51.5 82.1,78.4 68.5,-2 122,-6.5 137.2,46.4 4.9,17.1 1.9,37.1 -8.1,50.4 -18.8,25.3 -156,39.1 -197.7,18.2 -20.2,-20.2 -40.4,-40.4 -60.5,-60.5 -18.8,18.2 -37.7,36.3 -56.5,54.5 -16.8,18.2 -33.6,36.3 -50.4,54.5 32.9,28.9 65.9,57.8 98.9,86.8 11.2,17.9 18.9,272.3 8.1,306.7 -4.8,15.2 -19.9,32.9 -34.3,38.3 C 498.3,1028.1 527.8,798.3 529.4,706 505.9,686.5 482.3,667 458.8,647.5 427.9,676.7 402,732.8 362,750.4 333.5,762.9 140.3,728.4 113.8,712.1 100.1,703.6 89.3,686 85.6,667.7 59.7,543.2 281.5,646 321.3,617.4 334.7,601.3 348.2,585.1 361.7,569 266.4,454.2 335.5,414.9 402.1,326.9 c 0,-0.7 0,-1.3 0,-2 -8.1,0 -16.1,0 -24.2,0 -26.3,36.3 -124.9,147 -173.5,64.6 -35.9,-60.8 103.6,-172.2 141.1,-189.8 56.7,-3.8 167.5,-11 215.9,4 0.8,0.7 -14.9,22.6 -16.1,22.2 z" id="path6" stroke="black" stroke-width="10" />
+</g>
+`
+};
 /*****************************************************************************
   CLASS Hierarchical_List
 
@@ -10890,9 +11312,9 @@ var SVGSymbols = /** @class */ (function () {
      to editing a hierarchival list of moving items around.
 
  *****************************************************************************/
-var Hierarchical_List = /** @class */ (function () {
+class Hierarchical_List {
     // -- Constructor --
-    function Hierarchical_List() {
+    constructor() {
         this.length = 0;
         this.data = new Array();
         this.active = new Array();
@@ -10907,11 +11329,11 @@ var Hierarchical_List = /** @class */ (function () {
     /** dispose
      *
      */
-    Hierarchical_List.prototype.dispose = function () {
+    dispose() {
         if (this.sitplanview != null) {
             this.sitplanview.dispose();
         }
-    };
+    }
     // -- Definitief verwijderen van items die als inactief werden geflagged --
     /*    deleteInactive() {
             for (let i = 0; i<this.length; i++) { //Loop over all items
@@ -10931,26 +11353,23 @@ var Hierarchical_List = /** @class */ (function () {
      *  Onbereikbare of niet actieve elementen worden verwijderd
      *
      **/
-    Hierarchical_List.prototype.reSort = function () {
-        var _this = this;
-        var sortToOrdinal = function (parent, ordinals) {
-            if (parent === void 0) { parent = 0; }
-            if (ordinals === void 0) { ordinals = []; }
-            for (var i = 0; i < _this.length; i++) {
-                if (_this.active[i]) {
-                    if (_this.data[i].parent == parent) {
+    reSort() {
+        let sortToOrdinal = (parent = 0, ordinals = []) => {
+            for (let i = 0; i < this.length; i++) {
+                if (this.active[i]) {
+                    if (this.data[i].parent == parent) {
                         ordinals.push(i);
-                        sortToOrdinal(_this.id[i], ordinals);
+                        sortToOrdinal(this.id[i], ordinals);
                     }
                 }
             }
             return ordinals;
         };
-        var ordinals = sortToOrdinal();
-        var data = [];
-        var active = [];
-        var id = [];
-        for (var i = 0; i < ordinals.length; i++) {
+        let ordinals = sortToOrdinal();
+        let data = [];
+        let active = [];
+        let id = [];
+        for (let i = 0; i < ordinals.length; i++) {
             data.push(this.data[ordinals[i]]);
             active.push(this.active[ordinals[i]]);
             id.push(this.id[ordinals[i]]);
@@ -10959,36 +11378,36 @@ var Hierarchical_List = /** @class */ (function () {
         this.active = active;
         this.id = id;
         this.length = ordinals.length;
-    };
+    }
     // -- Plaats in de array zoeken op basis van de id --
-    Hierarchical_List.prototype.getOrdinalById = function (my_id) {
-        var ordinal = this.id.indexOf(my_id);
+    getOrdinalById(my_id) {
+        let ordinal = this.id.indexOf(my_id);
         return (ordinal == -1 ? null : ordinal);
-    };
-    Hierarchical_List.prototype.getElectroItemById = function (my_id) {
-        var ordinal = this.id.indexOf(my_id);
+    }
+    getElectroItemById(my_id) {
+        let ordinal = this.id.indexOf(my_id);
         if (ordinal != -1)
             return this.data[ordinal];
         return null;
-    };
+    }
     // -- Aantal actieve kinderen van id = parent_id --
-    Hierarchical_List.prototype.getNumChilds = function (parent_id) {
-        var returnval = 0;
-        for (var i = 0; i < this.length; i++) {
+    getNumChilds(parent_id) {
+        let returnval = 0;
+        for (let i = 0; i < this.length; i++) {
             if ((this.data[i].parent == parent_id) && (this.active[i]))
                 returnval++;
         }
         return (returnval);
-    };
+    }
     // -- Maximum aantal actieve kinderen van id = parent_id --
-    Hierarchical_List.prototype.getMaxNumChilds = function (parent_id) {
-        var returnval = this.data[this.getOrdinalById(parent_id)].getMaxNumChilds();
+    getMaxNumChilds(parent_id) {
+        let returnval = this.data[this.getOrdinalById(parent_id)].getMaxNumChilds();
         return (returnval);
-    };
+    }
     // Creëer een nieuw Electro_Item --
-    Hierarchical_List.prototype.createItem = function (electroType) {
+    createItem(electroType) {
         // First create the object
-        var tempval;
+        let tempval;
         switch (electroType) {
             case 'Aansluiting':
                 tempval = new Aansluiting(this);
@@ -11140,11 +11559,11 @@ var Hierarchical_List = /** @class */ (function () {
         tempval.indent = 0;
         // Then return the Object
         return (tempval);
-    };
+    }
     // -- Voeg item toe aan de Hierarchical list --
-    Hierarchical_List.prototype.addItem = function (electroType) {
+    addItem(electroType) {
         //First create the item
-        var tempval = this.createItem(electroType);
+        let tempval = this.createItem(electroType);
         //Then push the item into the queue
         this.data.push(tempval);
         this.active.push(true);
@@ -11154,10 +11573,10 @@ var Hierarchical_List = /** @class */ (function () {
         this.length += 1;
         //Return the Object
         return (tempval);
-    };
+    }
     // -- Item invoegen vóór bestaand item met id = my_id en op hetzelfde niveau --
-    Hierarchical_List.prototype.insertItemBeforeId = function (my_item, my_id) {
-        for (var i = 0; i < this.length; i++) {
+    insertItemBeforeId(my_item, my_id) {
+        for (let i = 0; i < this.length; i++) {
             if (this.id[i] == my_id) {
                 //First set the correct identifyer
                 my_item.id = this.curid;
@@ -11175,10 +11594,10 @@ var Hierarchical_List = /** @class */ (function () {
             }
         }
         this.reSort();
-    };
+    }
     // -- Item invoegen na bestaand item met id = my_id en op hetzelfde niveau --
-    Hierarchical_List.prototype.insertItemAfterId = function (my_item, my_id) {
-        for (var i = 0; i < this.length; i++) {
+    insertItemAfterId(my_item, my_id) {
+        for (let i = 0; i < this.length; i++) {
             if (this.id[i] == my_id) {
                 //First set the correct identifyer
                 my_item.id = this.curid;
@@ -11197,13 +11616,13 @@ var Hierarchical_List = /** @class */ (function () {
             }
         }
         this.reSort();
-    };
+    }
     // -- Item invoegen na bestaand item met id = my_id en één niveau dieper --
-    Hierarchical_List.prototype.insertChildAfterId = function (my_item, my_id) {
-        var numchilds = this.getNumChilds(my_id);
-        var maxchilds = this.getMaxNumChilds(my_id);
+    insertChildAfterId(my_item, my_id) {
+        let numchilds = this.getNumChilds(my_id);
+        let maxchilds = this.getMaxNumChilds(my_id);
         if (numchilds < maxchilds) {
-            var ordinal = this.insertItemAfterId(my_item, my_id);
+            let ordinal = this.insertItemAfterId(my_item, my_id);
             this.data[ordinal].parent = my_id;
             this.data[ordinal].indent = this.data[ordinal - 1].indent + 1;
         }
@@ -11211,199 +11630,261 @@ var Hierarchical_List = /** @class */ (function () {
             alert("Het maximum aantal kinderen van dit element is " + maxchilds);
         }
         this.reSort();
-    };
+    }
     // -- Item ééntje naar boven schuiven binnen hetzelfde niveau --
-    Hierarchical_List.prototype.moveUp = function (my_id) {
+    moveUp(my_id) {
         // First find the ordinal number of the current location and the desired location --
-        var currentOrdinal = this.getOrdinalById(my_id);
-        var newOrdinal = currentOrdinal;
-        var currentparent = this.data[currentOrdinal].parent;
-        for (var i = currentOrdinal - 1; i >= 0; i--) {
+        let currentOrdinal = this.getOrdinalById(my_id);
+        let newOrdinal = currentOrdinal;
+        let currentparent = this.data[currentOrdinal].parent;
+        for (let i = currentOrdinal - 1; i >= 0; i--) {
             if ((this.data[i].parent == currentparent) && (this.active[i])) {
                 newOrdinal = i;
                 break; //Leave the for loop
             }
         }
         // Swap both items (we swap data and id, we do not need to swap active as both items are active by construction)
-        var swapItem = new List_Item(this);
+        let swapItem = new List_Item(this);
         swapItem = this.data[currentOrdinal];
         this.data[currentOrdinal] = this.data[newOrdinal];
         this.data[newOrdinal] = swapItem;
-        var swapID = this.id[currentOrdinal];
+        let swapID = this.id[currentOrdinal];
         this.id[currentOrdinal] = this.id[newOrdinal];
         this.id[newOrdinal] = swapID;
         this.reSort();
-    };
+    }
     // -- Item ééntje naar beneden schuiven binnen hetzelfde niveau --
-    Hierarchical_List.prototype.moveDown = function (my_id) {
+    moveDown(my_id) {
         // First find the ordinal number of the current location and the desired location --
-        var currentOrdinal = this.getOrdinalById(my_id);
-        var newOrdinal = currentOrdinal;
-        var currentparent = this.data[currentOrdinal].parent;
-        for (var i = currentOrdinal + 1; i < this.length; i++) {
+        let currentOrdinal = this.getOrdinalById(my_id);
+        let newOrdinal = currentOrdinal;
+        let currentparent = this.data[currentOrdinal].parent;
+        for (let i = currentOrdinal + 1; i < this.length; i++) {
             if ((this.data[i].parent == currentparent) && (this.active[i])) {
                 newOrdinal = i;
                 break; //Leave the for loop
             }
         }
         // Swap both items (we swap data and id, we do not need to swap active as both items are active by construction)
-        var swapItem = new List_Item(this);
+        let swapItem = new List_Item(this);
         swapItem = this.data[currentOrdinal];
         this.data[currentOrdinal] = this.data[newOrdinal];
         this.data[newOrdinal] = swapItem;
-        var swapID = this.id[currentOrdinal];
+        let swapID = this.id[currentOrdinal];
         this.id[currentOrdinal] = this.id[newOrdinal];
         this.id[newOrdinal] = swapID;
         this.reSort();
-    };
+    }
     // -- Item clonen --
-    Hierarchical_List.prototype.clone = function (my_id, parent_id) {
+    clone(my_id, parent_id) {
         // First find the ordinal number of the current location and the desired location
-        var currentOrdinal = this.getOrdinalById(my_id);
+        let currentOrdinal = this.getOrdinalById(my_id);
         // Then create a clone of the object and assign the correct parent_id
         if (arguments.length < 2)
             parent_id = this.data[currentOrdinal].parent;
-        var parentOrdinal = this.getOrdinalById(parent_id);
-        var my_item = this.createItem(this.data[currentOrdinal].getType());
+        let parentOrdinal = this.getOrdinalById(parent_id);
+        let my_item = this.createItem(this.data[currentOrdinal].getType());
         my_item.clone(this.data[currentOrdinal]);
         // Now add the clone to the structure. The clone will have id this.curid-1
         if (arguments.length < 2)
             this.insertItemAfterId(my_item, my_id); //Cloning the top-element, this messes up the ordinals !!
         else
             this.insertChildAfterId(my_item, parent_id); //Cloning childs, this messes up the ordinals !!
-        var new_id = this.curid - 1;
+        let new_id = this.curid - 1;
         this.data[this.getOrdinalById(new_id)].collapsed = this.data[this.getOrdinalById(my_id)].collapsed;
         // Now loop over the childs of the original and also clone those
-        var toClone = new Array(); //list of id's to clone
-        for (var i = 0; i < this.length; i++) {
+        let toClone = new Array(); //list of id's to clone
+        for (let i = 0; i < this.length; i++) {
             if (this.id[i] == my_id) {
-                for (var j = this.length - 1; j >= 0; j--) { //We need to loop in opposite sense
+                for (let j = this.length - 1; j >= 0; j--) { //We need to loop in opposite sense
                     if (this.data[j].parent == my_id)
                         toClone.push(this.id[j]);
                 }
             }
         }
-        for (var clone_id = 0; clone_id < toClone.length; clone_id++) {
+        for (let clone_id = 0; clone_id < toClone.length; clone_id++) {
             this.clone(toClone[clone_id], new_id);
         }
         this.reSort();
-    };
+    }
     // -- Delete item with id = my_id --
-    Hierarchical_List.prototype.deleteById = function (my_id) {
-        for (var i = 0; i < this.length; i++) {
+    deleteById(my_id) {
+        for (let i = 0; i < this.length; i++) {
             if (this.id[i] == my_id) {
                 this.active[i] = false;
-                for (var j = 0; j < this.length; j++) {
+                for (let j = 0; j < this.length; j++) {
                     if (this.data[j].parent == my_id)
                         this.deleteById(this.id[j]);
                 }
             }
         }
         this.reSort();
-    };
+    }
     // -- Pas type aan van item op plaats ordinal in de array -- 
-    Hierarchical_List.prototype.adjustTypeByOrdinal = function (ordinal, electroType) {
-        var tempval = this.createItem(electroType);
+    adjustTypeByOrdinal(ordinal, electroType) {
+        let tempval = this.createItem(electroType);
         Object.assign(tempval, this.data[ordinal]);
         tempval.props.type = electroType; //We need to do this again as we overwrote it with assign
         tempval.resetProps(); //Already part of createItem but we need to run this again as the assign operation overwrote everything
         this.data[ordinal] = tempval;
-    };
+    }
     // -- Pas type aan van item met id = my_id --
-    Hierarchical_List.prototype.adjustTypeById = function (my_id, electroType) {
-        var ordinal = structure.getOrdinalById(my_id);
+    adjustTypeById(my_id, electroType) {
+        let ordinal = globalThis.structure.getOrdinalById(my_id);
         this.adjustTypeByOrdinal(ordinal, electroType);
-    };
+    }
     //-- Verticale lijn tekenen (kring links van gebruiker) --
-    Hierarchical_List.prototype.tekenVerticaleLijnIndienKindVanKring = function (item, mySVG) {
+    tekenVerticaleLijnIndienKindVanKring(item, mySVG) {
         // Eerst checken of het wel degelijk een kind van een kring is
-        var parent = item.getParent();
+        let parent = item.getParent();
         if (parent != null) {
             if (parent.getType() == "Kring") {
-                // Bepaal hoogte van de lijn. Idien dit het laatste element van de kring is is het een halve lijn,
-                // zoniet een hele lijn
-                var y1 = void 0, y2 = void 0;
-                var lastOrdinalInKring = 0;
-                var myOrdinal = this.getOrdinalById(item.id);
-                for (var i = 0; i < item.sourcelist.length; i++) {
+                let lastOrdinalInKring = 0;
+                let myOrdinal = this.getOrdinalById(item.id);
+                for (let i = 0; i < item.sourcelist.length; i++) {
                     if (this.active[i] && (this.data[i].parent == parent.id))
                         lastOrdinalInKring = i;
                 }
-                if (myOrdinal < lastOrdinalInKring) { // Teken een verticale lijn over de volledige hoogte
-                    y1 = 0;
-                    y2 = mySVG.yup + mySVG.ydown;
+                if ((item.getType() == "Omvormer") && (item.props.inkring)) {
+                    if (myOrdinal < lastOrdinalInKring)
+                        mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + 0 + '" y2="' + (mySVG.yup - 20) + '" stroke="black" />';
+                    mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + (mySVG.yup + mySVG.ydown - 5) + '" y2="' + (mySVG.yup + mySVG.ydown) + '" stroke="black" />';
                 }
-                else { // Teken een verticale lijn over de halve hoogte
-                    y1 = mySVG.yup;
-                    y2 = mySVG.yup + mySVG.ydown;
+                else {
+                    // Bepaal hoogte van de lijn. Idien dit het laatste element van de kring is is het een halve lijn,
+                    // zoniet een hele lijn
+                    let y1, y2;
+                    if (myOrdinal < lastOrdinalInKring) { // Teken een verticale lijn over de volledige hoogte
+                        y1 = 0;
+                        y2 = mySVG.yup + mySVG.ydown;
+                    }
+                    else { // Teken een verticale lijn over de halve hoogte
+                        y1 = mySVG.yup;
+                        y2 = mySVG.yup + mySVG.ydown;
+                    }
+                    // Teken de lijn
+                    mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + y1 + '" y2="' + y2 + '" stroke="black" />';
                 }
-                // Teken de lijn
-                mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + y1 + '" y2="' + y2 + '" stroke="black" />';
             }
             if ((parent.getType() == "Kring") || (parent.getType() == "Domotica module (verticaal)")) {
                 // Plaats het nummer van het item naast de lijn
-                var displaynr = void 0;
+                let displaynr;
                 displaynr = item.props.nr;
+                let posx = mySVG.xleft + 9;
+                if ((item.getType() == "Omvormer") && (item.props.inkring))
+                    posx -= 38;
                 mySVG.data +=
-                    '<text x="' + (mySVG.xleft + 9) + '" y="' + (mySVG.yup - 5) + '" ' +
+                    '<text x="' + (posx) + '" y="' + (mySVG.yup - 5) + '" ' +
                         'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' +
                         htmlspecialchars(displaynr) + '</text>';
             }
         }
         ;
-    };
+    }
     ;
-    Hierarchical_List.prototype.updateRibbon = function () {
-        if (structure.properties.currentView != '2col')
+    updateRibbon() {
+        if (globalThis.structure.properties.currentView != '2col')
             return; // het heeft geen zin de EDS ribbon aan te passen als de EDS niet open staat
-        var output = "";
+        let output = "";
         // Plaats bovenaan de switch van editeer-mode (teken of verplaats) --
-        output += "\n            <div class=\"icon\" ".concat((undostruct.undoStackSize() > 0 ? 'onclick="undoClicked()"' : "style=\"filter: opacity(45%)\""), ">\n                <img src=\"gif/undo.png\" alt=\"Ongedaan maken\" class=\"icon-image\">\n                <span class=\"icon-text\">Ongedaan maken</span>\n            </div>\n            <div class=\"icon\" ").concat((undostruct.redoStackSize() > 0 ? 'onclick="redoClicked()"' : "style=\"filter: opacity(45%)\""), ">\n                <img src=\"gif/redo.png\" alt=\"Opnieuw\" class=\"icon-image\">\n                <span class=\"icon-text\">Opnieuw</span>\n            </div>\n            <span style=\"display: inline-block; width: 30px;\"></span>\n        ");
+        output += `
+            <div class="icon" ${(globalThis.undostruct.undoStackSize() > 0 ? 'onclick="undoClicked()"' : "style=\"filter: opacity(45%)\"")}>
+                <img src="gif/undo.png" alt="Ongedaan maken" class="icon-image">
+                <span class="icon-text">Ongedaan maken</span>
+            </div>
+            <div class="icon" ${(globalThis.undostruct.redoStackSize() > 0 ? 'onclick="redoClicked()"' : "style=\"filter: opacity(45%)\"")}>
+                <img src="gif/redo.png" alt="Opnieuw" class="icon-image">
+                <span class="icon-text">Opnieuw</span>
+            </div>
+            <span style="display: inline-block; width: 30px;"></span>
+        `;
         output += '<p style="margin-top: 5px;margin-bottom: 5px;">';
         switch (this.mode) {
             case "edit":
-                output += "\n                        <div>\n                            Werkmodus<br>\n                            <select id=\"edit_mode\" onchange=\"HL_editmode()\">\n                                <option value=\"edit\" selected>Invoegen</option>\n                                <option value=\"move\">Verplaatsen/Clone</option>\n                            </select>\n                        </div>";
+                output += `
+                        <div>
+                            Werkmodus<br>
+                            <select id="edit_mode" onchange="HL_editmode()">
+                                <option value="edit" selected>Invoegen</option>
+                                <option value="move">Verplaatsen/Clone</option>
+                            </select>
+                        </div>`;
                 break;
             case "move":
-                output += "\n                        <div>\n                            Werkmodus<br>\n                            <select id=\"edit_mode\" onchange=\"HL_editmode()\">\n                                <option value=\"edit\">Invoegen</option>\n                                <option value=\"move\" selected>Verplaatsen/Clone</option>\n                            </select>\n                        </div>\n                        <span style=\"display: inline-block; width: 30px;\"></span>";
-                output += "\n                        <div style=\"color:black;font-size:12px\"><i>\n                            Gebruik de <b>blauwe</b> pijlen om de volgorde van elementen te wijzigen.<br>\n                            Gebruik het <u>Moeder</u>-veld om een component elders in het schema te hangen.<br>\n                            Kies \"<b>clone</b>\" om een dubbel te maken van een element.\n                        </i></div>";
+                output += `
+                        <div>
+                            Werkmodus<br>
+                            <select id="edit_mode" onchange="HL_editmode()">
+                                <option value="edit">Invoegen</option>
+                                <option value="move" selected>Verplaatsen/Clone</option>
+                            </select>
+                        </div>
+                        <span style="display: inline-block; width: 30px;"></span>`;
+                output += `
+                        <div style="color:black;font-size:12px"><i>
+                            Gebruik de <b>blauwe</b> pijlen om de volgorde van elementen te wijzigen.<br>
+                            Gebruik het <u>Moeder</u>-veld om een component elders in het schema te hangen.<br>
+                            Kies "<b>clone</b>" om een dubbel te maken van een element.
+                        </i></div>`;
                 break;
         }
         output += '</p>';
         if (autoSaver && autoSaver.hasChangesSinceLastManualSave()) {
             output += '<span style="display: inline-block; width: 30px;"></span>';
-            output += "<div style=\"margin-top: 5px;margin-bottom: 5px;display: flex; align-items: center; justify-content: center;\" class=\"highlight-warning-big\" onclick=\"exportjson(false)\"\n                           onmouseover=\"this.style.cursor='pointer'\" \n                           onmouseout=\"this.style.cursor='default'\">\n                           <div style=\"display: inline-block; vertical-align: middle;\"><span class=\"icon-image\" style=\"font-size:24px;\">\uD83D\uDCBE</span></div>\n                           <div style=\"display: inline-block; vertical-align: middle; margin-left: 10px;\">\n                               U heeft niet opgeslagen wijzigingen. Klik hier om op te slaan<br>\n                               of ga naar het \"Bestand\"-menu voor meer opties.\n                           </div>\n                        </div>";
+            output += `<div style="margin-top: 5px;margin-bottom: 5px;display: flex; align-items: center; justify-content: center;" class="highlight-warning-big" onclick="exportjson(false)"
+                           onmouseover="this.style.cursor='pointer'" 
+                           onmouseout="this.style.cursor='default'">
+                           <div style="display: inline-block; vertical-align: middle;"><span class="icon-image" style="font-size:24px;">💾</span></div>
+                           <div style="display: inline-block; vertical-align: middle; margin-left: 10px;">
+                               U heeft niet opgeslagen wijzigingen. Klik hier om op te slaan<br>
+                               of ga naar het "Bestand"-menu voor meer opties.
+                           </div>
+                        </div>`;
         }
         else {
             output += '<span style="display: inline-block; width: 30px;"></span>';
-            output += "<div style=\"margin-top: 5px;margin-bottom: 5px;display: flex; align-items: center; justify-content: center;\" class=\"highlight-ok-big\" onclick=\"topMenu.selectMenuItemByName('Bestand')\"\n                           onmouseover=\"this.style.cursor='pointer'\" \n                           onmouseout=\"this.style.cursor='default'\">\n                           <div style=\"display: inline-block; vertical-align: middle;\"><span class=\"icon-image\" style=\"font-size:24px; filter: grayscale(100%); opacity: 0.5;\">\uD83D\uDCBE</span></div>\n                           <div style=\"display: inline-block; vertical-align: middle; margin-left: 10px;\">\n                               Er zijn geen niet opgeslagen wijzigingen. Ga naar het \"Bestand\"-menu<br>\n                               indien u toch wenst op te slaan.\n                           </div>\n                        </div>";
+            output += `<div style="margin-top: 5px;margin-bottom: 5px;display: flex; align-items: center; justify-content: center;" class="highlight-ok-big" onclick="topMenu.selectMenuItemByName('Bestand')"
+                           onmouseover="this.style.cursor='pointer'" 
+                           onmouseout="this.style.cursor='default'">
+                           <div style="display: inline-block; vertical-align: middle;"><span class="icon-image" style="font-size:24px; filter: grayscale(100%); opacity: 0.5;">💾</span></div>
+                           <div style="display: inline-block; vertical-align: middle; margin-left: 10px;">
+                               Er zijn geen niet opgeslagen wijzigingen. Ga naar het "Bestand"-menu<br>
+                               indien u toch wenst op te slaan.
+                           </div>
+                        </div>`;
         }
-        var ribbonElement = document.getElementById("ribbon");
-        var newHTML = "<div id=\"left-icons\">".concat(output, "</div>");
+        const ribbonElement = document.getElementById("ribbon");
+        const newHTML = `<div id="left-icons">${output}</div>`;
         //if (ribbonElement.innerHTML !== newHTML) {
         ribbonElement.innerHTML = newHTML; // Doesn't make a lot of sense to test as browser changes innerHTML anyway
         //}
-    };
+    }
     // -- Functie om de tree links te tekenen te starten by node met id = myParent --
-    Hierarchical_List.prototype.toHTMLinner = function (ordinal) {
+    toHTMLinner(ordinal) {
         if (this.data[ordinal].collapsed) {
-            return ("<tr>\n                        <td bgcolor=\"#8AB2E4\" onclick=\"HLCollapseExpand(".concat(this.data[ordinal].id, ")\" valign= \"top\">&#x229E;</td>\n                        <td width=\"100%\">").concat(this.data[ordinal].toHTML(structure.mode), "<br></td>\n                    </tr>"));
+            return (`<tr>
+                        <td bgcolor="#8AB2E4" onclick="HLCollapseExpand(${this.data[ordinal].id})" valign= "top">&#x229E;</td>
+                        <td width="100%">${this.data[ordinal].toHTML(globalThis.structure.mode)}<br></td>
+                    </tr>`);
         }
         else {
-            return ("<tr>\n                       <td bgcolor=\"C0C0C0\" onclick=\"HLCollapseExpand(".concat(this.data[ordinal].id, ")\" valign= \"top\">&#x229F;</td>\n                       <td width=\"100%\">").concat(this.data[ordinal].toHTML(structure.mode), "<br>").concat(this.toHTML(this.id[ordinal]), "</td>\n                    </tr>"));
+            return (`<tr>
+                       <td bgcolor="C0C0C0" onclick="HLCollapseExpand(${this.data[ordinal].id})" valign= "top">&#x229F;</td>
+                       <td width="100%">${this.data[ordinal].toHTML(globalThis.structure.mode)}<br>${this.toHTML(this.id[ordinal])}</td>
+                    </tr>`);
         }
-    };
-    Hierarchical_List.prototype.updateHTMLinner = function (id) {
-        var ordinal = this.getOrdinalById(id);
+    }
+    updateHTMLinner(id) {
+        let ordinal = this.getOrdinalById(id);
         document.getElementById('id_elem_' + id).innerHTML = this.toHTMLinner(ordinal);
-    };
-    Hierarchical_List.prototype.toHTML = function (myParent) {
+    }
+    toHTML(myParent) {
         if (myParent == 0)
             this.updateRibbon();
-        var output = "";
-        var numberDrawn = 0;
+        let output = "";
+        let numberDrawn = 0;
         // Teken het volledige schema in HTML
-        for (var i = 0; i < this.length; i++) {
+        for (let i = 0; i < this.length; i++) {
             if (this.active[i] && (this.data[i].parent == myParent)) {
                 numberDrawn++;
                 output += '<table class="html_edit_table" id="id_elem_' + this.id[i] + '">';
@@ -11415,22 +11896,22 @@ var Hierarchical_List = /** @class */ (function () {
             output += "<button onclick=\"HLAdd()\">Voeg eerste object toe of kies bovenaan \"Nieuw\"</button><br>"; //no need for the add button if we have items
         }
         return (output);
-    };
+    }
     /** Functie om de naam van een kring te vinden waartoe een element behoord
      *
     */
-    Hierarchical_List.prototype.findKringName = function (my_id) {
-        var myOrdinal = this.getOrdinalById(my_id);
-        var myParent = this.data[myOrdinal].parent;
+    findKringName(my_id) {
+        let myOrdinal = this.getOrdinalById(my_id);
+        let myParent = this.data[myOrdinal].parent;
         if (myParent == 0) {
             return ("");
         }
         else {
-            var myParentOrdinal = this.getOrdinalById(myParent);
+            let myParentOrdinal = this.getOrdinalById(myParent);
             if (myParentOrdinal == null)
                 return ("");
             if (this.data[myParentOrdinal].getType() == "Kring") {
-                var kringnaam = this.data[myParentOrdinal].props.naam;
+                let kringnaam = this.data[myParentOrdinal].props.naam;
                 if (kringnaam.trim() != "") {
                     return (this.data[myParentOrdinal].props.naam);
                 }
@@ -11442,18 +11923,16 @@ var Hierarchical_List = /** @class */ (function () {
                 return (this.findKringName(myParent));
             }
         }
-    };
+    }
     // -- Functie om de tree links te tekenen te starten by node met id = myParent --
-    Hierarchical_List.prototype.toSVG = function (myParent, stack, minxleft, includeparent) {
-        if (minxleft === void 0) { minxleft = 0; }
-        if (includeparent === void 0) { includeparent = false; }
+    toSVG(myParent, stack, minxleft = 0, includeparent = false) {
         // Eerst creëren we een array van SVGelements met alle kinderen van myParent en eventueel myParent zelf
-        var inSVG = new Array(); //Results from nested calls will be added here
-        var elementCounter = 0;
+        let inSVG = new Array(); //Results from nested calls will be added here
+        let elementCounter = 0;
         // Dan vullen we de array door doorheen de lijst van kinderen te gaan en een tekening van elk kind op te slaan
-        for (var i = 0; i < this.length; i++) {
+        for (let i = 0; i < this.length; i++) {
             if (this.active[i] && ((this.data[i].parent == myParent) || ((includeparent == true) && (this.id[i] == myParent)))) {
-                var mytype = this.data[i].getType();
+                let mytype = this.data[i].getType();
                 /*if (typeof(this.data[i].keys) != 'undefined') mytype = this.data[i].keys[0][2]; else*/ mytype = this.data[i].props.type;
                 switch (mytype) {
                     case "":
@@ -11516,20 +11995,20 @@ var Hierarchical_List = /** @class */ (function () {
             inSVG[0] = new SVGelement();
         }
         // Now create the output element ---
-        var outSVG = new SVGelement;
+        let outSVG = new SVGelement;
         outSVG.xleft = 0;
         outSVG.xright = 0;
         outSVG.yup = 0;
         outSVG.ydown = 0;
         outSVG.data = "";
-        var width = 0; //How wide is the structure?
-        var height = 0; //How high is the structure?
+        let width = 0; //How wide is the structure?
+        let height = 0; //How high is the structure?
         switch (stack) {
             case "horizontal":
-                var max_yup = 0; //What is the maximal distance above the horizontal line?
-                var max_ydown = 0; //What is the maximal distance below the horizontal line?
+                let max_yup = 0; //What is the maximal distance above the horizontal line?
+                let max_ydown = 0; //What is the maximal distance below the horizontal line?
                 // analyse the size of the structure. Build horizontally
-                for (var i = 0; i < elementCounter; i++) {
+                for (let i = 0; i < elementCounter; i++) {
                     width = width + inSVG[i].xleft + inSVG[i].xright;
                     max_yup = Math.max(max_yup, inSVG[i].yup);
                     max_ydown = Math.max(max_ydown, inSVG[i].ydown);
@@ -11550,8 +12029,8 @@ var Hierarchical_List = /** @class */ (function () {
                 outSVG.yup = max_yup;
                 outSVG.ydown = max_ydown;
                 // Create the output data
-                var xpos = 0;
-                for (var i = 0; i < elementCounter; i++) {
+                let xpos = 0;
+                for (let i = 0; i < elementCounter; i++) {
                     outSVG.data += '<svg x="' + xpos + '" y="' + (max_yup - inSVG[i].yup) + '">';
                     outSVG.data += inSVG[i].data;
                     outSVG.data += '</svg>';
@@ -11559,10 +12038,10 @@ var Hierarchical_List = /** @class */ (function () {
                 }
                 break;
             case "vertical":
-                var max_xleft = 0; //What is the maximal distance left of the vertical line?
-                var max_xright = 0; //What is the maximal distance right of the vertical line?
+                let max_xleft = 0; //What is the maximal distance left of the vertical line?
+                let max_xright = 0; //What is the maximal distance right of the vertical line?
                 // analyse the size of the structure. Build vertically
-                for (var i = 0; i < elementCounter; i++) {
+                for (let i = 0; i < elementCounter; i++) {
                     height = height + inSVG[i].yup + inSVG[i].ydown;
                     max_xleft = Math.max(max_xleft, inSVG[i].xleft);
                     max_xright = Math.max(max_xright, inSVG[i].xright);
@@ -11578,8 +12057,8 @@ var Hierarchical_List = /** @class */ (function () {
                     max_xright += 10; // Altijd 10 extra rechts voorzien voor uitstekende tekst/adressen
                 outSVG.xright = Math.max(max_xright, 25); // foresee at least 25 at the right
                 // create the output data
-                var ypos = 0;
-                for (var i = elementCounter - 1; i >= 0; i--) {
+                let ypos = 0;
+                for (let i = elementCounter - 1; i >= 0; i--) {
                     outSVG.data += '<svg x="' + (outSVG.xleft - inSVG[i].xleft) + '" y="' + ypos + '">';
                     outSVG.data += inSVG[i].data;
                     outSVG.data += '</svg>';
@@ -11589,24 +12068,22 @@ var Hierarchical_List = /** @class */ (function () {
         }
         outSVG.data += "\n";
         if (myParent == 0) { //We will always foresee a 20 pixel horizontal and 5 pixel vertical margin
-            var header = "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" transform=\"scale(1,1)\" width=\"" + (width + 20) + "\" height=\"" + (height + 5) + "\">";
+            let header = "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" transform=\"scale(1,1)\" width=\"" + (width + 20) + "\" height=\"" + (height + 5) + "\">";
             header += SVGSymbols.outputSVGSymbols();
-            var footer = "</svg>";
+            let footer = "</svg>";
             outSVG.data = header + outSVG.data + footer;
         }
         return (outSVG);
-    };
-    Hierarchical_List.prototype.toJsonObject = function (removeUnneededDataMembers) {
-        if (removeUnneededDataMembers === void 0) { removeUnneededDataMembers = true; }
+    }
+    toJsonObject(removeUnneededDataMembers = true) {
         // Remove some unneeded data members that would only inflate the size of the output file
-        for (var _i = 0, _a = this.data; _i < _a.length; _i++) {
-            var listitem = _a[_i];
+        for (let listitem of this.data) {
             listitem.sourcelist = null;
         }
-        var swap = this.print_table.pagemarkers;
-        var swap2 = this.sitplan;
-        var swap3 = this.sitplanview;
-        var swap4 = this.properties.currentView;
+        let swap = this.print_table.pagemarkers;
+        let swap2 = this.sitplan;
+        let swap3 = this.sitplanview;
+        let swap4 = this.properties.currentView;
         this.print_table.pagemarkers = null;
         if (this.sitplan != null)
             this.sitplanjson = this.sitplan.toJsonObject();
@@ -11618,8 +12095,7 @@ var Hierarchical_List = /** @class */ (function () {
         // Create the output structure in uncompressed form
         var text = JSON.stringify(this);
         // Put the removed data members back
-        for (var _b = 0, _c = this.data; _b < _c.length; _b++) {
-            var listitem = _c[_b];
+        for (let listitem of this.data) {
             listitem.sourcelist = this;
         }
         this.print_table.pagemarkers = swap;
@@ -11629,20 +12105,121 @@ var Hierarchical_List = /** @class */ (function () {
         // Remove sitplanjson again
         this.sitplanjson = null;
         return (text);
-    };
-    return Hierarchical_List;
-}());
-var SITPLANVIEW_SELECT_PADDING = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--selectPadding').trim());
-var SITPLANVIEW_ZOOMINTERVAL = { MIN: 0.1, MAX: 1000 };
-var SITPLANVIEW_DEFAULT_SCALE = 0.7;
-var CONFIGPAGE_LEFT = "\n    <table border=\"1px\" style=\"border-collapse:collapse;\" align=\"center\" width=\"100%\"><tr><td style=\"padding-top: 0; padding-right: 10px; padding-bottom: 10px; padding-left: 10px;\">\n        <p><font size=\"+2\">\n          <b>Welkom op \u00E9\u00E9ndraadschema</b>\n        </font></p>\n      <p><font size=\"+1\">  \n           Deze gratis tool laat toe zowel \u00E9\u00E9ndraadschema's als situatieschema's te tekenen, inclusief complexere schema's\n           met bijvoorbeeld domotica. De schema's kunnen als PDF bestand worden ge\u00EBxporteerd en geprint.\n           Voor de experts kunnen schema's eveneens worden omgezet in SVG vectorformaat om in andere programma's verder te bewerken.\n      </font></p>\n      <p><font size=\"+1\">  \n           Kies \u00E9\u00E9n van onderstaande voorbeelden om van te starten of start van een leeg schema (optie 3).\n      </font></p>\n      <font size=\"+1\">\n        <i>\n          <b>Tip: </b>Om de mogelijkheden van het programma te leren kennen is het vaak beter eerst een voorbeeldschema te\n          bekijken alvorens van een leeg schema te vertrekken.\n        </i>\n      </font>\n    </td></tr></table>\n    <div id=\"autoSaveRecover\"></div>\n    <br>\n    <table border=\"1px\" style=\"border-collapse:collapse\" align=\"center\" width=\"100%\">\n      <tr>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Voorbeeld 1</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Voorbeeld 2</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Leeg schema</b>\n        </td>\n        <td width=\"25%\" align=\"center\" bgcolor=\"LightGrey\">\n          <b>Openen</b>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/example000.svg\" height=\"300px\"><br><br>\n          Eenvoudig schema, enkel contactdozen en lichtpunten.\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/example001.svg\" height=\"300px\"><br><br>\n          Iets complexer schema met teleruptoren, verbruikers achter contactdozen en gesplitste kringen.\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/gear.svg\" height=\"100px\"><br><br>\n";
-var CONFIGPAGE_RIGHT = "\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <img src=\"examples/import_icon.svg\" height=\"100px\"><br><br>\n          Open een schema dat u eerder heeft opgeslagen op uw computer (EDS-bestand). Enkel bestanden aangemaakt na 12 juli 2019 worden herkend.\n          <br><br>\n        </td>\n      </tr>\n      <tr>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"load_example(0)\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"load_example(1)\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"read_settings()\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n        <td width=\"25%\" align=\"center\">\n          <br>\n          <button onclick=\"loadClicked()\">Verdergaan met deze optie</button>\n          <br><br>\n        </td>\n      </tr>\n    </table>\n  ";
-var CONFIGPRINTPAGE = "\n<div>\n</div>\n<br>\n";
-var EXAMPLE0 = "EDS0040000eJztWe9r6zYU/VeMv84rjp2kaxhjbQdv422f3qMblIdRrBtHtSwF2Un6g+5v35HsxM5emiVpB68QKCWRda+uzjmSjuInX5LKqqk/6l0EPmcV80e3T77gaAj8GTOkKn8UBr5QfPUx1VKyWUnoM2GyJPQzelb6oydfGX/k/yImEz/wq4cZ4dslU6Wci0qoDI2MqYrJZKYxLB5GaBpTmU7JFLbDyOcIJjuqIJI2oJiRYZnN1A+brEnOxiQTxZKKpCQ7ZnTfG+LpRnTCSVYs6WSIQ5uCcUOo1l9l2xwSFeNBOjcLSti80gVjVd15M7kok5Ikpfg2WQORa1O52S4wIZ25OcYIVYwVnRHr+hdam3YG/nPgl3puUpKixIhqLuVzUFMRtVT0Wip6/01FS8OVNhzfUHVGjOHzqDJz6la2hmVHIVYkq0qitpLokEo+mjeXAlr+urny4g9RMNhHBTaY8rLhtWZD6pQhAE1lxRR3GB0okDoRIBYqGc9FuYbiFcpZ5wRcS3oU2TqiYc6ttl3aCTviuWg5i1+nns0i9pTPeUc94UvyqXX5avXU1FQCbZvaibZq5/qa7a+froA+0jxHCV/L6DflLSGkl0S0TUPXW0VUA/K2GtpY/Je7OBt+C5y5zf0FznqHc3ZDRop02pxJ75e4q13ExZ3Vdn7Quu+11F1rUJZWXOty2+mBhtwmBhxCtuXVRDeZOsdtI4AJK8nCxAWppCAyaLDBGzvvlGhSoVNGYz1fckogCpaTxON12Rh+yuRkySoy3BLafdJJ3DTWKYHRlrFXcSoBBxxMjfV6m9sBcj86FuToBPLeIPeOBTk+gbw3yOGxIPdPIO8LcnxxLMiDE8h7KzluQe53bin9QxzvjRF35NWGoTUOf9pZ5TrHjS3wF7ZL4h4lTdSjtsB7OeOux1Qb8WjZkpTgdJfiTtVGJ0VBhuo+DoCO86FkjEe8+vdVpG0dhjXvC9oAF66k7LqKfRx51Ntu7/rfjL07wpJfMZ6zwqH7fr3d9U7aOrYj6vwkMDiZuzfcSKL+0Sif3N3+KF8cjXLH3v1ua0+FSbHSWpjaCZcd6W/g4PP5GCsRu5bIOlB/mgnK3M9O9ZQxQ8VQvN1HJHaeO9oDwjoUaORS5Dg0vg7EKZBvYaUp311SZ3NVuV2jt/OXuc49fXjsbe+tQXw/6J0fi150GHrRVvRI5e8YvDg6Frw3Wb/vFLwv6A2nsEDaW7fl/2//MJKl6bYXREHvIoDNOw+GQXwewBzjao2LH64lMM3YfOErcOhhR8Z2gjURR18sZULB4LKxJEscKfvpEv5o5rxXfVxNSWQWwMEQYijY/VJw+1Kp/0PfmqRyJtlD3d3dMjPL0e3TZhROLlO/YCqR28VakGzvghmwUNbIIb/mBHIqkboTkklJ9mh1CR7WGR6avDMGm1iKR/cyqm+5sCK04eSUOBHwq7CLVkr3IFpSGIZnxG1KvVTu5cyN1sb6Mu8SxJL7+OPY/PSpMvCIXmg/Iyj0UCpB/GQbPpMced/FkYf21Z9t//Dpj1X75gP6vmACMYtmsDO2HuxnrgsS6mxM1kIozLR5ayQ4Fda0wmMYbcGwiVyfibbbjXfvRXF44/09CL1fH+3k4W/dJWlQ42hnzbHknv8BXkCfFg==";
-var EXAMPLE1 = "EDS0040000eJztWm1v2zYQ/iuCvk4rJEp2amMYlqRAO6z9lCIbEBQCLZ1lVpQoUJTzhu637yjJFp3YjqK4Q1O4CAqZr8fneXh3pHRvc8gTtbCnPnHsmCpqT6/ubRbbU8+xCyohV/bUdWyWx6vHSHBOixKwzZzyErCdFEVpT+/tXNpT+x2bz23HVrcF4K9Tmpe8YorlCRZSmivKw0LgtFhJsGgGZbQAmekGUzvGzqBnZQBcd8gKkDTRIwVuO2qY0hnwMKehAs5Bz0luvDHWbvQOY+CKhsYIvquHoLEEtNZejbY5JVqMFVEllxDSSomMUtU03hyclWEJHCL8NV8DkQqp6tUucUEiqdfoY9ec0syYsbF/KYTsVmB/c+xSVDICzkqcMa84/+Y0VJCOCq+jwnuaio6GMyFj/IVWJ0ApPk+VrMC0bA3LHkO8SWcJ6Swhz7HkL3lwKWDJP5dnlv+eOKM+KtCdIS1bXhs2uIgodsCiUtE8rjF6pkCagRBiloezipVrKF6gnPWYCNc13LFk3aNlrt5t+7TjGuKZdJz5L1PPphE95XNiqMfdJZ9Gly9WT0ONYli2qR2yVTvnEe2vH1NAf9EMpOVt0dGfuXWNStqlom0iOt+qogaRw4poY/ef7hXQ2GAt6FgbP0dAf9Myo9GC5dBTKuMfQSp1TNkhFW+oVMirlsrZ3vBgsDbe5Wq2keZ1rH0CkDEab6FhM1mxFGTZUzNvu9lPBjq6i4IzVba66TEl8bbrNPhhdDrApZ3RONVSfdVCPd9Hm5HGvN1F2qHSmASwokcEGkTVkPTlf8pe+iQve52J24OkA+2sI0fDOCLGyYQYR5PR0zvJcPnnAumJVCxEue2IggWpHhjhYLzb5w2p7UjGma4le05L0DjFDPIww6CCBbrzBvYLgLnCRgnMRHUdQ4iioClwrF6bjdMvKJ9fU4WBiUULZdYYA7eFzZAI0pa5V/3ycKmDHPCZWOfSe1D2J4NRJkeU+6JMhqPsdyh/1LZHTEa40TqYugWXhvQ3cLDjaoY7EX0USzahbtaKS8spWq09CEdf8xV6YNd0RRhSzlLMpB53VBK91GM6Wru5Hq2oclV7C2+vuz4ZmPuR54FHtoIHefqKsfPJQOwOIjyFoUJWhRLyNWIXjHpg90Qu905kQjFMlxMoVVWh0zBOHyvM4AaXmSN2qpJN1rBLdLi8WFIac+1qW94aRLhIKcdoL6s0zUVhApIAWpdImmlPFm92i0HVwfwBvo8sesrFBcb5TOM2KPH9uOLGfhgdGu4wL7lDh9z65c8fH8SODxWsENWqwBIO6zQoFyJG5Gv6G4zfN5kZAqTPHU2PnvLbF3D2OTLjSDc5pjTfJ9h6/lCQjxlNb5CDwLj69Qfe3H1iEfolwedi2ZyR+rwmIEPZ9Q/GLvnZ2fWDHiBvSxqCg1y2eUbc9dxnkTw6buHefjIYjPL4iHJvR2lcNfmTgY7yUrKvYDWXPt3lzwcNBDrQOo9c6iZhXRW2ve6EBt5KaVy3WAjJ7jRbmCViIs/Z17zJgyI0SELTpgbAuAyGcIZVsXp4s9SVjkYN70vYADeqZGleEfXZ94GRHnlGwv2sHPLCOJa81kPyPozIATB6YZ79IMl+dOPYL9VeO4jvkWkH/s8C026Nmce4gTD5RqT1h76A/cl3nD8+AEbHMLkD5C+4mkixJYJ0VS/6x/0PTdV6uPIc4ngTh7jOiUPGzthBB/PWIZ4zcTCPIsTBOE/w+cTxiROMnABbeA6ekvDQhMcX1BAmuJh9YWqAEQ8dOjor3Ij++IvWD8sxgNMZB60iyPXTKcbjon79s9ryLNEcjYITx87ozTWL9Wd2o8lIv60pC05vm+Z17pFo1Vzdb/ZChcjmk7tS6csi7Kup0K0zKutcveYHxxcxIJX6DksrkXIOWsL1ALfrEW7bcQtaYF90i9j0NNDBXu8I3R3qbTFnHNeU6Wq4wa3JwXW9NxDrIcV1Xn+udimE1C+IrFNUItSPv83k7xdKUqosVz+7+M9CU9FfKtAFn4FPrV98YmH56k+Xv7/4tCrfrIBfM8qwz7Kd7A1dT/ZHLDJg+ZuZvk1iOa60/Y6OxZDpt2e4l6XQYOiB6jZzoY+F1o1FfPfS+nfkWh/u9OIxC6qj0UmDo151zJT97T8FxBHk";
-var EXAMPLE_DEFAULT = "EDS0040000eJytVN9v00AM/leieyWM/GgniBCivICE4GVoL9MUuTk3PfVyF91dunbT+NuxkzZZAQ0VqKLq4rM/f/7s+EFoNHVYi2IWCwkBRHHzIJQURRqLFhyaIIokFsrI47GyWkPrkXxWoD2Sn7OtF8WDME4UQsQi7Fuk0wKM150KytRkBDABdNlayiiKLBZL9NUaXcPXhZBqtULOpxA1uzctOqgJ53I+IJYbWKIuDZQBtUbOle3SS/I9iS0l6gDlFJ8nxBqkQz+xK0/T9faqc1ssoQu2AQiD7RRZ+dKjxoreVmP1G+tCX+aWarE1F8eRBqB5km/gvrXWTezFYyy87VyFWnlKaDqtH+NB/mySP53kT8+R/4N1kt6IdI0AdC6C6/Aps1GUZ4jkE5FsIpKdQ+Sz+68T8LvO/NpzisCNP7RxUF/bCsidTF9fLc4chAGBtFSmXHbKj0X//YSMkKTLHd6regw4duiZtsymtuRTW/J/m4+f0v9hQG7pngrdEtZNP1mnf3TNRG/SOIvzeHbLRJQJZYClRqaDhk8LkrntezZM5xpVveZRv3wTiwZ2d0ryekpfp6y1bzXsB/eEFaiZHm2skygfwA27yhN2H8tk2bsBt0HnhwoI30qkpgRVAfce6MP04gCwHxH2B9wWaLy8uu9324w1YWk5HHt9V4oGGxq+RjTSAUie7wYuUDKsvTP9d39NW4A1jhbVOmB/fLt0764CRYQo4XNCv4joEk5ANnxDXUQv8iwi+/Fh+8erL0f76QW+bEBRzPaQ7ALGZO+lbVCZiyVy+w1Ve1hISmLD829NcJYFYaDeZ2V520a7KMuT6+j7PIk+3bMA9Klwk+eDlFy4VEE8/gDGURmI";
+    }
+}
+const SITPLANVIEW_SELECT_PADDING = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--selectPadding').trim());
+const SITPLANVIEW_ZOOMINTERVAL = { MIN: 0.1, MAX: 1000 };
+const SITPLANVIEW_DEFAULT_SCALE = 0.7;
+var CONFIGPAGE_LEFT = `
+    <table border="1px" style="border-collapse:collapse;" align="center" width="100%"><tr><td style="padding-top: 0; padding-right: 10px; padding-bottom: 10px; padding-left: 10px;">
+        <p><font size="+2">
+          <b>Welkom op ééndraadschema</b>
+        </font></p>
+      <p><font size="+1">  
+           Deze gratis tool laat toe zowel ééndraadschema's als situatieschema's te tekenen, inclusief complexere schema's
+           met bijvoorbeeld domotica. De schema's kunnen als PDF bestand worden geëxporteerd en geprint.
+           Voor de experts kunnen schema's eveneens worden omgezet in SVG vectorformaat om in andere programma's verder te bewerken.
+      </font></p>
+      <p><font size="+1">  
+           Kies één van onderstaande voorbeelden om van te starten of start van een leeg schema (optie 3).
+      </font></p>
+      <font size="+1">
+        <i>
+          <b>Tip: </b>Om de mogelijkheden van het programma te leren kennen is het vaak beter eerst een voorbeeldschema te
+          bekijken alvorens van een leeg schema te vertrekken.
+        </i>
+      </font>
+    </td></tr></table>
+    <div id="autoSaveRecover"></div>
+    <br>
+    <table border="1px" style="border-collapse:collapse" align="center" width="100%">
+      <tr>
+        <td width="25%" align="center" bgcolor="LightGrey">
+          <b>Voorbeeld 1</b>
+        </td>
+        <td width="25%" align="center" bgcolor="LightGrey">
+          <b>Voorbeeld 2</b>
+        </td>
+        <td width="25%" align="center" bgcolor="LightGrey">
+          <b>Leeg schema</b>
+        </td>
+        <td width="25%" align="center" bgcolor="LightGrey">
+          <b>Openen</b>
+        </td>
+      </tr>
+      <tr>
+        <td width="25%" align="center">
+          <br>
+          <img src="examples/example000.svg" height="300px"><br><br>
+          Eenvoudig schema, enkel contactdozen en lichtpunten.
+          <br><br>
+        </td>
+        <td width="25%" align="center">
+          <br>
+          <img src="examples/example001.svg" height="300px"><br><br>
+          Iets complexer schema met teleruptoren, verbruikers achter contactdozen en gesplitste kringen.
+          <br><br>
+        </td>
+        <td width="25%" align="center">
+          <br>
+          <img src="examples/gear.svg" height="100px"><br><br>
+`;
+var CONFIGPAGE_RIGHT = `
+          <br><br>
+        </td>
+        <td width="25%" align="center">
+          <br>
+          <img src="examples/import_icon.svg" height="100px"><br><br>
+          Open een schema dat u eerder heeft opgeslagen op uw computer (EDS-bestand). Enkel bestanden aangemaakt na 12 juli 2019 worden herkend.
+          <br><br>
+        </td>
+      </tr>
+      <tr>
+        <td width="25%" align="center">
+          <br>
+          <button onclick="load_example(0)">Verdergaan met deze optie</button>
+          <br><br>
+        </td>
+        <td width="25%" align="center">
+          <br>
+          <button onclick="load_example(1)">Verdergaan met deze optie</button>
+          <br><br>
+        </td>
+        <td width="25%" align="center">
+          <br>
+          <button onclick="read_settings()">Verdergaan met deze optie</button>
+          <br><br>
+        </td>
+        <td width="25%" align="center">
+          <br>
+          <button onclick="loadClicked()">Verdergaan met deze optie</button>
+          <br><br>
+        </td>
+      </tr>
+    </table>
+  `;
+var CONFIGPRINTPAGE = `
+<div>
+</div>
+<br>
+`;
+var EXAMPLE0 = `EDS0040000eJztWe9r6zYU/VeMv84rjp2kaxhjbQdv422f3qMblIdRrBtHtSwF2Un6g+5v35HsxM5emiVpB68QKCWRda+uzjmSjuInX5LKqqk/6l0EPmcV80e3T77gaAj8GTOkKn8UBr5QfPUx1VKyWUnoM2GyJPQzelb6oydfGX/k/yImEz/wq4cZ4dslU6Wci0qoDI2MqYrJZKYxLB5GaBpTmU7JFLbDyOcIJjuqIJI2oJiRYZnN1A+brEnOxiQTxZKKpCQ7ZnTfG+LpRnTCSVYs6WSIQ5uCcUOo1l9l2xwSFeNBOjcLSti80gVjVd15M7kok5Ikpfg2WQORa1O52S4wIZ25OcYIVYwVnRHr+hdam3YG/nPgl3puUpKixIhqLuVzUFMRtVT0Wip6/01FS8OVNhzfUHVGjOHzqDJz6la2hmVHIVYkq0qitpLokEo+mjeXAlr+urny4g9RMNhHBTaY8rLhtWZD6pQhAE1lxRR3GB0okDoRIBYqGc9FuYbiFcpZ5wRcS3oU2TqiYc6ttl3aCTviuWg5i1+nns0i9pTPeUc94UvyqXX5avXU1FQCbZvaibZq5/qa7a+froA+0jxHCV/L6DflLSGkl0S0TUPXW0VUA/K2GtpY/Je7OBt+C5y5zf0FznqHc3ZDRop02pxJ75e4q13ExZ3Vdn7Quu+11F1rUJZWXOty2+mBhtwmBhxCtuXVRDeZOsdtI4AJK8nCxAWppCAyaLDBGzvvlGhSoVNGYz1fckogCpaTxON12Rh+yuRkySoy3BLafdJJ3DTWKYHRlrFXcSoBBxxMjfV6m9sBcj86FuToBPLeIPeOBTk+gbw3yOGxIPdPIO8LcnxxLMiDE8h7KzluQe53bin9QxzvjRF35NWGoTUOf9pZ5TrHjS3wF7ZL4h4lTdSjtsB7OeOux1Qb8WjZkpTgdJfiTtVGJ0VBhuo+DoCO86FkjEe8+vdVpG0dhjXvC9oAF66k7LqKfRx51Ntu7/rfjL07wpJfMZ6zwqH7fr3d9U7aOrYj6vwkMDiZuzfcSKL+0Sif3N3+KF8cjXLH3v1ua0+FSbHSWpjaCZcd6W/g4PP5GCsRu5bIOlB/mgnK3M9O9ZQxQ8VQvN1HJHaeO9oDwjoUaORS5Dg0vg7EKZBvYaUp311SZ3NVuV2jt/OXuc49fXjsbe+tQXw/6J0fi150GHrRVvRI5e8YvDg6Frw3Wb/vFLwv6A2nsEDaW7fl/2//MJKl6bYXREHvIoDNOw+GQXwewBzjao2LH64lMM3YfOErcOhhR8Z2gjURR18sZULB4LKxJEscKfvpEv5o5rxXfVxNSWQWwMEQYijY/VJw+1Kp/0PfmqRyJtlD3d3dMjPL0e3TZhROLlO/YCqR28VakGzvghmwUNbIIb/mBHIqkboTkklJ9mh1CR7WGR6avDMGm1iKR/cyqm+5sCK04eSUOBHwq7CLVkr3IFpSGIZnxG1KvVTu5cyN1sb6Mu8SxJL7+OPY/PSpMvCIXmg/Iyj0UCpB/GQbPpMced/FkYf21Z9t//Dpj1X75gP6vmACMYtmsDO2HuxnrgsS6mxM1kIozLR5ayQ4Fda0wmMYbcGwiVyfibbbjXfvRXF44/09CL1fH+3k4W/dJWlQ42hnzbHknv8BXkCfFg==`;
+var EXAMPLE1 = `EDS0040000eJztWm1v2zYQ/iuCvk4rJEp2amMYlqRAO6z9lCIbEBQCLZ1lVpQoUJTzhu637yjJFp3YjqK4Q1O4CAqZr8fneXh3pHRvc8gTtbCnPnHsmCpqT6/ubRbbU8+xCyohV/bUdWyWx6vHSHBOixKwzZzyErCdFEVpT+/tXNpT+x2bz23HVrcF4K9Tmpe8YorlCRZSmivKw0LgtFhJsGgGZbQAmekGUzvGzqBnZQBcd8gKkDTRIwVuO2qY0hnwMKehAs5Bz0luvDHWbvQOY+CKhsYIvquHoLEEtNZejbY5JVqMFVEllxDSSomMUtU03hyclWEJHCL8NV8DkQqp6tUucUEiqdfoY9ec0syYsbF/KYTsVmB/c+xSVDICzkqcMa84/+Y0VJCOCq+jwnuaio6GMyFj/IVWJ0ApPk+VrMC0bA3LHkO8SWcJ6Swhz7HkL3lwKWDJP5dnlv+eOKM+KtCdIS1bXhs2uIgodsCiUtE8rjF6pkCagRBiloezipVrKF6gnPWYCNc13LFk3aNlrt5t+7TjGuKZdJz5L1PPphE95XNiqMfdJZ9Gly9WT0ONYli2qR2yVTvnEe2vH1NAf9EMpOVt0dGfuXWNStqlom0iOt+qogaRw4poY/ef7hXQ2GAt6FgbP0dAf9Myo9GC5dBTKuMfQSp1TNkhFW+oVMirlsrZ3vBgsDbe5Wq2keZ1rH0CkDEab6FhM1mxFGTZUzNvu9lPBjq6i4IzVba66TEl8bbrNPhhdDrApZ3RONVSfdVCPd9Hm5HGvN1F2qHSmASwokcEGkTVkPTlf8pe+iQve52J24OkA+2sI0fDOCLGyYQYR5PR0zvJcPnnAumJVCxEue2IggWpHhjhYLzb5w2p7UjGma4le05L0DjFDPIww6CCBbrzBvYLgLnCRgnMRHUdQ4iioClwrF6bjdMvKJ9fU4WBiUULZdYYA7eFzZAI0pa5V/3ycKmDHPCZWOfSe1D2J4NRJkeU+6JMhqPsdyh/1LZHTEa40TqYugWXhvQ3cLDjaoY7EX0USzahbtaKS8spWq09CEdf8xV6YNd0RRhSzlLMpB53VBK91GM6Wru5Hq2oclV7C2+vuz4ZmPuR54FHtoIHefqKsfPJQOwOIjyFoUJWhRLyNWIXjHpg90Qu905kQjFMlxMoVVWh0zBOHyvM4AaXmSN2qpJN1rBLdLi8WFIac+1qW94aRLhIKcdoL6s0zUVhApIAWpdImmlPFm92i0HVwfwBvo8sesrFBcb5TOM2KPH9uOLGfhgdGu4wL7lDh9z65c8fH8SODxWsENWqwBIO6zQoFyJG5Gv6G4zfN5kZAqTPHU2PnvLbF3D2OTLjSDc5pjTfJ9h6/lCQjxlNb5CDwLj69Qfe3H1iEfolwedi2ZyR+rwmIEPZ9Q/GLvnZ2fWDHiBvSxqCg1y2eUbc9dxnkTw6buHefjIYjPL4iHJvR2lcNfmTgY7yUrKvYDWXPt3lzwcNBDrQOo9c6iZhXRW2ve6EBt5KaVy3WAjJ7jRbmCViIs/Z17zJgyI0SELTpgbAuAyGcIZVsXp4s9SVjkYN70vYADeqZGleEfXZ94GRHnlGwv2sHPLCOJa81kPyPozIATB6YZ79IMl+dOPYL9VeO4jvkWkH/s8C026Nmce4gTD5RqT1h76A/cl3nD8+AEbHMLkD5C+4mkixJYJ0VS/6x/0PTdV6uPIc4ngTh7jOiUPGzthBB/PWIZ4zcTCPIsTBOE/w+cTxiROMnABbeA6ekvDQhMcX1BAmuJh9YWqAEQ8dOjor3Ij++IvWD8sxgNMZB60iyPXTKcbjon79s9ryLNEcjYITx87ozTWL9Wd2o8lIv60pC05vm+Z17pFo1Vzdb/ZChcjmk7tS6csi7Kup0K0zKutcveYHxxcxIJX6DksrkXIOWsL1ALfrEW7bcQtaYF90i9j0NNDBXu8I3R3qbTFnHNeU6Wq4wa3JwXW9NxDrIcV1Xn+udimE1C+IrFNUItSPv83k7xdKUqosVz+7+M9CU9FfKtAFn4FPrV98YmH56k+Xv7/4tCrfrIBfM8qwz7Kd7A1dT/ZHLDJg+ZuZvk1iOa60/Y6OxZDpt2e4l6XQYOiB6jZzoY+F1o1FfPfS+nfkWh/u9OIxC6qj0UmDo151zJT97T8FxBHk`;
+var EXAMPLE_DEFAULT = `EDS0040000eJytVN9v00AM/leieyWM/GgniBCivICE4GVoL9MUuTk3PfVyF91dunbT+NuxkzZZAQ0VqKLq4rM/f/7s+EFoNHVYi2IWCwkBRHHzIJQURRqLFhyaIIokFsrI47GyWkPrkXxWoD2Sn7OtF8WDME4UQsQi7Fuk0wKM150KytRkBDABdNlayiiKLBZL9NUaXcPXhZBqtULOpxA1uzctOqgJ53I+IJYbWKIuDZQBtUbOle3SS/I9iS0l6gDlFJ8nxBqkQz+xK0/T9faqc1ssoQu2AQiD7RRZ+dKjxoreVmP1G+tCX+aWarE1F8eRBqB5km/gvrXWTezFYyy87VyFWnlKaDqtH+NB/mySP53kT8+R/4N1kt6IdI0AdC6C6/Aps1GUZ4jkE5FsIpKdQ+Sz+68T8LvO/NpzisCNP7RxUF/bCsidTF9fLc4chAGBtFSmXHbKj0X//YSMkKTLHd6regw4duiZtsymtuRTW/J/m4+f0v9hQG7pngrdEtZNP1mnf3TNRG/SOIvzeHbLRJQJZYClRqaDhk8LkrntezZM5xpVveZRv3wTiwZ2d0ryekpfp6y1bzXsB/eEFaiZHm2skygfwA27yhN2H8tk2bsBt0HnhwoI30qkpgRVAfce6MP04gCwHxH2B9wWaLy8uu9324w1YWk5HHt9V4oGGxq+RjTSAUie7wYuUDKsvTP9d39NW4A1jhbVOmB/fLt0764CRYQo4XNCv4joEk5ANnxDXUQv8iwi+/Fh+8erL0f76QW+bEBRzPaQ7ALGZO+lbVCZiyVy+w1Ve1hISmLD829NcJYFYaDeZ2V520a7KMuT6+j7PIk+3bMA9Klwk+eDlFy4VEE8/gDGURmI`;
 var VERSION = "git"; //can be "git" or "online"
-var PROP_Contact_Text = "<html>\n  <head>\n    <title>Eendraadschema online</title>\n    <link rel=\"stylesheet\" href=\"css/about.css\">\n  </head>\n  <body>\n    <h2>Een &eacute;&eacute;ndraadschema tekenen.</h2>\n    <p class=\"ondertitel\">Een cr&eacute;atie van <a target=\"_blank\" href=\"https://ivan.goethals-jacobs.be\">Ivan Goethals</a></p>\n    <p>Dit is een standalone versie (development) waarbij enkele functionaliteiten zijn uitgeschakeld.</p>\n    <p>Gebruik de online versie op <a href=\"https://eendraadschema.goethals-jacobs.be\">https://eendraadschema.goethals-jacobs.be</a> om toegang te krijgen tot het contactformulier.</p>\n    <p>Kies <b>Bewerken</b> in het menu om verder te gaan met tekenen.</p>\n  </body>\n</html>";
+var PROP_Contact_Text = `<html>
+  <head>
+    <title>Eendraadschema online</title>
+    <link rel="stylesheet" href="css/about.css">
+  </head>
+  <body>
+    <h2>Een &eacute;&eacute;ndraadschema tekenen.</h2>
+    <p class="ondertitel">Een cr&eacute;atie van <a target="_blank" href="https://ivan.goethals-jacobs.be">Ivan Goethals</a></p>
+    <p>Dit is een standalone versie (development) waarbij enkele functionaliteiten zijn uitgeschakeld.</p>
+    <p>Gebruik de online versie op <a href="https://eendraadschema.goethals-jacobs.be">https://eendraadschema.goethals-jacobs.be</a> om toegang te krijgen tot het contactformulier.</p>
+    <p>Kies <b>Bewerken</b> in het menu om verder te gaan met tekenen.</p>
+  </body>
+</html>`;
 function PROP_GDPR() {
     return ("");
 }
@@ -11652,13 +12229,13 @@ function PROP_getCookieText() {
 function PROP_edit_menu(menuItems) { }
 //--- START OF DEVELOPMENT OPTIONS ---
 function PROP_development_options() {
-    var outstr = '<br><h2>Expert ontwikkel opties, Gebruik enkel indien u weet wat u doet.</h2>'
+    let outstr = '<br><h2>Expert ontwikkel opties, Gebruik enkel indien u weet wat u doet.</h2>'
         + '<textarea id="HL_loadfromtext" style="width: 80%; height: 8em;"></textarea><br>'
         + '<button onclick="loadFileFromText()">Load from input</button>';
     return outstr;
 }
 function loadFileFromText() {
-    var str = document.getElementById('HL_loadfromtext').value;
+    let str = document.getElementById('HL_loadfromtext').value;
     EDStoStructure(str);
     fileAPIobj.clear();
 }
@@ -11675,139 +12252,139 @@ function propUpload(text) {
     return ("");
     //Does nothing in the serverless version, only used on https://eendraadschema.goethals-jacobs.be  
 }
-var CookieBanner = /** @class */ (function () {
-    function CookieBanner() {
-    }
-    CookieBanner.prototype.run = function () { }; //Does nothing in the serverless version, only used on https://eendraadschema.goethals-jacobs.be
-    return CookieBanner;
-}());
-var _this = this;
+class CookieBanner {
+    run() { } //Does nothing in the serverless version, only used on https://eendraadschema.goethals-jacobs.be
+}
+globalThis.session = new Session();
+globalThis.appDocStorage = new MultiLevelStorage('appDocStorage', {});
+globalThis.undostruct = new undoRedo(100);
+globalThis.structure = null;
 function forceUndoStore() {
-    undostruct.store();
+    globalThis.undostruct.store();
 }
 function HLCollapseExpand(my_id, state) {
-    var ordinal;
-    ordinal = structure.getOrdinalById(my_id);
+    let ordinal;
+    ordinal = globalThis.structure.getOrdinalById(my_id);
     if (state == undefined) {
-        structure.data[ordinal].collapsed = !structure.data[ordinal].collapsed;
+        globalThis.structure.data[ordinal].collapsed = !globalThis.structure.data[ordinal].collapsed;
     }
     else {
-        structure.data[ordinal].collapsed = state;
+        globalThis.structure.data[ordinal].collapsed = state;
     }
-    undostruct.store();
-    structure.updateHTMLinner(my_id);
+    globalThis.undostruct.store();
+    globalThis.structure.updateHTMLinner(my_id);
     HLRedrawTreeSVG();
 }
 function HLDelete(my_id) {
-    structure.deleteById(my_id);
-    undostruct.store();
+    globalThis.structure.deleteById(my_id);
+    globalThis.undostruct.store();
     HLRedrawTree();
 }
 function HLAdd(my_id) {
-    structure.addItem("");
-    undostruct.store();
+    globalThis.structure.addItem("");
+    globalThis.undostruct.store();
     HLRedrawTree();
 }
 function HLInsertBefore(my_id) {
-    structure.insertItemBeforeId(new Electro_Item(structure), my_id);
-    undostruct.store();
+    globalThis.structure.insertItemBeforeId(new Electro_Item(globalThis.structure), my_id);
+    globalThis.undostruct.store();
     HLRedrawTree();
 }
 function HLInsertAfter(my_id) {
-    structure.insertItemAfterId(new Electro_Item(structure), my_id);
-    undostruct.store();
+    globalThis.structure.insertItemAfterId(new Electro_Item(globalThis.structure), my_id);
+    globalThis.undostruct.store();
     HLRedrawTree();
 }
 function HLMoveDown(my_id) {
-    structure.moveDown(my_id);
-    undostruct.store();
+    globalThis.structure.moveDown(my_id);
+    globalThis.undostruct.store();
     HLRedrawTree();
 }
 function HLMoveUp(my_id) {
-    structure.moveUp(my_id);
-    undostruct.store();
+    globalThis.structure.moveUp(my_id);
+    globalThis.undostruct.store();
     HLRedrawTree();
 }
 function HLClone(my_id) {
-    structure.clone(my_id);
-    undostruct.store();
+    globalThis.structure.clone(my_id);
+    globalThis.undostruct.store();
     HLRedrawTree();
 }
 function HLInsertChild(my_id) {
-    structure.insertChildAfterId(new Electro_Item(structure), my_id);
-    //undostruct.store();  We should not call this as the CollapseExpand already does that
+    globalThis.structure.insertChildAfterId(new Electro_Item(globalThis.structure), my_id);
+    //globalThis.undostruct.store();  We should not call this as the CollapseExpand already does that
     HLCollapseExpand(my_id, false);
     //No need to call HLRedrawTree as HLCollapseExpand already does that
 }
 function HL_editmode() {
-    structure.mode = document.getElementById("edit_mode").value;
+    globalThis.structure.mode = document.getElementById("edit_mode").value;
     HLRedrawTreeHTML();
 }
 function HLExpand(my_id) {
-    var element = structure.getElectroItemById(my_id);
+    let element = globalThis.structure.getElectroItemById(my_id);
     if (element !== null) {
         element.expand();
     }
-    structure.reSort();
-    undostruct.store();
+    globalThis.structure.reSort();
+    globalThis.undostruct.store();
     HLRedrawTree();
 }
 function HL_changeparent(my_id) {
     // See what the new parentid is
-    var str_newparentid = document.getElementById("id_parent_change_" + my_id).value;
+    let str_newparentid = document.getElementById("id_parent_change_" + my_id).value;
     //-- Check that it is valid. It needs to be a number and the parent an active component --
-    var error = 0;
-    var parentOrdinal = 0;
+    let error = 0;
+    let parentOrdinal = 0;
     if (!isInt(str_newparentid)) {
         error = 1;
     }
-    var int_newparentid = parseInt(str_newparentid);
+    let int_newparentid = parseInt(str_newparentid);
     if (int_newparentid != 0) {
-        parentOrdinal = structure.getOrdinalById(int_newparentid);
+        parentOrdinal = globalThis.structure.getOrdinalById(int_newparentid);
         if (typeof (parentOrdinal) == "undefined")
             error = 1;
-        else if ((!structure.active[parentOrdinal]) || (int_newparentid == my_id))
+        else if ((!globalThis.structure.active[parentOrdinal]) || (int_newparentid == my_id))
             error = 1;
     }
     if (error == 1)
         alert("Dat is geen geldig moeder-object. Probeer opnieuw.");
     else
-        structure.data[structure.getOrdinalById(my_id)].parent = int_newparentid;
-    structure.reSort();
-    undostruct.store();
+        globalThis.structure.data[globalThis.structure.getOrdinalById(my_id)].parent = int_newparentid;
+    globalThis.structure.reSort();
+    globalThis.undostruct.store();
     HLRedrawTree();
 }
 function HL_cancelFilename() {
-    document.getElementById("settings").innerHTML = '<code>' + structure.properties.filename + '</code><br><button style="font-size:14px" onclick="exportjson()">Opslaan</button>&nbsp;<button style="font-size:14px" onclick="HL_enterSettings()">Naam wijzigen</button>';
+    document.getElementById("settings").innerHTML = '<code>' + globalThis.structure.properties.filename + '</code><br><button style="font-size:14px" onclick="exportjson()">Opslaan</button>&nbsp;<button style="font-size:14px" onclick="HL_enterSettings()">Naam wijzigen</button>';
 }
 function HL_changeFilename() {
     var regex = new RegExp('^.*\\.eds$');
     var filename = document.getElementById("filename").value;
     if (regex.test(filename)) {
-        structure.properties.setFilename(document.getElementById("filename").value);
-        document.getElementById("settings").innerHTML = '<code>' + structure.properties.filename + '</code><br><button style="font-size:14px" onclick="HL_enterSettings()">Wijzigen</button>&nbsp;<button style="font-size:14px" onclick="exportjson()">Opslaan</button>';
+        globalThis.structure.properties.setFilename(document.getElementById("filename").value);
+        document.getElementById("settings").innerHTML = '<code>' + globalThis.structure.properties.filename + '</code><br><button style="font-size:14px" onclick="HL_enterSettings()">Wijzigen</button>&nbsp;<button style="font-size:14px" onclick="exportjson()">Opslaan</button>';
     }
     else {
-        structure.properties.setFilename(document.getElementById("filename").value + '.eds');
-        document.getElementById("settings").innerHTML = '<code>' + structure.properties.filename + '</code><br><button style="font-size:14px" onclick="HL_enterSettings()">Wijzigen</button>&nbsp;<button style="font-size:14px" onclick="exportjson()">Opslaan</button>';
+        globalThis.structure.properties.setFilename(document.getElementById("filename").value + '.eds');
+        document.getElementById("settings").innerHTML = '<code>' + globalThis.structure.properties.filename + '</code><br><button style="font-size:14px" onclick="HL_enterSettings()">Wijzigen</button>&nbsp;<button style="font-size:14px" onclick="exportjson()">Opslaan</button>';
     }
 }
 function HL_enterSettings() {
-    document.getElementById("settings").innerHTML = '<input type="text" id="filename" onchange="HL_changeFilename()" value="' + structure.properties.filename + '" pattern="^.*\\.eds$"><br><i>Gebruik enkel alphanumerieke karakters a-z A-Z 0-9, streepjes en spaties. <b>Eindig met ".eds"</b>. Druk daarna op enter.</i><br><button onclick="HL_cancelFilename()">Annuleer</button>&nbsp;<button onclick="HL_changeFilename()">Toepassen</button>';
+    document.getElementById("settings").innerHTML = '<input type="text" id="filename" onchange="HL_changeFilename()" value="' + globalThis.structure.properties.filename + '" pattern="^.*\\.eds$"><br><i>Gebruik enkel alphanumerieke karakters a-z A-Z 0-9, streepjes en spaties. <b>Eindig met ".eds"</b>. Druk daarna op enter.</i><br><button onclick="HL_cancelFilename()">Annuleer</button>&nbsp;<button onclick="HL_changeFilename()">Toepassen</button>';
 }
 function HLRedrawTreeHTML() {
     toggleAppView('2col');
     document.getElementById("configsection").innerHTML = "";
-    var output = structure.toHTML(0) + "<br>" + renderAddressStacked();
+    var output = globalThis.structure.toHTML(0) + "<br>" + renderAddressStacked();
     document.getElementById("left_col_inner").innerHTML = output;
 }
 function HLRedrawTreeHTMLLight() {
-    var output = structure.toHTML(0) + "<br>" + renderAddressStacked();
+    var output = globalThis.structure.toHTML(0) + "<br>" + renderAddressStacked();
     document.getElementById("left_col_inner").innerHTML = output;
 }
 function HLRedrawTreeSVG() {
-    var str = '<b>Tekening: </b>Ga naar het print-menu om de tekening af te printen of te exporteren als SVG vector graphics.<br><br>'
-        + '<div id="EDS">' + flattenSVGfromString(structure.toSVG(0, "horizontal").data, 10) + '</div>'
+    let str = '<b>Tekening: </b>Ga naar het print-menu om de tekening af te printen of te exporteren als SVG vector graphics.<br><br>'
+        + '<div id="EDS">' + flattenSVGfromString(globalThis.structure.toSVG(0, "horizontal").data, 10) + '</div>'
         + '<h2>Legende:</h2>'
         + '<button style="background-color:green;">&#9650;</button> Item hierboven invoegen (zelfde niveau)<br>'
         + '<button style="background-color:green;">&#9660;</button> Item hieronder invoegen (zelfde niveau)<br>'
@@ -11823,11 +12400,11 @@ function HLRedrawTree() {
 }
 function buildNewStructure(structure) {
     // Paremeterisation of the electro board
-    var aantalDrogeKringen = CONF_aantal_droge_kringen;
-    var aantalNatteKringen = CONF_aantal_natte_kringen;
+    let aantalDrogeKringen = CONF_aantal_droge_kringen;
+    let aantalNatteKringen = CONF_aantal_natte_kringen;
     ;
     // Eerst het hoofddifferentieel maken
-    var itemCounter = 0;
+    let itemCounter = 0;
     structure.addItem("Aansluiting");
     structure.data[0].props.type = "Aansluiting";
     structure.data[0].props.naam = "";
@@ -11841,7 +12418,7 @@ function buildNewStructure(structure) {
     structure.insertChildAfterId(new Bord(structure), itemCounter);
     structure.data[itemCounter].props.type = "Bord";
     itemCounter++;
-    var droogBordCounter = itemCounter;
+    let droogBordCounter = itemCounter;
     // Nat bord voorzien
     structure.insertChildAfterId(new Kring(structure), itemCounter);
     structure.data[itemCounter].props.type = "Kring";
@@ -11867,13 +12444,13 @@ function buildNewStructure(structure) {
     }
 }
 function reset_all() {
-    if (structure != null)
-        structure.dispose();
-    structure = new Hierarchical_List();
-    buildNewStructure(structure);
+    if (globalThis.structure != null)
+        globalThis.structure.dispose();
+    globalThis.structure = new Hierarchical_List();
+    buildNewStructure(globalThis.structure);
     topMenu.selectMenuItemByName('Eéndraadschema');
-    undostruct.clear();
-    undostruct.store();
+    globalThis.undostruct.clear();
+    globalThis.undostruct.store();
 }
 function renderAddress() {
     var outHTML = "";
@@ -11881,41 +12458,41 @@ function renderAddress() {
         '<div style="display:inline-block; width:25px;"></div><div style="display:inline-block;"><table cols="3" rows="1" style="border-collapse: collapse;border-style: solid; border-width:medium;" cellpadding="5">' +
         '  <tr><th style="text-align: left;border-style: solid; border-width:thin;">Plaats van de elektrische installatie</th><th style="text-align: left;border-style: solid; border-width:thin;">Installateur</th><th style="text-align: left;border-style: solid; border-width:thin;">Info</th></tr>' +
         '  <tr>' +
-        '    <td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_owner" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + structure.properties.owner + '</td>' +
-        '    <td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_installer" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + structure.properties.installer + '</td>' +
-        '    <td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_control" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + structure.properties.control + '</td>' +
-        '    <td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_info" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + structure.properties.info + '</td>' +
+        '    <td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_owner" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + globalThis.structure.properties.owner + '</td>' +
+        '    <td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_installer" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + globalThis.structure.properties.installer + '</td>' +
+        '    <td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_control" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + globalThis.structure.properties.control + '</td>' +
+        '    <td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_info" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + globalThis.structure.properties.info + '</td>' +
         '  </tr>' +
         '</table></div></div>';
     return outHTML;
 }
 function renderAddressStacked() {
     var outHTML = "";
-    if (!structure.properties.control)
-        structure.properties.control = "<br>";
+    if (!globalThis.structure.properties.control)
+        globalThis.structure.properties.control = "<br>";
     outHTML = 'Plaats van de elektrische installatie' +
         '<table width="90%" cols="1" rows="1" style="border-collapse: collapse;border-style: solid; border-width:thin;" cellpadding="5">' +
-        '<tr><td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_owner" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + structure.properties.owner + '</td></tr>' +
+        '<tr><td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_owner" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + globalThis.structure.properties.owner + '</td></tr>' +
         '</table><br>' +
         'Installateur' +
         '<table width="90%" cols="1" rows="1" style="border-collapse: collapse;border-style: solid; border-width:thin;" cellpadding="5">' +
-        '<tr><td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_installer" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + structure.properties.installer + '</td></tr>' +
+        '<tr><td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_installer" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + globalThis.structure.properties.installer + '</td></tr>' +
         '</table><br>' +
         'Erkend organisme (keuring)' +
         '<table width="90%" cols="1" rows="1" style="border-collapse: collapse;border-style: solid; border-width:thin;" cellpadding="5">' +
-        '<tr><td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_control" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + structure.properties.control + '</td></tr>' +
+        '<tr><td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_control" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + globalThis.structure.properties.control + '</td></tr>' +
         '</table><br>' +
         'Info' +
         '<table width="90%" cols="1" rows="1" style="border-collapse: collapse;border-style: solid; border-width:thin;" cellpadding="5">' +
-        '<tr><td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_info" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + structure.properties.info + '</td></tr>' +
+        '<tr><td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_info" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + globalThis.structure.properties.info + '</td></tr>' +
         '</table>';
     return outHTML;
 }
 function changeAddressParams() {
-    structure.properties.owner = document.getElementById("conf_owner").innerHTML;
-    structure.properties.installer = document.getElementById("conf_installer").innerHTML;
-    structure.properties.control = document.getElementById("conf_control").innerHTML;
-    structure.properties.info = document.getElementById("conf_info").innerHTML;
+    globalThis.structure.properties.owner = document.getElementById("conf_owner").innerHTML;
+    globalThis.structure.properties.installer = document.getElementById("conf_installer").innerHTML;
+    globalThis.structure.properties.control = document.getElementById("conf_control").innerHTML;
+    globalThis.structure.properties.info = document.getElementById("conf_info").innerHTML;
 }
 function openContactForm() {
     var strleft = PROP_Contact_Text;
@@ -11926,7 +12503,11 @@ function openContactForm() {
 function restart_all() {
     var strleft = CONFIGPAGE_LEFT;
     strleft +=
-        "\n      Hoofddifferentieel (in mA) <input id=\"differentieel_droog\" type=\"text\" size=\"5\" maxlength=\"5\" value=\"300\"><br><br>\n      Hoofdzekering (in A) <input id=\"hoofdzekering\" type=\"text\" size=\"4\" maxlength=\"4\" value=\"65\"><br><br>\n      Aantal fazen:\n      <select id=\"aantal_fazen_droog\"><option value=\"2\">2p</option><option value=\"3\">3p</option><option value=\"4\">4p (3p+n)</option></select>";
+        `
+      Hoofddifferentieel (in mA) <input id="differentieel_droog" type="text" size="5" maxlength="5" value="300"><br><br>
+      Hoofdzekering (in A) <input id="hoofdzekering" type="text" size="4" maxlength="4" value="65"><br><br>
+      Aantal fazen:
+      <select id="aantal_fazen_droog"><option value="2">2p</option><option value="3">3p</option><option value="4">4p (3p+n)</option></select>`;
     strleft += CONFIGPAGE_RIGHT;
     strleft += PROP_getCookieText(); //Will only be displayed in the online version
     strleft += PROP_development_options();
@@ -11937,17 +12518,17 @@ function restart_all() {
     }
 }
 function toggleAppView(type) {
-    var lastview = structure.properties.currentView;
-    if ((structure.sitplanview != null) && (structure.sitplanview.contextMenu != null))
-        structure.sitplanview.contextMenu.hide();
-    structure.properties.currentView = type;
+    let lastview = globalThis.structure.properties.currentView;
+    if ((globalThis.structure.sitplanview != null) && (globalThis.structure.sitplanview.contextMenu != null))
+        globalThis.structure.sitplanview.contextMenu.hide();
+    globalThis.structure.properties.currentView = type;
     if (type === '2col') {
         document.getElementById("configsection").innerHTML = '';
         document.getElementById("configsection").style.display = 'none';
         document.getElementById("outerdiv").style.display = 'none';
         document.getElementById("ribbon").style.display = 'flex';
         document.getElementById("canvas_2col").style.display = 'flex';
-        structure.updateRibbon();
+        globalThis.structure.updateRibbon();
     }
     else if (type === 'config') {
         document.getElementById("configsection").style.display = 'block';
@@ -11970,7 +12551,7 @@ function toggleAppView(type) {
         document.getElementById("canvas_2col").style.display = 'none';
     }
     if ((['2col', 'draw'].includes(type)) && (['2col', 'draw'].includes(lastview)) && (type !== lastview))
-        undostruct.store();
+        globalThis.undostruct.store();
 }
 function load_example(nr) {
     switch (nr) {
@@ -11985,14 +12566,14 @@ function load_example(nr) {
     }
 }
 function undoClicked() {
-    if ((structure.sitplanview != null) && (structure.sitplanview.contextMenu != null))
-        structure.sitplanview.contextMenu.hide();
-    undostruct.undo();
+    if ((globalThis.structure.sitplanview != null) && (globalThis.structure.sitplanview.contextMenu != null))
+        globalThis.structure.sitplanview.contextMenu.hide();
+    globalThis.undostruct.undo();
 }
 function redoClicked() {
-    if ((structure.sitplanview != null) && (structure.sitplanview.contextMenu != null))
-        structure.sitplanview.contextMenu.hide();
-    undostruct.redo();
+    if ((globalThis.structure.sitplanview != null) && (globalThis.structure.sitplanview.contextMenu != null))
+        globalThis.structure.sitplanview.contextMenu.hide();
+    globalThis.undostruct.redo();
 }
 function download(type) {
     var filename;
@@ -12009,7 +12590,7 @@ function download(type) {
             break;
         }
     }
-    var text = structure.toSVG(0, "horizontal").data;
+    var text = globalThis.structure.toSVG(0, "horizontal").data;
     if (document.getElementById("noGroup").checked == true)
         text = flattenSVGfromString(text);
     download_by_blob(text, filename, mimeType); //was text/plain
@@ -12030,17 +12611,13 @@ var CONF_hoofdzekering = 65;
 var CONF_differentieel_droog = 300;
 var CONF_differentieel_nat = 30;
 var CONF_upload_OK = "ask"; //can be "ask", "yes", "no"; //before uploading, we ask
-var session = new Session();
-var structure;
-var undostruct = new undoRedo(100);
-var appDocStorage = new MultiLevelStorage('appDocStorage', {});
 // Configure the app-zone in the HTML
 document.getElementById('svgdefs').innerHTML =
     '<pattern id="VerticalStripe" x="5" y="0" width="5" height="10" patternUnits="userSpaceOnUse" >' +
         '<line x1="0" y1="0" x2="0" y2="10" stroke="black" />' +
         '</pattern>';
 // Build the menu
-var menuItems;
+let menuItems;
 menuItems = [
     { name: 'Nieuw', callback: restart_all },
     { name: 'Bestand', callback: showFilePage },
@@ -12051,99 +12628,91 @@ menuItems = [
     { name: 'Info/Contact', callback: openContactForm }
 ];
 PROP_edit_menu(menuItems);
-var topMenu = new TopMenu('minitabs', 'menu-item', menuItems);
+const topMenu = new TopMenu('minitabs', 'menu-item', menuItems);
 // Now add handlers for everything that changes in the left column
 document.querySelector('#left_col_inner').addEventListener('change', function (event) {
     function propUpdate(my_id, item, type, value) {
         switch (type) {
             case "select-one":
                 if (item == "type") { // Type changed
-                    structure.adjustTypeById(my_id, value);
+                    globalThis.globalThis.structure.adjustTypeById(my_id, value);
                 }
                 else {
-                    structure.data[structure.getOrdinalById(my_id)].props[item] = value;
+                    globalThis.globalThis.structure.data[globalThis.globalThis.structure.getOrdinalById(my_id)].props[item] = value;
                 }
-                structure.updateHTMLinner(my_id);
+                globalThis.globalThis.structure.updateHTMLinner(my_id);
                 break;
             case "text":
-                structure.data[structure.getOrdinalById(my_id)].props[item] = value;
+                globalThis.globalThis.structure.data[globalThis.globalThis.structure.getOrdinalById(my_id)].props[item] = value;
                 if (item === 'kortsluitvermogen')
-                    structure.updateHTMLinner(my_id);
+                    globalThis.globalThis.structure.updateHTMLinner(my_id);
                 break;
             case "checkbox":
-                structure.data[structure.getOrdinalById(my_id)].props[item] = value;
-                structure.updateHTMLinner(my_id);
+                globalThis.globalThis.structure.data[globalThis.globalThis.structure.getOrdinalById(my_id)].props[item] = value;
+                globalThis.globalThis.structure.updateHTMLinner(my_id);
                 break;
         }
-        undostruct.store();
+        globalThis.undostruct.store();
         HLRedrawTreeSVG();
     }
-    var element = event.target;
+    const element = event.target;
     // Ensure the id starts with 'HL_edit_'
     if (!element.id.startsWith('HL_edit_'))
         return;
-    var type = element.type, id = element.id;
-    var value = type === 'checkbox' ? element.checked : element.value;
+    const { type, id } = element;
+    const value = type === 'checkbox' ? element.checked : element.value;
     // Extract id and key from id
-    var match = id.match(/^HL_edit_(\d+)_(.+)$/);
-    var idNumber = match ? match[1] : null;
-    var key = match ? match[2] : null;
+    const match = id.match(/^HL_edit_(\d+)_(.+)$/);
+    const idNumber = match ? match[1] : null;
+    const key = match ? match[2] : null;
     propUpdate(parseInt(idNumber), key, type, value);
     // Perform your logic here with the extracted data
 });
 EDStoStructure(EXAMPLE_DEFAULT, false); //Just in case the user doesn't select a scheme and goes to drawing immediately, there should be something there
 // Create the autoSaver
-// - the constructor takes a function that points it to the latest structure whenever it asks for it
+// - the constructor takes a function that points it to the latest globalThis.structure whenever it asks for it
 // - We also add a callback function that is called after each save performed by the autoSaver.  This function will update the Save icon in the ribbon when needed
-var autoSaver = new AutoSaver(5, function () { return (structure); });
-autoSaver.setCallbackAfterSave((function () {
-    var lastSavedType = autoSaver.getSavedType();
+var autoSaver = new AutoSaver(5, () => { return (globalThis.structure); }); // Als globale variabele moet dit een var zijn en geen let
+autoSaver.setCallbackAfterSave((() => {
+    let lastSavedType = autoSaver.getSavedType();
     function updateRibbons() {
-        var currentSavedType = autoSaver.getSavedType();
+        const currentSavedType = autoSaver.getSavedType();
         if (lastSavedType === currentSavedType)
             return; // Only update the ribbons if the type changed
         lastSavedType = currentSavedType;
-        structure.updateRibbon();
-        if (structure.sitplanview)
-            structure.sitplanview.updateRibbon();
+        globalThis.structure.updateRibbon();
+        if (globalThis.structure.sitplanview)
+            globalThis.structure.sitplanview.updateRibbon();
     }
     return updateRibbons;
 })());
 // Finally check if there is anything in the autosave and load it
-var recoveryAvailable = false;
-var lastSavedStr = null;
-var lastSavedInfo = null;
-(function () { return __awaiter(_this, void 0, void 0, function () {
-    var _a;
-    return __generator(this, function (_b) {
-        switch (_b.label) {
-            case 0: return [4 /*yield*/, autoSaver.loadLastSaved()];
-            case 1:
-                _a = _b.sent(), lastSavedStr = _a[0], lastSavedInfo = _a[1];
-                if ((lastSavedStr != null) /* && (lastSavedInfo.recovery == true) */)
-                    recoveryAvailable = true;
-                return [2 /*return*/];
-        }
-    });
-}); })().then(function () {
+let recoveryAvailable = false;
+let lastSavedStr = null;
+let lastSavedInfo = null;
+(async () => {
+    [lastSavedStr, lastSavedInfo] = await autoSaver.loadLastSaved();
+    if ((lastSavedStr != null) /* && (lastSavedInfo.recovery == true) */)
+        recoveryAvailable = true;
+})().then(() => {
     if (!recoveryAvailable) {
         EDStoStructure(EXAMPLE_DEFAULT, false);
         restart_all();
-        var myCookieBanner = new CookieBanner();
+        let myCookieBanner = new CookieBanner();
         myCookieBanner.run();
     }
     else {
-        var helperTip = new HelperTip(appDocStorage);
-        helperTip.show('file.autoRecovered', "<h3>Laatste schema geladen uit browsercache</h3>" +
-            "<p>Deze tool vond een schema in de browsercache. " +
-            "Dit schema dateert van <b>".concat(lastSavedInfo.currentTimeStamp, "</b> ") +
-            "met als naam <b>".concat(lastSavedInfo.filename, "</b>. ") +
-            "U kan op dit gerecupereerde schema verder werken of een ander schema laden in het \"Bestand\"-menu.</p>" +
-            "<p><b>Opgelet! </b>De browsercache is een tijdelijke opslag, en wordt occasioneel gewist. " +
-            "Het blijft belangrijk uw werk regelmatig op te slaan om gegevensverlies te voorkomen.</p>", false, (function () {
-            var myCookieBanner = new CookieBanner();
+        const helperTip = new HelperTip(globalThis.appDocStorage);
+        helperTip.show('file.autoRecovered', `<h3>Laatste schema geladen uit browsercache</h3>` +
+            `<p>Deze tool vond een schema in de browsercache. ` +
+            `Dit schema dateert van <b>${lastSavedInfo.currentTimeStamp}</b> ` +
+            `met als naam <b>${lastSavedInfo.filename}</b>. ` +
+            `U kan op dit gerecupereerde schema verder werken of een ander schema laden in het "Bestand"-menu.</p>` +
+            `<p><b>Opgelet! </b>De browsercache is een tijdelijke opslag, en wordt occasioneel gewist. ` +
+            `Het blijft belangrijk uw werk regelmatig op te slaan om gegevensverlies te voorkomen.</p>`, false, (() => {
+            let myCookieBanner = new CookieBanner();
             myCookieBanner.run();
-        }).bind(_this));
+        }).bind(this));
         EDStoStructure(lastSavedStr, true, true);
     }
     autoSaver.start();

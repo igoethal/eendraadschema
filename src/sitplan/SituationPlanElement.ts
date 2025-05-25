@@ -5,7 +5,7 @@ type AdresType = 'auto'|'manueel';
  * Class SituationPlanElement
  * 
  * Deze class refereert naar de volgende globale variabelen:
- * - structure
+ * - globalThis.structure
  * - SITPLANVIEW_DEFAULT_SCALE
  */
 
@@ -81,7 +81,7 @@ class SituationPlanElement {
 
     isEendraadschemaSymbool(): boolean {
         if (this.electroItemId != null) {
-            return (structure.getElectroItemById(this.electroItemId) != null);
+            return (globalThis.structure.getElectroItemById(this.electroItemId) != null);
         }
         return false;
     }
@@ -104,7 +104,7 @@ class SituationPlanElement {
 
     isEDSSymbolAndRotates360degrees(): boolean {
         if (this.isEendraadschemaSymbool()) {
-            let electroElement: Electro_Item = structure.getElectroItemById(this.electroItemId);
+            let electroElement: Electro_Item = globalThis.structure.getElectroItemById(this.electroItemId);
             if (electroElement != null) {
                 let type = electroElement.getType();
                 return SituationPlanElement.ROTATES_360_DEGREES_TYPES.has(type);
@@ -158,7 +158,7 @@ class SituationPlanElement {
     getAdres(): string {
         if (!this.isEendraadschemaSymbool()) return ''; // Geen adres voor niet-elektro-elementen
 
-        let element = structure.getElectroItemById(this.electroItemId);
+        let element = globalThis.structure.getElectroItemById(this.electroItemId);
         if (element == null) return ''; // zou redundant moeten zijn want we controleerden al in isEendraadschemaSymbool
 
         if (this.adrestype === 'auto') {
@@ -258,9 +258,9 @@ class SituationPlanElement {
     public berekenAfbeeldingsRotatieEnSpiegeling = (): [number, boolean] => {
 
         // Eerst testen we of het een schakelaar is die we niet in legacy afbeelden
-        if (structure.properties.legacySchakelaars == false) {
+        if (globalThis.structure.properties.legacySchakelaars == false) {
             if (this.isEendraadschemaSymbool()) {
-                let electroItem = structure.getElectroItemById(this.electroItemId);
+                let electroItem = globalThis.structure.getElectroItemById(this.electroItemId);
                 if (electroItem != null) {
                     if ( (electroItem.props.type == 'Schakelaars') && 
                         ( (electroItem.props.aantal_schakelaars == 1) || (electroItem.props.aantal_schakelaars == null) ) ) {
@@ -301,7 +301,7 @@ class SituationPlanElement {
     getScaledSVG(positioned: boolean = false): string {
 
         if (this.isEendraadschemaSymbool()) {
-            let electroItem = structure.getElectroItemById(this.electroItemId);
+            let electroItem = globalThis.structure.getElectroItemById(this.electroItemId);
             if (electroItem != null) electroItem.updateSituationPlanElement(this);
         }
 

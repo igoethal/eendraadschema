@@ -66,7 +66,7 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanE
         if ( (electroItemId==null) && (sitplanElement != null) && (sitplanElement.getElectroItemId() != null) ) {
             electroItemId = sitplanElement.getElectroItemId();
         }
-        if (electroItemId!=null) selectKring.value = structure.findKringName(electroItemId);
+        if (electroItemId!=null) selectKring.value = globalThis.structure.findKringName(electroItemId);
         selectKring.onchange = KringSelectChanged;
     }
 
@@ -169,7 +169,7 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanE
             textInput.value = textInput.value.replace(/[^0-9]/g, '');
             let electroItemId = Number(textInput.value);
             updateElectroType();
-            if (structure.getElectroItemById(electroItemId) != null) {
+            if (globalThis.structure.getElectroItemById(electroItemId) != null) {
                 initKringSelect(electroItemId);
                 initElectroItemBox(electroItemId);
                 selectAdresType.value = 'auto';
@@ -181,7 +181,7 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanE
     function handleExpandButton(electroItemId: number = null) {
         if (electroItemId == null) return;
 
-        let element = structure.getElectroItemById(electroItemId);
+        let element = globalThis.structure.getElectroItemById(electroItemId);
         if (element == null) return;
 
         element.expand();
@@ -191,7 +191,7 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanE
 
         IdFieldChanged();
 
-        structure.sitplanview.redraw();
+        globalThis.structure.sitplanview.redraw();
     }  
 
     /**
@@ -203,7 +203,7 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanE
             expandButton.style.display = 'none';
         } else {
             let electroItemId = Number(textInput.value);
-            let element = structure.getElectroItemById(electroItemId) as Electro_Item;
+            let element = globalThis.structure.getElectroItemById(electroItemId) as Electro_Item;
             if (element != null) {
                 const type = element.getType();
                 feedback.innerHTML = '<span style="color:green;">' + element.getType() + '</span>';
@@ -225,7 +225,7 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanE
     function selectAdresTypeChanged() {
         let id = Number(textInput.value);
         updateElectroType();
-        let element = structure.getElectroItemById(id) as Electro_Item;
+        let element = globalThis.structure.getElectroItemById(id) as Electro_Item;
         if (element == null) {
             adresInput.value = '';
             adresInput.readOnly = true;
@@ -382,7 +382,7 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanE
 
     if (sitplanElement != null) { // Form werd aangeroepen om een reeds bestaand element te editeren
         if (sitplanElement.getElectroItemId() != null) { // Het gaat over een bestaand Electro-item
-            let electroItem = structure.getElectroItemById(sitplanElement.getElectroItemId());
+            let electroItem = globalThis.structure.getElectroItemById(sitplanElement.getElectroItemId());
             if ( (electroItem != null) && (electroItem.getType() == 'Bord') ) {
                 selectKringContainer.style.display = 'none';
                 selectElectroItemContainer.style.display = 'none';    
@@ -405,8 +405,8 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanE
         rotationInput.value = String(sitplanElement.rotate);
     } else { // Form werd aangeroepen om een nieuw element te creëren
         selectAdresTypeChanged();
-        fontSizeInput.value = String(structure.sitplan.defaults.fontsize);
-        scaleInput.value = String(structure.sitplan.defaults.scale*100);
+        fontSizeInput.value = String(globalThis.structure.sitplan.defaults.fontsize);
+        scaleInput.value = String(globalThis.structure.sitplan.defaults.scale*100);
         selectAdresLocation.value = 'rechts';
     }
 
@@ -445,13 +445,13 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanE
             return /^-?\d+(\.\d+)?$/.test(value);
         }
         let returnId = (textInput.value.trim() == '' ? null : Number(textInput.value));
-        if (!(isNumeric(scaleInput.value)) || (Number(scaleInput.value) <= 0)) scaleInput.value = String(structure.sitplan.defaults.scale*100);
+        if (!(isNumeric(scaleInput.value)) || (Number(scaleInput.value) <= 0)) scaleInput.value = String(globalThis.structure.sitplan.defaults.scale*100);
         if (!(isNumeric(rotationInput.value))) rotationInput.value = String(0);
         
         if (setDefaultCheckbox.checked) {
             if ( (sitplanElement == null) || ( (sitplanElement != null) && (sitplanElement.getElectroItemId() != null) ) )
-                structure.sitplan.defaults.fontsize = Number(fontSizeInput.value);
-            structure.sitplan.defaults.scale = Number(scaleInput.value)/100;
+                globalThis.structure.sitplan.defaults.fontsize = Number(fontSizeInput.value);
+            globalThis.structure.sitplan.defaults.scale = Number(scaleInput.value)/100;
         }
         closePopup(); // We close the popup first to avoid that an error somewhere leaves it open
         callbackOK(returnId, selectAdresType.value, adresInput.value, selectAdresLocation.value, Number(fontSizeInput.value), Number(scaleInput.value)/100, Number(rotationInput.value));

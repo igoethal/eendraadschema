@@ -1,8 +1,14 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es2017",
     "lib": ["es2017", "dom"],
     "outFile": "swap.js",
+    "moduleResolution": "node"
+    //"module": "ESNext"
+    //"incremental": true,
+    //"strict": true,
+    //"outDir": "./dist"
+
     // other options...
   },
   "include": [
@@ -27,7 +33,9 @@
     "SVGSymbols.ts",
     "Hierarchical_List.ts",
     "config.ts",
+    "documentation/HelperTip.ts",
     "../prop/*.ts",
-    "main.ts"
-, "documentation/HelperTip.ts"  ]
+    "global.ts",
+    "main.ts"], 
+  "exclude": ["node_modules", "dist"]
 }

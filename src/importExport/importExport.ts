@@ -47,7 +47,7 @@ class importExportUsingFileAPI {
         const contents = await file.text();
 
         this.filename = file.name;
-        structure.properties.filename = file.name;
+        globalThis.structure.properties.filename = file.name;
 
         this.setSaveNeeded(false);
 
@@ -58,7 +58,7 @@ class importExportUsingFileAPI {
 
     async saveAs(content: string) {
         const options = {
-            suggestedName: structure.properties.filename,
+            suggestedName: globalThis.structure.properties.filename,
             types: [{
                 description: 'Eendraadschema (.eds)',
                 accept: {'application/eds': ['.eds']},
@@ -76,7 +76,7 @@ class importExportUsingFileAPI {
         await writable.close();
 
         this.filename = handle.name;
-        structure.properties.filename = handle.name;
+        globalThis.structure.properties.filename = handle.name;
 
         this.setSaveNeeded(false);
 
@@ -246,9 +246,9 @@ function exportjson(saveAs: boolean = true) { // Indien de boolean false is en d
      * Einddata leest "EDSXXX0000" met XXX een versie en daarna een 64base-encodering van de gedecomprimeerde uitvoer van Pako
      * filename = "eendraadschema.eds";
      */
-    filename = structure.properties.filename;
+    filename = globalThis.structure.properties.filename;
 
-    let origtext: string = structure.toJsonObject(true);
+    let origtext: string = globalThis.structure.toJsonObject(true);
     let text: string = '';
 
     // Comprimeer de uitvoerstructuur en bied deze aan als download aan de gebruiker. We zijn momenteel bij versie 004
@@ -381,7 +381,7 @@ function json_to_structure(text: string, oldstruct: Hierarchical_List = null, ve
 }
 
 function loadFromText(text: string, version: number, redraw = true) {
-    structure = json_to_structure(text, structure, version);
+    globalThis.structure = json_to_structure(text, globalThis.structure, version);
     if (redraw == true) topMenu.selectMenuItemByName('Eéndraadschema'); // Ga naar het bewerken scherm, dat zal automatisch voor hertekenen zorgen.
 }
 
@@ -473,8 +473,8 @@ function EDStoStructure(mystring: string, redraw = true, askUserToSave = false) 
     loadFromText(JSONdata.text, JSONdata.version, redraw);
 
     // Clear the undo stack and push this one on top
-    undostruct.clear();
-    undostruct.store();
+    globalThis.undostruct.clear();
+    globalThis.undostruct.store();
 
     // Scroll to top left for the SVG and HTML, this can only be done at the end because "right col" has to actually be visible
     const leftelem = document.getElementById("left_col");
@@ -493,7 +493,7 @@ function EDStoStructure(mystring: string, redraw = true, askUserToSave = false) 
     if (autoSaver && !askUserToSave) autoSaver.saveManually();
     if (askUserToSave) {
         autoSaver.forceHasChangesSinceLastManualSave();
-        structure.updateRibbon();
+        globalThis.structure.updateRibbon();
     } 
 
 }
@@ -504,8 +504,8 @@ function importToAppend(mystring: string, redraw = true) {
 
     //get the Maximal ID in array structure.id and call it maxID
     let maxID = 0;
-    for (let i = 0; i < structure.id.length; i++) {
-        if (structure.id[i] > maxID) maxID = structure.id[i];
+    for (let i = 0; i < globalThis.structure.id.length; i++) {
+        if (globalThis.structure.id[i] > maxID) maxID = globalThis.structure.id[i];
     }
     
     //then increase the ID's in structureToAppend accordingly
@@ -516,51 +516,51 @@ function importToAppend(mystring: string, redraw = true) {
             structureToAppend.data[i].parent += maxID;
         }
     }
-    structure.curid += structureToAppend.curid;
+    globalThis.structure.curid += structureToAppend.curid;
 
     //then merge information for the eendraadschema
-    structure.length = structure.length + structureToAppend.length;
-    structure.active = structure.active.concat(structureToAppend.active);
-    structure.id = structure.id.concat(structureToAppend.id);
-    structure.data = structure.data.concat(structureToAppend.data);
+    globalThis.structure.length = globalThis.structure.length + structureToAppend.length;
+    globalThis.structure.active = globalThis.structure.active.concat(structureToAppend.active);
+    globalThis.structure.id = globalThis.structure.id.concat(structureToAppend.id);
+    globalThis.structure.data = globalThis.structure.data.concat(structureToAppend.data);
 
     //update the sourcelist
-    structure.data.forEach((item) => {
-        item.sourcelist = structure;
+    globalThis.structure.data.forEach((item) => {
+        item.sourcelist = globalThis.structure;
     });
 
     //then set the printer to autopage
-    structure.print_table.enableAutopage = true;
+    globalThis.structure.print_table.enableAutopage = true;
 
     //then merge the situation plans but only if both exist
-    if (structure.sitplan != null) {
+    if (globalThis.structure.sitplan != null) {
         if (structureToAppend.sitplan != null) {
 
             // Eerst oude situationplanview leeg maken, anders blijven oude div's hangen
-            if (structure.sitplanview != null) structure.sitplanview.dispose(); 
+            if (globalThis.structure.sitplanview != null) globalThis.structure.sitplanview.dispose(); 
 
             // dan nieuw situationplan maken en bij openen van het schema zal automatisch een nieuw situationplanview gecreëerd wordne
-            structure.sitplanjson = structure.sitplan.toJsonObject();
+            globalThis.structure.sitplanjson = globalThis.structure.sitplan.toJsonObject();
             structureToAppend.sitplanjson = structureToAppend.sitplan.toJsonObject();
             
             for (let i = 0; i < structureToAppend.sitplanjson.elements.length; i++) {
                 if (structureToAppend.sitplanjson.elements[i].electroItemId != null)
                     structureToAppend.sitplanjson.elements[i].electroItemId += maxID;
-                structureToAppend.sitplanjson.elements[i].page += structure.sitplanjson.numPages;
+                structureToAppend.sitplanjson.elements[i].page += globalThis.structure.sitplanjson.numPages;
             }
 
-            if ( (structure.sitplanjson != null) && (structureToAppend.sitplanjson != null) ) {
-                structure.sitplanjson.numPages += structureToAppend.sitplanjson.numPages;
-                structure.sitplanjson.elements = structure.sitplanjson.elements.concat(structureToAppend.sitplanjson.elements);
+            if ( (globalThis.structure.sitplanjson != null) && (structureToAppend.sitplanjson != null) ) {
+                globalThis.structure.sitplanjson.numPages += structureToAppend.sitplanjson.numPages;
+                globalThis.structure.sitplanjson.elements = globalThis.structure.sitplanjson.elements.concat(structureToAppend.sitplanjson.elements);
             }
-            structure.sitplan.fromJsonObject(structure.sitplanjson);
+            globalThis.structure.sitplan.fromJsonObject(globalThis.structure.sitplanjson);
             
-            structure.sitplanjson = null;
+            globalThis.structure.sitplanjson = null;
         }
     }
     
-    structure.reSort();
-    undostruct.store();
+    globalThis.structure.reSort();
+    globalThis.undostruct.store();
 
     //then remove the pointer from structureToAppend and let the garbage collector do its work
     structureToAppend = null;   
@@ -661,7 +661,7 @@ function showFilePage() {
         
     } else { // Legacy
         strleft += '<table border=0><tr><td width=350 style="vertical-align:top;padding:7px">';
-        strleft += 'Bestandsnaam: <span id="settings"><code>' + structure.properties.filename + '</code><br><button style="font-size:14px" onclick="exportjson()">Opslaan</button>&nbsp;<button style="font-size:14px" onclick="HL_enterSettings()">Naam wijzigen</button></span>';
+        strleft += 'Bestandsnaam: <span id="settings"><code>' + globalThis.structure.properties.filename + '</code><br><button style="font-size:14px" onclick="exportjson()">Opslaan</button>&nbsp;<button style="font-size:14px" onclick="HL_enterSettings()">Naam wijzigen</button></span>';
         strleft += '</td><td style="vertical-align:top;padding:5px">'
         strleft += 'U kan het schema opslaan op uw lokale harde schijf voor later gebruik. De standaard-naam is eendraadschema.eds. U kan deze wijzigen door links op "wijzigen" te klikken. ';
         strleft += 'Klik vervolgens op "opslaan" en volg de instructies van uw browser. '

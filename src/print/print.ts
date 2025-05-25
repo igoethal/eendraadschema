@@ -1,5 +1,5 @@
 function HLDisplayPage() {
-    structure.print_table.displaypage = parseInt((document.getElementById("id_select_page") as HTMLInputElement).value)-1;
+    globalThis.structure.print_table.displaypage = parseInt((document.getElementById("id_select_page") as HTMLInputElement).value)-1;
     printsvg();
 }
 
@@ -9,13 +9,13 @@ function dosvgdownload() {
     download_by_blob(prtContent, filename, 'data:image/svg+xml;charset=utf-8'); //Was text/plain
 }
 
-function getPrintSVGWithoutAddress(outSVG: SVGelement, page:number = structure.print_table.displaypage) {
+function getPrintSVGWithoutAddress(outSVG: SVGelement, page:number = globalThis.structure.print_table.displaypage) {
     var scale = 1;
 
-    var startx = structure.print_table.pages[page].start;
-    var width = structure.print_table.pages[page].stop - startx;
-    var starty = structure.print_table.getstarty();
-    var height = structure.print_table.getstopy() - starty;
+    var startx = globalThis.structure.print_table.pages[page].start;
+    var width = globalThis.structure.print_table.pages[page].stop - startx;
+    var starty = globalThis.structure.print_table.getstarty();
+    var height = globalThis.structure.print_table.getstopy() - starty;
 
     var viewbox = '' + startx + ' ' + starty + ' ' + width + ' ' + height;
 
@@ -29,17 +29,17 @@ function getPrintSVGWithoutAddress(outSVG: SVGelement, page:number = structure.p
 function printsvg() {
 
     function generatePdf() {
-        if (typeof(structure.properties.dpi) == 'undefined') structure.properties.dpi = 300;
+        if (typeof(globalThis.structure.properties.dpi) == 'undefined') globalThis.structure.properties.dpi = 300;
     
-        let svg = flattenSVGfromString(structure.toSVG(0,"horizontal").data);
-        const pages = Array.from({ length: structure.print_table.pages.length }, (_, i) => i+1);  
+        let svg = flattenSVGfromString(globalThis.structure.toSVG(0,"horizontal").data);
+        const pages = Array.from({ length: globalThis.structure.print_table.pages.length }, (_, i) => i+1);  
 
-        const sitplanprint = structure.sitplan.toSitPlanPrint();
+        const sitplanprint = globalThis.structure.sitplan.toSitPlanPrint();
     
         printPDF(
             svg,
-            structure.print_table,
-            structure.properties,
+            globalThis.structure.print_table,
+            globalThis.structure.properties,
             pages, 
             (document.getElementById("dopdfname") as HTMLInputElement).value, //filename
             document.getElementById("progress_pdf"), //HTML element where callback status can be given
@@ -54,7 +54,7 @@ function printsvg() {
     }
 
     function renderPrintSVG_sitplan(page: number) {
-        const outstruct = structure.sitplan.toSitPlanPrint();
+        const outstruct = globalThis.structure.sitplan.toSitPlanPrint();
 
         document.getElementById("printarea").innerHTML = '<div id="printsvgarea">' +
                                                             outstruct.pages[page].svg +
@@ -65,13 +65,13 @@ function printsvg() {
     // We will display it at the end of this function    
 
     var outSVG = new SVGelement();
-    outSVG = structure.toSVG(0,"horizontal");
+    outSVG = globalThis.structure.toSVG(0,"horizontal");
 
     var height = outSVG.yup + outSVG.ydown;
     var width = outSVG.xleft + outSVG.xright;
 
-    structure.print_table.setHeight(height);
-    structure.print_table.setMaxWidth(width+10);
+    globalThis.structure.print_table.setHeight(height);
+    globalThis.structure.print_table.setMaxWidth(width+10);
 
     // Then we display all the print options
 
@@ -88,8 +88,8 @@ function printsvg() {
         +  '</div>';
 
     document.getElementById('button_pdfdownload').onclick = generatePdf;
-    structure.print_table.insertHTMLselectPaperSize(document.getElementById('select_papersize') as HTMLElement, printsvg);
-    structure.print_table.insertHTMLselectdpi(document.getElementById('select_dpi') as HTMLElement, printsvg);
+    globalThis.structure.print_table.insertHTMLselectPaperSize(document.getElementById('select_papersize') as HTMLElement, printsvg);
+    globalThis.structure.print_table.insertHTMLselectdpi(document.getElementById('select_dpi') as HTMLElement, printsvg);
     
     outstr 
         =  '<br>'
@@ -101,13 +101,13 @@ function printsvg() {
 
     document.getElementById("configsection").insertAdjacentHTML('beforeend', outstr);
 
-    structure.print_table.insertHTMLcheckAutopage(document.getElementById('check_autopage') as HTMLElement, printsvg);
-    if (!structure.print_table.enableAutopage) {
-        structure.print_table.insertHTMLchooseVerticals(document.getElementById('id_verticals') as HTMLElement, printsvg);
-        structure.print_table.insertHTMLsuggestXposButton(document.getElementById('id_suggest_xpos_button') as HTMLElement, printsvg);
+    globalThis.structure.print_table.insertHTMLcheckAutopage(document.getElementById('check_autopage') as HTMLElement, printsvg);
+    if (!globalThis.structure.print_table.enableAutopage) {
+        globalThis.structure.print_table.insertHTMLchooseVerticals(document.getElementById('id_verticals') as HTMLElement, printsvg);
+        globalThis.structure.print_table.insertHTMLsuggestXposButton(document.getElementById('id_suggest_xpos_button') as HTMLElement, printsvg);
     }
 
-    if (!structure.print_table.enableAutopage) {
+    if (!globalThis.structure.print_table.enableAutopage) {
         outstr 
             = '<br>'
             +  '<table border="0">'
@@ -125,19 +125,19 @@ function printsvg() {
         
         document.getElementById("configsection").insertAdjacentHTML('beforeend', outstr);    
 
-        structure.print_table.insertHTMLposxTable(document.getElementById('id_print_table') as HTMLElement, printsvg)
+        globalThis.structure.print_table.insertHTMLposxTable(document.getElementById('id_print_table') as HTMLElement, printsvg)
     }
 
     strleft += '<hr>';
 
-    const numPages = structure.print_table.pages.length + (structure.sitplan? structure.sitplan.getNumPages() : 0);
-    if (structure.print_table.displaypage >= numPages) {
-        structure.print_table.displaypage = numPages-1;
+    const numPages = globalThis.structure.print_table.pages.length + (globalThis.structure.sitplan? globalThis.structure.sitplan.getNumPages() : 0);
+    if (globalThis.structure.print_table.displaypage >= numPages) {
+        globalThis.structure.print_table.displaypage = numPages-1;
     }
 
     strleft += '<b>Printvoorbeeld: </b>Pagina <select onchange="HLDisplayPage()" id="id_select_page">'
     for (let i=0; i<numPages; i++) {
-        if (i==structure.print_table.displaypage) {
+        if (i==globalThis.structure.print_table.displaypage) {
             strleft += '<option value=' + (i+1) + ' selected>' + (i+1) + '</option>';
         } else {
             strleft += '<option value=' + (i+1) + '>' + (i+1) + '</option>';
@@ -157,10 +157,10 @@ function printsvg() {
 
     // Finally we show the actual SVG
 
-    if (structure.print_table.displaypage < structure.print_table.pages.length) { //displaypage starts counting at 0
+    if (globalThis.structure.print_table.displaypage < globalThis.structure.print_table.pages.length) { //displaypage starts counting at 0
         renderPrintSVG_EDS(outSVG);    
     } else {
-        renderPrintSVG_sitplan(structure.print_table.displaypage - structure.print_table.pages.length);
+        renderPrintSVG_sitplan(globalThis.structure.print_table.displaypage - globalThis.structure.print_table.pages.length);
     }
 
     toggleAppView('config');

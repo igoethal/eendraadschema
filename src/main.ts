@@ -3,84 +3,84 @@ interface Navigator{
 }
 
 function forceUndoStore() {
-    undostruct.store();
+    globalThis.undostruct.store();
 }
 
 function HLCollapseExpand(my_id: number, state?: Boolean) {
     let ordinal: number;
-    ordinal = structure.getOrdinalById(my_id);
+    ordinal = globalThis.structure.getOrdinalById(my_id);
     if (state == undefined) {
-       structure.data[ordinal].collapsed = !structure.data[ordinal].collapsed;
+       globalThis.structure.data[ordinal].collapsed = !globalThis.structure.data[ordinal].collapsed;
     } else {
-       structure.data[ordinal].collapsed = state;
+       globalThis.structure.data[ordinal].collapsed = state;
     }
-    undostruct.store();
-    structure.updateHTMLinner(my_id);
+    globalThis.undostruct.store();
+    globalThis.structure.updateHTMLinner(my_id);
     HLRedrawTreeSVG();
 }
 
 function HLDelete(my_id: number) {
-    structure.deleteById(my_id);
-    undostruct.store();
+    globalThis.structure.deleteById(my_id);
+    globalThis.undostruct.store();
     HLRedrawTree();
 }
 
 function HLAdd(my_id: number) {
-    structure.addItem("");
-    undostruct.store();
+    globalThis.structure.addItem("");
+    globalThis.undostruct.store();
     HLRedrawTree();
 }
 
 function HLInsertBefore(my_id: number) {
-    structure.insertItemBeforeId(new Electro_Item(structure), my_id);
-    undostruct.store();
+    globalThis.structure.insertItemBeforeId(new Electro_Item(globalThis.structure), my_id);
+    globalThis.undostruct.store();
     HLRedrawTree();
 }
 
 function HLInsertAfter(my_id: number) {
-    structure.insertItemAfterId(new Electro_Item(structure), my_id);
-    undostruct.store();
+    globalThis.structure.insertItemAfterId(new Electro_Item(globalThis.structure), my_id);
+    globalThis.undostruct.store();
     HLRedrawTree();
 }
 
 function HLMoveDown(my_id: number) {
-    structure.moveDown(my_id);
-    undostruct.store();
+    globalThis.structure.moveDown(my_id);
+    globalThis.undostruct.store();
     HLRedrawTree();
 }
 
 function HLMoveUp(my_id: number) {
-    structure.moveUp(my_id);
-    undostruct.store();
+    globalThis.structure.moveUp(my_id);
+    globalThis.undostruct.store();
     HLRedrawTree();
 }
 
 function HLClone(my_id: number) {
-    structure.clone(my_id);
-    undostruct.store();
+    globalThis.structure.clone(my_id);
+    globalThis.undostruct.store();
     HLRedrawTree();
 }
 
 function HLInsertChild(my_id: number) {
-    structure.insertChildAfterId(new Electro_Item(structure), my_id);
-    //undostruct.store();  We should not call this as the CollapseExpand already does that
+    globalThis.structure.insertChildAfterId(new Electro_Item(globalThis.structure), my_id);
+    //globalThis.undostruct.store();  We should not call this as the CollapseExpand already does that
     HLCollapseExpand(my_id, false);
     //No need to call HLRedrawTree as HLCollapseExpand already does that
 }
 
 function HL_editmode() {
-    structure.mode = (document.getElementById("edit_mode") as HTMLInputElement).value;
+    globalThis.structure.mode = (document.getElementById("edit_mode") as HTMLInputElement).value;
     HLRedrawTreeHTML();
 }
 
 function HLExpand(my_id: number ) {
-    let element: Electro_Item = structure.getElectroItemById(my_id) as Electro_Item;
+    let element: Electro_Item = globalThis.structure.getElectroItemById(my_id) as Electro_Item;
     if (element !== null) {
         element.expand();
     }
     
-    structure.reSort();
-    undostruct.store();
+    globalThis.structure.reSort();
+    globalThis.undostruct.store();
     HLRedrawTree();
 }
 
@@ -94,55 +94,55 @@ function HL_changeparent(my_id: number) {
     if (!isInt(str_newparentid)) { error=1; }
     let int_newparentid = parseInt(str_newparentid);
     if (int_newparentid != 0) {
-        parentOrdinal = structure.getOrdinalById(int_newparentid);
+        parentOrdinal = globalThis.structure.getOrdinalById(int_newparentid);
         if (typeof(parentOrdinal) == "undefined")
           error=1;
-          else if ( (!structure.active[parentOrdinal]) || (int_newparentid == my_id) ) error=1;
+          else if ( (!globalThis.structure.active[parentOrdinal]) || (int_newparentid == my_id) ) error=1;
     }
 
     if (error == 1) alert("Dat is geen geldig moeder-object. Probeer opnieuw.");
-    else structure.data[structure.getOrdinalById(my_id)].parent = int_newparentid;
+    else globalThis.structure.data[globalThis.structure.getOrdinalById(my_id)].parent = int_newparentid;
 
-    structure.reSort();
-    undostruct.store();
+    globalThis.structure.reSort();
+    globalThis.undostruct.store();
     HLRedrawTree();
 }
 
 function HL_cancelFilename() {
-    document.getElementById("settings").innerHTML = '<code>' + structure.properties.filename + '</code><br><button style="font-size:14px" onclick="exportjson()">Opslaan</button>&nbsp;<button style="font-size:14px" onclick="HL_enterSettings()">Naam wijzigen</button>';
+    document.getElementById("settings").innerHTML = '<code>' + globalThis.structure.properties.filename + '</code><br><button style="font-size:14px" onclick="exportjson()">Opslaan</button>&nbsp;<button style="font-size:14px" onclick="HL_enterSettings()">Naam wijzigen</button>';
 }
 
 function HL_changeFilename() {
     var regex:RegExp = new RegExp('^.*\\.eds$');
     var filename = (document.getElementById("filename") as HTMLInputElement).value;
     if (regex.test(filename)) {
-        structure.properties.setFilename((document.getElementById("filename") as HTMLInputElement).value);
-        document.getElementById("settings").innerHTML = '<code>' + structure.properties.filename + '</code><br><button style="font-size:14px" onclick="HL_enterSettings()">Wijzigen</button>&nbsp;<button style="font-size:14px" onclick="exportjson()">Opslaan</button>';
+        globalThis.structure.properties.setFilename((document.getElementById("filename") as HTMLInputElement).value);
+        document.getElementById("settings").innerHTML = '<code>' + globalThis.structure.properties.filename + '</code><br><button style="font-size:14px" onclick="HL_enterSettings()">Wijzigen</button>&nbsp;<button style="font-size:14px" onclick="exportjson()">Opslaan</button>';
     } else {
-        structure.properties.setFilename((document.getElementById("filename") as HTMLInputElement).value+'.eds');
-        document.getElementById("settings").innerHTML = '<code>' + structure.properties.filename + '</code><br><button style="font-size:14px" onclick="HL_enterSettings()">Wijzigen</button>&nbsp;<button style="font-size:14px" onclick="exportjson()">Opslaan</button>';
+        globalThis.structure.properties.setFilename((document.getElementById("filename") as HTMLInputElement).value+'.eds');
+        document.getElementById("settings").innerHTML = '<code>' + globalThis.structure.properties.filename + '</code><br><button style="font-size:14px" onclick="HL_enterSettings()">Wijzigen</button>&nbsp;<button style="font-size:14px" onclick="exportjson()">Opslaan</button>';
     }
 }
 
 function HL_enterSettings() {
-    document.getElementById("settings").innerHTML = '<input type="text" id="filename" onchange="HL_changeFilename()" value="' + structure.properties.filename + '" pattern="^.*\\.eds$"><br><i>Gebruik enkel alphanumerieke karakters a-z A-Z 0-9, streepjes en spaties. <b>Eindig met ".eds"</b>. Druk daarna op enter.</i><br><button onclick="HL_cancelFilename()">Annuleer</button>&nbsp;<button onclick="HL_changeFilename()">Toepassen</button>';
+    document.getElementById("settings").innerHTML = '<input type="text" id="filename" onchange="HL_changeFilename()" value="' + globalThis.structure.properties.filename + '" pattern="^.*\\.eds$"><br><i>Gebruik enkel alphanumerieke karakters a-z A-Z 0-9, streepjes en spaties. <b>Eindig met ".eds"</b>. Druk daarna op enter.</i><br><button onclick="HL_cancelFilename()">Annuleer</button>&nbsp;<button onclick="HL_changeFilename()">Toepassen</button>';
 }
 
 function HLRedrawTreeHTML() {
     toggleAppView('2col');
     document.getElementById("configsection").innerHTML = "";
-    var output:string = structure.toHTML(0) + "<br>" + renderAddressStacked();
+    var output:string = globalThis.structure.toHTML(0) + "<br>" + renderAddressStacked();
     document.getElementById("left_col_inner").innerHTML = output;
 }
 
 function HLRedrawTreeHTMLLight() {
-    var output:string = structure.toHTML(0) + "<br>" + renderAddressStacked();
+    var output:string = globalThis.structure.toHTML(0) + "<br>" + renderAddressStacked();
     document.getElementById("left_col_inner").innerHTML = output;
 }
 
 function HLRedrawTreeSVG() {
     let str:string = '<b>Tekening: </b>Ga naar het print-menu om de tekening af te printen of te exporteren als SVG vector graphics.<br><br>'
-                   + '<div id="EDS">' + flattenSVGfromString(structure.toSVG(0,"horizontal").data,10) + '</div>'
+                   + '<div id="EDS">' + flattenSVGfromString(globalThis.structure.toSVG(0,"horizontal").data,10) + '</div>'
                    + '<h2>Legende:</h2>'
                    + '<button style="background-color:green;">&#9650;</button> Item hierboven invoegen (zelfde niveau)<br>'
                    + '<button style="background-color:green;">&#9660;</button> Item hieronder invoegen (zelfde niveau)<br>'
@@ -205,12 +205,12 @@ function buildNewStructure(structure: Hierarchical_List) {
 }
 
 function reset_all() {
-    if (structure != null) structure.dispose();
-    structure = new Hierarchical_List();
-    buildNewStructure(structure);
+    if (globalThis.structure != null) globalThis.structure.dispose();
+    globalThis.structure = new Hierarchical_List();
+    buildNewStructure(globalThis.structure);
     topMenu.selectMenuItemByName('Eéndraadschema');
-    undostruct.clear();
-    undostruct.store();
+    globalThis.undostruct.clear();
+    globalThis.undostruct.store();
 }
 
 function renderAddress() {
@@ -220,10 +220,10 @@ function renderAddress() {
               '<div style="display:inline-block; width:25px;"></div><div style="display:inline-block;"><table cols="3" rows="1" style="border-collapse: collapse;border-style: solid; border-width:medium;" cellpadding="5">' +
               '  <tr><th style="text-align: left;border-style: solid; border-width:thin;">Plaats van de elektrische installatie</th><th style="text-align: left;border-style: solid; border-width:thin;">Installateur</th><th style="text-align: left;border-style: solid; border-width:thin;">Info</th></tr>' +
               '  <tr>' +
-              '    <td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_owner" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + structure.properties.owner + '</td>' +
-              '    <td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_installer" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + structure.properties.installer + '</td>' +
-              '    <td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_control" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + structure.properties.control + '</td>' +
-              '    <td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_info" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + structure.properties.info + '</td>' +
+              '    <td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_owner" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + globalThis.structure.properties.owner + '</td>' +
+              '    <td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_installer" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + globalThis.structure.properties.installer + '</td>' +
+              '    <td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_control" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + globalThis.structure.properties.control + '</td>' +
+              '    <td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_info" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + globalThis.structure.properties.info + '</td>' +
               '  </tr>' +
               '</table></div></div>';
 
@@ -233,33 +233,33 @@ function renderAddress() {
 function renderAddressStacked() {
     var outHTML: string = "";
 
-    if (!structure.properties.control) structure.properties.control = "<br>";
+    if (!globalThis.structure.properties.control) globalThis.structure.properties.control = "<br>";
 
     outHTML = 'Plaats van de elektrische installatie' +
               '<table width="90%" cols="1" rows="1" style="border-collapse: collapse;border-style: solid; border-width:thin;" cellpadding="5">' +
-              '<tr><td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_owner" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + structure.properties.owner + '</td></tr>' +
+              '<tr><td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_owner" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + globalThis.structure.properties.owner + '</td></tr>' +
               '</table><br>' +
               'Installateur' +
               '<table width="90%" cols="1" rows="1" style="border-collapse: collapse;border-style: solid; border-width:thin;" cellpadding="5">' +
-              '<tr><td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_installer" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + structure.properties.installer + '</td></tr>' +
+              '<tr><td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_installer" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + globalThis.structure.properties.installer + '</td></tr>' +
               '</table><br>' +
               'Erkend organisme (keuring)' +
               '<table width="90%" cols="1" rows="1" style="border-collapse: collapse;border-style: solid; border-width:thin;" cellpadding="5">' +
-              '<tr><td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_control" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + structure.properties.control + '</td></tr>' +
+              '<tr><td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_control" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + globalThis.structure.properties.control + '</td></tr>' +
               '</table><br>' +
               'Info' +
               '<table width="90%" cols="1" rows="1" style="border-collapse: collapse;border-style: solid; border-width:thin;" cellpadding="5">' +
-              '<tr><td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_info" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + structure.properties.info + '</td></tr>' +
+              '<tr><td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_info" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + globalThis.structure.properties.info + '</td></tr>' +
               '</table>';
 
     return outHTML;
 }
 
 function changeAddressParams() {
-    structure.properties.owner = (document.getElementById("conf_owner") as HTMLElement).innerHTML;
-    structure.properties.installer = (document.getElementById("conf_installer") as HTMLElement).innerHTML;
-    structure.properties.control = (document.getElementById("conf_control") as HTMLElement).innerHTML;
-    structure.properties.info = (document.getElementById("conf_info") as HTMLElement).innerHTML;
+    globalThis.structure.properties.owner = (document.getElementById("conf_owner") as HTMLElement).innerHTML;
+    globalThis.structure.properties.installer = (document.getElementById("conf_installer") as HTMLElement).innerHTML;
+    globalThis.structure.properties.control = (document.getElementById("conf_control") as HTMLElement).innerHTML;
+    globalThis.structure.properties.info = (document.getElementById("conf_info") as HTMLElement).innerHTML;
 }
 
 function openContactForm() {
@@ -294,10 +294,10 @@ function restart_all() {
 }
 
 function toggleAppView(type: '2col' | 'config' | 'draw') {
-    let lastview = structure.properties.currentView;
-    if ((structure.sitplanview != null) && (structure.sitplanview.contextMenu != null)) structure.sitplanview.contextMenu.hide();
+    let lastview = globalThis.structure.properties.currentView;
+    if ((globalThis.structure.sitplanview != null) && (globalThis.structure.sitplanview.contextMenu != null)) globalThis.structure.sitplanview.contextMenu.hide();
     
-    structure.properties.currentView = type;
+    globalThis.structure.properties.currentView = type;
     if (type === '2col') {  
         document.getElementById("configsection").innerHTML = '';
         document.getElementById("configsection").style.display = 'none';
@@ -306,7 +306,7 @@ function toggleAppView(type: '2col' | 'config' | 'draw') {
 
         document.getElementById("ribbon").style.display = 'flex';
         document.getElementById("canvas_2col").style.display = 'flex';
-        structure.updateRibbon();
+        globalThis.structure.updateRibbon();
     } else if (type === 'config') {
         document.getElementById("configsection").style.display = 'block';
         
@@ -337,7 +337,7 @@ function toggleAppView(type: '2col' | 'config' | 'draw') {
     }
 
     if ( (['2col','draw'].includes(type)) && (['2col','draw'].includes(lastview)) && (type !== lastview) )
-        undostruct.store();
+        globalThis.undostruct.store();
 
 }
 
@@ -355,13 +355,13 @@ function load_example(nr: number) {
 }
 
 function undoClicked() {
-    if ((structure.sitplanview != null) && (structure.sitplanview.contextMenu != null)) structure.sitplanview.contextMenu.hide();
-    undostruct.undo();    
+    if ((globalThis.structure.sitplanview != null) && (globalThis.structure.sitplanview.contextMenu != null)) globalThis.structure.sitplanview.contextMenu.hide();
+    globalThis.undostruct.undo();    
 }
 
 function redoClicked() {
-    if ((structure.sitplanview != null) && (structure.sitplanview.contextMenu != null)) structure.sitplanview.contextMenu.hide();
-    undostruct.redo();    
+    if ((globalThis.structure.sitplanview != null) && (globalThis.structure.sitplanview.contextMenu != null)) globalThis.structure.sitplanview.contextMenu.hide();
+    globalThis.undostruct.redo();    
 }
 
 function download(type: string) {
@@ -379,7 +379,7 @@ function download(type: string) {
             break;
         }
     }
-    var text:string = structure.toSVG(0,"horizontal").data;
+    var text:string = globalThis.structure.toSVG(0,"horizontal").data;
     if ((document.getElementById("noGroup") as HTMLInputElement).checked == true) text = flattenSVGfromString(text);
 
     download_by_blob(text, filename, mimeType); //was text/plain
@@ -408,13 +408,6 @@ var CONF_hoofdzekering = 65;
 var CONF_differentieel_droog = 300;
 var CONF_differentieel_nat = 30;
 var CONF_upload_OK = "ask"; //can be "ask", "yes", "no"; //before uploading, we ask
-
-var session = new Session();
-
-var structure: Hierarchical_List;
-var undostruct: undoRedo = new undoRedo(100);
-
-var appDocStorage = new MultiLevelStorage<any>('appDocStorage', {});
 
 // Configure the app-zone in the HTML
 
@@ -448,22 +441,22 @@ document.querySelector('#left_col_inner').addEventListener('change', function(ev
         switch (type) {
         case "select-one":
             if (item == "type") { // Type changed
-                structure.adjustTypeById(my_id, value as string);
+                globalThis.globalThis.structure.adjustTypeById(my_id, value as string);
             } else {
-                structure.data[structure.getOrdinalById(my_id)].props[item] = (value as string);
+                globalThis.globalThis.structure.data[globalThis.globalThis.structure.getOrdinalById(my_id)].props[item] = (value as string);
             }
-            structure.updateHTMLinner(my_id);
+            globalThis.globalThis.structure.updateHTMLinner(my_id);
             break;
         case "text":
-            structure.data[structure.getOrdinalById(my_id)].props[item] = (value as string);
-            if (item==='kortsluitvermogen') structure.updateHTMLinner(my_id);
+            globalThis.globalThis.structure.data[globalThis.globalThis.structure.getOrdinalById(my_id)].props[item] = (value as string);
+            if (item==='kortsluitvermogen') globalThis.globalThis.structure.updateHTMLinner(my_id);
             break;
         case "checkbox":
-            structure.data[structure.getOrdinalById(my_id)].props[item] = (value as boolean);
-            structure.updateHTMLinner(my_id);
+            globalThis.globalThis.structure.data[globalThis.globalThis.structure.getOrdinalById(my_id)].props[item] = (value as boolean);
+            globalThis.globalThis.structure.updateHTMLinner(my_id);
             break;
         }
-        undostruct.store();
+        globalThis.undostruct.store();
         HLRedrawTreeSVG();
     }
 
@@ -488,18 +481,18 @@ document.querySelector('#left_col_inner').addEventListener('change', function(ev
 EDStoStructure(EXAMPLE_DEFAULT,false); //Just in case the user doesn't select a scheme and goes to drawing immediately, there should be something there
 
 // Create the autoSaver
-// - the constructor takes a function that points it to the latest structure whenever it asks for it
+// - the constructor takes a function that points it to the latest globalThis.structure whenever it asks for it
 // - We also add a callback function that is called after each save performed by the autoSaver.  This function will update the Save icon in the ribbon when needed
 
-let autoSaver = new AutoSaver(5, () => {return(structure);});
+var autoSaver = new AutoSaver(5, () => {return(globalThis.structure);}); // Als globale variabele moet dit een var zijn en geen let
 autoSaver.setCallbackAfterSave((() => { // Update ribbons after each save (automatic or manual) by the autoSaver, but only if the lastSavedType changed
     let lastSavedType = autoSaver.getSavedType();
     function updateRibbons(){
         const currentSavedType = autoSaver.getSavedType();
         if (lastSavedType === currentSavedType) return; // Only update the ribbons if the type changed
         lastSavedType = currentSavedType;
-        structure.updateRibbon(); 
-        if (structure.sitplanview) structure.sitplanview.updateRibbon(); 
+        globalThis.structure.updateRibbon(); 
+        if (globalThis.structure.sitplanview) globalThis.structure.sitplanview.updateRibbon(); 
     }
     return updateRibbons;
 })());
@@ -522,7 +515,7 @@ let lastSavedInfo = null;
         let myCookieBanner = new CookieBanner();
         myCookieBanner.run();
     } else {
-        const helperTip = new HelperTip(appDocStorage);
+        const helperTip = new HelperTip(globalThis.appDocStorage);
         helperTip.show( 'file.autoRecovered',
                         `<h3>Laatste schema geladen uit browsercache</h3>` +
                         `<p>Deze tool vond een schema in de browsercache. `+

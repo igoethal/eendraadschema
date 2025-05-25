@@ -4,7 +4,7 @@
  * De effectieve code om te interageren met de browser zelf zit in class SituationPlanView.
  * 
  * Deze class refereert naar de volgende globale variabelen:
- * - structure
+ * - globalThis.structure
  */
 
 
@@ -54,7 +54,7 @@ class SituationPlan {
     heeftEenzameSchakelaars() {
         var schakelaars = this.elements.filter(function (element) {
             if (element.isEendraadschemaSymbool()) {
-                let electroItem = structure.getElectroItemById(element.getElectroItemId());
+                let electroItem = globalThis.structure.getElectroItemById(element.getElectroItemId());
                 if (electroItem != null) {
                     if (electroItem.props.type == "Schakelaars") {
                         if ( (electroItem.props.aantal_schakelaars == 1) || (electroItem.props.aantal_schakelaars == null) ) {
@@ -70,7 +70,7 @@ class SituationPlan {
     dropLegacySchakelaars() {
         for (let element of this.elements) {
             if (element.isEendraadschemaSymbool()) {
-                let electroItem = structure.getElectroItemById(element.getElectroItemId());
+                let electroItem = globalThis.structure.getElectroItemById(element.getElectroItemId());
                 if (electroItem != null) {
                     if (electroItem.props.type == "Schakelaars") {
                         if ( (electroItem.props.aantal_schakelaars == 1) || (electroItem.props.aantal_schakelaars == null) ) {
@@ -132,7 +132,7 @@ class SituationPlan {
     addElementFromElectroItem(electroItemId: number, page: number, posx: number, posy: number, adrestype: AdresType, adres:string, adreslocation: AdresLocation,
                               labelfontsize: number, scale: number, rotate: number): SituationPlanElement | null {
 
-        const electroItem: Electro_Item = structure.getElectroItemById(electroItemId);
+        const electroItem: Electro_Item = globalThis.structure.getElectroItemById(electroItemId);
         if (!electroItem) return null;
         
         const element: SituationPlanElement = electroItem.toSituationPlanElement();
@@ -174,7 +174,7 @@ class SituationPlan {
             //We kunnen hier niet de functie isEendraadSchemaSymbool of getElectroItemById gebruiken want die zorgen
             //ervoor dat onderstaande altijd false geeft als de symbolen niet langer in het eendraadschema zitten waardoor
             //de cleanup die nodig is niet gebeurd.
-            if (((element as any).electroItemId != null) && (structure.getElectroItemById(element.getElectroItemId()) == null)) {
+            if (((element as any).electroItemId != null) && (globalThis.structure.getElectroItemById(element.getElectroItemId()) == null)) {
                 this.removeElement(element); 
                 this.syncToEendraadSchema(); return; // Start opnieuw en stop na recursie
             }
@@ -192,7 +192,7 @@ class SituationPlan {
      */
 
     orderByZIndex() {
-        //if (structure.sitplanview == null) return;
+        //if (globalThis.structure.sitplanview == null) return;
         this.elements.sort((a, b) => {
             let asort = ( ((a.boxref == null) || (a.boxref.style.zIndex === "")) ? 0 : parseInt(a.boxref.style.zIndex));
             let bsort = ( ((b.boxref == null) || (b.boxref.style.zIndex === "")) ? 0 : parseInt(b.boxref.style.zIndex));
@@ -288,7 +288,7 @@ class SituationPlan {
         this.orderByZIndex(); // Sorteer de elementen op basis van de z-index zodat ze in de juiste volgorde worden geprint
 
         let outstruct:any = {};
-        outstruct.numpages = (this.elements.length > 0 ? structure.sitplan.numPages : 0);
+        outstruct.numpages = (this.elements.length > 0 ? globalThis.structure.sitplan.numPages : 0);
         outstruct.pages = [];
 
         for (let i=0; i<outstruct.numpages; i++ ) {    

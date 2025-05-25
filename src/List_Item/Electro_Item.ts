@@ -216,7 +216,7 @@ class Electro_Item extends List_Item {
           if (str == null) str = "";
           return str;
       } else {
-        let kringname:string = structure.findKringName(this.id).trim();
+        let kringname:string = globalThis.structure.findKringName(this.id).trim();
         let nr:string = this.getnr().trim();
 
         if (kringname == "") return nr;
@@ -329,7 +329,7 @@ class Electro_Item extends List_Item {
 
     // als we een enkelvoudige schakelaar hebben die niet legacy is, dan spiegelen we niet
     if (this.props.type == "Schakelaars") {
-      if (structure.properties.legacySchakelaars == false) {
+      if (globalThis.structure.properties.legacySchakelaars == false) {
         if ( (this.props.aantal_schakelaars == 1) || (this.props.aantal_schakelaars == null) ) {
           spiegeltext = false;
         }

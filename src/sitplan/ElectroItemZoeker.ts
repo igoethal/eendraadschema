@@ -3,7 +3,7 @@
  * Dit laat toe items to selecteren uit het volledige eendraadschema en ze te plaatsen op het situatieschema.
  * 
  * Deze class refereert naar de volgende globale variabelen:
- * - structure
+ * - globalThis.structure
  */
 
 class ElectroItemZoeker {
@@ -83,10 +83,10 @@ class ElectroItemZoeker {
     reCalculate() {
         this.data = [];
         this.borden = [];
-        for (let i = 0; i<structure.length; i++) {
-            if (structure.active[i]) {
-                let id:number = structure.id[i];
-                let electroItem = structure.data[i] as Electro_Item;
+        for (let i = 0; i<globalThis.structure.length; i++) {
+            if (globalThis.structure.active[i]) {
+                let id:number = globalThis.structure.id[i];
+                let electroItem = globalThis.structure.data[i] as Electro_Item;
                 if (electroItem == null) continue;
                 let type:string = electroItem.getType();
                 if (type == 'Bord') {
@@ -94,7 +94,7 @@ class ElectroItemZoeker {
                     if ( (myName == null) || (myName.trim() == '') ) myName = 'Bord';
                     this.borden.push({id: id, naam: myName})
                 } else {
-                    let kringnaam:string = structure.findKringName(id).trim();
+                    let kringnaam:string = globalThis.structure.findKringName(id).trim();
                     if (kringnaam != '') {
                         if ( (type != null) && (this.excludedTypes.indexOf(type) === -1) ) {
                             let adres:string = electroItem.getReadableAdres();

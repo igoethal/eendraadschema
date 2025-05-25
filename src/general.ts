@@ -75,7 +75,7 @@ function svgTextWidth(input:String, fontsize:Number = 10, options:String = '') {
 
 function flattenSVG(SVGstruct,shiftx,shifty,node,overflowright=0) {
 
-  if (node==0) structure.print_table.pagemarkers.clear();
+  if (node==0) globalThis.structure.print_table.pagemarkers.clear();
   
   var str:string = "";
 
@@ -170,7 +170,7 @@ function flattenSVG(SVGstruct,shiftx,shifty,node,overflowright=0) {
     str = str.replace(regex, '');
   }
 
-  structure.print_table.pagemarkers.addMarker(node,shiftx);
+  globalThis.structure.print_table.pagemarkers.addMarker(node,shiftx);
 
   return str;
 }

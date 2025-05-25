@@ -111,10 +111,10 @@ class AskLegacySchakelaar {
         okButton.addEventListener('click', () => {
           const symbolChoice = document.querySelector('input[name="symbolChoice"]:checked');
           if (symbolChoice && symbolChoice.id === 'keepLegacy') {
-            structure.properties.legacySchakelaars = true;
+            globalThis.structure.properties.legacySchakelaars = true;
           } else if (symbolChoice && symbolChoice.id === 'dropLegacy') {
-            structure.properties.legacySchakelaars = false;
-            structure.sitplan.dropLegacySchakelaars();
+            globalThis.structure.properties.legacySchakelaars = false;
+            globalThis.structure.sitplan.dropLegacySchakelaars();
           }
   
           // Remove the popup

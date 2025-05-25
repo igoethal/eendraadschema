@@ -9,7 +9,9 @@ class jsonStore {
         this.redoStack = [];
     }
 
-    store(text: string): void {
+    store(text: string, popFirst: boolean = false): void {
+        if ( (popFirst) && (this.undoStack.length > 0) ) this.undoStack.pop(); // Remove the oldest entry
+        
         if (this.undoStack.length >= this.maxSteps) {
             this.undoStack.shift(); // Remove the oldest entry to maintain maxSteps
         }
@@ -39,7 +41,7 @@ class jsonStore {
         if (this.redoStack.length === 0) {
             return null;
         }
-        var lastRedoState = this.redoStack.pop()!;
+        let lastRedoState = this.redoStack.pop()!;
         this.undoStack.push(lastRedoState);
         return lastRedoState;
     }
@@ -93,16 +95,16 @@ class undoRedo {
     }
 
     replaceSVGsByStringStore() {
-        if (structure.sitplan != null) {
-            for (let element of structure.sitplan.getElements()) {
+        if (globalThis.structure.sitplan != null) {
+            for (let element of globalThis.structure.sitplan.getElements()) {
                 if (!element.isEendraadschemaSymbool()) element.svg = this.largeStrings.pushIfNotExists(element.getUnscaledSVGifNotElectroItem()).toString();
             }
         }
     }
 
     replaceStringStoreBySVGs() {
-        if (structure.sitplan != null) {
-            for (let element of structure.sitplan.getElements()) {
+        if (globalThis.structure.sitplan != null) {
+            for (let element of globalThis.structure.sitplan.getElements()) {
                 if (!element.isEendraadschemaSymbool()) element.svg = this.largeStrings.get(parseInt(element.svg));
             }
         }
@@ -111,10 +113,10 @@ class undoRedo {
     getOptions(): string {
         let options:any = {};
 
-        if (structure.sitplanview != null) {
-            options.selectedBoxOrdinal = structure.sitplanview.getSelectedBoxOrdinal();
-            if ((structure.sitplanview.sideBar as any).getUndoRedoOptions != null) {
-                Object.assign(options,(structure.sitplanview.sideBar as any).getUndoRedoOptions());
+        if (globalThis.structure.sitplanview != null) {
+            options.selectedBoxesOrdinals = globalThis.structure.sitplanview.getSelectedBoxesOrdinals();
+            if ((globalThis.structure.sitplanview.sideBar as any).getUndoRedoOptions != null) {
+                Object.assign(options,(globalThis.structure.sitplanview.sideBar as any).getUndoRedoOptions());
             }
         }
 
@@ -127,48 +129,59 @@ class undoRedo {
         if ( (sleutel != null) && (sleutel == this.samenVoegSleutel) ) overschrijfVorige = true;
         this.samenVoegSleutel = sleutel;
 
-        // We store the current state of the structure in the history but we replace the SVGs by a reference to a large string store
+        // We store the current state of the globalThis.structure in the history but we replace the SVGs by a reference to a large string store
         this.replaceSVGsByStringStore();
 
         if (!overschrijfVorige) {
-            this.historyEds.store(structure.toJsonObject(false)); // needs to call with false as we want to keep currentView info
+            this.historyEds.store(globalThis.structure.toJsonObject(false)); // needs to call with false as we want to keep currentView info
             this.historyOptions.store(this.getOptions());
         } else {
-            this.historyEds.replace(structure.toJsonObject(false)); // needs to call with false as we want to keep currentView info
+            this.historyEds.replace(globalThis.structure.toJsonObject(false)); // needs to call with false as we want to keep currentView info
             this.historyOptions.replace(this.getOptions());
         }
         
         this.replaceStringStoreBySVGs();
 
-        if ( (structure.properties.currentView == 'draw') && (structure.sitplanview != null) ) structure.sitplanview.updateRibbon();
-        else if (structure.properties.currentView == '2col') structure.updateRibbon(); 
+        if ( (globalThis.structure.properties.currentView == 'draw') && (globalThis.structure.sitplanview != null) ) globalThis.structure.sitplanview.updateRibbon();
+        else if (globalThis.structure.properties.currentView == '2col') globalThis.structure.updateRibbon(); 
+    }
+
+    updateSelectedBoxes() {
+        this.historyOptions.store(this.getOptions(), true);
     }
 
     reload(text: string, options: any) {
         this.samenVoegSleutel = null;
 
-        let lastView = structure.properties.currentView;
-        let lastmode = structure.mode;
+        let lastView = globalThis.structure.properties.currentView;
+        let lastmode = globalThis.structure.mode;
         if (text != null) loadFromText(text, 0, false);
         
         // We replace the references to the large string store by the actual SVGs
         this.replaceStringStoreBySVGs();
-        // We need to resort and clean the structure to avoid bad references
-        structure.reSort();
+        // We need to resort and clean the globalThis.structure to avoid bad references
+        globalThis.structure.reSort();
 
-        structure.mode = lastmode;
-        if (structure.properties.currentView != lastView) toggleAppView(structure.properties.currentView as '2col' | 'config' | 'draw');
-        switch (structure.properties.currentView) {
+        globalThis.structure.mode = lastmode;
+        if (globalThis.structure.properties.currentView != lastView) toggleAppView(globalThis.structure.properties.currentView as '2col' | 'config' | 'draw');
+        switch (globalThis.structure.properties.currentView) {
             case 'draw': 
                 topMenu.selectMenuItemByOrdinal(3);
                 showSituationPlanPage();
+                
+                if ((globalThis.structure.sitplanview.sideBar as any).setUndoRedoOptions != null) (globalThis.structure.sitplanview.sideBar as any).setUndoRedoOptions(options);
 
-                if ((structure.sitplanview.sideBar as any).setUndoRedoOptions != null) (structure.sitplanview.sideBar as any).setUndoRedoOptions(options);
+                if (options.selectedBoxesOrdinals == null) break;
 
-                let htmlId = structure.sitplan.getElements()[options.selectedBoxOrdinal].id;
-                if (htmlId == null) break;
-                let div = document.getElementById(htmlId);
-                if (div != null) structure.sitplanview.selectBox(div);
+                for (let selectedBox of options.selectedBoxesOrdinals) {
+                    if (globalThis.structure.sitplan.getElements().length <= selectedBox) break;
+                    let element = globalThis.structure.sitplan.getElements()[selectedBox];
+                    if (element == null) break;
+                    let htmlId = element.id;
+                    if (htmlId == null) break;
+                    let div = document.getElementById(htmlId);
+                    if (div != null) globalThis.structure.sitplanview.selectBox(div);
+                }
 
                 break;
             case '2col': topMenu.selectMenuItemByOrdinal(2); HLRedrawTree(); break;
@@ -196,7 +209,7 @@ class undoRedo {
         this.historyEds.clear();
         this.historyOptions.clear();
         this.largeStrings.clear();
-        structure.updateRibbon();
+        globalThis.structure.updateRibbon();
     }
 
     undoStackSize():number {return(this.historyEds.undoStackSize());}

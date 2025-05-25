@@ -29,28 +29,30 @@ class MouseDrag {
         const ribbonHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ribbon-height'));
         const sideBarWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sideBarWidth'));
 
-        this.startPaperPos = structure.sitplanview.canvasPosToPaperPos(mouseX - sideBarWidth, mouseY - menuHeight - ribbonHeight);
+        this.startPaperPos = globalThis.structure.sitplanview.canvasPosToPaperPos(mouseX - sideBarWidth, mouseY - menuHeight - ribbonHeight);
     }
 
     /**
-     * Return the new left and top position of the box based on the current mouse position.
+     * Return the new x and y position of the box based on the current mouse position.
      * @param mouseX The current x position of the mouse.
      * @param mouseY The current y position of the mouse.
-     * @returns An object with the new left and top position of the box.
+     * @returns An object with the new x and y position of the box.
      */
-    returnNewLeftTop(mousex: number = 0, mousey: number = 0) {
+    returnNewPaperPos(mousex: number = 0, mousey: number = 0) {
 
         const menuHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--menu-height'));
         const ribbonHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ribbon-height'));
         const sideBarWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sideBarWidth'));
 
-        let stopPaperPos = structure.sitplanview.canvasPosToPaperPos(mousex - sideBarWidth, mousey - menuHeight - ribbonHeight);
+        let stopPaperPos = globalThis.structure.sitplanview.canvasPosToPaperPos(mousex - sideBarWidth, mousey - menuHeight - ribbonHeight);
 
         if (stopPaperPos.x != this.startPaperPos.x || stopPaperPos.y != this.startPaperPos.y) this.hassMoved = true;
 
         return ( {
-                    left: (stopPaperPos.x - this.startPaperPos.x) + this.startOffsetLeft,
-                    top: (stopPaperPos.y - this.startPaperPos.y) + this.startOffsetTop
+                    x: (stopPaperPos.x - this.startPaperPos.x) + this.startOffsetLeft,
+                    y: (stopPaperPos.y - this.startPaperPos.y) + this.startOffsetTop
                 });
     }
+
+
 }

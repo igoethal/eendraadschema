@@ -471,7 +471,7 @@ class Hierarchical_List {
     // -- Pas type aan van item met id = my_id --
 
     adjustTypeById(my_id: number, electroType : string) {
-        let ordinal = structure.getOrdinalById(my_id);
+        let ordinal = globalThis.structure.getOrdinalById(my_id);
         this.adjustTypeByOrdinal(ordinal, electroType);
     }
 
@@ -484,9 +484,6 @@ class Hierarchical_List {
         if (parent != null) {
             if (parent.getType() == "Kring") {
 
-                // Bepaal hoogte van de lijn. Idien dit het laatste element van de kring is is het een halve lijn,
-                // zoniet een hele lijn
-                let y1, y2: number;
                 let lastOrdinalInKring = 0;
                 let myOrdinal = this.getOrdinalById(item.id);
 
@@ -494,24 +491,40 @@ class Hierarchical_List {
                     if (this.active[i] && (this.data[i].parent == parent.id)) lastOrdinalInKring = i;
                 }
 
-                if (myOrdinal < lastOrdinalInKring) { // Teken een verticale lijn over de volledige hoogte
-                    y1 = 0;
-                    y2 = mySVG.yup + mySVG.ydown;
-                } else { // Teken een verticale lijn over de halve hoogte
-                    y1 = mySVG.yup;
-                    y2 = mySVG.yup + mySVG.ydown;    
-                }
+                if ( (item.getType() == "Omvormer") && (item.props.inkring) ) {
 
-                // Teken de lijn
-                mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + y1 + '" y2="' + y2 + '" stroke="black" />'
+                    if (myOrdinal < lastOrdinalInKring)
+                        mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + 0 + '" y2="' + (mySVG.yup-20) + '" stroke="black" />'
+                    mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + (mySVG.yup + mySVG.ydown - 5) + '" y2="' + (mySVG.yup + mySVG.ydown) + '" stroke="black" />'
+
+                } else {        
+
+                    // Bepaal hoogte van de lijn. Idien dit het laatste element van de kring is is het een halve lijn,
+                    // zoniet een hele lijn
+                    let y1, y2: number;
+                    
+                    if (myOrdinal < lastOrdinalInKring) { // Teken een verticale lijn over de volledige hoogte
+                        y1 = 0;
+                        y2 = mySVG.yup + mySVG.ydown;
+                    } else { // Teken een verticale lijn over de halve hoogte
+                        y1 = mySVG.yup;
+                        y2 = mySVG.yup + mySVG.ydown;    
+                    }
+        
+                    // Teken de lijn
+                    mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + y1 + '" y2="' + y2 + '" stroke="black" />'
+                }
             }
 
             if ( (parent.getType() == "Kring") || (parent.getType() == "Domotica module (verticaal)") ) {
                 // Plaats het nummer van het item naast de lijn
                 let displaynr:string;
                 displaynr = item.props.nr;
+                let posx = mySVG.xleft+9;
+                if ( (item.getType() == "Omvormer") && (item.props.inkring) ) posx -= 38;
+                
                 mySVG.data +=
-                  '<text x="' + (mySVG.xleft+9) + '" y="' + (mySVG.yup - 5) + '" ' +
+                  '<text x="' + (posx) + '" y="' + (mySVG.yup - 5) + '" ' +
                   'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' +
                   htmlspecialchars(displaynr)+'</text>';
             }
@@ -519,17 +532,17 @@ class Hierarchical_List {
     };
 
     updateRibbon() {
-        if (structure.properties.currentView != '2col') return; // het heeft geen zin de EDS ribbon aan te passen als de EDS niet open staat
+        if (globalThis.structure.properties.currentView != '2col') return; // het heeft geen zin de EDS ribbon aan te passen als de EDS niet open staat
 
         let output: string = "";
 
         // Plaats bovenaan de switch van editeer-mode (teken of verplaats) --
         output += `
-            <div class="icon" ${(undostruct.undoStackSize() > 0 ? 'onclick="undoClicked()"' : "style=\"filter: opacity(45%)\"")}>
+            <div class="icon" ${(globalThis.undostruct.undoStackSize() > 0 ? 'onclick="undoClicked()"' : "style=\"filter: opacity(45%)\"")}>
                 <img src="gif/undo.png" alt="Ongedaan maken" class="icon-image">
                 <span class="icon-text">Ongedaan maken</span>
             </div>
-            <div class="icon" ${(undostruct.redoStackSize() > 0 ? 'onclick="redoClicked()"' : "style=\"filter: opacity(45%)\"")}>
+            <div class="icon" ${(globalThis.undostruct.redoStackSize() > 0 ? 'onclick="redoClicked()"' : "style=\"filter: opacity(45%)\"")}>
                 <img src="gif/redo.png" alt="Opnieuw" class="icon-image">
                 <span class="icon-text">Opnieuw</span>
             </div>
@@ -605,12 +618,12 @@ class Hierarchical_List {
         if (this.data[ordinal].collapsed) {
             return(`<tr>
                         <td bgcolor="#8AB2E4" onclick="HLCollapseExpand(${this.data[ordinal].id})" valign= "top">&#x229E;</td>
-                        <td width="100%">${this.data[ordinal].toHTML(structure.mode)}<br></td>
+                        <td width="100%">${this.data[ordinal].toHTML(globalThis.structure.mode)}<br></td>
                     </tr>`);
         } else {
             return(`<tr>
                        <td bgcolor="C0C0C0" onclick="HLCollapseExpand(${this.data[ordinal].id})" valign= "top">&#x229F;</td>
-                       <td width="100%">${this.data[ordinal].toHTML(structure.mode)}<br>${this.toHTML(this.id[ordinal])}</td>
+                       <td width="100%">${this.data[ordinal].toHTML(globalThis.structure.mode)}<br>${this.toHTML(this.id[ordinal])}</td>
                     </tr>`);
         }
     }
