@@ -23,6 +23,8 @@ import { undoRedo } from "./undoRedo";
 import { importExportUsingFileAPI } from "./importExport/importExport";
 import { CookieBanner } from "../prop/prop_scripts";
 
+import '../css/styles.css';
+
 declare const BUILD_DATE: string;
 console.log(BUILD_DATE);
 
