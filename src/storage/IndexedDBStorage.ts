@@ -8,7 +8,7 @@
  * @param {string} dbName - De naam van de database.
  * @param {string} storeName - De naam van de store.
  */
-class IndexedDBStorage {
+export class IndexedDBStorage {
     private dbName: string; // Naam van de database
     private storeName: string; // Naam van de store
 

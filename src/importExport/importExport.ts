@@ -1,4 +1,11 @@
-class importExportUsingFileAPI {
+import { Hierarchical_List } from "../Hierarchical_List";
+import { SituationPlan } from "../sitplan/SituationPlan";
+import { Electro_Item } from "../List_Item/Electro_Item";
+import { PROP_GDPR } from "../../prop/prop_scripts";
+
+declare var pako: any;
+
+export class importExportUsingFileAPI {
 
     saveNeeded: boolean;
     fileHandle: any;
@@ -88,13 +95,11 @@ class importExportUsingFileAPI {
     };
 }
 
-var fileAPIobj = new importExportUsingFileAPI();
-
 /* FUNCTION importjson
 
    This is the callback function for the legacy filepicker if the file API is not available in the browser */
 
-var importjson = function(event) {
+globalThis.importjson = (event) => {
     var input = event.target;
     var reader = new FileReader();
     var text:string = "";
@@ -106,7 +111,7 @@ var importjson = function(event) {
     reader.readAsText(input.files[0]);
 };
 
-var appendjson = function(event) {
+globalThis.appendjson = function(event) {
     var input = event.target;
     var reader = new FileReader();
     var text:string = "";
@@ -124,9 +129,9 @@ var appendjson = function(event) {
    Gets called when a user wants to open a file.  Checks if the fileAPI is available in the browser.
    If so, the fileAPI is used.  If not, the legacy function importjson is called */
 
-async function loadClicked() {
+globalThis.loadClicked = async () => {
     if ((window as any).showOpenFilePicker) { // Use fileAPI
-        let data = await fileAPIobj.readFile();
+        let data = await globalThis.fileAPIobj.readFile();
         EDStoStructure(data);
     } else { // Legacy
         document.getElementById('importfile').click();
@@ -141,7 +146,7 @@ async function loadClicked() {
  * Vraagt om een EDS bestand op de machine te kiezen en voegt de inhoud toe aan het reeds geopende schema.
  * We gebruiken hier bewust niet de fileAPI aangezien die reeds gebruikt wordt voor het reeds geopende schema.
  */
-async function importToAppendClicked() {
+globalThis.importToAppendClicked = async () => {
     document.getElementById('appendfile').click();
     (document.getElementById('appendfile') as HTMLInputElement).value = "";
 }
@@ -221,7 +226,7 @@ function upgrade_version(mystructure, version) {
  * Exporteert de huidige structuur naar een bestand in het EDS-formaat.
  * @param {boolean} saveAs - Indien true, wordt de gebruiker gevraagd waar het bestand moet worden opgeslagen; anders wordt het bestand opgeslagen onder de bekende bestandsnaam.
  */
-function exportjson(saveAs: boolean = true) { // Indien de boolean false is en de file API is geïnstalleerd, wordt een normale opslag uitgevoerd (bekende bestandsnaam)
+globalThis.exportjson = (saveAs: boolean = true) => { // Indien de boolean false is en de file API is geïnstalleerd, wordt een normale opslag uitgevoerd (bekende bestandsnaam)
 
     /**
      * Converteert een Uint8Array naar een Base64-gecodeerde string.
@@ -262,18 +267,18 @@ function exportjson(saveAs: boolean = true) { // Indien de boolean false is en d
         text = "TXT0040000" + origtext;
     } finally {
         if ((window as any).showOpenFilePicker) { // Gebruik fileAPI    
-            if ( (fileAPIobj.filename == null) && (saveAs == false) ) saveAs = true; // Default to SaveAs if we have no file name
+            if ( (globalThis.fileAPIobj.filename == null) && (saveAs == false) ) saveAs = true; // Default to SaveAs if we have no file name
             if (saveAs) 
-                this.fileAPIobj.saveAs(text).then(() => autoSaver.saveManually("TXT0040000" + origtext)); 
+                globalThis.fileAPIobj.saveAs(text).then(() => globalThis.autoSaver.saveManually("TXT0040000" + origtext)); 
             else 
-                this.fileAPIobj.save(text).then(() => autoSaver.saveManually("TXT0040000" + origtext));
+                globalThis.fileAPIobj.save(text).then(() => globalThis.autoSaver.saveManually("TXT0040000" + origtext));
         } else { // legacy
           download_by_blob(text, filename, 'data:text/eds;charset=utf-8');
-          autoSaver.saveManually("TXT0040000" + origtext); // Needs to be as TXT to be able to check with last autosave
+          globalThis.autoSaver.saveManually("TXT0040000" + origtext); // Needs to be as TXT to be able to check with last autosave
         }
     }
 
-    propUpload(text);
+    globalThis.propUpload(text);
 }
 
 /* FUNCTION json_to_structure
@@ -380,9 +385,9 @@ function json_to_structure(text: string, oldstruct: Hierarchical_List = null, ve
     return outstruct;
 }
 
-function loadFromText(text: string, version: number, redraw = true) {
+export function loadFromText(text: string, version: number, redraw = true) {
     globalThis.structure = json_to_structure(text, globalThis.structure, version);
-    if (redraw == true) topMenu.selectMenuItemByName('Eéndraadschema'); // Ga naar het bewerken scherm, dat zal automatisch voor hertekenen zorgen.
+    if (redraw == true) globalThis.topMenu.selectMenuItemByName('Eéndraadschema'); // Ga naar het bewerken scherm, dat zal automatisch voor hertekenen zorgen.
 }
 
 /**
@@ -463,9 +468,9 @@ function EDStoJson(mystring: string) {
 
 */
 
-function EDStoStructure(mystring: string, redraw = true, askUserToSave = false) {
+export function EDStoStructure(mystring: string, redraw = true, askUserToSave = false) {
 
-    if (autoSaver) autoSaver.reset();
+    if (globalThis.autoSaver) globalThis.autoSaver.reset();
 
     let JSONdata = EDStoJson(mystring);
     
@@ -490,9 +495,9 @@ function EDStoStructure(mystring: string, redraw = true, askUserToSave = false) 
     }
 
     // Make a manual save in the autoSaver
-    if (autoSaver && !askUserToSave) autoSaver.saveManually();
+    if (globalThis.autoSaver && !askUserToSave) globalThis.autoSaver.saveManually();
     if (askUserToSave) {
-        autoSaver.forceHasChangesSinceLastManualSave();
+        globalThis.autoSaver.forceHasChangesSinceLastManualSave();
         globalThis.structure.updateRibbon();
     } 
 
@@ -566,7 +571,7 @@ function importToAppend(mystring: string, redraw = true) {
     structureToAppend = null;   
 
     //redraw if needed
-    if (redraw) topMenu.selectMenuItemByName('Eéndraadschema');
+    if (redraw) globalThis.topMenu.selectMenuItemByName('Eéndraadschema');
 }
 
 /** FUNCTION download_by_blob
@@ -575,11 +580,11 @@ function importToAppend(mystring: string, redraw = true) {
  *
  */
 
-function download_by_blob(text, filename, mimeType): void {
+export function download_by_blob(text, filename, mimeType): void {
     
     var element = document.createElement('a');
-    if (navigator.msSaveBlob) {
-        navigator.msSaveBlob(new Blob([text], {
+    if ((navigator as any).msSaveBlob) {
+        (navigator as any).msSaveBlob(new Blob([text], {
         type: mimeType
         }), filename);
     } else if (URL && 'download' in element) {
@@ -602,7 +607,7 @@ function download_by_blob(text, filename, mimeType): void {
 
 */
 
-function showFilePage() {
+export function showFilePage() {
 
     var strleft: string = '<span id="exportscreen"></span>'; //We need the id to check elsewhere that the screen is open
 
@@ -644,11 +649,11 @@ function showFilePage() {
     if ((window as any).showOpenFilePicker) { // Use fileAPI
  
         strleft += '<table border=0><tr><td width=350 style="vertical-align:top;padding:5px">';
-        if (fileAPIobj.filename != null) { 
+        if (globalThis.fileAPIobj.filename != null) { 
             strleft += '<button style="font-size:14px" onclick="exportjson(saveAs = false)">Opslaan</button>&nbsp;';
             strleft += '<button style="font-size:14px" onclick="exportjson(saveAs = true)">Opslaan als</button>';
             strleft += '</td><td style="vertical-align:top;padding:5px">'    
-            strleft += 'Laatst geopend of opgeslagen om <b>' + fileAPIobj.lastsaved + '</b> met naam <b>' + fileAPIobj.filename + '</b><br><br>'
+            strleft += 'Laatst geopend of opgeslagen om <b>' + globalThis.fileAPIobj.lastsaved + '</b> met naam <b>' + globalThis.fileAPIobj.filename + '</b><br><br>'
                     +  'Klik links op "Opslaan" om bij te werken'
         } else {
             strleft += '<button style="font-size:14px" onclick="exportjson(saveAs = true)">Opslaan als</button>';
@@ -706,5 +711,5 @@ function showFilePage() {
     </table>`
     
     document.getElementById("configsection").innerHTML = strleft;
-    toggleAppView('config');
+    globalThis.toggleAppView('config');
 }

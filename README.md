@@ -7,15 +7,23 @@ Eendraadschema Community edition
 Design and draw a one-wire diagram as enforced by the Belgian AREI legislation.
 Source code written in Typescript, transpiled to Javascript and run in a browser.
 
-## Build / Compile 
+## Build
 
-Below description is valid for a linux terminal with bash- or sh-shell.
-With some extra tweaks, compilation on other systems should be possible as well.
+Ensure you have vite installed, usually this is done using 
+```npm install vite@latest```
 
-- Extract all files and directories in a dedicated folder.
-- Ensure you have a typescript compiler installed that can be called by the name "tsc"
-- Run the ./compile -script from the dedicated folder.
-- Open index.html with a modern browser
+Then run
+```npm run dev```
+
+Open the indicated url in a browser window.
+
+A single file version can be built using
+```npm run build```
+
+This will create a single "`index.html`" file in the "`dist`"-folder
+The "`index.html`"-file will still need all the resources in the root folder so must be renamed and
+copied into the root-folder to get a working application.
+The default build configuration is only provided as an example.
 
 ## License
 
@@ -47,18 +55,6 @@ where I host this tool would go down for some reason.
 I cannot state with 100% certainty that I will never change my mind and
 accept contributions in the future, but don't start working on this code with that specific end-state in mind.
 I hate to say no, but I most probably will.
-
-### Have you considered modern solutions to streamline the monolytic code, e.g. including modules and a module bundler
-
-yes, but as the only developer on this still small code-base, I judge the benefit as being relatively limited.
-Hence, while it is in my feature list, I do not expect it to get priority soon.
-I'd rather spend that time on answering user queries and building features as per user suggestions.
-
-In addition, having learned to program in an age where it was a popular challenge to build cool
-graphical demos in a <= 4 kilobyte DOS-executable, I continue to be amazed at the megabytes of 
-dependencies that modern programming environments apparently need to get "Hello world!" displayed on the console.
-
-Call me old school, but I will only add dependencies to the project if I see a very clear benefit.
 
 ### Have you considered a framework like Angular, React, ...
 

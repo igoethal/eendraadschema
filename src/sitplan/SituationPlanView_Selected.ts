@@ -1,4 +1,4 @@
-class SituationPlanView_Selected {
+export class SituationPlanView_Selected {
     private data: Array<HTMLElement> = [];
 
     constructor() {}
@@ -35,10 +35,6 @@ class SituationPlanView_Selected {
         if (this.data.length == 0) return null;
         return this.data[this.data.length - 1];
     }
-
-    /*public getAllSelected(): IterableIterator<HTMLElement> {
-        return this.data[Symbol.iterator]();
-    }*/
 
     public getAllSelected(): Array<HTMLElement> {
         return this.data;

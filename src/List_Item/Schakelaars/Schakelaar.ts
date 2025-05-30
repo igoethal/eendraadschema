@@ -1,10 +1,13 @@
-interface drawReturnObj {
+import { htmlspecialchars } from "../../general";
+import { SVGSymbols } from "../../SVGSymbols";
+
+export interface drawReturnObj {
     endx: number;
     str: string;
     lowerbound: number;
 }
 
-class Schakelaar {
+export class Schakelaar {
 
     type: String;
     halfwaterdicht: boolean;

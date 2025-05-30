@@ -1,4 +1,8 @@
-class Splitsing extends Electro_Item {
+import { Electro_Item } from "./Electro_Item";
+import { SVGelement } from "../SVGelement";
+import { List_Item } from "./List_Item";
+
+export class Splitsing extends Electro_Item {
 
     convertLegacyKeys(mykeys: Array<[string,string,any]>) {
         this.props.type             = this.getLegacyKey(mykeys,0);
@@ -20,6 +24,9 @@ class Splitsing extends Electro_Item {
     }
 
     toHTML(mode: string, Parent?: List_Item) {
+        // Suppress 'declared but never read' warning for the Parent parameter
+        Parent;
+        
         let output = this.toHTMLHeader(mode);
 
         return(output);

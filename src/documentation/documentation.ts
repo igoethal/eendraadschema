@@ -4,7 +4,7 @@
 
 */
 
-function showDocumentationPage() {
+export function showDocumentationPage() {
 
     let strleft = `
     <table border="1px" style="border-collapse:collapse" align="center" width="100%">
@@ -42,8 +42,9 @@ function showDocumentationPage() {
       </tr>
     </table>`;
 
-    document.getElementById("configsection").innerHTML = strleft;
-    toggleAppView('config');
+    const configsection = document.getElementById("configsection");
+    if (configsection != null) configsection.innerHTML = strleft;
+    globalThis.toggleAppView('config');
 
     (document.getElementById('Btn_downloadManual') as HTMLElement).onclick = () => { window.open('Documentation/edsdoc.pdf', '_blank') };
     (document.getElementById('Btn_downloadSitPlanManual') as HTMLElement).onclick = () => { window.open('Documentation/sitplandoc.pdf', '_blank') };

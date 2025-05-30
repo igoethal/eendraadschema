@@ -1,6 +1,11 @@
-class Zekering extends Electro_Item {
+import { Electro_Item } from "./Electro_Item";
+import { htmlspecialchars, svgTextWidth } from "../general";
+import { SVGelement } from "../SVGelement";
+import { SVGSymbols } from "../SVGSymbols";
 
-    convertLegacyKeys(mykeys: Array<[string,string,any]>) {} // Not needed as this element didn't exist when we still had legacy keys
+export class Zekering extends Electro_Item {
+
+    convertLegacyKeys(mykeys: Array<[string,string,any]>) {/* suppress never read warning */ mykeys} // Not needed as this element didn't exist when we still had legacy keys
 
     resetProps() {
         this.clearProps();
@@ -81,7 +86,7 @@ class Zekering extends Electro_Item {
 
     toSVG() {
 
-        function addFase(startNumlines:number, mySVG:SVGelement): number {
+        let addFase = (startNumlines:number, mySVG:SVGelement): number => {
             let numlines = startNumlines;
             if (['L1','L2','L3'].includes(this.props.fase)) {
                 numlines = numlines + ((this.props.huishoudelijk && this.props.kortsluitvermogen != '') ? 1.3 : 1.0);
@@ -93,7 +98,6 @@ class Zekering extends Electro_Item {
         }
 
         let mySVG:SVGelement = new SVGelement();
-        let outputstr:string = "";
 
         SVGSymbols.addSymbol('zekering_automatisch_horizontaal');
         SVGSymbols.addSymbol('zekering_smelt_horizontaal');

@@ -1,4 +1,7 @@
-class Verlenging extends Electro_Item {
+import { Electro_Item } from "./Electro_Item";
+import { SVGelement } from "../SVGelement";
+
+export class Verlenging extends Electro_Item {
 
     convertLegacyKeys(mykeys: Array<[string,string,any]>) {
         this.props.type                        = this.getLegacyKey(mykeys,0);
@@ -26,7 +29,6 @@ class Verlenging extends Electro_Item {
 
     toSVG() {
         let mySVG:SVGelement = new SVGelement();
-        let outputstr:string = "";
 
         var width;
         if (isNaN(Number(this.props.breedte))) {

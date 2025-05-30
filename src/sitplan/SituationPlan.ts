@@ -1,3 +1,10 @@
+import { SituationPlanElement } from "./SituationPlanElement"; 
+import { getPixelsPerMillimeter } from "./GeometricFunctions";
+import { getRotatedRectangleSize } from "./GeometricFunctions";
+import { htmlspecialchars } from "../general";
+import { Electro_Item } from "../List_Item/Electro_Item";
+import { AdresType, AdresLocation } from "./SituationPlanElement";
+
 /**
  * Volledig overzicht van een situatieplan.
  * Werd gebouwd voor gebruik in de browser maar is redelijk browser-agnostic.
@@ -8,14 +15,14 @@
  */
 
 
-class SituationPlan {
+export class SituationPlan {
     public activePage: number = 1; // We houden deze bij in situationplan zodat ook wijzigingen van pagina's worden opgeslagen
     private numPages: number = 1;
     private elements: SituationPlanElement[] = [];
 
     public defaults = {
         fontsize: 11,
-        scale: SITPLANVIEW_DEFAULT_SCALE,
+        scale: globalThis.SITPLANVIEW_DEFAULT_SCALE,
         rotate: 0
     }
 
@@ -29,7 +36,7 @@ class SituationPlan {
         this.activePage = 1;
         this.defaults = {
             fontsize: 11,
-            scale: SITPLANVIEW_DEFAULT_SCALE,
+            scale: globalThis.SITPLANVIEW_DEFAULT_SCALE,
             rotate: 0
         }
     }

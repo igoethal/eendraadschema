@@ -1,9 +1,9 @@
-interface MenuItem {
+export interface MenuItem {
     name: string;
     callback: () => void;
 }
 
-class TopMenu {
+export class TopMenu {
     private ulElement: HTMLUListElement;
     private liClassName: string;
     private menuItems: MenuItem[];

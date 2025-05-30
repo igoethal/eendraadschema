@@ -1,4 +1,8 @@
-class Bel extends Electro_Item {
+import { Electro_Item } from "./Electro_Item";
+import { SVGelement } from "../SVGelement";
+import { SVGSymbols } from "../SVGSymbols";
+
+export class Bel extends Electro_Item {
 
     convertLegacyKeys(mykeys: Array<[string,string,any]>) {
         this.props.type             = this.getLegacyKey(mykeys,0);
@@ -23,7 +27,6 @@ class Bel extends Electro_Item {
 
     toSVG() {
         let mySVG:SVGelement = new SVGelement();
-        let outputstr:string = "";
 
         SVGSymbols.addSymbol('bel');
 

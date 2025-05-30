@@ -1,4 +1,8 @@
-class Boiler extends Electro_Item {
+import { Electro_Item } from "./Electro_Item";
+import { SVGelement } from "../SVGelement";
+import { SVGSymbols } from "../SVGSymbols";
+
+export class Boiler extends Electro_Item {
 
     convertLegacyKeys(mykeys: Array<[string,string,any]>) {
         this.props.type             = this.getLegacyKey(mykeys,0);
@@ -26,7 +30,6 @@ class Boiler extends Electro_Item {
 
     toSVG(sitplan: boolean = false) {
         let mySVG:SVGelement = new SVGelement();
-        let outputstr:string = "";
 
         mySVG.xleft = 1; // foresee at least some space for the conductor
         mySVG.xright = 59;

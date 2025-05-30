@@ -1,4 +1,7 @@
-class List_Item {
+import { Hierarchical_List } from "../Hierarchical_List";
+import { SVGelement } from "../SVGelement";
+
+export class List_Item {
 
     // -- Publieke variabelen --
 

@@ -1,4 +1,8 @@
-class Omvormer extends Electro_Item {
+import { Electro_Item } from "./Electro_Item";
+import { SVGelement } from "../SVGelement";
+import { SVGSymbols } from "../SVGSymbols";
+
+export class Omvormer extends Electro_Item {
 
     convertLegacyKeys(mykeys: Array<[string,string,any]>) {
         this.props.type             = this.getLegacyKey(mykeys,0);
@@ -18,7 +22,6 @@ class Omvormer extends Electro_Item {
         if (this.props.inkring == null) this.props.inkring = false;
         if ( ((parent = this.getParent()) != null) && (parent.getType() != "Kring") )
             this.props.inkring = false;
-        if (this.props.inkring) this.props.adres = "";
     }
 
     toHTML(mode: string) {
@@ -28,9 +31,8 @@ class Omvormer extends Electro_Item {
 
         output += "&nbsp;" + this.nrToHtml();
         if ( ((parent = this.getParent()) != null) && (parent.getType() == "Kring") )
-            output += "In kring: " + this.checkboxPropToHTML('inkring') 
-            + (!this.props.inkring ? ", " : "");
-        if (!this.props.inkring) output += "Adres/tekst: " + this.stringPropToHTML('adres',5);
+            output += "In kring: " + this.checkboxPropToHTML('inkring') + ", ";
+        output += "Adres/tekst: " + this.stringPropToHTML('adres',5);
 
         return(output);
     }
@@ -44,22 +46,18 @@ class Omvormer extends Electro_Item {
         mySVG.yup = 25;
         mySVG.ydown = 25;
 
-        if (this.props.inkring) {
-            mySVG.xleft = 41; // foresee at least some space for the conductor
-            mySVG.xright = 19;
+        mySVG.xleft = 1; // foresee at least some space for the conductor
+        mySVG.xright = 59;
 
-            mySVG.data = '<use xlink:href="#omvormer" x="21" y="25"></use>';
-        
-            //mySVG.data += (sitplan? "" : this.addAddressToSVG(mySVG,60,15));
+        if (this.props.inkring) {
+            mySVG.data = (sitplan? "" : '<line x1="1" y1="20" x2="21" y2="20" stroke="black" /><line x1="1" y1="30" x2="21" y2="30" stroke="black" />')            
         } else {
-            mySVG.xleft = 1; // foresee at least some space for the conductor
-            mySVG.xright = 59;
-            
             mySVG.data = (sitplan? "" : '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>')
-                       + '<use xlink:href="#omvormer" x="21" y="25"></use>';
-        
-            mySVG.data += (sitplan? "" : this.addAddressToSVG(mySVG,60,15));
         }
+
+        mySVG.data += '<use xlink:href="#omvormer" x="21" y="25"></use>';
+
+        mySVG.data += (sitplan? "" : this.addAddressToSVG(mySVG,60,15));
         
         return(mySVG);
     }

@@ -1,3 +1,7 @@
+    import { SituationPlanElement } from "./SituationPlanElement";
+    import { ElectroItemZoeker } from "./ElectroItemZoeker";
+    import { Electro_Item } from "../List_Item/Electro_Item";
+    
     /** 
      * Een serie functies om een formulier te tonen met edit-functionaliteiten voor symbolen in het situatieplan
      *
@@ -29,8 +33,8 @@
      * @param {function} callbackOK Een referentie naar de functie die moet worden uitgevoerd als op OK wordt geklikt.
      */
 
-function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanElement, 
-                         callbackOK: (id: number, adresType: string, adres: string, selectAdresLocation: string,
+export function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanElement, 
+                         callbackOK: (id: number|null, adresType: string, adres: string, selectAdresLocation: string,
                                       labelfontsize: number, scale: number, rotation: number) => void,
                          callbackCancel: () => void = () => {}) {
 
@@ -61,7 +65,7 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanE
      * 
      * Gebruikte variabelen: sitplanElement uit de hoofdfunctie is het element waarvoor we de eigenschappen wijzigen
      */
-    function initKringSelect(electroItemId: number = null) {
+    function initKringSelect(electroItemId: number|null = null) {
         rePopulateKringSelect();
         if ( (electroItemId==null) && (sitplanElement != null) && (sitplanElement.getElectroItemId() != null) ) {
             electroItemId = sitplanElement.getElectroItemId();
@@ -104,7 +108,7 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanE
      * 
      * Gebruikte variabelen: sitplanElement uit de hoofdfunctie is het element waarvoor we de eigenschappen wijzigen
      */
-    function initElectroItemBox(electroItemId: number = null) {
+    function initElectroItemBox(electroItemId: number|null = null) {
         rePopulateElectroItemBox();
         let electroItems = adressen.getElectroItemsByKring(selectKring.value);
         if ( (electroItemId==null) && (sitplanElement != null) && (sitplanElement.getElectroItemId() != null) ) {
@@ -178,7 +182,7 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanE
         }; 
     }
 
-    function handleExpandButton(electroItemId: number = null) {
+    function handleExpandButton(electroItemId: number|null = null) {
         if (electroItemId == null) return;
 
         let element = globalThis.structure.getElectroItemById(electroItemId);
@@ -205,7 +209,6 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanE
             let electroItemId = Number(textInput.value);
             let element = globalThis.structure.getElectroItemById(electroItemId) as Electro_Item;
             if (element != null) {
-                const type = element.getType();
                 feedback.innerHTML = '<span style="color:green;">' + element.getType() + '</span>';
                 if (element.isExpandable()) {
                     expandButton.style.display = 'block';
@@ -327,7 +330,7 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanE
                 </div> 
                 <div style="display: flex; margin-bottom: 10px; align-items: center;">
                     <label for="scaleInput" style="margin-right: 10px; display: inline-block;">Schaal (%):</label>
-                    <input id="scaleInput" style="width: 100px;" type="number" min="10" max="400" step="10" value="${String(SITPLANVIEW_DEFAULT_SCALE*100)}">
+                    <input id="scaleInput" style="width: 100px;" type="number" min="10" max="400" step="10" value="${String(globalThis.SITPLANVIEW_DEFAULT_SCALE*100)}">
                 </div>
                 <div style="display: flex; margin-bottom: 20px; align-items: center;">
                     <label for="rotationInput" style="margin-right: 10px; display: inline-block;">Rotatie (°):</label>
@@ -441,7 +444,7 @@ function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanE
      */
 
     okButton.onclick = () => {
-        function isNumeric(value) {
+        function isNumeric(value: any) {
             return /^-?\d+(\.\d+)?$/.test(value);
         }
         let returnId = (textInput.value.trim() == '' ? null : Number(textInput.value));

@@ -1,3 +1,7 @@
+import { loadFromText } from "./importExport/importExport";
+import { showSituationPlanPage } from "./sitplan/SituationPlanView";
+import { printsvg } from "./print/print";
+
 class jsonStore {
     private maxSteps: number;
     private undoStack: string[];
@@ -56,7 +60,7 @@ class jsonStore {
 }
 
 class LargeStringStore {
-    private data = [];
+    private data:string[] = [];
 
     push(text: string): number {
         this.data.push(text);
@@ -82,12 +86,12 @@ class LargeStringStore {
     }
 }
 
-class undoRedo {
+export class undoRedo {
     private historyEds: jsonStore;
     private historyOptions: jsonStore;
     private largeStrings: LargeStringStore = new LargeStringStore();
 
-    private samenVoegSleutel: string = null; // Indien de store functie wordt opgeroepen met deze string wordt geen nieuwe undo stap gecreëerd maar de vorige aangepast
+    private samenVoegSleutel: string|null = null; // Indien de store functie wordt opgeroepen met deze string wordt geen nieuwe undo stap gecreëerd maar de vorige aangepast
 
     constructor(maxSteps: number = 100) {
         this.historyEds = new jsonStore(maxSteps);
@@ -123,7 +127,7 @@ class undoRedo {
         return(JSON.stringify(options));
     }
 
-    store(sleutel: string = null) {
+    store(sleutel: string|null = null) {
         let overschrijfVorige = false;
 
         if ( (sleutel != null) && (sleutel == this.samenVoegSleutel) ) overschrijfVorige = true;
@@ -150,7 +154,7 @@ class undoRedo {
         this.historyOptions.store(this.getOptions(), true);
     }
 
-    reload(text: string, options: any) {
+    reload(text: string|null, options: any) {
         this.samenVoegSleutel = null;
 
         let lastView = globalThis.structure.properties.currentView;
@@ -163,10 +167,10 @@ class undoRedo {
         globalThis.structure.reSort();
 
         globalThis.structure.mode = lastmode;
-        if (globalThis.structure.properties.currentView != lastView) toggleAppView(globalThis.structure.properties.currentView as '2col' | 'config' | 'draw');
+        if (globalThis.structure.properties.currentView != lastView) globalThis.toggleAppView(globalThis.structure.properties.currentView as '2col' | 'config' | 'draw');
         switch (globalThis.structure.properties.currentView) {
             case 'draw': 
-                topMenu.selectMenuItemByOrdinal(3);
+                globalThis.topMenu.selectMenuItemByOrdinal(3);
                 showSituationPlanPage();
                 
                 if ((globalThis.structure.sitplanview.sideBar as any).setUndoRedoOptions != null) (globalThis.structure.sitplanview.sideBar as any).setUndoRedoOptions(options);
@@ -184,20 +188,20 @@ class undoRedo {
                 }
 
                 break;
-            case '2col': topMenu.selectMenuItemByOrdinal(2); HLRedrawTree(); break;
-            case 'config': topMenu.selectMenuItemByOrdinal(4); printsvg(); break;
+            case '2col': globalThis.topMenu.selectMenuItemByOrdinal(2); globalThis.HLRedrawTree(); break;
+            case 'config': globalThis.topMenu.selectMenuItemByOrdinal(4); printsvg(); break;
         }
     }
 
     undo() {
-        let text:string = this.historyEds.undo();
+        let text:string|null = this.historyEds.undo();
         let optionsString: string | null = this.historyOptions.undo();
         let options: any = optionsString ? JSON.parse(optionsString) : {};
         this.reload(text,options);
     }
 
     redo() { 
-        let text:string = this.historyEds.redo();
+        let text:string|null = this.historyEds.redo();
         let optionsString: string | null = this.historyOptions.redo();
         let options: any = optionsString ? JSON.parse(optionsString) : {};
         this.reload(text,options);

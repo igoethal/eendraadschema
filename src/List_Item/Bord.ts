@@ -1,4 +1,8 @@
-class Bord extends Electro_Item {
+import { Electro_Item } from "./Electro_Item";
+import { htmlspecialchars, svgTextWidth } from "../general";
+import { SVGelement } from "../SVGelement";
+
+export class Bord extends Electro_Item {
 
     convertLegacyKeys(mykeys: Array<[string,string,any]>) {
         this.props.type             = this.getLegacyKey(mykeys,0);
@@ -37,6 +41,9 @@ class Bord extends Electro_Item {
         //if ((str == null) || (str.trim() == "")) {
         //    str = '';
         //}
+
+        /* suppress murrortext never used warning */ mirrortext;
+
         let minheight = 60; //Math.max(60,svgTextWidth(htmlspecialchars(str),16,'') + 20); //15 padding
         let shift = (minheight-60)/2;
 

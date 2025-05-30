@@ -1,3 +1,19 @@
+import { SituationPlan } from "./SituationPlan";
+import { SituationPlanElement } from "./SituationPlanElement";
+import { AdresType, AdresLocation } from "./SituationPlanElement";
+import { SituationPlanView_SideBar } from "./SituationPlanView_SideBar";
+import { SituationPlanView_Selected } from "./SituationPlanView_Selected";
+import { ContextMenu } from "./ContextMenu";
+import { MouseDrag } from "./MouseDrag";
+import { EventManager } from "../EventManager";
+import { showSelectPopup, htmlspecialchars } from "../general";
+import { getXYRectangleSize } from "./GeometricFunctions";
+import { HelperTip } from "../documentation/HelperTip";
+import { Dialog } from "../documentation/Dialog";
+import { SituationPlanView_ElementPropertiesPopup } from "./SituationPlanView_ElementPropertiesPopup";
+import { SituationPlanView_MultiElementPropertiesPopup } from "./SituationPlanView_MultiElementPropertiesPopup";
+import { AskLegacySchakelaar } from "../importExport/AskLegacySchakelaar";
+
 enum MovableType {Movable, NotMovable, Mixed, Undefined};
 
 /**
@@ -7,7 +23,7 @@ enum MovableType {Movable, NotMovable, Mixed, Undefined};
  * een eendraadschema symbool zijn als een ingelezen extern bestand.
  */
 
-class SituationPlanView {
+export class SituationPlanView {
 
     private zoomfactor:number = 1;
 
@@ -204,8 +220,8 @@ class SituationPlanView {
         const paperPadding = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--paperPadding'));*/
         let mousePosOnPaper = this.canvasPosToPaperPos(canvasx, canvasy);
         this.setzoom(
-            Math.min(SITPLANVIEW_ZOOMINTERVAL.MAX,
-                Math.max(SITPLANVIEW_ZOOMINTERVAL.MIN, this.zoomfactor * (1 + increment))
+            Math.min(globalThis.SITPLANVIEW_ZOOMINTERVAL.MAX,
+                Math.max(globalThis.SITPLANVIEW_ZOOMINTERVAL.MIN, this.zoomfactor * (1 + increment))
             )
         );
         const scrollPos = this.canvasAndPaperPosToScrollPos(canvasx, canvasy, mousePosOnPaper.x, mousePosOnPaper.y);
@@ -454,8 +470,8 @@ class SituationPlanView {
 
         const scale = sitPlanElement.getscale();
         const forbiddenLabelZone = getXYRectangleSize(
-            sitPlanElement.sizex * scale + SITPLANVIEW_SELECT_PADDING, 
-            sitPlanElement.sizey * scale + SITPLANVIEW_SELECT_PADDING, 
+            sitPlanElement.sizex * scale + globalThis.SITPLANVIEW_SELECT_PADDING, 
+            sitPlanElement.sizey * scale + globalThis.SITPLANVIEW_SELECT_PADDING, 
             sitPlanElement.rotate
         );
 
@@ -522,16 +538,16 @@ class SituationPlanView {
         const contentwidth = sitPlanElement.sizex*scale;
         const contentheight = sitPlanElement.sizey*scale;
     
-        const left = ((sitPlanElement.posx-contentwidth/2-SITPLANVIEW_SELECT_PADDING)).toString() + "px";
+        const left = ((sitPlanElement.posx-contentwidth/2-globalThis.SITPLANVIEW_SELECT_PADDING)).toString() + "px";
         if (div.style.left != left) div.style.left = left; // Vermijd aanpassingen DOM indien niet nodig
 
-        const top = ((sitPlanElement.posy-contentheight/2-SITPLANVIEW_SELECT_PADDING)).toString() + "px";
+        const top = ((sitPlanElement.posy-contentheight/2-globalThis.SITPLANVIEW_SELECT_PADDING)).toString() + "px";
         if (div.style.top != top) div.style.top = top; // Vermijd aanpassingen DOM indien niet nodig
 
-        const width = ((contentwidth + SITPLANVIEW_SELECT_PADDING*2)).toString() + "px";
+        const width = ((contentwidth + globalThis.SITPLANVIEW_SELECT_PADDING*2)).toString() + "px";
         if (div.style.width != width) div.style.width = width; // Vermijd aanpassingen DOM indien niet nodig
 
-        const height = ((contentheight + SITPLANVIEW_SELECT_PADDING*2)).toString() + "px";
+        const height = ((contentheight + globalThis.SITPLANVIEW_SELECT_PADDING*2)).toString() + "px";
         if (div.style.height != height) div.style.height = height; // Vermijd aanpassingen DOM indien niet nodig
         
         const transform = getRotationTransform(sitPlanElement);
@@ -1483,7 +1499,7 @@ class SituationPlanView {
 
         // -- Add an icon of a floppy (save symbol) like the icons above --
 
-        if (autoSaver && autoSaver.hasChangesSinceLastManualSave()) {
+        if (globalThis.autoSaver && globalThis.autoSaver.hasChangesSinceLastManualSave()) {
             outputleft += `
                 <span style="display: inline-block; width: 10px;"></span>
                 <div class="highlight-warning-big" style="width: 64px; display: inline-block; vertical-align: middle; text-align: center;" id="button_save" onclick="exportjson(false)" onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'">
@@ -1609,8 +1625,8 @@ class SituationPlanView {
 /**
  * Toon de pagina voor het situatieplan
  */
-function showSituationPlanPage() {
-    toggleAppView('draw');
+export function showSituationPlanPage() {
+    globalThis.toggleAppView('draw');
 
     if (!(globalThis.structure.sitplan)) { globalThis.structure.sitplan = new SituationPlan() };
 

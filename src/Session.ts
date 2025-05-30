@@ -1,4 +1,4 @@
-class Session {
+export class Session {
     private sessionKey: string = 'SessionJS';
     private sessionId: string;
     private newUser: boolean = false;

@@ -1,4 +1,6 @@
-class HelperTip {
+import { MultiLevelStorage } from "../storage/MultiLevelStorage";
+
+export class HelperTip {
     private storage: MultiLevelStorage<any>;
     private storagePrefix: string;
   

@@ -3,7 +3,7 @@
  * De functie retourneert de breedte en hoogte van de kleinste rechthoek die de geroteerde rechthoek omsluit met zijden langs de X- en Y-assen.
  */
 
-function getRotatedRectangleSize(width: number, height: number, rotation: number) {
+export function getRotatedRectangleSize(width: number, height: number, rotation: number) {
     const rotationInRadians = rotation * Math.PI / 180;
     const cos = Math.cos(rotationInRadians);
     const sin = Math.sin(rotationInRadians);
@@ -21,7 +21,7 @@ function getRotatedRectangleSize(width: number, height: number, rotation: number
  * Deze functie kan gebruikt worden om de locatie van labels te bepalen.
  */
 
-function getXYRectangleSize(width: number, height: number, rotation: number) {
+export function getXYRectangleSize(width: number, height: number, rotation: number) {
     rotation = Math.abs(rotation) % 180;
     if (rotation > 90) rotation = 180 - rotation;
     const rotationInRadians = rotation * Math.PI / 180;
@@ -40,7 +40,7 @@ let cachedPixelsPerMillimeter: number | null = null;
  * Maakt gebruik van een cache om de overhead van het maken en verwijderen van een DOM-element bij elke oproep te voorkomen.
  * @returns {number} Het aantal pixels in een millimeter.
  */
-function getPixelsPerMillimeter(): number {
+export function getPixelsPerMillimeter(): number {
     if (cachedPixelsPerMillimeter === null) {
         const div = document.createElement('div');
         div.style.width = '10mm';

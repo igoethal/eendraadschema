@@ -1,4 +1,9 @@
-class Aansluiting extends Electro_Item {
+import { Electro_Item } from "./Electro_Item";
+import { htmlspecialchars, svgTextWidth } from "../general";
+import { SVGelement } from "../SVGelement";
+import { SVGSymbols } from "../SVGSymbols";
+
+export class Aansluiting extends Electro_Item {
     
     convertLegacyKeys(mykeys: Array<[string,string,any]>) {
         this.props.type                                 = this.getLegacyKey(mykeys,0);
@@ -124,7 +129,7 @@ class Aansluiting extends Electro_Item {
 
     toSVG() {
 
-        function addFase(startNumlines:number, mySVG:SVGelement): number {
+        let addFase = (startNumlines:number, mySVG:SVGelement): number => {
             let numlines = startNumlines;
             if (['L1','L2','L3'].includes(this.props.fase)) {
                 numlines = numlines + ((this.props.huishoudelijk && this.props.kortsluitvermogen != '') ? 1.3 : 1.0);

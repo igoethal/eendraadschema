@@ -1,15 +1,18 @@
-type AdresLocation = 'rechts'|'links'|'boven'|'onder';
-type AdresType = 'auto'|'manueel';
+import { randomId } from "../general";
+import { Electro_Item } from "../List_Item/Electro_Item";
+
+export type AdresLocation = 'rechts'|'links'|'boven'|'onder';
+export type AdresType = 'auto'|'manueel';
 
 /**
  * Class SituationPlanElement
  * 
  * Deze class refereert naar de volgende globale variabelen:
  * - globalThis.structure
- * - SITPLANVIEW_DEFAULT_SCALE
+ * - globalThis.SITPLANVIEW_DEFAULT_SCALE
  */
 
-class SituationPlanElement {
+export class SituationPlanElement {
 
     // -- Identificatie --
     public id:string; //unieke identificatie van het element
@@ -40,7 +43,7 @@ class SituationPlanElement {
     public sizey:number = 0; //hoogte
 
     public rotate:number = 0;
-    private scale:number = SITPLANVIEW_DEFAULT_SCALE;
+    private scale:number = globalThis.SITPLANVIEW_DEFAULT_SCALE;
 
     // -- Positionering van het label --
     public labelposx = 0;
@@ -482,7 +485,7 @@ class SituationPlanElement {
         this.adreslocation = (json.adreslocation != null) ? json.adreslocation : "rechts";
 
         this.rotate = (json.rotate != null) ? json.rotate : 0;
-        this.scale = (json.scale != null) ? json.scale : SITPLANVIEW_DEFAULT_SCALE;
+        this.scale = (json.scale != null) ? json.scale : globalThis.SITPLANVIEW_DEFAULT_SCALE;
 
         this.svg = json.svg;
         this.electroItemId = json.electroItemId;

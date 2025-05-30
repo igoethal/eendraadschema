@@ -1,15 +1,31 @@
-function HLDisplayPage() {
+import { download_by_blob } from "../importExport/importExport";
+import { SVGelement } from "../SVGelement";
+import { flattenSVGfromString } from "../general";
+
+declare function printPDF(svgs: any, print_table: any, properties: any, pages: any, filename: any, statuscallback: any, sitplanprint: any): any;
+
+globalThis.HLDisplayPage = () => {
     globalThis.structure.print_table.displaypage = parseInt((document.getElementById("id_select_page") as HTMLInputElement).value)-1;
     printsvg();
 }
 
-function dosvgdownload() {
-    var prtContent = document.getElementById("printsvgarea").innerHTML;
-    var filename = (document.getElementById("dosvgname") as HTMLInputElement).value;
+globalThis.dosvgdownload = () => {
+    const printsvgarea = document.getElementById("printsvgarea");    
+    let filename: string;
+
+    if (printsvgarea == null) return;
+    let prtContent = printsvgarea.innerHTML;
+ 
+    const dosvgname = (document.getElementById("dosvgname") as HTMLInputElement);
+    if (dosvgname == null)
+        filename = "eendraadschema.svg";
+    else
+        filename = (document.getElementById("dosvgname") as HTMLInputElement).value;
+
     download_by_blob(prtContent, filename, 'data:image/svg+xml;charset=utf-8'); //Was text/plain
 }
 
-function getPrintSVGWithoutAddress(outSVG: SVGelement, page:number = globalThis.structure.print_table.displaypage) {
+export function getPrintSVGWithoutAddress(outSVG: SVGelement, page:number = globalThis.structure.print_table.displaypage) {
     var scale = 1;
 
     var startx = globalThis.structure.print_table.pages[page].start;
@@ -26,7 +42,7 @@ function getPrintSVGWithoutAddress(outSVG: SVGelement, page:number = globalThis.
     return(outstr);
 }
 
-function printsvg() {
+export function printsvg() {
 
     function generatePdf() {
         if (typeof(globalThis.structure.properties.dpi) == 'undefined') globalThis.structure.properties.dpi = 300;
@@ -48,17 +64,16 @@ function printsvg() {
     }
 
     function renderPrintSVG_EDS(outSVG: SVGelement) {
-        document.getElementById("printarea").innerHTML = '<div id="printsvgarea">' +
-                                                            getPrintSVGWithoutAddress(outSVG) +
-                                                        '</div>';
+        const printarea = document.getElementById("printarea");
+        if (printarea == null) return;
+        printarea.innerHTML = '<div id="printsvgarea">' + getPrintSVGWithoutAddress(outSVG) + '</div>';
     }
 
     function renderPrintSVG_sitplan(page: number) {
         const outstruct = globalThis.structure.sitplan.toSitPlanPrint();
-
-        document.getElementById("printarea").innerHTML = '<div id="printsvgarea">' +
-                                                            outstruct.pages[page].svg +
-                                                        '</div>';
+        const printarea = document.getElementById("printarea");
+        if (printarea == null) return;
+        printarea.innerHTML = '<div id="printsvgarea">' + outstruct.pages[page].svg + '</div>';
     }
     
     // First we generate an SVG image. We do this first because we need the size
@@ -78,16 +93,21 @@ function printsvg() {
     let outstr: string = "";
     var strleft: string = "";
 
-    document.getElementById("configsection").innerHTML
-        =  '<div>'
-        +  '    <button id="button_pdfdownload">Genereer PDF</button>' // Generate PDF button comes here
-        +  '    <span id="select_papersize"></span>' // Selector to choose "A3" and "A4" comes here
-        +  '    <span id="select_dpi"></span>' // Selector for dpi 300 or 600 comes here
-        +  '    <input id="dopdfname" size="20" value="eendraadschema_print.pdf">&nbsp;' // Input box for filename of pdf document
-        +  '    <span id="progress_pdf"></span>' // Area where status of pdf generation can be displayed
-        +  '</div>';
+    const configsection = document.getElementById("configsection");
+    if (configsection != null)
+        configsection.innerHTML
+            =  '<div>'
+            +  '    <button id="button_pdfdownload">Genereer PDF</button>' // Generate PDF button comes here
+            +  '    <span id="select_papersize"></span>' // Selector to choose "A3" and "A4" comes here
+            +  '    <span id="select_dpi"></span>' // Selector for dpi 300 or 600 comes here
+            +  '    <input id="dopdfname" size="20" value="eendraadschema_print.pdf">&nbsp;' // Input box for filename of pdf document
+            +  '    <span id="progress_pdf"></span>' // Area where status of pdf generation can be displayed
+            +  '</div>';
 
-    document.getElementById('button_pdfdownload').onclick = generatePdf;
+    const button_pdfdownload = document.getElementById('button_pdfdownload');
+    if (button_pdfdownload != null)
+        button_pdfdownload.onclick = generatePdf;
+
     globalThis.structure.print_table.insertHTMLselectPaperSize(document.getElementById('select_papersize') as HTMLElement, printsvg);
     globalThis.structure.print_table.insertHTMLselectdpi(document.getElementById('select_dpi') as HTMLElement, printsvg);
     
@@ -99,7 +119,8 @@ function printsvg() {
         +  '    <span id="id_suggest_xpos_button"></span>' // A button to force auto pagination comes here
         +  '</div>';
 
-    document.getElementById("configsection").insertAdjacentHTML('beforeend', outstr);
+    if (configsection != null)
+        configsection.insertAdjacentHTML('beforeend', outstr);
 
     globalThis.structure.print_table.insertHTMLcheckAutopage(document.getElementById('check_autopage') as HTMLElement, printsvg);
     if (!globalThis.structure.print_table.enableAutopage) {
@@ -123,7 +144,8 @@ function printsvg() {
             +  '</table>'
             +  '<br>';
         
-        document.getElementById("configsection").insertAdjacentHTML('beforeend', outstr);    
+        if (configsection != null)
+            configsection.insertAdjacentHTML('beforeend', outstr);    
 
         globalThis.structure.print_table.insertHTMLposxTable(document.getElementById('id_print_table') as HTMLElement, printsvg)
     }
@@ -149,11 +171,12 @@ function printsvg() {
     
     strleft += '<table border="0"><tr><td style="vertical-align:top"><button onclick="dosvgdownload()">Zichtbare pagina als SVG opslaan</button></td><td>&nbsp;</td><td style="vertical-align:top"><input id="dosvgname" size="20" value="eendraadschema_print.svg"></td><td>&nbsp;&nbsp;</td><td>Sla tekening hieronder op als SVG en converteer met een ander programma naar PDF (bvb Inkscape).</td></tr></table><br>';
     
-    strleft += displayButtonPrintToPdf(); // This is only for the online version
+    strleft += globalThis.displayButtonPrintToPdf(); // This is only for the online version
 
     strleft += '<div id="printarea"></div>';
 
-    document.getElementById("configsection").insertAdjacentHTML('beforeend', strleft);
+    if (configsection != null)
+        configsection.insertAdjacentHTML('beforeend', strleft);
 
     // Finally we show the actual SVG
 
@@ -163,5 +186,5 @@ function printsvg() {
         renderPrintSVG_sitplan(globalThis.structure.print_table.displaypage - globalThis.structure.print_table.pages.length);
     }
 
-    toggleAppView('config');
+    globalThis.toggleAppView('config');
 }

@@ -1,13 +1,15 @@
+import type { Hierarchical_List } from "../Hierarchical_List";
+
 /**
  * Class that helps with dragging a box on the situation plan view.
  * It keeps track of the start position of the drag and the zoomfactor.
  */
-class MouseDrag {
+export class MouseDrag {
 
     private startOffsetLeft: number = 0;
     private startOffsetTop: number = 0;
 
-    private startPaperPos;
+    private startPaperPos = {x:0, y:0};
 
     public hassMoved: boolean = false;
 
@@ -29,7 +31,7 @@ class MouseDrag {
         const ribbonHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ribbon-height'));
         const sideBarWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sideBarWidth'));
 
-        this.startPaperPos = globalThis.structure.sitplanview.canvasPosToPaperPos(mouseX - sideBarWidth, mouseY - menuHeight - ribbonHeight);
+        this.startPaperPos = (globalThis.structure as Hierarchical_List).sitplanview.canvasPosToPaperPos(mouseX - sideBarWidth, mouseY - menuHeight - ribbonHeight);
     }
 
     /**
@@ -44,7 +46,7 @@ class MouseDrag {
         const ribbonHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ribbon-height'));
         const sideBarWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sideBarWidth'));
 
-        let stopPaperPos = globalThis.structure.sitplanview.canvasPosToPaperPos(mousex - sideBarWidth, mousey - menuHeight - ribbonHeight);
+        let stopPaperPos = (globalThis.structure as Hierarchical_List).sitplanview.canvasPosToPaperPos(mousex - sideBarWidth, mousey - menuHeight - ribbonHeight);
 
         if (stopPaperPos.x != this.startPaperPos.x || stopPaperPos.y != this.startPaperPos.y) this.hassMoved = true;
 

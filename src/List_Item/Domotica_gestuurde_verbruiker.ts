@@ -1,4 +1,9 @@
-class Domotica_gestuurde_verbruiker extends Electro_Item {
+import { Electro_Item } from "./Electro_Item";
+import { htmlspecialchars } from "../general";
+import { SVGelement } from "../SVGelement";
+import { SVGSymbols } from "../SVGSymbols";
+
+export class Domotica_gestuurde_verbruiker extends Electro_Item {
 
     convertLegacyKeys(mykeys: Array<[string,string,any]>) {
         this.props.type                   = this.getLegacyKey(mykeys,0);

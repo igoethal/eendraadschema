@@ -1,3 +1,5 @@
+import { Electro_Item } from "../List_Item/Electro_Item";
+
 /**
  * Class gebruikt in SituationPlanView om te zoeken naar electroitems op basis van de kringnaam.
  * Dit laat toe items to selecteren uit het volledige eendraadschema en ze te plaatsen op het situatieschema.
@@ -6,7 +8,7 @@
  * - globalThis.structure
  */
 
-class ElectroItemZoeker {
+export class ElectroItemZoeker {
 
     private excludedTypes = ['Aansluiting','Bord','Kring','Domotica','Domotica module (verticaal)',
                              'Domotica gestuurde verbruiker','Leiding','Splitsing','Verlenging',

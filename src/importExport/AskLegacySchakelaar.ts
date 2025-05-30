@@ -1,4 +1,4 @@
-class AskLegacySchakelaar {
+export class AskLegacySchakelaar {
   
     // Show the helper tip if it hasn't been dismissed before
     show() {

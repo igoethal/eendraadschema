@@ -1,3 +1,61 @@
+import { htmlspecialchars } from "./general";
+import { Aansluiting } from "./List_Item/Aansluiting";
+import { Aansluitpunt } from "./List_Item/Aansluitpunt";
+import { Aftakdoos } from "./List_Item/Aftakdoos";
+import { Batterij } from "./List_Item/Batterij";
+import { Bel } from "./List_Item/Bel";
+import { Boiler } from "./List_Item/Boiler";
+import { Bord } from "./List_Item/Bord";
+import { Contactdoos } from "./List_Item/Contactdoos";
+import { Diepvriezer } from "./List_Item/Diepvriezer";
+import { Domotica } from "./List_Item/Domotica";
+import { Domotica_gestuurde_verbruiker } from "./List_Item/Domotica_gestuurde_verbruiker";
+import { Domotica_verticaal } from "./List_Item/Domotica_verticaal";
+import { Droogkast } from "./List_Item/Droogkast";
+import { Drukknop } from "./List_Item/Drukknop";
+import { Electro_Item } from "./List_Item/Electro_Item";
+import { Elektriciteitsmeter } from "./List_Item/Elektriciteitsmeter";
+import { Elektrische_oven } from "./List_Item/Elektrische_oven";
+import { EV_lader } from "./List_Item/EV_lader";
+import { Ketel } from "./List_Item/Ketel";
+import { Koelkast } from "./List_Item/Koelkast";
+import { Kookfornuis } from "./List_Item/Kookfornuis";
+import { Kring } from "./List_Item/Kring";
+import { Leiding } from "./List_Item/Leiding";
+import { Lichtpunt } from "./List_Item/Lichtpunt";
+import { List_Item } from "./List_Item/List_Item";
+import { Media } from "./List_Item/Media";
+import { Meerdere_verbruikers } from "./List_Item/Meerdere_verbruikers";
+import { Microgolfoven } from "./List_Item/Microgolfoven";
+import { Motor } from "./List_Item/Motor";
+import { Omvormer } from "./List_Item/Omvormer";
+import { Overspanningsbeveiliging } from "./List_Item/Overspanningsbeveiliging";
+import { Lichtcircuit } from "./List_Item/Schakelaars/Lichtcircuit";
+import { Schakelaars } from "./List_Item/Schakelaars/Schakelaars";
+import { Splitsing } from "./List_Item/Splitsing";
+import { Stoomoven } from "./List_Item/Stoomoven";
+import { Transformator } from "./List_Item/Transformator";
+import { USB_lader } from "./List_Item/USB_lader";
+import { Vaatwasmachine } from "./List_Item/Vaatwasmachine";
+import { Ventilator } from "./List_Item/Ventilator";
+import { Verbruiker } from "./List_Item/Verbruiker";
+import { Verlenging } from "./List_Item/Verlenging";
+import { Verwarmingstoestel } from "./List_Item/Verwarmingstoestel";
+import { Vrije_ruimte } from "./List_Item/Vrije_ruimte";
+import { Vrije_tekst } from "./List_Item/Vrije_tekst";
+import { Warmtepomp } from "./List_Item/Warmtepomp";
+import { Wasmachine } from "./List_Item/Wasmachine";
+import { Zekering } from "./List_Item/Zekering";
+import { Zeldzame_symbolen } from "./List_Item/Zeldzame_symbolen";
+import { Zonnepaneel } from "./List_Item/Zonnepaneel";
+import { Properties } from "./Properties";
+import { SVGelement } from "./SVGelement";
+import { SVGSymbols } from "./SVGSymbols";
+import { Print_Table } from "./print/Print_Table";
+import { SituationPlan } from "./sitplan/SituationPlan";
+import { SituationPlanView } from "./sitplan/SituationPlanView";
+import { MarkerList } from "./print/MarkerList";
+
 /*****************************************************************************
   CLASS Hierarchical_List
 
@@ -69,7 +127,7 @@
 
  *****************************************************************************/
 
-class Hierarchical_List {
+export class Hierarchical_List {
 
     // -- Public variables --
 
@@ -84,7 +142,7 @@ class Hierarchical_List {
     sitplan: SituationPlan;
     sitplanjson: any; //this is where we store the situation plan in plan object exporting to json
     sitplanview: SituationPlanView;
-    currentView: string; // Here we store '2col' | 'config' | 'draw'
+    currentView: string = ""; // Here we store '2col' | 'config' | 'draw'
 
     // -- Constructor --
 
@@ -171,7 +229,7 @@ class Hierarchical_List {
         return (ordinal == -1 ? null : ordinal); 
     }
 
-    getElectroItemById(my_id: number) : Electro_Item | null {
+    getElectroItemById(my_id: number|null) : Electro_Item | null {
         let ordinal = this.id.indexOf(my_id);
         if (ordinal != -1) return(this.data[ordinal] as Electro_Item);
         return null;
@@ -493,9 +551,9 @@ class Hierarchical_List {
 
                 if ( (item.getType() == "Omvormer") && (item.props.inkring) ) {
 
-                    if (myOrdinal < lastOrdinalInKring)
-                        mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + 0 + '" y2="' + (mySVG.yup-20) + '" stroke="black" />'
-                    mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + (mySVG.yup + mySVG.ydown - 5) + '" y2="' + (mySVG.yup + mySVG.ydown) + '" stroke="black" />'
+                    //if (myOrdinal < lastOrdinalInKring)
+                    mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + 0 + '" y2="' + (mySVG.yup-5) + '" stroke="black" />'
+                    mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + (mySVG.yup + 5) + '" y2="' + (mySVG.yup + mySVG.ydown) + '" stroke="black" />'
 
                 } else {        
 
@@ -521,10 +579,11 @@ class Hierarchical_List {
                 let displaynr:string;
                 displaynr = item.props.nr;
                 let posx = mySVG.xleft+9;
-                if ( (item.getType() == "Omvormer") && (item.props.inkring) ) posx -= 38;
+                let posy = mySVG.yup-5;
+                if ( (item.getType() == "Omvormer") && (item.props.inkring) ) posy -= 5;
                 
                 mySVG.data +=
-                  '<text x="' + (posx) + '" y="' + (mySVG.yup - 5) + '" ' +
+                  '<text x="' + (posx) + '" y="' + (posy) + '" ' +
                   'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' +
                   htmlspecialchars(displaynr)+'</text>';
             }
@@ -581,7 +640,7 @@ class Hierarchical_List {
         }
         output += '</p>';
 
-        if (autoSaver && autoSaver.hasChangesSinceLastManualSave()) {
+        if (globalThis.autoSaver && globalThis.autoSaver.hasChangesSinceLastManualSave()) {
             output +=  '<span style="display: inline-block; width: 30px;"></span>';
             output +=  `<div style="margin-top: 5px;margin-bottom: 5px;display: flex; align-items: center; justify-content: center;" class="highlight-warning-big" onclick="exportjson(false)"
                            onmouseover="this.style.cursor='pointer'" 

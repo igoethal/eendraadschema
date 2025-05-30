@@ -1,4 +1,7 @@
-class Vrije_ruimte extends Electro_Item {
+import { Electro_Item } from "./Electro_Item";
+import { SVGelement } from "../SVGelement";
+
+export class Vrije_ruimte extends Electro_Item {
 
     convertLegacyKeys(mykeys: Array<[string,string,any]>) {
         this.props.type                        = this.getLegacyKey(mykeys,0);

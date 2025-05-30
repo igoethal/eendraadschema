@@ -1,4 +1,4 @@
-class SituationPlanView_SideBar {
+export class SituationPlanView_SideBar {
     
     constructor(div: HTMLElement) {
     }
@@ -11,5 +11,6 @@ class SituationPlanView_SideBar {
 
 }
 
-function HLInsertSymbol(event: MouseEvent, id: number) {
-}
+globalThis.HLInsertAndEditSymbol = (event: MouseEvent, id: number) => {}
+
+globalThis.HLExpandSitPlan = (my_id: number) => {}

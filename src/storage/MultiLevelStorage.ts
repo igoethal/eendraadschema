@@ -1,4 +1,6 @@
-class MultiLevelStorage<T> {
+import { deepClone } from "../general";
+
+export class MultiLevelStorage<T> {
     private data: T;
     private memoryData: T;
     private storageKey: string;

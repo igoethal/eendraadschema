@@ -1,4 +1,11 @@
-class Lichtcircuit extends Schakelaars {
+import { Schakelaar } from "./Schakelaar";
+import { Schakelaars } from "./Schakelaars";
+import { htmlspecialchars } from "../../general";
+import { SVGSymbols } from "../../SVGSymbols";
+import { SVGelement } from "../../SVGelement";
+import { Lichtpunt } from "../Lichtpunt";
+
+export class Lichtcircuit extends Schakelaars {
 
     resetProps() {
         super.resetProps(); //Schakelaars

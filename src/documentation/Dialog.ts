@@ -1,10 +1,10 @@
-class Dialog {
+export class Dialog {
 
     private title: string;
     private body: string;
     private buttons: {text: string, callback: () => void}[];
   
-    constructor(title: string, body: string, buttons: {text: string, callback: () => void}[] = null) {
+    constructor(title: string, body: string, buttons: {text: string, callback: () => void}[]|null = null) {
         this.title = title;
         this.body = body;
         if (!buttons) {

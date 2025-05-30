@@ -1,7 +1,13 @@
-class Leiding extends Electro_Item {
+import { Electro_Item } from "./Electro_Item";
+import { htmlspecialchars } from "../general";
+import { SVGelement } from "../SVGelement";
+
+export class Leiding extends Electro_Item {
 
     convertLegacyKeys(mykeys: Array<[string,string,any]>) {
         // Niet van toepassing, element bestond nog niet toen we met legacy keys werkten
+        // suppress warning on mykeys never used
+        mykeys
     }
 
     resetProps() {
@@ -33,7 +39,6 @@ class Leiding extends Electro_Item {
         this.overrideKeys();
 
         let mySVG:SVGelement = new SVGelement();
-        let outputstr:string = "";
 
         let width = 100;
 

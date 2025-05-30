@@ -1,4 +1,4 @@
-class Properties {
+export class Properties {
   filename: string;
   owner: string;
   installer: string;

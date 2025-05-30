@@ -1,3 +1,5 @@
+    import { SituationPlanElement } from "./SituationPlanElement";
+    
     /** 
      * Een serie functies om een formulier te tonen met edit-functionaliteiten voor symbolen in het situatieplan
      *
@@ -29,8 +31,8 @@
      * @param {function} callbackOK Een referentie naar de functie die moet worden uitgevoerd als op OK wordt geklikt.
      */
 
-function SituationPlanView_MultiElementPropertiesPopup(sitplanElements: SituationPlanElement[], 
-                         callbackOK: (labelfontsize: number, scale: number, rotation: number) => void,
+export function SituationPlanView_MultiElementPropertiesPopup(sitplanElements: SituationPlanElement[], 
+                         callbackOK: (labelfontsize: number|null, scale: number|null, rotation: number|null) => void,
                          callbackCancel: () => void = () => {}) {
 
     /**
@@ -85,7 +87,7 @@ function SituationPlanView_MultiElementPropertiesPopup(sitplanElements: Situatio
                 </div> 
                 <div style="display: flex; margin-bottom: 10px; align-items: center;">
                     <label for="scaleInput" style="margin-right: 10px; display: inline-block;">Schaal (%):</label>
-                    <input id="scaleInput" style="width: 100px;" type="number" min="10" max="400" step="10" value="${String(SITPLANVIEW_DEFAULT_SCALE*100)}">
+                    <input id="scaleInput" style="width: 100px;" type="number" min="10" max="400" step="10" value="${String(globalThis.SITPLANVIEW_DEFAULT_SCALE*100)}">
                 </div>
                 <div style="display: flex; margin-bottom: 20px; align-items: center;">
                     <label for="rotationInput" style="margin-right: 10px; display: inline-block;">Rotatie (°):</label>
@@ -104,8 +106,7 @@ function SituationPlanView_MultiElementPropertiesPopup(sitplanElements: Situatio
 
     const popupOverlay = div.querySelector('#popupOverlay') as HTMLDivElement;
         const popupWindow = popupOverlay.querySelector('#popupWindow') as HTMLDivElement;
-            const fontSizeContainer = popupWindow.querySelector('#fontSizeContainer') as HTMLElement;
-                const fontSizeInput = popupWindow.querySelector('#fontSizeInput') as HTMLInputElement;           
+            const fontSizeInput = popupWindow.querySelector('#fontSizeInput') as HTMLInputElement;           
             const scaleInput = popupWindow.querySelector('#scaleInput') as HTMLInputElement;
             const rotationInput = popupWindow.querySelector('#rotationInput') as HTMLInputElement;
             const setDefaultCheckbox = popupWindow.querySelector('#setDefaultCheckbox') as HTMLInputElement;
@@ -136,7 +137,7 @@ function SituationPlanView_MultiElementPropertiesPopup(sitplanElements: Situatio
     }
     
     fontSizeInput.value = (fontSize != 'multiple') ? String(fontSize) : String(''); 
-    scaleInput.value = (scale != 'multiple') ? String(scale*100) : String('');
+    scaleInput.value = ( (scale != 'multiple') && (scale != null) ) ? String((scale as number)*100) : String('');
     rotationInput.value = (rotation != 'multiple') ? String(rotation) : String(''); 
 
     /*
@@ -152,7 +153,7 @@ function SituationPlanView_MultiElementPropertiesPopup(sitplanElements: Situatio
      */
 
     okButton.onclick = () => {
-        function isNumeric(value) {
+        function isNumeric(value: any) {
             return /^-?\d+(\.\d+)?$/.test(value);
         }
 

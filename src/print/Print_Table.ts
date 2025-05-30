@@ -1,3 +1,6 @@
+import { Page_Info } from "./Page_Info";
+import { MarkerList } from "./MarkerList";  
+
 type PaperSize = "A4" | "A3";
 type ModeVertical = "alles" | "kies";
 type RedrawCallBackFunction = () => void;
@@ -9,7 +12,7 @@ type RedrawCallBackFunction = () => void;
  * We don't use private variables in this class as we want to serialize it (JSON)
  */
 
-class Print_Table {
+export class Print_Table {
     pages:Array<Page_Info> // List of pages with for every page the displayed height (in pixels) and startx and stopx in the SVG
 
     height: number = 0;          //How high is the SVG that will be printed in pixels

@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "sourceMap": true,
+    "module": "esnext",
+    "target": "es2017",
+    "lib": ["es2017", "dom"],
+    "moduleResolution": "node",
+    "noEmit": true
+  },
+  "include": [
+    "src/global.d.ts",
+    "src/main.ts",
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

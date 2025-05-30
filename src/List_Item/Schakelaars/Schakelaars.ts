@@ -1,4 +1,9 @@
-class Schakelaars extends Electro_Item {
+import { Electro_Item } from "../Electro_Item";
+import { SVGelement } from "../../SVGelement";
+import { Schakelaar } from "./Schakelaar";
+import { Hierarchical_List } from "../../Hierarchical_List";
+
+export class Schakelaars extends Electro_Item {
     
     constructor(mylist: Hierarchical_List) { 
         super(mylist);

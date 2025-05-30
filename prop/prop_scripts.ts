@@ -1,9 +1,10 @@
-var VERSION = "git"; //can be "git" or "online"
+import { EDStoStructure } from '../src/importExport/importExport';
+import type { MenuItem } from '../src/TopMenu.js';
 
-var PROP_Contact_Text = `<html>
+export var PROP_Contact_Text = `<html>
   <head>
     <title>Eendraadschema online</title>
-    <link rel="stylesheet" href="css/about.css">
+    <link rel="stylesheet" href="css/about.css" style="text/css" />
   </head>
   <body>
     <h2>Een &eacute;&eacute;ndraadschema tekenen.</h2>
@@ -14,48 +15,51 @@ var PROP_Contact_Text = `<html>
   </body>
 </html>`
 
-function PROP_GDPR() {
+export function PROP_GDPR() {
   return("");
 }
 
-function PROP_getCookieText() {
+export function PROP_getCookieText() {
   return("");
 }
 
-function PROP_edit_menu(menuItems) {}
+export function PROP_edit_menu(menuItems: MenuItem[]) {}
 
 //--- START OF DEVELOPMENT OPTIONS ---
 
-function PROP_development_options() {
+export function PROP_development_options() {
   let outstr:string = '<br><h2>Expert ontwikkel opties, Gebruik enkel indien u weet wat u doet.</h2>'
                     + '<textarea id="HL_loadfromtext" style="width: 80%; height: 8em;"></textarea><br>'
                     + '<button onclick="loadFileFromText()">Load from input</button>';
   return outstr;
 }
 
-function loadFileFromText() {
+globalThis.loadFileFromText = () => {
   let str:string = (document.getElementById('HL_loadfromtext') as HTMLInputElement).value;
   EDStoStructure(str);
-  fileAPIobj.clear();
+  globalThis.fileAPIobj.clear();
 }
 
 /// --- END OF DEVELOPMENT OPTIONS ---
 
-function displayButtonPrintToPdf() {
+globalThis.displayButtonPrintToPdf = () => {
   return("");
-  //Does nothing in the serverless version, only used on https://eendraadschema.goethals-jacobs.be
+  //Does nothing, we use jsPDF now, not Latex anymore
 }
 
-function handleButtonPrintToPdf() {
+globalThis.handleButtonPrintToPdf = () => {
+  return(0);
+  //Does nothing, we use jsPDF now, not Latex anymore
+}
+
+globalThis.propUpload = (text: string) => {
   return(0);
   //Does nothing in the serverless version, only used on https://eendraadschema.goethals-jacobs.be
+  
+  //avoid warning on text never used
+  text;
 }
 
-function propUpload(text: string) {
-  return("");
-  //Does nothing in the serverless version, only used on https://eendraadschema.goethals-jacobs.be  
-}
-
-class CookieBanner {
+export class CookieBanner {
   run() {} //Does nothing in the serverless version, only used on https://eendraadschema.goethals-jacobs.be
 }

@@ -1,9 +1,12 @@
+import { Hierarchical_List } from "../Hierarchical_List";
+import { IndexedDBStorage } from "../storage/IndexedDBStorage";
+
 /**
  * Klasse voor het automatisch en regelmatig opslaan van het huidige schema in IndexedDB
  *
  * @class AutoSaver
  */
-class AutoSaver {
+export class AutoSaver {
 
     /**
      * Enum voor soorten opslag.
@@ -66,7 +69,7 @@ class AutoSaver {
      *
      * @type {() => void}
      */
-    private callbackAfterSave: () => void = null;
+    private callbackAfterSave: () => void = () => {};
     
     /**
      * Constructor voor AutoSaver-klasse.
@@ -187,7 +190,7 @@ class AutoSaver {
      *
      * @param {string} [text] - De tekst die opgeslagen moet worden. Indien niet gespecificeerd, wordt de structure.toJsonObject gebruikt.
      */
-    saveManually(text: string = null) {
+    saveManually(text: string|null = null) {
 
         // Een gebruiker die actief zelf een schema opslaat wordt gezien als bewijs dat de gebruiker actief aan het tekenen is
         this.suspendSaving = false;
