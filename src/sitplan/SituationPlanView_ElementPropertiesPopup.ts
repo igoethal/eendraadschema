@@ -1,42 +1,50 @@
-    import { SituationPlanElement } from "./SituationPlanElement";
-    import { ElectroItemZoeker } from "./ElectroItemZoeker";
-    import { Electro_Item } from "../List_Item/Electro_Item";
-    
-    /** 
-     * Een serie functies om een formulier te tonen met edit-functionaliteiten voor symbolen in het situatieplan
-     *
-     * De volgorde van code en functies in deze file volgt de structuur van de popup.
-     *                   
-     * popupWindow
-     *  selectKringContainer
-     *      selectKring -- Keuze kringnaam, gedraagt zich als een filter.
-     *  selectElectroItemContainer
-     *      selectElectroItemBox -- Keuze electroItem.
-     *  textContainer
-     *      textInput -- Hier wordt het electroItemId ingevuld, ofwel door de gebruiker, ofwel door het programma
-     *      feedback -- Hier wordt weergegeven over welk soort item het gaat, bvb "Contactdoos"
-     *  selectContainer
-     *      selectAdresType -- Hier kan gekozen wat voor soort tekstlabel gebruikt wordt, automatisch of handmatig.
-     *  adresContainer
-     *      adresInput -- Het eigenlijke tekstlabel, kan automatisch ingevuld zijn ("automatisch") of handmatig door de gebruiker
-     *      selectAdresLocation -- Locatie van het label, boven, onder, links of rechts.
-     *  fontsizeContainer
-     *      fontsizeInput -- De fontsize van het label, kan automatisch ingevuld zijn ("automatisch") of handmatig door de gebruiker
-     *  Andere elementen
-     *      scale -- Schaalfactor van het symbool
-     *      rotation -- Eventuele rotatie van het symbool
-     *  buttons
-     *      OK, Cancel -- OK en Cancel knoppen
-     * 
-     * @param {SituationPlanElement} sitplanElement Het element waarvoor de eigenschappen getoond moeten worden.
-     *                                              Indien null fungeert deze functie als Add in plaats van Edit.
-     * @param {function} callbackOK Een referentie naar de functie die moet worden uitgevoerd als op OK wordt geklikt.
-     */
+import { SituationPlanElement } from "./SituationPlanElement";
+import { ElectroItemZoeker } from "./ElectroItemZoeker";
+import { Electro_Item } from "../List_Item/Electro_Item";
+import { EventManager } from "../EventManager";
+import { formatFloat } from "../general";
+
+/** 
+ * Een serie functies om een formulier te tonen met edit-functionaliteiten voor symbolen in het situatieplan
+ *
+ * De volgorde van code en functies in deze file volgt de structuur van de popup.
+ *                   
+ * popupWindow
+ *  selectKringContainer
+ *      selectKring -- Keuze kringnaam, gedraagt zich als een filter.
+ *  selectElectroItemContainer
+ *      selectElectroItemBox -- Keuze electroItem.
+ *  electroItemIdContainer
+ *      electroItemIdInput -- Hier wordt het electroItemId ingevuld, ofwel door de gebruiker, ofwel door het programma
+ *      electroItemType -- Hier wordt weergegeven over welk soort item het gaat, bvb "Contactdoos"
+ *  selectContainer
+ *      selectAdresType -- Hier kan gekozen wat voor soort tekstlabel gebruikt wordt, automatisch of handmatig.
+ *  adresContainer
+ *      adresInput -- Het eigenlijke tekstlabel, kan automatisch ingevuld zijn ("automatisch") of handmatig door de gebruiker
+ *      selectAdresLocation -- Locatie van het label, boven, onder, links of rechts.
+ *  fontsizeContainer
+ *      fontsizeInput -- De fontsize van het label, kan automatisch ingevuld zijn ("automatisch") of handmatig door de gebruiker
+ *  Andere elementen
+ *      scale -- Schaalfactor van het symbool
+ *      rotation -- Eventuele rotatie van het symbool
+ *  buttons
+ *      OK, Cancel -- OK en Cancel knoppen
+ * 
+ * @param {SituationPlanElement} sitplanElement Het element waarvoor de eigenschappen getoond moeten worden.
+ *                                              Indien null fungeert deze functie als Add in plaats van Edit.
+ * @param {function} callbackOK Een referentie naar de functie die moet worden uitgevoerd als op OK wordt geklikt.
+ * @param {function} callbackCancel Een referentie naar de functie die moet worden uitgevoerd als op Cancel wordt geklikt.
+ * @param {object} options Een object met opties die worden gebruikt door de popup.
+ *                         Mogelijke opties zijn:
+ *                             - toonTekenGrootteStandaardVoorNieuweObjecten: boolean (laat in de checkbox onderaan ook toe de tekengrootte als standaard in te stellen voor alle toekomstige objecten )
+ *                             - toonElementZoeker: boolean (laat toe een ander electroElement te zoeken dan hetgeen reeds eerder gekozen werd) 
+ */
 
 export function SituationPlanView_ElementPropertiesPopup(sitplanElement: SituationPlanElement, 
                          callbackOK: (id: number|null, adresType: string, adres: string, selectAdresLocation: string,
                                       labelfontsize: number, scale: number, rotation: number) => void,
-                         callbackCancel: () => void = () => {}) {
+                         callbackCancel: () => void = () => {},
+                         options: any = {} ) {
 
     // Interne variabelen voor alle subfuncties                                    
 
@@ -145,7 +153,7 @@ export function SituationPlanView_ElementPropertiesPopup(sitplanElement: Situati
             let item = electroItems[idx];
             if (item != null) str = electroItems[idx].id.toString();
         }
-        textInput.value = str;
+        electroItemIdInput.value = str;
     }
 
     /**
@@ -155,10 +163,10 @@ export function SituationPlanView_ElementPropertiesPopup(sitplanElement: Situati
      */
     function initIdField() {
         if (sitplanElement != null) {
-            if (sitplanElement.getElectroItemId() != null) textInput.value = String(sitplanElement.getElectroItemId());
+            if (sitplanElement.getElectroItemId() != null) electroItemIdInput.value = String(sitplanElement.getElectroItemId());
         } else
             rePopulateIdField();
-        textInput.oninput = IdFieldChanged;
+        electroItemIdInput.oninput = IdFieldChanged;
     }
 
     /**
@@ -169,9 +177,9 @@ export function SituationPlanView_ElementPropertiesPopup(sitplanElement: Situati
      * - idem als hierboven voor de selectie van het electroItem 
      */
     function IdFieldChanged() {
-        if (textInput.value != null) {
-            textInput.value = textInput.value.replace(/[^0-9]/g, '');
-            let electroItemId = Number(textInput.value);
+        if (electroItemIdInput.value != null) {
+            electroItemIdInput.value = electroItemIdInput.value.replace(/[^0-9]/g, '');
+            let electroItemId = Number(electroItemIdInput.value);
             updateElectroType();
             if (globalThis.structure.getElectroItemById(electroItemId) != null) {
                 initKringSelect(electroItemId);
@@ -202,21 +210,21 @@ export function SituationPlanView_ElementPropertiesPopup(sitplanElement: Situati
      * Toon het type verbruiker van het gekozen electro-item
      */
     function updateElectroType() {
-        if (textInput.value == null || textInput.value.trim() == '') {
-            feedback.innerHTML = '<span style="color: red;">Geen ID ingegeven</span>';
+        if (electroItemIdInput.value == null || electroItemIdInput.value.trim() == '') {
+            electroItemType.innerHTML = '<span style="color: red;">Geen ID ingegeven</span>';
             expandButton.style.display = 'none';
         } else {
-            let electroItemId = Number(textInput.value);
+            let electroItemId = Number(electroItemIdInput.value);
             let element = globalThis.structure.getElectroItemById(electroItemId) as Electro_Item;
             if (element != null) {
-                feedback.innerHTML = '<span style="color:green;">' + element.getType() + '</span>';
+                electroItemType.innerHTML = '<span style="color:green;">' + element.getType() + '</span>';
                 if (element.isExpandable()) {
                     expandButton.style.display = 'block';
-                    feedback.innerHTML += '<br><span style="color: black;">Klik op uitpakken indien u de onderliggende elementen in het situatieschema wil kunnen plaatsen.</span>';
+                    electroItemType.innerHTML += '<br><span style="color: black;">Klik op uitpakken indien u de onderliggende elementen in het situatieschema wil kunnen plaatsen.</span>';
                     expandButton.onclick = () => { handleExpandButton(electroItemId) };
                 } else expandButton.style.display = 'none';
             } else {
-                feedback.innerHTML = '<span style="color: red;">Element niet gevonden</span>';
+                electroItemType.innerHTML = '<span style="color: red;">Element niet gevonden</span>';
                 expandButton.style.display = 'none';
             }
         }
@@ -226,7 +234,7 @@ export function SituationPlanView_ElementPropertiesPopup(sitplanElement: Situati
      * Wanneer het type adres gewijzigd wordt, wordt ook het adresveld zelf aangepast
      */ 
     function selectAdresTypeChanged() {
-        let id = Number(textInput.value);
+        let id = Number(electroItemIdInput.value);
         updateElectroType();
         let element = globalThis.structure.getElectroItemById(id) as Electro_Item;
         if (element == null) {
@@ -262,6 +270,7 @@ export function SituationPlanView_ElementPropertiesPopup(sitplanElement: Situati
      * in het situatieplan. Dit dient de gebruiker van deze set functies zelf nog te doen.
      */
     function closePopup() {
+        event_manager.dispose();
         popupOverlay.style.visibility = 'hidden';
         document.body.style.pointerEvents = 'auto'; // Re-enable interactions with the background
         div.remove();
@@ -283,9 +292,14 @@ export function SituationPlanView_ElementPropertiesPopup(sitplanElement: Situati
 
     //--- HOOFDFUNCTIE ------------------------------------------------------------------------------------
 
-    /* 
-     * Eerst maken we de pop-up
-     */
+    // options verwerken
+
+    if (options.toonTekenGrootteStandaardVoorNieuweObjecten == null) {
+        if (sitplanElement == null) /* nieuw element */ options.toonTekenGrootteStandaardVoorNieuweObjecten = true;
+        else options.toonTekenGrootteStandaardVoorNieuweObjecten = (sitplanElement.getElectroItemId() != null); /* tonen als het een electroItem is */
+    }
+
+    // Pop-up maken
 
     const div = document.createElement('div');
 
@@ -293,6 +307,9 @@ export function SituationPlanView_ElementPropertiesPopup(sitplanElement: Situati
         <div id="popupOverlay" class="popup-overlay">
             <div id="popupWindow" class="popup">
                 <h3>Element toevoegen/bewerken</h3>
+                <div style="position: absolute; top: 5px; right: 5px; display: flex; align-items: center; justify-content: center;">
+                    <button id="closeButton" style="background-color: #e00; border-radius: 4px; width: 20px; height: 20px; font-size: 16px; color: white; border: none; outline: none; cursor: pointer; display: flex; align-items: center; justify-content: center;">&#10006;</button>
+                </div>
                 <div id="selectKringContainer" style="display: flex; margin-bottom: 10px; align-items: center;">
                     <label for="selectKring" style="margin-right: 10px; display: inline-block;">Kring:</label>
                     <select id="selectKring"></select>
@@ -302,10 +319,10 @@ export function SituationPlanView_ElementPropertiesPopup(sitplanElement: Situati
                     <select id="selectElectroItemBox"></select><span style="display: inline-block; width: 10px;"></span>
                     <button id="expandButton" title="Omzetten in indivuele elementen" style="background-color:lightblue;">Uitpakken</button>
                 </div>
-                <div id="textContainer" style="display: flex; margin-bottom: 30px; align-items: center;">
-                    <label for="textInput" style="margin-right: 10px; display: inline-block;">ID:</label>
-                    <input id="textInput" style="width: 100px;" type="number" min="0" step="1" value="">
-                    <div id="feedback" style="margin-left: 10px; width: 100%; font-size: 12px"></div>
+                <div id="electroItemIdContainer" style="display: flex; margin-bottom: 30px; align-items: center;">
+                    <label for="electroItemIdInput" style="margin-right: 10px; display: inline-block;">ID:</label>
+                    <input id="electroItemIdInput" style="width: 100px;" type="number" min="0" step="1" value="">
+                    <div id="electroItemType" style="margin-left: 10px; width: 100%; font-size: 12px"></div>
                 </div>
                 <div id="selectContainer" style="display: flex; margin-bottom: 10px; align-items: center;">
                     <label for="selectAdresType" style="margin-right: 10px; display: inline-block; white-space: nowrap;">Label type:</label>
@@ -338,7 +355,7 @@ export function SituationPlanView_ElementPropertiesPopup(sitplanElement: Situati
                 </div>
                 <div id="setDefaultContainer" style="display: flex; margin-bottom: 20px; align-items: flex-start;">
                     <input type="checkbox" id="setDefaultCheckbox">
-                    ${ (sitplanElement == null) || ( (sitplanElement != null) && (sitplanElement.getElectroItemId() != null) )
+                    ${ (options.toonTekenGrootteStandaardVoorNieuweObjecten)
                         ? `<label for="setDefaultCheckbox" style="margin-left: 10px; flex-grow: 1; flex-wrap: wrap;">Zet tekengrootte en schaal als standaard voor alle toekomstige nieuwe symbolen.</label>`
                         : `<label for="setDefaultCheckbox" style="margin-left: 10px; flex-grow: 1; flex-wrap: wrap;">Zet schaal als standaard voor alle toekomstige nieuwe symbolen.</label>`
                     }            
@@ -352,14 +369,15 @@ export function SituationPlanView_ElementPropertiesPopup(sitplanElement: Situati
 
     const popupOverlay = div.querySelector('#popupOverlay') as HTMLDivElement;
         const popupWindow = popupOverlay.querySelector('#popupWindow') as HTMLDivElement;
+            const closeButton = popupWindow.querySelector('#closeButton') as HTMLButtonElement;
             const selectKringContainer = popupWindow.querySelector('#selectKringContainer') as HTMLSelectElement;
                 const selectKring = popupWindow.querySelector('#selectKring') as HTMLSelectElement;
             const selectElectroItemContainer = popupWindow.querySelector('#selectElectroItemContainer') as HTMLSelectElement;
                 const selectElectroItemBox = popupWindow.querySelector('#selectElectroItemBox') as HTMLSelectElement;
                 const expandButton = popupWindow.querySelector('#expandButton') as HTMLButtonElement;
-            const textContainer = popupWindow.querySelector('#textContainer') as HTMLElement;
-                const textInput = popupWindow.querySelector('#textInput') as HTMLInputElement;
-                const feedback = popupWindow.querySelector('#feedback') as HTMLElement;
+            const electroItemIdContainer = popupWindow.querySelector('#electroItemIdContainer') as HTMLElement;
+                const electroItemIdInput = popupWindow.querySelector('#electroItemIdInput') as HTMLInputElement;
+                const electroItemType = popupWindow.querySelector('#electroItemType') as HTMLElement;
             const selectContainer = popupWindow.querySelector('#selectContainer') as HTMLSelectElement;
                 const selectAdresType = popupWindow.querySelector('#selectAdresType') as HTMLSelectElement;
             const adresContainer = popupWindow.querySelector('#adresContainer') as HTMLElement;
@@ -387,9 +405,7 @@ export function SituationPlanView_ElementPropertiesPopup(sitplanElement: Situati
         if (sitplanElement.getElectroItemId() != null) { // Het gaat over een bestaand Electro-item
             let electroItem = globalThis.structure.getElectroItemById(sitplanElement.getElectroItemId());
             if ( (electroItem != null) && (electroItem.getType() == 'Bord') ) {
-                selectKringContainer.style.display = 'none';
-                selectElectroItemContainer.style.display = 'none';    
-                textContainer.style.display = 'none';
+                if (options.toonElementZoeker == null) options.toonElementZoeker = false;
             }
             selectAdresType.value = sitplanElement.getAdresType();
             adresInput.value = sitplanElement.getAdres();
@@ -397,37 +413,55 @@ export function SituationPlanView_ElementPropertiesPopup(sitplanElement: Situati
             selectAdresLocation.value = sitplanElement.getAdresLocation();
             selectAdresTypeChanged();
         } else { // Het gaat over een geimporteerde CSV
-            selectKringContainer.style.display = 'none';
-            selectElectroItemContainer.style.display = 'none';
-            textContainer.style.display = 'none';
+            if (options.toonElementZoeker == null) options.toonElementZoeker = false;
             selectContainer.style.display = 'none';
             fontSizeContainer.style.display = 'none';
             adresContainer.style.display = 'none';
         }
-        scaleInput.value = String(sitplanElement.getscale()*100);
-        rotationInput.value = String(sitplanElement.rotate);
+        scaleInput.value = formatFloat(sitplanElement.getscale()*100,6);
+        rotationInput.value = formatFloat(sitplanElement.rotate,2);
     } else { // Form werd aangeroepen om een nieuw element te creëren
         selectAdresTypeChanged();
-        fontSizeInput.value = String(globalThis.structure.sitplan.defaults.fontsize);
-        scaleInput.value = String(globalThis.structure.sitplan.defaults.scale*100);
+        fontSizeInput.value = formatFloat(globalThis.structure.sitplan.defaults.fontsize,2);
+        scaleInput.value = formatFloat(globalThis.structure.sitplan.defaults.scale*100,6);
         selectAdresLocation.value = 'rechts';
+    }
+
+    if (options.toonElementZoeker == null) options.toonElementZoeker = true;
+
+    if (!options.toonElementZoeker) {
+        selectKringContainer.style.display = 'none';
+        selectElectroItemContainer.style.display = 'none';    
+        electroItemIdContainer.style.display = 'none';
     }
 
     /*
      * Eventhandlers, enter op de tekst velden staat gelijk aan OK klikken
      */
    
-    textInput.onkeydown = handleEnterKey;
+    /*electroItemIdInput.onkeydown = handleEnterKey;
     adresInput.onkeydown = handleEnterKey;
     fontSizeInput.onkeydown = handleEnterKey;
     scaleInput.onkeydown = handleEnterKey;
-    rotationInput.onkeydown = handleEnterKey;
+    rotationInput.onkeydown = handleEnterKey;*/
+
+    // handle enter and escape key
+    let event_manager = new EventManager();
+    event_manager.addEventListener(document as any, 'keydown', (event: KeyboardEvent) => {
+        if (event.key === 'Enter') {
+            handleEnterKey(event);
+        } else if (event.key === 'Escape') {
+            event.preventDefault();
+            event.stopPropagation();
+            cancelButton.click();
+        }
+    });
 
     /*
      * Eventhandlers, adres-text aanpassen triggert aanpassingen van adres-type
      */
 
-    textInput.onblur = selectAdresTypeChanged;
+    electroItemIdInput.onblur = selectAdresTypeChanged;
     selectAdresType.onchange = selectAdresTypeChanged; 
 
     adresInput.onclick = () => {
@@ -447,7 +481,7 @@ export function SituationPlanView_ElementPropertiesPopup(sitplanElement: Situati
         function isNumeric(value: any) {
             return /^-?\d+(\.\d+)?$/.test(value);
         }
-        let returnId = (textInput.value.trim() == '' ? null : Number(textInput.value));
+        let returnId = (electroItemIdInput.value.trim() == '' ? null : Number(electroItemIdInput.value));
         if (!(isNumeric(scaleInput.value)) || (Number(scaleInput.value) <= 0)) scaleInput.value = String(globalThis.structure.sitplan.defaults.scale*100);
         if (!(isNumeric(rotationInput.value))) rotationInput.value = String(0);
         
@@ -464,6 +498,8 @@ export function SituationPlanView_ElementPropertiesPopup(sitplanElement: Situati
         closePopup();
         callbackCancel();
     };
+
+    closeButton.onclick = cancelButton.onclick;
 
     /*
      * Het volledige formulier aan de body toevoegen en tonen

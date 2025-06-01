@@ -9,6 +9,7 @@ import { showSituationPlanPage } from "./sitplan/SituationPlanView";
 import { printsvg } from "./print/print";
 import { PROP_edit_menu } from "../prop/prop_scripts";
 import { PROP_getCookieText } from "../prop/prop_scripts";
+import { CookieBanner } from "../prop/CookieBanner";
 import { flattenSVGfromString } from "./general";
 import { isInt } from "./general";
 import { Bord } from "./List_Item/Bord";
@@ -21,9 +22,8 @@ import { Session } from "./Session";
 import { MultiLevelStorage } from "./storage/MultiLevelStorage";   
 import { undoRedo } from "./undoRedo";
 import { importExportUsingFileAPI } from "./importExport/importExport";
-import { CookieBanner } from "../prop/prop_scripts";
 
-import '../css/styles.css';
+import "../css/all.css";
 
 declare const BUILD_DATE: string;
 console.log(BUILD_DATE);

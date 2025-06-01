@@ -291,3 +291,23 @@ export function browser_ie_detected() {
 
     if ( (msie > 0) || (trident > 0) ) return true; else return false;
 }
+
+// I need a function that takes a floating point number as an input and transforms it into a string with a meaninful number of decimals like excel would do.
+// the easiest is probably to first round to 6 decimals and then remove all trailing zeros and the dot if it is the last character
+export function formatFloat(value: number, decimals: number = 6): string {
+    if (isNaN(value) || !isFinite(value)) return "";
+
+    // Ensure decimals is an integer
+    decimals = Math.floor(decimals);
+
+    // Round to the specified number of decimal places
+    let roundedValue = Math.round(value * 10**decimals) / (10**decimals);
+
+    // Convert to string and remove trailing zeros
+    let strValue = roundedValue.toString();
+    
+    // Remove trailing zeros and dot if necessary
+    strValue = strValue.replace(/(\.\d*?[1-9])0+$/, '$1').replace(/\.$/, '');
+
+    return strValue;
+}

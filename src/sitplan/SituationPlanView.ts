@@ -1320,8 +1320,19 @@ export class SituationPlanView {
      * @param scale - De schaal van het ElectroItem.
      * @param rotate - De rotatie van het ElectroItem.
      */
-    addElectroItem = (id: number | null, adrestype: AdresType, adres: string, adreslocation: AdresLocation, labelfontsize: number, scale: number, rotate: number, posx: number = null, posy: number = null) => {
+    addElectroItem = (id: number | null, 
+                      adrestype: AdresType, 
+                      adres: string, 
+                      adreslocation: AdresLocation, 
+                      labelfontsize: number, 
+                      scale: number, 
+                      rotate: number, 
+                      posx: number = null, 
+                      posy: number = null,
+                      options: any = { undoStore: true } ) => {
 
+        if (options.undoStore == undefined) options.undoStore = true; // default is to store the action in the undo stack
+        
         let paperPos = this.canvasPosToPaperPos(50, 50);
 
         if (posx == null) posx = paperPos.x;
@@ -1336,7 +1347,7 @@ export class SituationPlanView {
                 this.clearSelection();
                 this.redraw();
                 this.selectOneBox(element.boxref); // We moeten dit na redraw doen anders bestaat de box mogelijk nog niet
-                this.bringToFront(); // Deze slaat ook automatisch undo informatie op dus we moeten geen globalThis.undostruct.store() meer doen.
+                this.bringToFront(options.undoStore); // Deze slaat ook automatisch undo informatie op dus we moeten geen globalThis.undostruct.store() meer doen.
             }
         } else {
             alert('Geen geldig ID ingegeven!');
@@ -1352,8 +1363,18 @@ export class SituationPlanView {
         this.event_manager.addEventListener(elem, 'click', () => {
             this.contextMenu.hide();
             this.unattachArrowKeys();
-            SituationPlanView_ElementPropertiesPopup(null, this.addElectroItem.bind(this));
-            this.attachArrowKeys();
+            SituationPlanView_ElementPropertiesPopup(
+                /* no element selected */
+                null,
+                /* OK button callback */
+                (electroid, adrestype, adres, adreslocation, labelfontsize, scale, rotate) => {
+                    this.attachArrowKeys();
+                    this.addElectroItem(electroid, adrestype as AdresType, adres, adreslocation as AdresLocation, labelfontsize, scale, rotate);
+                },
+                /* Cancel button callback */
+                () => {
+                    this.attachArrowKeys();
+                });
         });
     }
 
@@ -1368,7 +1389,9 @@ export class SituationPlanView {
             if (!sitPlanElement) return;
 
             SituationPlanView_ElementPropertiesPopup(sitPlanElement,
+                /* OK button callback */
                 (electroid, adrestype, adres, adreslocation, labelfontsize, scale, rotate) => {
+                    this.attachArrowKeys();
                     if (electroid != null) {
                         sitPlanElement.setElectroItemId(electroid);
                         sitPlanElement.setAdres(adrestype,adres,adreslocation);
@@ -1380,7 +1403,13 @@ export class SituationPlanView {
                     this.updateBoxContent(sitPlanElement); //content needs to be updated first to know the size of the box
                     this.updateSymbolAndLabelPosition(sitPlanElement);
                     globalThis.undostruct.store();
-                }, cancelCallback
+                }, 
+                /* Cancel button callback */
+                () => {
+                    this.attachArrowKeys();
+                    if (cancelCallback) cancelCallback(); },  
+                /* Opties */
+                { toonElementZoeker: false } // opties
             );
         } else if (this.selected.length() > 1) {
             const elements: SituationPlanElement[] = [];
@@ -1390,7 +1419,9 @@ export class SituationPlanView {
                 elements.push(sitPlanElement);
             }
             SituationPlanView_MultiElementPropertiesPopup(elements,
+                /* OK button callback */
                 (labelfontsize, scale, rotate) => {
+                    this.attachArrowKeys();
                     for (let sitPlanElement of elements) {
                         if (labelfontsize != null) sitPlanElement.labelfontsize = labelfontsize;
                         if (scale != null) sitPlanElement.setscale(scale);
@@ -1399,11 +1430,13 @@ export class SituationPlanView {
                         this.updateSymbolAndLabelPosition(sitPlanElement);
                     }
                     globalThis.undostruct.store();
-                }, cancelCallback
-            );
-            
+                }, 
+                /* Cancel button callback */
+                () => {
+                    this.attachArrowKeys();
+                    if (cancelCallback) cancelCallback(); }
+            );    
         }
-        this.attachArrowKeys();
     }
 
     /**

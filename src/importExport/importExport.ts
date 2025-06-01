@@ -268,10 +268,11 @@ globalThis.exportjson = (saveAs: boolean = true) => { // Indien de boolean false
     } finally {
         if ((window as any).showOpenFilePicker) { // Gebruik fileAPI    
             if ( (globalThis.fileAPIobj.filename == null) && (saveAs == false) ) saveAs = true; // Default to SaveAs if we have no file name
-            if (saveAs) 
-                globalThis.fileAPIobj.saveAs(text).then(() => globalThis.autoSaver.saveManually("TXT0040000" + origtext)); 
-            else 
-                globalThis.fileAPIobj.save(text).then(() => globalThis.autoSaver.saveManually("TXT0040000" + origtext));
+            if (saveAs) {
+                globalThis.fileAPIobj.saveAs(text).then(() => {globalThis.autoSaver.saveManually("TXT0040000" + origtext);}) 
+            } else { 
+                globalThis.fileAPIobj.save(text).then(() => {globalThis.autoSaver.saveManually("TXT0040000" + origtext);});
+            }          
         } else { // legacy
           download_by_blob(text, filename, 'data:text/eds;charset=utf-8');
           globalThis.autoSaver.saveManually("TXT0040000" + origtext); // Needs to be as TXT to be able to check with last autosave
@@ -565,13 +566,15 @@ function importToAppend(mystring: string, redraw = true) {
     }
     
     globalThis.structure.reSort();
-    globalThis.undostruct.store();
-
+    
     //then remove the pointer from structureToAppend and let the garbage collector do its work
     structureToAppend = null;   
 
     //redraw if needed
     if (redraw) globalThis.topMenu.selectMenuItemByName('Eéndraadschema');
+
+    // Store only after having redrawn, anders worden we naar de print-pagina gestuurd bij undo
+    globalThis.undostruct.store();
 }
 
 /** FUNCTION download_by_blob
