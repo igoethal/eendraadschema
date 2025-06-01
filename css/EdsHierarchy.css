@@ -1,0 +1,94 @@
+.button-insertChild {
+    background-color: green;
+    width: 26px;
+    height: 26px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><line x1="4" y1="11" x2="16" y2="11" stroke="black" stroke-width="2" stroke-linecap="round"/><line x1="4" y1="11" x2="4" y2="4" stroke="black" stroke-width="2" stroke-linecap="round"/><line x1="16" y1="11" x2="11" y2="6" stroke="black" stroke-width="2" stroke-linecap="round"/><line x1="16" y1="11" x2="11" y2="16" stroke="black" stroke-width="2" stroke-linecap="round"/></svg>');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 20px 20px;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 0px;
+    margin-right: 4px;
+    margin-top: 1px;
+    margin-bottom: 1px;
+}
+
+.button-insertAfter {
+    background-color: green;
+    width: 26px;
+    height: 26px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><line x1="10" y1="4" x2="10" y2="16" stroke="black" stroke-width="2" stroke-linecap="round"/><line x1="10" y1="16" x2="5" y2="11" stroke="black" stroke-width="2" stroke-linecap="round"/><line x1="10" y1="16" x2="15" y2="11" stroke="black" stroke-width="2" stroke-linecap="round"/></svg>');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 20px 20px;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 0px;
+    margin-right: 4px;
+    margin-top: 1px;
+    margin-bottom: 1px;
+}
+
+.button-insertBefore {
+    background-color: green;
+    width: 26px;
+    height: 26px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><line x1="10" y1="4" x2="10" y2="16" stroke="black" stroke-width="2" stroke-linecap="round"/><line x1="10" y1="4" x2="5" y2="9" stroke="black" stroke-width="2" stroke-linecap="round"/><line x1="10" y1="4" x2="15" y2="9" stroke="black" stroke-width="2" stroke-linecap="round"/></svg>');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 20px 20px;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 0px;
+    margin-right: 4px;
+    margin-top: 1px;
+    margin-bottom: 1px;
+}
+
+.button-green {
+    background-color: green;
+    height: 26px;
+    display: inline-block;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    margin-left: 0px;
+    margin-right: 4px;
+    margin-top: 1px;
+    margin-bottom: 1px;
+    font-size: 20px;
+}
+
+.button-red {
+    background-color: red;
+    height: 26px;
+    min-width: 26px;
+    display: inline-block;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    padding: 0px;
+    margin-left: 0px;
+    margin-right: 4px;
+    margin-top: 1px;
+    margin-bottom: 1px;
+    font-size: 16px;
+}
+
+.button-lightblue {
+    background-color: lightblue;
+    height: 26px;
+    min-width: 26px;
+    display: inline-block;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    margin-left: 0px;
+    margin-right: 4px;
+    margin-top: 1px;
+    margin-bottom: 1px;
+    font-size: 14px;
+    padding: 0px 5px 0px 5px;
+}
+

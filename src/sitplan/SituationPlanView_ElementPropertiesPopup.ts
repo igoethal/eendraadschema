@@ -308,7 +308,7 @@ export function SituationPlanView_ElementPropertiesPopup(sitplanElement: Situati
             <div id="popupWindow" class="popup">
                 <h3>Element toevoegen/bewerken</h3>
                 <div style="position: absolute; top: 5px; right: 5px; display: flex; align-items: center; justify-content: center;">
-                    <button id="closeButton" style="background-color: #e00; border-radius: 4px; width: 20px; height: 20px; font-size: 16px; color: white; border: none; outline: none; cursor: pointer; display: flex; align-items: center; justify-content: center;">&#10006;</button>
+                    <button id="closeButton" style="background-color: #e00; border-radius: 4px; width: 20px; height: 20px; font-size: 16px; color: white; border: none; outline: none; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0px; vertical-align: middle;">&#10006;</button>
                 </div>
                 <div id="selectKringContainer" style="display: flex; margin-bottom: 10px; align-items: center;">
                     <label for="selectKring" style="margin-right: 10px; display: inline-block;">Kring:</label>

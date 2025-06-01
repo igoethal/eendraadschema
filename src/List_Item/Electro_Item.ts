@@ -156,21 +156,21 @@ export class Electro_Item extends List_Item {
     if (mode=="move") {
       output += "<b>ID: "+this.id+"</b>, ";
       output += 'Moeder: <input id="id_parent_change_' + this.id + '" type="text" size="2" value="' + this.parent + '" onchange="HL_changeparent(' + this.id + ')"> ';
-      output += " <button style=\"background-color:lightblue;\" onclick=\"HLMoveUp(" + this.id +")\">&#9650;</button>";
-      output += " <button style=\"background-color:lightblue;\" onclick=\"HLMoveDown(" + this.id +")\">&#9660;</button>";
+      output += `<button class="button-lightblue" onclick="HLMoveUp(${this.id})">&#9650;</button>`;
+      output += `<button class="button-lightblue" onclick="HLMoveDown(${this.id})">&#9660;</button>`;
       if (this.checkInsertSibling()) {
-        output += " <button style=\"background-color:lightblue;\" onclick=\"HLClone(" + this.id +")\">Clone</button>";
+        output += `<button class="button-lightblue" onclick="HLClone(${this.id})">Clone</button>`;
       }
     } else {
       if (this.checkInsertSibling()) {
-        output += " <button style=\"background-color:green;\" onclick=\"HLInsertBefore(" + this.id +")\">&#9650;</button>";
-        output += " <button style=\"background-color:green;\" onclick=\"HLInsertAfter(" + this.id +")\">&#9660;</button>";
+        output += `<button class="button-insertBefore" onclick="HLInsertBefore(${this.id})"></button>`;
+        output += `<button class="button-insertAfter" onclick="HLInsertAfter(${this.id})"></button>`;
       }
       if (this.checkInsertChild()) {
-        output += " <button style=\"background-color:green;\" onclick=\"HLInsertChild(" + this.id +")\">&#9654;</button>";
+        output +=  `<button class="button-insertChild" onclick="HLInsertChild(${this.id})"></button>`;
       }
     };
-    output += " <button style=\"background-color:red;\" onclick=\"HLDelete(" + this.id +")\">&#9851;</button>";
+    output += `<button class="button-red" onclick="HLDelete(${this.id})">🗑</button>`;
     output += "&nbsp;"
 
     let parent:Electro_Item = this.getParent();

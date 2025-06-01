@@ -293,10 +293,10 @@ globalThis.HLRedrawTreeSVG = () => {
     let str:string = '<b>Tekening: </b>Ga naar het print-menu om de tekening af te printen of te exporteren als SVG vector graphics.<br><br>'
                    + '<div id="EDS">' + flattenSVGfromString(globalThis.structure.toSVG(0,"horizontal").data,10) + '</div>'
                    + '<h2>Legende:</h2>'
-                   + '<button style="background-color:green;">&#9650;</button> Item hierboven invoegen (zelfde niveau)<br>'
-                   + '<button style="background-color:green;">&#9660;</button> Item hieronder invoegen (zelfde niveau)<br>'
-                   + '<button style="background-color:green;">&#9654;</button> Afhankelijk item hieronder toevoegen (niveau dieper)<br>'
-                   + '<button style="background-color:red;">&#9851;</button> Item verwijderen<br>'
+                   + '<button class="button-insertBefore"></button> Item hierboven invoegen (zelfde niveau)<br>'
+                   + '<button class="button-insertAfter"></button> Item hieronder invoegen (zelfde niveau)<br>'
+                   + '<button class="button-insertChild"></button> Afhankelijk item hieronder toevoegen (niveau dieper)<br>'
+                   + '<button class="button-red">🗑</button> Item verwijderen<br>'
                    + '<i><br><small>Versie: ' + BUILD_DATE
                    + ' (C) Ivan Goethals -- <a href="license.html" target="popup" onclick="window.open(\'license.html\',\'popup\',\'width=800,height=600\'); return false;">Terms</a></small></i><br><br>';
 
