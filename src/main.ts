@@ -296,7 +296,7 @@ globalThis.HLRedrawTreeSVG = () => {
                    + '<button class="button-insertBefore"></button> Item hierboven invoegen (zelfde niveau)<br>'
                    + '<button class="button-insertAfter"></button> Item hieronder invoegen (zelfde niveau)<br>'
                    + '<button class="button-insertChild"></button> Afhankelijk item hieronder toevoegen (niveau dieper)<br>'
-                   + '<button class="button-red">🗑</button> Item verwijderen<br>'
+                   + '<button class="button-delete-garbage-can"></button> Item verwijderen<br>'
                    + '<i><br><small>Versie: ' + BUILD_DATE
                    + ' (C) Ivan Goethals -- <a href="license.html" target="popup" onclick="window.open(\'license.html\',\'popup\',\'width=800,height=600\'); return false;">Terms</a></small></i><br><br>';
 
@@ -618,27 +618,31 @@ if (left_col_inner == null) throw new Error("HTML element left_col_inner is null
 left_col_inner.addEventListener('change', function(event) {
 
     function propUpdate(my_id: number, item: string, type: string, value: string | boolean): void {
-        let ordinal: number|null;
-        ordinal = globalThis.structure.getOrdinalById(my_id);
-        if (ordinal == null) return;
+
+        let electroItem = globalThis.structure.getElectroItemById(my_id);
+
         switch (type) {
             case "select-one":
                 if (item == "type") { // Type changed
                     globalThis.structure.adjustTypeById(my_id, value as string);
                 } else {
-                    globalThis.structure.data[ordinal].props[item] = (value as string);
+                    electroItem.props[item] = (value as string);
                 }
                 globalThis.structure.updateHTMLinner(my_id);
                 break;
             case "text":
-                globalThis.structure.data[ordinal].props[item] = (value as string);
+                electroItem.props[item] = (value as string);
                 if (item==='kortsluitvermogen') globalThis.structure.updateHTMLinner(my_id);
                 break;
             case "checkbox":
-                globalThis.structure.data[ordinal].props[item] = (value as boolean);
+                electroItem.props[item] = (value as boolean);
                 globalThis.structure.updateHTMLinner(my_id);
                 break;
         }
+
+        if (electroItem.getType() == "Domotica gestuurde verbruiker")
+            globalThis.structure.voegAttributenToeAlsNodig();
+
         globalThis.undostruct.store();
         globalThis.HLRedrawTreeSVG();
     }

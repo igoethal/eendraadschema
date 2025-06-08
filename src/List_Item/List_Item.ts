@@ -34,16 +34,6 @@ export class List_Item {
         return(2^16);
     }
 
-    // -- Tel aantal kinderen --
-
-    getNumChilds() : number {
-        let numChilds = 0;
-            for (let i=0; i<this.sourcelist.data.length; ++i) {
-                if ((this.sourcelist.data[i].parent === this.id) && (this.sourcelist.active[i])) numChilds++;
-            }  
-        return(numChilds);
-    }
-
     // -- Check of het item actief is --
 
     isActief() : Boolean {
@@ -60,10 +50,20 @@ export class List_Item {
     // -- Editeren van een string --
 
     stringPropToHTML(item: string, size?: number) {
+
+        let style = "";
+        if (item == "naam") {
+            switch (this.props.type) {
+                case "Aansluiting": case "Bord": style += "font-weight: bold;"; break;
+                case "Kring": case "Zekering/differentieel": case "Splitsing":style += "font-weight: bold; background-color:#FFFFE0;"; break;
+                case "Domotica": case "Domotica module (verticaal)": style += "font-weight: bold; background-color: lightgreen;"; break;
+            }
+        }
+
         let output:string = "";
         let sizestr:string = "";
         if (size!=null) sizestr = ' size="'+size+'" ';
-        output = '<input type="text"' + sizestr + ' id="' + 'HL_edit_' + this.id + '_' + item +  '" value="' + this.props[item] + '">';
+        output = `<input type="text"${sizestr} style="${style}" id="HL_edit_${this.id}_${item}" value="${this.props[item]}">`;
 
         return(output);
     }
@@ -85,7 +85,17 @@ export class List_Item {
         let output: string = "";
         let options: string = "";
 
-        output = '<select id="' + myId + '">';
+        let style = "";
+        if (item == "type") {
+            switch (this.props.type) {
+                case "Aansluiting": case "Bord": style += "background-color: #FFD580;"; break;
+                case "Kring": case "Zekering/differentieel": case "Splitsing":style += "background-color:#FFFFE0;"; break;
+                case "Domotica": case "Domotica module (verticaal)": style += "background-color: lightgreen;"; break;
+            }
+        };
+
+
+        output = `<select style="${style}" id="${myId}">`;
         for (let i:number=0; i<items.length; i++) {
             options = "";
             if (this.props[item]==items[i]) { options += " selected"; }

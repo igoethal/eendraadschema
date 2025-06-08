@@ -380,6 +380,7 @@ function json_to_structure(text: string, oldstruct: Hierarchical_List = null, ve
     outstruct.curid = mystructure.curid;
 
     // Sort the entire new structure
+    outstruct.voegAttributenToeAlsNodig();
     outstruct.reSort();
 
     // Return the result

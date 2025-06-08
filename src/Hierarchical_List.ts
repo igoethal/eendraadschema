@@ -220,8 +220,6 @@ export class Hierarchical_List {
         this.length = ordinals.length;
     }
 
-
-
     // -- Plaats in de array zoeken op basis van de id --
 
     getOrdinalById(my_id: number) : number | null {
@@ -240,7 +238,8 @@ export class Hierarchical_List {
     getNumChilds(parent_id: number) : number {
         let returnval = 0;
         for (let i = 0; i<this.length; i++) {
-            if ( (this.data[i].parent == parent_id) && (this.active[i]) ) returnval++;
+            if ( (this.data[i].parent == parent_id) && (this.active[i]) 
+                && !((this.data[i] as Electro_Item).isAttribuut() ) ) returnval++;
         }
         return(returnval);
     }
@@ -396,7 +395,7 @@ export class Hierarchical_List {
         let numchilds:number = this.getNumChilds(my_id);
         let maxchilds:number = this.getMaxNumChilds(my_id);
 
-        if (numchilds < maxchilds) {
+        if ( (numchilds < maxchilds) || ((my_item as Electro_Item).isAttribuut() ) ) {
             let ordinal:number = this.insertItemAfterId(my_item, my_id);
             this.data[ordinal].parent = my_id;
             this.data[ordinal].indent = this.data[ordinal-1].indent+1;
@@ -415,7 +414,8 @@ export class Hierarchical_List {
         let newOrdinal = currentOrdinal;
         let currentparent = this.data[currentOrdinal].parent;
         for (let i = currentOrdinal-1; i>=0; i--) {
-            if ( (this.data[i].parent == currentparent) && (this.active[i]) ) {
+            if ( (this.data[i].parent == currentparent) && (this.active[i]) 
+                && !((this.data[i] as Electro_Item).isAttribuut() ) ) {
                 newOrdinal = i;
                 break; //Leave the for loop
             }
@@ -443,7 +443,8 @@ export class Hierarchical_List {
         let newOrdinal = currentOrdinal;
         let currentparent = this.data[currentOrdinal].parent;
         for (let i = currentOrdinal+1; i<this.length; i++) {
-            if ( (this.data[i].parent == currentparent) && (this.active[i]) ) {
+            if ( (this.data[i].parent == currentparent) && (this.active[i]) 
+                && !((this.data[i] as Electro_Item).isAttribuut() ) ) {
                 newOrdinal = i;
                 break; //Leave the for loop
             }
@@ -692,6 +693,79 @@ export class Hierarchical_List {
         (document.getElementById('id_elem_'+id) as HTMLElement).innerHTML = this.toHTMLinner(ordinal);
     }
 
+    voegAttributenToeAlsNodig() {
+
+        // Verwijder alle attributen die geen kind zijn van een domotica gestuurde verbruiker met externe sturing
+        // of van het verkeerde type zijn
+        for (let i = 0; i<this.length; i++) {
+            if ( (this.data[i].props != null) && ( (this.data[i] as Electro_Item).isAttribuut() ) ) {
+                let parentItem: Electro_Item = this.data[i].getParent() as Electro_Item;
+                if (parentItem == null) continue;
+                if (parentItem.getType() != "Domotica gestuurde verbruiker") continue;
+                if (parentItem.props.heeft_externe_sturing == true) {
+                    switch (parentItem.props.type_externe_sturing) {
+                        case "schakelaar":
+                            if (this.data[i].props.type == "Schakelaars") continue;
+                            break;
+                        case "drukknop":
+                            if (this.data[i].props.type == "Drukknop") continue;
+                            break;
+                        default:
+                            continue;
+                    }
+                }
+                    
+                // Als al het bovenstaande faalt, dan hebben we een attribuut dat er niet mag zijn of van het verkeerde type is en maken 
+                // we ons klaar om dat te verwijderen. reSort aan het einde van deze functie zal het effectieve
+                // verwijderen uitvoeren
+                this.active[i] = false;
+            }
+        }
+
+        // Ga opnieuw over alle items om attributen toe te voegen waar het nodig is
+        for (let i = 0; i<this.length; i++) {
+
+            // Check of het item een domotica gestuurde verbruiker is met externe sturing
+            if ( (this.active[i]) && ((this.data[i] as Electro_Item).getType() == "Domotica gestuurde verbruiker" )
+                                  && (this.data[i].props.heeft_externe_sturing == true) ) {
+
+                // Check of de externe sturing reeds als attribuut in de datastructuur hangt 
+                let heeftAttribuut = false;
+                for (let j = 0; j<this.length; j++) {
+                    if (this.active[j] && (this.data[j].parent == this.id[i])
+                    && ( (this.data[j] as Electro_Item).isAttribuut() ) )
+                        heeftAttribuut = true;
+                }
+
+                // Indien het attribuut nog niet bestaat creëren we het
+                if (!heeftAttribuut) {
+                    let newElement: Electro_Item = null;
+                    switch (this.data[i].props.type_externe_sturing) {
+                        case "schakelaar":
+                            newElement = this.createItem("Schakelaars");
+                            newElement.props.type_schakelaar = "enkelpolig";
+                            break;
+                        case "drukknop":
+                        default:
+                            newElement = this.createItem("Drukknop");
+                            break;
+                    }
+                    if (newElement != null) {
+                        newElement.props.isAttribuut = true;
+                        this.insertChildAfterId(newElement, this.id[i]);
+                        this.voegAttributenToeAlsNodig(); // De volgorde is gewijzigd dus we lanceren de functie opnieuw
+                        return;
+                    }
+                }
+            }
+        }
+
+        // herStoreren van de matrix
+
+        this.reSort();
+          
+    }
+
     toHTML(myParent: number) {
         
         if (myParent==0) this.updateRibbon();
@@ -701,7 +775,8 @@ export class Hierarchical_List {
 
         // Teken het volledige schema in HTML
         for (let i = 0; i<this.length; i++) {
-            if (this.active[i] && (this.data[i].parent == myParent)) {
+            if (this.active[i] && (this.data[i].parent == myParent)
+            && !( (this.data[i] as Electro_Item).isAttribuut() ) ) {
                 numberDrawn++;
                 output += '<table class="html_edit_table" id="id_elem_' + this.id[i]  + '">';
                 output += this.toHTMLinner(i);
@@ -749,7 +824,10 @@ export class Hierarchical_List {
 
         // Dan vullen we de array door doorheen de lijst van kinderen te gaan en een tekening van elk kind op te slaan
         for (let i = 0; i<this.length; i++) {
-            if (this.active[i] && ( (this.data[i].parent == myParent) || ( (includeparent==true) && (this.id[i] == myParent) ) ) ) {
+            if (this.active[i]
+                && !( (this.data[i] as Electro_Item).isAttribuut() ) 
+                && ( (this.data[i].parent == myParent) || ( (includeparent==true) && (this.id[i] == myParent) ) ) ) {
+
                 let mytype:string = (this.data[i] as Electro_Item).getType();
                 /*if (typeof(this.data[i].keys) != 'undefined') mytype = this.data[i].keys[0][2]; else*/ mytype = this.data[i].props.type;
                 switch (mytype) {

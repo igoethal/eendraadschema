@@ -118,21 +118,31 @@ export class Contactdoos extends Electro_Item {
             startx += 20; mySVG.xright += 20;
         }
 
-        // Teken kader indien in verdeelbord
-        if (this.props.in_verdeelbord) {
-            mySVG.data += '<rect x="' + (mySVG.xright - this.props.aantal * 20 - 3 - (this.props.heeft_ingebouwde_schakelaar) * 12) + '" y="3" width="' + (this.props.aantal * 20 + 6 + (this.props.heeft_ingebouwde_schakelaar) * 12) + '" height="44" fill="none" style="stroke:black" />';
-                       +  '<line x1="' + (17 + (mySVG.xright-20+3)) + '" y1="3" x2="' + (17 + (mySVG.xright-20+3)) + '" y2="47" fill="none" style="stroke:black" />';
-        };  
-
-        // Teken halfwaterdicht indien van toepassing
+        // Teken halfwaterdicht indien van toepassing en kader indien in verdeelbord
         if (this.props.is_halfwaterdicht) {
-            mySVG.data += '<rect x="' + (22+(this.props.heeft_ingebouwde_schakelaar)*10+(this.props.is_meerfasig)*34) + '" y="0" width="6" height="8" style="fill:rgb(255,255,255)" />';
             let textX = (25+(this.props.heeft_ingebouwde_schakelaar)*10+(this.props.is_meerfasig)*34);
             let textStyle = 'text-anchor:middle" font-family="Arial, Helvetica, sans-serif';
+
             if (mirrortext == false)
                 mySVG.data += '<text x="' + (+textX) + '" y="8" style="' + textStyle + '" font-size="10">h</text>';
             else
                 mySVG.data += '<text transform="scale(-1,1) translate(' + (-textX*2) + ',0)" x="' + (+textX) + '" y="8" style="' + textStyle + '" font-size="10">h</text>';
+
+            if (this.props.in_verdeelbord) {
+                let upperleft:any = {x: mySVG.xright - this.props.aantal * 20 - 3 - (this.props.heeft_ingebouwde_schakelaar) * 12, y: 3};
+                let size:any = {width: (this.props.aantal * 20 + 6 + (this.props.heeft_ingebouwde_schakelaar) * 12), height: 44};
+                mySVG.data += `<line x1="${upperleft.x}" y1="${upperleft.y}" x2="${upperleft.x}" y2="${upperleft.y + size.height}" style="stroke:black" />`
+                            + `<line x1="${upperleft.x}" y1="${upperleft.y + size.height}" x2="${upperleft.x + size.width}" y2="${upperleft.y + size.height}" style="stroke:black" />`
+                            + `<line x1="${upperleft.x + size.width}" y1="${upperleft.y}" x2="${upperleft.x + size.width}" y2="${upperleft.y + size.height}" style="stroke:black" />`
+                            + `<line x1="${upperleft.x}" y1="${upperleft.y}" x2="${textX-3}" y2="${upperleft.y}" style="stroke:black" />`
+                            + `<line x1="${textX+3}" y1="${upperleft.y}" x2="${upperleft.x + size.width}" y2="${upperleft.y}" style="stroke:black" />`
+                            + `<line x1="${(17 + (mySVG.xright-20+3))}" y1="3" x2="${(17 + (mySVG.xright-20+3))}" y2="47" fill="none" style="stroke:black" />`;
+            }
+        } else {
+            if (this.props.in_verdeelbord) {
+                mySVG.data += '<rect x="' + (mySVG.xright - this.props.aantal * 20 - 3 - (this.props.heeft_ingebouwde_schakelaar) * 12) + '" y="3" width="' + (this.props.aantal * 20 + 6 + (this.props.heeft_ingebouwde_schakelaar) * 12) + '" height="44" fill="none" style="stroke:black" />'
+                           +  '<line x1="' + (17 + (mySVG.xright-20+3)) + '" y1="3" x2="' + (17 + (mySVG.xright-20+3)) + '" y2="47" fill="none" style="stroke:black" />';
+            };  
         }
 
         // Indien de contactdoos een kind heeft, teken een streepje rechts

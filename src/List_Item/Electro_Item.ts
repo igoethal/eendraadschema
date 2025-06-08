@@ -42,20 +42,22 @@ export class Electro_Item extends List_Item {
       return ["", "Aansluiting", "Domotica", "Domotica module (verticaal)", "Domotica gestuurde verbruiker", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Contactdoos", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Media", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zekering/differentieel", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Zeldzame symbolen"];
   }
 
-  // -- Aantal actieve kinderen van het Electro_item --
+  // -- Aantal actieve kinderen van het Electro_item, attributes worden niet geteld --
 
   getNumChildsWithKnownType() : number {
       let numChilds = 0;
       if (this.sourcelist != null) {
           for (let i=0; i<this.sourcelist.data.length; ++i) {
               if ( (this.sourcelist.data[i].parent === this.id) && (this.sourcelist.active[i]) 
-                && ((this.sourcelist.data[i] as Electro_Item).getType() != "") ) numChilds++;
+                && ((this.sourcelist.data[i] as Electro_Item).getType() != "") 
+                && !(this.props.isAttribuut)) numChilds++;
           }  
       }
       return(numChilds);
   }
 
-  // -- Check of Electro_item een kind heeft --
+  // -- Check of Electro_item een kind heeft, attributen worden niet als kind beschouwd
+  //    i.e. electro-Items waarvoor props.attribuut == true --
 
   heeftKindMetGekendType() : boolean {
     return(this.getNumChildsWithKnownType() > 0);
@@ -67,6 +69,18 @@ export class Electro_Item extends List_Item {
     if (this.getType() == "Vrije tekst") {
       if (this.props.vrije_tekst_type == "zonder kader") return true; else return false;
     } else return false;
+  }
+
+  // -- Checken of parent een gevraagd type is --
+
+  isChildOf(typestr: string) {
+      if (this.parent != 0) return (this.getParent().getType() == typestr); else return false;
+  }
+
+  // Checken of Electro item een attribuut is (in casu externe sturing van Domotica Gestuurde Verbruiker)
+
+  isAttribuut() : boolean { 
+      return this.props.isAttribuut; // zal false teruggeven als isAttribuut niet gedefinieerd is
   }
 
   // -- Check of er een streepje moet geplaatst worden achter bepaalde elementen zoals een contactdoos of lichtpunt --
@@ -110,12 +124,6 @@ export class Electro_Item extends List_Item {
 
   getType() : string { return this.props.type; }
 
-  // -- Checken of parent een gevraagd type is --
-
-  isChildOf(typestr: string) {
-      if (this.parent != 0) return (this.getParent().getType() == typestr); else return false;
-  }
-
   //-- Clear all keys, met uitzondering van nr indien er een nummer is --
 
   clearProps() {
@@ -134,6 +142,17 @@ export class Electro_Item extends List_Item {
       case "Meerdere verbruikers": return 0;  break;  // Childs of "Meerdere verbruikers" cannot have childs
       default:                     return 1;  break;  // By default, most element can have 1 child unless overwritten by derived classes
     } 
+  }
+
+  // -- Tel aantal kinderen, Attributes worden niet geteld --
+
+  getNumChilds() : number {
+      let numChilds = 0;
+          for (let i=0; i<this.sourcelist.data.length; ++i) {
+              if ((this.sourcelist.data[i].parent === this.id) && (this.sourcelist.active[i])
+              && !((this.sourcelist.data[i] as Electro_Item).isAttribuut())) numChilds++;
+          }  
+      return(numChilds);
   }
 
   // -- Returns true if the Electro_Item can take an extra childs --
@@ -170,7 +189,7 @@ export class Electro_Item extends List_Item {
         output +=  `<button class="button-insertChild" onclick="HLInsertChild(${this.id})"></button>`;
       }
     };
-    output += `<button class="button-red" onclick="HLDelete(${this.id})">🗑</button>`;
+    output += `<button class="button-delete-garbage-can" onclick="HLDelete(${this.id})"></button>`;
     output += "&nbsp;"
 
     let parent:Electro_Item = this.getParent();
@@ -179,7 +198,9 @@ export class Electro_Item extends List_Item {
     if (parent == null) consumerArray = ["", "Aansluiting", "Zekering/differentieel", "Kring"];
     else consumerArray = this.getParent().allowedChilds()
 
+    //output += '<div class="type-orange">';
     output += this.selectPropToHTML('type', consumerArray);
+    //output += '</div>';
 
     return(output);
   }

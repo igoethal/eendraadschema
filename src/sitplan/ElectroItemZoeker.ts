@@ -97,6 +97,7 @@ export class ElectroItemZoeker {
                     this.borden.push({id: id, naam: myName})
                 } else {
                     let kringnaam:string = globalThis.structure.findKringName(id).trim();
+                    if (electroItem.isAttribuut()) type = "Externe sturing";
                     if (kringnaam != '') {
                         if ( (type != null) && (this.excludedTypes.indexOf(type) === -1) ) {
                             let adres:string = electroItem.getReadableAdres();

@@ -69,7 +69,8 @@ export class Domotica_gestuurde_verbruiker extends Electro_Item {
                               // Kind 1 is het element dat effectief gestuurd wordt.                
 
         for (let i = 0; i<this.sourcelist.length; i++) {
-            if ( this.isActief() && (this.sourcelist.data[i].parent == this.id ) ) {
+            if ( this.isActief() && (this.sourcelist.data[i].parent == this.id ) 
+                && !((this.sourcelist.data[i] as Electro_Item).isAttribuut() ) ) {
                 childcounter++; // We hebben een kind gevonden
                 switch (childcounter) {
                     case 1: // Het Kind is het eerste element, i.e. de aangestuurde verbruiker. We tekenen dit kind.
@@ -118,6 +119,7 @@ export class Domotica_gestuurde_verbruiker extends Electro_Item {
                                + '<line x1="78" y1="21" x2="78" y2="25" stroke="black" />';
                     mySVG.yup += 20;
                     break; 
+                case "drukknop":
                 default:  
                     mySVG.data = '<svg x="' + (0) + '" y="20">' + mySVG.data + '</svg>'
                                + '<use xlink:href="#drukknop_klein" x="70" y="14"></use>'
