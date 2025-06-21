@@ -56,6 +56,10 @@ button, select, select option, input[type="checkbox"] {
   cursor: pointer;
 }
 
+select option {
+  background-color: #f7f7f7;
+}
+
 td[contenteditable="true"] { 
   cursor: text; /* Set the cursor to text edit pointer */ 
 }

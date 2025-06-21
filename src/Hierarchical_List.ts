@@ -530,7 +530,7 @@ export class Hierarchical_List {
     // -- Pas type aan van item met id = my_id --
 
     adjustTypeById(my_id: number, electroType : string) {
-        let ordinal = globalThis.structure.getOrdinalById(my_id);
+        let ordinal = this.getOrdinalById(my_id);
         this.adjustTypeByOrdinal(ordinal, electroType);
     }
 
@@ -575,7 +575,7 @@ export class Hierarchical_List {
                 }
             }
 
-            if ( (parent.getType() == "Kring") || (parent.getType() == "Domotica module (verticaal)") ) {
+            if ( (parent.getType() == "Kring") || (["Domotica module (verticaal)"].includes(parent.getType())) ) {
                 // Plaats het nummer van het item naast de lijn
                 let displaynr:string;
                 displaynr = item.props.nr;
@@ -592,7 +592,7 @@ export class Hierarchical_List {
     };
 
     updateRibbon() {
-        if (globalThis.structure.properties.currentView != '2col') return; // het heeft geen zin de EDS ribbon aan te passen als de EDS niet open staat
+        if (this.properties.currentView != '2col') return; // het heeft geen zin de EDS ribbon aan te passen als de EDS niet open staat
 
         let output: string = "";
 
@@ -678,12 +678,12 @@ export class Hierarchical_List {
         if (this.data[ordinal].collapsed) {
             return(`<tr>
                         <td bgcolor="#8AB2E4" onclick="HLCollapseExpand(${this.data[ordinal].id})" valign= "top">&#x229E;</td>
-                        <td width="100%">${this.data[ordinal].toHTML(globalThis.structure.mode)}<br></td>
+                        <td width="100%">${this.data[ordinal].toHTML(this.mode)}<br></td>
                     </tr>`);
         } else {
             return(`<tr>
                        <td bgcolor="C0C0C0" onclick="HLCollapseExpand(${this.data[ordinal].id})" valign= "top">&#x229F;</td>
-                       <td width="100%">${this.data[ordinal].toHTML(globalThis.structure.mode)}<br>${this.toHTML(this.id[ordinal])}</td>
+                       <td width="100%">${this.data[ordinal].toHTML(this.mode)}<br>${this.toHTML(this.id[ordinal])}</td>
                     </tr>`);
         }
     }
@@ -858,6 +858,11 @@ export class Hierarchical_List {
                         break;  
 
                     case "Domotica module (verticaal)":
+                        inSVG[elementCounter] = this.data[i].toSVG(); //Maak de tekening
+                        this.tekenVerticaleLijnIndienKindVanKring(this.data[i] as Electro_Item,inSVG[elementCounter]);         
+                        break; 
+
+                    case "Omvormer":
                         inSVG[elementCounter] = this.data[i].toSVG(); //Maak de tekening
                         this.tekenVerticaleLijnIndienKindVanKring(this.data[i] as Electro_Item,inSVG[elementCounter]);         
                         break; 

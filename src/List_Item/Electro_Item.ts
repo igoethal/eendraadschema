@@ -226,8 +226,8 @@ export class Electro_Item extends List_Item {
       if (parent != null) {
           switch (parent.getType()) {
               case "Kring": 
-              case "Domotica module (verticaal)": 
-                  return this.props.nr;
+              case "Domotica module (verticaal)":
+                  return this.props.nr? this.props.nr : "";
               default: 
                   return parent.getnr();
           }
@@ -244,7 +244,7 @@ export class Electro_Item extends List_Item {
           if (str == null) str = "";
           return str;
       } else {
-        let kringname:string = globalThis.structure.findKringName(this.id).trim();
+        let kringname:string = this.sourcelist.findKringName(this.id).trim();
         let nr:string = this.getnr().trim();
 
         if (kringname == "") return nr;
@@ -357,7 +357,7 @@ export class Electro_Item extends List_Item {
 
     // als we een enkelvoudige schakelaar hebben die niet legacy is, dan spiegelen we niet
     if (this.props.type == "Schakelaars") {
-      if (globalThis.structure.properties.legacySchakelaars == false) {
+      if (this.sourcelist.properties.legacySchakelaars == false) {
         if ( (this.props.aantal_schakelaars == 1) || (this.props.aantal_schakelaars == null) ) {
           spiegeltext = false;
         }

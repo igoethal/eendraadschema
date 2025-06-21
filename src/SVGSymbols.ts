@@ -120,6 +120,9 @@ magneetcontact: `
 sinus: `
 <path d="M0,0 C2,-5 8,-5 10,0 S18,5 20,0" style="stroke:black;fill:none" />
 `,
+sinusVerticaal: `
+<path d="M0,0 C-5,-2 -5,-8 0,-10 S5,-18 0,-20" style="stroke:black;fill:none" />
+`,
 spot: `
 <path d="M0 0 A10 10 0 0 1 10 -10" stroke="black" fill="white" stroke-width="1" />
 <path d="M0 0 A10 10 0 0 0 10 10" stroke="black" fill="white" stroke-width="1" />
