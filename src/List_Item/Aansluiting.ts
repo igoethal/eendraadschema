@@ -127,7 +127,7 @@ export class Aansluiting extends Electro_Item {
         return(output);
     }
 
-    toSVG() {
+    toSVG(sitplan = false): SVGelement {
 
         let addFase = (startNumlines:number, mySVG:SVGelement): number => {
             let numlines = startNumlines;
@@ -140,6 +140,25 @@ export class Aansluiting extends Electro_Item {
             }
             return numlines;
         }
+
+        // Als we het situateplan tekenen, dan tekenen we enkel de elektriciteitsmeter
+
+        if (sitplan) {
+                    let mySVG:SVGelement = new SVGelement();
+
+            SVGSymbols.addSymbol('elektriciteitsmeter');
+
+            mySVG.xleft = 1; // foresee at least some space for the conductor
+            mySVG.xright = 59;
+            mySVG.yup = 25;
+            mySVG.ydown = 25;
+
+            mySVG.data = '<use xlink:href="#elektriciteitsmeter" x="21" y="25"></use>';
+            
+            return(mySVG);
+        }
+
+        // Zo-niet tekenen we de hele aansluiting met zekering, differentieel, of ander symbool onderaan
 
         let mySVG:SVGelement = new SVGelement();
 

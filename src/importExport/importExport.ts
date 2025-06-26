@@ -258,6 +258,7 @@ globalThis.exportjson = (saveAs: boolean = true) => { // Indien de boolean false
 
     // Comprimeer de uitvoerstructuur en bied deze aan als download aan de gebruiker. We zijn momenteel bij versie 004
     try {
+        if (globalThis.structure.properties.disableEDSCompression == true) throw new Error("Compression is disabled");
         let encoder = new TextEncoder();
         let pako_inflated = new Uint8Array(encoder.encode(origtext));
         let pako_deflated = new Uint8Array(pako.deflate(pako_inflated));
@@ -320,6 +321,7 @@ function json_to_structure(text: string, oldstruct: Hierarchical_List = null, ve
         if (typeof mystructure.properties.info != "undefined") outstruct.properties.info = mystructure.properties.info;
         if (typeof mystructure.properties.info != "undefined") outstruct.properties.dpi = mystructure.properties.dpi;
         if (typeof mystructure.properties.currentView != "undefined") outstruct.properties.currentView = mystructure.properties.currentView;
+        if (typeof mystructure.properties.disableEDSCompression != "undefined") outstruct.properties.disableEDSCompression = mystructure.properties.disableEDSCompression;        
         if (typeof mystructure.properties.legacySchakelaars != "undefined") 
             outstruct.properties.legacySchakelaars = mystructure.properties.legacySchakelaars;
         else
@@ -650,6 +652,18 @@ export function showFilePage() {
         <td width="100%" align="left">
     `;
 
+    // Bepaal of compressie uitgeschakeld moet worden (standaard: false)
+    let disableEDSCompression = false;
+    if (
+        globalThis.structure &&
+        globalThis.structure.properties &&
+        typeof globalThis.structure.properties.disableEDSCompression !== "undefined"
+    ) {
+        disableEDSCompression = !!globalThis.structure.properties.disableEDSCompression;
+    }
+
+    // Toon de opslaan-knoppen en de laatste opgeslagen informatie
+
     if ((window as any).showOpenFilePicker) { // Use fileAPI
  
         strleft += '<table border=0><tr><td width=350 style="vertical-align:top;padding:5px">';
@@ -660,22 +674,35 @@ export function showFilePage() {
             strleft += 'Laatst geopend of opgeslagen om <b>' + globalThis.fileAPIobj.lastsaved + '</b> met naam <b>' + globalThis.fileAPIobj.filename + '</b><br><br>'
                     +  'Klik links op "Opslaan" om bij te werken'
         } else {
-            strleft += '<button style="font-size:14px" onclick="exportjson(saveAs = true)">Opslaan als</button>';
-            strleft += '</td><td style="vertical-align:top;padding:7px">'    
-            strleft += '<span class="highlight-warning">Uw werk werd nog niet opgeslagen tijdens deze sessie. Klik links op "Opslaan als".</span>';
+            strleft += 
+                '<button style="font-size:14px" onclick="exportjson(saveAs = true)">Opslaan als</button>' +
+                '</td><td style="vertical-align:top;padding:7px">' +
+                '<span class="highlight-warning">Uw werk werd nog niet opgeslagen tijdens deze sessie. Klik links op "Opslaan als".</span>';
         }
+        strleft +=  '<br><br>' +
+                    '<label>' +
+                        '<input type="checkbox" id="saveUncompressedCheckbox" style="vertical-align:middle;margin-right:5px;" ' + (disableEDSCompression ? "checked" : "") + '>' +
+                        'Opslaan zonder compressie (groter bestand)' +
+                    '</label>';  
+
         strleft += '</td></tr>';
         strleft += PROP_GDPR(); //Function returns empty for GIT version, returns GDPR notice when used online.
         strleft += '</table>';
         
     } else { // Legacy
-        strleft += '<table border=0><tr><td width=350 style="vertical-align:top;padding:7px">';
-        strleft += 'Bestandsnaam: <span id="settings"><code>' + globalThis.structure.properties.filename + '</code><br><button style="font-size:14px" onclick="exportjson()">Opslaan</button>&nbsp;<button style="font-size:14px" onclick="HL_enterSettings()">Naam wijzigen</button></span>';
-        strleft += '</td><td style="vertical-align:top;padding:5px">'
-        strleft += 'U kan het schema opslaan op uw lokale harde schijf voor later gebruik. De standaard-naam is eendraadschema.eds. U kan deze wijzigen door links op "wijzigen" te klikken. ';
-        strleft += 'Klik vervolgens op "opslaan" en volg de instructies van uw browser. '
-        strleft += 'In de meeste gevallen zal uw browser het bestand automatisch plaatsen in de Downloads-folder tenzij u uw browser instelde dat die eerst een locatie moet vragen.<br><br>'
-        strleft += 'Eens opgeslagen kan het schema later opnieuw geladen worden door in het menu "openen" te kiezen en vervolgens het bestand op uw harde schijf te selecteren.'
+        strleft +=  '<table border=0><tr><td width=350 style="vertical-align:top;padding:7px">';
+        strleft +=  'Bestandsnaam: <span id="settings"><code>' + globalThis.structure.properties.filename + '</code><br><button style="font-size:14px" onclick="exportjson()">Opslaan</button>&nbsp;<button style="font-size:14px" onclick="HL_enterSettings()">Naam wijzigen</button></span>';
+        strleft +=  '</td><td style="vertical-align:top;padding:5px">'
+        strleft +=  'U kan het schema opslaan op uw lokale harde schijf voor later gebruik. De standaard-naam is eendraadschema.eds. U kan deze wijzigen door links op "wijzigen" te klikken. ';
+        strleft +=  'Klik vervolgens op "opslaan" en volg de instructies van uw browser. '
+        strleft +=  'In de meeste gevallen zal uw browser het bestand automatisch plaatsen in de Downloads-folder tenzij u uw browser instelde dat die eerst een locatie moet vragen.<br><br>'
+        strleft +=  'Eens opgeslagen kan het schema later opnieuw geladen worden door in het menu "openen" te kiezen en vervolgens het bestand op uw harde schijf te selecteren.'
+        strleft +=  '<br><br>' +
+                    '<label>' +
+                        '<input type="checkbox" id="saveUncompressedCheckbox" style="vertical-align:middle;margin-right:5px;" ' + (disableEDSCompression ? "checked" : "") + '>' +
+                        'Opslaan zonder compressie (groter bestand)' +
+                    '</label>';   
+
         strleft += '</td></tr>';
     
         strleft += PROP_GDPR(); //Function returns empty for GIT version, returns GDPR notice when used online.
@@ -715,5 +742,12 @@ export function showFilePage() {
     </table>`
     
     document.getElementById("configsection").innerHTML = strleft;
+
+    let saveUncompressedCheckbox: HTMLInputElement = document.getElementById("saveUncompressedCheckbox") as HTMLInputElement;
+    saveUncompressedCheckbox.onchange = function() {
+        if (!globalThis.structure.properties) globalThis.structure.properties = {};
+        globalThis.structure.properties.disableEDSCompression = saveUncompressedCheckbox.checked;
+    }
+
     globalThis.toggleAppView('config');
 }

@@ -10,7 +10,7 @@ import { Electro_Item } from "../List_Item/Electro_Item";
 
 export class ElectroItemZoeker {
 
-    private excludedTypes = ['Aansluiting','Bord','Kring','Domotica','Domotica module (verticaal)',
+    private excludedTypes = ['Bord','Kring','Domotica','Domotica module (verticaal)',
                              'Domotica gestuurde verbruiker','Leiding','Splitsing','Verlenging',
                              'Vrije ruimte','Meerdere verbruikers'];
 
@@ -84,6 +84,7 @@ export class ElectroItemZoeker {
 
     reCalculate() {
         this.data = [];
+        let dataAchteraan: {id: number, kringnaam: string, adres: string, type: string}[] = [];
         this.borden = [];
         for (let i = 0; i<globalThis.structure.length; i++) {
             if (globalThis.structure.active[i]) {
@@ -98,15 +99,16 @@ export class ElectroItemZoeker {
                 } else {
                     let kringnaam:string = globalThis.structure.findKringName(id).trim();
                     if (electroItem.isAttribuut()) type = "Externe sturing";
-                    if (kringnaam != '') {
-                        if ( (type != null) && (this.excludedTypes.indexOf(type) === -1) ) {
-                            let adres:string = electroItem.getReadableAdres();
-                            this.data.push({id: id, kringnaam: kringnaam, adres:adres, type: type});
-                        }
+                    if ( (type != null) && (this.excludedTypes.indexOf(type) === -1) ) {
+                        let adres:string = electroItem.getReadableAdres();
+                        if (kringnaam.trim() !== '')
+                            this.data.push({id: id, kringnaam: kringnaam, adres: adres, type: type});
+                        else
+                            dataAchteraan.push({id: id, kringnaam: 'Zonder naam', adres: adres, type: type});
                     }
                 }
             }
         }
+        this.data = this.data.concat(dataAchteraan);
     }
-    
 }

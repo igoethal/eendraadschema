@@ -821,9 +821,6 @@ export class SituationPlanView {
         else if (event.target.classList.contains('boxlabel')) box = sitPlanElement.boxref;
         if (box == null) return;
 
-        // Hoeveel ruimte slepen we mee in de halo van alle geselecteerde en movable boxes
-        this.draggedHalo = this.getDraggedHaloAroundElement(sitPlanElement);
-
         // Nu gaan we de box selecteren. Dit moet zowel voor de linker als de rechter muisknop
         // Als de shift toets werd ingedrukt houden we ook de reeds bestaande selectie in stand
         if (shiftPressed) {
@@ -845,6 +842,9 @@ export class SituationPlanView {
         if (box.getAttribute('movable') == 'false') return;
         
         this.draggedBox = box; // Houdt de box die we aan het slepen zijn
+
+        // Hoeveel ruimte slepen we mee in de halo van alle geselecteerde en movable boxes
+        this.draggedHalo = this.getDraggedHaloAroundElement(sitPlanElement);
 
         switch (event.type) {
             case 'mousedown':

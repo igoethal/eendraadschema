@@ -2,7 +2,7 @@ import { SituationPlanElement } from "./SituationPlanElement";
 import { ElectroItemZoeker } from "./ElectroItemZoeker";
 import { Electro_Item } from "../List_Item/Electro_Item";
 import { EventManager } from "../EventManager";
-import { formatFloat } from "../general";
+import { formatFloat, htmlspecialchars } from "../general";
 
 /** 
  * Een serie functies om een formulier te tonen met edit-functionaliteiten voor symbolen in het situatieplan
@@ -103,7 +103,7 @@ export function SituationPlanView_ElementPropertiesPopup(sitplanElement: Situati
             const electroItem = electroItems[i];
             const option = document.createElement('option');
             option.value = String(i);
-            option.text = electroItem.adres + ' | ' + electroItem.type;
+            option.text = (electroItem.adres.trim() !== '' ? htmlspecialchars(electroItem.adres) + ' | ' : '') + electroItem.type;
             selectElectroItemBox.appendChild(option);
         }
     }

@@ -6,6 +6,7 @@ export class Properties {
   info: string;
   dpi: number;
   currentView: string;
+  disableEDSCompression: boolean; // true als we de EDS niet mogen comprimeren, false als we het mogen comprimeren
   legacySchakelaars: boolean | null; // true als we geisoleerde schakelaars met een streepje moeten tekenen, null als we het moeten vragen
 
   constructor() {
