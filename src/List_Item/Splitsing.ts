@@ -45,6 +45,15 @@ export class Splitsing extends Electro_Item {
             mySVG.data += '<line x1="' + (mySVG.xleft) + '" x2="' + (mySVG.xleft + mySVG.xrightmin)
                        +  '" y1="' + mySVG.yup + '" y2="' + mySVG.yup + '" stroke="black" />'
 
+        // Indien we kind zijn van een kring met meer dan 1 kind, voeg 10 pixels extra toe onderaan
+        if (this.isChildOf("Kring")) {
+            const parent =  this.getParent();
+            if ( (parent !== null) && (parent.getNumChilds() > 1) ) {
+                mySVG.ydown += 10;
+                mySVG.data += `<line x1="${mySVG.xleft}" x2="${mySVG.xleft}" y1="${mySVG.yup+0}" y2="${mySVG.yup+10}" stroke="black" stroke-width="1" />`;
+            }
+        }
+
         } else {
 
             if ( (mySVG.xleft + mySVG.xright) <=0 ) mySVG.xrightmin = 15; // We teken altijd minstens een lijntje van 15 pixels om duidelijk te maken dat er een splitsing is

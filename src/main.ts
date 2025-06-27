@@ -714,7 +714,8 @@ let lastSavedInfo:any = null;
                             myCookieBanner.run();
                         }).bind(this));
         if (lastSavedStr == null) return;
-        EDStoStructure(lastSavedStr, true, true);  
+        EDStoStructure(lastSavedStr, true, true);
+        if (globalThis.structure.sitplan) globalThis.structure.sitplan.activePage = 1;  
     } 
     globalThis.autoSaver.start();    
 });

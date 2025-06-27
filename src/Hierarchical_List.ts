@@ -553,8 +553,8 @@ export class Hierarchical_List {
                 if ( (item.getType() == "Omvormer") && (item.props.inkring) ) {
 
                     //if (myOrdinal < lastOrdinalInKring)
-                    mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + 0 + '" y2="' + (mySVG.yup-5) + '" stroke="black" />'
-                    mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + (mySVG.yup + 5) + '" y2="' + (mySVG.yup + mySVG.ydown) + '" stroke="black" />'
+                    mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + 0 + '" y2="' + (mySVG.yup-5+0.5) + '" stroke="black" />'
+                    mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + (mySVG.yup+5-0.5) + '" y2="' + (mySVG.yup + mySVG.ydown) + '" stroke="black" />'
 
                 } else {        
 
@@ -705,11 +705,16 @@ export class Hierarchical_List {
                 if (parentItem.props.heeft_externe_sturing == true) {
                     switch (parentItem.props.type_externe_sturing) {
                         case "schakelaar":
+                            // Als het attribuut al een schakelaar is, dan doen we niets, anders maken we er een schakelaar van
                             if (this.data[i].props.type == "Schakelaars") continue;
-                            break;
+                            Object.setPrototypeOf(this.data[i], Schakelaars.prototype);
+                            this.data[i].resetProps(); this.data[i].props.isAttribuut = true; 
+                            continue; 
                         case "drukknop":
                             if (this.data[i].props.type == "Drukknop") continue;
-                            break;
+                            Object.setPrototypeOf(this.data[i], Drukknop.prototype);
+                            this.data[i].resetProps(); this.data[i].props.isAttribuut = true; 
+                            continue;
                         default:
                             continue;
                     }

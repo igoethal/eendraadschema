@@ -4,6 +4,17 @@ import { SVGelement } from "../SVGelement";
 
 export class Bord extends Electro_Item {
 
+    erBestaatEenBordUpstream() : boolean {
+        let parent = this.getParent();
+        while ((parent != null) && (parent.id != 0)) {
+            if (parent.props.type === "Bord") {
+                return true;
+            }
+            parent = parent.getParent();
+        }
+        return false;
+    }
+
     convertLegacyKeys(mykeys: Array<[string,string,any]>) {
         this.props.type             = this.getLegacyKey(mykeys,0);
         this.props.is_geaard        = this.getLegacyKey(mykeys,1);
@@ -14,7 +25,7 @@ export class Bord extends Electro_Item {
     resetProps() {
         this.clearProps();
         this.props.type = "Bord";
-        this.props.is_geaard = true;
+        if (this.erBestaatEenBordUpstream()) this.props.is_geaard = false; else this.props.is_geaard = true;
         this.props.naam = "";
         this.props.adres = "";
     }
@@ -105,6 +116,15 @@ export class Bord extends Electro_Item {
         // Teken de lijn onderaan
         mySVG.data += '<line x1="4" x2="' + (mySVG.xleft + mySVG.xright - 6) +
                       '" y1="' + mySVG.yup + '" y2="' + mySVG.yup + '" stroke="black" stroke-width="3" />'
+
+        // Indien we kind zijn van een kring met meer dan 1 kind, voeg 10 pixels extra toe onderaan
+        if (this.isChildOf("Kring")) {
+            const parent =  this.getParent();
+            if ( (parent !== null) && (parent.getNumChilds() > 1) ) {
+                mySVG.ydown += 10;
+                mySVG.data += `<line x1="${mySVG.xleft}" x2="${mySVG.xleft}" y1="${mySVG.yup+1}" y2="${mySVG.yup+11}" stroke="black" stroke-width="1" />`;
+            }
+        }
 
         // Voeg naam van het bord toe
         if (this.props.naam !== "")

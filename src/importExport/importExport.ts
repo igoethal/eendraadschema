@@ -95,10 +95,10 @@ export class importExportUsingFileAPI {
     };
 }
 
-/* FUNCTION importjson
-
-   This is the callback function for the legacy filepicker if the file API is not available in the browser */
-
+/**
+ * Callback functie voor de legacy filepicker als de file API niet beschikbaar is in de browser.
+ * @param event filepicker click event
+ */
 globalThis.importjson = (event) => {
     var input = event.target;
     var reader = new FileReader();
@@ -106,11 +106,17 @@ globalThis.importjson = (event) => {
 
     reader.onload = function(){
         EDStoStructure(reader.result.toString());
+        if (globalThis.structure.sitplan) globalThis.structure.sitplan.activePage = 1;
     };
 
     reader.readAsText(input.files[0]);
 };
 
+/**
+ * Callback functie voor de legacy filepicker om een schema toe te voegen aan een reeds bestaand schema.
+ * Dit doen we altijd via de legacy filepicker, aangezien dit toch een read-only situatie is.
+ * @param event filepicker click event
+ */
 globalThis.appendjson = function(event) {
     var input = event.target;
     var reader = new FileReader();
@@ -123,16 +129,17 @@ globalThis.appendjson = function(event) {
     reader.readAsText(input.files[0]);
 };
 
-
-/* FUNCTION loadClicked()
-
-   Gets called when a user wants to open a file.  Checks if the fileAPI is available in the browser.
-   If so, the fileAPI is used.  If not, the legacy function importjson is called */
-
+/**
+ * Wordt aangeroepen wanneer een gebruiker een bestand wil openen. Controleert of de fileAPI beschikbaar is in de browser.
+ * Indien ja, wordt de fileAPI gebruikt. Indien niet, wordt de legacy functie importjson aangeroepen.
+ * 
+ * @returns {Promise<void>} Een promise die wordt opgelost wanneer het bestand is geladen en verwerkt.
+ */
 globalThis.loadClicked = async () => {
     if ((window as any).showOpenFilePicker) { // Use fileAPI
         let data = await globalThis.fileAPIobj.readFile();
         EDStoStructure(data);
+        if (globalThis.structure.sitplan) globalThis.structure.sitplan.activePage = 1;
     } else { // Legacy
         document.getElementById('importfile').click();
         (document.getElementById('importfile') as HTMLInputElement).value = "";
