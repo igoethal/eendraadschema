@@ -8,9 +8,8 @@ import { AutoSaver } from "./importExport/AutoSaver";
 import { showSituationPlanPage } from "./sitplan/SituationPlanView";
 import { printsvg } from "./print/print";
 import { PROP_edit_menu } from "../prop/prop_scripts";
-import { PROP_getCookieText } from "../prop/prop_scripts";
 import { CookieBanner } from "../prop/CookieBanner";
-import { flattenSVGfromString } from "./general";
+import { flattenSVGfromString, isFirefox } from "./general";
 import { isInt } from "./general";
 import { Bord } from "./List_Item/Bord";
 import { Kring } from "./List_Item/Kring";
@@ -133,8 +132,8 @@ globalThis.CONFIGPAGE_RIGHT = `
 
 globalThis.CONFIGPRINTPAGE  = `<div></div><br>`;
 
-globalThis.EXAMPLE0 = `EDS0040000eJztWe9r6zYU/VeMv84rjp2kaxhjbQdv422f3qMblIdRrBtHtSwF2Un6g+5v35HsxM5emiVpB68QKCWRda+uzjmSjuInX5LKqqk/6l0EPmcV80e3T77gaAj8GTOkKn8UBr5QfPUx1VKyWUnoM2GyJPQzelb6oydfGX/k/yImEz/wq4cZ4dslU6Wci0qoDI2MqYrJZKYxLB5GaBpTmU7JFLbDyOcIJjuqIJI2oJiRYZnN1A+brEnOxiQTxZKKpCQ7ZnTfG+LpRnTCSVYs6WSIQ5uCcUOo1l9l2xwSFeNBOjcLSti80gVjVd15M7kok5Ikpfg2WQORa1O52S4wIZ25OcYIVYwVnRHr+hdam3YG/nPgl3puUpKixIhqLuVzUFMRtVT0Wip6/01FS8OVNhzfUHVGjOHzqDJz6la2hmVHIVYkq0qitpLokEo+mjeXAlr+urny4g9RMNhHBTaY8rLhtWZD6pQhAE1lxRR3GB0okDoRIBYqGc9FuYbiFcpZ5wRcS3oU2TqiYc6ttl3aCTviuWg5i1+nns0i9pTPeUc94UvyqXX5avXU1FQCbZvaibZq5/qa7a+froA+0jxHCV/L6DflLSGkl0S0TUPXW0VUA/K2GtpY/Je7OBt+C5y5zf0FznqHc3ZDRop02pxJ75e4q13ExZ3Vdn7Quu+11F1rUJZWXOty2+mBhtwmBhxCtuXVRDeZOsdtI4AJK8nCxAWppCAyaLDBGzvvlGhSoVNGYz1fckogCpaTxON12Rh+yuRkySoy3BLafdJJ3DTWKYHRlrFXcSoBBxxMjfV6m9sBcj86FuToBPLeIPeOBTk+gbw3yOGxIPdPIO8LcnxxLMiDE8h7KzluQe53bin9QxzvjRF35NWGoTUOf9pZ5TrHjS3wF7ZL4h4lTdSjtsB7OeOux1Qb8WjZkpTgdJfiTtVGJ0VBhuo+DoCO86FkjEe8+vdVpG0dhjXvC9oAF66k7LqKfRx51Ntu7/rfjL07wpJfMZ6zwqH7fr3d9U7aOrYj6vwkMDiZuzfcSKL+0Sif3N3+KF8cjXLH3v1ua0+FSbHSWpjaCZcd6W/g4PP5GCsRu5bIOlB/mgnK3M9O9ZQxQ8VQvN1HJHaeO9oDwjoUaORS5Dg0vg7EKZBvYaUp311SZ3NVuV2jt/OXuc49fXjsbe+tQXw/6J0fi150GHrRVvRI5e8YvDg6Frw3Wb/vFLwv6A2nsEDaW7fl/2//MJKl6bYXREHvIoDNOw+GQXwewBzjao2LH64lMM3YfOErcOhhR8Z2gjURR18sZULB4LKxJEscKfvpEv5o5rxXfVxNSWQWwMEQYijY/VJw+1Kp/0PfmqRyJtlD3d3dMjPL0e3TZhROLlO/YCqR28VakGzvghmwUNbIIb/mBHIqkboTkklJ9mh1CR7WGR6avDMGm1iKR/cyqm+5sCK04eSUOBHwq7CLVkr3IFpSGIZnxG1KvVTu5cyN1sb6Mu8SxJL7+OPY/PSpMvCIXmg/Iyj0UCpB/GQbPpMced/FkYf21Z9t//Dpj1X75gP6vmACMYtmsDO2HuxnrgsS6mxM1kIozLR5ayQ4Fda0wmMYbcGwiVyfibbbjXfvRXF44/09CL1fH+3k4W/dJWlQ42hnzbHknv8BXkCfFg==`;
-globalThis.EXAMPLE1 = `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`;
+globalThis.EXAMPLE0 = `EDS0040000eJztWW1v2zYQ/iuCvk4L9JZkNoZhSQZ0Q7ehQIZsQFEItHS2GVGkQVF2XpD99t2RsiWjrptqcbYUAYJAOpLH4/M8vKOpez9vtAZprjis/LHvB74AOTNzfxyNAr9ghvnj9/c+L9AQ+AtGff1xGPhcFuvHXAnBFjVgnykTNWA/rRa1P773pUanP/HpFB2zxij7XjHZAIjW9FZzOfudsWqrxdwuAA1nTNai4Qa7UHcmDRPZQmGM2BijaQJ1PgddUYexX+BMQCHy1n+1AM1m5CkNW69ZySYgMskyA0IABRTfRCfYujU6K0AYlvU8JCG5YIWG2iFlvW1PiRFjA2K6hIwWVzFmXOdt57zOahCQ49t0g1qptLGrXeKC1MyuMcGh0oGzHf9SKd2tANvmDa/nqsGw+XXpj41u0OWU1RS6/xD4tWp0jo01BiQbIR4CR2vc0Rp1tEafp3UgpedKF/iGCMyAMXxuQ+1WuYF4T9SkznXYcRd2fLCwbePTahAtf12de8mbODh+jPxoMJR1KygnA6FyhgPQVBsmCwvoFyrTOUI+uMwmKKINbv9CsnvF2JsS0VzBHZ9tHLYqsCljn2jDnmpHHf/JM8p2O+JH6va0J9vwU7p1cA0Jm94HaNYJwnC0bSs23qnYiwv2eNX2ZfsWmhJD+Fi8v0hvhfL9lHR3Kfdip3QddM+q3K30dbaP/KTH/ukXiTbq09+S/FnJXiikPTeFUvWuhIuGkkJAXLnoFuLEsp6zq3atiAgKwrvgILMKQKOBBm/lnznA1GCnGUxUsyogQ2GxEgQ2bxaI08+ZmK6YAV3wfG76LT3HrdG5RDR3zL0eJzMks0AMJmqzQffQkcZD6Yhf6TgAHUlHR9qr6enBcvqV5tfgueTUJak/CYJSlXiwCvwldclsU9aOulPEkleywvaYK83viFoBGaYTTBvSJdUco9fg+li0elkWsgk2FYb8zZEoMlOm7qwnoRPJEraYwDRY99PYY2pOGg3VefKq8wPoPBxKR/pKx9PTkYyG0nH8SsfT03Hysg7I9uLgEwfk6MsPyFegBcHuwvpqT8nne3/a9yRwcvhT8q+Ed851jqvspNDtjbp1bCHvbxm/aCa4TBSNLd29Xem2Be4CyXB5RJ5Axq/hEdvMDUW0S8FLPIJ8PBDPFOWOndvGbdWzaKSxVEV7cT4divOg4+9jcI534gyyfMEwJ/FQmAedvobL+WXDHEe7C0f6AgvHgJuVc1aUrLI/Nr7aqnGxl//eNot7F9nHr5cr/8k5Lk4H8/F6u3IIPkaD+XjmOrT7WHW54DCzE/zP69EH7I3pcIlu31uRHewfzkTMvo+COIhGAVa90yA5DdI4SJMgjYI0DPDH7UmAB2o86+E5BHnHNIk7Mx59IJK5NJlhEwFE9Rz4jKA6PsFMWrGbFS/oM3D6XUo5v14IdruwlQeLK0gadYYacKa2rOJzbT8Xb/nCvaLdh+Ia+1uPBBL1rphGFmqHHM6qCkByDM/tnmRCAG1m6+B24+G29btgWAtrfme/E6fEBcmWhoPV7pRjUcaaSEebGyRaQBiGR1CQS7WS9rvplVKaqot3hsSCffx+on+4NBoLoRfSMw4KPQwVcLsAGf4AMfa+SWIP7es/sr+5/G1t326AbyvGccyyneyIbSb7sVAVcHk0AUpaElfaftDlBVRUmTGraUVgkCPbZ6ooRXo3XpyEV97fx6H3852r4d13fAengBnLby/7W85lBOpsb6KOHeaEUGG3ac0NEi3XHtrX61pJmw2a6p3jOFqL/J3lH18LmLJGGIc8Ru2IibClRjZJNkf4e0Mrw+h6M8Qg8NhQYcSkmA8Pm7mWmwU8/ANHMC6N`;
+globalThis.EXAMPLE1 = `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`;
 globalThis.EXAMPLE_DEFAULT = `EDS0040000eJytVN9v00AM/leieyWM/GgniBCivICE4GVoL9MUuTk3PfVyF91dunbT+NuxkzZZAQ0VqKLq4rM/f/7s+EFoNHVYi2IWCwkBRHHzIJQURRqLFhyaIIokFsrI47GyWkPrkXxWoD2Sn7OtF8WDME4UQsQi7Fuk0wKM150KytRkBDABdNlayiiKLBZL9NUaXcPXhZBqtULOpxA1uzctOqgJ53I+IJYbWKIuDZQBtUbOle3SS/I9iS0l6gDlFJ8nxBqkQz+xK0/T9faqc1ssoQu2AQiD7RRZ+dKjxoreVmP1G+tCX+aWarE1F8eRBqB5km/gvrXWTezFYyy87VyFWnlKaDqtH+NB/mySP53kT8+R/4N1kt6IdI0AdC6C6/Aps1GUZ4jkE5FsIpKdQ+Sz+68T8LvO/NpzisCNP7RxUF/bCsidTF9fLc4chAGBtFSmXHbKj0X//YSMkKTLHd6regw4duiZtsymtuRTW/J/m4+f0v9hQG7pngrdEtZNP1mnf3TNRG/SOIvzeHbLRJQJZYClRqaDhk8LkrntezZM5xpVveZRv3wTiwZ2d0ryekpfp6y1bzXsB/eEFaiZHm2skygfwA27yhN2H8tk2bsBt0HnhwoI30qkpgRVAfce6MP04gCwHxH2B9wWaLy8uu9324w1YWk5HHt9V4oGGxq+RjTSAUie7wYuUDKsvTP9d39NW4A1jhbVOmB/fLt0764CRYQo4XNCv4joEk5ANnxDXUQv8iwi+/Fh+8erL0f76QW+bEBRzPaQ7ALGZO+lbVCZiyVy+w1Ve1hISmLD829NcJYFYaDeZ2V520a7KMuT6+j7PIk+3bMA9Klwk+eDlFy4VEE8/gDGURmI`;
 
 
@@ -152,54 +151,127 @@ globalThis.HLCollapseExpand = (my_id: number, state?: Boolean) => {
        globalThis.structure.data[ordinal].collapsed = state;
     }
     globalThis.undostruct.store();
-    globalThis.structure.updateHTMLinner(my_id);
-    globalThis.HLRedrawTreeSVG();
+
+    if (!isFirefox()) {
+        globalThis.structure.updateHTMLinner(my_id);
+        globalThis.HLRedrawTreeSVG();
+    } else {
+        globalThis.HLRedrawTree();
+    }
 }
 
 globalThis.HLDelete = (my_id: number) => {
+    const electroItem = globalThis.structure.getElectroItemById(my_id);
+    if (electroItem === null) return;
+    const parent = electroItem.getParent();
+    
     globalThis.structure.deleteById(my_id);
     globalThis.undostruct.store();
-    globalThis.HLRedrawTree();
+    
+    if ((parent !== null) && (!isFirefox())) {
+        globalThis.structure.reNumber();
+        globalThis.structure.updateHTMLinner(parent.id); 
+        globalThis.HLRedrawTreeSVG();
+    } else {
+        globalThis.HLRedrawTree();
+    }
 }
 
 globalThis.HLAdd = () => {
     globalThis.structure.addItem("");
     globalThis.undostruct.store();
+
     globalThis.HLRedrawTree();
 }
 
 globalThis.HLInsertBefore = (my_id: number) => {
+    const electroItem = globalThis.structure.getElectroItemById(my_id);
+    if (electroItem === null) return;
+    const parent = electroItem.getParent();
+
     globalThis.structure.insertItemBeforeId(new Electro_Item(globalThis.structure), my_id);
     globalThis.undostruct.store();
-    globalThis.HLRedrawTree();
+
+    if ((parent !== null) && (!isFirefox())) {
+        globalThis.structure.reNumber();
+        globalThis.structure.updateHTMLinner(parent.id);
+        globalThis.HLRedrawTreeSVG();
+    } else {
+        globalThis.HLRedrawTree();
+    }
 }
 
 globalThis.HLInsertAfter = (my_id: number) => {
+    const electroItem = globalThis.structure.getElectroItemById(my_id);
+    if (electroItem === null) return;
+    const parent = electroItem.getParent();
+
     globalThis.structure.insertItemAfterId(new Electro_Item(globalThis.structure), my_id);
     globalThis.undostruct.store();
-    globalThis.HLRedrawTree();
+
+    if ((parent !== null) && (!isFirefox())) {
+        globalThis.structure.reNumber();
+        globalThis.structure.updateHTMLinner(parent.id);
+        globalThis.HLRedrawTreeSVG();
+    } else {
+        globalThis.HLRedrawTree();
+    }
 }
 
 globalThis.HLMoveDown = (my_id: number) => {
+    const electroItem = globalThis.structure.getElectroItemById(my_id);
+    if (electroItem === null) return;
+    const parent = electroItem.getParent();
+
     globalThis.structure.moveDown(my_id);
     globalThis.undostruct.store();
-    globalThis.HLRedrawTree();
+
+    if ((parent !== null) && (!isFirefox())) {
+        globalThis.structure.reNumber();
+        globalThis.structure.updateHTMLinner(parent.id);
+        globalThis.HLRedrawTreeSVG();
+    } else {
+        globalThis.HLRedrawTree();
+    }
 }
 
 globalThis.HLMoveUp = (my_id: number) => {
+    const electroItem = globalThis.structure.getElectroItemById(my_id);
+    if (electroItem === null) return;
+    const parent = electroItem.getParent();
+
     globalThis.structure.moveUp(my_id);
     globalThis.undostruct.store();
-    globalThis.HLRedrawTree();
+
+    if ((parent !== null) && (!isFirefox())) {
+        globalThis.structure.reNumber();
+        globalThis.structure.updateHTMLinner(parent.id);
+        globalThis.HLRedrawTreeSVG();
+    } else {
+        globalThis.HLRedrawTree();
+    }
 }
 
 globalThis.HLClone = (my_id: number) => {
+    const electroItem = globalThis.structure.getElectroItemById(my_id);
+    if (electroItem === null) return;
+    const parent = electroItem.getParent();
+    
     globalThis.structure.clone(my_id);
     globalThis.undostruct.store();
-    globalThis.HLRedrawTree();
+
+    if ((parent !== null) && (!isFirefox())) {
+        globalThis.structure.reNumber();
+        globalThis.structure.updateHTMLinner(parent.id);
+        globalThis.HLRedrawTreeSVG();
+    } else {
+        globalThis.HLRedrawTree();
+    }
 }
 
 globalThis.HLInsertChild = (my_id: number) => {
     globalThis.structure.insertChildAfterId(new Electro_Item(globalThis.structure), my_id);
+    globalThis.structure.reNumber();
     //globalThis.undostruct.store();  We should not call this as the CollapseExpand already does that
     globalThis.HLCollapseExpand(my_id, false);
     //No need to call HLRedrawTree as HLCollapseExpand already does that
@@ -277,16 +349,16 @@ globalThis.HL_enterSettings = () => {
 globalThis.HLRedrawTreeHTML = () => {
     globalThis.toggleAppView('2col');
     const settings = document.getElementById("settings");
-    if (settings != null) settings.innerHTML = "";
+    if (settings !== null) settings.innerHTML = "";
     var output:string = globalThis.structure.toHTML(0) + "<br>" + renderAddressStacked();
     const left_col_inner = document.getElementById("left_col_inner");
-    if (left_col_inner != null) left_col_inner.innerHTML = output;
+    if (left_col_inner !== null) left_col_inner.innerHTML = output;
 }
 
 globalThis.HLRedrawTreeHTMLLight = () => {
     var output:string = globalThis.structure.toHTML(0) + "<br>" + renderAddressStacked();
     const left_col_inner = document.getElementById("left_col_inner");
-    if (left_col_inner != null) left_col_inner.innerHTML = output;
+    if (left_col_inner !== null) left_col_inner.innerHTML = output;
 }
 
 globalThis.HLRedrawTreeSVG = () => {
@@ -306,7 +378,7 @@ globalThis.HLRedrawTreeSVG = () => {
 
 globalThis.HLRedrawTree = () => {
     globalThis.HLRedrawTreeHTML();
-    globalThis.HLRedrawTreeSVG();
+    globalThis.HLRedrawTreeSVG();  
 }
 
 function buildNewStructure(structure: Hierarchical_List) {
@@ -331,6 +403,7 @@ function buildNewStructure(structure: Hierarchical_List) {
     // Nat bord voorzien
     structure.insertChildAfterId(new Kring(structure),itemCounter);
     structure.data[itemCounter].props.type  = "Kring";
+    structure.data[itemCounter].props.autoKringNaam  = "manueel";
     structure.data[itemCounter].props.bescherming  = "differentieel";
     structure.data[itemCounter].props.aantal_polen  = CONF_aantal_fazen_nat;
     structure.data[itemCounter].props.amperage  = CONF_hoofdzekering;
@@ -411,7 +484,6 @@ function restart_all() {
 
     strleft += globalThis.CONFIGPAGE_RIGHT;
 
-    strleft += PROP_getCookieText(); //Will only be displayed in the online version
     strleft += PROP_development_options();
 
     const configsection = document.getElementById("configsection");
@@ -442,14 +514,17 @@ globalThis.toggleAppView = (type: '2col' | 'config' | 'draw') => {
         if (ribbon == null) return;
         if (canvas_2col == null) return;
 
-        configsection.innerHTML = '';
-        configsection.style.display = 'none';
+        if (canvas_2col.style.display === 'none') {
+            ribbon.style.display = 'flex';
+            canvas_2col.style.display = 'flex';
+            configsection.style.display = 'none';
+            outerdiv.style.display = 'none';
 
-        outerdiv.style.display = 'none';
+            configsection.innerHTML = '';
+            
+            globalThis.structure.updateRibbon();
+        }
 
-        ribbon.style.display = 'flex';
-        canvas_2col.style.display = 'flex';
-        globalThis.structure.updateRibbon();
     } else if (type === 'config') {
         if (configsection == null) return;
         if (outerdiv == null) return;
@@ -457,12 +532,13 @@ globalThis.toggleAppView = (type: '2col' | 'config' | 'draw') => {
         if (left_col_inner == null) return;
         if (canvas_2col == null) return;
 
-        configsection.style.display = 'block';
-        
-        outerdiv.style.display = 'none';
+        if (configsection.style.display === "none") {
+            configsection.style.display = 'block';
+            outerdiv.style.display = 'none';
+            ribbon.style.display = 'none';
 
-        ribbon.innerHTML = ''; // Voor performance redenen
-        ribbon.style.display = 'none';
+            ribbon.innerHTML = ''; // Voor performance redenen    
+        }
 
         left_col_inner.innerHTML = ''; // Voor performance redenen
 
@@ -475,19 +551,19 @@ globalThis.toggleAppView = (type: '2col' | 'config' | 'draw') => {
         if (ribbon == null) return;
         if (left_col_inner == null) return;
         if (canvas_2col == null) return;
-        
-        configsection.innerHTML = "";
-        configsection.style.display = 'none';
 
-        outerdiv.style.display = 'flex';
-        ribbon.style.display = 'flex';
+        if (outerdiv.style.display === 'none') {
+            outerdiv.style.display = 'flex';
+            ribbon.style.display = 'flex';
+            configsection.style.display = 'none';
+            canvas_2col.style.display = 'none';
 
-        left_col_inner.innerHTML = ''; // Voor performance redenen
+            configsection.innerHTML = "";
+            left_col_inner.innerHTML = ''; // Voor performance redenen
 
-        if (EDSSVG !== null) EDSSVG.innerHTML = ''; // Deze is nodig anders wil het situatieschema het patroon VerticalStripe niet laden wegens dubbel gedefinieerd
-                                                             // We maken de EDSSVG leeg en niet de EDS-DIV want anders onthoudt de browser de positie van de scrollbars niet
-
-        canvas_2col.style.display = 'none';
+            if (EDSSVG !== null) EDSSVG.innerHTML = ''; // Deze is nodig anders wil het situatieschema het patroon VerticalStripe niet laden wegens dubbel gedefinieerd
+                                                        // We maken de EDSSVG leeg en niet de EDS-DIV want anders onthoudt de browser de positie van de scrollbars niet
+        }
     }
 
     if ( (['2col','draw'].includes(type)) && (['2col','draw'].includes(lastview)) && (type !== lastview) )
@@ -625,18 +701,39 @@ left_col_inner.addEventListener('change', function(event) {
             case "select-one":
                 if (item == "type") { // Type changed
                     globalThis.structure.adjustTypeById(my_id, value as string);
+                    if (isFirefox()) {
+                        globalThis.HLRedrawTreeHTML();
+                    } else {
+                        globalThis.structure.reNumber();
+                        const parent = electroItem.getParent();
+                        if (parent !== null) globalThis.structure.updateHTMLinner(parent.id); else globalThis.structure.updateHTMLinner(my_id);
+                    }
                 } else {
                     electroItem.props[item] = (value as string);
+                    if (isFirefox()) {
+                        globalThis.HLRedrawTreeHTML();
+                    } else {
+                        globalThis.structure.reNumber();
+                        globalThis.structure.updateHTMLinner(my_id);
+                    } 
                 }
-                globalThis.structure.updateHTMLinner(my_id);
                 break;
             case "text":
                 electroItem.props[item] = (value as string);
-                if (item==='kortsluitvermogen') globalThis.structure.updateHTMLinner(my_id);
+                globalThis.structure.reNumber();
+                if (item==='kortsluitvermogen')
+                    if (isFirefox()) {
+                        globalThis.HLRedrawTreeHTML();
+                    } else {
+                        globalThis.structure.updateHTMLinner(my_id);
+                    } 
                 break;
             case "checkbox":
                 electroItem.props[item] = (value as boolean);
-                globalThis.structure.updateHTMLinner(my_id);
+                if (!isFirefox()) {
+                    globalThis.structure.reNumber();
+                    globalThis.structure.updateHTMLinner(my_id);
+                } else globalThis.HLRedrawTreeHTML();
                 break;
         }
 
@@ -661,8 +758,6 @@ left_col_inner.addEventListener('change', function(event) {
     const key = match ? match[2] : null;
     if (idNumber == null || key == null) return;
     propUpdate(parseInt(idNumber),key,type,value);
-
-    // Perform your logic here with the extracted data
 });
 
 EDStoStructure(globalThis.EXAMPLE_DEFAULT,false); //Just in case the user doesn't select a scheme and goes to drawing immediately, there should be something there

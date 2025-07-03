@@ -1,3 +1,4 @@
+
 export function htmlspecialchars(my_input) {
     let returnstr:string;
     if (typeof(my_input) == 'undefined') returnstr = ""; else returnstr=my_input.toString();
@@ -13,6 +14,28 @@ export function htmlspecialchars(my_input) {
     return returnstr.replace(/[&<>"']/g, function(m) {return map[m];});
 }
 
+export const isFirefox = (function () {
+  let cachedResult = null;
+
+  // return function() { return false; }; // Default to false for non-Firefox browsers
+
+  return function () {
+    if (cachedResult !== null) {
+      return cachedResult;
+    }
+
+    // Primary detection using Firefox-specific object
+    if ("InstallTrigger" in window) {
+      cachedResult = true;
+    } else {
+      // Fallback to user agent sniffing
+      cachedResult = navigator.userAgent.toLowerCase().includes('firefox');
+    }
+
+    return cachedResult;
+  };
+})();
+
 export function svgTextWidth(input:String, fontsize:Number = 10, options:String = '') {
     const div = document.createElement('div');
     div.innerHTML = '<svg width="1000" height="20"><text x="0" y="10" style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-size="' + Number(fontsize) + '" ' + options + '>' + input + '</text></svg>';
@@ -23,6 +46,16 @@ export function svgTextWidth(input:String, fontsize:Number = 10, options:String 
     const width = (div.children[0].children[0] as SVGGraphicsElement).getBBox().width;
     tryoutdiv.removeChild(div);
     return(Math.ceil(width));
+}
+
+export function insertArrow(textColor: string = "black"): string {
+  return `
+    <div style="display:inline-block; width:1em; height:1em; vertical-align:middle;">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="100%" height="100%">
+        <path d="M4 11h12M4 11L4 4M16 11L11 6M16 11L11 16" stroke="${textColor}" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </div>
+  `;
 }
 
 export function contains(a, obj) {

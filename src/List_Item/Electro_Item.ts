@@ -127,10 +127,18 @@ export class Electro_Item extends List_Item {
   //-- Clear all keys, met uitzondering van nr indien er een nummer is --
 
   clearProps() {
-      let oldnr: string;
-      if (typeof(this.props.nr) != 'undefined') oldnr = this.props.nr; else oldnr = "";
+      let oldautonr: string = "auto";
+      let oldautoKringNaam: string = "auto";
+      let oldnr: string = "";
+
+      if (typeof(this.props.autonr) != 'undefined') oldautonr = this.props.autonr;
+      if (typeof(this.props.autoKringNaam) != 'undefined') oldautoKringNaam = this.props.autoKringNaam;
+      if (typeof(this.props.nr) != 'undefined') oldnr = this.props.nr;
+
       this.props = {};
       this.props.nr = oldnr;
+      if (oldautonr !== null) this.props.autonr = oldautonr;
+      if (oldautoKringNaam !== null) this.props.autoKringNaam = oldautoKringNaam;
   }
 
   // -- Returns the maximum number of childs the Electro_Item can have --
@@ -193,13 +201,13 @@ export class Electro_Item extends List_Item {
     output += "&nbsp;"
 
     let parent:Electro_Item = this.getParent();
-    let consumerArray;
+    let consumerArray: Array<string>;
     
     if (parent == null) consumerArray = ["", "Aansluiting", "Zekering/differentieel", "Kring"];
     else consumerArray = this.getParent().allowedChilds()
 
     //output += '<div class="type-orange">';
-    output += this.selectPropToHTML('type', consumerArray);
+    output += this.selectPropToHTML('type', consumerArray, 175);
     //output += '</div>';
 
     return(output);
@@ -256,11 +264,16 @@ export class Electro_Item extends List_Item {
   // -- Display the number in the html tree view, but only if it is displayable
 
   nrToHtml() {
+      if (typeof(this.props.autonr) == undefined) this.props.autonr = "manueel"; // false voor compatibiliteit met oude schema's
       let str = "";
       let parent:Electro_Item = (this.getParent() as Electro_Item);
       if (parent != null) {
           if ( (parent.getType() == "Kring") || (parent.getType() == "Domotica module (verticaal)") ) {
-              str += "Nr: " + this.stringPropToHTML('nr',5) + ", "
+                str += `, Nr: ${this.selectPropToHTML('autonr',['auto','manueel'])}`
+                  +  (this.props.autonr === 'auto'
+                  ? `<input type="text" id="HL_edit_${this.id}_nr" size="2" value="${this.props.nr ?? ''}" disabled />`
+                  : this.stringPropToHTML('nr',2)) 
+                  + ', ';
           } else {
               this.props.nr = "";
           }

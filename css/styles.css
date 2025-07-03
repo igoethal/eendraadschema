@@ -11,6 +11,8 @@
   --sideBarWidth: 0px; /* Can be overwritte in propstyles */
 
   --total-offset: calc(var(--menu-height) + var(--ribbon-height) + var(--status-bar-height));
+
+  --EDStekenFoutKleur: #8C5A00; /* Very dark amber */
 }
 
 /* DOCUMENT */
@@ -445,6 +447,18 @@ table {
   font-weight: normal;
   font-size: smaller;
   color: #006600; /* Dark green for text */
+}
+
+.EDS-tekenfout {
+  background-color: #FFF9E5; /* Very light yellowish grey */
+  border: 1px solid #E6C97A; /* Somewhat darker yellowish grey */
+  padding: 4px 5px 4px 5px;  
+  font-weight: normal;
+  font-size: smaller;
+  color: var(--EDStekenFoutKleur); /* Darker shade of amber */
+  margin-top: 5px; 
+  margin-bottom: 5px; 
+  cursor: default;
 }
 
 .svg-icon {

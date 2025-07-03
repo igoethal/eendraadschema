@@ -126,7 +126,7 @@ sinusVerticaal: `
 spot: `
 <path d="M0 0 A10 10 0 0 1 10 -10" stroke="black" fill="white" stroke-width="1" />
 <path d="M0 0 A10 10 0 0 0 10 10" stroke="black" fill="white" stroke-width="1" />
-<circle cx="10" cy="0" r="6" style="stroke:black;fill:white" />
+<circle cx="10" cy="0" r="6" style="stroke:black;fill:none" />
 <line x1="5.76" x2="14.24" y1="-4.24" y2="4.24" stroke="black" stroke-width="1" />
 <line x1="5.76" x2="14.24" y1="4.24" y2="-4.24" stroke="black" stroke-width="1" />
 `,
@@ -408,9 +408,11 @@ usblader: `
 `,
 vaatwasmachine: `
 <rect x="0" y="-20" width="40" height="40" fill="none" style="stroke:black" />
-<line x1="0" y1="-20" x2="40" y2="20" style="stroke:black;fill:none" />
-<line x1="40" y1="-20" x2="0" y2="20" style="stroke:black;fill:none" />
-<circle cx="20" cy="0" r="8" style="stroke:black;fill:white" />
+<line x1="0" y1="-20" x2="14.34" y2="-5.66" style="stroke:black;fill:none" />
+<line x1="40" y1="20" x2="25.66" y2="5.66" style="stroke:black;fill:none" />
+<line x1="0" y1="20" x2="14.34" y2="5.66" style="stroke:black;fill:none" />
+<line x1="40" y1="-20" x2="25.66" y2="-5.66" style="stroke:black;fill:none" />
+<circle cx="20" cy="0" r="8" style="stroke:black;fill:none" />
 `,
 ventilator: `
 <rect x="0" y="-15" width="30" height="30" fill="none" style="stroke:black" />

@@ -109,9 +109,12 @@ export class Kring extends Electro_Item {
         this.overrideKeys();
         let output = this.toHTMLHeader(mode);
 
-        output += "&nbsp;Naam: " + this.stringPropToHTML('naam',5) + "<br>"
-               +  "Zekering: " + this.selectPropToHTML('bescherming',["automatisch","differentieel","differentieelautomaat","smelt","geen","---","schakelaar","relais","schemer","overspanningsbeveiliging"]);
+        output += `&nbsp;Naam: ${this.selectPropToHTML('autoKringNaam',['auto','manueel'])}`
+                  +  (this.props.autoKringNaam === 'auto'
+                  ? `<input type="text" id="HL_edit_${this.id}_naam" size="5" style="font-weight: bold; background-color:#FFFFE0;" value="${this.props.naam ?? ''}" disabled /><br>`
+                  : `${this.stringPropToHTML('naam',5)}<br>`);
 
+        output += "Zekering: " + this.selectPropToHTML('bescherming',["automatisch","differentieel","differentieelautomaat","smelt","geen","---","schakelaar","relais","schemer","overspanningsbeveiliging"]);
 
         // Aantal polen en Ampérage
 

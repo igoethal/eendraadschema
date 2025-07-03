@@ -34,7 +34,7 @@
     background-color: green;
     width: 26px;
     height: 26px;
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M10 4v12M10 4l-5 5M10 4l5 5" stroke="black" stroke-width="2" stroke-linecap="round"/></svg>');   
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M10 4v12M10 4l-5 5M10 4l5 5" stroke="black" stroke-width="2" stroke-linecap="round"/></svg>');
     background-repeat: no-repeat;
     background-position: center;
     background-size: 20px 20px;

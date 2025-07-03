@@ -44,7 +44,9 @@ export class List_Item {
     // -- Retourneer ouder-item --
 
     getParent() {
-        return this.sourcelist.data[this.sourcelist.getOrdinalById(this.parent)];
+        let returnval = this.sourcelist.data[this.sourcelist.getOrdinalById(this.parent)];
+        if (returnval === undefined) returnval = null; // If parent is not found, return null
+        return returnval;
     }
 
     // -- Editeren van een string --
@@ -80,7 +82,7 @@ export class List_Item {
 
     // -- Editeren van een select box --
 
-    selectPropToHTML(item: string, items: Array<String>) {
+    selectPropToHTML(item: string, items: Array<String>, length?: number) {
         let myId = "HL_edit_"+this.id+"_"+item;
         let output: string = "";
         let options: string = "";
@@ -94,6 +96,7 @@ export class List_Item {
             }
         };
 
+        if (length != null) style += "width: "+length+"px;";
 
         output = `<select style="${style}" id="${myId}">`;
         for (let i:number=0; i<items.length; i++) {

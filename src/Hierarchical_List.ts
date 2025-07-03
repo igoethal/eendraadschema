@@ -1,4 +1,4 @@
-import { htmlspecialchars } from "./general";
+import { htmlspecialchars, insertArrow, contains } from "./general";
 import { Aansluiting } from "./List_Item/Aansluiting";
 import { Aansluitpunt } from "./List_Item/Aansluitpunt";
 import { Aftakdoos } from "./List_Item/Aftakdoos";
@@ -690,7 +690,8 @@ export class Hierarchical_List {
 
     updateHTMLinner(id: number) {
         let ordinal: number = this.getOrdinalById(id);
-        (document.getElementById('id_elem_'+id) as HTMLElement).innerHTML = this.toHTMLinner(ordinal);
+        let div = document.getElementById('id_elem_'+id) as HTMLElement;
+        div.innerHTML = this.toHTMLinner(ordinal);
     }
 
     voegAttributenToeAlsNodig() {
@@ -773,24 +774,58 @@ export class Hierarchical_List {
 
     toHTML(myParent: number) {
         
-        if (myParent==0) this.updateRibbon();
+        // Als we alles tekenen mogen we ook de ribbon niet vergeten te updaten
+        if (myParent==0) {
+            this.updateRibbon();
+            this.reNumber();
+        }
 
+        // Enkele variabelen initialiseren
+        let parent = this.getElectroItemById(myParent);
         let output: string = "";
-        let numberDrawn: number = 0;
+        let aantalElementen: number = 0;
+        let aantalKringen: number = 0;
 
-        // Teken het volledige schema in HTML
+        // Genereer de HTML voor de elementen die onder myParent hangen
         for (let i = 0; i<this.length; i++) {
             if (this.active[i] && (this.data[i].parent == myParent)
             && !( (this.data[i] as Electro_Item).isAttribuut() ) ) {
-                numberDrawn++;
+                aantalElementen++;
+                const electroItemType = (this.data[i] as Electro_Item).getType();
+                if (electroItemType != null && electroItemType == "Kring") aantalKringen++;
                 output += '<table class="html_edit_table" id="id_elem_' + this.id[i]  + '">';
                 output += this.toHTMLinner(i);
                 output += "</table>";
             }
-        }
-        if ( (myParent == 0) && (numberDrawn<1) ) {
+        };
+
+        // Indien we het volledige schema aan het tekenen zijn, maar er valt niets te tekenen, dan gevven we enkel een melding om een nieuw schema te starten
+        if ( (myParent == 0) && (aantalElementen<1) ) {
             output += "<button onclick=\"HLAdd()\">Voeg eerste object toe of kies bovenaan \"Nieuw\"</button><br>"; //no need for the add button if we have items
+        };
+        
+        // Indien we een kring hebben met meer dan 1 kring als kind, dan geven we een waarschuwing en vragen we dit anders te doen
+        if (parent != null && parent.getType() == "Kring" && aantalKringen > 1) {
+            const EDStekenFoutKleur = getComputedStyle(document.documentElement).getPropertyValue('--EDStekenFoutKleur').trim();
+            const arrowstr = insertArrow(EDStekenFoutKleur);
+            output = `<div class="EDS-tekenfout">`
+                   + `<b>Tekenfout:</b> U heeft meer dan 1 kring achter deze kring gehangen, Kring ${arrowstr} {Kring, Kring, &#8230;}. Dat is niet gebruikelijk.<br>`
+                   + `Als u hier een vertakking wilt, gebruik dan eerst het "Splitsing"-element: Kring ${arrowstr} Splitsing ${arrowstr} {Kring, Kring, &#8230;}.<br>`
+                   + `Als u daadwerkelijk verticaal gestapelde kringen in het schema wilt, is het correcter ze hiërarchisch onder elkaar te hangen: Kring ${arrowstr} Kring ${arrowstr} Kring.<br>`
+                   + "</div>" + output;
         }
+
+        // Indien we een Aansluiting hebben met meer dan 1 kind, dan geven we een waarschuwing en vragen we dit anders te doen
+        if (parent != null && parent.getType() == "Aansluiting" && aantalElementen > 1) {
+            const EDStekenFoutKleur = getComputedStyle(document.documentElement).getPropertyValue('--EDStekenFoutKleur').trim();
+            const arrowstr = insertArrow(EDStekenFoutKleur);
+            output = `<div class="EDS-tekenfout">`
+                   + `<b>Tekenfout:</b> U heeft meer dan 1 element achter een aansluiting gehangen, Aansluiting ${arrowstr} {Element1, Element2, &#8230;}. Dat is niet gebruikelijk.<br>`
+                   + `Het is correcter om elementen achter een aansluiting als volgt te stapelen: Aansluiting ${arrowstr} Element1 ${arrowstr} Element2 ${arrowstr} &#8230;.<br>`
+                   + `Verwijder het teveel aan elementen of gebruik de werkmodus "Verplaatsen/Clone" bovenaan om ze onder elkaar te hangen.`
+                   + "</div>" + output;
+        }
+
         return(output);
     }
 
@@ -815,6 +850,184 @@ export class Hierarchical_List {
                 }
             } else {
                 return(this.findKringName(myParent));
+            }
+        }
+    }
+
+    /**
+     * Deze functie zorgt ervoor dat alle kringen een unieke naam krijgen.
+     * Indien autoKringNaam is ingesteld op "auto", dan wordt de naam automatisch gegenereerd.
+     * De namen worden gegenereerd in de volgorde van het alfabet, beginnend met "A", "B", ..., "Z", "AA", "AB", ..., "ZZ", "AAA", "AAB", ..., enzovoort.
+     */
+
+    updateKringNamen() {
+
+        function changeInLeftColIfOpen(id: number, newname: string) {
+            let div: HTMLInputElement = (document.getElementById(`HL_edit_${id}_naam`) as HTMLInputElement);
+            if (div) {
+                if (div.value != newname) div.value = newname;
+            }
+        }
+
+        function vindVolgendeKringNaam(kringNamen: { [kring: string]: boolean }): string {
+            let letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            let nextName = "";
+            let found = false;
+
+            // Loop through the letters and find the first available name
+            for (let i = 0; i < letters.length; i++) {
+                nextName = letters[i];
+                if (!kringNamen[nextName]) { found = true; break; }
+            }
+
+            // If no single letter name was found, we need to create a two-letter name
+            if (!found) {
+                for (let i = 0; i < letters.length; i++) {
+                    for (let j = 0; j < letters.length; j++) {
+                        nextName = letters[i] + letters[j];
+                        if (!kringNamen[nextName]) { found = true; break; }
+                    }
+                    if (found) break;
+                }
+            }
+
+            // If still not found, we use a three-letter name
+            if (!found) {
+                for (let i = 0; i < letters.length; i++) {
+                    for (let j = 0; j < letters.length; j++) { 
+                        for (let k = 0; k < letters.length; k++) {
+                            nextName = letters[i] + letters[j] + letters[k];
+                            if (!kringNamen[nextName]) { found = true; break; }
+                        }
+                        if (found) break;
+                    }
+                    if (found) break;
+                }
+            }
+
+            return nextName;
+        }
+
+        function bestaandeKringNamen(): { [kring: string]: boolean } {
+            let kringNamen: { [kring: string]: boolean } = {}; // Object to keep track of kring names we have already seen
+            for (let i = 0; i<this.length; i++) {
+                if (!this.active[i]) continue;
+
+                let electroItem = this.data[i] as Electro_Item;
+                if (electroItem == null) continue;
+
+                let electroType = electroItem.getType();
+                if (electroType == null) continue;
+
+                if ( (electroType == "Kring") && (electroItem.props.autoKringNaam !== "auto") ) {
+                    // We have a kring, so we store the name in the list of names we have already seen
+                    let kringnaam = electroItem.props.naam.trim();
+                    if (kringnaam != "") {
+                        kringNamen[kringnaam] = true; // Store the name in the object
+                    }
+                }
+            }
+            return kringNamen
+        }            
+
+        // Eerst maken we een lookup structuur aan van alle kringen
+        let kringNamen: { [kring: string]: boolean } = bestaandeKringNamen.call(this);
+
+        // Nu lopen we doorheen alle kringen.  
+        // Als electroItem.props.autoKringNaam is true, dan roepen we vindVolgendeKringNaam aan en zetten we electroItem.props.naam hieraan gelijk.
+        // We voegen de naam ook toe aan onze lijst met namen die we al kennen.
+        for (let i = 0; i<this.length; i++) {
+            if (!this.active[i]) continue;
+            
+            let electroItem = this.data[i] as Electro_Item;
+            if ( (electroItem == null) || (electroItem.isAttribuut()) ) continue;
+
+            let electroType = electroItem.getType();
+            if (electroType == null) continue;
+
+            // Zoek naar kringen die een automatische naam moeten krijgen
+            if (electroType == "Kring") {
+                if (electroItem.props.autoKringNaam === "auto") {
+                    let newName = "";
+
+                    if (contains(["automatisch","differentieel","differentieelautomaat","smelt"],electroItem.props.bescherming)) {
+                        newName = vindVolgendeKringNaam(kringNamen);
+                    }
+                    
+                    kringNamen[newName] = true; // Add the new name to the list of names we have already seen
+                    if (electroItem.props.naam != newName) {
+                        electroItem.props.naam = newName; // Set the new name
+                        changeInLeftColIfOpen(electroItem.id, newName); // Update the left column in the EDS view if it is open
+                    }
+                    
+                }
+            }
+        }
+    }
+
+    /** Functie om de nummers van de kringen en verbruikers aan te passen
+     * 
+     * Deze functie gaat doorheen alle actieve items en past de nummers aan indien nodig.
+     * Het houdt rekening met autonummering en zorgt ervoor dat de nummers uniek zijn binnen een kring.
+     * 
+     * @returns true indien er wijzigingen zijn gemaakt, anders false
+     */
+    reNumber() {
+
+        function changeInLeftColIfOpen(id: number, newnr: string) {
+            let div: HTMLInputElement = (document.getElementById(`HL_edit_${id}_nr`) as HTMLInputElement);
+            if (div) {
+                if (div.value != newnr) div.value = newnr;
+            }
+        }
+
+        // Eerst sorteren we de lijst opnieuw en zorgen we ervoor dat alle kringen een naam hebben
+        this.reSort();
+        this.updateKringNamen(); // Zorg ervoor dat de kringen namen hebben
+
+        // Nu gaan we doorheen alle items en passen we de nummers aan indien nodig
+        let lastNumbers: { [kring: string]: number } = {}; // Object to keep track of last numbers for each type
+        let itemsZonderNr: Array<string> = ["", "Bord", "Kring", "Splitsing"];
+        
+        for (let i = 0; i<this.length; i++) {
+            if (!this.active[i]) continue;
+
+            let electroItem = this.data[i] as Electro_Item;
+            if ( (electroItem == null) || (electroItem.isAttribuut()) ) continue;
+
+            let electroType = electroItem.getType();
+            if (electroType == null) continue;
+
+            let parent:Electro_Item = (electroItem.getParent() as Electro_Item);
+            if (parent == null) continue;
+
+            let kringnaam = this.findKringName(electroItem.id);
+
+            if (electroType == "Bord") {
+                // indien we een bord tegen komen tellen we elke kring opnieuw vanaf 1
+                for (let kring in lastNumbers) lastNumbers[kring] = 0;
+            } else if (electroType == "Kring") {
+                if (parent.getType() === "Bord") {
+                    let kring = electroItem.props.naam.trim();
+                    lastNumbers[kring] = 0;
+                }
+            } else if (!contains(itemsZonderNr, (this.data[i] as Electro_Item).getType())) {
+                let electroItem: Electro_Item = this.data[i] as Electro_Item; if (electroItem == null) continue;
+                let parent:Electro_Item = (electroItem.getParent() as Electro_Item); if (parent == null) continue;
+                if ( (parent.getType() == "Kring") || (parent.getType() == "Domotica module (verticaal)") ) {
+                    if (electroItem.props.autonr === 'auto') {
+                        // We hebben een autonummering, dus we gaan het nummer aanpassen
+                        lastNumbers[kringnaam] = (lastNumbers[kringnaam] || 0) + 1; // Increment the last number for this kring
+                        let newnr = lastNumbers[kringnaam].toString(); 
+                        if (electroItem.props.nr != newnr) {
+                            electroItem.props.nr = newnr; // Set the new number
+                            changeInLeftColIfOpen(electroItem.id, newnr); // Update the left column if it is open
+                        }
+                    } else {
+                        // if electroItem.props.nr is a true number, we set lastNumber to that number
+                        if (electroItem.props.nr != null && !isNaN(Number(electroItem.props.nr))) lastNumbers[kringnaam] = Number(electroItem.props.nr);
+                    }
+                }
             }
         }
     }

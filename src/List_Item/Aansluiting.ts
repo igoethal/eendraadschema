@@ -78,7 +78,10 @@ export class Aansluiting extends Electro_Item {
 
         output += "&nbsp;Naam: " + this.stringPropToHTML('naam',5) + "<br>";
 
-        if (this.getParent() != null) output += "Nr: " + this.stringPropToHTML('nr',5) + ", ";
+        if (this.getParent() != null) {
+            const nrHtml = this.nrToHtml();
+            output += (typeof nrHtml === "string" ? nrHtml.substring(2) : nrHtml);
+        }
         
         output += "Zekering: " + this.selectPropToHTML('bescherming',["automatisch","differentieel","differentieelautomaat","smelt","geen","---","schakelaar","schemer"]) 
                                + this.selectPropToHTML('aantal_polen',["2","3","4"]) 

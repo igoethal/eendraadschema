@@ -1,7 +1,6 @@
 import { Hierarchical_List } from "../Hierarchical_List";
 import { SituationPlan } from "../sitplan/SituationPlan";
 import { Electro_Item } from "../List_Item/Electro_Item";
-import { PROP_GDPR } from "../../prop/prop_scripts";
 
 declare var pako: any;
 
@@ -366,17 +365,35 @@ function json_to_structure(text: string, oldstruct: Hierarchical_List = null, ve
     }
 
     /* Kopieren van de eigenschappen van elk element.
-    * Keys voor versies 1 en 2 en props voor versie 3
-    */
+     * Keys voor versies 1 en 2 en props voor versie 3
+     */
 
     for (let i = 0; i < mystructure.length; i++) {
         if ( (version != 0) && (version < 3) ) {
             outstruct.addItem(mystructure.data[i].keys[0][2]);
             (outstruct.data[i] as Electro_Item).convertLegacyKeys(mystructure.data[i].keys);
+
+            // In deze oude  versie bestonden autonummering nog niet dus we zetten deze af
+            outstruct.data[i].props.autoKringNaam = "manueel";
+            outstruct.data[i].props.autonr = "manueel";
+
         } else {
             outstruct.addItem(mystructure.data[i].props.type);
             (Object as any).assign(outstruct.data[i].props,mystructure.data[i].props);
+
+            // Veel files uit versie 4 hadden nog geen autonummering (ingevoerd halfweg versie 4)
+            // Indien we dit vastsellen zetten we de autonummering op "manueel"
+
+            if ( (mystructure.data[i].props.type === "Kring") &&
+                 (!mystructure.data[i].props.autoKringNaam) )
+                        outstruct.data[i].props.autoKringNaam = "manueel"; 
+
+            if ( (mystructure.data[i].props.nr !== undefined) && 
+                 (mystructure.data[i].props.nr !== null) && 
+                 (!mystructure.data[i].props.autonr) ) 
+                        outstruct.data[i].props.autonr = "manueel"; 
         }
+
         outstruct.data[i].parent = mystructure.data[i].parent;
         outstruct.active[i] = mystructure.active[i];
         outstruct.id[i] = mystructure.id[i];
@@ -693,7 +710,6 @@ export function showFilePage() {
                     '</label>';  
 
         strleft += '</td></tr>';
-        strleft += PROP_GDPR(); //Function returns empty for GIT version, returns GDPR notice when used online.
         strleft += '</table>';
         
     } else { // Legacy
@@ -711,9 +727,6 @@ export function showFilePage() {
                     '</label>';   
 
         strleft += '</td></tr>';
-    
-        strleft += PROP_GDPR(); //Function returns empty for GIT version, returns GDPR notice when used online.
-    
         strleft += '</table>';
     }
 
