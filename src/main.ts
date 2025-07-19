@@ -9,7 +9,7 @@ import { showSituationPlanPage } from "./sitplan/SituationPlanView";
 import { printsvg } from "./print/print";
 import { PROP_edit_menu } from "../prop/prop_scripts";
 import { CookieBanner } from "../prop/CookieBanner";
-import { flattenSVGfromString, isFirefox } from "./general";
+import { flattenSVGfromString, isFirefox, trimString } from "./general";
 import { isInt } from "./general";
 import { Bord } from "./List_Item/Bord";
 import { Kring } from "./List_Item/Kring";
@@ -21,6 +21,7 @@ import { Session } from "./Session";
 import { MultiLevelStorage } from "./storage/MultiLevelStorage";   
 import { undoRedo } from "./undoRedo";
 import { importExportUsingFileAPI } from "./importExport/importExport";
+import { changelog } from "./changelog";
 
 import "../css/all.css";
 
@@ -36,7 +37,7 @@ globalThis.fileAPIobj = new importExportUsingFileAPI();
 
 // Global constants
 
-globalThis.SITPLANVIEW_SELECT_PADDING = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--selectPadding').trim());
+globalThis.SITPLANVIEW_SELECT_PADDING = parseInt(trimString(getComputedStyle(document.documentElement).getPropertyValue('--selectPadding')));
 globalThis.SITPLANVIEW_ZOOMINTERVAL = {MIN: 0.1, MAX: 1000};
 globalThis.SITPLANVIEW_DEFAULT_SCALE = 0.7;
 
@@ -485,6 +486,22 @@ function restart_all() {
     strleft += globalThis.CONFIGPAGE_RIGHT;
 
     strleft += PROP_development_options();
+
+    // --- Changelog section ---
+    strleft += `<h2>Recent toegevoegde functionaliteiten</h2>`;
+    if (Array.isArray(changelog)) {
+        strleft += `<table style="width:100%;border-collapse:collapse;">`;
+        for (let i = 0; i < Math.min(10, changelog.length); i++) {
+            const entry = changelog[i];
+            strleft += `
+                <tr>
+                    <td style="vertical-align:top; font-weight:bold; white-space:nowrap; padding-right:10px;">${entry.date}</td>
+                    <td style="vertical-align:top;">${entry.msg}</td>
+                </tr>
+            `;
+        }
+        strleft += `</table>`;
+    }
 
     const configsection = document.getElementById("configsection");
     if (configsection != null) configsection.innerHTML = strleft;

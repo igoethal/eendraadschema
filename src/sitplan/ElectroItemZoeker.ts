@@ -1,4 +1,5 @@
 import { Electro_Item } from "../List_Item/Electro_Item";
+import { trimString } from "../general";
 
 /**
  * Class gebruikt in SituationPlanView om te zoeken naar electroitems op basis van de kringnaam.
@@ -94,14 +95,14 @@ export class ElectroItemZoeker {
                 let type:string = electroItem.getType();
                 if (type == 'Bord') {
                     let myName = electroItem.props.naam;
-                    if ( (myName == null) || (myName.trim() == '') ) myName = 'Bord';
+                    if ( (myName == null) || (trimString(myName) == '') ) myName = 'Bord';
                     this.borden.push({id: id, naam: myName})
                 } else {
-                    let kringnaam:string = globalThis.structure.findKringName(id).trim();
+                    let kringnaam:string = trimString(globalThis.structure.findKringName(id));
                     if (electroItem.isAttribuut()) type = "Externe sturing";
                     if ( (type != null) && (this.excludedTypes.indexOf(type) === -1) ) {
                         let adres:string = electroItem.getReadableAdres();
-                        if (kringnaam.trim() !== '')
+                        if (trimString(kringnaam) !== '')
                             this.data.push({id: id, kringnaam: kringnaam, adres: adres, type: type});
                         else
                             dataAchteraan.push({id: id, kringnaam: 'Zonder naam', adres: adres, type: type});

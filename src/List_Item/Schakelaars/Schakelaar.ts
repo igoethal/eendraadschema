@@ -15,16 +15,20 @@ export class Schakelaar {
     signalisatielamp: boolean;
     trekschakelaar: boolean;
     aantal: number;
+    normaalGesloten: boolean;
+    sturing: string;
 
     sitplan: boolean = false;
     mirrortext: boolean = false;
 
-    constructor(type: String, halfwaterdicht: boolean=false, verklikkerlamp: boolean=false, signalisatielamp: boolean=false, trekschakelaar: boolean=false, aantal: number=1) {
+    constructor(type: String, halfwaterdicht: boolean=false, verklikkerlamp: boolean=false, signalisatielamp: boolean=false, trekschakelaar: boolean=false, normaalGesloten: boolean=false, sturing: string = "", aantal: number=1) {
         this.type = type;
         this.halfwaterdicht = halfwaterdicht;
         this.verklikkerlamp = verklikkerlamp;
         this.signalisatielamp = signalisatielamp;
         this.trekschakelaar = trekschakelaar;
+        this.normaalGesloten = normaalGesloten;
+        this.sturing = sturing;
         this.aantal = aantal;
     }
 
@@ -226,6 +230,29 @@ export class Schakelaar {
         return({endx: endx, str: outputstr, lowerbound: null});
     }
 
+    contacttoDrawReturnObj(startx: number): drawReturnObj {
+        let outputstr:string = "";
+        let endx = startx + 20;
+
+        SVGSymbols.addSymbol("schakelaar");
+
+        outputstr += '<line x1="' + startx + '" x2="' + endx + '" y1="25" y2="25" stroke="black" />'
+                  +  '<use xlink:href="#schakelaar" x="' + endx + '" y="25" />';
+
+        if (this.normaalGesloten) {
+            outputstr += '<line x1="' + (endx+32.5) + '" x2="' + (endx+35) + '" y1="25" y2="25" stroke="black" />'
+                      +  '<line x1="' + (endx+32) + '" x2="' + (endx+32) + '" y1="13" y2="25.5" stroke="black" />';
+        }
+
+        if (this.sturing === "spoel") {
+            outputstr += '<rect x="' + (endx+8) + '" y="1" width="24" height="10" stroke="black" fill="none" />';
+            outputstr += '<line x1="' + (endx+16) + '" x2="' + (endx+24) + '" y1="1" y2="11" stroke="black" />';
+            outputstr += '<line x1="' + (endx+20) + '" x2="' + (endx+20) + '" y1="11" y2="20" stroke="black" stroke-dasharray="1,1" />';
+        }
+
+        return({endx: endx, str: outputstr, lowerbound: null});        
+    }    
+
     defaulttoDrawReturnObj(startx: number, symbol: string): drawReturnObj {
         let outputstr:string = "";
         let endx = startx + 20;
@@ -306,12 +333,12 @@ export class Schakelaar {
                 lowerbound = Math.max(lowerbound,25);
                 break;    
             case "magneetcontact": 
-                ( {endx: endx, str: outputstr} = (this.magneetcontacttoDrawReturnObj(startx,)) ); 
+                ( {endx: endx, str: outputstr} = (this.magneetcontacttoDrawReturnObj(startx)) ); 
                 endx += 20; 
                 lowerbound = Math.max(lowerbound,25);
                 break;                    
-            case "schakelaar": 
-                ( {endx: endx, str: outputstr} = (this.defaulttoDrawReturnObj(startx,'#schakelaar')) ); 
+            case "contact": 
+                ( {endx: endx, str: outputstr} = (this.contacttoDrawReturnObj(startx)) );              
                 endx += 40; 
                 break;
             case "schemerschakelaar": 

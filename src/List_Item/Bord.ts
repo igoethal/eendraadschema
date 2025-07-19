@@ -48,10 +48,6 @@ export class Bord extends Electro_Item {
     }
 
     toSitPlanSVG(mirrortext: boolean = false) {
-        //let str = this.props.naam;
-        //if ((str == null) || (str.trim() == "")) {
-        //    str = '';
-        //}
 
         /* suppress murrortext never used warning */ mirrortext;
 

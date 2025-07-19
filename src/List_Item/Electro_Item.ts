@@ -4,6 +4,7 @@ import { SVGSymbols } from "../SVGSymbols";
 import { SVGelement } from "../SVGelement";
 import { Hierarchical_List } from "../Hierarchical_List";
 import { SituationPlanElement } from "../sitplan/SituationPlanElement";
+import { trimString } from "../general";
 
 export class Electro_Item extends List_Item {
 
@@ -252,8 +253,8 @@ export class Electro_Item extends List_Item {
           if (str == null) str = "";
           return str;
       } else {
-        let kringname:string = this.sourcelist.findKringName(this.id).trim();
-        let nr:string = this.getnr().trim();
+        let kringname:string = trimString(this.sourcelist.findKringName(this.id));
+        let nr:string = trimString(this.getnr());
 
         if (kringname == "") return nr;
         else if (nr == "") return kringname
@@ -269,7 +270,7 @@ export class Electro_Item extends List_Item {
       let parent:Electro_Item = (this.getParent() as Electro_Item);
       if (parent != null) {
           if ( (parent.getType() == "Kring") || (parent.getType() == "Domotica module (verticaal)") ) {
-                str += `, Nr: ${this.selectPropToHTML('autonr',['auto','manueel'])}`
+                str += `Nr: ${this.selectPropToHTML('autonr',['auto','manueel'])}`
                   +  (this.props.autonr === 'auto'
                   ? `<input type="text" id="HL_edit_${this.id}_nr" size="2" value="${this.props.nr ?? ''}" disabled />`
                   : this.stringPropToHTML('nr',2)) 

@@ -1,4 +1,3 @@
-
 export function htmlspecialchars(my_input) {
     let returnstr:string;
     if (typeof(my_input) == 'undefined') returnstr = ""; else returnstr=my_input.toString();
@@ -36,17 +35,26 @@ export const isFirefox = (function () {
   };
 })();
 
-export function svgTextWidth(input:String, fontsize:Number = 10, options:String = '') {
+export const svgTextWidth = (() => {
+  const cache: Record<string, number> = {};
+
+  return (input: string, fontsize: number = 10, options: string = ''): number => {
+    const key = `${input}|${fontsize}|${options}`;
+    if (key in cache) {
+      return cache[key];
+    }
+
     const div = document.createElement('div');
-    div.innerHTML = '<svg width="1000" height="20"><text x="0" y="10" style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-size="' + Number(fontsize) + '" ' + options + '>' + input + '</text></svg>';
-    
-    let tryoutdiv: HTMLElement = document.body;
-    
-    tryoutdiv.appendChild(div);
+    div.innerHTML = `<svg width="1000" height="20"><text x="0" y="10" style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-size="${fontsize}" ${options}>${input}</text></svg>`;
+
+    document.body.appendChild(div);
     const width = (div.children[0].children[0] as SVGGraphicsElement).getBBox().width;
-    tryoutdiv.removeChild(div);
-    return(Math.ceil(width));
-}
+    document.body.removeChild(div);
+
+    cache[key] = Math.ceil(width);
+    return cache[key];
+  };
+})();
 
 export function insertArrow(textColor: string = "black"): string {
   return `
@@ -65,6 +73,21 @@ export function contains(a, obj) {
         }
     }
     return false;
+}
+
+// A function to trim a string.  If it is not a string, attempt to convert to string first. If conversion is not possible, return an empty string.
+export function trimString(str: any): string {
+  if (str == null || typeof str === 'undefined') {
+    return '';
+  }
+  if (typeof str !== 'string') {
+    try {
+      str = String(str);
+    } catch {
+      return '';
+    }
+  }
+  return str.trim();
 }
 
 export function deepClone (obj) {

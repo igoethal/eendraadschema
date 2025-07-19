@@ -23,7 +23,7 @@ export class Lichtcircuit extends Schakelaars {
         let output = this.toHTMLHeader(mode);
 
         output += "&nbsp;" + this.nrToHtml();
-        output += this.selectPropToHTML('type_schakelaar',["enkelpolig", "dubbelpolig", "driepolig", "dubbelaansteking", "wissel_enkel", "wissel_dubbel", "kruis_enkel", "---", "schakelaar", "dimschakelaar", "dimschakelaar wissel", "bewegingsschakelaar", "schemerschakelaar", "---", "teleruptor", "relais", "dimmer", "tijdschakelaar", "minuterie", "thermostaat", "rolluikschakelaar"]);
+        output += this.selectPropToHTML('type_schakelaar',["enkelpolig", "dubbelpolig", "driepolig", "dubbelaansteking", "wissel_enkel", "wissel_dubbel", "kruis_enkel", "---", "contact", "dimschakelaar", "dimschakelaar wissel", "bewegingsschakelaar", "schemerschakelaar", "---", "teleruptor", "relais", "dimmer", "tijdschakelaar", "minuterie", "thermostaat", "rolluikschakelaar"]);
 
         if (this.kanHalfwaterdichtZijn())       output += ", Halfwaterdicht: " + this.checkboxPropToHTML('is_halfwaterdicht');
         if (this.kanVerklikkerlampjeHebben())   output += ", Verklikkerlampje: " + this.checkboxPropToHTML('heeft_verklikkerlampje');
@@ -44,6 +44,10 @@ export class Lichtcircuit extends Schakelaars {
                            +  '<span style="color: red;"> Compatibiliteitsmodus, kies aantal schakelaars verschillend van 0 of gebruik element lichtpunt</span>';
                 } else {
                     output += ", Aantal schakelaars: " + this.selectPropToHTML('aantal_schakelaars',["1","2"]); }
+                break;
+            case "contact":
+                output += ', Normaal Gesloten: ' + this.checkboxPropToHTML('normaalGesloten'); 
+                output += ", Sturing: " + this.selectPropToHTML('sturing',["","spoel"]);
                 break;
         }
 
@@ -174,6 +178,14 @@ export class Lichtcircuit extends Schakelaars {
         mySVG.xright = startx-2;
         mySVG.yup = 25;
         mySVG.ydown = 25;
+
+        if ( (this.props.type_schakelaar === "contact") && (this.props.sturing === "spoel") ) {
+            mySVG.data = `<svg xmlns="http://www.w3.org/2000/svg" x="0" y="5" width="${mySVG.xleft+mySVG.xright}" height="${mySVG.yup+mySVG.ydown}" >`
+                            + mySVG.data
+                        + '</svg>';
+            mySVG.yup += 5;
+            lowerbound += 5;
+        }
 
         mySVG.data += (sitplan? '' : this.addAddressToSVG(mySVG,25+lowerbound,Math.max(0,lowerbound-20)));
 

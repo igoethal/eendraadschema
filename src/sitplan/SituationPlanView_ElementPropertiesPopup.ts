@@ -2,7 +2,7 @@ import { SituationPlanElement } from "./SituationPlanElement";
 import { ElectroItemZoeker } from "./ElectroItemZoeker";
 import { Electro_Item } from "../List_Item/Electro_Item";
 import { EventManager } from "../EventManager";
-import { formatFloat, htmlspecialchars } from "../general";
+import { formatFloat, htmlspecialchars, trimString } from "../general";
 
 /** 
  * Een serie functies om een formulier te tonen met edit-functionaliteiten voor symbolen in het situatieplan
@@ -103,7 +103,7 @@ export function SituationPlanView_ElementPropertiesPopup(sitplanElement: Situati
             const electroItem = electroItems[i];
             const option = document.createElement('option');
             option.value = String(i);
-            option.text = (electroItem.adres.trim() !== '' ? htmlspecialchars(electroItem.adres) + ' | ' : '') + electroItem.type;
+            option.text = (trimString(electroItem.adres) !== '' ? htmlspecialchars(electroItem.adres) + ' | ' : '') + electroItem.type;
             selectElectroItemBox.appendChild(option);
         }
     }
@@ -210,7 +210,7 @@ export function SituationPlanView_ElementPropertiesPopup(sitplanElement: Situati
      * Toon het type verbruiker van het gekozen electro-item
      */
     function updateElectroType() {
-        if (electroItemIdInput.value == null || electroItemIdInput.value.trim() == '') {
+        if (electroItemIdInput.value == null || trimString(electroItemIdInput.value) == '') {
             electroItemType.innerHTML = '<span style="color: red;">Geen ID ingegeven</span>';
             expandButton.style.display = 'none';
         } else {
@@ -481,7 +481,7 @@ export function SituationPlanView_ElementPropertiesPopup(sitplanElement: Situati
         function isNumeric(value: any) {
             return /^-?\d+(\.\d+)?$/.test(value);
         }
-        let returnId = (electroItemIdInput.value.trim() == '' ? null : Number(electroItemIdInput.value));
+        let returnId = (trimString(electroItemIdInput.value) == '' ? null : Number(electroItemIdInput.value));
         if (!(isNumeric(scaleInput.value)) || (Number(scaleInput.value) <= 0)) scaleInput.value = String(globalThis.structure.sitplan.defaults.scale*100);
         if (!(isNumeric(rotationInput.value))) rotationInput.value = String(0);
         

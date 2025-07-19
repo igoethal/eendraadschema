@@ -1292,6 +1292,16 @@ export class SituationPlanView {
                         return;
                     }
 
+                    if (element.svg && element.svg.length > 5000000) {
+                        //Use the built in help top to display a text that the image is rather large
+                        const dialog = new Dialog('Zeer groot bestand', 
+                            '<p>Dit bestand is met ' + (element.svg.length / 1000000 * 6 / 8).toFixed(0) + 'MB behoorlijk groot en kan uw browser vertragen '+
+                            'of tot moeilijkheden leiden bij het opslaan en/of printen.</p><p>We raden aan het bestand te verkleinen tot beneden 5MB, bijvoorbeeld '+
+                            'door het gebruik van het jpeg-bestandsformaat en/of verlagen van de resolutie.</p>'
+                        );
+                        dialog.show();
+                    }
+
                     this.bringToFront(); // Deze slaat ook automatisch undo informatie op dus we moeten geen globalThis.undostruct.store() meer doen.
                                          // We voeren deze om dezelfde reden pas uit na het checken dat het bestand geldig is.
 

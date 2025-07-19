@@ -4,6 +4,7 @@ import { MarkerList } from "./MarkerList";
 type PaperSize = "A4" | "A3";
 type ModeVertical = "alles" | "kies";
 type RedrawCallBackFunction = () => void;
+type printPageMode = "all" | "custom";
 
 /**
  * Stores all information about pagination and how pages will be printed.
@@ -13,6 +14,7 @@ type RedrawCallBackFunction = () => void;
  */
 
 export class Print_Table {
+
     pages:Array<Page_Info> // List of pages with for every page the displayed height (in pixels) and startx and stopx in the SVG
 
     height: number = 0;          //How high is the SVG that will be printed in pixels
@@ -27,6 +29,9 @@ export class Print_Table {
 
     pagemarkers: MarkerList;             //List of pagemarkers that can be used for automatic pagination
     enableAutopage: boolean = true;      //Flag to indicate if automatic pagination is used or not
+
+    printPageMode: printPageMode = "all"; // Current print page mode
+    printPageRange: string = ""; // Custom page range input by user, e.g. "1-2, 4"
 
     /**
      * Initialize list of pages (foresee at least 1 page) and pagemarkers
@@ -370,6 +375,142 @@ export class Print_Table {
     }
 
     /**
+     * Display a select box for page range selection (all/custom), input for custom range, and error span.
+     * Handles validation and calls redrawCallBack when needed.
+     * @param div - Existing HTMLElement where the controls will be inserted
+     * @param redrawCallBack - Callback function to redraw print preview
+     */
+    insertHTMLselectPageRange(div: HTMLElement, redrawCallBack: RedrawCallBackFunction): void {
+        // Create container with all elements using innerHTML
+        const container = document.createElement('div');
+        container.style.margin = '1em 0';
+        container.innerHTML =
+            '<label for="print_page_mode"><b>Pagina\'s:</b></label>' +
+            '<select id="print_page_mode" style="margin-left:0.5em;">' +
+            '<option value="all">Alles</option>' +
+            '<option value="custom">Aangepast</option>' +
+            '</select>' +
+            '<input type="text" id="print_page_range" style="margin-left:0.5em;width:120px;" placeholder="bijv. 1-2, 4">' +
+            '<span id="print_range_error" style="color:red;display:none;margin-left:0.5em;">Ongeldige invoer!</span>';
+
+        // Get references to elements
+        const select = container.querySelector<HTMLSelectElement>('#print_page_mode')!;
+        const input = container.querySelector<HTMLInputElement>('#print_page_range')!;
+        const errorSpan = container.querySelector<HTMLSpanElement>('#print_range_error')!;
+
+        // Set initial values from state
+        const mode = this.printPageMode ?? "all";
+        const range = this.printPageRange ?? "";
+        select.value = mode;
+        input.value = range;
+        input.style.display = (mode === "custom") ? '' : 'none';
+
+        // Helper to validate and show error for page range
+        const validatePageRange = () => {
+            // Get maxPage from globalThis.structure.print_table and sitplan
+            const maxPage = globalThis.structure.print_table.pages.length +
+                (globalThis.structure.sitplan ? globalThis.structure.sitplan.getNumPages() : 0);
+            const [isValid, errorMsg] = Print_Table.isValidPageRange(input.value, maxPage);
+            if (!isValid) {
+                errorSpan.style.display = '';
+                errorSpan.textContent = errorMsg;
+            } else {
+                errorSpan.style.display = 'none';
+                errorSpan.textContent = '';
+            }
+        };
+
+        // Event listeners
+        select.addEventListener('change', () => {
+            this.printPageMode = select.value as printPageMode;
+            if (select.value === 'custom') {
+                input.style.display = '';
+            } else {
+                input.style.display = 'none';
+                input.value = '';
+                errorSpan.style.display = 'none';
+                this.printPageRange = "";
+            }
+            validatePageRange();
+        });
+
+        input.addEventListener('input', () => {
+            this.printPageRange = input.value;
+            validatePageRange();
+        });
+
+        // Validate on initial draw
+        validatePageRange();
+
+        div.appendChild(container);
+    }
+
+    /**
+     * Static helper for validating custom page ranges (same logic as before)
+     */
+    static isValidPageRange(input: string, maxPage: number): [boolean, string] {
+        if (input.trim() === "") return [true, ""];
+        // Only allow digits, spaces, commas, and dashes
+        if (!/^[\d\s,\-]*$/.test(input)) {
+            return [false, "Ongeldige invoer: alleen cijfers, spaties, komma's en streepjes toegestaan."];
+        }
+        const ranges = input.split(',').map(r => r.trim());
+        let lastPage = 0;
+        for (const range of ranges) {
+            if (range === "") continue;
+            if (range.includes('-')) {
+                const [startStr, endStr] = range.split('-').map(s => s.trim());
+                // Check if both are integer numbers
+                if (!/^\d+$/.test(startStr) || !/^\d+$/.test(endStr)) {
+                    return [false, `Ongeldige invoer: niet-geheel getal in bereik (${range})`];
+                }
+                const start = Number(startStr);
+                const end = Number(endStr);
+                if (!Number.isInteger(start) || !Number.isInteger(end)) {
+                    return [false, `Ongeldige invoer: niet-geheel getal in bereik (${range})`];
+                }
+                if (start < 1 || end > maxPage) {
+                    return [false, `Ongeldige invoer: pagina buiten bereik (${range}), toegestaan: 1-${maxPage}`];
+                }
+                if (start > end) {
+                    return [false, `Ongeldige invoer: startpagina groter dan eindpagina (${range})`];
+                }
+                if (start <= lastPage) {
+                    return [false, `Ongeldige invoer: overlappende of niet-oplopende pagina's (${range})`];
+                }
+                lastPage = end;
+            } else {
+                // Check if integer
+                if (!/^\d+$/.test(range)) {
+                    return [false, `Ongeldige invoer: niet-geheel getal (${range})`];
+                }
+                const pageNum = Number(range);
+                if (!Number.isInteger(pageNum)) {
+                    return [false, `Ongeldige invoer: niet-geheel getal (${range})`];
+                }
+                if (pageNum < 1 || pageNum > maxPage) {
+                    return [false, `Ongeldige invoer: pagina buiten bereik (${range}), toegestaan: 1-${maxPage}`];
+                }
+                if (pageNum <= lastPage) {
+                    return [false, `Ongeldige invoer: overlappende of niet-oplopende pagina's (${range})`];
+                }
+                lastPage = pageNum;
+            }
+        }
+        return [true, ""];
+    }
+
+    /**
+     * Returns true if the current page range is valid and can be printed.
+     */
+    canPrint(): boolean {
+        const maxPage = globalThis.structure.print_table.pages.length +
+            (globalThis.structure.sitplan ? globalThis.structure.sitplan.getNumPages() : 0);
+        const [isValid, _] = Print_Table.isValidPageRange(this.printPageRange ?? "", maxPage);
+        return isValid;
+    }
+
+    /**
      * Display a Check box to decide if one wants to use autopage or not.
      * If autopage is enabled, we also recalculate the page boundaries
      * The checkbox is displayed in the HTMLElement div that is given as a parameter to the function.
@@ -387,7 +528,7 @@ export class Print_Table {
 
         var label = document.createElement('label');
         label.htmlFor = 'autopage';
-        label.textContent = "Handmatig over pagina's verdelen";
+        label.textContent = "Eéndraadschema handmatig over pagina's verdelen";
 
         if (this.enableAutopage) {
             this.setModeVertical("alles");

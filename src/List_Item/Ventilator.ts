@@ -14,13 +14,21 @@ export class Ventilator extends Electro_Item {
         this.clearProps();
         this.props.type = "Ventilator";
         this.props.adres = "";  
-    } 
+        this.props.ventilatortype = "ventilator";
+    }
+
+    overrideKeys() {
+        if (!this.props.ventilatortype) this.props.ventilatortype = "ventilator";
+    }
 
     toHTML(mode: string) {
+        this.overrideKeys();
+
         let output = this.toHTMLHeader(mode);
 
         output += "&nbsp;" + this.nrToHtml();
-        output += "Adres/tekst: " + this.stringPropToHTML('adres',5);
+        output += this.selectPropToHTML('ventilatortype', ['ventilator', 'afzuigkap']);
+        output += ", Adres/tekst: " + this.stringPropToHTML('adres',5);
 
         return(output);
     }
@@ -37,6 +45,11 @@ export class Ventilator extends Electro_Item {
 
         mySVG.data = (sitplan? "" : '<line x1="1" y1="25" x2="21" y2="25" stroke="black"></line>')
                    + '<use xlink:href="#ventilator" x="21" y="25"></use>';
+
+        if (this.props.ventilatortype === 'afzuigkap') {
+            mySVG.data += `<line x1="21" y1="7" x2="36" y2="5" stroke="black" stroke-linecap="round"></line>`;
+            mySVG.data += `<line x1="51" y1="7" x2="36" y2="5" stroke="black" stroke-linecap="round"></line>`;
+        }
         
         mySVG.data += (sitplan? "" : this.addAddressToSVG(mySVG,55,10));
 

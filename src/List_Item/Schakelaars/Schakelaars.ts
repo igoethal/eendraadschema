@@ -31,6 +31,8 @@ export class Schakelaars extends Electro_Item {
         this.props.is_halfwaterdicht = false;        // Per default niet halfwaterdicht
         this.props.heeft_verklikkerlampje = false;        // Per default geen verklikkerslampje
         this.props.is_trekschakelaar = false;        // Per default geen trekschakelaar
+        this.props.normaalGesloten = false;
+        this.props.sturing = "";
     }
 
     kanHalfwaterdichtZijn() : boolean {
@@ -55,16 +57,28 @@ export class Schakelaars extends Electro_Item {
     }
 
     overrideKeys() {
+        if (this.props.sturing == null) this.props.sturing = "";
+        if (this.props.normaalGesloten == null) this.props.normaalGesloten = false;
+
+        if (this.props.type_schakelaar == "schakelaar") this.props.type_schakelaar = "contact"; // used to be called "schakelaar" in older saves
+        
         switch (this.props.type_schakelaar) {
             case "enkelpolig":     this.props.aantal_schakelaars = String(Math.min(Number(this.props.aantal_schakelaars),5)); break;
             case "dubbelpolig":    this.props.aantal_schakelaars = String(Math.min(Number(this.props.aantal_schakelaars),2)); break;
             case "magneetcontact": this.props.aantal_schakelaars = String(Math.min(Number(this.props.aantal_schakelaars),20)); break;
             default:               this.props.aantal_schakelaars = "1"; break;
         }
+
         if (!this.kanHalfwaterdichtZijn) this.props.is_halfwaterdicht = false;
         if (!this.kanVerklikkerlampjeHebben) this.props.heeft_verklikkerlampje = false;
         if (!this.kanSignalisatielampjeHebben) this.props.heeft_signalisatielampje = false;
         if (!this.kanTrekschakelaarHebben) this.props.is_trekschakelaar = false;
+
+        if ( (this.props.normaalGesloten === true) && (this.props.type_schakelaar !== "contact") ) {
+            this.props.normaalGesloten = false; // Indien normaal gesloten, dan moet de bescherming een contact zijn
+        }
+
+        if (this.props.type_schakelaar !== "contact") this.props.sturing = "";
     }
 
     toHTML(mode: string) {
@@ -72,7 +86,7 @@ export class Schakelaars extends Electro_Item {
         let output = this.toHTMLHeader(mode);
 
         output += "&nbsp;" + this.nrToHtml();
-        output += this.selectPropToHTML('type_schakelaar',["enkelpolig", "dubbelpolig", "driepolig", "dubbelaansteking", "wissel_enkel", "wissel_dubbel", "kruis_enkel", "---", "schakelaar", "dimschakelaar", "dimschakelaar wissel", "bewegingsschakelaar", "schemerschakelaar", "---", "teleruptor", "relais", "dimmer", "tijdschakelaar", "minuterie", "thermostaat", "rolluikschakelaar", "---", "magneetcontact"]);
+        output += this.selectPropToHTML('type_schakelaar',["enkelpolig", "dubbelpolig", "driepolig", "dubbelaansteking", "wissel_enkel", "wissel_dubbel", "kruis_enkel", "---", "contact", "dimschakelaar", "dimschakelaar wissel", "bewegingsschakelaar", "schemerschakelaar", "---", "teleruptor", "relais", "dimmer", "tijdschakelaar", "minuterie", "thermostaat", "rolluikschakelaar", "---", "magneetcontact"]);
 
         if (this.kanHalfwaterdichtZijn())       output += ", Halfwaterdicht: " + this.checkboxPropToHTML('is_halfwaterdicht');
         if (this.kanVerklikkerlampjeHebben())   output += ", Verklikkerlampje: " + this.checkboxPropToHTML('heeft_verklikkerlampje');
@@ -83,6 +97,10 @@ export class Schakelaars extends Electro_Item {
             case "enkelpolig":     output += ", Aantal schakelaars: " + this.selectPropToHTML('aantal_schakelaars',["1","2","3","4","5"]); break;
             case "dubbelpolig":    output += ", Aantal schakelaars: " + this.selectPropToHTML('aantal_schakelaars',["1","2"]); break;
             case "magneetcontact": output += ", Aantal schakelaars: " + this.selectPropToHTML('aantal_schakelaars',["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]); break;
+            case "contact":        
+                output += ', Normaal Gesloten: ' + this.checkboxPropToHTML('normaalGesloten'); 
+                output += ", Sturing: " + this.selectPropToHTML('sturing',["","spoel"]);
+                break;
         }
 
         output += ", Adres/tekst: " + this.stringPropToHTML('adres',5);
@@ -100,7 +118,7 @@ export class Schakelaars extends Electro_Item {
             case "teleruptor":           tekenKeten.push(new Schakelaar("teleruptor")); break;
             case "bewegingsschakelaar":  tekenKeten.push(new Schakelaar("bewegingsschakelaar")); break;
             case "schemerschakelaar":    tekenKeten.push(new Schakelaar("schemerschakelaar")); break;
-            case "schakelaar":           tekenKeten.push(new Schakelaar("schakelaar")); break;
+            case "contact":              tekenKeten.push(new Schakelaar("contact",false,false,false,false,this.props.normaalGesloten,this.props.sturing)); break;
             case "dimmer":               tekenKeten.push(new Schakelaar("dimmer")); break;
             case "relais":               tekenKeten.push(new Schakelaar("relais")); break;
             case "minuterie":            tekenKeten.push(new Schakelaar("minuterie")); break;
@@ -250,7 +268,15 @@ export class Schakelaars extends Electro_Item {
         mySVG.xright = startx-2;
         mySVG.yup = 25;
         mySVG.ydown = 25;
-        
+
+        if ( (this.props.type_schakelaar === "contact") && (this.props.sturing === "spoel") ) {
+            mySVG.data = `<svg xmlns="http://www.w3.org/2000/svg" x="0" y="5" width="${mySVG.xleft+mySVG.xright}" height="${mySVG.yup+mySVG.ydown}" >`
+                            + mySVG.data
+                        + '</svg>';
+            mySVG.yup += 5;
+            lowerbound += 5;
+        }
+            
         mySVG.data += (sitplan? '' : this.addAddressToSVG(mySVG,25+lowerbound,Math.max(0,lowerbound-20)));
 
         return(mySVG);

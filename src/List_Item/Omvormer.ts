@@ -1,5 +1,5 @@
 import { Electro_Item } from "./Electro_Item";
-import { htmlspecialchars, svgTextWidth } from "../general";
+import { htmlspecialchars, svgTextWidth, trimString } from "../general";
 import { SVGelement } from "../SVGelement";
 import { SVGSymbols } from "../SVGSymbols";
 
@@ -105,7 +105,7 @@ export class Omvormer extends Electro_Item {
 
         // Tekst plaatsen
 
-        if (text.trim() !== "") {
+        if (trimString(text) !== "") {
             const textX = 49;
             const textY = mySVG.yup;
             const fontSize = 10;

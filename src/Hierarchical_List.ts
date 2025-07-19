@@ -1,4 +1,4 @@
-import { htmlspecialchars, insertArrow, contains } from "./general";
+import { htmlspecialchars, insertArrow, contains, trimString } from "./general";
 import { Aansluiting } from "./List_Item/Aansluiting";
 import { Aansluitpunt } from "./List_Item/Aansluitpunt";
 import { Aftakdoos } from "./List_Item/Aftakdoos";
@@ -806,7 +806,7 @@ export class Hierarchical_List {
         
         // Indien we een kring hebben met meer dan 1 kring als kind, dan geven we een waarschuwing en vragen we dit anders te doen
         if (parent != null && parent.getType() == "Kring" && aantalKringen > 1) {
-            const EDStekenFoutKleur = getComputedStyle(document.documentElement).getPropertyValue('--EDStekenFoutKleur').trim();
+            const EDStekenFoutKleur = trimString(getComputedStyle(document.documentElement).getPropertyValue('--EDStekenFoutKleur'));
             const arrowstr = insertArrow(EDStekenFoutKleur);
             output = `<div class="EDS-tekenfout">`
                    + `<b>Tekenfout:</b> U heeft meer dan 1 kring achter deze kring gehangen, Kring ${arrowstr} {Kring, Kring, &#8230;}. Dat is niet gebruikelijk.<br>`
@@ -817,7 +817,7 @@ export class Hierarchical_List {
 
         // Indien we een Aansluiting hebben met meer dan 1 kind, dan geven we een waarschuwing en vragen we dit anders te doen
         if (parent != null && parent.getType() == "Aansluiting" && aantalElementen > 1) {
-            const EDStekenFoutKleur = getComputedStyle(document.documentElement).getPropertyValue('--EDStekenFoutKleur').trim();
+            const EDStekenFoutKleur = trimString(getComputedStyle(document.documentElement).getPropertyValue('--EDStekenFoutKleur'));
             const arrowstr = insertArrow(EDStekenFoutKleur);
             output = `<div class="EDS-tekenfout">`
                    + `<b>Tekenfout:</b> U heeft meer dan 1 element achter een aansluiting gehangen, Aansluiting ${arrowstr} {Element1, Element2, &#8230;}. Dat is niet gebruikelijk.<br>`
@@ -842,8 +842,8 @@ export class Hierarchical_List {
             let myParentOrdinal = this.getOrdinalById(myParent);
             if (myParentOrdinal == null) return("");
             if ((this.data[myParentOrdinal] as Electro_Item).getType() == "Kring") {
-                let kringnaam:string = this.data[myParentOrdinal].props.naam;
-                if (kringnaam.trim() != "") {
+                let kringnaam:string = trimString(this.data[myParentOrdinal].props.naam);
+                if (kringnaam != "") {
                     return(this.data[myParentOrdinal].props.naam);
                 } else {
                     return(this.findKringName(myParent));
@@ -921,7 +921,7 @@ export class Hierarchical_List {
 
                 if ( (electroType == "Kring") && (electroItem.props.autoKringNaam !== "auto") ) {
                     // We have a kring, so we store the name in the list of names we have already seen
-                    let kringnaam = electroItem.props.naam.trim();
+                    let kringnaam = trimString(electroItem.props.naam);
                     if (kringnaam != "") {
                         kringNamen[kringnaam] = true; // Store the name in the object
                     }
@@ -1008,7 +1008,7 @@ export class Hierarchical_List {
                 for (let kring in lastNumbers) lastNumbers[kring] = 0;
             } else if (electroType == "Kring") {
                 if (parent.getType() === "Bord") {
-                    let kring = electroItem.props.naam.trim();
+                    let kring = trimString(electroItem.props.naam);
                     lastNumbers[kring] = 0;
                 }
             } else if (!contains(itemsZonderNr, (this.data[i] as Electro_Item).getType())) {

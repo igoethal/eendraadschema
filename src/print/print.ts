@@ -1,8 +1,7 @@
 import { download_by_blob } from "../importExport/importExport";
 import { SVGelement } from "../SVGelement";
 import { flattenSVGfromString } from "../general";
-
-declare function printPDF(svgs: any, print_table: any, properties: any, pages: any, filename: any, statuscallback: any, sitplanprint: any): any;
+import { printPDF } from './printToJsPDF';
 
 globalThis.HLDisplayPage = () => {
     globalThis.structure.print_table.displaypage = parseInt((document.getElementById("id_select_page") as HTMLInputElement).value)-1;
@@ -45,10 +44,31 @@ export function getPrintSVGWithoutAddress(outSVG: SVGelement, page:number = glob
 export function printsvg() {
 
     function generatePdf() {
+
         if (typeof(globalThis.structure.properties.dpi) == 'undefined') globalThis.structure.properties.dpi = 300;
     
         let svg = flattenSVGfromString(globalThis.structure.toSVG(0,"horizontal").data);
-        const pages = Array.from({ length: globalThis.structure.print_table.pages.length }, (_, i) => i+1);  
+        
+        let pages: (number | null)[];
+        const totalPages = globalThis.structure.print_table.pages.length + (globalThis.structure.sitplan ? globalThis.structure.sitplan.getNumPages() : 0);
+
+        const modeSelect = document.getElementById("print_page_mode") as HTMLSelectElement | null;
+        const rangeInput = document.getElementById("print_page_range") as HTMLInputElement | null;
+        if (!globalThis.structure.print_table.canPrint()) {
+            modeSelect.value = "all";
+            rangeInput.value = "";
+            rangeInput.style.display = "none";
+            let rangeError = document.getElementById("print_range_error");
+            if (rangeError) {
+                rangeError.style.display = "none";
+            }
+        }
+
+        let pagerange = "1-" + totalPages; // Default to all pages
+
+        if (modeSelect && modeSelect.value === "custom" && rangeInput && rangeInput.value.trim() !== "") {
+            pagerange = rangeInput.value.trim();
+        }
 
         const sitplanprint = globalThis.structure.sitplan.toSitPlanPrint();
     
@@ -56,7 +76,7 @@ export function printsvg() {
             svg,
             globalThis.structure.print_table,
             globalThis.structure.properties,
-            pages, 
+            pagerange,
             (document.getElementById("dopdfname") as HTMLInputElement).value, //filename
             document.getElementById("progress_pdf"), //HTML element where callback status can be given
             sitplanprint
@@ -95,14 +115,15 @@ export function printsvg() {
 
     const configsection = document.getElementById("configsection");
     if (configsection != null)
-        configsection.innerHTML
-            =  '<div>'
-            +  '    <button id="button_pdfdownload">Genereer PDF</button>' // Generate PDF button comes here
-            +  '    <span id="select_papersize"></span>' // Selector to choose "A3" and "A4" comes here
-            +  '    <span id="select_dpi"></span>' // Selector for dpi 300 or 600 comes here
-            +  '    <input id="dopdfname" size="20" value="eendraadschema_print.pdf">&nbsp;' // Input box for filename of pdf document
-            +  '    <span id="progress_pdf"></span>' // Area where status of pdf generation can be displayed
-            +  '</div>';
+        configsection.innerHTML 
+            = '<div>'
+            +   '<button id="button_pdfdownload">Genereer PDF</button>&nbsp;'
+            +   '<span id="select_papersize"></span>&nbsp;'
+            +   '<span id="select_dpi"></span>&nbsp;'
+            +   '<input id="dopdfname" size="20" value="eendraadschema_print.pdf">&nbsp;'
+            +   '<span id="progress_pdf"></span>' // Area where status of pdf generation can be displayed
+            + '</div>'
+            + '<div id="select_page_range"></div>';
 
     const button_pdfdownload = document.getElementById('button_pdfdownload');
     if (button_pdfdownload != null)
@@ -110,18 +131,20 @@ export function printsvg() {
 
     globalThis.structure.print_table.insertHTMLselectPaperSize(document.getElementById('select_papersize') as HTMLElement, printsvg);
     globalThis.structure.print_table.insertHTMLselectdpi(document.getElementById('select_dpi') as HTMLElement, printsvg);
-    
+
+    // Insert page range selector
+    globalThis.structure.print_table.insertHTMLselectPageRange(document.getElementById('select_page_range') as HTMLElement, printsvg);
+
     outstr 
-        =  '<br>'
-        +  '<div>'
-        +  '    <span style="margin-right: 2em" id="check_autopage"></span>' // Checkbox to choose if we want to auto paginate or not comes here
-        +  '    <span style="margin-right: 2em" id="id_verticals"></span>' // An optional area to choose what part of the y-space of the image is shown
-        +  '    <span id="id_suggest_xpos_button"></span>' // A button to force auto pagination comes here
-        +  '</div>';
+        = '<div>'
+        +   '<span style="margin-right: 2em" id="check_autopage"></span>' // Checkbox to choose if we want to auto paginate or not comes here
+        +   '<span style="margin-right: 2em" id="id_verticals"></span>' // An optional area to choose what part of the y-space of the image is shown
+        +   '<span id="id_suggest_xpos_button"></span>' // A button to force auto pagination comes here
+        + '</div>';
 
     if (configsection != null)
         configsection.insertAdjacentHTML('beforeend', outstr);
-
+        
     globalThis.structure.print_table.insertHTMLcheckAutopage(document.getElementById('check_autopage') as HTMLElement, printsvg);
     if (!globalThis.structure.print_table.enableAutopage) {
         globalThis.structure.print_table.insertHTMLchooseVerticals(document.getElementById('id_verticals') as HTMLElement, printsvg);
