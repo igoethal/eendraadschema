@@ -143,6 +143,9 @@ export class Hierarchical_List {
     sitplanjson: any; //this is where we store the situation plan in plan object exporting to json
     sitplanview: SituationPlanView;
     currentView: string = ""; // Here we store '2col' | 'config' | 'draw'
+    
+    // -- Hash table for efficient ID to ordinal lookups --
+    private idToOrdinalMap: Map<number, number> | null = null;
 
     // -- Constructor --
 
@@ -166,19 +169,6 @@ export class Hierarchical_List {
             this.sitplanview.dispose();
         }
     }
-
-    // -- Definitief verwijderen van items die als inactief werden geflagged --
-
-/*    deleteInactive() {
-        for (let i = 0; i<this.length; i++) { //Loop over all items
-            while ( (!this.active[i]) && (i<this.length) ) {
-                this.data.splice(i,1);
-                this.active.splice(i,1);
-                this.id.splice(i,1);
-                this.length--;
-            }
-        }
-    }*/
 
     /** Member functie resort
      * 
@@ -218,18 +208,60 @@ export class Hierarchical_List {
         this.active = active;
         this.id = id;
         this.length = ordinals.length;
+        
+        // Invalidate the hash table since the structure has changed
+        this.idToOrdinalMap = null;
+    }
+
+    // -- Build or rebuild the internal hash table for fast ID to ordinal lookups --
+
+    private buildIdToOrdinalMap() {
+        this.idToOrdinalMap = new Map<number, number>();
+        for (let i = 0; i < this.length; i++) {
+            if (this.active[i]) {
+                this.idToOrdinalMap.set(this.id[i], i);
+            }
+        }
     }
 
     // -- Plaats in de array zoeken op basis van de id --
 
     getOrdinalById(my_id: number) : number | null {
-        let ordinal = this.id.indexOf(my_id);
-        return (ordinal == -1 ? null : ordinal); 
+
+        function isInValidOrdinal(ordinal: number): boolean {
+            return ( (ordinal === undefined) || 
+                     (ordinal === null) ||
+                     (ordinal >= this.length) ||
+                     (!this.active[ordinal]) ||
+                     (this.id[ordinal] !== my_id) )
+        }
+
+        if (my_id === 0) return null; // ID 0 is not a valid Electro_Item
+
+        // Build hash table if it doesn't exist
+        if (this.idToOrdinalMap === null) this.buildIdToOrdinalMap();
+
+        // Try to get ordinal from hash table
+        let ordinal = this.idToOrdinalMap!.get(my_id);
+
+        if (isInValidOrdinal.call(this, ordinal)) {
+            this.buildIdToOrdinalMap(); // Rebuild if not found or invalid
+            ordinal = this.idToOrdinalMap!.get(my_id);
+            if (isInValidOrdinal.call(this, ordinal)) {
+                return(null); // if still not found, give up
+            }
+        }
+        
+        return ordinal // if all goes well, return the ordinal
+
     }
 
     getElectroItemById(my_id: number|null) : Electro_Item | null {
-        let ordinal = this.id.indexOf(my_id);
-        if (ordinal != -1) return(this.data[ordinal] as Electro_Item);
+        if (my_id === null) return null;
+        if (my_id === 0) return null; // ID 0 is not a valid Electro_Item
+        
+        let ordinal = this.getOrdinalById(my_id);
+        if (ordinal !== null) return(this.data[ordinal] as Electro_Item);
         return null;
     }
 
@@ -247,10 +279,13 @@ export class Hierarchical_List {
     // -- Maximum aantal actieve kinderen van id = parent_id --
 
     getMaxNumChilds(parent_id: number) : number {
-        let returnval:number = this.data[this.getOrdinalById(parent_id)].getMaxNumChilds();
+        let ordinal = this.getOrdinalById(parent_id);
+        if (ordinal === null) return 0; // If parent_id is not found, return 0
+
+        let returnval:number = this.data[ordinal].getMaxNumChilds();
         return(returnval);
     }
-
+    
     // Creëer een nieuw Electro_Item --
 
     createItem(electroType: string) : Electro_Item {
@@ -331,6 +366,9 @@ export class Hierarchical_List {
         //Adjust length of the queue and future identifyer
         this.curid += 1;
         this.length += 1;
+        
+        // Invalidate the hash table since the structure has changed
+        this.idToOrdinalMap = null;
 
         //Return the Object
         return(tempval);
@@ -411,6 +449,8 @@ export class Hierarchical_List {
 
         // First find the ordinal number of the current location and the desired location --
         let currentOrdinal = this.getOrdinalById(my_id);
+        if (currentOrdinal === null) return; // If my_id is not found, do nothing
+
         let newOrdinal = currentOrdinal;
         let currentparent = this.data[currentOrdinal].parent;
         for (let i = currentOrdinal-1; i>=0; i--) {
@@ -440,6 +480,8 @@ export class Hierarchical_List {
 
         // First find the ordinal number of the current location and the desired location --
         let currentOrdinal = this.getOrdinalById(my_id);
+        if (currentOrdinal === null) return; // If my_id is not found, do nothing
+
         let newOrdinal = currentOrdinal;
         let currentparent = this.data[currentOrdinal].parent;
         for (let i = currentOrdinal+1; i<this.length; i++) {
@@ -469,10 +511,10 @@ export class Hierarchical_List {
 
         // First find the ordinal number of the current location and the desired location
         let currentOrdinal = this.getOrdinalById(my_id);
+        if (currentOrdinal === null) return; // If my_id is not found, do nothing
 
         // Then create a clone of the object and assign the correct parent_id
         if(arguments.length < 2) parent_id = this.data[currentOrdinal].parent;
-        let parentOrdinal = this.getOrdinalById(parent_id);
 
         let my_item = this.createItem((this.data[currentOrdinal] as Electro_Item).getType());
         my_item.clone(this.data[currentOrdinal]);
@@ -480,11 +522,19 @@ export class Hierarchical_List {
         // Now add the clone to the structure. The clone will have id this.curid-1
         if(arguments.length < 2)
             this.insertItemAfterId(my_item, my_id); //Cloning the top-element, this messes up the ordinals !!
-            else this.insertChildAfterId(my_item, parent_id); //Cloning childs, this messes up the ordinals !!
+        else
+            this.insertChildAfterId(my_item, parent_id); //Cloning childs, this messes up the ordinals !!
         
         let new_id = this.curid-1;
-        this.data[this.getOrdinalById(new_id)].collapsed = this.data[this.getOrdinalById(my_id)].collapsed;
-        
+
+        let new_ordinal = this.getOrdinalById(new_id);
+        currentOrdinal = this.getOrdinalById(my_id); // we need to do this again as the ordinals might have changed
+
+        if (currentOrdinal === null) return; // If my_id is not found, do nothing
+        if (new_ordinal === null) return; // If new_id is not found, do nothing
+
+        this.data[new_ordinal].collapsed = this.data[currentOrdinal].collapsed;
+
         // Now loop over the childs of the original and also clone those
         let toClone = new Array(); //list of id's to clone
         for (let i = 0; i<this.length; i++) {
@@ -525,12 +575,15 @@ export class Hierarchical_List {
         tempval.resetProps();   //Already part of createItem but we need to run this again as the assign operation overwrote everything
 
         this.data[ordinal] = tempval;
+        
+        // Hash table doesn't need invalidation as IDs and structure remain the same
     }
 
     // -- Pas type aan van item met id = my_id --
 
     adjustTypeById(my_id: number, electroType : string) {
         let ordinal = this.getOrdinalById(my_id);
+        if (ordinal === null) return; // If my_id is not found, do nothing
         this.adjustTypeByOrdinal(ordinal, electroType);
     }
 
@@ -544,7 +597,9 @@ export class Hierarchical_List {
             if (parent.getType() == "Kring") {
 
                 let lastOrdinalInKring = 0;
+
                 let myOrdinal = this.getOrdinalById(item.id);
+                if (myOrdinal === null) return; // If item is not found, do nothing 
 
                 for (let i = 0; i<item.sourcelist.length; i++) {
                     if (this.active[i] && (this.data[i].parent == parent.id)) lastOrdinalInKring = i;
@@ -690,6 +745,8 @@ export class Hierarchical_List {
 
     updateHTMLinner(id: number) {
         let ordinal: number = this.getOrdinalById(id);
+        if (ordinal === null) return; // If id is not found, do nothing
+
         let div = document.getElementById('id_elem_'+id) as HTMLElement;
         div.innerHTML = this.toHTMLinner(ordinal);
     }
@@ -835,6 +892,8 @@ export class Hierarchical_List {
 
     findKringName(my_id: number) : string {
         let myOrdinal = this.getOrdinalById(my_id);
+        if (myOrdinal == null) return(""); // If my_id is not found, do nothing
+
         let myParent = this.data[myOrdinal].parent;
         if (myParent == 0) {
             return("");
@@ -1100,12 +1159,16 @@ export class Hierarchical_List {
                         break;   
 
                     default:
-                        if ( (myParent != 0) && 
-                             ( (this.data[this.getOrdinalById(myParent)] as Electro_Item).getType() == "Meerdere verbruikers") )
+                        const parentElectroItem = this.getElectroItemById(myParent) as Electro_Item | null;
+                        if (
+                            myParent != 0 &&
+                            parentElectroItem != null &&
+                            parentElectroItem.getType() == "Meerdere verbruikers"
+                        ) {
                             inSVG[elementCounter] = this.data[i].toSVG();
-                        else if (stack == "vertical") 
-                            inSVG[elementCounter] = this.toSVG(this.id[i],"horizontal",0,true); //if we are still in vertical mode, switch to horizontal and take childs with us
-                        else { //we are in horizontal mode and can start drawing
+                        } else if (stack == "vertical") {
+                            inSVG[elementCounter] = this.toSVG(this.id[i], "horizontal", 0, true); //if we are still in vertical mode, switch to horizontal and take childs with us
+                        } else { //we are in horizontal mode and can start drawing
                             if (this.id[i] == myParent) { // Element is de parent en tekent zichzelf
                                 inSVG[elementCounter] = this.data[i].toSVG();
                             } else { // Element is niet de parent, we tekenen het element en al zijn kinderen
@@ -1187,8 +1250,11 @@ export class Hierarchical_List {
                 outSVG.yup = height; //As a general rule, there is no ydown, but to be confirmed
                 outSVG.ydown = 0;
                 //outSVG.xleft = Math.max(max_xleft,35); // foresee at least 35 for text at the left
-                outSVG.xleft = max_xleft; 
-                if ((this.data[this.getOrdinalById(myParent)] as Electro_Item).getType() == "Kring") max_xright += 10; // Altijd 10 extra rechts voorzien voor uitstekende tekst/adressen
+                outSVG.xleft = max_xleft;
+
+                let parentItem: Electro_Item = this.getElectroItemById(myParent);
+                if (parentItem != null && parentItem.getType() == "Kring") max_xright += 10; // Altijd 10 extra rechts voorzien voor uitstekende tekst/adressen
+                
                 outSVG.xright = Math.max(max_xright,25); // foresee at least 25 at the right
 
                 // create the output data

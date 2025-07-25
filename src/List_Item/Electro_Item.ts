@@ -40,7 +40,7 @@ export class Electro_Item extends List_Item {
   // -- Lijst met toegestande kinderen van het Electro_item --
 
   allowedChilds() : Array<string> { 
-      return ["", "Aansluiting", "Domotica", "Domotica module (verticaal)", "Domotica gestuurde verbruiker", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Contactdoos", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Media", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zekering/differentieel", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Zeldzame symbolen"];
+      return ["", "Aansluiting", "Domotica", "Domotica module (verticaal)", "Domotica gestuurde verbruiker", "Leiding", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Contactdoos", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Media", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zekering/differentieel", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Zeldzame symbolen"];
   }
 
   // -- Aantal actieve kinderen van het Electro_item, attributes worden niet geteld --
@@ -91,6 +91,8 @@ export class Electro_Item extends List_Item {
 
     if ( (parent != null) && ((parent as Electro_Item).getType() == "Meerdere verbruikers") ) {
         let myOrdinal = this.sourcelist.getOrdinalById(this.id);
+        if (myOrdinal === null) return false; // This should never happen, but just in case
+        
         let lastOrdinal = 0;
         for (let i = 0; i<this.sourcelist.data.length; ++i) {
             if (this.sourcelist.active[i] && !((this.sourcelist.data[i] as Electro_Item).isVrijeTekstZonderKader()) && (this.sourcelist.data[i].parent == this.parent)) lastOrdinal = i;

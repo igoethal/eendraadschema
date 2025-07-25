@@ -1,4 +1,5 @@
 export const changelog = [
+  { date: "2025-07-20", msg: "Micro-omvormer optie toegevoegd. Voor omvormers met maximaal één aansluiting kan nu \"micro\" worden aangevinkt, wat resulteert in een dunnere lijndikte in het schema." },
   { date: "2025-07-20", msg: "Mogelijkheid om slechts bepaalde pagina's af te drukken uit het schema." },
   { date: "2025-07-07", msg: "Symbool voor afzuigkap (in Ventilator) en aarding (in Zeldzame symbolen)." },
   { date: "2025-07-05", msg: "Verbeteringen en meer mogelijkheden aan het contact/contactor symbool (binnen Kring, of Schakelaars)." },

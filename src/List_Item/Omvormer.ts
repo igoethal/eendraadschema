@@ -16,6 +16,7 @@ export class Omvormer extends Electro_Item {
         this.props.type = "Omvormer";
         this.props.adres = "";
         this.props.inkring = false;
+        this.props.micro = false;
     }
 
     allowedChilds() : Array<string> { // returns an array with the type-names of allowed childs
@@ -30,8 +31,12 @@ export class Omvormer extends Electro_Item {
         let parent: Electro_Item;
         if (this.props.tekst == null) this.props.tekst = "";
         if (this.props.inkring == null) this.props.inkring = false;
+        if (this.props.micro == null) this.props.micro = false;
         if ( ((parent = this.getParent()) != null) && (parent.getType() != "Kring") )
             this.props.inkring = false;
+        if (this.props.micro && this.getNumChilds() > 1) {
+            this.props.micro = false;
+        }
     }
 
     toHTML(mode: string) {
@@ -42,6 +47,12 @@ export class Omvormer extends Electro_Item {
         output += "&nbsp;" + this.nrToHtml();
         if ( ((parent = this.getParent()) != null) && (parent.getType() == "Kring") )
             output += "In kring: " + this.checkboxPropToHTML('inkring') + ", ";
+        
+        // Only show micro checkbox if there's one child or less
+        if (this.getNumChilds() <= 1) {
+            output += "Micro: " + this.checkboxPropToHTML('micro') + ", ";
+        }
+        
         output += "Tekst: " + this.stringPropToHTML('tekst',10) + ", ";
         output += "Adres/tekst: " + this.stringPropToHTML('adres',5);
 
@@ -91,8 +102,9 @@ export class Omvormer extends Electro_Item {
         mySVG.xleft = 1;
         mySVG.xright += 70;
 
+        const strokeWidth = this.props.micro ? "1" : "2";
         mySVG.data += '<rect x="' + (21) + '" width="' + (50) +
-                      '" y="' + (5) + '" height="' + (height-10) + '" stroke="black" stroke-width="2" fill="white" />';
+                      '" y="' + (5) + '" height="' + (height-10) + '" stroke="black" stroke-width="' + strokeWidth + '" fill="white" />';
 
         mySVG.data += `<line x1="21" y1="5" x2="${21+50}" y2="${5 + (height-10)}" stroke="black" />`;
 

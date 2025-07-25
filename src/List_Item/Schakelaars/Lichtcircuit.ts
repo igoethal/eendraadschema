@@ -100,7 +100,7 @@ export class Lichtcircuit extends Schakelaars {
                 lichtpunt.parent = schakelaars.id;
             }
             let ordinal = this.sourcelist.getOrdinalById(this.id); // Deze kan hier pas komen want de ordinal is gewijzigd door het invoegen van de schakelaars
-            this.sourcelist.data[ordinal] = lichtpunt;
+            if (ordinal !== null) this.sourcelist.data[ordinal] = lichtpunt;
 
         } else { // enkel schakelaars
 
@@ -108,7 +108,7 @@ export class Lichtcircuit extends Schakelaars {
             schakelaars.id = this.id;
             schakelaars.parent = this.getParent().id;
             let ordinal = this.sourcelist.getOrdinalById(this.id);
-            this.sourcelist.data[ordinal] = schakelaars;
+            if (ordinal !== null) this.sourcelist.data[ordinal] = schakelaars;
 
         }
         

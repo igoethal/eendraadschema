@@ -38,14 +38,19 @@ export class List_Item {
 
     isActief() : Boolean {
         let ordinal = this.sourcelist.getOrdinalById(this.id);
+        if (ordinal === null) return false; // This should never happen, but just in case
         return(this.sourcelist.active[ordinal]);   
     }
 
     // -- Retourneer ouder-item --
 
     getParent() {
-        let returnval = this.sourcelist.data[this.sourcelist.getOrdinalById(this.parent)];
+        let ordinal = this.sourcelist.getOrdinalById(this.parent);
+        if (ordinal === null) return null; // If parent is not found, return null
+
+        let returnval = this.sourcelist.data[ordinal];
         if (returnval === undefined) returnval = null; // If parent is not found, return null
+        
         return returnval;
     }
 
