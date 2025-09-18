@@ -7,7 +7,7 @@ declare global {
 
 type PrintTable = {
     papersize: string;
-    pages: { start: number; stop: number }[];
+    pages: { start: number; stop: number; info: string }[];
     starty: number;
     stopy: number;
 };
@@ -275,7 +275,11 @@ export function printPDF(
                      startx + 2 * paperdetails.owner_box_width + 2 + 3, 
                      paperdetails.paperheight - paperdetails.paper_margin - paperdetails.drawnby_box_height - paperdetails.owner_box_height - textHeight / 6 + textHeight * (1 + 1.2) + 1.5);
 
-            let infoshorter = properties.info.replace("https://www.eendraadschema.goethals-jacobs.be", "eendraadschema");
+            let info : string = (iter < print_table.pages.length ? 
+                                    print_table.pages[iter].info || properties.info || "" :
+                                    properties.info || "");
+                                             
+            let infoshorter = info.replace("https://www.eendraadschema.goethals-jacobs.be", "eendraadschema");
 
             doc.text(htmlToPDFlines(doc, infoshorter).slice(0, 8), 
                      startx + 3 * paperdetails.owner_box_width + 2 + 3,

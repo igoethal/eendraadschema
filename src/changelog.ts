@@ -1,4 +1,9 @@
 export const changelog = [
+  { date: "2025-09-18", msg: "Eerste stapjes om symbolen toe te voegen aan het situatieschema die niet in het ééndraadschema zitten." },
+  { date: "2025-08-22", msg: "Aftakdoos kan nu meerdere kinderen bevatten." },
+  { date: "2025-08-19", msg: "Kring en Aansluiting kennen nu ook de bescherming \"zekeringscheider\"." },
+  { date: "2025-07-29", msg: "Bij handmatig pagineren kan voor iedere pagina van het ééndraadschema een andere info-tekst gekozen worden om rechts onder te tonen bij het afprinten." },
+  { date: "2025-07-28", msg: "Voor elementen op het hoogste niveau kan gekozen worden om tijdens het printen altijd een nieuwe pagina te starten." },
   { date: "2025-07-20", msg: "Micro-omvormer optie toegevoegd. Voor omvormers met maximaal één aansluiting kan nu \"micro\" worden aangevinkt, wat resulteert in een dunnere lijndikte in het schema." },
   { date: "2025-07-20", msg: "Mogelijkheid om slechts bepaalde pagina's af te drukken uit het schema." },
   { date: "2025-07-07", msg: "Symbool voor afzuigkap (in Ventilator) en aarding (in Zeldzame symbolen)." },

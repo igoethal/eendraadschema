@@ -1,12 +1,14 @@
 import { htmlspecialchars, insertArrow, contains, trimString } from "./general";
 import { Aansluiting } from "./List_Item/Aansluiting";
 import { Aansluitpunt } from "./List_Item/Aansluitpunt";
+import { Aardingsonderbreker } from "./List_Item/Aardingsonderbreker";
 import { Aftakdoos } from "./List_Item/Aftakdoos";
 import { Batterij } from "./List_Item/Batterij";
 import { Bel } from "./List_Item/Bel";
 import { Boiler } from "./List_Item/Boiler";
 import { Bord } from "./List_Item/Bord";
 import { Contactdoos } from "./List_Item/Contactdoos";
+import { Container } from "./List_Item/Container";
 import { Diepvriezer } from "./List_Item/Diepvriezer";
 import { Domotica } from "./List_Item/Domotica";
 import { Domotica_gestuurde_verbruiker } from "./List_Item/Domotica_gestuurde_verbruiker";
@@ -179,7 +181,35 @@ export class Hierarchical_List {
      * 
      **/
 
-    reSort() {
+    reSort() { // niet de meest elegante implementate maar draait in 2 ms op een lang schema dus meer dan goed genoeg
+
+        let isSorted = () => { // Controleer of de data reeds gesorteerd is. Controleert niet of Id's dubbel voorkomen, dat laatste mag normaal niet gebeuren
+            if (this.length <= 1) return true; // If only one element or no element at all, it's sorted by definition
+
+            // We maken een stack van Ids maar laatste element is een variabele voor snellere performance
+            let stack: number[] = [];
+            let stacktop: number = 0;
+
+            for (let i: number = 0; i < this.length; i++) {
+                if (this.active[i]) {
+                    let parentId = this.data[i].parent;
+
+                    if (parentId == stacktop) { // We zakken 1 level dieper
+                        stack.push(stacktop);
+                        stacktop = this.id[i];
+                    } else { // We blijven op hetzelfde niveau of stijgen terug op tot we onder de parent hangen
+                        while (stack.length > 0 && stack[stack.length - 1] !== parentId) stack.pop();
+                        if (stack.length === 0) return false; // referentie naar een parentId die we nog niet eerder zagen due niet gesorteerd
+                        stacktop = this.id[i];
+                    }
+                } else {
+                    return(false); // force a re-sort if we find an inactive item
+                }
+            }
+
+            return true;
+        }
+
         let sortToOrdinal = (parent = 0, ordinals = []) => {
             for (let i = 0; i<this.length; i++) {
                 if (this.active[i]) {
@@ -191,6 +221,8 @@ export class Hierarchical_List {
             }
             return ordinals;
         }
+
+        if (isSorted()) return; // If already sorted, do nothing
 
         let ordinals = sortToOrdinal();
 
@@ -276,6 +308,18 @@ export class Hierarchical_List {
         return(returnval);
     }
 
+    // -- Get the ID of the first child of parent_id --
+
+    getFirstChildId(parent_id: number) : number | null {
+        for (let i = 0; i < this.length; i++) {
+            if (this.active[i] && this.data[i].parent == parent_id 
+                && !((this.data[i] as Electro_Item).isAttribuut())) {
+                return this.id[i];
+            }
+        }
+        return null; // No child found
+    }
+
     // -- Maximum aantal actieve kinderen van id = parent_id --
 
     getMaxNumChilds(parent_id: number) : number {
@@ -285,7 +329,22 @@ export class Hierarchical_List {
         let returnval:number = this.data[ordinal].getMaxNumChilds();
         return(returnval);
     }
-    
+
+    createContainerIfNotExists(): Electro_Item {
+        // loop over all childs of the root element (parent = 0) and check if any has type "Container"
+        // if not, create a new Container with parent the root node and return it
+        for (let i = 0; i < this.length; i++) {
+            if (this.active[i] && this.data[i].parent === 0 && this.data[i] instanceof Container) {
+                return (this.data[i] as Electro_Item); // Container already exists
+            }
+        }
+
+        // Create a new Container
+        let container = this.addItem("Container");
+        container.parent = 0;
+        return container; // Return the id of the newly created Container
+    }
+
     // Creëer een nieuw Electro_Item --
 
     createItem(electroType: string) : Electro_Item {
@@ -295,11 +354,13 @@ export class Hierarchical_List {
         switch (electroType) {
             case 'Aansluiting': tempval = new Aansluiting(this); break; 
             case 'Aansluitpunt': case 'Leeg': tempval = new Aansluitpunt(this); break;
+            case 'Aardingsonderbreker': tempval = new Aardingsonderbreker(this); break;
             case 'Aftakdoos': tempval = new Aftakdoos(this); break;
             case 'Batterij': tempval = new Batterij(this); break;
             case 'Bel': tempval = new Bel(this); break;
             case 'Boiler': tempval = new Boiler(this); break;
             case 'Bord': tempval = new Bord(this); break;
+            case 'Container': tempval = new Container(this); break;
             case 'Diepvriezer': tempval = new Diepvriezer(this); break;
             case 'Domotica': tempval = new Domotica(this); break; 
             case 'Domotica module (verticaal)': tempval = new Domotica_verticaal(this); break; 
@@ -751,7 +812,7 @@ export class Hierarchical_List {
         div.innerHTML = this.toHTMLinner(ordinal);
     }
 
-    voegAttributenToeAlsNodig() {
+    voegAttributenToeAlsNodigEnReSort() {
 
         // Verwijder alle attributen die geen kind zijn van een domotica gestuurde verbruiker met externe sturing
         // of van het verkeerde type zijn
@@ -816,7 +877,7 @@ export class Hierarchical_List {
                     if (newElement != null) {
                         newElement.props.isAttribuut = true;
                         this.insertChildAfterId(newElement, this.id[i]);
-                        this.voegAttributenToeAlsNodig(); // De volgorde is gewijzigd dus we lanceren de functie opnieuw
+                        this.voegAttributenToeAlsNodigEnReSort(); // De volgorde is gewijzigd dus we lanceren de functie opnieuw
                         return;
                     }
                 }
@@ -846,9 +907,11 @@ export class Hierarchical_List {
         // Genereer de HTML voor de elementen die onder myParent hangen
         for (let i = 0; i<this.length; i++) {
             if (this.active[i] && (this.data[i].parent == myParent)
-            && !( (this.data[i] as Electro_Item).isAttribuut() ) ) {
+            && !( (this.data[i] as Electro_Item).isAttribuut() ) 
+            && !((this.data[i] as Electro_Item).getType() == "Container") ) {
                 aantalElementen++;
                 const electroItemType = (this.data[i] as Electro_Item).getType();
+                if (electroItemType == "Container") continue; // We tekenen de container niet zelf
                 if (electroItemType != null && electroItemType == "Kring") aantalKringen++;
                 output += '<table class="html_edit_table" id="id_elem_' + this.id[i]  + '">';
                 output += this.toHTMLinner(i);
@@ -1142,7 +1205,12 @@ export class Hierarchical_List {
                     case "Omvormer":
                         inSVG[elementCounter] = this.data[i].toSVG(); //Maak de tekening
                         this.tekenVerticaleLijnIndienKindVanKring(this.data[i] as Electro_Item,inSVG[elementCounter]);         
-                        break; 
+                        break;
+
+                    case "Aftakdoos":
+                        inSVG[elementCounter] = this.data[i].toSVG(); //Maak de tekening
+                        this.tekenVerticaleLijnIndienKindVanKring(this.data[i] as Electro_Item,inSVG[elementCounter]);
+                        break;
 
                     case "Domotica gestuurde verbruiker":
                         inSVG[elementCounter] = this.data[i].toSVG(); //Maak de tekening
@@ -1156,7 +1224,10 @@ export class Hierarchical_List {
                     case "Aansluiting":
                         inSVG[elementCounter] = this.data[i].toSVG(); //Maak de tekening
                         this.tekenVerticaleLijnIndienKindVanKring(this.data[i] as Electro_Item,inSVG[elementCounter]);         
-                        break;   
+                        break;
+
+                    case "Container":
+                        break;
 
                     default:
                         const parentElectroItem = this.getElectroItemById(myParent) as Electro_Item | null;
@@ -1178,7 +1249,7 @@ export class Hierarchical_List {
                         this.tekenVerticaleLijnIndienKindVanKring(this.data[i] as Electro_Item,inSVG[elementCounter]);
                         break;
                 }
-                elementCounter++;
+                if (mytype !== 'Container') elementCounter++;
             }    
         }
 
@@ -1242,6 +1313,11 @@ export class Hierarchical_List {
                   height = height + inSVG[i].yup + inSVG[i].ydown;
                   max_xleft = Math.max(max_xleft,inSVG[i].xleft);
                   max_xright = Math.max(max_xright,inSVG[i].xright);
+                  if (inSVG[i].yup + inSVG[i].ydown > 0) {
+                      outSVG.connectorPos.push(height - inSVG[i].yup);
+                  } else {
+                      outSVG.connectorPos.push(null);
+                  }
                 }
                 max_xleft = Math.max(minxleft, max_xleft);
                 width = max_xleft + max_xright;
@@ -1252,10 +1328,20 @@ export class Hierarchical_List {
                 //outSVG.xleft = Math.max(max_xleft,35); // foresee at least 35 for text at the left
                 outSVG.xleft = max_xleft;
 
+                if (elementCounter > 0) {
+                    outSVG.firstChildydown = inSVG[0].ydown;
+                    outSVG.lastChildyup = inSVG[elementCounter-1].yup;
+                }
+
                 let parentItem: Electro_Item = this.getElectroItemById(myParent);
                 if (parentItem != null && parentItem.getType() == "Kring") max_xright += 10; // Altijd 10 extra rechts voorzien voor uitstekende tekst/adressen
-                
-                outSVG.xright = Math.max(max_xright,25); // foresee at least 25 at the right
+
+                if (!(this.getElectroItemById(myParent) instanceof Omvormer) && 
+                    !(this.getElectroItemById(myParent) instanceof Aftakdoos)) {
+                    outSVG.xright = Math.max(max_xright,25); // foresee at least 25 at the right
+                } else {
+                    outSVG.xright = Math.max(max_xright,0);
+                }
 
                 // create the output data
                 let ypos:number = 0;
@@ -1270,7 +1356,7 @@ export class Hierarchical_List {
                 break;
         }
 
-        outSVG.data += "\n";
+        //outSVG.data += "\n";
 
         if (myParent==0) { //We will always foresee a 20 pixel horizontal and 5 pixel vertical margin
           let header: string = "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" transform=\"scale(1,1)\" width=\"" + (width + 20) + "\" height=\"" + (height + 5) + "\">";

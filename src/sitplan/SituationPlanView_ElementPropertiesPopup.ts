@@ -438,12 +438,6 @@ export function SituationPlanView_ElementPropertiesPopup(sitplanElement: Situati
     /*
      * Eventhandlers, enter op de tekst velden staat gelijk aan OK klikken
      */
-   
-    /*electroItemIdInput.onkeydown = handleEnterKey;
-    adresInput.onkeydown = handleEnterKey;
-    fontSizeInput.onkeydown = handleEnterKey;
-    scaleInput.onkeydown = handleEnterKey;
-    rotationInput.onkeydown = handleEnterKey;*/
 
     // handle enter and escape key
     let event_manager = new EventManager();

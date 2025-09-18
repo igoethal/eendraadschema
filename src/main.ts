@@ -306,14 +306,25 @@ globalThis.HL_changeparent = (my_id: number) => {
     if (int_newparentid != 0) {
         parentOrdinal = globalThis.structure.getOrdinalById(int_newparentid);
         if (parentOrdinal == null)
-          error=1;
-          else if ( (!globalThis.structure.active[parentOrdinal]) || (int_newparentid == my_id) ) error=1;
+            error=1;
+        else if ( (!globalThis.structure.active[parentOrdinal]) || (int_newparentid == my_id) ) 
+            error=1;
+        else {
+            // We need to check that newparentid is not a decendant of my_id
+            let id = int_newparentid;
+            while (id != 0) {
+                id = globalThis.structure.getElectroItemById(id)?.parent ?? 0;
+                if (id == my_id) error = 2;
+            } 
+        }
     }
 
-    if (error == 1) alert("Dat is geen geldig moeder-object. Probeer opnieuw.");
-    else {
-        const idx = globalThis.structure.getOrdinalById(my_id);
-        if (idx !== null) globalThis.structure.data[idx].parent = int_newparentid;
+    switch (error) {
+        case 1: alert("Dat is geen geldig moeder-object. Probeer opnieuw."); break;
+        case 2: alert("Circulaire referentie. Nieuwe moeder kan geen afstammeling van het te verplaatsen element zijn."); break;
+        default:
+            const idx = globalThis.structure.getOrdinalById(my_id);
+            if (idx !== null) globalThis.structure.data[idx].parent = int_newparentid;
     }
 
     globalThis.structure.reSort();
@@ -450,7 +461,7 @@ function renderAddressStacked() {
               '<table width="90%" cols="1" rows="1" style="border-collapse: collapse;border-style: solid; border-width:thin;" cellpadding="5">' +
               '<tr><td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_control" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + globalThis.structure.properties.control + '</td></tr>' +
               '</table><br>' +
-              'Info' +
+              'Info <i>(wordt overschreven bij handmatig pagineren in het print-menu)</i>' +
               '<table width="90%" cols="1" rows="1" style="border-collapse: collapse;border-style: solid; border-width:thin;" cellpadding="5">' +
               '<tr><td style="border-style: solid; border-width:thin;" contenteditable="true" valign="top" id="conf_info" onblur="javascript:forceUndoStore()" onkeyup="javascript:changeAddressParams()">' + globalThis.structure.properties.info + '</td></tr>' +
               '</table>';
@@ -755,7 +766,7 @@ left_col_inner.addEventListener('change', function(event) {
         }
 
         if (electroItem.getType() == "Domotica gestuurde verbruiker")
-            globalThis.structure.voegAttributenToeAlsNodig();
+            globalThis.structure.voegAttributenToeAlsNodigEnReSort();
 
         globalThis.undostruct.store();
         globalThis.HLRedrawTreeSVG();

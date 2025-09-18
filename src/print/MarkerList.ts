@@ -6,7 +6,7 @@
 
 export class MarkerList {
 
-    markers: { depth: number, xpos: number }[] = [];
+    markers: { depth: number, xpos: number, forceNewPage: boolean }[] = [];
 
     /**
      * Clear the list of markers
@@ -23,11 +23,11 @@ export class MarkerList {
      * @param xpos - The x-coordinate position of the marker.
      */
 
-    addMarker(depth, xpos): void {
+    addMarker(depth, xpos, forceNewPage = false): void {
         // Check if the marker already exists
         const exists = this.markers.some(marker => marker.depth === depth && marker.xpos === xpos);
         if (!exists) {
-          this.markers.push({ depth, xpos });
+          this.markers.push({ depth, xpos, forceNewPage });
         }
     }
 
@@ -64,4 +64,19 @@ export class MarkerList {
             return minDepthMarker;
         }, filteredMarkers[0]);
     }
+
+    /**
+     * Zoekt de eerste marker binnen het opgegeven bereik waarvoor forceNewPage is ingesteld op true.
+     *
+     * @param minx - De minimale x-positie (exclusief) van het bereik.
+     * @param maxx - De maximale x-positie (inclusief) van het bereik.
+     * @returns Een object met de diepte en x-positie van de gevonden marker, of null als er geen marker wordt gevonden.
+     */
+    findForceNewPage(minx: number, maxx: number): { depth: number, xpos: number } | null {
+        // Find the first marker with forceNewPage set to true within the range
+        const marker = this.markers.find(m => m.xpos > minx && m.xpos <= maxx && m.forceNewPage);
+        return marker ? { depth: marker.depth, xpos: marker.xpos } : null;
+    }
+
+
 }

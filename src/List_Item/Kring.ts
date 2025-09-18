@@ -1,5 +1,5 @@
 import { Electro_Item } from "./Electro_Item";
-import { htmlspecialchars, svgTextWidth, contains, trimString } from "../general";
+import { htmlspecialchars, svgTextWidth, contains, trimString, parseLocaleFloat } from "../general";
 import { SVGelement } from "../SVGelement";
 import { SVGSymbols } from "../SVGSymbols";
 
@@ -56,6 +56,7 @@ export class Kring extends Electro_Item {
         this.props.normaalGesloten = false;
         this.props.sturing = "";
         this.props.adres = "";
+        this.props.newPage = false;
 
         //Bepalen of er per default een kabel aanwezig is en of we zekeringen plaatsen
         let parent = this.getParent();
@@ -100,8 +101,11 @@ export class Kring extends Electro_Item {
     }
 
     overrideKeys() {
+        if (this.props.curve_automaat === "E") this.props.curve_automaat = "U"; // used to be called "E" in older saves
+
         if (this.props.sturing == null) this.props.sturing = "";
         if (this.props.normaalGesloten == null) this.props.normaalGesloten = false;
+        if (this.props.newPage == null) this.props.newPage = false;
 
         if (this.props.bescherming == "schakelaar") this.props.bescherming = "contact"; // used to be called "schakelaar" in older saves
         
@@ -109,11 +113,19 @@ export class Kring extends Electro_Item {
              ( ( (this.props.aantal_polen as number) < 1 ) || 
                ( (this.props.aantal_polen as number) > 4 ) ) ) this.props.aantal_polen = "2"; //Test dat aantal polen bestaat
 
-        if ( (this.props.normaalGesloten === true) && (this.props.bescherming !== "contact") ) {
-            this.props.normaalGesloten = false; // Indien normaal gesloten, dan moet de bescherming een contact zijn
+        if ( (this.props.normaalGesloten === true) && (!["contact","zekeringscheider"].includes(this.props.bescherming)) ) {
+            this.props.normaalGesloten = false; // Indien normaal gesloten, dan moet de bescherming een contact of zekeringscheider zijn
         }
 
         if (this.props.bescherming !== "contact") this.props.sturing = "";
+
+        // nooit een newPage als dit geen kind van root is of het eerste kind van root
+        if (this.getParent() !== null) {
+            this.props.newPage = false;
+        } else {
+            let firstChildId = this.sourcelist.getFirstChildId(0);
+            if (firstChildId !== null && this.id === firstChildId) this.props.newPage = false;
+        }
 
         if (this.props.kabel_locatie == "Luchtleiding") this.props.kabel_is_in_buis = false; //Indien luchtleiding nooit een buis tekenen
         if ( (this.props.bescherming != "differentieel") && (this.props.bescherming != "differentieelautomaat") ) this.props.differentieel_is_selectief = false;
@@ -131,7 +143,7 @@ export class Kring extends Electro_Item {
                   ? `<input type="text" id="HL_edit_${this.id}_naam" size="5" style="font-weight: bold; background-color:#FFFFE0;" value="${this.props.naam ?? ''}" disabled /><br>`
                   : `${this.stringPropToHTML('naam',5)}<br>`);
 
-        output += "Bescherming: " + this.selectPropToHTML('bescherming',["automatisch","differentieel","differentieelautomaat","smelt","geen","---","contact","relais","schemer","overspanningsbeveiliging"]);
+        output += "Bescherming: " + this.selectPropToHTML('bescherming',["automatisch","differentieel","differentieelautomaat","smelt","geen","---","contact","zekeringscheider","relais","schemer","overspanningsbeveiliging"]);
 
         // Aantal polen en Ampérage
 
@@ -150,14 +162,14 @@ export class Kring extends Electro_Item {
                 break;
 
             case "automatisch":
-                output += ", Curve:" + this.selectPropToHTML('curve_automaat',["","B","C","D"])
+                output += ", Curve:" + this.selectPropToHTML('curve_automaat',["","B","C","D","U"])
                        +  ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen',3) + "kA"
                        +  ", Fase: " + this.selectPropToHTML('fase',["","L1","L2","L3"]);
                 break;
 
             case "differentieelautomaat":
                 output += ", \u0394 " + this.stringPropToHTML('differentieel_delta_amperage',3) + "mA"
-                       +  ", Curve:" + this.selectPropToHTML('curve_automaat',["","B","C","D"])
+                       +  ", Curve:" + this.selectPropToHTML('curve_automaat',["","B","C","D","U"])
                        +  ", Type:" + this.selectPropToHTML('type_differentieel',["","A","B"])
                        +  ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen',3) + "kA"
                        +  ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief')
@@ -171,6 +183,10 @@ export class Kring extends Electro_Item {
             case "contact":
                 output += ", Normaal Gesloten: " + this.checkboxPropToHTML('normaalGesloten');
                 output += ", Sturing: " + this.selectPropToHTML('sturing',["","spoel"]);
+                break;
+
+            case "zekeringscheider":
+                output += ", Normaal Gesloten: " + this.checkboxPropToHTML('normaalGesloten');
                 break;
         }
 
@@ -187,6 +203,16 @@ export class Kring extends Electro_Item {
         }
         
         output += ", Tekst: " + this.stringPropToHTML('tekst',10);
+
+        // Only show newPage checkbox if not the first child of root node
+        // nooit een newPage als dit geen kind van root is of het eerste kind van root
+        if (this.getParent() == null) { 
+            let firstChildId = this.sourcelist.getFirstChildId(0);
+            if (firstChildId !== null && this.id !== firstChildId) {
+                output += ", Start op nieuwe pagina: " + this.checkboxPropToHTML('newPage');
+            }
+        }
+
         output += ', Adres: ' + this.stringPropToHTML('adres',5);
 
         return(output);
@@ -223,6 +249,7 @@ export class Kring extends Electro_Item {
         SVGSymbols.addSymbol('zekering_automatisch');
         SVGSymbols.addSymbol('zekering_empty');
         SVGSymbols.addSymbol('zekering_smelt');
+        SVGSymbols.addSymbol('zekeringscheider');
         SVGSymbols.addSymbol('overspanningsbeveiliging_inline');
         SVGSymbols.addSymbol('arrow');
         SVGSymbols.addSymbol('relais_kring');
@@ -352,7 +379,7 @@ export class Kring extends Electro_Item {
                            +  aantalpolenamperagestr + "</text>";
 
                 // Code om de curve toe te voegen
-                if ( (this.props.curve_automaat=='B') || (this.props.curve_automaat=='C') || (this.props.curve_automaat=='D') ) {
+                if ( (this.props.curve_automaat=='B') || (this.props.curve_automaat=='C') || (this.props.curve_automaat=='D') || (this.props.curve_automaat=='U') ) {
                     ++numlines;
                     mySVG.data += "<text x=\"" + (mySVG.xleft+15+11*(numlines-1)) + "\" y=\"" + (mySVG.yup-10) + "\"" 
                                +  " transform=\"rotate(-90 " + (mySVG.xleft+15+11*(numlines-1)) + "," + (mySVG.yup-10) + ")" 
@@ -367,8 +394,8 @@ export class Kring extends Electro_Item {
                         mySVG.data += "<text x=\"" + (mySVG.xleft+15+11*(numlines-1)) + "\" y=\"" + (mySVG.yup-10) + "\"" 
                                 +  " transform=\"rotate(-90 " + (mySVG.xleft+15+11*(numlines-1)) + "," + (mySVG.yup-10) + ")" 
                                 +  "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" 
-                                +  htmlspecialchars("" + (this.props.kortsluitvermogen*1000)) + "</text>";
-                        let rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen*1000)))+6;
+                                +  htmlspecialchars("" + (parseLocaleFloat(this.props.kortsluitvermogen)*1000)) + "</text>";
+                        let rectsize = svgTextWidth(htmlspecialchars("" + (parseLocaleFloat(this.props.kortsluitvermogen)*1000)))+6;
                         mySVG.data += '<rect x="' + (mySVG.xleft+15+11*(numlines-2)+1) + '" y="' + (mySVG.yup-10-(rectsize/2)) + '" width="' + (11*1.2) + '" height="' + rectsize + '" fill="none" stroke="black" />';
                         numlines = numlines + 0.3;
                     } else {
@@ -423,8 +450,8 @@ export class Kring extends Electro_Item {
                         mySVG.data += "<text x=\"" + (mySVG.xleft+15+11*(numlines-1)) + "\" y=\"" + (mySVG.yup-10) + "\"" 
                                 +  " transform=\"rotate(-90 " + (mySVG.xleft+15+11*(numlines-1)) + "," + (mySVG.yup-10) + ")" 
                                 +  "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" 
-                                +  htmlspecialchars("" + (this.props.kortsluitvermogen*1000)) + "</text>";
-                        let rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen*1000)))+6;
+                                +  htmlspecialchars("" + (parseLocaleFloat(this.props.kortsluitvermogen)*1000)) + "</text>";
+                        let rectsize = svgTextWidth(htmlspecialchars("" + (parseLocaleFloat(this.props.kortsluitvermogen)*1000)))+6;
                         mySVG.data += '<rect x="' + (mySVG.xleft+15+11*(numlines-2)+1) + '" y="' + (mySVG.yup-10-(rectsize/2)) + '" width="' + (11*1.2) + '" height="' + rectsize + '" fill="none" stroke="black" />';
                         numlines = numlines + 0.3;
                     } else {
@@ -463,7 +490,7 @@ export class Kring extends Electro_Item {
                            +  aantalpolenamperagestr + "</text>";
 
                 // Code om de curve toe te voegen
-                if ( (this.props.curve_automaat=='B') || (this.props.curve_automaat=='C') || (this.props.curve_automaat=='D') ) {
+                if ( (this.props.curve_automaat=='B') || (this.props.curve_automaat=='C') || (this.props.curve_automaat=='D') || (this.props.curve_automaat=='U') ) {
                     ++numlines;
                     mySVG.data += "<text x=\"" + (mySVG.xleft+15+11*(numlines-1)) + "\" y=\"" + (mySVG.yup-10) + "\"" 
                                +  " transform=\"rotate(-90 " + (mySVG.xleft+15+11*(numlines-1)) + "," + (mySVG.yup-10) + ")" 
@@ -487,8 +514,8 @@ export class Kring extends Electro_Item {
                         mySVG.data += "<text x=\"" + (mySVG.xleft+15+11*(numlines-1)) + "\" y=\"" + (mySVG.yup-10) + "\"" 
                                 +  " transform=\"rotate(-90 " + (mySVG.xleft+15+11*(numlines-1)) + "," + (mySVG.yup-10) + ")" 
                                 +  "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" 
-                                +  htmlspecialchars("" + (this.props.kortsluitvermogen*1000)) + "</text>";
-                        let rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen*1000)))+6;
+                                +  htmlspecialchars("" + (parseLocaleFloat(this.props.kortsluitvermogen)*1000)) + "</text>";
+                        let rectsize = svgTextWidth(htmlspecialchars("" + (parseLocaleFloat(this.props.kortsluitvermogen)*1000)))+6;
                         mySVG.data += '<rect x="' + (mySVG.xleft+15+11*(numlines-2)+1) + '" y="' + (mySVG.yup-10-(rectsize/2)) + '" width="' + (11*1.2) + '" height="' + rectsize + '" fill="none" stroke="black" />';
                         numlines = numlines + 0.3;
                     } else {
@@ -511,6 +538,7 @@ export class Kring extends Electro_Item {
                 break;
 
             case "contact":
+            case "zekeringscheider":
 
                 numlines = 0 + (trimString(aantalpolenamperagestr) !== '' ? 1 : 0); // Hier houden we het aantal lijnen tekst bij
 
@@ -523,11 +551,12 @@ export class Kring extends Electro_Item {
                     nameshift = -30;
                 }
 
-                mySVG.data += '<use xlink:href="#zekering_empty" x=\"' + mySVG.xleft + '" y="' + mySVG.yup + '" />'
-                           +  "<text x=\"" + (mySVG.xleft+15) + "\" y=\"" + (mySVG.yup-10) + "\"" 
-                           +  " transform=\"rotate(-90 " + (mySVG.xleft+15) + "," + (mySVG.yup-10) + ")" 
-                           +  "\" style=\"text-anchor:middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" 
-                           +  aantalpolenamperagestr + "</text>";
+                mySVG.data += `<use xlink:href="${(this.props.bescherming == 'contact' ? '#zekering_empty' : '#zekeringscheider')}" `
+                           +  `x="${mySVG.xleft}" y="${mySVG.yup}" />`
+                           +  `<text x="${mySVG.xleft+15}" y="${mySVG.yup-10}"` 
+                           +  ` transform="rotate(-90 ${mySVG.xleft+15},${mySVG.yup-10})"` 
+                           +  ` style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">` 
+                           +  `${aantalpolenamperagestr}</text>`;
 
                 if (this.props.normaalGesloten) {
                     mySVG.data += `<line x1="${mySVG.xleft}" x2="${mySVG.xleft}" y1="${mySVG.yup-25.5
@@ -656,7 +685,12 @@ export class Kring extends Electro_Item {
             mySVG.xright = 20;
             mySVG.yup = 50;
             mySVG.ydown = 0;
-        }                   
+        }
+
+        // Set newPage attribute if the property is true
+        if (this.props.newPage) {
+            mySVG.data = `<svg newPage="true" x="0" y="0" width="${mySVG.xleft + mySVG.xright}" height="${mySVG.yup + mySVG.ydown}">`+ mySVG.data + '</svg>';
+        }
 
         return(mySVG);
     }

@@ -8,10 +8,14 @@ export class Page_Info {
     height: number;
     start: number;
     stop: number;
+    info: string;
 
     constructor() {
         this.height = 0;
         this.start = 0;
         this.stop = 0;
+        this.info = (globalThis.structure?.properties?.info != null) 
+                    ? globalThis.structure.properties.info 
+                    : "";
     }
 }

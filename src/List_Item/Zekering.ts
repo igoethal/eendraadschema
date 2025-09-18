@@ -1,5 +1,5 @@
 import { Electro_Item } from "./Electro_Item";
-import { htmlspecialchars, svgTextWidth } from "../general";
+import { htmlspecialchars, svgTextWidth, parseLocaleFloat } from "../general";
 import { SVGelement } from "../SVGelement";
 import { SVGSymbols } from "../SVGSymbols";
 
@@ -21,12 +21,26 @@ export class Zekering extends Electro_Item {
         this.props.kortsluitvermogen = "";
         this.props.huishoudelijk = true;
         this.props.fase = '';
+        this.props.newPage = false;
     }
 
     overrideKeys() {
+        if (this.props.curve_automaat === "E") this.props.curve_automaat = "U"; // used to be called "E" in older saves
+
+        if (this.props.newPage == null) this.props.newPage = false;
+
         if ( ( (this.props.aantal_polen as number) < 1 ) || ( (this.props.aantal_polen as number) > 4 ) ) this.props.aantal_polen = "2"; //Test dat aantal polen bestaat
         if ( (this.props.bescherming != "differentieel") && (this.props.bescherming != "differentieelautomaat") ) this.props.differentieel_is_selectief = false;
         if (!this.isChildOf("Kring")) this.props.nr = "";
+
+        // nooit een newPage als dit geen kind van root is of het eerste kind van root
+        if (this.getParent() !== null) {
+            this.props.newPage = false;
+        } else {
+            let firstChildId = this.sourcelist.getFirstChildId(0);
+            if (firstChildId !== null && this.id === firstChildId) this.props.newPage = false;
+        }
+
         if (typeof(this.props.huishoudelijk) == 'undefined') this.props.huishoudelijk = true;
         if (!["automatisch", "differentieel", "differentieelautomaat", "smelt"].includes(this.props.bescherming)) this.props.fase = '';
         if (!["automatisch", "differentieel", "differentieelautomaat"].includes(this.props.bescherming)) this.props.kortsluitvermogen = '';
@@ -57,14 +71,14 @@ export class Zekering extends Electro_Item {
                 break;
 
             case "automatisch":
-                output += ", Curve:" + this.selectPropToHTML('curve_automaat',["","B","C","D"])
+                output += ", Curve:" + this.selectPropToHTML('curve_automaat',["","B","C","D","U"])
                        +  ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen',3) + "kA"
                        +  ", Fase: " + this.selectPropToHTML('fase',["","L1","L2","L3"]);           
                 break;
 
             case "differentieelautomaat":
                 output += ", \u0394 " + this.stringPropToHTML('differentieel_delta_amperage',3) + "mA"
-                       +  ", Curve:" + this.selectPropToHTML('curve_automaat',["","B","C","D"])
+                       +  ", Curve:" + this.selectPropToHTML('curve_automaat',["","B","C","D","U"])
                        +  ", Type:" + this.selectPropToHTML('type_differentieel',["","A","B"])
                        +  ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen',3) + "kA"
                        +  ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief')
@@ -79,6 +93,15 @@ export class Zekering extends Electro_Item {
 
         if ((this.props.kortsluitvermogen != '') && (['differentieel','automatisch','differentieelautomaat'].includes(this.props.bescherming))) {
             output += ", Huishoudelijke installatie: " + this.checkboxPropToHTML('huishoudelijk');
+        }
+
+        // Only show newPage checkbox if not the first child of root node
+        // nooit een newPage als dit geen kind van root is of het eerste kind van root
+        if (this.getParent() == null) { 
+            let firstChildId = this.sourcelist.getFirstChildId(0);
+            if (firstChildId !== null && this.id !== firstChildId) {
+                output += ", Start op nieuwe pagina: " + this.checkboxPropToHTML('newPage');
+            }
         }
 
         return(output);
@@ -123,7 +146,7 @@ export class Zekering extends Electro_Item {
                            +  htmlspecialchars(this.props.aantal_polen + "P - " + this.props.amperage + "A") + '</text>';
 
                 // Code om de curve toe te voegen
-                if ( (this.props.curve_automaat=='B') || (this.props.curve_automaat=='C') || (this.props.curve_automaat=='D') ) {
+                if ( (this.props.curve_automaat=='B') || (this.props.curve_automaat=='C') || (this.props.curve_automaat=='D') || (this.props.curve_automaat=='U') ) {
                     ++numlines;
                     mySVG.data += '<text x="' + (21+10) + '" y="' + (25+15+(numlines-1)*11) + '" ' 
                                 +  'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' 
@@ -136,8 +159,8 @@ export class Zekering extends Electro_Item {
                         numlines = numlines + 1.3;
                         mySVG.data += '<text x="' + (21+10) + '" y="' + (25+15+(numlines-1)*11) + '" ' 
                                     +  'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' 
-                                    +  htmlspecialchars("" + (this.props.kortsluitvermogen*1000)) + '</text>';
-                        let rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen*1000)))+6;
+                                    +  htmlspecialchars("" + (parseLocaleFloat(this.props.kortsluitvermogen)*1000)) + '</text>';
+                        let rectsize = svgTextWidth(htmlspecialchars("" + (parseLocaleFloat(this.props.kortsluitvermogen)*1000)))+6;
                         mySVG.data += '<rect x="' + (21+10-(rectsize/2)) + '" y="' + (25+15+(numlines-1)*11-10) + '" width="' + rectsize + '" height="' + (11*1.2) + '" fill="none" stroke="black" />';
                     } else {
                         numlines = numlines + 1.0;
@@ -179,8 +202,8 @@ export class Zekering extends Electro_Item {
                         numlines = numlines + 1.3;
                         mySVG.data += '<text x="' + (21+10) + '" y="' + (25+15+(numlines-1)*11) + '" ' 
                                     +  'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' 
-                                    +  htmlspecialchars("" + (this.props.kortsluitvermogen*1000)) + '</text>';
-                        let rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen*1000)))+6;
+                                    +  htmlspecialchars("" + (parseLocaleFloat(this.props.kortsluitvermogen)*1000)) + '</text>';
+                        let rectsize = svgTextWidth(htmlspecialchars("" + (parseLocaleFloat(this.props.kortsluitvermogen)*1000)))+6;
                         mySVG.data += '<rect x="' + (21+10-(rectsize/2)) + '" y="' + (25+15+(numlines-1)*11-10) + '" width="' + rectsize + '" height="' + (11*1.2) + '" fill="none" stroke="black" />';
                     } else {
                         numlines = numlines + 1.0;
@@ -209,7 +232,7 @@ export class Zekering extends Electro_Item {
                            +  htmlspecialchars(this.props.aantal_polen + "P - " + this.props.amperage + "A") + '</text>';
 
                 // Code om de curve toe te voegen
-                if ( (this.props.curve_automaat=='B') || (this.props.curve_automaat=='C') || (this.props.curve_automaat=='D') ) {
+                if ( (this.props.curve_automaat=='B') || (this.props.curve_automaat=='C') || (this.props.curve_automaat=='D') || (this.props.curve_automaat=='U') ) {
                     ++numlines;
                     mySVG.data += '<text x="' + (21+10) + '" y="' + (25+15+(numlines-1)*11) + '" ' 
                                 +  'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' 
@@ -231,8 +254,8 @@ export class Zekering extends Electro_Item {
                         numlines = numlines + 1.3;
                         mySVG.data += '<text x="' + (21+10) + '" y="' + (25+15+(numlines-1)*11) + '" ' 
                                     +  'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' 
-                                    +  htmlspecialchars("" + (this.props.kortsluitvermogen*1000)) + '</text>';
-                        let rectsize = svgTextWidth(htmlspecialchars("" + (this.props.kortsluitvermogen*1000)))+6;
+                                    +  htmlspecialchars("" + (parseLocaleFloat(this.props.kortsluitvermogen)*1000)) + '</text>';
+                        let rectsize = svgTextWidth(htmlspecialchars("" + (parseLocaleFloat(this.props.kortsluitvermogen)*1000)))+6;
                         mySVG.data += '<rect x="' + (21+10-(rectsize/2)) + '" y="' + (25+15+(numlines-1)*11-10) + '" width="' + rectsize + '" height="' + (11*1.2) + '" fill="none" stroke="black" />';
                     } else {
                         numlines = numlines + 1.0;
@@ -272,6 +295,11 @@ export class Zekering extends Electro_Item {
                         + '<text x="' + (mySVG.xright+16) + '" y="' + (25+19) + '" ' 
                         + 'style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">' + 'S' + '</text>';
             mySVG.xright = mySVG.xright + 30;
+        }
+
+        // Set newPage attribute if the property is true
+        if (this.props.newPage) {
+            mySVG.data = `<svg newPage="true" x="0" y="0" width="${mySVG.xleft + mySVG.xright}" height="${mySVG.yup + mySVG.ydown}">`+ mySVG.data + '</svg>';
         }
 
         return(mySVG);

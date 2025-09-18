@@ -354,6 +354,9 @@ function json_to_structure(text: string, oldstruct: Hierarchical_List = null, ve
             outstruct.print_table.pages[i].height = mystructure.print_table.pages[i].height;
             outstruct.print_table.pages[i].start = mystructure.print_table.pages[i].start;
             outstruct.print_table.pages[i].stop = mystructure.print_table.pages[i].stop;
+            if (mystructure.print_table.pages[i].info != null) {
+                outstruct.print_table.pages[i].info = mystructure.print_table.pages[i].info;
+            }
         }
     }
 
@@ -391,7 +394,14 @@ function json_to_structure(text: string, oldstruct: Hierarchical_List = null, ve
             if ( (mystructure.data[i].props.nr !== undefined) && 
                  (mystructure.data[i].props.nr !== null) && 
                  (!mystructure.data[i].props.autonr) ) 
-                        outstruct.data[i].props.autonr = "manueel"; 
+                        outstruct.data[i].props.autonr = "manueel";
+
+            // Vanaf versie 4 werd het batterijsymbool vervangen maar voor oudere files houden we ook de blokbatterij aan
+            if ( (mystructure.data[i].props.type === "Batterij") &&
+                 (mystructure.data[i].props.symbool == null) ) {
+                outstruct.data[i].props.symbool = "blokbatterij";
+            }
+
         }
 
         outstruct.data[i].parent = mystructure.data[i].parent;
@@ -406,8 +416,7 @@ function json_to_structure(text: string, oldstruct: Hierarchical_List = null, ve
     outstruct.curid = mystructure.curid;
 
     // Sort the entire new structure
-    outstruct.voegAttributenToeAlsNodig();
-    outstruct.reSort();
+    outstruct.voegAttributenToeAlsNodigEnReSort();
 
     // Return the result
     return outstruct;

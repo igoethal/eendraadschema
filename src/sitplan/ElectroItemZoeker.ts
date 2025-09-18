@@ -1,5 +1,6 @@
 import { Electro_Item } from "../List_Item/Electro_Item";
 import { trimString } from "../general";
+import { Container } from "../List_Item/Container";
 
 /**
  * Class gebruikt in SituationPlanView om te zoeken naar electroitems op basis van de kringnaam.
@@ -93,7 +94,11 @@ export class ElectroItemZoeker {
                 let electroItem = globalThis.structure.data[i] as Electro_Item;
                 if (electroItem == null) continue;
                 let type:string = electroItem.getType();
-                if (type == 'Bord') {
+                if (type == 'Container') {
+                    /* do nothing */
+                } else if (electroItem.getParent() instanceof Container) {
+                    // Container is een soort van 'wrapper' voor andere items, dus we negeren deze
+                } else if (type == 'Bord') {
                     let myName = electroItem.props.naam;
                     if ( (myName == null) || (trimString(myName) == '') ) myName = 'Bord';
                     this.borden.push({id: id, naam: myName})

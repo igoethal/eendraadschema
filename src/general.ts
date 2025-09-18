@@ -215,9 +215,13 @@ function flattenSVG(SVGstruct,shiftx,shifty,node,overflowright=0) {
 
   var X = new XMLSerializer()
   var parser = new DOMParser();
+  var forceNewPage: boolean = false;
 
   var outstruct = SVGstruct;
   if (SVGstruct.localName == "svg") {
+    if (outstruct.attributes.getNamedItem("newPage")) {
+      forceNewPage = true;
+    }
     if (outstruct.attributes.getNamedItem("x")) { // make SVG a 0,0 element
       shiftx += parseFloat(outstruct.attributes.getNamedItem("x").nodeValue);
       outstruct.attributes.getNamedItem("x").nodeValue = 0;
@@ -304,7 +308,7 @@ function flattenSVG(SVGstruct,shiftx,shifty,node,overflowright=0) {
     str = str.replace(regex, '');
   }
 
-  globalThis.structure.print_table.pagemarkers.addMarker(node,shiftx);
+  globalThis.structure.print_table.pagemarkers.addMarker(node, shiftx, forceNewPage);
 
   return str;
 }
@@ -366,4 +370,34 @@ export function formatFloat(value: number, decimals: number = 6): string {
     strValue = strValue.replace(/(\.\d*?[1-9])0+$/, '$1').replace(/\.$/, '');
 
     return strValue;
+}
+
+/**
+ * Converts a string to a floating point number, handling both dot and comma as decimal separators.
+ * First attempts conversion with dot as decimal separator, then with comma if that fails.
+ * 
+ * @param str - The string to convert to a number
+ * @returns The parsed number, or NaN if conversion fails
+ */
+export function parseLocaleFloat(str: string): number {
+    if (typeof str !== 'string' || str.trim() === '') {
+        return NaN;
+    }
+
+    const trimmed = str.trim();
+    
+    // First try with dot as decimal separator (standard)
+    let result = parseFloat(trimmed);
+    if (!isNaN(result) && !trimmed.includes(',')) {
+        return result;
+    }
+    
+    // If the string contains a comma, try replacing comma with dot and parse again
+    if (trimmed.includes(',')) {
+        const withDot = trimmed.replace(',', '.');
+        result = parseFloat(withDot);
+        return result; // Will be NaN if this also fails
+    }
+    
+    return result; // Return the original result (could be NaN)
 }

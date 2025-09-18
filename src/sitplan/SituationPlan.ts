@@ -4,6 +4,7 @@ import { getRotatedRectangleSize } from "./GeometricFunctions";
 import { htmlspecialchars } from "../general";
 import { Electro_Item } from "../List_Item/Electro_Item";
 import { AdresType, AdresLocation } from "./SituationPlanElement";
+import { Container } from "../List_Item/Container";
 
 /**
  * Volledig overzicht van een situatieplan.
@@ -160,6 +161,19 @@ export class SituationPlan {
      */
 
     removeElement(element: SituationPlanElement): void {
+
+        // als het een custom element is moeten we het ook verwijderen uit het eendraadschema
+        if (element.isEendraadschemaSymbool()) {
+            const id = element.getElectroItemId();
+            const electroItem = globalThis.structure.getElectroItemById(id);
+            if (electroItem != null) {
+                if (electroItem.getParent() instanceof Container) {
+                    globalThis.structure.deleteById(electroItem.id);
+                }
+            }
+        }
+
+        // Verwijder het element uit de lijst
         const index = this.elements.indexOf(element);
         if (index === -1) return;
         this.elements.splice(index, 1);

@@ -71,6 +71,16 @@ export function printsvg() {
         }
 
         const sitplanprint = globalThis.structure.sitplan.toSitPlanPrint();
+
+        // If autopage, overwrite the input fields
+        if (globalThis.structure.print_table.enableAutopage) {
+            const info = globalThis.structure.properties.info;
+            for (let page of globalThis.structure.print_table.pages) {
+                page.info = info;
+            }
+        }
+
+        // Print everything
     
         printPDF(
             svg,
@@ -154,18 +164,19 @@ export function printsvg() {
     if (!globalThis.structure.print_table.enableAutopage) {
         outstr 
             = '<br>'
-            +  '<table border="0">'
-            +  '    <tr>'
-            +  '        <td style="vertical-align:top;">'
-            +  '            <div id="id_print_table"></div>' // Table with all startx and stopx comes here
-            +  '        </td>'
-            +  '        <td style="vertical-align:top;padding:5px">'
-            +  '            <div>Klik op de groene pijl om het schema over meerdere pagina\'s te printen en kies voor elke pagina de start- en stop-positie in het schema (in pixels).</div>'
-            +  '            <div>Onderaan kan je bekijken welk deel van het schema op welke pagina belandt.</div>'
-            +  '        </td>'
-            +  '    </tr>'
-            +  '</table>'
-            +  '<br>';
+            + '<table border="0">'
+                + '<tr>'
+                    + '<td style="vertical-align:top;">'
+                        + '<div id="id_print_table"></div>' // Table with all startx and stopx comes here
+                    + '</td>'
+                    + '<td style="vertical-align:top;padding:5px">'
+                        + '<div>Klik op de groene pijl om het schema over meerdere pagina\'s te printen en kies voor elke pagina de start- en stop-positie in het schema (in pixels).</div>'
+                        + '<div>Je kan eventueel ook de tekst (info) aanpassen die op elke pagina rechts onderaan komt te staan.</div>'
+                        + '<div>Onderaan kan je bekijken welk deel van het schema op welke pagina belandt.</div>'
+                    + '</td>'
+                + '</tr>'
+            + '</table>'
+            + '<br>';
         
         if (configsection != null)
             configsection.insertAdjacentHTML('beforeend', outstr);    

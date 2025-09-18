@@ -1,5 +1,6 @@
 import { Page_Info } from "./Page_Info";
 import { MarkerList } from "./MarkerList";  
+import { htmlspecialchars } from "../general";
 
 type PaperSize = "A4" | "A3";
 type ModeVertical = "alles" | "kies";
@@ -259,9 +260,15 @@ export class Print_Table {
 
         let page = 0;
         let pos = 0;
+        let forceMarker: { depth: number, xpos: number } | null = null;
+
         if (maxsvgwidth > 0) {
-            while ( (this.maxwidth - pos) > maxsvgwidth ) { // The undivided part still does not fit on a page
-                pos = this.pagemarkers.findMinDepth(pos+minsvgwidth,pos+maxsvgwidth).xpos;
+            while ((forceMarker = this.pagemarkers.findForceNewPage(pos, pos+maxsvgwidth)) != null
+                    || (this.maxwidth - pos) > maxsvgwidth ) { // The undivided part still does not fit on a page
+                if (forceMarker) 
+                    pos = forceMarker.xpos; // If there is a forceNewPage marker, we take that position
+                else
+                    pos = this.pagemarkers.findMinDepth(pos+minsvgwidth,pos+maxsvgwidth).xpos;
                 while (this.pages.length < page+2) this.addPage();
                 this.setStop(page,pos);
                 page++;
@@ -542,6 +549,11 @@ export class Print_Table {
 
         checkbox.onchange = (event) => {
             this.enableAutopage = !(event.target as HTMLInputElement).checked;
+            if (!this.enableAutopage) {
+                this.pages.forEach(page => {
+                    page.info = globalThis.structure.properties.info;
+                });
+            }
             redrawCallBack();
         }
     }
@@ -631,7 +643,7 @@ export class Print_Table {
         let pagenum: number;
 
         outstr += '<table border="1" cellpadding="3">';
-        outstr += '<tr><th align="center">Pagina</th><th align="center">Startx</th><th align"center">Stopx</th><th align"left">Acties</th></tr>';
+        outstr += '<tr><th align="center">Pagina</th><th align="center">Startx</th><th align="center">Stopx</th><th align="left">Info</th><th align="left">Acties</th></tr>';
 
         for (pagenum=0; pagenum<this.pages.length; pagenum++) {
             outstr += '<tr><td align=center>' + (pagenum+1) + '</td><td align=center>' + this.pages[pagenum].start + '</td><td align=center>';
@@ -643,7 +655,9 @@ export class Print_Table {
                 outstr += this.pages[pagenum].stop.toString();
             }  
 
-            outstr += '</td><td align=left>';
+            outstr += '</td><td><div style="width:200px; border-style:solid; border-width:thin; cursor:text; padding: 2px; border-color:darkgray; font-size: small;" align=left contenteditable="true" id="input_info_' + pagenum + '">';
+            outstr += this.pages[pagenum].info;
+            outstr += '</div></td><td align=left>';
 
             if (pagenum == this.pages.length-1) {
                 outstr += '<button style="background-color:green;" id="Btn_Addpage">&#9660;</button>';
@@ -684,6 +698,17 @@ export class Print_Table {
                     const stop = parseInt((event.target as HTMLInputElement).value as string);
                     this.setStop(page, stop);
                     redrawCallBack();
+                }
+            });
+        });
+
+        document.querySelectorAll('div[id^="input_info_"]').forEach(input => {
+            input.addEventListener('blur', (event) => {
+                const match = (event.target as HTMLTableCellElement).id.match(/input_info_(\d+)/);
+                if (match) {
+                    const page = parseInt(match[1]);
+                    const info = (event.target as HTMLTableCellElement).innerHTML;
+                    this.pages[page].info = info;
                 }
             });
         });

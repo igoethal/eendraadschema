@@ -1,3 +1,5 @@
+import { Aardingsonderbreker } from "./List_Item/Aardingsonderbreker";
+
 export class SVGSymbols {
 
     static neededSymbols: string[] = [];
@@ -51,6 +53,15 @@ export class SVGSymbols {
 
 static data = {
 
+aardingsonderbreker: `
+<line x1="0" y1="0" x2="5" y2="0" stroke="black"/>
+<line x1="10" y1="0" x2="30" y2="0" stroke="black"/>
+<line x1="35" y1="0" x2="40" y2="0" stroke="black"/>
+<line x1="5" y1="-5" x2="5" y2="5" stroke="black"/>
+<line x1="10" y1="-5" x2="10" y2="5" stroke="black"/>
+<line x1="30" y1="-5" x2="30" y2="5" stroke="black"/>
+<line x1="35" y1="-5" x2="35" y2="5" stroke="black"/>
+`,
 batterij: `
 <rect x="0" y="-12" width="40" height="27" stroke="black" fill="none"/>
 <rect x="5" y="-15" width="10" height="3" stroke="black" fill="none"/>
@@ -58,6 +69,13 @@ batterij: `
 <line x1="8" y1="-5" x2="12" y2="-5" stroke="black"/>
 <line x1="10" y1="-7" x2="10" y2="-3" stroke="black"/>
 <line x1="28" y1="-5" x2="32" y2="-5" stroke="black"/>
+`,
+batterij_nieuw: `
+<line x1="0" y1="-15" x2="0" y2="+15" stroke="black" stroke-linecap="round" />
+<line x1="7" y1="-8" x2="7" y2="+8" stroke="black" stroke-width="3" stroke-linecap="round" />
+<line x1="8.5" y1="0" x2="21.5" y2="0" stroke="black" stroke-dasharray="3,3" stroke-linecap="round" />
+<line x1="22" y1="-15" x2="22" y2="+15" stroke="black" stroke-linecap="round" />
+<line x1="29" y1="-8" x2="29" y2="+8" stroke="black" stroke-width="3" stroke-linecap="round" />
 `,
 contactdoos: `
 <path d="M20 0 A15 15 0 0 1 35 -15" stroke="black" fill="none" stroke-width="2" />
@@ -481,6 +499,12 @@ overspanningsbeveiliging_inline: `
 zekering_empty: `
 <g transform="rotate(-20)">
 <line x1="0" y1="-30" x2="0" y2="0"  stroke="black" />
+</g>
+`,
+zekeringscheider: `
+<g transform="rotate(-20)">
+<line x1="0" y1="-30" x2="0" y2="0"  stroke="black" />
+<rect x="-4" y="-23" width="8" height="18" style="fill:none;stroke:black" />
 </g>
 `,
 arrow: `
