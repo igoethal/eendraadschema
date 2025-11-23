@@ -61,6 +61,10 @@ export class SituationPlanView_ChooseCustomElementPopup {
                     <div style="display: flex; margin-bottom: 20px; align-items: center;">
                         <label for="itemTypeSelect" style="margin-right: 10px; display: inline-block;">Type:</label>
                         <select id="itemTypeSelect" style="width: 200px;">
+                            <option value="Muur">Muur</option>
+                            <option value="Deur">Deur</option>
+                            <option value="Raam">Raam</option>
+                            <option value="Poort">Poort</option>
                             <option value="Aardingsonderbreker">Aardingsonderbreker</option>
                             <option value="Elektriciteitsmeter">Elektriciteitsmeter</option>
                         </select>
