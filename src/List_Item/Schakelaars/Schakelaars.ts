@@ -231,6 +231,16 @@ export class Schakelaars extends Electro_Item {
     }
 
     toSVG(sitplan = false, mirrortext = false) {
+        if (sitplan) {
+            let mySVG: SVGelement = new SVGelement();
+            // A simple circle with a line through it
+            mySVG.data = `<circle cx="25" cy="25" r="20" style="stroke:black;fill:none;" /><line x1="5" y1="5" x2="45" y2="45" style="stroke:black;" />`;
+            mySVG.xleft = 0;
+            mySVG.xright = 50;
+            mySVG.yup = 0;
+            mySVG.ydown = 50;
+            return mySVG;
+        }
         let mySVG:SVGelement = new SVGelement();
         let tekenKeten: Array<Schakelaar> = [];
 

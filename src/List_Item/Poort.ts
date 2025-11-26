@@ -34,11 +34,10 @@ export class Poort extends Electro_Item {
         mySVG.yup = dikte / 2;
         mySVG.ydown = dikte / 2;
 
-        // Draw dashed box
-        mySVG.data = `<rect x="0" y="${-dikte/2}" width="${breedte}" height="${dikte}" style="stroke:black;fill:none;stroke-dasharray:5,5" />`;
-        // Draw Cross
-        mySVG.data += `<line x1="0" y1="${-dikte/2}" x2="${breedte}" y2="${dikte/2}" style="stroke:black" />`;
-        mySVG.data += `<line x1="0" y1="${dikte/2}" x2="${breedte}" y2="${-dikte/2}" style="stroke:black" />`;
+        // Sliding door representation
+        mySVG.data = `<rect x="0" y="${-dikte/2}" width="${breedte / 2}" height="${dikte}" style="stroke:black;fill:white;" />`;
+        mySVG.data += `<rect x="${breedte / 2}" y="${-dikte/2}" width="${breedte / 2}" height="${dikte}" style="stroke:black;fill:none;stroke-dasharray:5,5" />`;
+
 
         return mySVG;
     }

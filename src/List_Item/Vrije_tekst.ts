@@ -72,6 +72,16 @@ export class Vrije_tekst extends Electro_Item {
     }
 
     toSVG(sitplan = false) {
+        if (sitplan) {
+            let mySVG: SVGelement = new SVGelement();
+            // A simple text element
+            mySVG.data = `<text x="25" y="25" style="text-anchor:middle" font-family="Arial, Helvetica, sans-serif" font-size="10">${this.props.tekst}</text>`;
+            mySVG.xleft = 0;
+            mySVG.xright = 50;
+            mySVG.yup = 0;
+            mySVG.ydown = 50;
+            return mySVG;
+        }
         let mySVG:SVGelement = new SVGelement();
         var strlines = htmlspecialchars(this.props.tekst).split("|");
 

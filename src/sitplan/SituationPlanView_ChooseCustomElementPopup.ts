@@ -67,6 +67,11 @@ export class SituationPlanView_ChooseCustomElementPopup {
                             <option value="Poort">Poort</option>
                             <option value="Aardingsonderbreker">Aardingsonderbreker</option>
                             <option value="Elektriciteitsmeter">Elektriciteitsmeter</option>
+                            <option value="Kring">Kring</option>
+                            <option value="Bord">Bord</option>
+                            <option value="Contactdoos">Contactdoos</option>
+                            <option value="Vrije_tekst">Vrije tekst</option>
+                            <option value="Schakelaars">Schakelaar</option>
                         </select>
                     </div>
                     <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">

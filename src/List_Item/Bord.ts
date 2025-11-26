@@ -76,7 +76,14 @@ export class Bord extends Electro_Item {
         let mySVG:SVGelement; // = new SVGelement();
 
         if (sitplan) {
-            return this.toSitPlanSVG(mirrortext);
+            let mySVG: SVGelement = new SVGelement();
+            // A simple rectangle
+            mySVG.data = `<rect x="5" y="5" width="40" height="40" style="stroke:black;fill:none;" />`;
+            mySVG.xleft = 0;
+            mySVG.xright = 50;
+            mySVG.yup = 0;
+            mySVG.ydown = 50;
+            return mySVG;
         }
 
         // Maak een tekening van alle kinderen

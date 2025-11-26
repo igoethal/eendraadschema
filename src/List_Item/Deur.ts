@@ -35,19 +35,8 @@ export class Deur extends Electro_Item {
         mySVG.yup = breedte;
         mySVG.ydown = 0;
 
-        // Draw door frame/opening
-        // A simple line for the door itself and an arc for the swing
-        // Assume the door is hinged at (0,0) or (breedte, 0) depending on direction
-        // And opens 'up' (negative y in SVG usually, but yup is positive)
-
-        // Let's assume the wall is along the X axis.
-        // Hinge at (0,0).
-        // Door length is 'breedte'.
-        // If L, it swings up-left? Or up-right?
-        // Standard architectural symbols:
-        // L: Hinge left, swings open.
-        // We will draw hinge at (0,0).
-
+        //line
+        let line = `<line x1="0" y1="0" x2="${breedte}" y2="0" style="stroke:gray;stroke-width:10" />`;
         // Door panel
         let doorPanel = `<line x1="0" y1="0" x2="0" y2="${-breedte}" style="stroke:black;stroke-width:2" />`;
         // Swing arc
@@ -59,10 +48,7 @@ export class Deur extends Electro_Item {
              swingArc = `<path d="M ${breedte} ${-breedte} A ${breedte} ${breedte} 0 0 0 0 0" style="stroke:black;fill:none;stroke-dasharray:5,5" />`;
         }
 
-        mySVG.data = doorPanel + swingArc;
-
-        // Add a baseline for the opening? Or maybe not, as it is an opening in a wall.
-        // Usually just the arc and the door leaf.
+        mySVG.data = line + doorPanel + swingArc;
 
         return mySVG;
     }

@@ -1104,22 +1104,24 @@ export class SituationPlanView {
                             globalThis.undostruct.store('arrowMove' + sitPlanElement.id); // technically this is not correct and should contain the list of all moved objects
                             break;
                         }
-                        case 'ArrowRight':
+                        case 'ArrowRight': {
                             const shiftx = 1;
                             for (let element of selectedMovableSitPlanElements) element.posx += shiftx;
                             globalThis.undostruct.store('arrowMove' + sitPlanElement.id); // technically this is not correct and should contain the list of all moved objects
                             break;
+                        }
                         case 'ArrowUp': {
                             const shifty = Math.max(draggedHalo.top - paperPadding / this.zoomfactor, sitPlanElement.posy - 1) - sitPlanElement.posy;
                             for (let element of selectedMovableSitPlanElements) element.posy += shifty;
                             globalThis.undostruct.store('arrowMove' + sitPlanElement.id); // technically this is not correct and should contain the list of all moved objects
                             break;
                         }
-                        case 'ArrowDown':
+                        case 'ArrowDown': {
                             const shifty = 1;
                             for (let element of selectedMovableSitPlanElements) element.posy += shifty;
                             globalThis.undostruct.store('arrowMove' + sitPlanElement.id); // technically this is not correct and should contain the list of all moved objects
                             break;
+                        }
                         case 'PageDown':
                             {
                                 let oldPage = sitPlanElement.page;

@@ -218,7 +218,17 @@ export class Kring extends Electro_Item {
         return(output);
     }
 
-    toSVG() {
+    toSVG(sitplan = false) {
+        if (sitplan) {
+            let mySVG: SVGelement = new SVGelement();
+            // A simple circle
+            mySVG.data = `<circle cx="25" cy="25" r="20" style="stroke:black;fill:none;" />`;
+            mySVG.xleft = 0;
+            mySVG.xright = 50;
+            mySVG.yup = 0;
+            mySVG.ydown = 50;
+            return mySVG;
+        }
 
         let addFase = (startNumlines:number, mySVG:SVGelement): number => {
             let numlines = startNumlines;

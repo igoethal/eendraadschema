@@ -39,4 +39,5 @@ export class Muur extends Electro_Item {
 
         return mySVG;
     }
+
 }
