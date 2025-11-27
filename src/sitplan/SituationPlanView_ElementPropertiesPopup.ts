@@ -210,6 +210,8 @@ export function SituationPlanView_ElementPropertiesPopup(sitplanElement: Situati
      * Toon het type verbruiker van het gekozen electro-item
      */
     function updateElectroType() {
+        customPropsContainer.innerHTML = ''; // Clear previous custom props
+
         if (electroItemIdInput.value == null || trimString(electroItemIdInput.value) == '') {
             electroItemType.innerHTML = '<span style="color: red;">Geen ID ingegeven</span>';
             expandButton.style.display = 'none';
@@ -223,11 +225,81 @@ export function SituationPlanView_ElementPropertiesPopup(sitplanElement: Situati
                     electroItemType.innerHTML += '<br><span style="color: black;">Klik op uitpakken indien u de onderliggende elementen in het situatieschema wil kunnen plaatsen.</span>';
                     expandButton.onclick = () => { handleExpandButton(electroItemId) };
                 } else expandButton.style.display = 'none';
+
+                // Custom properties logic
+                if (element.getType() === 'Muur') {
+                     addCustomPropInput('Lengte (cm)', 'lengte', element.props.lengte || 100);
+                     addCustomPropInput('Dikte (cm)', 'dikte', element.props.dikte || 20);
+                } else if (element.getType() === 'Deur') {
+                     addCustomPropInput('Breedte (cm)', 'breedte', element.props.breedte || 90);
+                     addCustomSelectInput('Draairichting', 'draairichting', element.props.draairichting || 'L', ['L', 'R']);
+                } else if (element.getType() === 'Raam') {
+                     addCustomPropInput('Breedte (cm)', 'breedte', element.props.breedte || 100);
+                     addCustomPropInput('Dikte (cm)', 'dikte', element.props.dikte || 20);
+                } else if (element.getType() === 'Poort') {
+                     addCustomPropInput('Breedte (cm)', 'breedte', element.props.breedte || 200);
+                     addCustomPropInput('Dikte (cm)', 'dikte', element.props.dikte || 20);
+                }
+
             } else {
                 electroItemType.innerHTML = '<span style="color: red;">Element niet gevonden</span>';
                 expandButton.style.display = 'none';
             }
         }
+    }
+
+    function addCustomPropInput(label: string, propName: string, value: any) {
+        const container = document.createElement('div');
+        container.style.display = 'flex';
+        container.style.marginBottom = '10px';
+        container.style.alignItems = 'center';
+
+        const lbl = document.createElement('label');
+        lbl.innerText = label + ':';
+        lbl.style.marginRight = '10px';
+        lbl.style.display = 'inline-block';
+        lbl.style.width = '100px';
+
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.style.width = '100px';
+        input.value = String(value);
+        input.dataset.propName = propName;
+        input.dataset.propType = 'number';
+
+        container.appendChild(lbl);
+        container.appendChild(input);
+        customPropsContainer.appendChild(container);
+    }
+
+    function addCustomSelectInput(label: string, propName: string, value: any, options: string[]) {
+        const container = document.createElement('div');
+        container.style.display = 'flex';
+        container.style.marginBottom = '10px';
+        container.style.alignItems = 'center';
+
+        const lbl = document.createElement('label');
+        lbl.innerText = label + ':';
+        lbl.style.marginRight = '10px';
+        lbl.style.display = 'inline-block';
+        lbl.style.width = '100px';
+
+        const select = document.createElement('select');
+        select.style.width = '100px';
+        select.dataset.propName = propName;
+        select.dataset.propType = 'string';
+
+        options.forEach(opt => {
+            const option = document.createElement('option');
+            option.value = opt;
+            option.text = opt;
+            if (opt === value) option.selected = true;
+            select.appendChild(option);
+        });
+
+        container.appendChild(lbl);
+        container.appendChild(select);
+        customPropsContainer.appendChild(container);
     }
 
     /**
@@ -324,6 +396,9 @@ export function SituationPlanView_ElementPropertiesPopup(sitplanElement: Situati
                     <input id="electroItemIdInput" style="width: 100px;" type="number" min="0" step="1" value="">
                     <div id="electroItemType" style="margin-left: 10px; width: 100%; font-size: 12px"></div>
                 </div>
+                <div id="customPropsContainer" style="margin-bottom: 10px;">
+                     <!-- Custom properties will be injected here -->
+                </div>
                 <div id="selectContainer" style="display: flex; margin-bottom: 10px; align-items: center;">
                     <label for="selectAdresType" style="margin-right: 10px; display: inline-block; white-space: nowrap;">Label type:</label>
                     <select id="selectAdresType">
@@ -378,6 +453,7 @@ export function SituationPlanView_ElementPropertiesPopup(sitplanElement: Situati
             const electroItemIdContainer = popupWindow.querySelector('#electroItemIdContainer') as HTMLElement;
                 const electroItemIdInput = popupWindow.querySelector('#electroItemIdInput') as HTMLInputElement;
                 const electroItemType = popupWindow.querySelector('#electroItemType') as HTMLElement;
+            const customPropsContainer = popupWindow.querySelector('#customPropsContainer') as HTMLElement;
             const selectContainer = popupWindow.querySelector('#selectContainer') as HTMLSelectElement;
                 const selectAdresType = popupWindow.querySelector('#selectAdresType') as HTMLSelectElement;
             const adresContainer = popupWindow.querySelector('#adresContainer') as HTMLElement;
@@ -476,6 +552,26 @@ export function SituationPlanView_ElementPropertiesPopup(sitplanElement: Situati
             return /^-?\d+(\.\d+)?$/.test(value);
         }
         let returnId = (trimString(electroItemIdInput.value) == '' ? null : Number(electroItemIdInput.value));
+
+        // Save custom props
+        if (returnId != null) {
+            let element = globalThis.structure.getElectroItemById(returnId) as Electro_Item;
+            if (element) {
+                const inputs = customPropsContainer.querySelectorAll('input, select');
+                inputs.forEach((input: any) => {
+                    const propName = input.dataset.propName;
+                    const propType = input.dataset.propType;
+                    if (propName) {
+                        if (propType === 'number') {
+                             element.props[propName] = Number(input.value);
+                        } else {
+                             element.props[propName] = input.value;
+                        }
+                    }
+                });
+            }
+        }
+
         if (!(isNumeric(scaleInput.value)) || (Number(scaleInput.value) <= 0)) scaleInput.value = String(globalThis.structure.sitplan.defaults.scale*100);
         if (!(isNumeric(rotationInput.value))) rotationInput.value = String(0);
         

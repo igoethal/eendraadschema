@@ -57,6 +57,16 @@ export class Contactdoos extends Electro_Item {
     }
 
     toSVG(sitplan: boolean = false, mirrortext: boolean = false): SVGelement {
+        if (sitplan) {
+            let mySVG: SVGelement = new SVGelement();
+            // A simple circle with a line
+            mySVG.data = `<circle cx="25" cy="25" r="20" style="stroke:black;fill:none;" /><line x1="5" y1="25" x2="45" y2="25" style="stroke:black;" />`;
+            mySVG.xleft = 0;
+            mySVG.xright = 50;
+            mySVG.yup = 0;
+            mySVG.ydown = 50;
+            return mySVG;
+        }
         let mySVG:SVGelement = new SVGelement();
 
         SVGSymbols.addSymbol('contactdoos');
