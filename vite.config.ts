@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import { viteSingleFile } from "vite-plugin-singlefile";
+import tailwindcss from "@tailwindcss/vite";
 
 const formatDate = () => {
     const now = new Date();
@@ -41,5 +42,5 @@ export default defineConfig({
             ]
         }
     },
-    plugins: [viteSingleFile()]
+    plugins: [viteSingleFile(), tailwindcss()]
 });

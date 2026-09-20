@@ -20,7 +20,7 @@ export class Omvormer extends Electro_Item {
     }
 
     allowedChilds() : Array<string> { // returns an array with the type-names of allowed childs
-        return ["", "Aansluiting", "Domotica", "Domotica module (verticaal)", "Domotica gestuurde verbruiker", "Leiding", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Contactdoos", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Media", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zekering/differentieel", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Zeldzame symbolen"];
+        return ["", "Aansluiting", "Domotica", "Domotica module (verticaal)", "Domotica gestuurde verbruiker", "Leiding", "Meerdere verbruikers", "Splitsing", "Omschakelaar", "---", "Batterij", "Bel", "Boiler", "Contactdoos", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Media", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zekering/differentieel", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Zeldzame symbolen"];
     }
 
     getMaxNumChilds(): number {
@@ -39,25 +39,6 @@ export class Omvormer extends Electro_Item {
         }
     }
 
-    toHTML(mode: string) {
-        this.overrideKeys();
-        let output = this.toHTMLHeader(mode);
-        let parent;
-
-        output += "&nbsp;" + this.nrToHtml();
-        if ( ((parent = this.getParent()) != null) && (parent.getType() == "Kring") )
-            output += "In kring: " + this.checkboxPropToHTML('inkring') + ", ";
-        
-        // Only show micro checkbox if there's one child or less
-        if (this.getNumChilds() <= 1) {
-            output += "Micro: " + this.checkboxPropToHTML('micro') + ", ";
-        }
-        
-        output += "Tekst: " + this.stringPropToHTML('tekst',10) + ", ";
-        output += "Adres/tekst: " + this.stringPropToHTML('adres',5);
-
-        return(output);
-    }
 
     toSVG(sitplan = false) {
         let mySVG:SVGelement = new SVGelement();

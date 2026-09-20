@@ -1,4 +1,4 @@
-import { htmlspecialchars, insertArrow, contains, trimString } from "./general";
+import { htmlspecialchars, contains, trimString } from "./general";
 import { Aansluiting } from "./List_Item/Aansluiting";
 import { Aansluitpunt } from "./List_Item/Aansluitpunt";
 import { Aardingsonderbreker } from "./List_Item/Aardingsonderbreker";
@@ -9,6 +9,8 @@ import { Boiler } from "./List_Item/Boiler";
 import { Bord } from "./List_Item/Bord";
 import { Contactdoos } from "./List_Item/Contactdoos";
 import { Container } from "./List_Item/Container";
+import type { BoardLayout } from "./domain/BoardLayout";
+import type { PlacementTask } from "./domain/Dossier";
 import { Diepvriezer } from "./List_Item/Diepvriezer";
 import { Domotica } from "./List_Item/Domotica";
 import { Domotica_gestuurde_verbruiker } from "./List_Item/Domotica_gestuurde_verbruiker";
@@ -31,6 +33,8 @@ import { Meerdere_verbruikers } from "./List_Item/Meerdere_verbruikers";
 import { Microgolfoven } from "./List_Item/Microgolfoven";
 import { Motor } from "./List_Item/Motor";
 import { Omvormer } from "./List_Item/Omvormer";
+import { Omschakelaar } from "./List_Item/Omschakelaar";
+import { Omschakelaarpoort } from "./List_Item/Omschakelaarpoort";
 import { Overspanningsbeveiliging } from "./List_Item/Overspanningsbeveiliging";
 import { Lichtcircuit } from "./List_Item/Schakelaars/Lichtcircuit";
 import { Schakelaars } from "./List_Item/Schakelaars/Schakelaars";
@@ -51,12 +55,75 @@ import { Zekering } from "./List_Item/Zekering";
 import { Zeldzame_symbolen } from "./List_Item/Zeldzame_symbolen";
 import { Zonnepaneel } from "./List_Item/Zonnepaneel";
 import { Properties } from "./Properties";
+import { createDefaultMainBoard, type DistributionBoard } from "./domain/DistributionBoard";
 import { SVGelement } from "./SVGelement";
 import { SVGSymbols } from "./SVGSymbols";
 import { Print_Table } from "./print/Print_Table";
 import { SituationPlan } from "./sitplan/SituationPlan";
 import { SituationPlanView } from "./sitplan/SituationPlanView";
 import { MarkerList } from "./print/MarkerList";
+
+/** Single source of truth mapping every electro-item type name to its class.
+ *  Used by the item factory and by tests that require complete coverage. */
+export const ELECTRO_ITEM_CONSTRUCTORS: Readonly<Record<string, new (sourcelist: Hierarchical_List) => Electro_Item>> = {
+    'Aansluiting': Aansluiting,
+    'Aansluitpunt': Aansluitpunt,
+    'Aardingsonderbreker': Aardingsonderbreker,
+    'Aftakdoos': Aftakdoos,
+    'Batterij': Batterij,
+    'Bel': Bel,
+    'Boiler': Boiler,
+    'Bord': Bord,
+    'Contactdoos': Contactdoos,
+    'Container': Container,
+    'Diepvriezer': Diepvriezer,
+    'Domotica': Domotica,
+    'Domotica module (verticaal)': Domotica_verticaal,
+    'Domotica gestuurde verbruiker': Domotica_gestuurde_verbruiker,
+    'Droogkast': Droogkast,
+    'Drukknop': Drukknop,
+    'Elektriciteitsmeter': Elektriciteitsmeter,
+    'Elektrische oven': Elektrische_oven,
+    'EV lader': EV_lader,
+    'Ketel': Ketel,
+    'Koelkast': Koelkast,
+    'Kookfornuis': Kookfornuis,
+    'Kring': Kring,
+    'Leiding': Leiding,
+    'Lichtcircuit': Lichtcircuit,
+    'Lichtpunt': Lichtpunt,
+    'Meerdere verbruikers': Meerdere_verbruikers,
+    'Media': Media,
+    'Microgolfoven': Microgolfoven,
+    'Motor': Motor,
+    'Omvormer': Omvormer,
+    'Omschakelaar': Omschakelaar,
+    'Omschakelaarpoort': Omschakelaarpoort,
+    'Overspanningsbeveiliging': Overspanningsbeveiliging,
+    'Schakelaars': Schakelaars,
+    'Splitsing': Splitsing,
+    'Stoomoven': Stoomoven,
+    'Transformator': Transformator,
+    'USB lader': USB_lader,
+    'Vaatwasmachine': Vaatwasmachine,
+    'Ventilator': Ventilator,
+    'Verbruiker': Verbruiker,
+    'Verlenging': Verlenging,
+    'Verwarmingstoestel': Verwarmingstoestel,
+    'Vrije ruimte': Vrije_ruimte,
+    'Vrije tekst': Vrije_tekst,
+    'Warmtepomp/airco': Warmtepomp,
+    'Wasmachine': Wasmachine,
+    'Zeldzame symbolen': Zeldzame_symbolen,
+    'Zekering/differentieel': Zekering,
+    'Zonnepaneel': Zonnepaneel,
+};
+
+/** Every user-editable type; only the internal Container is excluded. */
+const INTERNAL_ELECTRO_ITEM_TYPES = new Set(['Container', 'Omschakelaarpoort']);
+
+export const PUBLIC_ELECTRO_ITEM_TYPES: readonly string[] =
+    Object.keys(ELECTRO_ITEM_CONSTRUCTORS).filter((type) => !INTERNAL_ELECTRO_ITEM_TYPES.has(type));
 
 /*****************************************************************************
   CLASS Hierarchical_List
@@ -144,6 +211,9 @@ export class Hierarchical_List {
     sitplan: SituationPlan;
     sitplanjson: any; //this is where we store the situation plan in plan object exporting to json
     sitplanview: SituationPlanView;
+    boards: DistributionBoard[];
+    boardLayouts: BoardLayout[];
+    placementTasks: PlacementTask[];
     currentView: string = ""; // Here we store '2col' | 'config' | 'draw'
     
     // -- Hash table for efficient ID to ordinal lookups --
@@ -160,7 +230,10 @@ export class Hierarchical_List {
         this.properties = new Properties();
         this.curid = 1;
         this.mode = "edit";
-        this.sitplan = new SituationPlan();
+        this.sitplan = new SituationPlan(this);
+        this.boards = [createDefaultMainBoard([])];
+        this.boardLayouts = [];
+        this.placementTasks = [];
       };
 
     /** dispose
@@ -330,6 +403,10 @@ export class Hierarchical_List {
         return(returnval);
     }
 
+    allowedRootChilds(): Array<string> {
+        return ["", "Aansluiting", "Zekering/differentieel", "Kring"];
+    }
+
     createContainerIfNotExists(): Electro_Item {
         // loop over all childs of the root element (parent = 0) and check if any has type "Container"
         // if not, create a new Container with parent the root node and return it
@@ -350,60 +427,11 @@ export class Hierarchical_List {
     createItem(electroType: string) : Electro_Item {
 
         // First create the object
-        let tempval;
-        switch (electroType) {
-            case 'Aansluiting': tempval = new Aansluiting(this); break; 
-            case 'Aansluitpunt': case 'Leeg': tempval = new Aansluitpunt(this); break;
-            case 'Aardingsonderbreker': tempval = new Aardingsonderbreker(this); break;
-            case 'Aftakdoos': tempval = new Aftakdoos(this); break;
-            case 'Batterij': tempval = new Batterij(this); break;
-            case 'Bel': tempval = new Bel(this); break;
-            case 'Boiler': tempval = new Boiler(this); break;
-            case 'Bord': tempval = new Bord(this); break;
-            case 'Container': tempval = new Container(this); break;
-            case 'Diepvriezer': tempval = new Diepvriezer(this); break;
-            case 'Domotica': tempval = new Domotica(this); break; 
-            case 'Domotica module (verticaal)': tempval = new Domotica_verticaal(this); break; 
-            case 'Domotica gestuurde verbruiker': tempval = new Domotica_gestuurde_verbruiker(this); break; 
-            case 'Droogkast': tempval = new Droogkast(this); break; 
-            case 'Drukknop': tempval = new Drukknop(this); break; 
-            case 'Elektriciteitsmeter': tempval = new Elektriciteitsmeter(this); break; 
-            case 'Elektrische oven': tempval = new Elektrische_oven(this); break; 
-            case 'EV lader': tempval = new EV_lader(this); break;
-            case 'Ketel': tempval = new Ketel(this); break; 
-            case 'Koelkast': tempval = new Koelkast(this); break;
-            case 'Kookfornuis': tempval = new Kookfornuis(this); break;
-            case 'Kring': tempval = new Kring(this); break;
-            case 'Leiding': tempval = new Leiding(this); break;
-            case 'Lichtcircuit': tempval = new Lichtcircuit(this); break;
-            case 'Lichtpunt': tempval = new Lichtpunt(this); break;
-            case 'Meerdere verbruikers': tempval = new Meerdere_verbruikers(this); break;
-            case 'Media': tempval = new Media(this); break;
-            case 'Microgolfoven': tempval = new Microgolfoven(this); break;
-            case 'Motor': tempval = new Motor(this); break;
-            case 'Omvormer': tempval = new Omvormer(this); break;
-            case 'Overspanningsbeveiliging': tempval = new Overspanningsbeveiliging(this); break;
-            case 'Schakelaars': tempval = new Schakelaars(this); break;
-            case 'Splitsing': tempval = new Splitsing(this); break;
-            case 'Stoomoven': tempval = new Stoomoven(this); break;
-            case 'Contactdoos': tempval = new Contactdoos(this); break;
-            case 'Transformator': tempval = new Transformator(this); break;
-            case 'USB lader': tempval = new USB_lader(this); break;
-            case 'Vaatwasmachine': tempval = new Vaatwasmachine(this); break;
-            case 'Ventilator': tempval = new Ventilator(this); break;
-            case 'Verbruiker': tempval = new Verbruiker(this); break;
-            case 'Verlenging': tempval = new Verlenging(this); break;
-            case 'Verwarmingstoestel': tempval = new Verwarmingstoestel(this); break;
-            case 'Vrije ruimte': tempval = new Vrije_ruimte(this); break;
-            case 'Vrije tekst': tempval = new Vrije_tekst(this); break;
-            case 'Warmtepomp/airco': tempval = new Warmtepomp(this); break;
-            case 'Wasmachine': tempval = new Wasmachine(this); break;
-            case 'Zeldzame symbolen': tempval = new Zeldzame_symbolen(this); break;
-            case 'Zekering/differentieel': tempval = new Zekering(this); break;
-            case 'Zonnepaneel': tempval = new Zonnepaneel(this); break;
-            default: tempval = new Electro_Item(this);
-        }
-      
+        const constructor = electroType === 'Leeg'
+            ? Aansluitpunt
+            : ELECTRO_ITEM_CONSTRUCTORS[electroType];
+        let tempval = constructor !== undefined ? new constructor(this) : new Electro_Item(this);
+
         // Then set the correct identifyer
         tempval.id = this.curid;
         tempval.parent = 0;
@@ -707,110 +735,7 @@ export class Hierarchical_List {
         };
     };
 
-    updateRibbon() {
-        if (this.properties.currentView != '2col') return; // het heeft geen zin de EDS ribbon aan te passen als de EDS niet open staat
-
-        let output: string = "";
-
-        // Plaats bovenaan de switch van editeer-mode (teken of verplaats) --
-        output += `
-            <div class="icon" ${(globalThis.undostruct.undoStackSize() > 0 ? 'onclick="undoClicked()"' : "style=\"filter: opacity(45%)\"")}>
-                <img src="gif/undo.png" alt="Ongedaan maken" class="icon-image">
-                <span class="icon-text">Ongedaan maken</span>
-            </div>
-            <div class="icon" ${(globalThis.undostruct.redoStackSize() > 0 ? 'onclick="redoClicked()"' : "style=\"filter: opacity(45%)\"")}>
-                <img src="gif/redo.png" alt="Opnieuw" class="icon-image">
-                <span class="icon-text">Opnieuw</span>
-            </div>
-            <span style="display: inline-block; width: 30px;"></span>
-        `
-        output += '<p style="margin-top: 5px;margin-bottom: 5px;">';
-        switch (this.mode) {
-            case "edit":
-                output += `
-                        <div>
-                            Werkmodus<br>
-                            <select id="edit_mode" onchange="HL_editmode()">
-                                <option value="edit" selected>Invoegen</option>
-                                <option value="move">Verplaatsen/Clone</option>
-                            </select>
-                        </div>`;
-                break;
-            case "move":
-                output += `
-                        <div>
-                            Werkmodus<br>
-                            <select id="edit_mode" onchange="HL_editmode()">
-                                <option value="edit">Invoegen</option>
-                                <option value="move" selected>Verplaatsen/Clone</option>
-                            </select>
-                        </div>
-                        <span style="display: inline-block; width: 30px;"></span>`;
-
-                output+= `
-                        <div style="color:black;font-size:12px"><i>
-                            Gebruik de <b>blauwe</b> pijlen om de volgorde van elementen te wijzigen.<br>
-                            Gebruik het <u>Moeder</u>-veld om een component elders in het schema te hangen.<br>
-                            Kies "<b>clone</b>" om een dubbel te maken van een element.
-                        </i></div>`;
-                break;
-        }
-        output += '</p>';
-
-        if (globalThis.autoSaver && globalThis.autoSaver.hasChangesSinceLastManualSave()) {
-            output +=  '<span style="display: inline-block; width: 30px;"></span>';
-            output +=  `<div style="margin-top: 5px;margin-bottom: 5px;display: flex; align-items: center; justify-content: center;" class="highlight-warning-big" onclick="exportjson(false)"
-                           onmouseover="this.style.cursor='pointer'" 
-                           onmouseout="this.style.cursor='default'">
-                           <div style="display: inline-block; vertical-align: middle;"><span class="icon-image" style="font-size:24px;">💾</span></div>
-                           <div style="display: inline-block; vertical-align: middle; margin-left: 10px;">
-                               U heeft niet opgeslagen wijzigingen. Klik hier om op te slaan<br>
-                               of ga naar het "Bestand"-menu voor meer opties.
-                           </div>
-                        </div>`;
-        } else {
-            output +=  '<span style="display: inline-block; width: 30px;"></span>';
-            output +=  `<div style="margin-top: 5px;margin-bottom: 5px;display: flex; align-items: center; justify-content: center;" class="highlight-ok-big" onclick="topMenu.selectMenuItemByName('Bestand')"
-                           onmouseover="this.style.cursor='pointer'" 
-                           onmouseout="this.style.cursor='default'">
-                           <div style="display: inline-block; vertical-align: middle;"><span class="icon-image" style="font-size:24px; filter: grayscale(100%); opacity: 0.5;">💾</span></div>
-                           <div style="display: inline-block; vertical-align: middle; margin-left: 10px;">
-                               Er zijn geen niet opgeslagen wijzigingen. Ga naar het "Bestand"-menu<br>
-                               indien u toch wenst op te slaan.
-                           </div>
-                        </div>`;
-        }
-        
-        const ribbonElement = document.getElementById("ribbon");
-        const newHTML = `<div id="left-icons">${output}</div>`;
-        //if (ribbonElement.innerHTML !== newHTML) {
-            ribbonElement.innerHTML = newHTML; // Doesn't make a lot of sense to test as browser changes innerHTML anyway
-        //}
-    }
-
-    // -- Functie om de tree links te tekenen te starten by node met id = myParent --
-
-    toHTMLinner(ordinal: number) {
-        if (this.data[ordinal].collapsed) {
-            return(`<tr>
-                        <td bgcolor="#8AB2E4" onclick="HLCollapseExpand(${this.data[ordinal].id})" valign= "top">&#x229E;</td>
-                        <td width="100%">${this.data[ordinal].toHTML(this.mode)}<br></td>
-                    </tr>`);
-        } else {
-            return(`<tr>
-                       <td bgcolor="C0C0C0" onclick="HLCollapseExpand(${this.data[ordinal].id})" valign= "top">&#x229F;</td>
-                       <td width="100%">${this.data[ordinal].toHTML(this.mode)}<br>${this.toHTML(this.id[ordinal])}</td>
-                    </tr>`);
-        }
-    }
-
-    updateHTMLinner(id: number) {
-        let ordinal: number = this.getOrdinalById(id);
-        if (ordinal === null) return; // If id is not found, do nothing
-
-        let div = document.getElementById('id_elem_'+id) as HTMLElement;
-        div.innerHTML = this.toHTMLinner(ordinal);
-    }
+    /** @deprecated React owns the complete workspace command bar. */
 
     voegAttributenToeAlsNodigEnReSort() {
 
@@ -884,69 +809,31 @@ export class Hierarchical_List {
             }
         }
 
+        // Elke omschakelaar heeft altijd een aansluitpoort per positie (OUT1, IN, OUT2). Oudere
+        // documenten hadden er maar twee; de ontbrekende wordt hier aangevuld.
+        for (let i = 0; i<this.length; i++) {
+            if (!this.active[i] || (this.data[i] as Electro_Item).getType() != "Omschakelaar") continue;
+            const present = new Set<string>();
+            for (let j = 0; j<this.length; j++) {
+                if (this.active[j] && this.data[j].parent == this.id[i] && this.data[j].props.type == "Omschakelaarpoort")
+                    present.add(this.data[j].props.poort);
+            }
+            const missing = ["OUT2", "IN", "OUT1"].filter(port => !present.has(port));
+            if (missing.length > 0) {
+                for (const port of missing) {
+                    const connector = this.createItem("Omschakelaarpoort");
+                    connector.props.poort = port;
+                    this.insertChildAfterId(connector, this.id[i]);
+                }
+                this.voegAttributenToeAlsNodigEnReSort();
+                return;
+            }
+        }
+
         // herStoreren van de matrix
 
         this.reSort();
           
-    }
-
-    toHTML(myParent: number) {
-        
-        // Als we alles tekenen mogen we ook de ribbon niet vergeten te updaten
-        if (myParent==0) {
-            this.updateRibbon();
-            this.reNumber();
-        }
-
-        // Enkele variabelen initialiseren
-        let parent = this.getElectroItemById(myParent);
-        let output: string = "";
-        let aantalElementen: number = 0;
-        let aantalKringen: number = 0;
-
-        // Genereer de HTML voor de elementen die onder myParent hangen
-        for (let i = 0; i<this.length; i++) {
-            if (this.active[i] && (this.data[i].parent == myParent)
-            && !( (this.data[i] as Electro_Item).isAttribuut() ) 
-            && !((this.data[i] as Electro_Item).getType() == "Container") ) {
-                aantalElementen++;
-                const electroItemType = (this.data[i] as Electro_Item).getType();
-                if (electroItemType == "Container") continue; // We tekenen de container niet zelf
-                if (electroItemType != null && electroItemType == "Kring") aantalKringen++;
-                output += '<table class="html_edit_table" id="id_elem_' + this.id[i]  + '">';
-                output += this.toHTMLinner(i);
-                output += "</table>";
-            }
-        };
-
-        // Indien we het volledige schema aan het tekenen zijn, maar er valt niets te tekenen, dan gevven we enkel een melding om een nieuw schema te starten
-        if ( (myParent == 0) && (aantalElementen<1) ) {
-            output += "<button onclick=\"HLAdd()\">Voeg eerste object toe of kies bovenaan \"Nieuw\"</button><br>"; //no need for the add button if we have items
-        };
-        
-        // Indien we een kring hebben met meer dan 1 kring als kind, dan geven we een waarschuwing en vragen we dit anders te doen
-        if (parent != null && parent.getType() == "Kring" && aantalKringen > 1) {
-            const EDStekenFoutKleur = trimString(getComputedStyle(document.documentElement).getPropertyValue('--EDStekenFoutKleur'));
-            const arrowstr = insertArrow(EDStekenFoutKleur);
-            output = `<div class="EDS-tekenfout">`
-                   + `<b>Tekenfout:</b> U heeft meer dan 1 kring achter deze kring gehangen, Kring ${arrowstr} {Kring, Kring, &#8230;}. Dat is niet gebruikelijk.<br>`
-                   + `Als u hier een vertakking wilt, gebruik dan eerst het "Splitsing"-element: Kring ${arrowstr} Splitsing ${arrowstr} {Kring, Kring, &#8230;}.<br>`
-                   + `Als u daadwerkelijk verticaal gestapelde kringen in het schema wilt, is het correcter ze hiërarchisch onder elkaar te hangen: Kring ${arrowstr} Kring ${arrowstr} Kring.<br>`
-                   + "</div>" + output;
-        }
-
-        // Indien we een Aansluiting hebben met meer dan 1 kind, dan geven we een waarschuwing en vragen we dit anders te doen
-        if (parent != null && parent.getType() == "Aansluiting" && aantalElementen > 1) {
-            const EDStekenFoutKleur = trimString(getComputedStyle(document.documentElement).getPropertyValue('--EDStekenFoutKleur'));
-            const arrowstr = insertArrow(EDStekenFoutKleur);
-            output = `<div class="EDS-tekenfout">`
-                   + `<b>Tekenfout:</b> U heeft meer dan 1 element achter een aansluiting gehangen, Aansluiting ${arrowstr} {Element1, Element2, &#8230;}. Dat is niet gebruikelijk.<br>`
-                   + `Het is correcter om elementen achter een aansluiting als volgt te stapelen: Aansluiting ${arrowstr} Element1 ${arrowstr} Element2 ${arrowstr} &#8230;.<br>`
-                   + `Verwijder het teveel aan elementen of gebruik de werkmodus "Verplaatsen/Clone" bovenaan om ze onder elkaar te hangen.`
-                   + "</div>" + output;
-        }
-
-        return(output);
     }
 
     /** Functie om de naam van een kring te vinden waartoe een element behoord 
@@ -982,9 +869,10 @@ export class Hierarchical_List {
      * De namen worden gegenereerd in de volgorde van het alfabet, beginnend met "A", "B", ..., "Z", "AA", "AB", ..., "ZZ", "AAA", "AAB", ..., enzovoort.
      */
 
-    updateKringNamen() {
+    updateKringNamen(updateDom: boolean = true) {
 
         function changeInLeftColIfOpen(id: number, newname: string) {
+            if (!updateDom) return;
             let div: HTMLInputElement = (document.getElementById(`HL_edit_${id}_naam`) as HTMLInputElement);
             if (div) {
                 if (div.value != newname) div.value = newname;
@@ -1094,9 +982,10 @@ export class Hierarchical_List {
      * 
      * @returns true indien er wijzigingen zijn gemaakt, anders false
      */
-    reNumber() {
+    reNumber(updateDom: boolean = true) {
 
         function changeInLeftColIfOpen(id: number, newnr: string) {
+            if (!updateDom) return;
             let div: HTMLInputElement = (document.getElementById(`HL_edit_${id}_nr`) as HTMLInputElement);
             if (div) {
                 if (div.value != newnr) div.value = newnr;
@@ -1105,11 +994,11 @@ export class Hierarchical_List {
 
         // Eerst sorteren we de lijst opnieuw en zorgen we ervoor dat alle kringen een naam hebben
         this.reSort();
-        this.updateKringNamen(); // Zorg ervoor dat de kringen namen hebben
+        this.updateKringNamen(updateDom); // Zorg ervoor dat de kringen namen hebben
 
         // Nu gaan we doorheen alle items en passen we de nummers aan indien nodig
         let lastNumbers: { [kring: string]: number } = {}; // Object to keep track of last numbers for each type
-        let itemsZonderNr: Array<string> = ["", "Bord", "Kring", "Splitsing"];
+        let itemsZonderNr: Array<string> = ["", "Bord", "Kring", "Splitsing", "Leiding"];
         
         for (let i = 0; i<this.length; i++) {
             if (!this.active[i]) continue;
@@ -1160,6 +1049,7 @@ export class Hierarchical_List {
 
         // Eerst creëren we een array van SVGelements met alle kinderen van myParent en eventueel myParent zelf
         let inSVG: Array<SVGelement> = new Array<SVGelement>(); //Results from nested calls will be added here
+        let inSVGItemIds: number[] = [];
         let elementCounter: number = 0;
 
         // Dan vullen we de array door doorheen de lijst van kinderen te gaan en een tekening van elk kind op te slaan
@@ -1226,6 +1116,11 @@ export class Hierarchical_List {
                         this.tekenVerticaleLijnIndienKindVanKring(this.data[i] as Electro_Item,inSVG[elementCounter]);         
                         break;
 
+                    case "Omschakelaar":
+                        // The transfer switch owns its incoming and outgoing conductors.
+                        inSVG[elementCounter] = this.data[i].toSVG();
+                        break;
+
                     case "Container":
                         break;
 
@@ -1249,7 +1144,10 @@ export class Hierarchical_List {
                         this.tekenVerticaleLijnIndienKindVanKring(this.data[i] as Electro_Item,inSVG[elementCounter]);
                         break;
                 }
-                if (mytype !== 'Container') elementCounter++;
+                if (mytype !== 'Container') {
+                    inSVGItemIds[elementCounter] = this.id[i];
+                    elementCounter++;
+                }
             }    
         }
 
@@ -1296,7 +1194,14 @@ export class Hierarchical_List {
                 let xpos:number = 0;
 
                 for (let i = 0; i<elementCounter; i++) {
-                    outSVG.data += '<svg x="' + xpos + '" y="' + (max_yup-inSVG[i].yup) + '">';
+                    outSVG.data += '<svg data-schema-item-id="' + inSVGItemIds[i]
+                        + '" data-schema-anchor-y="' + inSVG[i].yup
+                        + '" data-schema-end-x="' + (inSVG[i].xleft + inSVG[i].xright)
+                        + '" data-schema-top-x="' + inSVG[i].xleft
+                        + '" data-schema-top-y="0'
+                        + '" data-schema-width="' + (inSVG[i].xleft + inSVG[i].xright)
+                        + '" data-schema-height="' + (inSVG[i].yup + inSVG[i].ydown)
+                        + '" x="' + xpos + '" y="' + (max_yup-inSVG[i].yup) + '">';
                     outSVG.data += inSVG[i].data;
                     outSVG.data += '</svg>';
                     xpos += inSVG[i].xleft + inSVG[i].xright;
@@ -1347,7 +1252,14 @@ export class Hierarchical_List {
                 let ypos:number = 0;
 
                 for (let i = elementCounter-1; i>=0; i--) {
-                    outSVG.data += '<svg x="' + (outSVG.xleft-inSVG[i].xleft) + '" y="' + ypos + '">';
+                    outSVG.data += '<svg data-schema-item-id="' + inSVGItemIds[i]
+                        + '" data-schema-anchor-y="' + inSVG[i].yup
+                        + '" data-schema-end-x="' + (inSVG[i].xleft + inSVG[i].xright)
+                        + '" data-schema-top-x="' + inSVG[i].xleft
+                        + '" data-schema-top-y="0'
+                        + '" data-schema-width="' + (inSVG[i].xleft + inSVG[i].xright)
+                        + '" data-schema-height="' + (inSVG[i].yup + inSVG[i].ydown)
+                        + '" x="' + (outSVG.xleft-inSVG[i].xleft) + '" y="' + ypos + '">';
                     outSVG.data += inSVG[i].data;
                     outSVG.data += '</svg>';
                     ypos += inSVG[i].yup + inSVG[i].ydown;
@@ -1368,6 +1280,17 @@ export class Hierarchical_List {
     }
 
     toJsonObject(removeUnneededDataMembers = true) {
+
+        const activeRootItemIds = this.data
+            .filter((item, index) => this.active[index] && item.parent === 0)
+            .map((item) => item.id);
+        const mainBoard = this.boards.find((board) => board.id === "main")
+            ?? this.boards.find((board) => board.feeder === undefined);
+        if (mainBoard !== undefined) {
+            this.boards = this.boards.map((board) => board.id === mainBoard.id
+                ? { ...board, rootItemIds: activeRootItemIds }
+                : board);
+        }
 
         // Remove some unneeded data members that would only inflate the size of the output file
         for (let listitem of this.data) {

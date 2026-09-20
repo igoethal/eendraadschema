@@ -37,22 +37,6 @@ export class Domotica_gestuurde_verbruiker extends Electro_Item {
         return 1;
     }
 
-    toHTML(mode: string) {
-        let output = this.toHTMLHeader(mode);
-
-        output += "&nbsp;" + this.nrToHtml()
-               +    "Draadloos: " + this.checkboxPropToHTML('is_draadloos')
-               +  ", Lokale Drukknop: " + this.checkboxPropToHTML('heeft_lokale_drukknop')
-               +  ", Geprogrammeerd: " + this.checkboxPropToHTML('is_geprogrammeerd')
-               +  ", Detectie: " + this.checkboxPropToHTML('heeft_detectie')
-               +  ", Externe sturing: " + this.checkboxPropToHTML('heeft_externe_sturing');    
-
-        if (this.props.heeft_externe_sturing) output += ", Externe sturing: " + this.selectPropToHTML('type_externe_sturing',["drukknop","schakelaar"]);
-
-        output += ", Adres/tekst: " + this.stringPropToHTML('adres',5); 
-
-        return(output);
-    }
 
     toSVG(sitplan = false) {
         let mySVG:SVGelement = new SVGelement();

@@ -31,6 +31,14 @@ export class Electro_Item extends List_Item {
 
   resetProps() { super.resetProps(); } // overriden in each derived class
 
+  // Legacy subclasses use this hook to enforce their property invariants.
+  overrideKeys(): void {}
+
+  /** Application-facing compatibility seam for existing subclass invariants. */
+  normalizeProperties(): void {
+    this.overrideKeys();
+  }
+
   // -- Zoek vader van het Electro_Item --
   
   getParent(): Electro_Item { 
@@ -40,7 +48,7 @@ export class Electro_Item extends List_Item {
   // -- Lijst met toegestande kinderen van het Electro_item --
 
   allowedChilds() : Array<string> { 
-      return ["", "Aansluiting", "Domotica", "Domotica module (verticaal)", "Domotica gestuurde verbruiker", "Leiding", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Contactdoos", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Media", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zekering/differentieel", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Zeldzame symbolen"];
+      return ["", "Aansluiting", "Domotica", "Domotica module (verticaal)", "Domotica gestuurde verbruiker", "Leiding", "Meerdere verbruikers", "Splitsing", "Omschakelaar", "---", "Batterij", "Bel", "Boiler", "Contactdoos", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Media", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zekering/differentieel", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Zeldzame symbolen"];
   }
 
   // -- Aantal actieve kinderen van het Electro_item, attributes worden niet geteld --
@@ -180,55 +188,12 @@ export class Electro_Item extends List_Item {
 
   // -- Displays the navigation buttons for the Electro_Item, i.e. the green and blue arrows, and the selection of the Type (Bord, Kring, ...) --
 
-  toHTMLHeader(mode: string) {
-    let output:string = "";
-    
-    if (mode=="move") {
-      output += "<b>ID: "+this.id+"</b>, ";
-      output += 'Moeder: <input id="id_parent_change_' + this.id + '" type="text" size="2" value="' + this.parent + '" onchange="HL_changeparent(' + this.id + ')"> ';
-      output += `<button class="button-lightblue" onclick="HLMoveUp(${this.id})">&#9650;</button>`;
-      output += `<button class="button-lightblue" onclick="HLMoveDown(${this.id})">&#9660;</button>`;
-      if (this.checkInsertSibling()) {
-        output += `<button class="button-lightblue" onclick="HLClone(${this.id})">Clone</button>`;
-      }
-    } else {
-      if (this.checkInsertSibling()) {
-        output += `<button class="button-insertBefore" onclick="HLInsertBefore(${this.id})"></button>`;
-        output += `<button class="button-insertAfter" onclick="HLInsertAfter(${this.id})"></button>`;
-      }
-      if (this.checkInsertChild()) {
-        output +=  `<button class="button-insertChild" onclick="HLInsertChild(${this.id})"></button>`;
-      }
-    };
-    output += `<button class="button-delete-garbage-can" onclick="HLDelete(${this.id})"></button>`;
-    output += "&nbsp;"
-
-    let parent:Electro_Item = this.getParent();
-    let consumerArray: Array<string>;
-    
-    if (parent == null) consumerArray = ["", "Aansluiting", "Zekering/differentieel", "Kring"];
-    else consumerArray = this.getParent().allowedChilds()
-
-    //output += '<div class="type-orange">';
-    output += this.selectPropToHTML('type', consumerArray, 175);
-    //output += '</div>';
-
-    return(output);
-  }
 
   // -- Displays the Expand button for the Electro_item, in case the item is expandable --
 
-  toHTMLFooter() {
-    if (this.isExpandable()) {
-      return(` <button title="Meerdere elementen (bvb schakelaars) omzetten in indivuele elementen" style="background-color:lightblue;" onclick="HLExpand(${this.id})">Uitpakken</button>`);
-    } else {
-      return("");
-    }
-  }
 
   // -- This one will get called if the type of the Electro_Item has not yet been chosen --
 
-  toHTML(mode: string) { return(this.toHTMLHeader(mode)); } // Implemented in the derived classes
 
   // -- Get the number of the Electro_Item, if it is not defined, ask the parent
 
@@ -266,23 +231,6 @@ export class Electro_Item extends List_Item {
 
   // -- Display the number in the html tree view, but only if it is displayable
 
-  nrToHtml() {
-      if (typeof(this.props.autonr) == undefined) this.props.autonr = "manueel"; // false voor compatibiliteit met oude schema's
-      let str = "";
-      let parent:Electro_Item = (this.getParent() as Electro_Item);
-      if (parent != null) {
-          if ( (parent.getType() == "Kring") || (parent.getType() == "Domotica module (verticaal)") ) {
-                str += `Nr: ${this.selectPropToHTML('autonr',['auto','manueel'])}`
-                  +  (this.props.autonr === 'auto'
-                  ? `<input type="text" id="HL_edit_${this.id}_nr" size="2" value="${this.props.nr ?? ''}" disabled />`
-                  : this.stringPropToHTML('nr',2)) 
-                  + ', ';
-          } else {
-              this.props.nr = "";
-          }
-      };
-      return(str);
-  };
 
   // -- Code to add the addressline below when drawing SVG. This is called by most derived classes --
 

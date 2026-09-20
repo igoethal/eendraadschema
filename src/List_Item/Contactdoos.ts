@@ -34,27 +34,6 @@ export class Contactdoos extends Electro_Item {
         this.props.in_verdeelbord = false;
     }
 
-    toHTML(mode: string) {
-        let output = this.toHTMLHeader(mode);
-
-        output += "&nbsp;" + this.nrToHtml()
-               +  "Geaard: " + this.checkboxPropToHTML('is_geaard') + ", "
-               +  "Kinderveiligheid: " + this.checkboxPropToHTML('is_kinderveilig') + " "
-               +  "Halfwaterdicht: " + this.checkboxPropToHTML('is_halfwaterdicht') + ", "
-               +  "Meerfasig: " + this.checkboxPropToHTML('is_meerfasig') + ", ";
-
-        if (this.props.is_meerfasig) {
-          output += "Aantal fasen: " + this.selectPropToHTML('aantal_fases_indien_meerfasig',["1","2","3"]) + ", "
-                 +  "Met nul: " + this.checkboxPropToHTML('heeft_nul_indien_meerfasig') + ", ";
-        };
-
-        output += "Ingebouwde schakelaar: " + this.checkboxPropToHTML('heeft_ingebouwde_schakelaar') + ", "
-               +  "Aantal: " + this.selectPropToHTML('aantal',["1","2","3","4","5","6"]) + ", "
-               +  "In verdeelbord: " + this.checkboxPropToHTML('in_verdeelbord')
-               +  ", Adres/tekst: " + this.stringPropToHTML('adres',5);
-
-        return(output);
-    }
 
     toSVG(sitplan: boolean = false, mirrortext: boolean = false): SVGelement {
         let mySVG:SVGelement = new SVGelement();
@@ -175,4 +154,3 @@ export class Contactdoos extends Electro_Item {
     }
          
 }
-

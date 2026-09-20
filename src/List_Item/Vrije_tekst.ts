@@ -37,25 +37,6 @@ export class Vrije_tekst extends Electro_Item {
         this.adjustTextWidthIfAuto();
     }
 
-    toHTML(mode: string) {
-        this.overrideKeys();
-        let output = this.toHTMLHeader(mode);
-
-        output += "&nbsp;" + this.nrToHtml()
-               +  "Tekst (nieuwe lijn = \"|\"): " + this.stringPropToHTML('tekst',30)
-               +  ", Breedte: " + this.selectPropToHTML('heeft_automatische_breedte',["automatisch","handmatig"]);
-
-        if (this.props.heeft_automatische_breedte != "automatisch") output += " " + this.stringPropToHTML('breedte',3);
-        
-        output += ", Vet: " + this.checkboxPropToHTML('is_vet')
-               +  ", Cursief: " + this.checkboxPropToHTML('is_cursief')
-               +  ", Horizontale alignering: " + this.selectPropToHTML('horizontale_uitlijning',["links","centreer","rechts"])
-               +  ", Type: " + this.selectPropToHTML('vrije_tekst_type',(this.heeftVerbruikerAlsKind() ? ["verbruiker"] : ["verbruiker","zonder kader"]));
-               
-        if (this.props.vrije_tekst_type != "zonder kader") output += ", Adres/tekst: " + this.stringPropToHTML('adres',5);
-
-        return(output);
-    }
 
     adjustTextWidthIfAuto() {
         if (this.props.heeft_automatische_breedte === "automatisch") {

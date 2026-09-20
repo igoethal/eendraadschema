@@ -1,3 +1,9 @@
+// Does nothing in the serverless (local/community) version; only used on
+// https://eendraadschema.goethals-jacobs.be, which ships its own prop_scripts_js.js.
+globalThis.propUpload = function (text) {
+  return 0;
+};
+
 function popUp(URL) {
   //day = new Date();
   //id = day.getTime();

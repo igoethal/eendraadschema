@@ -23,14 +23,6 @@ export class Splitsing extends Electro_Item {
         return 256;
     }
 
-    toHTML(mode: string, Parent?: List_Item) {
-        // Suppress 'declared but never read' warning for the Parent parameter
-        Parent;
-        
-        let output = this.toHTMLHeader(mode);
-
-        return(output);
-    }
 
     toSVG() {
         let mySVG:SVGelement; // = new SVGelement();

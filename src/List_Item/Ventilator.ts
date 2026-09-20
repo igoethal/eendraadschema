@@ -21,17 +21,6 @@ export class Ventilator extends Electro_Item {
         if (!this.props.ventilatortype) this.props.ventilatortype = "ventilator";
     }
 
-    toHTML(mode: string) {
-        this.overrideKeys();
-
-        let output = this.toHTMLHeader(mode);
-
-        output += "&nbsp;" + this.nrToHtml();
-        output += this.selectPropToHTML('ventilatortype', ['ventilator', 'afzuigkap']);
-        output += ", Adres/tekst: " + this.stringPropToHTML('adres',5);
-
-        return(output);
-    }
 
     toSVG(sitplan = false) {
         let mySVG:SVGelement = new SVGelement();

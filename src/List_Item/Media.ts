@@ -28,21 +28,6 @@ export class Media extends Electro_Item {
         }    
     }
 
-    toHTML(mode: string) {
-        this.overrideKeys();
-        let output = this.toHTMLHeader(mode);
-
-        output += "&nbsp;" + this.nrToHtml()
-               +  "Symbool: " + this.selectPropToHTML('symbool',["","luidspreker","intercom"]);
-
-        if (['luidspreker','intercom'].includes(this.props.symbool)) {
-            output += ", Aantal: " + this.selectPropToHTML('aantal',["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]);
-        }
-
-        output += ", Adres/tekst: " + this.stringPropToHTML('adres',5);
-
-        return(output);
-    }
 
     toSVG(sitplan = false) {
         let mySVG:SVGelement = new SVGelement();

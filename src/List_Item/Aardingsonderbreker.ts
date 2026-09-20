@@ -16,14 +16,6 @@ export class Aardingsonderbreker extends Electro_Item {
         this.props.adres = "";  
     }      
 
-    toHTML(mode: string) {
-        let output = this.toHTMLHeader(mode);
-
-        output += "&nbsp;" + this.nrToHtml();
-        output += "Adres/tekst: " + this.stringPropToHTML('adres',5);
-
-        return(output);
-    }
 
     toSVG(sitplan = false) {
         let mySVG:SVGelement = new SVGelement();

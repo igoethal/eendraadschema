@@ -23,21 +23,81 @@ export class Leiding extends Electro_Item {
         if (this.props.kabel_locatie == "Luchtleiding") this.props.kabel_is_in_buis = false; //Indien luchtleiding nooit een buis tekenen
     }
 
-    toHTML(mode: string) {
-        let output = this.toHTMLHeader(mode);
-
-        output += "&nbsp;" + this.nrToHtml()
-               +  "Type: " + this.stringPropToHTML('type_kabel',10)
-               +  ", Plaatsing: " + this.selectPropToHTML('kabel_locatie',["N/A","Ondergronds","Luchtleiding","In wand","Op wand"]);
-        
-        if (this.props.kabel_locatie != "Luchtleiding") output += ", In buis: " + this.checkboxPropToHTML('kabel_is_in_buis');
-
-        return(output);
-    }
 
     toSVG() {
         this.overrideKeys();
 
+        // Een leiding die rechtstreeks onder een kring hangt (tussen verbruikers) wordt verticaal
+        // getekend, in lijn met de verticale as van de kring, in plaats van horizontaal.
+        let parent = this.getParent();
+        if (parent != null && parent.getType() == "Kring") return this.toSVGVerticaal();
+
+        return this.toSVGHorizontaal();
+    }
+
+
+    toSVGVerticaal() {
+        let mySVG:SVGelement = new SVGelement();
+
+        let height = 100;
+
+        mySVG.xleft = 15; // ruimte links van de as voor symbolen (in buis, ondergronds, in/op wand)
+        mySVG.xright = 20; // ruimte rechts van de as voor de naam van de kabel
+        mySVG.yup = height/2;
+        mySVG.ydown = height/2;
+
+        // De as (het verticale stuk kabel) tekenen
+        mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="0" y2="' + height + '" stroke="black" />'
+                   +  "<text x=\"" + (mySVG.xleft+15) + "\" y=\"" + (80) + "\""
+                   +  " transform=\"rotate(-90 " + (mySVG.xleft+15) + "," + (80) + ")"
+                   +  "\" style=\"text-anchor:start\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">"
+                   +  htmlspecialchars(this.props.type_kabel) + "</text>";
+
+        // Luchtleiding tekenen indien van toepassing
+        if (this.props.kabel_locatie == "Luchtleiding") mySVG.data += '<circle cx="' + (mySVG.xleft) + '" cy="' + (20) + '" r="4" style="stroke:black;fill:none" />';
+
+        // Symbolen naast de kabel zetten
+        if ( (this.props.kabel_is_in_buis) && (this.props.kabel_locatie != "Luchtleiding") ) // Rondje voor "in buis" tekenen
+            mySVG.data += '<circle cx="' + (mySVG.xleft-10) + '" cy="' + (40) + '" r="4" style="stroke:black;fill:none" />';
+
+        switch (this.props.kabel_locatie) {
+
+            case "Ondergronds":
+                mySVG.data += '<line x1="' + (mySVG.xleft-13) + '" x2="' + (mySVG.xleft-13) + '" y1="' + (60) + '" y2="' + (80) + '" style="stroke:black" />'
+                           +  '<line x1="' + (mySVG.xleft-10) + '" x2="' + (mySVG.xleft-10) + '" y1="' + (62) + '" y2="' + (78) + '" style="stroke:black" />'
+                           +  '<line x1="' + (mySVG.xleft-7)  + '" x2="' + (mySVG.xleft-7)  + '" y1="' + (64) + '" y2="' + (76) + '" style="stroke:black" />';
+                break;
+
+            case "In wand":
+                mySVG.data += '<line x1="' + (mySVG.xleft-15) + '" x2="' + (mySVG.xleft-15) + '" y1="' + (10) + '" y2="' + (30) + '" style="stroke:black" />'
+                           +  '<line x1="' + (mySVG.xleft-15) + '" x2="' + (mySVG.xleft-5)  + '" y1="' + (10) + '" y2="' + (10) + '" style="stroke:black" />'
+                           +  '<line x1="' + (mySVG.xleft-15) + '" x2="' + (mySVG.xleft-5)  + '" y1="' + (20) + '" y2="' + (20) + '" style="stroke:black" />'
+                           +  '<line x1="' + (mySVG.xleft-15) + '" x2="' + (mySVG.xleft-5)  + '" y1="' + (30) + '" y2="' + (30) + '" style="stroke:black" />'
+                           +  '<line x1="' + (mySVG.xleft-15) + '" x2="' + (mySVG.xleft-15) + '" y1="' + (65) + '" y2="' + (85) + '" style="stroke:black" />'
+                           +  '<line x1="' + (mySVG.xleft-15) + '" x2="' + (mySVG.xleft-5)  + '" y1="' + (85) + '" y2="' + (85) + '" style="stroke:black" />'
+                           +  '<line x1="' + (mySVG.xleft-15) + '" x2="' + (mySVG.xleft-5)  + '" y1="' + (65) + '" y2="' + (65) + '" style="stroke:black" />'
+                           +  '<line x1="' + (mySVG.xleft-15) + '" x2="' + (mySVG.xleft-5)  + '" y1="' + (75) + '" y2="' + (75) + '" style="stroke:black" />';
+                break;
+
+            case "Op wand":
+                mySVG.data += '<line x1="' + (mySVG.xleft-5)  + '" x2="' + (mySVG.xleft-5)  + '" y1="' + (10) + '" y2="' + (30) + '" style="stroke:black" />'
+                           +  '<line x1="' + (mySVG.xleft-15) + '" x2="' + (mySVG.xleft-5)  + '" y1="' + (10) + '" y2="' + (10) + '" style="stroke:black" />'
+                           +  '<line x1="' + (mySVG.xleft-15) + '" x2="' + (mySVG.xleft-5)  + '" y1="' + (20) + '" y2="' + (20) + '" style="stroke:black" />'
+                           +  '<line x1="' + (mySVG.xleft-15) + '" x2="' + (mySVG.xleft-5)  + '" y1="' + (30) + '" y2="' + (30) + '" style="stroke:black" />'
+                           +  '<line x1="' + (mySVG.xleft-5)  + '" x2="' + (mySVG.xleft-5)  + '" y1="' + (65) + '" y2="' + (85) + '" style="stroke:black" />'
+                           +  '<line x1="' + (mySVG.xleft-15) + '" x2="' + (mySVG.xleft-5)  + '" y1="' + (85) + '" y2="' + (85) + '" style="stroke:black" />'
+                           +  '<line x1="' + (mySVG.xleft-15) + '" x2="' + (mySVG.xleft-5)  + '" y1="' + (65) + '" y2="' + (65) + '" style="stroke:black" />'
+                           +  '<line x1="' + (mySVG.xleft-15) + '" x2="' + (mySVG.xleft-5)  + '" y1="' + (75) + '" y2="' + (75) + '" style="stroke:black" />';
+                break;
+        }
+
+        mySVG.data += "\n";
+
+        return(mySVG);
+    }
+
+
+    toSVGHorizontaal() {
         let mySVG:SVGelement = new SVGelement();
 
         let width = 100;

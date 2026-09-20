@@ -1,2 +1,58 @@
-@import url("./styles.css");
-@import url("./EdsHierarchy.css");
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --selectPadding: 2;
+    --paperPadding: 10px;
+    --menu-height: 40px;
+    --ribbon-height: 56px;
+    --status-bar-height: 0px;
+    --react-shell-height: 64px;
+    --workspace-left-width: 19rem;
+    --workspace-right-width: 19rem;
+    --total-offset: calc(var(--react-shell-height) + var(--menu-height) + var(--ribbon-height) + var(--status-bar-height));
+  }
+
+  html {
+    height: 100%;
+    background: white;
+  }
+
+  body {
+    min-width: 20rem;
+    cursor: default;
+  }
+
+  #app { min-height: 0; }
+
+  #react-workspace-sidebar,
+  #properties_col { scrollbar-gutter: stable; }
+
+  .workspace-resize-handle { touch-action: none; }
+
+  @media (max-width: 72rem) {
+    #react-workspace-sidebar,
+    #properties_col { display: none !important; }
+
+    #react-board-layout-root,
+    #canvas_2col,
+    #outerdiv { right: 0 !important; left: 0 !important; }
+
+    .workspace-resize-handle { display: none !important; }
+  }
+
+  button,
+  select,
+  select option,
+  input[type="checkbox"] {
+    cursor: pointer;
+  }
+
+  select option {
+    background: #f7f7f7;
+  }
+
+  td[contenteditable="true"] {
+    cursor: text;
+  }
+}

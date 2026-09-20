@@ -15,13 +15,6 @@ export class Vrije_ruimte extends Electro_Item {
         this.props.breedte = 25;            // Default breedte van de vrije ruimte
     }
 
-    toHTML(mode: string) {
-        let output = this.toHTMLHeader(mode);
-
-        output += "&nbsp;Breedte: " + this.stringPropToHTML('breedte',3);
-
-        return(output);
-    }
 
     getMaxNumChilds(): number {
         return 0;

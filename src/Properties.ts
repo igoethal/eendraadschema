@@ -8,6 +8,7 @@ export class Properties {
   currentView: string;
   disableEDSCompression: boolean; // true als we de EDS niet mogen comprimeren, false als we het mogen comprimeren
   legacySchakelaars: boolean | null; // true als we geisoleerde schakelaars met een streepje moeten tekenen, null als we het moeten vragen
+  dossier: import("./domain/Dossier").DossierMetadata;
 
   constructor() {
     this.filename = "eendraadschema.eds";
@@ -18,6 +19,7 @@ export class Properties {
     this.info = "1 x 230V + N ~50 Hz";
     this.currentView = 'config';
     this.legacySchakelaars = null;
+    this.dossier = { installationContext: "existing", installationAddress: "", nominalVoltage: "", currentNature: "", frequencyHz: "", revisionLabel: "", issueDate: "" };
   };
 
   setFilename(name) {

@@ -5,11 +5,15 @@
     "target": "es2017",
     "lib": ["es2017", "dom"],
     "moduleResolution": "node",
+    "jsx": "react-jsx",
     "noEmit": true
   },
   "include": [
     "src/global.d.ts",
     "src/main.ts",
+    "src/application/**/*.ts",
+    "src/ui/**/*.ts",
+    "src/ui/**/*.tsx"
   ],
   "exclude": [
     "node_modules",

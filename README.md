@@ -25,6 +25,37 @@ The "`index.html`"-file will still need all the resources in the root folder so 
 copied into the root-folder to get a working application.
 The default build configuration is only provided as an example.
 
+## Local MCP assistant bridge
+
+An external MCP client can inspect the live electrical graph and submit a reviewed change proposal.
+This is deliberately local-only. The browser asks for approval before applying a proposal; accepted proposals are one undoable document change.
+
+The easy way, one command that starts everything in the right order:
+
+```npm run dev:mcp```
+
+It starts the bridge (`ws://127.0.0.1:9234`), the MCP HTTP server (`http://127.0.0.1:9235/mcp`) and
+the Vite dev server (`http://localhost:5173`), then prints the URL to open, which ends in `?mcp=on`.
+Ctrl+C stops all three. Point the MCP client at `http://127.0.0.1:9235/mcp` (type `http`).
+
+Things that go wrong if you start the pieces by hand:
+
+- The browser tab connects to the bridge **once, at page load**, and never retries. Start the bridge first;
+  if it is restarted afterwards, reload the tab.
+- The tab must be opened with `?mcp=on`, otherwise it never connects.
+- An MCP client configured for HTTP needs `npm run mcp:http` running too, not only `npm run mcp:serve`.
+- `dev:mcp` uses a fixed port (default 5173, `EDS_DEV_PORT` to change) and fails if it is taken, so the URL it prints is always right.
+
+Manual alternative: `npm run mcp:serve`, open the app with `?mcp=on`, then have the MCP client run `npm run mcp:stdio`
+(or `npm run mcp:http` for a long-running HTTP server).
+
+## Product and user-flow documentation
+
+The detailed Dutch/Flemish product vision is maintained in
+[`docs/gebruiksvisie`](docs/gebruiksvisie/README.md). It describes the intended
+end-to-end user flow, the relationship between the three views, MCP-assisted
+editing, and the decisions that should be revisited as the application evolves.
+
 ## License
 
 See LICENSE.md

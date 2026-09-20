@@ -18,15 +18,6 @@ export class Boiler extends Electro_Item {
         this.props.adres               = "";
     }
 
-    toHTML(mode: string) {
-        let output = this.toHTMLHeader(mode);
-
-        output += "&nbsp;" + this.nrToHtml();
-        output += "Accumulatie: " + this.checkboxPropToHTML('heeft_accumulatie');
-        output += ", Adres/tekst: " + this.stringPropToHTML('adres',5);
-
-        return(output);
-    }
 
     toSVG(sitplan: boolean = false) {
         let mySVG:SVGelement = new SVGelement();

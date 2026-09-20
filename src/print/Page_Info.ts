@@ -10,12 +10,10 @@ export class Page_Info {
     stop: number;
     info: string;
 
-    constructor() {
+    constructor(info: string = "") {
         this.height = 0;
         this.start = 0;
         this.stop = 0;
-        this.info = (globalThis.structure?.properties?.info != null) 
-                    ? globalThis.structure.properties.info 
-                    : "";
+        this.info = info;
     }
 }

@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <!--<link rel="stylesheet" href="css/styles.css" type="text/css">-->
     <script src="prop/prop_scripts_js.js"></script>
     <script src="resources/pako/pako.min.js"></script>
     <script src="resources/jsPDF/jspdf.umd.min.js"></script>
@@ -18,7 +17,42 @@
     </style>
   </head>
   <body>
-    <div id="container" class="container"></div>
+    <div id="container" class="h-screen w-screen">
+      <div id="react-editor-root"></div>
+      <div id="react-application-menu-root" class="relative z-40 h-[var(--menu-height)] w-full border-b border-neutral-300 bg-neutral-200 select-none"></div>
+      <div id="app" class="flex-1 overflow-hidden">
+        <svg id="svgdefs" class="absolute size-0" aria-hidden="true">
+          <defs>
+            <pattern id="VerticalStripe" x="5" y="0" width="5" height="10" patternUnits="userSpaceOnUse">
+              <line x1="0" y1="0" x2="0" y2="10" stroke="black"></line>
+            </pattern>
+          </defs>
+        </svg>
+        <div id="react-workspace-commandbar-root" class="fixed top-[calc(var(--react-shell-height)+var(--menu-height))] right-0 left-0 z-30 hidden h-[var(--ribbon-height)] overflow-x-auto"></div>
+        <aside id="react-workspace-sidebar" class="fixed top-[var(--total-offset)] bottom-0 left-0 z-10 hidden w-[var(--workspace-left-width)] overflow-y-auto overflow-x-hidden border-r border-neutral-300 bg-white">
+          <div id="react-hierarchy-root"></div>
+        </aside>
+        <main id="react-board-layout-root" class="fixed top-[var(--total-offset)] right-[var(--workspace-right-width)] bottom-0 left-[var(--workspace-left-width)] z-0 hidden overflow-hidden bg-neutral-100"></main>
+        <div id="canvas_2col" class="absolute top-[var(--total-offset)] right-[var(--workspace-right-width)] bottom-0 left-[var(--workspace-left-width)] flex-row overflow-hidden bg-white pb-9" style="display: none">
+          <div id="right_col" class="relative min-w-0 flex-1 overflow-auto">
+            <div id="right_col_inner" class="min-h-full p-2.5 text-black"></div>
+            <div id="react-schematic-controls-root" class="pointer-events-none absolute inset-0 z-[2]"></div>
+          </div>
+          <div id="react-statusbar-root" class="absolute inset-x-0 bottom-0"></div>
+        </div>
+        <div id="outerdiv" class="absolute top-[var(--total-offset)] right-[var(--workspace-right-width)] bottom-0 left-[var(--workspace-left-width)] flex-row bg-white" style="display: none">
+          <div id="canvas" class="absolute inset-0 flex flex-row overflow-auto bg-white">
+            <div id="paper" class="absolute top-[var(--paperPadding)] left-[var(--paperPadding)] h-[150mm] w-[277mm] rounded-md bg-white shadow-xl"></div>
+          </div>
+        </div>
+        <aside id="properties_col" class="fixed top-[var(--total-offset)] right-0 bottom-0 z-10 hidden w-[var(--workspace-right-width)] overflow-y-auto overflow-x-hidden border-l border-neutral-300 bg-white" aria-label="Eigenschappen van het geselecteerde onderdeel">
+          <div id="react-properties-root"></div>
+        </aside>
+      </div>
+    </div>
+    <input id="importfile" type="file" accept=".eds" hidden>
+    <input id="appendfile" type="file" accept=".eds" hidden>
+    <input id="fileInput" type="file" accept="image/*" hidden>
     <script type="module" src="src/main.js"></script>
   </body>
 </html>

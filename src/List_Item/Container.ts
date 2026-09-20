@@ -12,9 +12,6 @@ export class Container extends Electro_Item {
         this.props.type = "Container";  
     }    
 
-    toHTML(mode: string) {
-        return("");
-    }
 
     toSVG(sitplan = false) {
         let mySVG:SVGelement = new SVGelement();

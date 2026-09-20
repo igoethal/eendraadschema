@@ -21,15 +21,6 @@ export class Batterij extends Electro_Item {
         if (this.props.symbool == null) this.props.symbool = "standaard";
     }
 
-    toHTML(mode: string) {
-        let output = this.toHTMLHeader(mode);
-
-        output += "&nbsp;" + this.nrToHtml();
-        output += 'Symbool: ' + this.selectPropToHTML('symbool',["standaard","blokbatterij"])
-        output += ", Adres/tekst: " + this.stringPropToHTML('adres',5);
-
-        return(output);
-    }
 
     toSVG(sitplan: boolean = false) {
         let mySVG:SVGelement = new SVGelement();

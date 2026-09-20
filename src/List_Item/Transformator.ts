@@ -19,15 +19,6 @@ export class Transformator extends Electro_Item {
         this.props.adres = "";
     }
 
-    toHTML(mode: string) {
-        let output = this.toHTMLHeader(mode);
-
-        output += "&nbsp;" + this.nrToHtml()
-               +  "Voltage: " + this.stringPropToHTML('voltage',8)
-               + ", Adres/tekst: " + this.stringPropToHTML('adres',5);
-
-        return(output);
-    }
 
     toSVG(sitplan = false) {
         let mySVG:SVGelement = new SVGelement();

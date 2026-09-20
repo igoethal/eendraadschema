@@ -46,66 +46,6 @@ export class Zekering extends Electro_Item {
         if (!["automatisch", "differentieel", "differentieelautomaat"].includes(this.props.bescherming)) this.props.kortsluitvermogen = '';
     }
 
-    toHTML(mode: string) {
-        this.overrideKeys();
-        let output = this.toHTMLHeader(mode);
-
-        output += "&nbsp;";
-        if (this.isChildOf("Kring")) output = output + this.nrToHtml();
-        output = output + this.selectPropToHTML('bescherming',["automatisch","differentieel","differentieelautomaat","smelt"]);
-
-        // Aantal polen en Ampérage
-
-        if ( (this.props.bescherming != "geen") ) output += this.selectPropToHTML('aantal_polen',["2","3","4","-","1"]) + this.stringPropToHTML('amperage',2) + "A";
-
-        // Specifieke input voor differentielen en automaten
-
-        switch (this.props.bescherming) {
-
-            case "differentieel":
-                output += ", \u0394 " + this.stringPropToHTML('differentieel_delta_amperage',3) + "mA"
-                       +  ", Type:" + this.selectPropToHTML('type_differentieel',["","A","B"])
-                       +  ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen',3) + "kA"
-                       +  ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief')
-                       +  ", Fase: " + this.selectPropToHTML('fase',["","L1","L2","L3"]);
-                break;
-
-            case "automatisch":
-                output += ", Curve:" + this.selectPropToHTML('curve_automaat',["","B","C","D","U"])
-                       +  ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen',3) + "kA"
-                       +  ", Fase: " + this.selectPropToHTML('fase',["","L1","L2","L3"]);           
-                break;
-
-            case "differentieelautomaat":
-                output += ", \u0394 " + this.stringPropToHTML('differentieel_delta_amperage',3) + "mA"
-                       +  ", Curve:" + this.selectPropToHTML('curve_automaat',["","B","C","D","U"])
-                       +  ", Type:" + this.selectPropToHTML('type_differentieel',["","A","B"])
-                       +  ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen',3) + "kA"
-                       +  ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief')
-                       +  ", Fase: " + this.selectPropToHTML('fase',["","L1","L2","L3"]);
-                break;
-
-            case "smelt":
-                output += ", Fase: " + this.selectPropToHTML('fase',["","L1","L2","L3"]);
-                break;
-
-        }
-
-        if ((this.props.kortsluitvermogen != '') && (['differentieel','automatisch','differentieelautomaat'].includes(this.props.bescherming))) {
-            output += ", Huishoudelijke installatie: " + this.checkboxPropToHTML('huishoudelijk');
-        }
-
-        // Only show newPage checkbox if not the first child of root node
-        // nooit een newPage als dit geen kind van root is of het eerste kind van root
-        if (this.getParent() == null) { 
-            let firstChildId = this.sourcelist.getFirstChildId(0);
-            if (firstChildId !== null && this.id !== firstChildId) {
-                output += ", Start op nieuwe pagina: " + this.checkboxPropToHTML('newPage');
-            }
-        }
-
-        return(output);
-    }
 
     toSVG() {
 

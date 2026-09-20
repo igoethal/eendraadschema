@@ -70,6 +70,7 @@ export class Kring extends Electro_Item {
                 this.props.kabel_is_aanwezig = true;         // wel een kabel na bord
                 break;
             case "Splitsing":
+            case "Omschakelaarpoort":
                 this.props.bescherming = "geen"; // geen zekering per default na splitsing
                 this.props.naam = "";    // We geven de kring geen naam
                 this.props.kabel_is_aanwezig = false; // geen kabel per default na splitsing
@@ -93,7 +94,7 @@ export class Kring extends Electro_Item {
     }
 
     allowedChilds() : Array<string> { // returns an array with the type-names of allowed childs
-        return ["", "Aansluiting", "Bord", "Domotica", "Domotica module (verticaal)", "Domotica gestuurde verbruiker", "Kring", "Meerdere verbruikers", "Splitsing", "---", "Batterij", "Bel", "Boiler", "Contactdoos", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Media", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zekering/differentieel", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Zeldzame symbolen"];
+        return ["", "Aansluiting", "Bord", "Domotica", "Domotica module (verticaal)", "Domotica gestuurde verbruiker", "Kring", "Meerdere verbruikers", "Splitsing", "Omschakelaar", "---", "Batterij", "Bel", "Boiler", "Contactdoos", "Diepvriezer", "Droogkast", "Drukknop", "Elektriciteitsmeter", "Elektrische oven", "EV lader", "Ketel", "Koelkast", "Kookfornuis", "Lichtcircuit", "Lichtpunt", "Media", "Microgolfoven", "Motor", "Omvormer", "Overspanningsbeveiliging", "Schakelaars", "Stoomoven", "Transformator", "USB lader", "Vaatwasmachine", "Ventilator", "Verlenging", "Verwarmingstoestel", "Verbruiker", "Vrije tekst", "Warmtepomp/airco", "Wasmachine", "Zekering/differentieel", "Zonnepaneel", "---", "Aansluitpunt", "Aftakdoos", "Zeldzame symbolen"];
     }
 
     getMaxNumChilds(): number {
@@ -134,89 +135,6 @@ export class Kring extends Electro_Item {
         if (!["automatisch", "differentieel", "differentieelautomaat"].includes(this.props.bescherming)) this.props.kortsluitvermogen = '';
     }
 
-    toHTML(mode: string) {
-        this.overrideKeys();
-        let output = this.toHTMLHeader(mode);
-
-        output += `&nbsp;Naam: ${this.selectPropToHTML('autoKringNaam',['auto','manueel'])}`
-                  +  (this.props.autoKringNaam === 'auto'
-                  ? `<input type="text" id="HL_edit_${this.id}_naam" size="5" style="font-weight: bold; background-color:#FFFFE0;" value="${this.props.naam ?? ''}" disabled /><br>`
-                  : `${this.stringPropToHTML('naam',5)}<br>`);
-
-        output += "Bescherming: " + this.selectPropToHTML('bescherming',["automatisch","differentieel","differentieelautomaat","smelt","geen","---","contact","zekeringscheider","relais","schemer","overspanningsbeveiliging"]);
-
-        // Aantal polen en Ampérage
-
-        if ( (this.props.bescherming != "geen") && (this.props.bescherming != "relais") ) output += this.selectPropToHTML('aantal_polen',["2","3","4","-","1",""]) + this.stringPropToHTML('amperage',2) + "A";
-
-        // Specifieke input voor differentielen en automaten
-
-        switch (this.props.bescherming) {
-
-            case "differentieel":
-                output += ", \u0394 " + this.stringPropToHTML('differentieel_delta_amperage',3) + "mA"
-                       +  ", Type:" + this.selectPropToHTML('type_differentieel',["","A","B"])
-                       +  ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen',3) + "kA"
-                       +  ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief')
-                       +  ", Fase: " + this.selectPropToHTML('fase',["","L1","L2","L3"]);
-                break;
-
-            case "automatisch":
-                output += ", Curve:" + this.selectPropToHTML('curve_automaat',["","B","C","D","U"])
-                       +  ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen',3) + "kA"
-                       +  ", Fase: " + this.selectPropToHTML('fase',["","L1","L2","L3"]);
-                break;
-
-            case "differentieelautomaat":
-                output += ", \u0394 " + this.stringPropToHTML('differentieel_delta_amperage',3) + "mA"
-                       +  ", Curve:" + this.selectPropToHTML('curve_automaat',["","B","C","D","U"])
-                       +  ", Type:" + this.selectPropToHTML('type_differentieel',["","A","B"])
-                       +  ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen',3) + "kA"
-                       +  ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief')
-                       +  ", Fase: " + this.selectPropToHTML('fase',["","L1","L2","L3"]);
-                break;
-
-            case "smelt":
-                output += ", Fase: " + this.selectPropToHTML('fase',["","L1","L2","L3"]);
-                break;
-
-            case "contact":
-                output += ", Normaal Gesloten: " + this.checkboxPropToHTML('normaalGesloten');
-                output += ", Sturing: " + this.selectPropToHTML('sturing',["","spoel"]);
-                break;
-
-            case "zekeringscheider":
-                output += ", Normaal Gesloten: " + this.checkboxPropToHTML('normaalGesloten');
-                break;
-        }
-
-        // Eigenschappen van de kabel
-        output += ", Kabel: " + this.checkboxPropToHTML('kabel_is_aanwezig');
-        if (this.props.kabel_is_aanwezig) { // Kabel aanwezig
-            output += ", Type: " + this.stringPropToHTML('type_kabel',10)
-                   +  ", Plaatsing: " + this.selectPropToHTML('kabel_locatie',["N/A","Ondergronds","Luchtleiding","In wand","Op wand"]);
-            if (this.props.kabel_locatie != "Luchtleiding") output += ", In buis: " + this.checkboxPropToHTML('kabel_is_in_buis')
-        }
-
-        if ((this.props.kortsluitvermogen != '') && (['differentieel','automatisch','differentieelautomaat'].includes(this.props.bescherming))) {
-            output += ", Huishoudelijke installatie: " + this.checkboxPropToHTML('huishoudelijk');
-        }
-        
-        output += ", Tekst: " + this.stringPropToHTML('tekst',10);
-
-        // Only show newPage checkbox if not the first child of root node
-        // nooit een newPage als dit geen kind van root is of het eerste kind van root
-        if (this.getParent() == null) { 
-            let firstChildId = this.sourcelist.getFirstChildId(0);
-            if (firstChildId !== null && this.id !== firstChildId) {
-                output += ", Start op nieuwe pagina: " + this.checkboxPropToHTML('newPage');
-            }
-        }
-
-        output += ', Adres: ' + this.stringPropToHTML('adres',5);
-
-        return(output);
-    }
 
     toSVG() {
 
@@ -294,7 +212,7 @@ export class Kring extends Electro_Item {
         if (this.props.kabel_is_aanwezig) { // Kabel aanwezig
 
             // Kabel tekenen en naam van de kabel ernaast zetten
-            mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + mySVG.yup + '" y2="' + (mySVG.yup+100) + '" stroke="black" />'
+            mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + mySVG.yup + '" y2="' + (mySVG.yup+100) + '" stroke="black" stroke-linecap="round" />'
                        +  "<text x=\"" + (mySVG.xleft+15) + "\" y=\"" + (mySVG.yup+80) + "\""
                        +  " transform=\"rotate(-90 " + (mySVG.xleft+15) + "," + (mySVG.yup+80) + ")" 
                        +  "\" style=\"text-anchor:start\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"10\">" 
@@ -676,7 +594,7 @@ export class Kring extends Electro_Item {
 
 
         // Lijntje onder de zekering
-        mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + mySVG.yup + '" y2="' + (mySVG.yup+15) + '" stroke="black" />';
+        mySVG.data += '<line x1="' + mySVG.xleft + '" x2="' + mySVG.xleft + '" y1="' + mySVG.yup + '" y2="' + (mySVG.yup+15) + '" stroke="black" stroke-linecap="round" />';
         mySVG.yup  += 15;
 
         // Als er helemaal niets getekend is voorzien we nog steeds een lege box

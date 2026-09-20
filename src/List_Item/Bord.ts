@@ -2,6 +2,9 @@ import { Electro_Item } from "./Electro_Item";
 import { htmlspecialchars, svgTextWidth } from "../general";
 import { SVGelement } from "../SVGelement";
 
+/** Extra length (in pixels) the busbar can be extended to the right, next to the space it already has on the left. */
+export const BORD_BUSBAR_EXTENSIONS = ["0", "20", "40", "60", "80", "100", "150", "200", "300"];
+
 export class Bord extends Electro_Item {
 
     erBestaatEenBordUpstream() : boolean {
@@ -28,6 +31,11 @@ export class Bord extends Electro_Item {
         if (this.erBestaatEenBordUpstream()) this.props.is_geaard = false; else this.props.is_geaard = true;
         this.props.naam = "";
         this.props.adres = "";
+        this.props.verlenging_rechts = "0";
+    }
+
+    overrideKeys() {
+        if (!BORD_BUSBAR_EXTENSIONS.includes(String(this.props.verlenging_rechts))) this.props.verlenging_rechts = "0";
     }
 
     allowedChilds() : Array<string> { // returns an array with the type-names of allowed childs
@@ -38,14 +46,6 @@ export class Bord extends Electro_Item {
         return 256;
     }
 
-    toHTML(mode: string) {
-        let output = this.toHTMLHeader(mode);
-
-        output += "&nbsp;Naam: " + this.stringPropToHTML('naam',5) + ", "
-               +  "Geaard: " + this.checkboxPropToHTML('is_geaard');
-
-        return(output);
-    }
 
     toSitPlanSVG(mirrortext: boolean = false) {
 
@@ -88,7 +88,25 @@ export class Bord extends Electro_Item {
 
         // Schuif het geheel voldoende naar links om plaats te hebben voor label en eventuele aarding
 
-        let mintextsize = Math.max(30, svgTextWidth(htmlspecialchars(this.props.naam),10,'font-weight="bold"') + 13);
+        const boardMetadata = this.sourcelist.boards.find((board) => board.rootItemIds.includes(this.id));
+        // Legacy item properties remain authoritative for visible labels so
+        // migrated EDS004 documents retain their original board text.
+        const boardName = this.props.naam || boardMetadata?.name || "";
+        const boardLocation = this.props.adres || boardMetadata?.location || "";
+        const feederDescription = boardMetadata?.feeder
+            ? [boardMetadata.feeder.cableType, boardMetadata.feeder.conductorSection,
+               boardMetadata.feeder.lengthMeters === undefined ? undefined : `${boardMetadata.feeder.lengthMeters} m`]
+                .filter((value) => value !== undefined && value !== "")
+                .join(" · ")
+            : "";
+        const boardLabelLines = [
+            { text: boardName, prefix: "", weight: "bold", attribute: "data-distribution-board-name" },
+            { text: boardLocation, prefix: "Locatie: ", weight: "normal", attribute: "data-distribution-board-location" },
+            { text: feederDescription, prefix: "Voeding: ", weight: "normal", attribute: "data-distribution-board-feeder" },
+        ].filter((line) => line.text !== "");
+        let mintextsize = Math.max(30, ...boardLabelLines.map((line) =>
+            svgTextWidth(htmlspecialchars(`${line.prefix}${line.text}`), 10, line.weight === "bold" ? 'font-weight="bold"' : "") + 13
+        ));
         let minxleft = mintextsize + (this.props.is_geaard ? 70 : 0); //Indien geaard hebben we 70 meer nodig
         if (this.isChildOf("Aansluiting")) {
             let maxTotalSize = 145;
@@ -106,6 +124,9 @@ export class Bord extends Electro_Item {
         // Indien door het schuiven er niets rechts over blijft, voorzie minstens 10 pixels
         if (mySVG.xright <=10) mySVG.xright = 10;
 
+        // De door de gebruiker gekozen verlenging van de balk naar rechts komt na het links-schuiven, anders wordt ze opgeslorpt
+        mySVG.xright += Number(BORD_BUSBAR_EXTENSIONS.includes(String(this.props.verlenging_rechts)) ? this.props.verlenging_rechts : 0);
+
         // Voorzie voldoende plaats voor de lijn onderaan
         mySVG.ydown = Math.max(mySVG.ydown,1);
 
@@ -122,11 +143,12 @@ export class Bord extends Electro_Item {
             }
         }
 
-        // Voeg naam van het bord toe
-        if (this.props.naam !== "")
-            mySVG.data += '<text x="' + (5) + '" y="' + (mySVG.yup + 13) + '" ' 
-                       +  'style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="10">' 
-                       +  htmlspecialchars(this.props.naam)+'</text>';
+        // Voeg naam, locatie en voedingsgegevens van het bord toe.
+        boardLabelLines.forEach((line, index) => {
+            mySVG.data += `<text ${line.attribute}="true" x="5" y="${mySVG.yup + 13 + index * 11}" `
+                       +  `style="text-anchor:start" font-family="Arial, Helvetica, sans-serif" font-weight="${line.weight}" font-size="10">`
+                       +  `${htmlspecialchars(line.prefix)}${htmlspecialchars(line.text)}</text>`;
+        });
         
         // Teken aarding onderaan
         if (this.props.is_geaard)

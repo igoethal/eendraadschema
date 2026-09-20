@@ -56,7 +56,7 @@ export class Aansluiting extends Electro_Item {
     }
 
     allowedChilds() : Array<string> { // returns an array with the type-names of allowed childs
-        return ["", "Bord", "Kring", "Splitsing"];
+        return ["", "Bord", "Kring", "Splitsing", "Omschakelaar"];
     }
 
     getMaxNumChilds(): number {
@@ -96,77 +96,6 @@ export class Aansluiting extends Electro_Item {
         if (!["automatisch", "differentieel", "differentieelautomaat"].includes(this.props.bescherming)) this.props.kortsluitvermogen = '';
     }
 
-    toHTML(mode: string) {
-        this.overrideKeys();
-        let output = this.toHTMLHeader(mode);
-
-        output += "&nbsp;Naam: " + this.stringPropToHTML('naam',5) + "<br>";
-
-        if (this.getParent() != null) {
-            const nrHtml = this.nrToHtml();
-            output += (typeof nrHtml === "string" ? nrHtml.substring(2) : nrHtml);
-        }
-        
-        output += "Bescherming: " + this.selectPropToHTML('bescherming',["automatisch","differentieel","differentieelautomaat","smelt","geen","---","contact","zekeringscheider","schemer"]) 
-
-        if (this.props.bescherming != "geen") output += this.selectPropToHTML('aantal_polen',["2","3","4","-","1",""]) + this.stringPropToHTML('amperage',2) + "A";
-
-        switch (this.props.bescherming) {
-
-            case "differentieel":
-                output += ", \u0394 " + this.stringPropToHTML('differentieel_delta_amperage',3) + "mA"
-                        +  ", Type:" + this.selectPropToHTML('type_differentieel',["","A","B"])
-                        +  ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen',3) + "kA"
-                        +  ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief')
-                        +  ", Fase: " + this.selectPropToHTML('fase',["","L1","L2","L3"]);
-                break;
-
-            case "automatisch":
-                output += ", Curve:" + this.selectPropToHTML('curve_automaat',["","B","C","D","U"])
-                        +  ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen',3) + "kA"
-                        +  ", Fase: " + this.selectPropToHTML('fase',["","L1","L2","L3"]);
-                break;
-
-            case "differentieelautomaat":
-                output += ", \u0394 " + this.stringPropToHTML('differentieel_delta_amperage',3) + "mA"
-                        +  ", Curve:" + this.selectPropToHTML('curve_automaat',["","B","C","D","U"])
-                        +  ", Type:" + this.selectPropToHTML('type_differentieel',["","A","B"])
-                        +  ", Kortsluitstroom: " + this.stringPropToHTML('kortsluitvermogen',3) + "kA"
-                        +  ", Selectief: " + this.checkboxPropToHTML('differentieel_is_selectief')
-                        +  ", Fase: " + this.selectPropToHTML('fase',["","L1","L2","L3"]);
-                break;
-
-            case "smelt":
-                output += ", Fase: " + this.selectPropToHTML('fase',["","L1","L2","L3"]);
-                break;
-
-            case "contact":
-            case "zekeringscheider":
-                output += ", Normaal Gesloten: " + this.checkboxPropToHTML('normaalGesloten');
-                break;
-
-        }
-
-        output += ", Kabeltype na teller: " + this.stringPropToHTML('type_kabel_na_teller',10)
-               +  ", Kabeltype v&oacute;&oacute;r teller: " + this.stringPropToHTML('type_kabel_voor_teller',10);
-
-        if ((this.props.kortsluitvermogen != '') && (['differentieel','automatisch','differentieelautomaat'].includes(this.props.bescherming))) {
-            output += ", Huishoudelijke installatie: " + this.checkboxPropToHTML('huishoudelijk');
-        }
-
-        // Only show newPage checkbox if not the first child of root node
-        // nooit een newPage als dit geen kind van root is of het eerste kind van root
-        if (this.getParent() == null) { 
-            let firstChildId = this.sourcelist.getFirstChildId(0);
-            if (firstChildId !== null && this.id !== firstChildId) {
-                output += ", Start op nieuwe pagina: " + this.checkboxPropToHTML('newPage');
-            }
-        }
-
-        output += ", Adres/tekst: " + this.stringPropToHTML('adres',5);
-
-        return(output);
-    }
 
     toSVG(sitplan = false): SVGelement {
 

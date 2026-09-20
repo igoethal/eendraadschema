@@ -81,34 +81,6 @@ export class Schakelaars extends Electro_Item {
         if (this.props.type_schakelaar !== "contact") this.props.sturing = "";
     }
 
-    toHTML(mode: string) {
-        this.overrideKeys();
-        let output = this.toHTMLHeader(mode);
-
-        output += "&nbsp;" + this.nrToHtml();
-        output += this.selectPropToHTML('type_schakelaar',["enkelpolig", "dubbelpolig", "driepolig", "dubbelaansteking", "wissel_enkel", "wissel_dubbel", "kruis_enkel", "---", "contact", "dimschakelaar", "dimschakelaar wissel", "bewegingsschakelaar", "schemerschakelaar", "---", "teleruptor", "relais", "dimmer", "tijdschakelaar", "minuterie", "thermostaat", "rolluikschakelaar", "---", "magneetcontact"]);
-
-        if (this.kanHalfwaterdichtZijn())       output += ", Halfwaterdicht: " + this.checkboxPropToHTML('is_halfwaterdicht');
-        if (this.kanVerklikkerlampjeHebben())   output += ", Verklikkerlampje: " + this.checkboxPropToHTML('heeft_verklikkerlampje');
-        if (this.kanSignalisatielampjeHebben()) output += ", Signalisatielampje: " + this.checkboxPropToHTML('heeft_signalisatielampje');
-        if (this.kanTrekschakelaarHebben())     output += ", Trekschakelaar: " + this.checkboxPropToHTML('is_trekschakelaar');
-        
-        switch (this.props.type_schakelaar) {
-            case "enkelpolig":     output += ", Aantal schakelaars: " + this.selectPropToHTML('aantal_schakelaars',["1","2","3","4","5"]); break;
-            case "dubbelpolig":    output += ", Aantal schakelaars: " + this.selectPropToHTML('aantal_schakelaars',["1","2"]); break;
-            case "magneetcontact": output += ", Aantal schakelaars: " + this.selectPropToHTML('aantal_schakelaars',["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]); break;
-            case "contact":        
-                output += ', Normaal Gesloten: ' + this.checkboxPropToHTML('normaalGesloten'); 
-                output += ", Sturing: " + this.selectPropToHTML('sturing',["","spoel"]);
-                break;
-        }
-
-        output += ", Adres/tekst: " + this.stringPropToHTML('adres',5);
-
-        output += this.toHTMLFooter();
-
-        return(output);
-    }
 
     bouwSchakelaarKeten(tekenKeten: Array<Schakelaar>) {      
         switch (this.props.type_schakelaar) {

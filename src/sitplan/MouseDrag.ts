@@ -1,5 +1,3 @@
-import type { Hierarchical_List } from "../Hierarchical_List";
-
 /**
  * Class that helps with dragging a box on the situation plan view.
  * It keeps track of the start position of the drag and the zoomfactor.
@@ -12,6 +10,10 @@ export class MouseDrag {
     private startPaperPos = {x:0, y:0};
 
     public hassMoved: boolean = false;
+
+    constructor(
+        private readonly canvasToPaper: (x: number, y: number) => { x: number; y: number },
+    ) {}
 
     /**
      * Start the drag.
@@ -27,11 +29,7 @@ export class MouseDrag {
         this.startOffsetTop = startOffsetTop;
         this.hassMoved = false;
 
-        const menuHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--menu-height'));
-        const ribbonHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ribbon-height'));
-        const sideBarWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sideBarWidth'));
-
-        this.startPaperPos = (globalThis.structure as Hierarchical_List).sitplanview.canvasPosToPaperPos(mouseX - sideBarWidth, mouseY - menuHeight - ribbonHeight);
+        this.startPaperPos = this.canvasToPaper(mouseX, mouseY);
     }
 
     /**
@@ -42,11 +40,7 @@ export class MouseDrag {
      */
     returnNewPaperPos(mousex: number = 0, mousey: number = 0) {
 
-        const menuHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--menu-height'));
-        const ribbonHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ribbon-height'));
-        const sideBarWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sideBarWidth'));
-
-        let stopPaperPos = (globalThis.structure as Hierarchical_List).sitplanview.canvasPosToPaperPos(mousex - sideBarWidth, mousey - menuHeight - ribbonHeight);
+        let stopPaperPos = this.canvasToPaper(mousex, mousey);
 
         if (stopPaperPos.x != this.startPaperPos.x || stopPaperPos.y != this.startPaperPos.y) this.hassMoved = true;
 

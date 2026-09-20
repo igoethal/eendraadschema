@@ -27,15 +27,6 @@ export class Domotica extends Electro_Item {
         return 256;
     }
 
-    toHTML(mode: string) {
-        let output = this.toHTMLHeader(mode);
-
-        output += "&nbsp;" + this.nrToHtml()
-               +  "Tekst (nieuwe lijn = \"|\"): " + this.stringPropToHTML('tekst',30)
-               +  ", Adres/tekst: " + this.stringPropToHTML('adres',5);
-
-        return(output);
-    }
 
     toSVG() {
         let mySVG:SVGelement; // = new SVGelement();

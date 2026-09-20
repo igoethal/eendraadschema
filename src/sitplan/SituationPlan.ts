@@ -1,30 +1,51 @@
 import { SituationPlanElement } from "./SituationPlanElement"; 
 import { getPixelsPerMillimeter } from "./GeometricFunctions";
 import { getRotatedRectangleSize } from "./GeometricFunctions";
-import { htmlspecialchars } from "../general";
+import { htmlspecialchars, randomId } from "../general";
 import { Electro_Item } from "../List_Item/Electro_Item";
 import { AdresType, AdresLocation } from "./SituationPlanElement";
 import { Container } from "../List_Item/Container";
+import type { Hierarchical_List } from "../Hierarchical_List";
+import { DEFAULT_SITUATION_SCALE } from "./SituationPlanConfig";
+
+export interface SituationPlanDefaults {
+    fontsize: number;
+    scale: number;
+    rotate: number;
+}
 
 /**
  * Volledig overzicht van een situatieplan.
  * Werd gebouwd voor gebruik in de browser maar is redelijk browser-agnostic.
  * De effectieve code om te interageren met de browser zelf zit in class SituationPlanView.
  * 
- * Deze class refereert naar de volgende globale variabelen:
- * - globalThis.structure
+ * Het bijhorende elektrische document wordt door Hierarchical_List geïnjecteerd.
  */
 
 
 export class SituationPlan {
-    public activePage: number = 1; // We houden deze bij in situationplan zodat ook wijzigingen van pagina's worden opgeslagen
+    private activePage: number = 1; // We houden deze bij in situationplan zodat ook wijzigingen van pagina's worden opgeslagen
     private numPages: number = 1;
     private elements: SituationPlanElement[] = [];
 
-    public defaults = {
+    constructor(private document: Hierarchical_List | null = null) {}
+
+    private defaults: SituationPlanDefaults = {
         fontsize: 11,
-        scale: globalThis.SITPLANVIEW_DEFAULT_SCALE,
+        scale: DEFAULT_SITUATION_SCALE,
         rotate: 0
+    }
+
+    attachDocument(document: Hierarchical_List): void {
+        this.document = document;
+        for (const element of this.elements) element.attachDocument(document);
+    }
+
+    private getDocument(): Hierarchical_List {
+        if (this.document === null) {
+            throw new Error("SituationPlan is niet aan een elektrisch document gekoppeld.");
+        }
+        return this.document;
     }
 
     /**
@@ -37,18 +58,78 @@ export class SituationPlan {
         this.activePage = 1;
         this.defaults = {
             fontsize: 11,
-            scale: globalThis.SITPLANVIEW_DEFAULT_SCALE,
+            scale: DEFAULT_SITUATION_SCALE,
             rotate: 0
         }
     }
 
     /**
-     * Workaround om de private variabele elements te kunnen gebruiken in friend classs
-     * @returns {SituationPlanElement[]} De elementen van het situatieplan
+     * Geeft een read-only overzicht van de elementen in het situatieplan.
      */
-
-    getElements(): SituationPlanElement[] {
+    getElements(): readonly SituationPlanElement[] {
         return this.elements;
+    }
+
+    getElementsOnPage(page: number): readonly SituationPlanElement[] {
+        return this.elements.filter(element => element.page === page);
+    }
+
+    moveElementsToBack(elementIds: ReadonlySet<string>): boolean {
+        return this.moveElementsToEdge(elementIds, false);
+    }
+
+    moveElementsToFront(elementIds: ReadonlySet<string>): boolean {
+        return this.moveElementsToEdge(elementIds, true);
+    }
+
+    private moveElementsToEdge(elementIds: ReadonlySet<string>, front: boolean): boolean {
+        const selected = this.elements.filter(element => elementIds.has(element.id));
+        const remaining = this.elements.filter(element => !elementIds.has(element.id));
+        const reordered = front ? [...remaining, ...selected] : [...selected, ...remaining];
+        if (reordered.every((element, index) => element === this.elements[index])) return false;
+        this.elements = reordered;
+        return true;
+    }
+
+    getActivePage(): number {
+        return this.activePage;
+    }
+
+    setActivePage(page: number): void {
+        this.activePage = page;
+    }
+
+    getPageCount(): number {
+        return this.numPages;
+    }
+
+    addPage(): number {
+        this.numPages++;
+        return this.numPages;
+    }
+
+    deletePage(page: number): boolean {
+        if (this.numPages <= 1 || page < 1 || page > this.numPages) return false;
+
+        for (const element of [...this.getElementsOnPage(page)]) {
+            this.removeElement(element);
+        }
+        for (const element of this.elements) {
+            if (element.page > page) element.page--;
+        }
+
+        this.numPages--;
+        if (this.activePage > page) this.activePage--;
+        this.activePage = Math.min(this.activePage, this.numPages);
+        return true;
+    }
+
+    getDefaults(): Readonly<SituationPlanDefaults> {
+        return Object.freeze({ ...this.defaults });
+    }
+
+    updateDefaults(defaults: Partial<SituationPlanDefaults>): void {
+        Object.assign(this.defaults, defaults);
     }
 
     /**
@@ -60,9 +141,9 @@ export class SituationPlan {
     }
 
     heeftEenzameSchakelaars() {
-        var schakelaars = this.elements.filter(function (element) {
+        const schakelaars = this.elements.filter((element) => {
             if (element.isEendraadschemaSymbool()) {
-                let electroItem = globalThis.structure.getElectroItemById(element.getElectroItemId());
+                let electroItem = this.getDocument().getElectroItemById(element.getElectroItemId());
                 if (electroItem != null) {
                     if (electroItem.props.type == "Schakelaars") {
                         if ( (electroItem.props.aantal_schakelaars == 1) || (electroItem.props.aantal_schakelaars == null) ) {
@@ -78,7 +159,7 @@ export class SituationPlan {
     dropLegacySchakelaars() {
         for (let element of this.elements) {
             if (element.isEendraadschemaSymbool()) {
-                let electroItem = globalThis.structure.getElectroItemById(element.getElectroItemId());
+                let electroItem = this.getDocument().getElectroItemById(element.getElectroItemId());
                 if (electroItem != null) {
                     if (electroItem.props.type == "Schakelaars") {
                         if ( (electroItem.props.aantal_schakelaars == 1) || (electroItem.props.aantal_schakelaars == null) ) {
@@ -97,6 +178,7 @@ export class SituationPlan {
      */
 
     addElement(element: SituationPlanElement) {
+        element.attachDocument(this.document);
         this.elements.push(element);
     }
 
@@ -114,6 +196,7 @@ export class SituationPlan {
 
     addElementFromFile(event: InputEvent, page: number, posx: number, posy: number, callback: () => void): SituationPlanElement {
         let element: SituationPlanElement = new SituationPlanElement();
+        element.attachDocument(this.document);
         element.setVars({page: page, posx: posx, posy: posy, labelfontsize: this.defaults.fontsize, scale: this.defaults.scale, rotate: this.defaults.rotate});
         element.importFromFile(event, callback);
         this.elements.push(element);
@@ -140,10 +223,11 @@ export class SituationPlan {
     addElementFromElectroItem(electroItemId: number, page: number, posx: number, posy: number, adrestype: AdresType, adres:string, adreslocation: AdresLocation,
                               labelfontsize: number, scale: number, rotate: number): SituationPlanElement | null {
 
-        const electroItem: Electro_Item = globalThis.structure.getElectroItemById(electroItemId);
+        const electroItem: Electro_Item = this.getDocument().getElectroItemById(electroItemId);
         if (!electroItem) return null;
         
         const element: SituationPlanElement = electroItem.toSituationPlanElement();
+        element.attachDocument(this.document);
         Object.assign(element, {page, posx, posy, labelfontsize, scale, rotate});
         element.setElectroItemId(electroItemId);
         element.setAdres(adrestype,adres,adreslocation);
@@ -165,10 +249,10 @@ export class SituationPlan {
         // als het een custom element is moeten we het ook verwijderen uit het eendraadschema
         if (element.isEendraadschemaSymbool()) {
             const id = element.getElectroItemId();
-            const electroItem = globalThis.structure.getElectroItemById(id);
+            const electroItem = this.getDocument().getElectroItemById(id);
             if (electroItem != null) {
                 if (electroItem.getParent() instanceof Container) {
-                    globalThis.structure.deleteById(electroItem.id);
+                    this.getDocument().deleteById(electroItem.id);
                 }
             }
         }
@@ -195,30 +279,11 @@ export class SituationPlan {
             //We kunnen hier niet de functie isEendraadSchemaSymbool of getElectroItemById gebruiken want die zorgen
             //ervoor dat onderstaande altijd false geeft als de symbolen niet langer in het eendraadschema zitten waardoor
             //de cleanup die nodig is niet gebeurd.
-            if (((element as any).electroItemId != null) && (globalThis.structure.getElectroItemById(element.getElectroItemId()) == null)) {
+            if (((element as any).electroItemId != null) && (this.getDocument().getElectroItemById(element.getElectroItemId()) == null)) {
                 this.removeElement(element); 
                 this.syncToEendraadSchema(); return; // Start opnieuw en stop na recursie
             }
         }
-    }
-
-    /**
-     * Sorteer de elementen in het situatieplan op basis van de z-index van hun boxref elementen in de DOM.
-     * Elementen met een `null` `boxref` worden naar het einde van de lijst verplaatst.
-     * 
-     * Het sorteren is nodig om ervoor te zorgen dat bij het printen wanneer lineair door de elementen wordt gegaan
-     * de elementen in de juiste volgorde worden gestacked.
-     * 
-     * @returns {void}
-     */
-
-    orderByZIndex() {
-        //if (globalThis.structure.sitplanview == null) return;
-        this.elements.sort((a, b) => {
-            let asort = ( ((a.boxref == null) || (a.boxref.style.zIndex === "")) ? 0 : parseInt(a.boxref.style.zIndex));
-            let bsort = ( ((b.boxref == null) || (b.boxref.style.zIndex === "")) ? 0 : parseInt(b.boxref.style.zIndex));
-            return asort - bsort;
-        });
     }
 
     /**
@@ -248,9 +313,13 @@ export class SituationPlan {
         }
 
         if (Array.isArray(json.elements)) {
+            const elementIds = new Set<string>();
             this.elements = json.elements.map((element: any) => {
                 const newElement = new SituationPlanElement();
+                newElement.attachDocument(this.document);
                 newElement.fromJsonObject(element);
+                while (elementIds.has(newElement.id)) newElement.id = randomId("SP_");
+                elementIds.add(newElement.id);
                 return newElement;
             });
         } else {
@@ -265,12 +334,11 @@ export class SituationPlan {
      * @returns {any} Het JSON-object dat het situatieplan bevat.
      */
     toJsonObject(): any {
-        this.orderByZIndex();
         let elements = [];
         for (let element of this.elements) {
             elements.push(element.toJsonObject());
         }
-        return {numPages: this.numPages, activePage: this.activePage, defaults: this.defaults, elements: elements};
+        return {numPages: this.numPages, activePage: this.activePage, defaults: { ...this.defaults }, elements: elements};
     }
 
     /**
@@ -306,10 +374,9 @@ export class SituationPlan {
 
     toSitPlanPrint(fitToPage: boolean = false): any {
         this.syncToEendraadSchema(); // Om zeker te zijn dat we geen onbestaande elementen meer hebben
-        this.orderByZIndex(); // Sorteer de elementen op basis van de z-index zodat ze in de juiste volgorde worden geprint
 
         let outstruct:any = {};
-        outstruct.numpages = (this.elements.length > 0 ? globalThis.structure.sitplan.numPages : 0);
+        outstruct.numpages = (this.elements.length > 0 ? this.numPages : 0);
         outstruct.pages = [];
 
         for (let i=0; i<outstruct.numpages; i++ ) {    
@@ -334,7 +401,8 @@ export class SituationPlan {
                     }
 
                     let str = element.getAdres();
-                    svgstr += `<text x="${element.labelposx}" y="${element.labelposy}" font-size="${fontsize}" fill="black" text-anchor="middle" dominant-baseline="middle">${htmlspecialchars(str)}</text>`
+                    const labelPosition = element.getLabelPosition();
+                    svgstr += `<text x="${labelPosition.x}" y="${labelPosition.y}" font-size="${fontsize}" fill="black" text-anchor="middle" dominant-baseline="middle">${htmlspecialchars(str)}</text>`
                 }
             }
 

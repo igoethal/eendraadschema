@@ -1,0 +1,7 @@
+node_modules/
+dist/
+coverage/
+test-results/
+playwright-report/
+.worktrees/
+PDF_SCHEMA_IMPORT.md

@@ -18,11 +18,12 @@ type Properties = {
     owner: string;
     installer: string;
     info: string;
+    dossier?: { installationAddress?: string; nominalVoltage?: string; currentNature?: string; frequencyHz?: string; revisionLabel?: string; issueDate?: string; };
 };
 
 type SitPlanPrint = {
     numpages: number;
-    pages: { svg: string; sizex: number; sizey: number }[];
+    pages: { svg: string; sizex: number; sizey: number; name?: string }[];
 };
 
 type StatusCallback = { innerHTML: string };
@@ -243,7 +244,7 @@ export function printPDF(
                      startx + 3 * paperdetails.owner_box_width + 2, //Leave 2mm at the left 
                      paperdetails.paperheight - paperdetails.paper_margin - paperdetails.drawnby_box_height - paperdetails.owner_box_height - textHeight / 6 + textHeight + 1.5);
 
-            let pagename = iter < print_table.pages.length ? "Eendraadschema" : "Situatieschema";
+            let pagename = iter < print_table.pages.length ? "Eendraadschema" : sitplanprint.pages[iter - print_table.pages.length]?.name ?? "Situatieschema";
 
             doc.text(pagename, 
                      startx + 3 * paperdetails.owner_box_width + 2, //Leave 2mm at the left 
@@ -278,6 +279,15 @@ export function printPDF(
             let info : string = (iter < print_table.pages.length ? 
                                     print_table.pages[iter].info || properties.info || "" :
                                     properties.info || "");
+            if (properties.dossier) {
+                const dossierLines = [
+                    properties.dossier.installationAddress && `Adres: ${properties.dossier.installationAddress}`,
+                    properties.dossier.nominalVoltage && `Spanning: ${properties.dossier.nominalVoltage}${properties.dossier.currentNature ? ` ${properties.dossier.currentNature}` : ""}${properties.dossier.frequencyHz ? ` ${properties.dossier.frequencyHz} Hz` : ""}`,
+                    properties.dossier.revisionLabel && `Versie: ${properties.dossier.revisionLabel}`,
+                    properties.dossier.issueDate && `Datum: ${properties.dossier.issueDate}`,
+                ].filter(Boolean).join("<br>");
+                if (dossierLines) info = [info, dossierLines].filter(Boolean).join("<br>");
+            }
                                              
             let infoshorter = info.replace("https://www.eendraadschema.goethals-jacobs.be", "eendraadschema");
 

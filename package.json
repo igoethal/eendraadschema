@@ -3,19 +3,44 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "bin": {
+    "eds-mcp": "scripts/eds-mcp.mjs"
+  },
   "scripts": {
     "dev": "vite",
+    "dev:mcp": "node scripts/dev-mcp.mjs",
     "clean": "rimraf dist",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:e2e": "playwright test",
+    "typecheck:test": "tsc -p tsconfig.test.json",
+    "mcp:serve": "node scripts/eds-mcp.mjs serve",
+    "mcp:stdio": "node scripts/eds-mcp.mjs stdio",
+    "mcp:http": "node scripts/eds-mcp.mjs http"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "@testing-library/jest-dom": "^7.0.0",
+    "@testing-library/react": "^16.3.2",
+    "@types/node": "^24.2.0",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@types/ws": "^8.18.1",
+    "jsdom": "^30.0.1",
+    "rimraf": "^6.0.1",
     "typescript": "~5.8.3",
     "vite": "^6.3.5",
-    "vite-plugin-singlefile": "^2.2.0"
+    "vite-plugin-singlefile": "^2.2.0",
+    "vitest": "^4.1.10"
   },
   "dependencies": {
-    "rimraf": "^6.0.1",
-    "save-dev": "^0.0.1-security"
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "tailwindcss": "^4.3.3",
+    "ws": "^8.21.3"
   }
 }

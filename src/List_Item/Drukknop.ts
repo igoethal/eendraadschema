@@ -39,20 +39,6 @@ export class Drukknop extends Electro_Item {
     return this.props.aantal;
   }
 
-    toHTML(mode: string) {
-        let output = this.toHTMLHeader(mode);
-
-        output += "&nbsp;" + this.nrToHtml()
-               +    "Type: " + this.selectPropToHTML('type_knop',["standaard","dimmer","rolluik"])
-               +  ", Verklikkerlampje: " + this.checkboxPropToHTML('heeft_verklikkerlampje')
-               +  ", Halfwaterdicht: " + this.checkboxPropToHTML('is_halfwaterdicht')
-               +  ", Afgeschermd: " + this.checkboxPropToHTML('is_afgeschermd')
-               +  ", Aantal armaturen: " + this.selectPropToHTML('aantal',["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"])
-               +  ", Aantal knoppen per armatuur: " + this.selectPropToHTML('aantal_knoppen_per_armatuur',["1","2","3","4","5","6","7","8"])
-               +  ", Adres/tekst: " + this.stringPropToHTML('adres',5);
-
-        return(output);
-    }
 
     toSVG(sitplan: boolean = false, mirrortext: boolean = false) {
         let mySVG:SVGelement = new SVGelement();

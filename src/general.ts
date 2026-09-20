@@ -1,3 +1,5 @@
+import type { MarkerList } from "./print/MarkerList";
+
 export function htmlspecialchars(my_input) {
     let returnstr:string;
     if (typeof(my_input) == 'undefined') returnstr = ""; else returnstr=my_input.toString();
@@ -120,96 +122,17 @@ export const randomId = (() => {
   };
 })();
 
-/**
- * Toont een popup met een vraag en een dropdown lijst met opties.
- * De gebruiker kan kiezen tussen "OK" of "Annuleer".
- * 
- * @param question - De vraag om af te beelden in de popup.
- * @param options - An array van strings met de opties in de dropdown lijst.
- * @returns A promise that resolves to the selected option string, or null if cancelled.
- */
 
-export async function showSelectPopup(
-  question: string,
-  options: string[]
-): Promise<string | null> {
-  return new Promise((resolve) => {
-    const popupOverlay = document.createElement("div");
-    Object.assign(popupOverlay.style, {
-      position: 'fixed',
-      top: 0, left: 0, width: '100%', height: '100%',
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      display: 'flex',
-      justifyContent: 'center', alignItems: 'center',
-      visibility: 'hidden',
-      zIndex: 9999
-    });
-    document.body.appendChild(popupOverlay);
+function flattenSVG(
+  SVGstruct,
+  shiftx,
+  shifty,
+  node,
+  overflowright = 0,
+  pageMarkers: MarkerList | null = null,
+) {
 
-    const popup = document.createElement("div");
-    Object.assign(popup.style, {
-      backgroundColor: "white", border: "1px solid #ccc", padding: "20px", boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)"
-    });
-    popupOverlay.appendChild(popup);
-
-    const questionAndSelect = document.createElement("div");
-    questionAndSelect.style.display = "flex";
-    questionAndSelect.style.alignItems = "center";
-
-    const questionElem = document.createElement("p");
-    questionElem.textContent = question;
-    questionAndSelect.appendChild(questionElem);
-
-    const selectElem = document.createElement("select");
-    options.forEach((option) => {
-      const optionElem = document.createElement("option");
-      optionElem.value = option;
-      optionElem.textContent = option;
-      selectElem.appendChild(optionElem);
-    });
-    selectElem.style.marginLeft = "10px";
-    questionAndSelect.appendChild(selectElem);
-
-    popup.appendChild(questionAndSelect);
-
-    const buttonBar = document.createElement("div");
-    Object.assign(buttonBar.style, {
-      display: "flex", justifyContent: "center", marginTop: "10px"
-    });
-
-    const okButton = document.createElement("button");
-    okButton.textContent = "OK";
-    okButton.style.marginRight = "10px";
-    buttonBar.appendChild(okButton);
-
-    const cancelButton = document.createElement("button");
-    cancelButton.textContent = "Annuleren";
-    buttonBar.appendChild(cancelButton);
-
-    popup.appendChild(buttonBar);
-
-    okButton.addEventListener("click", () => {
-      const selectedValue = selectElem.value;
-      popupOverlay.style.visibility = 'hidden';
-      popupOverlay.removeChild(popup);
-      document.body.removeChild(popupOverlay);
-      resolve(selectedValue);
-    });
-
-    cancelButton.addEventListener("click", () => {
-      popupOverlay.style.visibility = 'hidden';
-      popupOverlay.removeChild(popup);
-      document.body.removeChild(popupOverlay);
-      resolve(null);
-    });
-
-    popupOverlay.style.visibility = 'visible';
-  });
-}
-
-function flattenSVG(SVGstruct,shiftx,shifty,node,overflowright=0) {
-
-  if (node==0) globalThis.structure.print_table.pagemarkers.clear();
+  if (node === 0) pageMarkers?.clear();
   
   var str:string = "";
 
@@ -231,7 +154,24 @@ function flattenSVG(SVGstruct,shiftx,shifty,node,overflowright=0) {
       outstruct.attributes.getNamedItem("y").nodeValue = 0;
     }
     for (var i = 0; i < SVGstruct.children.length; i++) {
-      str = str.concat(flattenSVG(SVGstruct.children[i],shiftx,shifty,node+1),"\n");
+      str = str.concat(flattenSVG(
+        SVGstruct.children[i],
+        shiftx,
+        shifty,
+        node + 1,
+        0,
+        pageMarkers,
+      ),"\n");
+    }
+    const schemaItemId = outstruct.attributes.getNamedItem("data-schema-item-id")?.nodeValue;
+    if (node > 0 && schemaItemId !== undefined) {
+      const anchorY = parseFloat(outstruct.attributes.getNamedItem("data-schema-anchor-y")?.nodeValue ?? "0");
+      const endX = parseFloat(outstruct.attributes.getNamedItem("data-schema-end-x")?.nodeValue ?? "0");
+      const topX = parseFloat(outstruct.attributes.getNamedItem("data-schema-top-x")?.nodeValue ?? "0");
+      const topY = parseFloat(outstruct.attributes.getNamedItem("data-schema-top-y")?.nodeValue ?? "0");
+      const width = parseFloat(outstruct.attributes.getNamedItem("data-schema-width")?.nodeValue ?? "0");
+      const height = parseFloat(outstruct.attributes.getNamedItem("data-schema-height")?.nodeValue ?? "0");
+      str = `<g data-schema-item-id="${schemaItemId}" data-schema-x="${shiftx}" data-schema-y="${shifty}" data-schema-width="${width}" data-schema-height="${height}" data-schema-anchor-x="${shiftx}" data-schema-anchor-y="${shifty + anchorY}" data-schema-end-x="${shiftx + endX}" data-schema-top-x="${shiftx + topX}" data-schema-top-y="${shifty + topY}">${str}</g>`;
     }
     if (node <= 0) {
       if (outstruct.attributes.getNamedItem("width")) { // make SVG a 0,0 element
@@ -241,6 +181,37 @@ function flattenSVG(SVGstruct,shiftx,shifty,node,overflowright=0) {
         str = '<svg>' + str + '</svg>';
       }
     }
+  } else if (SVGstruct.localName == "g") {
+    // Unlike <svg>, a <g> establishes no coordinate system of its own, so its
+    // drawable descendants (e.g. the omschakelaar's self-contained <g>) still
+    // need the shift accumulated so far. Recurse instead of serializing
+    // verbatim, and shift any zero-size schema-anchor attributes carried
+    // directly on the <g> itself (used for port/insertion anchors).
+    if (shiftx != 0) {
+      for (const attrName of ["data-schema-anchor-x", "data-schema-end-x"]) {
+        const attr = outstruct.attributes.getNamedItem(attrName);
+        if (attr) attr.nodeValue = String(parseFloat(attr.nodeValue) + shiftx);
+      }
+    }
+    if (shifty != 0) {
+      const attr = outstruct.attributes.getNamedItem("data-schema-anchor-y");
+      if (attr) attr.nodeValue = String(parseFloat(attr.nodeValue) + shifty);
+    }
+    var innerG = "";
+    for (var gi = 0; gi < SVGstruct.children.length; gi++) {
+      innerG = innerG.concat(flattenSVG(
+        SVGstruct.children[gi],
+        shiftx,
+        shifty,
+        node + 1,
+        0,
+        pageMarkers,
+      ), "\n");
+    }
+    var openTagG = X.serializeToString(outstruct.cloneNode(false))
+      .replace(/\/>\s*$/, ">")
+      .replace(/xmlns="[^"]+"/g, '');
+    str = openTagG + innerG + "</g>";
   } else {
     if (SVGstruct.localName == "line") {
       if (shiftx != 0) {
@@ -308,16 +279,20 @@ function flattenSVG(SVGstruct,shiftx,shifty,node,overflowright=0) {
     str = str.replace(regex, '');
   }
 
-  globalThis.structure.print_table.pagemarkers.addMarker(node, shiftx, forceNewPage);
+  pageMarkers?.addMarker(node, shiftx, forceNewPage);
 
   return str;
 }
 
-export function flattenSVGfromString(xmlstr, overflowright: number = 0) {
+export function flattenSVGfromString(
+  xmlstr,
+  overflowright: number = 0,
+  pageMarkers: MarkerList | null = null,
+) {
   var str:string = "";
   var parser = new DOMParser();
   var xmlDoc = parser.parseFromString(xmlstr, "text/xml"); //important to use "text/xml"
-  str = flattenSVG(xmlDoc.childNodes[0],0,0,0,overflowright);
+  str = flattenSVG(xmlDoc.childNodes[0], 0, 0, 0, overflowright, pageMarkers);
   return str;
 }
 

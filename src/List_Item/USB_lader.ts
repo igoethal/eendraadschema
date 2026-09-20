@@ -19,15 +19,6 @@ export class USB_lader extends Electro_Item {
         this.props.adres = "";         // Set Adres/tekst to "" when the item is cleared
     }
 
-    toHTML(mode: string) {
-        let output = this.toHTMLHeader(mode);
-
-        output += "&nbsp;" + this.nrToHtml();
-        output += "Aantal: " + this.selectPropToHTML('aantal',["1","2","3","4","5","6","7","8","9","10"]);
-        output += ", Adres/tekst: " + this.stringPropToHTML('adres',5);
-
-        return(output);
-    }
 
     toSVG(sitplan = false) {
         let mySVG:SVGelement = new SVGelement();

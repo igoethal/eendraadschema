@@ -1,63 +1,15 @@
-import { loadFromText } from "./importExport/importExport";
-import { showSituationPlanPage } from "./sitplan/SituationPlanView";
-import { printsvg } from "./print/print";
+import { DocumentSnapshotHistory } from "./application/DocumentSnapshotHistory";
+import type { Hierarchical_List } from "./Hierarchical_List";
 
-class jsonStore {
-    private maxSteps: number;
-    private undoStack: string[];
-    private redoStack: string[];
-
-    constructor(maxSteps: number = 100) {
-        this.maxSteps = maxSteps;
-        this.undoStack = [];
-        this.redoStack = [];
-    }
-
-    store(text: string, popFirst: boolean = false): void {
-        if ( (popFirst) && (this.undoStack.length > 0) ) this.undoStack.pop(); // Remove the oldest entry
-        
-        if (this.undoStack.length >= this.maxSteps) {
-            this.undoStack.shift(); // Remove the oldest entry to maintain maxSteps
-        }
-        this.undoStack.push(text);
-        this.redoStack = []; // Clear the redo stack whenever a new store is made
-    }
-
-    replace(text: string): void {
-        if (this.undoStack.length > 0) {
-            this.undoStack[this.undoStack.length - 1] = text;
-        } else {
-            this.store(text);
-        }
-    }
-
-    //Always call store before undo otherwise there is nothing to put on the redo stack !!
-    undo(): string | null {
-        if (this.undoStack.length <= 1) {
-            return null;
-        }
-        const lastState = this.undoStack.pop()!;
-        this.redoStack.push(lastState);
-        return this.undoStack.length > 0 ? this.undoStack[this.undoStack.length - 1] : null;
-    }
-
-    redo(): string | null {
-        if (this.redoStack.length === 0) {
-            return null;
-        }
-        let lastRedoState = this.redoStack.pop()!;
-        this.undoStack.push(lastRedoState);
-        return lastRedoState;
-    }
-
-    clear(): void {
-        this.undoStack = [];
-        this.redoStack = [];
-    }
-
-    undoStackSize():number {return(Math.max(this.undoStack.length-1,0));}
-    redoStackSize():number {return(Math.max(this.redoStack.length,0));}
+export interface UndoRedoViewPort {
+    showSituationPlan(): void;
+    showSchema(): void;
 }
+
+const noOpViewPort: UndoRedoViewPort = {
+    showSituationPlan() {},
+    showSchema() {},
+};
 
 class LargeStringStore {
     private data:string[] = [];
@@ -87,28 +39,35 @@ class LargeStringStore {
 }
 
 export class undoRedo {
-    private historyEds: jsonStore;
-    private historyOptions: jsonStore;
+    private historyEds: DocumentSnapshotHistory;
+    private historyOptions: DocumentSnapshotHistory;
     private largeStrings: LargeStringStore = new LargeStringStore();
 
     private samenVoegSleutel: string|null = null; // Indien de store functie wordt opgeroepen met deze string wordt geen nieuwe undo stap gecreëerd maar de vorige aangepast
 
-    constructor(maxSteps: number = 100) {
-        this.historyEds = new jsonStore(maxSteps);
-        this.historyOptions = new jsonStore(maxSteps);
+    constructor(
+        maxSteps: number,
+        private readonly getDocument: () => Hierarchical_List,
+        private readonly replaceDocumentFromText: (text: string, version: number) => Hierarchical_List,
+        private readonly viewPort: UndoRedoViewPort = noOpViewPort,
+    ) {
+        this.historyEds = new DocumentSnapshotHistory(undefined, maxSteps, false);
+        this.historyOptions = new DocumentSnapshotHistory(undefined, maxSteps, false);
     }
 
     replaceSVGsByStringStore() {
-        if (globalThis.structure.sitplan != null) {
-            for (let element of globalThis.structure.sitplan.getElements()) {
+        const document = this.getDocument();
+        if (document.sitplan != null) {
+            for (let element of document.sitplan.getElements()) {
                 if (!element.isEendraadschemaSymbool()) element.svg = this.largeStrings.pushIfNotExists(element.getUnscaledSVGifNotElectroItem()).toString();
             }
         }
     }
 
     replaceStringStoreBySVGs() {
-        if (globalThis.structure.sitplan != null) {
-            for (let element of globalThis.structure.sitplan.getElements()) {
+        const document = this.getDocument();
+        if (document.sitplan != null) {
+            for (let element of document.sitplan.getElements()) {
                 if (!element.isEendraadschemaSymbool()) element.svg = this.largeStrings.get(parseInt(element.svg));
             }
         }
@@ -116,12 +75,10 @@ export class undoRedo {
 
     getOptions(): string {
         let options:any = {};
+        const document = this.getDocument();
 
-        if (globalThis.structure.sitplanview != null) {
-            options.selectedBoxesOrdinals = globalThis.structure.sitplanview.getSelectedBoxesOrdinals();
-            if ((globalThis.structure.sitplanview.sideBar as any).getUndoRedoOptions != null) {
-                Object.assign(options,(globalThis.structure.sitplanview.sideBar as any).getUndoRedoOptions());
-            }
+        if (document.sitplanview != null) {
+            options.selectedBoxesOrdinals = document.sitplanview.getSelectedBoxesOrdinals();
         }
 
         return(JSON.stringify(options));
@@ -133,76 +90,76 @@ export class undoRedo {
         if ( (sleutel != null) && (sleutel == this.samenVoegSleutel) ) overschrijfVorige = true;
         this.samenVoegSleutel = sleutel;
 
-        // We store the current state of the globalThis.structure in the history but we replace the SVGs by a reference to a large string store
+        // Store the current document while replacing large custom SVG strings by compact references.
         this.replaceSVGsByStringStore();
+        const document = this.getDocument();
 
         if (!overschrijfVorige) {
-            this.historyEds.store(globalThis.structure.toJsonObject(false)); // needs to call with false as we want to keep currentView info
-            this.historyOptions.store(this.getOptions());
+            this.historyEds.record(document.toJsonObject(false)); // needs to call with false as we want to keep currentView info
+            this.historyOptions.record(this.getOptions());
         } else {
-            this.historyEds.replace(globalThis.structure.toJsonObject(false)); // needs to call with false as we want to keep currentView info
+            this.historyEds.replace(document.toJsonObject(false)); // needs to call with false as we want to keep currentView info
             this.historyOptions.replace(this.getOptions());
         }
         
         this.replaceStringStoreBySVGs();
 
-        if ( (globalThis.structure.properties.currentView == 'draw') && (globalThis.structure.sitplanview != null) ) globalThis.structure.sitplanview.updateRibbon();
-        else if (globalThis.structure.properties.currentView == '2col') globalThis.structure.updateRibbon(); 
     }
 
     updateSelectedBoxes() {
-        this.historyOptions.store(this.getOptions(), true);
+        this.historyOptions.replace(this.getOptions());
     }
 
     reload(text: string|null, options: any) {
         this.samenVoegSleutel = null;
 
-        let lastView = globalThis.structure.properties.currentView;
-        let lastmode = globalThis.structure.mode;
-        if (text != null) loadFromText(text, 0, false);
+        let document = this.getDocument();
+        let lastmode = document.mode;
+        if (text != null) document = this.replaceDocumentFromText(text, 0);
         
         // We replace the references to the large string store by the actual SVGs
         this.replaceStringStoreBySVGs();
-        // We need to resort and clean the globalThis.structure to avoid bad references
-        globalThis.structure.reSort();
+        // Resort and clean the restored document to avoid stale references.
+        document.reSort();
 
-        globalThis.structure.mode = lastmode;
-        if (globalThis.structure.properties.currentView != lastView) globalThis.toggleAppView(globalThis.structure.properties.currentView as '2col' | 'config' | 'draw');
-        switch (globalThis.structure.properties.currentView) {
+        document.mode = lastmode;
+        switch (document.properties.currentView) {
             case 'draw': 
-                globalThis.topMenu.selectMenuItemByOrdinal(3);
-                showSituationPlanPage();
+                this.viewPort.showSituationPlan();
                 
-                if ((globalThis.structure.sitplanview.sideBar as any).setUndoRedoOptions != null) (globalThis.structure.sitplanview.sideBar as any).setUndoRedoOptions(options);
-
                 if (options.selectedBoxesOrdinals == null) break;
 
                 for (let selectedBox of options.selectedBoxesOrdinals) {
-                    if (globalThis.structure.sitplan.getElements().length <= selectedBox) break;
-                    let element = globalThis.structure.sitplan.getElements()[selectedBox];
+                    if (document.sitplan.getElements().length <= selectedBox) break;
+                    let element = document.sitplan.getElements()[selectedBox];
                     if (element == null) break;
                     let htmlId = element.id;
                     if (htmlId == null) break;
-                    let div = document.getElementById(htmlId);
-                    if (div != null) globalThis.structure.sitplanview.selectBox(div);
+                    let div = globalThis.document.getElementById(htmlId);
+                    if (div != null) document.sitplanview.selectBox(div);
                 }
 
                 break;
-            case '2col': globalThis.topMenu.selectMenuItemByOrdinal(2); globalThis.HLRedrawTree(); break;
-            case 'config': globalThis.topMenu.selectMenuItemByOrdinal(4); printsvg(); break;
+            case '2col':
+                this.viewPort.showSchema();
+                break;
+            case 'config':
+                document.properties.currentView = '2col';
+                this.viewPort.showSchema();
+                break;
         }
     }
 
     undo() {
-        let text:string|null = this.historyEds.undo();
-        let optionsString: string | null = this.historyOptions.undo();
+        let text:string|null = this.historyEds.undo() ?? null;
+        let optionsString: string | null = this.historyOptions.undo() ?? null;
         let options: any = optionsString ? JSON.parse(optionsString) : {};
         this.reload(text,options);
     }
 
     redo() { 
-        let text:string|null = this.historyEds.redo();
-        let optionsString: string | null = this.historyOptions.redo();
+        let text:string|null = this.historyEds.redo() ?? null;
+        let optionsString: string | null = this.historyOptions.redo() ?? null;
         let options: any = optionsString ? JSON.parse(optionsString) : {};
         this.reload(text,options);
     }
@@ -213,10 +170,9 @@ export class undoRedo {
         this.historyEds.clear();
         this.historyOptions.clear();
         this.largeStrings.clear();
-        globalThis.structure.updateRibbon();
     }
 
-    undoStackSize():number {return(this.historyEds.undoStackSize());}
-    redoStackSize():number {return(this.historyEds.redoStackSize());}
+    undoStackSize():number {return(this.historyEds.undoCount());}
+    redoStackSize():number {return(this.historyEds.redoCount());}
 
 }

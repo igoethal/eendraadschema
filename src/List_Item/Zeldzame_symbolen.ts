@@ -24,18 +24,6 @@ export class Zeldzame_symbolen extends Electro_Item {
         }
     }
 
-    toHTML(mode: string) {
-        this.overrideKeys();
-
-        let output = this.toHTMLHeader(mode);
-
-        output += "&nbsp;" + this.nrToHtml()
-               +  "Symbool: " + this.selectPropToHTML('symbool',["","aarding","deurslot"]);
-
-        if (this.props.symbool === "deurslot") output += ", Adres/tekst: " + this.stringPropToHTML('adres',5);
-
-        return(output);
-    }
 
     toSVG(sitplan = false) {
         let mySVG:SVGelement = new SVGelement();

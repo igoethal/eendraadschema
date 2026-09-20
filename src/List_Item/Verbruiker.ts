@@ -33,22 +33,6 @@ export class Verbruiker extends Electro_Item {
         this.adjustTextWidthIfAuto();
     }
 
-    toHTML(mode: string) {
-        let output = this.toHTMLHeader(mode);
-
-        output += "&nbsp;" + this.nrToHtml()
-               +  "Tekst (nieuwe lijn = \"|\"): " + this.stringPropToHTML('tekst',30)
-               +  ", Breedte: " + this.selectPropToHTML('heeft_automatische_breedte',["automatisch","handmatig"]);
-
-        if (this.props.heeft_automatische_breedte != "automatisch") output += " " + this.stringPropToHTML('breedte',3);
-
-        output += ", Vet: " + this.checkboxPropToHTML('is_vet')
-               +  ", Cursief: " + this.checkboxPropToHTML('is_cursief')
-               +  ", Horizontale alignering: " + this.selectPropToHTML('horizontale_uitlijning',["links","centreer","rechts"])
-               +  ", Adres/tekst: " + this.stringPropToHTML('adres',2);
-
-        return(output);
-    }
 
     adjustTextWidthIfAuto() {
         if (this.props.heeft_automatische_breedte === "automatisch") {

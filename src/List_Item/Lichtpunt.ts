@@ -47,26 +47,6 @@ export class Lichtpunt extends Electro_Item {
         return this.props.aantal;
     }
 
-    toHTML(mode: string) {
-        this.overrideKeys();
-        let output = this.toHTMLHeader(mode);
-
-        output += "&nbsp;" + this.nrToHtml() 
-               +  "Type: " + this.selectPropToHTML('type_lamp',["standaard", "TL", "spot", "led" /*, "Spot", "Led", "Signalisatielamp" */]) + ", ";
-
-        if (this.props.type_lamp == "TL") {
-            output += "Aantal buizen: " + this.selectPropToHTML('aantal_buizen_indien_TL',["1","2","3","4"]) + ", ";
-        }
-
-        output += "Aantal lampen: " + this.selectPropToHTML('aantal',["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]) + ", "
-               +  "Wandlamp: " + this.checkboxPropToHTML('is_wandlamp') + ", "
-               +  "Halfwaterdicht: " + this.checkboxPropToHTML('is_halfwaterdicht') + ", "
-               +  "Ingebouwde schakelaar: " + this.checkboxPropToHTML('heeft_ingebouwde_schakelaar') + ", "
-               +  "Noodverlichting: " + this.selectPropToHTML('type_noodverlichting',["Geen", "Centraal", "Decentraal"])
-               +  ", Adres/tekst: " + this.stringPropToHTML('adres',5);
-
-        return(output);
-    }
 
 /**
  * Berekent de grenzen voor het sitplan-element op basis van het type lamp.

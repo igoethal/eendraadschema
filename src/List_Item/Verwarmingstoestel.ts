@@ -24,17 +24,6 @@ export class Verwarmingstoestel extends Electro_Item {
         if (!this.props.heeft_accumulatie) this.props.heeft_ventilator = false; //Indien geen accumulatie kan er ook geen ventilator zijn
     }
 
-    toHTML(mode: string) {
-        this.overrideKeys;
-        let output = this.toHTMLHeader(mode);
-
-        output += "&nbsp;" + this.nrToHtml()
-               +  "Accumulatie: " + this.checkboxPropToHTML('heeft_accumulatie')
-               +  (this.props.heeft_accumulatie ? ", Ventilator: " + this.checkboxPropToHTML('heeft_ventilator') : "")
-               +  ", Adres/tekst: " + this.stringPropToHTML('adres',5);
-
-        return(output);
-    }
 
     toSVG(sitplan = false) {
         let mySVG:SVGelement = new SVGelement();      

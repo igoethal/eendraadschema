@@ -25,18 +25,6 @@ export class Ketel extends Electro_Item {
         this.props.warmtefunctie = "";
     }
 
-    toHTML(mode: string) {
-        let output = this.toHTMLHeader(mode);
-
-        output += "&nbsp;" + this.nrToHtml();
-        output +=   "Type: " + this.selectPropToHTML('keteltype',["", "Met boiler", "Met tapspiraal", "Warmtekrachtkoppeling", "Warmtewisselaar"]);
-        output += ", Energiebron: " + this.selectPropToHTML('energiebron',["", "Elektriciteit", "Gas (atmosferisch)", "Gas (ventilator)", "Vaste brandstof", "Vloeibare brandstof"]);
-        output += ", Warmte functie: " + this.selectPropToHTML('warmtefunctie',["", "Koelend", "Verwarmend", "Verwarmend en koelend"]);
-        output += ", Aantal: " + this.selectPropToHTML('aantal',["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]);
-        output += ", Adres/tekst: " + this.stringPropToHTML('adres',5);
-
-        return(output);
-    }
 
     toSVG(sitplan = false) {
         let mySVG:SVGelement = new SVGelement();

@@ -1,5 +1,7 @@
 import { randomId } from "../general";
 import { Electro_Item } from "../List_Item/Electro_Item";
+import type { Hierarchical_List } from "../Hierarchical_List";
+import { DEFAULT_SITUATION_SCALE } from "./SituationPlanConfig";
 
 export type AdresLocation = 'rechts'|'links'|'boven'|'onder';
 export type AdresType = 'auto'|'manueel';
@@ -7,12 +9,12 @@ export type AdresType = 'auto'|'manueel';
 /**
  * Class SituationPlanElement
  * 
- * Deze class refereert naar de volgende globale variabelen:
- * - globalThis.structure
- * - globalThis.SITPLANVIEW_DEFAULT_SCALE
+ * Het bijhorende elektrische document wordt door SituationPlan gekoppeld.
  */
 
 export class SituationPlanElement {
+
+    private document: Hierarchical_List | null = null;
 
     // -- Identificatie --
     public id:string; //unieke identificatie van het element
@@ -43,11 +45,11 @@ export class SituationPlanElement {
     public sizey:number = 0; //hoogte
 
     public rotate:number = 0;
-    private scale:number = globalThis.SITPLANVIEW_DEFAULT_SCALE;
+    private scale:number = DEFAULT_SITUATION_SCALE;
 
     // -- Positionering van het label --
-    public labelposx = 0;
-    public labelposy = 0;
+    private labelposx = 0;
+    private labelposy = 0;
     public labelfontsize = 11;
 
     // -- Een vlag om de situationplanview te laten weten dat de box content moet geupdated worden
@@ -62,6 +64,17 @@ export class SituationPlanElement {
 
     constructor() {
         this.id = randomId("SP_");
+    }
+
+    attachDocument(document: Hierarchical_List | null): void {
+        this.document = document;
+    }
+
+    private getDocument(): Hierarchical_List {
+        if (this.document === null) {
+            throw new Error("SituationPlanElement is niet aan een elektrisch document gekoppeld.");
+        }
+        return this.document;
     }
 
     public setscale(scale: number) {
@@ -84,7 +97,7 @@ export class SituationPlanElement {
 
     isEendraadschemaSymbool(): boolean {
         if (this.electroItemId != null) {
-            return (globalThis.structure.getElectroItemById(this.electroItemId) != null);
+            return (this.getDocument().getElectroItemById(this.electroItemId) != null);
         }
         return false;
     }
@@ -107,7 +120,7 @@ export class SituationPlanElement {
 
     isEDSSymbolAndRotates360degrees(): boolean {
         if (this.isEendraadschemaSymbool()) {
-            let electroElement: Electro_Item = globalThis.structure.getElectroItemById(this.electroItemId);
+            let electroElement: Electro_Item = this.getDocument().getElectroItemById(this.electroItemId);
             if (electroElement != null) {
                 let type = electroElement.getType();
                 return SituationPlanElement.ROTATES_360_DEGREES_TYPES.has(type);
@@ -161,7 +174,7 @@ export class SituationPlanElement {
     getAdres(): string {
         if (!this.isEendraadschemaSymbool()) return ''; // Geen adres voor niet-elektro-elementen
 
-        let element = globalThis.structure.getElectroItemById(this.electroItemId);
+        let element = this.getDocument().getElectroItemById(this.electroItemId);
         if (element == null) return ''; // zou redundant moeten zijn want we controleerden al in isEendraadschemaSymbool
 
         if (this.adrestype === 'auto') {
@@ -179,6 +192,17 @@ export class SituationPlanElement {
 
     getAdresLocation(): AdresLocation {
         return this.adreslocation;
+    }
+
+    /** Renderer-derived label center retained for EDS and print compatibility. */
+    setDerivedLabelPosition(position: Readonly<{ x: number; y: number }>): void {
+        if (!Number.isFinite(position.x) || !Number.isFinite(position.y)) return;
+        this.labelposx = position.x;
+        this.labelposy = position.y;
+    }
+
+    getLabelPosition(): Readonly<{ x: number; y: number }> {
+        return { x: this.labelposx, y: this.labelposy };
     }
 
     /**
@@ -261,9 +285,9 @@ export class SituationPlanElement {
     public berekenAfbeeldingsRotatieEnSpiegeling = (): [number, boolean] => {
 
         // Eerst testen we of het een schakelaar is die we niet in legacy afbeelden
-        if (globalThis.structure.properties.legacySchakelaars == false) {
+        if (this.getDocument().properties.legacySchakelaars == false) {
             if (this.isEendraadschemaSymbool()) {
-                let electroItem = globalThis.structure.getElectroItemById(this.electroItemId);
+                let electroItem = this.getDocument().getElectroItemById(this.electroItemId);
                 if (electroItem != null) {
                     if ( (electroItem.props.type == 'Schakelaars') && 
                         ( (electroItem.props.aantal_schakelaars == 1) || (electroItem.props.aantal_schakelaars == null) ) ) {
@@ -304,7 +328,7 @@ export class SituationPlanElement {
     getScaledSVG(positioned: boolean = false): string {
 
         if (this.isEendraadschemaSymbool()) {
-            let electroItem = globalThis.structure.getElectroItemById(this.electroItemId);
+            let electroItem = this.getDocument().getElectroItemById(this.electroItemId);
             if (electroItem != null) electroItem.updateSituationPlanElement(this);
         }
 
@@ -325,7 +349,7 @@ export class SituationPlanElement {
 
         } else { // Indien we de SVG willen gebruiken in een innerHTML van een div element en dit element dan zelf positioneren en roteren
 
-            return `<svg class="svg-icon" width="${this.sizex*this.scale}px" height="${this.sizey*this.scale}px" viewBox="0 0 ${this.sizex} ${this.sizey}">${this.svg}</svg>`;           
+            return `<svg class="pointer-events-none absolute left-1/2 top-1/2 -translate-1/2" width="${this.sizex*this.scale}px" height="${this.sizey*this.scale}px" viewBox="0 0 ${this.sizex} ${this.sizey}">${this.svg}</svg>`;
         }
     }
 
@@ -433,6 +457,7 @@ export class SituationPlanElement {
 
     toJsonObject() {
         return {
+            id: this.id,
             page: this.page,
 
             posx: this.posx, 
@@ -467,6 +492,7 @@ export class SituationPlanElement {
      */
 
     fromJsonObject(json: any) {
+        if (typeof json.id === "string" && /^SP_[A-Za-z0-9_-]+$/.test(json.id)) this.id = json.id;
         this.page = json.page;
 
         this.posx = json.posx;
@@ -485,7 +511,7 @@ export class SituationPlanElement {
         this.adreslocation = (json.adreslocation != null) ? json.adreslocation : "rechts";
 
         this.rotate = (json.rotate != null) ? json.rotate : 0;
-        this.scale = (json.scale != null) ? json.scale : globalThis.SITPLANVIEW_DEFAULT_SCALE;
+        this.scale = (json.scale != null) ? json.scale : DEFAULT_SITUATION_SCALE;
 
         this.svg = json.svg;
         this.electroItemId = json.electroItemId;
